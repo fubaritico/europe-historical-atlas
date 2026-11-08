@@ -214,14 +214,17 @@ the packages are public — see `rules/known-issues/tooling.md`.
   built with the design system. **Nothing is wired yet**: the atlas installs none of its packages. Its
   interface elements *inside* the map, in 3D, are drawn by three.js, not by the design system.
 - **Decided**: the canvas is never a React component, unlike the Cartographer's.
-- **Undecided**: React or not, Zustand or not (*"probably a React instance"*) — to be read from the
-  interface's scenarios (ATLAS-329): how many panels, how much state they share with the map. If React, a
-  root mounted beside the canvas; the map and the interface share state through a store that lives outside
-  React (Zustand's `createStore` from `zustand/vanilla`, read in React by `useStore(store, selector)`).
+- **Decided, 2026-11-08: React** (the dev: *"the interface will be in React — the elements laid over the
+  relief map will be in React"*). A root mounted beside the canvas, never around it. **Still undecided**:
+  Zustand or not, and **how the relief map and the interface talk to each other, both ways** (the dev, same
+  day — ATLAS-392) — to be read from the interface's scenarios (ATLAS-329). Whatever the store, the map and the
+  interface share state through one that lives outside React (Zustand's `createStore` from `zustand/vanilla`,
+  read in React by `useStore(store, selector)`). Until that root exists, a message to the reader goes through
+  the plain-DOM notices (`ui/notice.ts`, `ui/errorNet.ts`), which move into it then.
 - **Undecided**: whether the 3D elements share the design system's redefined tokens (*"I don't want to
   commit to that yet"*).
-- **To measure, not assumed**: whether the map's fast first display owes anything to the absence of a
-  framework. A React root mounted after the first frame should not delay it — a hypothesis either way.
+- **To measure, not assumed**: whether the React root delays the map's first display. Mounted after the
+  first frame it should not — a hypothesis, to measure when it lands.
 
 The three levels of consumption, and what each costs the atlas:
 

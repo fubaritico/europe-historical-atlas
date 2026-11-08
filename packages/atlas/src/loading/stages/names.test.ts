@@ -468,12 +468,12 @@ describe('rebuildYearNames, the names placed at the build', () => {
   })
 
   describe('managed errors', () => {
-    it('places the names here when the build’s file cannot be read', async () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    it('places the names here, said as an error, when the build’s file cannot be read', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
       const { context, sources } = stage(undefined, () => Promise.reject(new Error('HTTP 500')))
       await rebuildYearNames(context, AUTHORED_YEAR)
       expect(sources.yearNames).toBe(PLACED)
-      expect(warned(warn, 'cannot be read')).toBe(true)
+      expect(warned(error, 'cannot be read')).toBe(true)
     })
   })
 

@@ -6,7 +6,7 @@ import { authoredRegionColours } from '@europe-historical-atlas/core/editor/poli
 import { scaleProgress } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
-import { yearPaintsExactFills } from '../../scene/political/paintsExactFills'
+import { paintsExactFills, yearPaintsExactFills } from '../../scene/political/paintsExactFills'
 import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
 import { settleYearBorders } from '../yearBorders'
@@ -58,15 +58,16 @@ async function drawYear(
   context: PipelineContext,
   isCurrent: () => boolean,
   report: ProgressReport
-): Promise<RegionSet | null> {
-  const { dev, sources, layers } = context
+): Promise<DrawnYear | null> {
   const asked = centuryOf(context)
+  // 0. A year set aside under the settings of now comes back whole, in a frame (ATLAS-333).
+  const restored = restoreYear(context, asked)
+  if (restored !== null) return { loaded: restored, restored: true }
   // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
   const loaded = await context.assets.regions.load(asked)
   if (context.isDisposed() || !isCurrent()) return null
   // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it.
-  const exact = yearPaintsExactFills(dev, loaded)
-  const result = exact
+  const result = yearPaintsExactFills(context.dev, loaded)
     ? await exactYearResult(context, loaded)
     : await gridYearResult(
         context,
@@ -74,12 +75,34 @@ async function drawYear(
         scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
       )
   if (context.isDisposed() || !isCurrent()) return null
-  // The year and its lines change together: a redraw between the two would read one year's pairs against the
-  // other's polities, or one kind of year's patterns against the other kind's lines.
-  sources.regionSet = loaded
-  settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
+  return installYear(context, { asked, loaded, result }, isCurrent, report)
+}
+
+/**
+ * Put a year read and computed on screen: the one shown set aside, the year's lines settled, the terrain baked when it
+ * must be, the fills, borders and events laid.
+ * @param context - the pipeline's world
+ * @param year - the year asked, its polities and what the compute settled
+ * @param year.asked - the year asked for
+ * @param year.loaded - its polities
+ * @param year.result - its tints and traced lines
+ * @param isCurrent - whether this year is still the newest asked for
+ * @param report - where its progress goes
+ * @returns the year drawn; `null` when torn down or overtaken during the bake
+ */
+async function installYear(
+  context: PipelineContext,
+  year: { asked: number; loaded: RegionSet; result: PoliticalResult },
+  isCurrent: () => boolean,
+  report: ProgressReport
+): Promise<DrawnYear | null> {
+  const { dev, sources, layers } = context
+  const { asked, loaded, result } = year
+  const exact = yearPaintsExactFills(dev, loaded)
   // 3. Re-bake the terrain with the year's colours, in the share's bake slice — unless the fills paint the year and
-  //    the bare terrain they lie on is already on the relief: that bake would give it back pixel for pixel.
+  //    the bare terrain they lie on is already on the relief: that bake would give it back pixel for pixel. First, and
+  //    the last wait: the bake reads the relief, the mask and the compute's grid, never the year's sources, so nothing
+  //    of the year on screen is touched before it.
   if (!(exact && context.held.bareTexture)) {
     await rebuildTexture(
       context,
@@ -87,6 +110,13 @@ async function drawYear(
     )
     if (context.isDisposed() || !isCurrent()) return null
   }
+  // From here to the end, no wait: the year on screen is set aside and the new one laid in one go, so a year overtaken
+  // or failing leaves the map — and the years set aside — as they were (reviews QUAL-001, ARCH-001).
+  if (asked !== sources.askedYear) setShownYearAside(context)
+  // The year and its lines change together: a redraw between the two would read one year's pairs against the
+  // other's polities, or one kind of year's patterns against the other kind's lines.
+  sources.regionSet = loaded
+  settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
   // 4. Lay the fills and the border lines — this thread's own work, said before it holds the page still.
   report(POLITICAL_SPLIT.bake, 'borders')
   layers.rebuildFills()
@@ -95,7 +125,62 @@ async function drawYear(
   //    events, as they were (review QUAL-004). A no-op at startup, which pins them itself once the map is drawn.
   sources.askedYear = asked
   layers.rebuildEvents()
-  return loaded
+  return { loaded, restored: false }
+}
+
+/** A year on screen, and whether it came back from the years set aside rather than being built. */
+interface DrawnYear {
+  /** The year's polities. */
+  readonly loaded: RegionSet
+  /** Whether it was put back whole — its names with it, when they had come before it was left. */
+  readonly restored: boolean
+}
+
+/**
+ * Whether the year on screen can be set aside: a year whose countries are geometry (an authored year, exact fills on).
+ * A year the texture carries is baked into it, so there is nothing to keep apart.
+ * @param context - the pipeline's world
+ * @returns the year on screen, or `null` when there is none to set aside
+ */
+function shownYearToShelve(context: PipelineContext): number | null {
+  const { sources, dev } = context
+  if (sources.askedYear === null || sources.regionSet === null) return null
+  return paintsExactFills(dev, sources) ? sources.askedYear : null
+}
+
+/**
+ * Set the year on screen aside, when it can be. Its names still being placed would land on the next year: given up
+ * here — the placement is kept in the names' cache all the same (`placeNames`), and laid when the year comes back.
+ * @param context - the pipeline's world
+ */
+function setShownYearAside(context: PipelineContext): void {
+  const shown = shownYearToShelve(context)
+  if (shown === null) return
+  context.namesGate.begin()
+  context.layers.shelveYear(shown)
+}
+
+/**
+ * Put a year set aside back on screen, in place of the one shown — when it was set aside under the settings of now and
+ * the year on screen can be set aside in turn. Otherwise nothing moves, and the year is built.
+ * @param context - the pipeline's world
+ * @param asked - the year asked for
+ * @returns its polities when it came back; `null` when it must be built
+ */
+function restoreYear(context: PipelineContext, asked: number): RegionSet | null {
+  const { sources, layers } = context
+  if (asked === sources.askedYear || !layers.holdsYear(asked)) return null
+  if (shownYearToShelve(context) === null) return null
+  setShownYearAside(context)
+  if (!layers.restoreYear(asked) || sources.regionSet === null) {
+    // `holdsYear` said yes a moment ago, with nothing between: a defect, said, never a blank map passed off as a year.
+    throw new Error(
+      `[atlas] ${String(asked)} was set aside under these settings, yet did not come back`
+    )
+  }
+  sources.askedYear = asked
+  layers.rebuildEvents()
+  return sources.regionSet
 }
 
 /**
@@ -169,10 +254,11 @@ export async function rebuildPolitical(context: PipelineContext): Promise<void> 
   const isCurrent = context.politicalGate.begin()
   ui.progress.begin(context.translate('loadingYear', { year: String(centuryOf(context)) }))
   try {
-    const loaded = await drawYear(context, isCurrent, barReport(context))
-    if (loaded === null) return
+    const drawn = await drawYear(context, isCurrent, barReport(context))
+    if (drawn === null) return
     ui.progress.report(1)
-    void rebuildYearNames(context, loaded)
+    // A year put back with its names needs none placed; one left before they came gets them now, from their cache.
+    if (!drawn.restored || sources.yearNames === null) void rebuildYearNames(context, drawn.loaded)
   } catch (error: unknown) {
     // A failed fetch or compute is told as a failure of the year's file.
     ui.reportAssetFailure('regions', error)
@@ -196,7 +282,8 @@ export async function startYear(
   if (!context.sources.heightmap) return null
   const isCurrent = context.politicalGate.begin()
   try {
-    return await drawYear(context, isCurrent, report)
+    // Nothing is set aside before the first year: the startup always builds it.
+    return (await drawYear(context, isCurrent, report))?.loaded ?? null
   } catch (error: unknown) {
     // The first year failed: its events still stand, under its failure (the dev, 2026-10-26) — they are dated, and no
     // other year's map is on screen to contradict them.

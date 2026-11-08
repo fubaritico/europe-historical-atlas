@@ -67,8 +67,8 @@ const bakedNames = z.object({
  * @param value - the file's parsed JSON, of no known shape
  * @param where - the file, for the message
  * @returns the names and their key
- * @throws when the file is not a year's baked names of this version — never laid half-read; the page says so in its
- *   console and places the names itself (whether that deserves the error dialog is the dev's call, open — ATLAS-333)
+ * @throws when the file is not a year's baked names of this version — never laid half-read; the page says so as an
+ *   error in its console, not on screen, and places the names itself (the dev, 2026-11-08)
  */
 export function readBakedNames(value: unknown, where: string): BakedNames {
   const read = bakedNames.safeParse(value)

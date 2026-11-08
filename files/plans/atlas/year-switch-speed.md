@@ -73,6 +73,47 @@ checked against Chrome's `measureText` on the 57 characters of 1100: advances an
 the fills and lines off the main thread, ~0.5 s and no freeze), **then 6** (the neighbouring year prepared ahead: a change
 under 0.2 s when it is ready).
 
+## The slider — a map ready before the reader reaches it (the dev, 2026-11-08)
+
+> The dev, the same night: *« il va y avoir la frise synchronoptique, et quand on va déplacer la réglette, il faut qu'on
+> ait un rafraîchissement de la carte qui soit acceptable »* — and *« faut penser à long terme »*: not only centuries,
+> **emblematic years too**, so many maps, never a handful.
+
+**The rule of which map a date shows** — his words: *a map stays until another map's date is reached.* At 1150 the map is
+1100's. **Going back** below the shown map's year switches at once to the map before, and starts preparing the one before
+that; **going forward** prepares the maps ahead. Today `centuryOf` rounds to the nearest century (1150 → 1200): wrong
+by this rule, replaced.
+
+So the target is no longer *a year computed fast* but **a year already prepared when the slider reaches it**. Three
+parts, all three asked for:
+
+| # | what | expected |
+| --- | --- | --- |
+| A | **the map of a date and the maps to prepare** — pure, in core: the latest map year at or before the date; the maps to prepare, the next in the slider's direction first, then the other side | his rule held; the order of preparation decided in one place |
+| B | **a year prepared off the main thread** — the cut, the borders, the tints, as typed arrays, in a worker, the cut itself faster (typed arrays instead of growing lists) | a map not yet prepared: ~0.5 s, and the slider never frozen |
+| C | **the cache** — prepared years kept under a memory budget, measured in bytes, the oldest seen dropped first, never the shown map and its neighbours; the shown map's layers built from it; while the slider moves, the last ready map shown, the newest asked for wins | a map already prepared: one frame |
+
+**Done, 2026-11-08 — C, its first half**: a year left is set aside whole (`scene/layers/yearShelf.ts`) — its countries,
+tribes, borders and names off the scene but kept, under a stamp of the settings, relief and texture — and comes back in a
+frame; the shown year plus four aside. Tried by the dev on the built site: *« le cache fonctionne mieux, aucun
+problème »*. Left: the years ahead prepared, and what the GPU's memory allows (measured in Chrome).
+
+**D — a loading bar that measures** (the dev, same night: *« est-ce qu'on peut streamer et avoir le progrès réel de ce
+qui se passe ? »*; the mock-up `1b · Écran de chargement` — the step's name, the bar, a percentage). Today the bar's shares
+are guesses (`STARTUP_SPLIT`, 60 % the year, 35 % the names — gone in an instant since the names are baked), it stands
+still through the 2 s of cut and borders on the main thread, and the splash before it measures nothing. So:
+
+1. **every step counts its own units, known ahead** — bytes to download, polities to cut, border groups, bake rows — and
+   says *done / total*; a file's true size written by the build (the server's `Content-Length` is the compressed one);
+2. **each step weighed by its measured time**, not a guess; their sum is the percentage;
+3. **the heavy work off the main thread** (B), sending its counts — or the bar cannot repaint at all;
+4. **one bar from the splash on**, the relief included, as in the mock-up.
+
+Order: B first — without it the bar stays still whatever it measures — then D.
+
+**Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
+bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
+
 Steps 1 and 2 need no decision of the dev's beyond this order: nothing visible changes, only what is computed twice.
 Step 4 ships a baked image: what it weighs on the wire against 4 s of CPU is measured at step 3 before it is chosen.
 

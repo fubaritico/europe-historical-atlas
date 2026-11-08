@@ -27,6 +27,7 @@ import { frameLineWork, frameRelief } from './frameLayers'
 import { createLayerProjection } from './layerProjection'
 import { layersWithRole } from './layerRoles'
 import { rebuildSurface } from './rebuildSurface'
+import { createObjectIds, createYearShelf, yearStamp } from './yearShelf'
 
 import type { LayerContext, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
@@ -174,9 +175,36 @@ export interface MapLayers {
    * @returns the relief mesh
    */
   pickTarget: () => Object3D | null
+  /**
+   * Set the year on screen aside, whole — its countries, tribes, borders and names taken off the scene but kept, its
+   * sources emptied — so the next year is built in their place and this one can come back in a frame (ATLAS-333).
+   * @param year - the year on screen
+   * @returns nothing
+   */
+  shelveYear: (year: number) => void
+  /**
+   * Put a year set aside back on screen, when it was built under the settings and on the relief the map has now; the
+   * year on screen must have been set aside first.
+   * @param year - the year
+   * @returns whether it came back; `false` when it must be built
+   */
+  restoreYear: (year: number) => boolean
+  /**
+   * Whether a year is set aside under the settings and on the relief the map has now.
+   * @param year - the year
+   * @returns whether {@link MapLayers.restoreYear} would bring it back
+   */
+  holdsYear: (year: number) => boolean
   /** Remove every layer from the scene and free its GPU resources. */
   dispose: () => void
 }
+
+/**
+ * How many years are kept aside besides the one on screen: the maps either side, and room for a reader going back and
+ * forth (the dev, 2026-11-08: *« la date d'avant et la date d'après, au pire »*). To measure against the GPU's memory
+ * once the years ahead are prepared too.
+ */
+export const YEAR_SHELF_CAPACITY = 4
 
 /**
  * The calls that rebuild geometry.
@@ -265,19 +293,64 @@ function layerSetters(
   }
 }
 
+/** The viewport last told to the layers, `null` before the first. */
+interface ViewportSize {
+  /** Its width and height in CSS pixels. */
+  size: { width: number; height: number } | null
+}
+
+/**
+ * The years set aside (ATLAS-333): the shelf, and the stamp of the settings and relief the map has now.
+ * @param context - the layers and what they read
+ * @param viewport - the viewport last told, for borders put back after a resize made while they were aside
+ * @returns that slice of the handle, and the shelf's teardown
+ */
+function layerYears(
+  context: LayerContext,
+  viewport: ViewportSize
+): Pick<MapLayers, 'shelveYear' | 'restoreYear' | 'holdsYear'> & { disposeYears: () => void } {
+  const { scene, handles, dev, sources } = context
+  const shelf = createYearShelf({ scene, sources, handles, capacity: YEAR_SHELF_CAPACITY })
+  const objectIds = createObjectIds()
+  const stamp = (): string =>
+    yearStamp(dev, { relief: handles.relief, texture: handles.texture }, objectIds)
+  return {
+    shelveYear(year: number): void {
+      shelf.shelve(year, stamp())
+    },
+    restoreYear(year: number): boolean {
+      if (!shelf.restore(year, stamp())) return false
+      const { size } = viewport
+      if (size !== null) handles.borders?.setResolution(size.width, size.height)
+      return true
+    },
+    holdsYear(year: number): boolean {
+      return shelf.holds(year, stamp())
+    },
+    disposeYears(): void {
+      shelf.dispose()
+    },
+  }
+}
+
 /**
  * What the frame loop, the resize handler and teardown call.
  * @param context - the layers and what they read
+ * @param viewport - where the viewport last told is kept
+ * @param disposeYears - frees the years set aside
  * @returns that slice of the handle
  */
 function layerLifecycle(
-  context: LayerContext
+  context: LayerContext,
+  viewport: ViewportSize,
+  disposeYears: () => void
 ): Pick<MapLayers, 'setResolution' | 'frame' | 'faceCamera' | 'dispose' | 'pickTarget'> {
   const { scene, handles } = context
   return {
     setResolution(width: number, height: number): void {
       // Fat lines size their stroke in screen pixels, so the shader needs the new viewport or the width
       // distorts with the aspect ratio.
+      viewport.size = { width, height }
       handles.rivers?.setResolution(width, height)
       handles.borders?.setResolution(width, height)
     },
@@ -294,6 +367,8 @@ function layerLifecycle(
       return handles.relief
     },
     dispose(): void {
+      // The years set aside first: off the scene already, held by the shelf alone.
+      disposeYears()
       // Every layer taken off the scene and freed.
       disposeRelief(scene, handles.relief)
       for (const key of DRAWN_LAYERS) disposeHandle(scene, handles[key])
@@ -341,6 +416,9 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     // The level of detail the zoom chooses, fading in time toward what it shows.
     detail: createDetailState(),
   }
+  // The viewport last told, and the years set aside, shared by the slices that read them.
+  const viewport: ViewportSize = { size: null }
+  const years = layerYears(context, viewport)
   // The handle, assembled from its slices over that same context.
   return {
     ...layerRebuilders(context),
@@ -354,6 +432,9 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       rebuildNames(context)
     },
     ...layerSetters(context),
-    ...layerLifecycle(context),
+    shelveYear: years.shelveYear,
+    restoreYear: years.restoreYear,
+    holdsYear: years.holdsYear,
+    ...layerLifecycle(context, viewport, years.disposeYears),
   }
 }

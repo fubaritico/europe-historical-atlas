@@ -132,8 +132,9 @@ interface Placement {
 /**
  * A year's names as the build placed them (ATLAS-333), when they are the ones the page would place now: the build's
  * key is the page's for this year and these settings. Otherwise `null`, and the page places them itself — the names
- * come seconds later, never wrong — said once in the console: none baked (the dev server, a year added since the
- * build), baked for another version of the year or other settings, or a file that cannot be read.
+ * come seconds later, never wrong — said once in the console: a warning when none is baked (the dev server, a year
+ * added since the build) or baked for another version of the year or other settings, an error when the file cannot be
+ * read.
  * @param context - the pipeline's world
  * @param year - the year
  * @param key - the page's key for its names
@@ -158,7 +159,9 @@ async function bakedNamesFor(
     }
     return baked.names
   } catch (error: unknown) {
-    console.warn(
+    // A file the build wrote wrong, or the transport broke: a defect, so an error — in the console only, not on screen,
+    // the reader still gets the names (the dev, 2026-11-08: « juste un console error »).
+    console.error(
       `[atlas] ${String(year)}: the names placed at the build cannot be read — placed here.`,
       error
     )

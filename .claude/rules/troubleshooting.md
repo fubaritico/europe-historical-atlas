@@ -37,8 +37,8 @@ the vertex shader (GPU); the CPU geometry stays flat → the `Raycaster` hits th
 
 - **Plain three.js in the atlas, and no framework near its render loop.** The atlas's canvas is never a
   React component (the dev, 2026-11-01). Its flat interface over the canvas — panels, buttons, menus, built
-  with the design system — is **not built yet, and React or not, Zustand or not, is undecided**; if React, a
-  root mounted beside the canvas, sharing state through a store that lives outside React. See
+  with the design system — is **not built yet; it will be React** (the dev, 2026-11-08), a root mounted beside
+  the canvas, sharing state through a store that lives outside React; Zustand or not is still undecided. See
   `architecture.md`, "apps and resources". The Cartographer's chrome is **React + Zustand** (the dev's call,
   2026-09-29) because its chrome *is* the application.
   **What makes that safe is not the framework choice but one rule**: per-frame state never goes through a

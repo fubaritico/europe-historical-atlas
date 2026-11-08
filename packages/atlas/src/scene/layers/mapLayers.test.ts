@@ -1292,3 +1292,60 @@ describe('rebuildFrame and rebuildRose', () => {
     })
   })
 })
+
+/**
+ * An authored year on screen, its fills, tribe and borders laid.
+ * @returns what {@link withTribe} returns, the borders built too
+ */
+function shown(): ReturnType<typeof build> {
+  const built = withTribe()
+  built.layers.rebuildBorders()
+  return built
+}
+
+// ATLAS-333: the years set aside, wired on the map's own settings, relief and texture (review QUAL-003).
+describe('the years set aside', () => {
+  describe('happy path', () => {
+    it('sets 1100 aside off the scene and puts the same layers back', () => {
+      const { scene, layers } = shown()
+      const before = [...scene.children]
+      layers.shelveYear(1100)
+      expect(layers.holdsYear(1100)).toBe(true)
+      expect(layers.restoreYear(1100)).toBe(true)
+      expect(scene.children).toEqual(expect.arrayContaining(before))
+    })
+  })
+
+  describe('variants', () => {
+    it('holds no year once a setting its countries are built under has moved', () => {
+      const { dev, layers } = shown()
+      layers.shelveYear(1100)
+      dev.names.capitals = !dev.names.capitals
+      expect(layers.holdsYear(1100)).toBe(false)
+      expect(layers.restoreYear(1100)).toBe(false)
+    })
+
+    it('holds no year once a new texture hangs on the relief', () => {
+      const { layers } = shown()
+      layers.shelveYear(1100)
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      expect(layers.holdsYear(1100)).toBe(false)
+    })
+
+    it('gives the borders put back the viewport told while they were aside', () => {
+      const { scene, layers } = shown()
+      layers.shelveYear(1100)
+      layers.setResolution(800, 600)
+      layers.restoreYear(1100)
+      const strokes = scene.children.flatMap((layer) =>
+        layer.children.flatMap((level) => level.children)
+      ) as LineSegments2[]
+      const resolutions = strokes
+        .map((stroke) => stroke.material.resolution)
+        .filter((resolution) => resolution.x === 800 && resolution.y === 600)
+      expect(resolutions.length).toBeGreaterThan(0)
+    })
+  })
+
+  // L3, L4, L5: the shelf's own suite (yearShelf.test.ts).
+})

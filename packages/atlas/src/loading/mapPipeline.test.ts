@@ -56,8 +56,33 @@ function fakeLayers(): MapLayers {
     'setResolution',
     'frame',
     'dispose',
+    'shelveYear',
+    'restoreYear',
+    'holdsYear',
   ]
   return Object.fromEntries(names.map((n) => [n, vi.fn()])) as unknown as MapLayers
+}
+
+/**
+ * Layers that set years aside as the real shelf does, by year alone: a year shelved is held, restoring it brings it back.
+ * @param layers - the recorded layers
+ * @param sources - the map's sources, whose year is emptied on shelving and given back on restoring
+ * @returns the layers
+ */
+function shelvingLayers(layers: MapLayers, sources: MapPipelineDeps['sources']): MapLayers {
+  const aside = new Map<number, RegionSet | null>()
+  asMock(layers.shelveYear).mockImplementation((year: number) => {
+    aside.set(year, sources.regionSet)
+    sources.regionSet = null
+  })
+  asMock(layers.holdsYear).mockImplementation((year: number) => aside.has(year))
+  asMock(layers.restoreYear).mockImplementation((year: number) => {
+    if (!aside.has(year)) return false
+    sources.regionSet = aside.get(year) ?? null
+    aside.delete(year)
+    return true
+  })
+  return layers
 }
 
 /** An interface that records what it was told, without any DOM. */
@@ -360,6 +385,114 @@ describe('createMapPipeline', () => {
       await grid.pipeline.start()
       const gridCalls = asMock(grid.deps.layers.setTexture).mock.calls
       expect(pixels(gridCalls.at(-1))).not.toEqual(pixels(gridCalls[0]))
+    })
+
+    // ATLAS-333, the dev, 2026-11-08: a year left is set aside, and comes back without being built again.
+    it('puts 1100 back from the years set aside on a return from 1200, fetching and building nothing', async () => {
+      const loads: number[] = []
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({
+          regions: {
+            load: (year: number) => {
+              loads.push(year)
+              return Promise.resolve({ ...AUTHORED_YEAR, year })
+            },
+          },
+        }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).toHaveBeenCalledWith(1100)
+
+      dev.political.year = 1100
+      await pipeline.rebuildPolitical()
+      expect(loads).toEqual([1100, 1200])
+      expect(asMock(deps.layers.restoreYear)).toHaveBeenCalledWith(1100)
+      expect(asMock(deps.layers.rebuildFills)).toHaveBeenCalledTimes(2)
+      expect(deps.sources.askedYear).toBe(1100)
+      expect(deps.sources.regionSet?.year).toBe(1100)
+    })
+
+    it('builds a year never set aside, and sets the one on screen aside only once the new one is ready', async () => {
+      const second = deferred<RegionSet>()
+      let year: Promise<RegionSet> = Promise.resolve(AUTHORED_YEAR)
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => year } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      year = second.promise
+      dev.political.year = 1200
+      const change = pipeline.rebuildPolitical()
+      await flush()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
+      second.resolve({ ...AUTHORED_YEAR, year: 1200 })
+      await change
+      expect(asMock(deps.layers.shelveYear)).toHaveBeenCalledWith(1100)
+      expect(deps.sources.regionSet?.year).toBe(1200)
+    })
+
+    it('leaves the year on screen in place when the next one fails to load', async () => {
+      let year: Promise<RegionSet> = Promise.resolve(AUTHORED_YEAR)
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => year } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      year = Promise.reject(new Error('offline'))
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
+      expect(deps.sources.regionSet).toBe(AUTHORED_YEAR)
+    })
+
+    // Reviews QUAL-001, ARCH-001: a year set aside before the bake, and the bake failing, left the shelf a hollow year.
+    it('sets nothing aside when the bake of the next year fails, the year on screen left whole', async () => {
+      let year: RegionSet = AUTHORED_YEAR
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(year) } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      // Drawn through the grid, its texture tinted; then the exact fills switched back on, with no redraw: the next
+      // year must bake the bare terrain again.
+      dev.political.exactFills = false
+      await pipeline.start()
+      dev.political.exactFills = true
+      asMock(deps.layers.setTexture).mockImplementation(() => {
+        throw new Error('the GPU said no')
+      })
+      year = { ...AUTHORED_YEAR, year: 1200 }
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
+      expect(deps.sources.regionSet).toBe(AUTHORED_YEAR)
+      expect(deps.sources.askedYear).toBe(1100)
+    })
+
+    it('sets nothing aside when the same year is drawn again', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
+      expect(asMock(deps.layers.restoreYear)).not.toHaveBeenCalled()
+    })
+
+    it('sets aside no year the texture carries: a payload year is built again on a return', async () => {
+      let year: RegionSet = YEAR
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(year) } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      year = { ...AUTHORED_YEAR, year: 1200 }
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
     })
 
     // ATLAS-333: the startup's bare terrain is the very texture an authored year's fills lie on.

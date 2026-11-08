@@ -15,7 +15,7 @@ region shows a historical event (battle, political decision, invention…), its 
   its server the dev's. `@europe-historical-atlas/core` is a resource, pure TypeScript, and is forbidden
   three.js, React, react-dom and zustand **by ESLint**.
 - **The design system is `fubaritico-ds`**, as an external dependency (decided 2026-09-24). The atlas will use it
-  for its flat interface over the canvas — **not wired yet**, React or not undecided (`rules/architecture.md`). `Lerna` and `Nx` remain refused; so do Storybook and Tailwind
+  for its flat interface over the canvas — **not wired yet**, and **in React** (the dev, 2026-11-08; `rules/architecture.md`). `Lerna` and `Nx` remain refused; so do Storybook and Tailwind
   here. A reference to Stencil is about that design system's web-component variant, not about this repo.
 - **Relief**: extracted from a black & white heightmap (elevation bitmap) → displacement of a subdivided plane.
 - **Historical borders**: a separate layer, versioned by date (relief is stable over time, the political
