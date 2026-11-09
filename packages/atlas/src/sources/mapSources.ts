@@ -19,6 +19,7 @@ import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource
 import type { ContentCity, ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { OverlapHatch } from '@europe-historical-atlas/core/data/overlapHatches'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
@@ -103,6 +104,11 @@ export interface MapSources {
    */
   tribes: TribeArea[]
   /**
+   * The pieces of ground two polities or more cover, in their colours, to hatch (ATLAS-399) — empty for a year with no
+   * overlap, and for a year read from the per-century payloads.
+   */
+  hatches: OverlapHatch[]
+  /**
    * The year's country names, placed at every display level (ATLAS-301) — `null` before they arrive, which is
    * after the year is drawn: the names never hold the map back.
    */
@@ -176,6 +182,7 @@ export function createMapSources(): MapSources {
     borderPatterns: null,
     borderLevels: null,
     tribes: [],
+    hatches: [],
     yearNames: null,
     nameSheet: null,
   }

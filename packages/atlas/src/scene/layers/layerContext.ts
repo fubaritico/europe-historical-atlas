@@ -13,6 +13,7 @@ import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'
 import type { LevelledBorderLayer } from '../political/borders/levelledBorderLayer'
 import type { FillLayer } from '../political/fills/fillLayer'
+import type { HatchLayer } from '../political/hatches/hatchLayer'
 import type { NameLayer } from '../political/names/nameLayer'
 import type { TribeCutKey } from '../political/tribes/tribeCutKey'
 import type { TribeLayer } from '../political/tribes/tribeLayer'
@@ -71,6 +72,8 @@ export interface LayerHandles {
   } | null
   /** The tribes' colour fading at their limit (ATLAS-258), or `null` when there is none to draw. */
   tribes: TribeLayer | null
+  /** The overlaps hatched in their polities' colours (ATLAS-399), or `null` when there is none to draw. */
+  hatches: HatchLayer | null
   /**
    * The last tribe patches built, and what from (`mapTribeLayer`'s key): like {@link LayerHandles.fillCut},
    * they depend on the year, the grid and the land, not the heights, so a height-curve slider re-lays them

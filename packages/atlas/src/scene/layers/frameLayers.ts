@@ -92,6 +92,7 @@ function frameReveal(context: LayerContext): void {
   const strength = dev.texture.politicalStrength * reveal.value
   handles.fills?.setLook(dev.texture.politicalMode, strength)
   handles.tribes?.setLook(dev.texture.politicalMode, strength)
+  handles.hatches?.setLook(dev.texture.politicalMode, strength)
   handles.names?.setReveal(reveal.value)
   handles.events?.setReveal(reveal.value)
 }

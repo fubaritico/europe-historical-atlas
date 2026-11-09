@@ -17,7 +17,7 @@
 
 import polygonClipping from 'polygon-clipping'
 
-import type { YearDocument } from '../data/yearDocument'
+import type { YearDocument } from './yearDocument'
 import type { MultiPolygon, Polygon } from 'polygon-clipping'
 
 /** A polity's ground, in longitude and latitude, with the box round it. */

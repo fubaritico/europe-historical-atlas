@@ -32,6 +32,7 @@ export const LAYER_ROLES = {
   fillCut: 'cache',
   fillArrays: 'cache',
   tribes: 'draped',
+  hatches: 'draped',
   tribeCut: 'cache',
   names: 'draped',
   events: 'draped',

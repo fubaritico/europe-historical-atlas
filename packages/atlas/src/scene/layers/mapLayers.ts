@@ -181,7 +181,7 @@ export interface MapLayers {
    */
   pickTarget: () => Object3D | null
   /**
-   * Set the year on screen aside, whole — its countries, tribes, borders and names taken off the scene but kept, its
+   * Set the year on screen aside, whole — its countries, tribes, hatches, borders and names taken off the scene but kept, its
    * sources emptied — so the next year is built in their place and this one can come back in a frame (ATLAS-333).
    * @param year - the year on screen
    * @returns nothing
@@ -485,6 +485,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       fillCut: null,
       fillArrays: null,
       tribes: null,
+      hatches: null,
       tribeCut: null,
       names: null,
       events: null,

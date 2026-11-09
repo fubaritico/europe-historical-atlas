@@ -8,6 +8,7 @@ import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshVertexGrid, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
+import { rebuildHatches } from '../hatches/mapHatchLayer'
 import { paintsExactFills } from '../paintsExactFills'
 import { rebuildTribes } from '../tribes/mapTribeLayer'
 
@@ -150,6 +151,20 @@ function laidArraysFor(
 }
 
 /**
+ * Take the year's colour off the relief: its fills, its tribes and its hatches, which are built again together.
+ * @param scene - the scene they are on
+ * @param handles - the layers' handles, emptied of the three
+ */
+function clearTints(scene: LayerContext['scene'], handles: LayerContext['handles']): void {
+  disposeHandle(scene, handles.fills)
+  handles.fills = null
+  disposeHandle(scene, handles.tribes)
+  handles.tribes = null
+  disposeHandle(scene, handles.hatches)
+  handles.hatches = null
+}
+
+/**
  * Lay an authored year's polities on the relief as geometry, or clear them when the texture carries the
  * colour (a payload year, or the panel's switch off).
  *
@@ -159,15 +174,12 @@ function laidArraysFor(
  * @returns nothing
  */
 export function rebuildFills(context: LayerContext): void {
-  // Clear the fills and the tribes on screen; the tribes are rebuilt with the fills, at the end.
+  // Clear the fills, the tribes and the hatches on screen; the last two are rebuilt with the fills, at the end.
   const { scene, dev, sources, handles } = context
   // The arrays the worker laid, let go by the handles whatever this build does: used now, or never (review QUAL-003).
   const laid = handles.fillArrays
   handles.fillArrays = null
-  disposeHandle(scene, handles.fills)
-  handles.fills = null
-  disposeHandle(scene, handles.tribes)
-  handles.tribes = null
+  clearTints(scene, handles)
   // Nothing to draw when the texture carries the colour.
   if (!paintsExactFills(dev, sources)) return
   // Everything the fills are built from; any of it may still be loading.
@@ -215,6 +227,7 @@ export function rebuildFills(context: LayerContext): void {
   handles.fills.object.scale.setY(relief.scale.y)
   scene.add(handles.fills.object)
   releaseAfterUpload(handles.fills.object)
-  // The tribes are laid on the same grid, over the same regions.
+  // The tribes are laid on the same grid, over the same regions; the overlaps hatched over both.
   rebuildTribes(context, grid, regions)
+  rebuildHatches(context, grid)
 }

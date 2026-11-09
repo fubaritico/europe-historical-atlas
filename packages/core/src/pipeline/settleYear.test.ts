@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { authoredRegionColours } from '../data/polityColours'
 import { projectRegions } from '../data/regionSource'
 import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
+import { TWO_OVERLAPPING, squaresDocument } from '../data/testing/overlapFixtures'
 import { toRegionPayload } from '../data/toRegionPayload'
+import { saveYearDocument } from '../data/yearDocument'
 
 import { settleAuthoredYear } from './settleYear'
 
@@ -116,6 +118,23 @@ describe('settleAuthoredYear', () => {
         [],
         [],
       ])
+    })
+  })
+
+  // ATLAS-399: the overlaps, in their polities' colours, for the hatching.
+  describe('overlaps', () => {
+    it('hands test1 and test2’s shared band to hatch, in their colours, nothing refused', () => {
+      const year = { year: 1100, ...saveYearDocument(squaresDocument(TWO_OVERLAPPING)) }
+      const settled = settleAuthoredYear(requestFor(year), null)
+      expect([
+        settled.hatches.map(({ polities }) => polities),
+        settled.hatches[0]?.colours[0],
+        settled.hatchRefusals,
+      ]).toEqual([[['test1', 'test2']], { r: 0xff, g: 0x20, b: 0x00 }, []])
+    })
+
+    it('hatches nothing between a vassal and its suzerain', () => {
+      expect(settleAuthoredYear(requestFor(franceAndAquitaine()), null).hatches).toEqual([])
     })
   })
 

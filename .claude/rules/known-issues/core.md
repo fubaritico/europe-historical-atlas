@@ -57,3 +57,9 @@ Open issues of `packages/core`: the document model, the history, the derivations
   eux non. Mesuré le 21/10 sur tout ce qui est commité (`years/index.json`, les trois fichiers de 1100) : aucun an 0. Remède : les faire passer par `time/` le jour où le format des
   années change pour DESIGN-262 (palier 6, la scission territoire / dépendance / lien) — pas avant, ce serait une
   migration des pays de 1100 pour un cas qu'aucun ne contient (mesuré le 21/10 : 142 pays, aucun an 0). **Sévérité : à savoir.**
+- **The overlaps' sequence is written twice** (2026-11-09, ATLAS-399, review ARCH-003): shapes, candidate pairs, their
+  share and its cut, with the refusal skipped and handed back — in `data/yearOverlaps` (the atlas, a year whole) and in the
+  Cartographer's `canvas/overlapCache` (memoised per shape and per pair, so a gesture costs tens of milliseconds, not
+  ~0.8 s). A change to the refusal rule or to the cut's order made in one hatches other ground in the other. **Remedy**:
+  one sequence in core taking the shape and the pair steps as callbacks, the cache plugging its memoised ones in.
+  **Severity: worth knowing.**

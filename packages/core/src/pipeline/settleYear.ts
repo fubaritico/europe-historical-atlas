@@ -13,10 +13,14 @@
  *
  * **A vassal's band** (ATLAS-398): each region's depth of homage when it wears the band, read off the same homage — what
  * the fill shader reveals the band by, as it reveals the vassal's colour.
+ *
+ * **The overlaps** (ATLAS-399): the common ground of polities whose outlines overlap, in their colours, for the hatching
+ * — the Cartographer's computation, ~1.3 s a year, here off the page.
  */
 
 import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
+import { overlapHatches } from '../data/overlapHatches'
 import { authoredTintLevels, polityColours } from '../data/polityColours'
 import { tribeIds } from '../data/tribes'
 import { bandedVassalIds, regionBandDepths } from '../data/vassalBand'
@@ -26,9 +30,11 @@ import type { BorderPattern } from '../data/borderStyles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { HomageLevels } from '../data/homageLevels'
 import type { LandMask } from '../data/landMask'
+import type { OverlapHatch } from '../data/overlapHatches'
 import type { RegionBorders } from '../data/regionBorders'
 import type { Region } from '../data/regionSource'
 import type { AuthoredYear } from '../data/yearFormat'
+import type { OverlapRefusal } from '../data/yearOverlaps'
 import type { GeoBounds } from '../geo/mercator'
 import type { RgbColor } from '../utils/color'
 
@@ -78,14 +84,19 @@ export interface SettledYear {
    * band, `0` for a sovereign or a tribe — one per region, in the fills' order.
    */
   readonly bandDepths: number[]
+  /** The pieces of ground two polities or more cover, to hatch in their colours (ATLAS-399); empty when none. */
+  readonly hatches: OverlapHatch[]
+  /** The overlaps the geometry refused, left unhatched — said by the page, which reads them. */
+  readonly hatchRefusals: OverlapRefusal[]
 }
 
 /**
- * Settle an authored year: its homage, its exact lines, its colours, its tints by level and its tribes.
+ * Settle an authored year: its homage, its exact lines, its colours, its tints by level, its tribes, its vassals' band
+ * depths and its overlaps to hatch — the overlaps the costliest, ~1.3 s a year (ATLAS-399).
  * @param request - the year, its frame, its regions and the palette
  * @param mask - the land mask the coastline borders are cut against, or `null` when it failed
  * @param warn - where a border the atlas cannot draw yet is said — the console of the thread it runs on
- * @returns the year settled
+ * @returns the year settled, the overlaps the geometry refused among it
  */
 export function settleAuthoredYear(
   request: SettleRequest,
@@ -97,7 +108,9 @@ export function settleAuthoredYear(
   const { year, bbox, regions, palette } = request
   const homage = homageLevels(year.registry.polities)
   const exact = exactBordersOf(year, bbox, mask, warn, homage)
-  const colours = polityColours(openYearDocument(year), palette)
+  const document = openYearDocument(year)
+  const colours = polityColours(document, palette)
+  const overlaps = overlapHatches(document, bbox, colours)
   const { deepest, levels } = tintsByLevel(year, regions, colours, homage)
   return {
     tints: deepest,
@@ -108,6 +121,8 @@ export function settleAuthoredYear(
     levels: exact.levels,
     tribes: colouredTribes(year, regions, colours),
     bandDepths: regionBandDepths(regions, bandedVassalIds(year.registry.polities), homage),
+    hatches: overlaps.hatches,
+    hatchRefusals: overlaps.refused,
   }
 }
 

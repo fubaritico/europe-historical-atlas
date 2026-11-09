@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   authoredRegionColours,
@@ -6,11 +6,12 @@ import {
 } from '@europe-historical-atlas/core/data/polityColours'
 import { openYearDocument, saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
+import { settleAuthoredYear } from '@europe-historical-atlas/core/pipeline/settleYear'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { createMapSources } from '../sources/mapSources'
 
-import { settleYearBorders } from './yearBorders'
+import { installSettledYear, settleYearBorders } from './yearBorders'
 
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
@@ -266,5 +267,73 @@ describe('settleYearBorders', () => {
       expect(sources.derivedBorders).toEqual({ between: [], frontier: [] })
       expect(sources.borderPatterns?.size).toBe(0)
     })
+  })
+})
+
+// ATLAS-399: the overlaps to hatch, written with the year; what the geometry refused, said on the page.
+/**
+ * The settled fixture year, its overlaps and refusals as given.
+ * @param over - what to put in its place
+ * @returns the settled year
+ */
+function settled(
+  over: Partial<ReturnType<typeof settleAuthoredYear>>
+): ReturnType<typeof settleAuthoredYear> {
+  const year = authoredYear()
+  const authored = year.authored ?? fail()
+  return {
+    ...settleAuthoredYear(
+      { year: authored.year, bbox, regions: year.regions, palette: PALETTE },
+      null
+    ),
+    ...over,
+  }
+}
+
+const HATCH = {
+  polities: ['fr-couronne', 'hre'],
+  colours: [RED, BLUE],
+  rings: [
+    [
+      { u: 0.1, v: 0.1 },
+      { u: 0.2, v: 0.1 },
+      { u: 0.2, v: 0.2 },
+    ],
+  ],
+}
+
+describe('installSettledYear — overlaps', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('writes the year’s overlaps into the sources', () => {
+    const sources = createMapSources()
+    installSettledYear(sources, settled({ hatches: [HATCH] }))
+    expect(sources.hatches).toEqual([HATCH])
+  })
+
+  it('says each refused pair and shape on the console, once, as an error', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    installSettledYear(
+      createMapSources(),
+      settled({
+        hatchRefusals: [
+          { a: 'fr-couronne', b: 'hre', reason: 'degenerate ring' },
+          { a: 'hre', b: null, reason: 'self-crossing' },
+        ],
+      })
+    )
+    expect(error.mock.calls.map(([message]) => String(message))).toEqual([
+      '[atlas] the overlap of "fr-couronne" and "hre" could not be computed, so it is not hatched: degenerate ring',
+      '[atlas] the shape of "hre" could not be computed, so its overlaps are not hatched: self-crossing',
+    ])
+  })
+
+  it('forgets the overlaps when a payload year follows', () => {
+    const sources = createMapSources()
+    installSettledYear(sources, settled({ hatches: [HATCH] }))
+    settleYearBorders(sources, PAYLOAD_YEAR, COMPUTED, PALETTE)
+    expect(sources.hatches).toEqual([])
   })
 })

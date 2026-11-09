@@ -35,6 +35,7 @@ type SettledSources = Pick<
   | 'homageDepth'
   | 'bandDepths'
   | 'tribes'
+  | 'hatches'
 >
 
 /** What the compute settled for the year: its traced lines and each region's tint. */
@@ -70,6 +71,7 @@ export function settleYearBorders(
     sources.borderPatterns = null
     sources.borderLevels = null
     sources.tribes = []
+    sources.hatches = []
     return
   }
   const { year, bbox } = loaded.authored
@@ -95,4 +97,13 @@ export function installSettledYear(sources: SettledSources, settled: SettledYear
   sources.borderPatterns = settled.patterns
   sources.borderLevels = settled.levels
   sources.tribes = settled.tribes
+  sources.hatches = settled.hatches
+  // An overlap the geometry refused goes unhatched — the Cartographer's rule (the dev, 2026-11-06) — and is said here,
+  // once per year installed: the settling ran in the worker, whose console nobody reads.
+  for (const { a, b, reason } of settled.hatchRefusals)
+    console.error(
+      b === null
+        ? `[atlas] the shape of "${a}" could not be computed, so its overlaps are not hatched: ${reason}`
+        : `[atlas] the overlap of "${a}" and "${b}" could not be computed, so it is not hatched: ${reason}`
+    )
 }

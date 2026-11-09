@@ -3,10 +3,10 @@ import {
   overlapCandidates,
   pairOverlap,
   polityShape,
-} from '@europe-historical-atlas/core/editor/overlaps'
+} from '@europe-historical-atlas/core/data/overlaps'
 
+import type { Overlap, PolityShape } from '@europe-historical-atlas/core/data/overlaps'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
-import type { Overlap, PolityShape } from '@europe-historical-atlas/core/editor/overlaps'
 
 /** A ground, in longitude and latitude — the geometry's own shape, read through core. */
 type MultiPolygon = Overlap['area']

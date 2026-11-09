@@ -30,6 +30,7 @@ import { DEPTH_BIAS_UNIFORM } from '../depthBias'
 import { DETAIL_FADE_SECONDS } from '../detail/detailView'
 import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
+import { HATCH_RENDER_ORDER } from '../political/hatches/hatchLayer'
 import { tribeCutSettings } from '../political/tribes/mapTribeLayer'
 import { TRIBE_RENDER_ORDER } from '../political/tribes/tribeLayer'
 import { MAP_TITLE_OBJECT } from '../sheet/mapTitle'
@@ -1604,4 +1605,81 @@ describe('primeTribeCut', () => {
   })
 
   // L3, L4: N/A — a handle written, read by the tribes' own suite.
+})
+
+// ATLAS-399: the overlaps hatched with the fills and the tribes, on the same relief, and cleared with them.
+/** A piece of common ground in the fixture's frame, red and blue in turn. */
+const HATCH = {
+  polities: ['a', 'b'],
+  colours: [
+    { r: 255, g: 0, b: 0 },
+    { r: 0, g: 0, b: 255 },
+  ],
+  rings: [TRIBE_RING],
+}
+
+/**
+ * The hatch mesh in a scene, found by its draw order.
+ * @param scene - the scene
+ * @returns the mesh, or `undefined` when none is drawn
+ */
+function hatchMesh(scene: Scene): { scale: { y: number } } | undefined {
+  return scene.children.find((child) => child.renderOrder === HATCH_RENDER_ORDER)
+}
+
+describe('the hatches', () => {
+  describe('happy path', () => {
+    it('hatches the year’s overlaps over the fills, scaled with the relief', () => {
+      const built = withTribe()
+      built.sources.hatches = [HATCH]
+      built.layers.rebuildFills()
+      const reliefScale = built.scene.children.find((child) => child.renderOrder === 0)?.scale.y
+      expect([hatchMesh(built.scene) !== undefined, hatchMesh(built.scene)?.scale.y]).toEqual([
+        true,
+        reliefScale,
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('draws the hatches once, however many times the fills are rebuilt', () => {
+      const built = withTribe()
+      built.sources.hatches = [HATCH]
+      built.layers.rebuildFills()
+      built.layers.rebuildFills()
+      expect(
+        built.scene.children.filter((child) => child.renderOrder === HATCH_RENDER_ORDER)
+      ).toHaveLength(1)
+    })
+  })
+
+  // L3, L4: N/A — the arrays and the layer are core's and the layer's suites'.
+
+  describe('edge cases', () => {
+    it('draws no hatch for a year without an overlap', () => {
+      expect(hatchMesh(withTribe().scene)).toBeUndefined()
+    })
+
+    it('composites onto a freshly baked terrain, which needs no rebuild', () => {
+      const built = withTribe()
+      built.sources.hatches = [HATCH]
+      built.layers.rebuildFills()
+      const baked = new DataTexture(new Uint8Array(16), 2, 2)
+      built.layers.setTexture(baked)
+      const mesh = built.scene.children.find(
+        (child) => child.renderOrder === HATCH_RENDER_ORDER
+      ) as unknown as
+        { material: { uniforms: Record<string, { value: unknown } | undefined> } } | undefined
+      expect(mesh?.material.uniforms.map?.value).toBe(baked)
+    })
+
+    it('clears the hatches when the overlaps are gone', () => {
+      const built = withTribe()
+      built.sources.hatches = [HATCH]
+      built.layers.rebuildFills()
+      built.sources.hatches = []
+      built.layers.rebuildFills()
+      expect(hatchMesh(built.scene)).toBeUndefined()
+    })
+  })
 })

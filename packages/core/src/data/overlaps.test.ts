@@ -1,13 +1,25 @@
 import { describe, expect, it } from 'vitest'
 
-import { createYearDocument } from '../data/yearDocument'
-
-import { AQUITAINE_IDENTITY } from './documentFixtures'
 import { addOverlap, overlapCandidates, pairOverlap, polityShape, suzerainsOf } from './overlaps'
+import { createYearDocument } from './yearDocument'
 
 import type { Overlap, PolityShape } from './overlaps'
-import type { YearDocument } from '../data/yearDocument'
+import type { YearDocument } from './yearDocument'
+import type { YearPolity } from './yearFormat'
 import type { MultiPolygon } from 'polygon-clipping'
+
+/** A polity's identity the tests copy, renaming it — data/ reads nothing of the editor's fixtures. */
+const IDENTITY: YearPolity = {
+  id: 'aquitaine',
+  name: 'Duché d’Aquitaine',
+  rank: 'duchy',
+  status: 'country',
+  suzerain: 'fr-couronne',
+  existsFrom: 1058,
+  existsTo: null,
+  colour: null,
+  wikidata: null,
+}
 
 // CARTO-364 — the dev, 2026-11-06: an outline spilling over another's makes a hatched zone in the colours of both;
 // four over one another, four — "it must be computed that way".
@@ -35,7 +47,7 @@ function square(
     [west, south + side]
   )
   document.anchorSource.push(0, 0, 0, 0)
-  document.polities.push({ ...AQUITAINE_IDENTITY, id: polity, name: polity, suzerain })
+  document.polities.push({ ...IDENTITY, id: polity, name: polity, suzerain })
   document.claims.push({ polity, rings: [[from, from + 1, from + 2, from + 3]] })
 }
 

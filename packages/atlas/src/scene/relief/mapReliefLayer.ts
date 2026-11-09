@@ -93,6 +93,8 @@ export function setTexture(context: LayerContext, texture: DataTexture): void {
   handles.fills?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
   handles.tribes?.setMap(texture)
   handles.tribes?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
+  handles.hatches?.setMap(texture)
+  handles.hatches?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
   // The relief wears it too, once it exists; the material must be recompiled to pick up a new map.
   const relief = handles.relief
   if (!relief) return

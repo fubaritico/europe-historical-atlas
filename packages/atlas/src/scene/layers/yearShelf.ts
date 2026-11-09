@@ -29,6 +29,7 @@ type YearSourceKey =
   | 'borderPatterns'
   | 'borderLevels'
   | 'tribes'
+  | 'hatches'
   | 'yearNames'
   | 'nameSheet'
 
@@ -40,6 +41,7 @@ type YearSourceKey =
 const YEAR_LAYERS = [
   'fills',
   'tribes',
+  'hatches',
   'borders',
   'names',
   'events',
@@ -191,6 +193,7 @@ function takeSources(sources: MapSources): YearSources {
     borderPatterns: sources.borderPatterns,
     borderLevels: sources.borderLevels,
     tribes: sources.tribes,
+    hatches: sources.hatches,
     yearNames: sources.yearNames,
     nameSheet: sources.nameSheet,
   }
@@ -204,6 +207,7 @@ function takeSources(sources: MapSources): YearSources {
     borderPatterns: null,
     borderLevels: null,
     tribes: [],
+    hatches: [],
     yearNames: null,
     nameSheet: null,
   } satisfies YearSources)
@@ -220,6 +224,7 @@ function takeLayers(scene: Scene, handles: LayerHandles): YearLayers {
   const layers: YearLayers = {
     fills: handles.fills,
     tribes: handles.tribes,
+    hatches: handles.hatches,
     borders: handles.borders,
     names: handles.names,
     events: handles.events,

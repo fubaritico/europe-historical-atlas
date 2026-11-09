@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import * as overlaps from '@europe-historical-atlas/core/data/overlaps'
 import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
-import * as overlaps from '@europe-historical-atlas/core/editor/overlaps'
 
 import { createOverlapCache } from './overlapCache'
 
@@ -10,7 +10,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocume
 // CARTO-364 — the overlaps hatched, computed again only where a gesture moved something; a refusal of the geometry
 // skipped and said (the dev, 2026-11-06).
 
-vi.mock('@europe-historical-atlas/core/editor/overlaps', async (original) => {
+vi.mock('@europe-historical-atlas/core/data/overlaps', async (original) => {
   const actual = await original<typeof overlaps>()
   return { ...actual, pairOverlap: vi.fn(actual.pairOverlap), addOverlap: vi.fn(actual.addOverlap) }
 })

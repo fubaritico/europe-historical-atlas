@@ -14,7 +14,7 @@ import type { LayerContext, LayerHandles } from './layerContext'
 const TOLD = ['edge', 'events'] as const
 
 /** The layers laid on the relief that are scaled as a whole. */
-const SCALED = ['coastline', 'rivers', 'borders', 'fills', 'tribes', 'names'] as const
+const SCALED = ['coastline', 'rivers', 'borders', 'fills', 'tribes', 'hatches', 'names'] as const
 
 /** The layers on the scene that are not on the relief, and must never follow it. */
 const FLAT = ['rhumb', 'compass', 'sheet', 'frame', 'labels', 'title'] as const
@@ -227,12 +227,13 @@ describe('frameLineWork', () => {
   })
 
   // The dev, 2026-10-29: everything but the relief fades in together at startup.
-  it('multiplies the countries’, the names’ and the events’ opacity by how far they have come in', () => {
+  it('multiplies the countries’, the hatches’, the names’ and the events’ opacity by how far they have come in', () => {
     const dev = createDevState()
     const handles = {
       rivers: null,
       fills: { setDetail: vi.fn(), setLook: vi.fn() },
       tribes: { setLook: vi.fn(), setFeather: vi.fn() },
+      hatches: { setLook: vi.fn() },
       borders: null,
       coastline: null,
       rhumb: null,
@@ -256,9 +257,11 @@ describe('frameLineWork', () => {
     expect([
       handles.fills.setLook.mock.lastCall,
       handles.tribes.setLook.mock.lastCall,
+      handles.hatches.setLook.mock.lastCall,
       handles.names.setReveal.mock.lastCall,
       handles.events.setReveal.mock.lastCall,
     ]).toEqual([
+      [dev.texture.politicalMode, dev.texture.politicalStrength * 0.25],
       [dev.texture.politicalMode, dev.texture.politicalStrength * 0.25],
       [dev.texture.politicalMode, dev.texture.politicalStrength * 0.25],
       [0.25],

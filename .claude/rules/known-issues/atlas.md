@@ -375,3 +375,13 @@ target.z)` would be coherent with the navigation that already exists.
   cut, so the page's cut cache (`fillCut`) is empty until a fill is laid here; a height-curve slider or a fill switch then
   pays one cut (~0.45 s on 1100), the slides after it reuse it. **Only the dev panel reaches it.** **Remedy if it bites**:
   the worker keeps the year's cut and lays it again on new heights. **Severity: cosmetic.**
+- **The overlaps are computed in the year's settling, ~1.3 s a year, on the way to its first frame** (2026-11-09,
+  ATLAS-399, review ARCH-002): the worker settles the year before its fills are laid, so a map not prepared waits for it;
+  with the panel's _exact fills_ off, the settling runs on the page and freezes it as long. **Remedy, the next step of
+  ATLAS-399**: the overlaps computed when the site is built, as the names are (`bake/namesBake`), the settling reading them;
+  the dev server keeps computing them. Measure a map switch on the built site before and after. **Severity: gênant** until
+  then — the dev server only, as long as the branch is not published.
+- **The hatches are cut again on the page at every rebuild of the fills** (2026-11-09, ATLAS-399, review ARCH-005): neither
+  cached like the fills' and tribes' cuts nor laid in the worker. A handful of small pieces a year (25 in 1100), not
+  measured. **Remedy if a height-curve slider stutters**: keep the last cut in a handle, as `fillCut`. **Severity:
+  cosmétique.**
