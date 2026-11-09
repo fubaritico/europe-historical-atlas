@@ -2,8 +2,7 @@
  * How an authored year's polities are laid on the relief as geometry (`fillLayer`), and when they are.
  */
 
-import { VASSAL_BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
-import { bandedFillRegions, cutYearFills } from '@europe-historical-atlas/core/pipeline/vassalBands'
+import { cutYearFills, vassalBandCut } from '@europe-historical-atlas/core/pipeline/vassalBands'
 
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
@@ -80,10 +79,8 @@ function cutFills(
   if (last?.regions === regions && last.segX === grid.segX && last.segY === grid.segY)
     return last.fills
   // Otherwise cut anew, and keep the cut for next time.
-  const fills = cutYearFills(bandedFillRegions(regions, year.polities), grid, {
-    bounds: year.bounds,
-    reachKm: VASSAL_BAND_REACH_KM,
-  })
+  const cut = vassalBandCut(regions, year.polities, year.bounds)
+  const fills = cutYearFills(cut.regions, grid, cut.band)
   primeFillCut(context, regions, grid, fills)
   return fills
 }

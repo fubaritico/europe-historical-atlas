@@ -22,7 +22,7 @@ import type { YearPolity } from './yearFormat'
 
 /**
  * The band's share of the vassal's colour — half, the tribes' own (`editor/tribeFeather`'s `BAND_SHARE`, which `data/`
- * may not import: the editor reads the data, never the reverse). The vassals' test holds the two equal.
+ * may not import: the editor reads the data, never the reverse). `editor/tribeFeather`'s test holds the two equal.
  */
 export const VASSAL_BAND_SHARE = 0.5
 
@@ -64,6 +64,7 @@ export function bandedVassalIds(
  * @param banded - the ids of the polities wearing the band ({@link bandedVassalIds})
  * @param homage - the year's homage read as levels
  * @returns one depth per region; `0` for a region of no polity, of a sovereign or of a tribe
+ * @throws when a banded id names no polity of the year — `homage.chainOf`'s refusal, every id coming from the registry
  */
 export function regionBandDepths(
   regions: readonly { readonly polityId?: string | undefined }[],
@@ -84,7 +85,8 @@ export function regionBandDepths(
  * **A width of zero or less is no band**: only the outline itself is at half, which no fill shows. A NaN distance or
  * width stays NaN, so a broken value shows rather than reading as a plausible share.
  * @param signedKm - the distance to the vassal's outline, km, negative inside (`geo/signedDistance`)
- * @param widthKm - the band's width, km
+ * @param widthKm - the band's width, km, positive — a negative one leaves no band inside the outline (only the ground
+ *   past it would read the share, and no vassal's vertex lies there)
  * @returns the share of the colour, {@link VASSAL_BAND_SHARE} or `1`
  */
 export function vassalBandOpacity(signedKm: number, widthKm: number): number {

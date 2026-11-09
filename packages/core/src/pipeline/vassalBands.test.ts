@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { VASSAL_BAND_REACH_KM } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
 import { fillTriangles } from './fillTriangles'
 import { indexFill } from './indexFill'
-import { cutYearFills, measureVassalBands } from './vassalBands'
+import { cutYearFills, measureVassalBands, vassalBandCut } from './vassalBands'
+
+import type { YearPolity } from '../data/yearFormat'
 
 const BOUNDS = { west: 0, south: 40, east: 10, north: 50 }
 const BAND = { bounds: BOUNDS, reachKm: 20 }
@@ -29,6 +32,12 @@ function square(u0: number, v0: number, side: number): { u: number; v: number }[
 const SOVEREIGN = { rings: [square(0.1, 0.1, 0.4)] }
 const VASSAL = { rings: [square(0.5, 0.1, 0.4)], banded: true }
 
+const REGISTRY: Pick<YearPolity, 'id' | 'suzerain' | 'rank'>[] = [
+  { id: 'crown', suzerain: null, rank: 'kingdom' },
+  { id: 'duchy', suzerain: 'crown', rank: 'duchy' },
+  { id: 'people', suzerain: 'crown', rank: 'tribe' },
+]
+
 describe('vassalBands', () => {
   describe('happy path', () => {
     it('measures each of a vassal’s vertices against its own outline, as the signed distance does', () => {
@@ -45,6 +54,27 @@ describe('vassalBands', () => {
   })
 
   describe('variants', () => {
+    // Mutation: a cut that bands every region whose polity has a suzerain bands the tribe too, which keeps its own band.
+    it('bands the vassal alone, never the sovereign, the tribe or a region of no polity', () => {
+      const rings = SOVEREIGN.rings
+      const cut = vassalBandCut(
+        [
+          { rings, polityId: 'crown' },
+          { rings, polityId: 'duchy' },
+          { rings, polityId: 'people' },
+          { rings },
+        ],
+        REGISTRY,
+        BOUNDS
+      )
+      expect(cut.regions).toEqual([{ rings }, { rings, banded: true }, { rings }, { rings }])
+    })
+
+    it('measures the band in the year’s frame, as deep as the vassals’ reach', () => {
+      const { band } = vassalBandCut([], REGISTRY, BOUNDS)
+      expect(band).toEqual({ bounds: BOUNDS, reachKm: VASSAL_BAND_REACH_KM })
+    })
+
     // Mutation: measuring every region costs the sovereigns' distances for nothing.
     it('measures no sovereign', () => {
       const [sovereign] = cutYearFills([SOVEREIGN, VASSAL], GRID, BAND)
@@ -87,7 +117,8 @@ describe('vassalBands', () => {
     it('gives a vassal with no triangle an empty measure', () => {
       const tiny = { rings: [square(0.5, 0.5, 1e-6)], banded: true }
       const [fill] = cutYearFills([tiny], GRID, BAND)
-      expect(fill?.bandKm?.length).toBe((fill?.vertices.length ?? 0) / 2)
+      expect(fill?.vertices).toHaveLength(0)
+      expect(fill?.bandKm).toEqual(new Float32Array(0))
     })
   })
 })

@@ -155,16 +155,27 @@ function featherBox(
   ground: Pick<FeatherGround, 'frame' | 'feather'>
 ): { box: Rect; grown: GridBox } | null {
   const { frame, feather } = ground
-  const { width: W, height: H } = frame.size
   const grown = paddedBox(rings, frame.bounds, featherShiftKm(feather.mode, feather.widthKm))
   if (grown === null) return null
-  // One pixel more on each side, so the outline's own pixels are inside the image.
-  const x0 = Math.max(0, Math.floor(grown.u0 * W) - 1)
-  const y0 = Math.max(0, Math.floor(grown.v0 * H) - 1)
-  const x1 = Math.min(W, Math.ceil(grown.u1 * W) + 1)
-  const y1 = Math.min(H, Math.ceil(grown.v1 * H) + 1)
-  if (x1 <= x0 || y1 <= y0) return null
-  return { box: { x: x0, y: y0, width: x1 - x0, height: y1 - y0 }, grown }
+  const box = pixelBoxOf(grown, frame)
+  return box === null ? null : { box, grown }
+}
+
+/**
+ * A box of the grid in whole backdrop pixels, one more on each side so the outline's own pixels are inside it, held
+ * within the backdrop — the one rounding a tribe's fade and a vassal's band are measured over (`paint/vassalBands`).
+ * A box that is not a number comes back as it is, for the caller to refuse.
+ * @param grid - the box, in the grid's normalized coordinates
+ * @param frame - the backdrop's coordinate system
+ * @returns the pixels, or `null` for a box with none
+ */
+export function pixelBoxOf(grid: GridBox, frame: BackdropFrame): Rect | null {
+  const { width: W, height: H } = frame.size
+  const x0 = Math.max(0, Math.floor(grid.u0 * W) - 1)
+  const y0 = Math.max(0, Math.floor(grid.v0 * H) - 1)
+  const x1 = Math.min(W, Math.ceil(grid.u1 * W) + 1)
+  const y1 = Math.min(H, Math.ceil(grid.v1 * H) + 1)
+  return x1 <= x0 || y1 <= y0 ? null : { x: x0, y: y0, width: x1 - x0, height: y1 - y0 }
 }
 
 /**

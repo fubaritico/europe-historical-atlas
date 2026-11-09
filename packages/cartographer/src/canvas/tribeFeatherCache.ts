@@ -153,11 +153,13 @@ export function createTribeFeatherCache(
 }
 
 /**
- * A raster as a canvas of its own size — the browser's {@link RasterToImage}.
+ * A raster as a canvas of its own size — the browser's {@link RasterToImage}, for a tribe's fade and a vassal's band
+ * alike.
  * @param raster - the pixels and their size
  * @returns the canvas
  * @throws when the browser gives no 2D context — a browser that cannot run this application at all, the
- *   same decision `startCanvasController` takes; an image drawn from nothing would hide a tribe silently
+ *   same decision `startCanvasController` takes; an image drawn from nothing would hide a tribe or a vassal's band
+ *   silently
  */
 export function rasterToCanvas(raster: TribeFeatherRaster): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
@@ -165,7 +167,9 @@ export function rasterToCanvas(raster: TribeFeatherRaster): HTMLCanvasElement {
   canvas.height = raster.box.height
   const ctx = canvas.getContext('2d')
   if (ctx === null)
-    throw new Error('Cartographer: the canvas gave no 2D context — a tribe cannot be drawn.')
+    throw new Error(
+      'Cartographer: the canvas gave no 2D context — no tribe and no vassal band can be drawn.'
+    )
   ctx.putImageData(new ImageData(raster.pixels, raster.box.width, raster.box.height), 0, 0)
   return canvas
 }

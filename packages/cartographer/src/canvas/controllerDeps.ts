@@ -75,7 +75,10 @@ export interface CanvasControllerDeps {
   landMask: LandMask
   /** What is under the pointer — a border, or a polity's fill — for the status bar; `null` for nothing. */
   onFeature: (feature: string | null) => void
-  /** How a tribe's fade becomes a drawable image — `rasterToCanvas` in the application, a stand-in in a test. */
+  /**
+   * How a raster — a tribe's fade or a vassal's band — becomes a drawable image: `rasterToCanvas` in the application, a
+   * stand-in in a test.
+   */
   tribeImage: RasterToImage
   /**
    * Everything the canvas says, in the language of the moment (ATLAS-159) — `canvasWords` over the page's

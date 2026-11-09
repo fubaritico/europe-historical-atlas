@@ -3,9 +3,8 @@
  */
 
 import { authoredRegionColours } from '@europe-historical-atlas/core/data/polityColours'
-import { VASSAL_BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
 import { scaleProgress } from '@europe-historical-atlas/core/pipeline/inlineCompute'
-import { bandedFillRegions } from '@europe-historical-atlas/core/pipeline/vassalBands'
+import { vassalBandCut } from '@europe-historical-atlas/core/pipeline/vassalBands'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { paintsExactFills, yearPaintsExactFills } from '../../scene/political/paintsExactFills'
@@ -251,13 +250,10 @@ export async function prepareYear(
   const [, fills, settled, tribes] = await Promise.all([
     bake,
     // Each vassal measured for its band beside its cut (ATLAS-398), off this thread like it.
-    timedStep(context.clock, loaded.year, 'cut', () =>
-      context.box.compute.cutFills(
-        bandedFillRegions(loaded.regions, authored.year.registry.polities),
-        grid,
-        { bounds, reachKm: VASSAL_BAND_REACH_KM }
-      )
-    ),
+    timedStep(context.clock, loaded.year, 'cut', () => {
+      const cut = vassalBandCut(loaded.regions, authored.year.registry.polities, bounds)
+      return context.box.compute.cutFills(cut.regions, grid, cut.band)
+    }),
     settling,
     // The tribes the settling coloured, measured once it has.
     settling.then((year) => measureTribes(context, loaded, year.tribes, { bounds, grid })),

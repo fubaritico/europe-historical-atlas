@@ -8,13 +8,12 @@ import { paddedBox, signedDistanceField } from '@europe-historical-atlas/core/ge
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { claimsInPaintOrder } from './scene'
-import { flattenRings, ringsOnGrid } from './tribeFeathers'
+import { flattenRings, pixelBoxOf, ringsOnGrid } from './tribeFeathers'
 
 import type { FeatherSignature, GridProjection, TribeFeatherRaster } from './tribeFeathers'
-import type { Rect } from '../../geometry/marquee'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
-import type { GridBox, GridPoint } from '@europe-historical-atlas/core/geo/signedDistance'
+import type { GridPoint } from '@europe-historical-atlas/core/geo/signedDistance'
 
 /**
  * Each vassal's band as an image — the Cartographer's half of ATLAS-398, the same look as the atlas
@@ -64,22 +63,6 @@ function sayNotANumber(polity: { id: string; name: string }): void {
 }
 
 /**
- * A box of the grid in whole backdrop pixels, one more on each side so the outline's own pixels are inside it, held
- * within the backdrop.
- * @param grid - the box, in the grid's normalized coordinates
- * @param frame - the backdrop's coordinate system
- * @returns the pixels, or `null` for a box with none
- */
-function pixelBox(grid: GridBox, frame: BackdropFrame): Rect | null {
-  const { width: W, height: H } = frame.size
-  const x0 = Math.max(0, Math.floor(grid.u0 * W) - 1)
-  const y0 = Math.max(0, Math.floor(grid.v0 * H) - 1)
-  const x1 = Math.min(W, Math.ceil(grid.u1 * W) + 1)
-  const y1 = Math.min(H, Math.ceil(grid.v1 * H) + 1)
-  return x1 <= x0 || y1 <= y0 ? null : { x: x0, y: y0, width: x1 - x0, height: y1 - y0 }
-}
-
-/**
  * One vassal's band over its box, in whole backdrop pixels, one more on each side so the outline's own pixels are in.
  * @param polity - the vassal, named in a refusal
  * @param polity.id - its id
@@ -103,7 +86,7 @@ export function vassalBandRaster(
     sayNotANumber(polity)
     return null
   }
-  const box = pixelBox(grid, frame)
+  const box = pixelBoxOf(grid, frame)
   if (box === null) return null
   const distance = signedDistanceField(rings, frame.bounds, VASSAL_BAND_REACH_KM)
   const { r, g, b } = hexToRgb(colour)

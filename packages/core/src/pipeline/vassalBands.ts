@@ -12,7 +12,7 @@
  * within the straightness of a relief cell — the accuracy a tribe's band already has.
  */
 
-import { bandedVassalIds } from '../data/vassalBand'
+import { VASSAL_BAND_REACH_KM, bandedVassalIds } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
 import { fillTriangles } from './fillTriangles'
@@ -22,6 +22,15 @@ import type { FillGrid } from './fillTriangles'
 import type { IndexedFill } from './indexFill'
 import type { FillBand, FillRegion } from './mapCompute'
 import type { YearPolity } from '../data/yearFormat'
+import type { GeoBounds } from '../geo/mercator'
+
+/** What a year's fills are cut from: its regions, each saying whether it wears the band, and how the vassals are measured. */
+export interface VassalBandCut {
+  /** One region to cut per region of the year, in the same order. */
+  readonly regions: FillRegion[]
+  /** The year's frame and the reach of the vassals' distance ({@link VASSAL_BAND_REACH_KM}). */
+  readonly band: FillBand
+}
 
 /**
  * A year's regions as the fills are cut from them: each one's rings, and whether its polity wears the band — read off
@@ -30,7 +39,7 @@ import type { YearPolity } from '../data/yearFormat'
  * @param polities - the year's registry
  * @returns one region to cut per region, in the same order
  */
-export function bandedFillRegions(
+function bandedFillRegions(
   regions: readonly {
     readonly rings: FillRegion['rings']
     readonly polityId?: string | undefined
@@ -41,6 +50,28 @@ export function bandedFillRegions(
   return regions.map(({ rings, polityId }) =>
     polityId !== undefined && banded.has(polityId) ? { rings, banded: true } : { rings }
   )
+}
+
+/**
+ * What to cut a year's fills from, the vassals banded — the one place the atlas's two cuts (the page's, the worker's)
+ * take their regions and their band from, so the two never differ.
+ * @param regions - the year's regions, each with the id of its polity, in the order the fills are laid
+ * @param polities - the year's registry
+ * @param bounds - the year's frame, which is the relief's
+ * @returns the regions to cut and the band to measure them with
+ */
+export function vassalBandCut(
+  regions: readonly {
+    readonly rings: FillRegion['rings']
+    readonly polityId?: string | undefined
+  }[],
+  polities: readonly Pick<YearPolity, 'id' | 'suzerain' | 'rank'>[],
+  bounds: GeoBounds
+): VassalBandCut {
+  return {
+    regions: bandedFillRegions(regions, polities),
+    band: { bounds, reachKm: VASSAL_BAND_REACH_KM },
+  }
 }
 
 /**

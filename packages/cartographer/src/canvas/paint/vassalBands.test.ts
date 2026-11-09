@@ -15,6 +15,19 @@ import { createGridProjection } from './tribeFeathers'
 import { vassalBandPlans, vassalBandRaster } from './vassalBands'
 
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
+import type * as SignedDistance from '@europe-historical-atlas/core/geo/signedDistance'
+
+/** Whether the signed distance answers `NaN` everywhere — a broken distance inside a box that is a number. */
+const brokenDistance = vi.hoisted(() => ({ on: false }))
+
+vi.mock('@europe-historical-atlas/core/geo/signedDistance', async (importOriginal) => {
+  const actual = await importOriginal<typeof SignedDistance>()
+  return {
+    ...actual,
+    signedDistanceField: (...args: Parameters<typeof actual.signedDistanceField>) =>
+      brokenDistance.on ? () => Number.NaN : actual.signedDistanceField(...args),
+  }
+})
 
 /** The Empire made a vassal of France. */
 const withVassal = (): YearDocument => {
@@ -128,6 +141,31 @@ describe('vassalBands', () => {
       expect(String(error.mock.calls[0]?.[0])).toMatch(/band of the vassal "X"/)
       error.mockRestore()
     })
+
+    // Mutation: without the guard per pixel, every pixel's alpha reads nought — the vassal erased, said nowhere.
+    it('says a distance that is not a number once, inside a box that is one, and draws none', () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      brokenDistance.on = true
+      try {
+        const raster = vassalBandRaster(
+          { id: 'x', name: 'X' },
+          [
+            [
+              { u: 0.5, v: 0.5 },
+              { u: 0.6, v: 0.5 },
+              { u: 0.6, v: 0.6 },
+            ],
+          ],
+          '#204060',
+          TEST_BACKDROP_FRAME
+        )
+        expect(raster).toBeNull()
+        expect(error).toHaveBeenCalledTimes(1)
+      } finally {
+        brokenDistance.on = false
+        error.mockRestore()
+      }
+    })
   })
 
   describe('edge cases', () => {
@@ -152,6 +190,40 @@ describe('vassalBands', () => {
       )
       expect(raster?.box.x).toBe(0)
       expect(raster?.box.y).toBe(0)
+    })
+
+    it('holds the box within the backdrop on its far sides too', () => {
+      const raster = vassalBandRaster(
+        { id: 'x', name: 'X' },
+        [
+          [
+            { u: 0.99, v: 0.99 },
+            { u: 1, v: 0.99 },
+            { u: 1, v: 1 },
+          ],
+        ],
+        '#204060',
+        TEST_BACKDROP_FRAME
+      )
+      const { width: W, height: H } = TEST_BACKDROP_FRAME.size
+      expect((raster?.box.x ?? 0) + (raster?.box.width ?? 0)).toBe(W)
+      expect((raster?.box.y ?? 0) + (raster?.box.height ?? 0)).toBe(H)
+    })
+
+    it('gives rings wholly past the backdrop no raster — a box with no pixel', () => {
+      const raster = vassalBandRaster(
+        { id: 'x', name: 'X' },
+        [
+          [
+            { u: 1.5, v: 1.5 },
+            { u: 1.6, v: 1.5 },
+            { u: 1.6, v: 1.6 },
+          ],
+        ],
+        '#204060',
+        TEST_BACKDROP_FRAME
+      )
+      expect(raster).toBeNull()
     })
   })
 })
