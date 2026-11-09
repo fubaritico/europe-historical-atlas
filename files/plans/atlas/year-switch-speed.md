@@ -170,6 +170,10 @@ page's heap ~250 MB with three maps.
 borders' buffers built in the worker (~50 ms each when a map is not prepared), and the map of a date by his rule
 (`data/mapOfDate`, written, not wired; `centuryOf` still rounds to the nearest century).
 
+**Built on this work — ATLAS-399, the overlaps hatched** (2026-11-09): a map-legend subject with its own plan,
+`overlap-hatching.md`. It leans on the second point above — its common zones are cut in the worker beside the fills, and
+computed when the site is built — and must cost the loading nothing.
+
 ## Where we stopped — 2026-11-08, afternoon
 
 **Branch `atlas-baked-years`, rebased onto main (CMS-391, CARTO-393), not merged**: `addad3a` (the cuts in the worker,

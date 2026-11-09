@@ -275,8 +275,8 @@ target.z)` would be coherent with the navigation that already exists.
   **Severity: worth knowing.**
 - **At the closest zoom the names' contrast is about 1.7:1** (review A11Y-005, 2026-10-29, computed, not measured on
   screen): the watermark multiplied on the fills, the halo gone by then. Computed with the ink at 0.3; since, the share is
-  `watermark` per level in `scene/detail/detailLevels.ts` — 0.25 at the two closest, on `NAME_OPACITY` 0.75, so the ink at
-  about 0.19 and the contrast lower still (not recomputed, 08/11). From afar it is 3 to 4.7:1. **The dev's choice** (A11Y-001: the cities read over the names close up);
+  `watermark` per level in `scene/detail/detailLevels.ts` — 0.4 at the two closest since 2026-11-09 (the dev: 30 % of ink close
+  up; 0.25 before), on `NAME_OPACITY` 0.75, so the ink at 0.30 (contrast not recomputed). From afar it is 3 to 4.7:1. **The dev's choice** (A11Y-001: the cities read over the names close up);
   the remedy if it is reopened, a share of about 0.8 (0.6 effective, ~3:1). **Severity: worth knowing.**
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
@@ -285,9 +285,10 @@ target.z)` would be coherent with the navigation that already exists.
   `files/plans/atlas/performance.md`; `scene/blur/`, their layers in `scene/blurLayers`). Each frame it is on, a blur
   draws its layer alone into a 4-sample image the size of the drawing buffer (with a depth buffer nothing reads), resolves
   it, blurs it across then down, resolves it again and lays it as a full-screen quad; the icons' draws the whole scene
-  filtered to its layer, for the markers' lights. **They switch on as soon as the zoom leaves 0** (`frameLayers`:
-  `closeness = zoom / borderInlayZoom`), not only close up. At 4.0 Mpx: one blur alone ≈ 1 ms of GPU, **the three together
-  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there. With _borders
+  filtered to its layer, for the markers' lights. **Since 2026-11-09 they switch on at the step into the second level of detail** (zoom 0.45), faded in time with
+  the rest (`frameLayers`: `closeness = view.closeness`, the dev: no fade with the zoom); before, from the first zoom off 0.
+  Measured then, not since: at 4.0 Mpx, one blur alone ≈ 1 ms of GPU, **the three together 9 ms at zoom 0.12 and 18 ms at
+  zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there. With _borders
   over the relief_ off the borders' blur is set to nought (the image holds no relief). **R1 built 29/10 and kept dormant**: the
   blur is a method injected into the layers (`scene/blur/`); the standard, in service, is the code of 28/10
   (`separateImages`); `sharedImages` — one target set, one colour-only resolve, a 0.25 px threshold, 40 → 54–55 fps at
@@ -375,12 +376,14 @@ target.z)` would be coherent with the navigation that already exists.
   cut, so the page's cut cache (`fillCut`) is empty until a fill is laid here; a height-curve slider or a fill switch then
   pays one cut (~0.45 s on 1100), the slides after it reuse it. **Only the dev panel reaches it.** **Remedy if it bites**:
   the worker keeps the year's cut and lays it again on new heights. **Severity: cosmetic.**
-- **The overlaps are computed in the year's settling, ~1.3 s a year, on the way to its first frame** (2026-11-09,
-  ATLAS-399, review ARCH-002): the worker settles the year before its fills are laid, so a map not prepared waits for it;
-  with the panel's _exact fills_ off, the settling runs on the page and freezes it as long. **Remedy, the next step of
-  ATLAS-399**: the overlaps computed when the site is built, as the names are (`bake/namesBake`), the settling reading them;
-  the dev server keeps computing them. Measure a map switch on the built site before and after. **Severity: gênant** until
-  then — the dev server only, as long as the branch is not published.
+- **The overlaps are computed at the build; the dev server still computes them in the settling** (2026-11-09,
+  ATLAS-399, reviews ARCH-002 and ARCH-001): `bake/overlapsBake` writes `years/<year>/overlaps.json` (1100: 26 pieces,
+  12 KB, 4 KB gzipped; ~0.9–1.4 s at the build), the page hands it to the settling, which takes it when its key is the
+  year's — checked in the worker, ~13 ms. On the dev server, or for a year retouched since the build, the settling
+  computes them, ~1.3 s before the year's first frame. **And the clipping library now ships in the page's chunk**: the
+  page's own settling (`loading/yearBorders.settleYearBorders`, the dev panel's _exact fills_ off) reaches
+  `settleAuthoredYear`, which imports the overlaps. **Remedy if the bundle matters**: the overlaps computation injected
+  into the settling, the worker's given the real one. **Severity: worth knowing.**
 - **The hatches are cut again on the page at every rebuild of the fills** (2026-11-09, ATLAS-399, review ARCH-005): neither
   cached like the fills' and tribes' cuts nor laid in the worker. A handful of small pieces a year (25 in 1100), not
   measured. **Remedy if a height-curve slider stutters**: keep the last cut in a handle, as `fillCut`. **Severity:
