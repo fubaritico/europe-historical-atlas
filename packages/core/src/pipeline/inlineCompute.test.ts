@@ -520,3 +520,44 @@ describe('cutTribes', () => {
 
   // L4: the patches' own suite (tribePatches.test.ts).
 })
+
+// ATLAS-396 × ATLAS-398: a year's fills laid by the compute, a vassal with its band, and a defect said by the promise.
+describe('layFills', () => {
+  const square = [
+    { u: 0.25, v: 0.25 },
+    { u: 0.75, v: 0.25 },
+    { u: 0.75, v: 0.75 },
+    { u: 0.25, v: 0.75 },
+  ]
+  const request = {
+    regions: [{ rings: [square], banded: true }],
+    grid: { segX: 4, segY: 4 },
+    tintLevels: [[{ r: 200, g: 40, b: 10 }]],
+    bandDepths: [1],
+    band: { bounds: { west: 0, south: 50, east: 10, north: 60 }, reachKm: 30 },
+    heights: new Float32Array(25),
+    worldWidth: 10,
+    worldDepth: 10,
+  }
+
+  describe('happy path', () => {
+    it('lays a vassal’s square with its depth on every vertex and its distances measured', async () => {
+      const compute = createInlineMapCompute()
+      const { bandDepth, bandKm } = await compute.layFills(request)
+      expect([bandDepth.every((depth) => depth === 1), bandKm.some((km) => km !== 0)]).toEqual([
+        true,
+        true,
+      ])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('rejects, rather than throws at the call, a vassal given a depth but no band to measure it with', async () => {
+      const compute = createInlineMapCompute()
+      const asked = compute.layFills({ ...request, band: null })
+      await expect(asked).rejects.toThrow(/without its band/)
+    })
+  })
+
+  // L2, L4, L5: the laying's own suite (fillBuffers.test.ts) and the worker's (workerCompute.test.ts).
+})

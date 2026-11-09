@@ -57,14 +57,15 @@ export interface LayerHandles {
   fillCut: { regions: object; segX: number; segY: number; fills: IndexedFill[] } | null
   /**
    * The fills laid in the worker for the year about to be laid (ATLAS-396), and what they were laid from — the year's
-   * polities, the grid, the tints and the relief, all compared by identity: used once, by the next build that matches,
-   * then let go, as the GPU holds them after.
+   * polities, the grid, the tints, the band depths and the relief, all compared by identity: used once, by the next
+   * build that matches, then let go, as the GPU holds them after.
    */
   fillArrays: {
     regions: object
     segX: number
     segY: number
     tintLevels: object
+    bandDepths: object
     relief: object | null
     arrays: FillArrays
   } | null

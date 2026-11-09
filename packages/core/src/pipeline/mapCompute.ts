@@ -2,7 +2,7 @@
  * The contracts for the map's expensive CPU work, stated so it can run anywhere — on the calling thread
  * or in a worker — without either side knowing which.
  *
- * Two jobs, deliberately separate: the political layer and the terrain bake. They are separate because
+ * Its first two jobs are kept apart on purpose: the political layer and the terrain bake. They are separate because
  * **the bake is not political**. It is what every texture tunable triggers, what the relief load
  * triggers, and what the land mask triggers; the political layer is merely one of its callers, and all
  * it contributes is a tint. Folding the bake into a political port would have left a second, untouched
@@ -150,10 +150,6 @@ export interface NameCompute {
    */
   placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames>
 }
-
-/** A polity's outline as the fills are cut from it, and what laying them takes — `fillBuffers`', read here as before. */
-export type { FillLayRequest } from './fillBuffers'
-export type { FillBand, FillRegion } from './vassalBands'
 
 /**
  * Lay an authored year's polities on the relief (ATLAS-333, ATLAS-396): cut into triangles on the relief's planes, their

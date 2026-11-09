@@ -23,7 +23,7 @@ import {
   flush,
   shelvingLayers,
 } from './testing/pipelineStubs'
-import { AUTHORED_YEAR, META, TRIBE_YEAR, YEAR } from './testing/yearFixtures'
+import { AUTHORED_YEAR, META, TRIBE_YEAR, VASSAL_YEAR, YEAR } from './testing/yearFixtures'
 import * as yearBordersModule from './yearBorders'
 
 import type { MapLayers } from '../scene/layers/mapLayers'
@@ -392,6 +392,29 @@ describe('createMapPipeline', () => {
       expect(lay.mock.calls[0]?.[0].heights).toBe(read.heights)
       const [key] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [{ relief: unknown }]
       expect(key.relief).toBe(RELIEF)
+    })
+
+    // ATLAS-396 × ATLAS-398: the vassal is flagged on the page, measured in the compute, and its band comes back laid.
+    it('lays a vassal’s fill with its band: flagged on the way in, its distances in the arrays that come back', async () => {
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(VASSAL_YEAR) } }),
+      })
+      await pipeline.start()
+      const request = lay.mock.calls[0]?.[0]
+      if (request === undefined) throw new Error('test: the compute laid nothing')
+      const vassal = VASSAL_YEAR.regions.findIndex((region) => region.polityId === 'hre')
+      expect([
+        request.regions[vassal]?.banded,
+        request.band === null,
+        request.bandDepths[vassal],
+      ]).toEqual([true, false, 1])
+      const [, arrays] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [
+        unknown,
+        { bandDepth: Uint8Array; bandKm: Float32Array },
+      ]
+      const banded = Array.from(arrays.bandKm).filter((_, vertex) => arrays.bandDepth[vertex] === 1)
+      expect(banded.length > 0 && banded.some((km) => km !== 0)).toBe(true)
     })
 
     it('asks the compute to lay nothing before the relief is built: the page lays the fills once it is', async () => {

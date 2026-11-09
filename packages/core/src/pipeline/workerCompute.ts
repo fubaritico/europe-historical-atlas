@@ -123,16 +123,16 @@ function isKind<K extends ComputePayload['kind']>(
 }
 
 /**
- * The year's preparation over a transport (ATLAS-333): the fills and the tribes cut, the year settled — the outlines
- * and ids alone sent across.
+ * The year's preparation over a transport (ATLAS-333, ATLAS-396): the fills laid, the tribes cut, the year settled —
+ * each region sent with its rings and nothing else of it.
  * @param send - post a command and wait for its answer
  * @returns that slice of the compute
  */
 function cutsOver(send: SendCommand): Pick<MapCompute, 'layFills' | 'cutTribes' | 'settleYear'> {
   return {
     async layFills(request: FillLayRequest): Promise<FillArrays> {
-      // The outlines and the band's flag alone cross over: a region's other fields are nothing the cut reads, and all
-      // copied. The heights are copied too, not handed over: the page keeps them for the next year.
+      // Only each region's rings and its band's flag cross over: its other fields are nothing the cut reads, and would
+      // all be copied. The heights are copied, not handed over: the page keeps them for the next year.
       const regions = request.regions.map(({ rings, banded }) =>
         banded === true ? { rings, banded } : { rings }
       )

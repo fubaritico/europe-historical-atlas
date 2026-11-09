@@ -105,6 +105,8 @@ export interface FillArraysKey {
   readonly grid: { segX: number; segY: number }
   /** The tints by level — the very array the sources hold once the year is settled. */
   readonly tintLevels: object
+  /** The vassals' band depths — the very array the sources hold once the year is settled (review ARCH-002). */
+  readonly bandDepths: object
   /** The relief whose heights they were laid on — read with the heights, never when they come back. */
   readonly relief: object
 }
@@ -136,9 +138,10 @@ function laidArraysFor(
   key: FillArraysKey
 ): FillArrays | null {
   if (laid === null) return null
-  const { regions, grid, tintLevels, relief } = key
+  const { regions, grid, tintLevels, bandDepths, relief } = key
   const same =
     laid.regions === regions &&
+    laid.bandDepths === bandDepths &&
     laid.segX === grid.segX &&
     laid.segY === grid.segY &&
     laid.tintLevels === tintLevels &&
@@ -192,7 +195,7 @@ export function rebuildFills(context: LayerContext): void {
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,
   }
-  const arrays = laidArraysFor(laid, { regions, grid, tintLevels, relief })
+  const arrays = laidArraysFor(laid, { regions, grid, tintLevels, bandDepths, relief })
   handles.fills = createFillLayer(
     arrays === null
       ? {

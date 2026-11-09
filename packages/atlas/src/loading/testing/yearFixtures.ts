@@ -67,3 +67,22 @@ function tribeYear(): RegionSet {
 
 /** An authored year with one tribe, the Empire. */
 export const TRIBE_YEAR: RegionSet = tribeYear()
+
+/**
+ * The same year with the Empire a vassal of France — so it wears the vassals' band (ATLAS-398).
+ * @returns the year, read as the atlas reads it
+ */
+function vassalYear(): RegionSet {
+  const doc = sharedBorderDocument()
+  const hre = doc.polities.find((polity) => polity.id === 'hre')
+  if (hre === undefined) throw new Error('fixture: no Empire in the shared-border document')
+  hre.suzerain = 'fr-couronne'
+  const files = { year: 1100, ...saveYearDocument(doc) }
+  return {
+    ...projectRegions(toRegionPayload(files, META.bbox)),
+    authored: { year: files, bbox: META.bbox },
+  }
+}
+
+/** An authored year with one vassal, the Empire under France. */
+export const VASSAL_YEAR: RegionSet = vassalYear()

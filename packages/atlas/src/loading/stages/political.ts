@@ -204,6 +204,7 @@ export function primeWorkerCut(context: PipelineContext, loaded: RegionSet, cut:
     regions: loaded.regions,
     grid: cut.grid,
     tintLevels: cut.settled.tintLevels,
+    bandDepths: cut.settled.bandDepths,
     relief: cut.relief,
   }
   layers.primeFillArrays(key, cut.fillArrays)

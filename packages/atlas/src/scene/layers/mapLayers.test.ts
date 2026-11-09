@@ -1450,13 +1450,13 @@ const LAID = (): FillArrays => ({
  */
 function laidKey(built: ReturnType<typeof withTribe>): FillArraysKey {
   const regions = built.sources.regionSet?.regions
-  const tintLevels = built.sources.tintLevels
+  const { tintLevels, bandDepths } = built.sources
   const read = built.layers.reliefHeights()
-  if (regions === undefined || tintLevels === null || read === null)
+  if (regions === undefined || tintLevels === null || bandDepths === null || read === null)
     throw new Error('test: no year')
   const segX = built.dev.relief.segments
   const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
-  return { regions, grid: { segX, segY }, tintLevels, relief: read.relief }
+  return { regions, grid: { segX, segY }, tintLevels, bandDepths, relief: read.relief }
 }
 
 // ATLAS-396: fills laid in the worker are wrapped as they came, never cut nor laid here.
@@ -1483,7 +1483,7 @@ describe('primeFillArrays', () => {
     })
 
     // Review R5: the reuse compares the very arrays the sources hold, so arrays for a copy are for another year.
-    it('lays again when the arrays were for other polities, or other tints', () => {
+    it('lays again when the arrays were for other polities, other tints, or other band depths', () => {
       const built = withTribe()
       const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
       const key = laidKey(built)
@@ -1491,7 +1491,9 @@ describe('primeFillArrays', () => {
       built.layers.rebuildFills()
       built.layers.primeFillArrays({ ...key, tintLevels: [] }, LAID())
       built.layers.rebuildFills()
-      expect(spy).toHaveBeenCalledTimes(2)
+      built.layers.primeFillArrays({ ...key, bandDepths: [] }, LAID())
+      built.layers.rebuildFills()
+      expect(spy).toHaveBeenCalledTimes(3)
     })
 
     // Reviews QUAL-001, ARCH-001: the relief rebuilt while the worker laid the fills on its old heights.

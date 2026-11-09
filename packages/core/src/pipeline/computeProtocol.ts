@@ -7,11 +7,10 @@
  * closure, a `Map`, or anything carrying a method.
  */
 
-import type { FillArrays } from './fillBuffers'
+import type { FillArrays, FillLayRequest } from './fillBuffers'
 import type {
   ComputePhase,
   ComputeSources,
-  FillLayRequest,
   PoliticalRequest,
   PoliticalResult,
   TerrainBakeResult,
