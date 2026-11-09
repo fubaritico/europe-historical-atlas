@@ -24,7 +24,7 @@ Nearly all of Europe, by the dev's own reckoning — **except Scandinavia and It
 | --- | --- | --- | --- | --- |
 | 1 | *The Historical Atlas of the British Isles* | Ian Barnes, Alex Swanston | ? | British Isles |
 | 2 | *Atlas de historia de España* | Fernando† García de Cortázar | Planeta, 2005 | Iberia |
-| 3 | *Les Balkans, atlas historique* | Dennis P.† Hupchick, Harold E.† Cox | Economica, 2008 | Balkans |
+| 3 | *Les Balkans, atlas historique* | Dennis P.† Hupchick, Harold E.† Cox | Economica, 2008 (tr. Philippe Ricalens, from *The Palgrave Concise Historical Atlas of the Balkans*, 2001) | Balkans — **scanning started 2026-11-10**: 12 pages (front matter, legend, the general maps), OCR'd, on the external disk (`ATLAS-BOOKS/`); in copyright: a reference |
 | 4 | *Atlas historique Napoléon Iᵉʳ* | ? | *Comprendre l'histoire* no. 29 | ~1800 only |
 | 5 | *Atlas historique des provinces et régions de France* | ? | ? | France, the provinces |
 | 6 | *Atlas historique de la Méditerranée, des origines à nos jours* | Sassi, Aycard | ?, 2009 | Mediterranean |

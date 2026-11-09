@@ -54,6 +54,8 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
    reminded me — the reason this step stands before the libraries.
    **The paper atlases** (same file, « Ordered or owned »: García de Cortázar for Iberia, Nicolle for Islam, the Duby…):
    I cannot open them — ask him for a photo of the plate, its legend and its date, read from `~/Desktop`.
+   **Scanned, they become searchable like the rest**: the recipe — VueScan's settings, the black sheet, what I do after —
+   is `references/scanning.md`.
 4. **Search the open libraries, in this order**, stopping a library when it has given what it has:
 
    | library | what it holds | how to search it |
