@@ -119,7 +119,7 @@ export function createGridProjection(frame: BackdropFrame): GridProjection {
  * @param projection - where an anchor falls on the grid
  * @returns the rings, each point `u` west→east and `v` north→south over the backdrop
  */
-function ringsOnGrid(
+export function ringsOnGrid(
   rings: readonly (readonly number[])[],
   anchors: YearDocument['anchors'],
   projection: GridProjection
@@ -281,7 +281,7 @@ export function sameSignature(a: FeatherSignature, b: FeatherSignature): boolean
  * @param sets - the sets of rings
  * @returns the numbers
  */
-function flattenRings(sets: readonly (readonly (readonly GridPoint[])[])[]): Float64Array {
+export function flattenRings(sets: readonly (readonly (readonly GridPoint[])[])[]): Float64Array {
   let length = 0
   for (const rings of sets) {
     length += 1

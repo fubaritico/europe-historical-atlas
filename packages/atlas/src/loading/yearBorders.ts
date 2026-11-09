@@ -33,6 +33,7 @@ type SettledSources = Pick<
   | 'regionTints'
   | 'tintLevels'
   | 'homageDepth'
+  | 'bandDepths'
   | 'tribes'
 >
 
@@ -64,6 +65,7 @@ export function settleYearBorders(
     sources.regionTints = computed.tints
     sources.tintLevels = [computed.tints]
     sources.homageDepth = 0
+    sources.bandDepths = null
     sources.derivedBorders = computed.borders
     sources.borderPatterns = null
     sources.borderLevels = null
@@ -88,6 +90,7 @@ export function installSettledYear(sources: SettledSources, settled: SettledYear
   sources.regionTints = settled.tints
   sources.tintLevels = settled.tintLevels
   sources.homageDepth = settled.homageDepth
+  sources.bandDepths = settled.bandDepths
   sources.derivedBorders = settled.borders
   sources.borderPatterns = settled.patterns
   sources.borderLevels = settled.levels

@@ -21,6 +21,7 @@ import type { HeightmapMeta } from '../data/heightmap'
 import type { LandMaskMeta } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
 import type { Region } from '../data/regionSource'
+import type { GeoBounds } from '../geo/mercator'
 import type { RgbColor } from '../utils/color'
 
 /**
@@ -157,6 +158,16 @@ export interface NameCompute {
 export interface FillRegion {
   /** The rings. */
   readonly rings: readonly (readonly UvPoint[])[]
+  /** Whether it wears the vassals' band (`data/vassalBand`), its vertices then measured; absent, it does not. */
+  readonly banded?: boolean
+}
+
+/** What the vassals' band is measured with (ATLAS-398): the frame the rings were projected against, and the reach. */
+export interface FillBand {
+  /** The frame — the year's, which is the DEM's. */
+  readonly bounds: GeoBounds
+  /** How deep the distance is computed, km — `VASSAL_BAND_REACH_KM`, handed in. */
+  readonly reachKm: number
 }
 
 /**
@@ -168,9 +179,14 @@ export interface FillCompute {
    * Cut every polity on the relief's grid. Reads none of the installed state.
    * @param regions - the polities' outlines, in the order the fills are laid
    * @param grid - the relief's subdivision
-   * @returns each polity's triangles, their vertices shared (`indexFill`)
+   * @param band - the frame and reach a banded region's vertices are measured with; `null` measures none
+   * @returns each polity's triangles, their vertices shared (`indexFill`), a banded one with its distances
    */
-  cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<IndexedFill[]>
+  cutFills(
+    regions: readonly FillRegion[],
+    grid: FillGrid,
+    band: FillBand | null
+  ): Promise<IndexedFill[]>
 }
 
 /** What a year's tribes are measured against in the compute — {@link TribeGround} with the land left to it. */

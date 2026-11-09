@@ -224,7 +224,16 @@ export interface CanvasScene {
    * Each polity's territory, filled in its colour: all its rings in one path, so a ring inside another
    * is a hole by the even-odd rule — `H-07`'s *"inclusion decides"*.
    */
-  fills: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
+  fills: readonly {
+    rings: readonly (readonly Point[])[]
+    colour: string
+    /**
+     * A vassal's band (ATLAS-398, `core/data/vassalBand`): its colour as an image, half within the band and full
+     * deeper, and where it lies on screen — drawn in place of the flat colour, clipped by the fill's own outline.
+     * Absent for a polity that wears none.
+     */
+    band?: { image: CanvasImageSource; rect: Rect }
+  }[]
   /**
    * Each tribe's colour fading at its limit (`core/editor/tribeFeather`), as an image and the rectangle it
    * covers on screen — instead of a fill, and of its borders, which {@link borders} leaves out.
@@ -557,7 +566,17 @@ function paintFills(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void
     ctx.fillStyle = fill.colour
     ctx.beginPath()
     for (const ring of fill.rings) addRingToPath(ctx, ring)
-    ctx.fill('evenodd')
+    if (fill.band === undefined) {
+      ctx.fill('evenodd')
+      continue
+    }
+    // A vassal's band: its image, clipped by its own outline so the fill's edge stays the vector's (ATLAS-398). The
+    // state is saved after the blend and the opacity were set, so the restore leaves them for the next fill.
+    const { image, rect } = fill.band
+    ctx.save()
+    ctx.clip('evenodd')
+    ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height)
+    ctx.restore()
   }
   ctx.globalCompositeOperation = 'source-over'
   ctx.globalAlpha = 1

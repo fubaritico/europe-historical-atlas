@@ -2,7 +2,15 @@
 import { describe, expect, it } from 'vitest'
 
 import { createFillLayer } from './fillLayer'
-import { LORD, VASSAL, options, relief, texture, twoPolities } from './testing/fillFixtures'
+import {
+  LORD,
+  VASSAL,
+  bandedPolities,
+  options,
+  relief,
+  texture,
+  twoPolities,
+} from './testing/fillFixtures'
 
 describe('createFillLayer', () => {
   describe('happy path', () => {
@@ -40,6 +48,25 @@ describe('createFillLayer', () => {
       expect(layer.object.geometry.getAttribute('tint0')).toBeDefined()
       expect(layer.object.geometry.getAttribute('tint1')).toBeDefined()
       expect(layer.object.material.uniforms.detail?.value).toBe(1)
+      layer.dispose()
+    })
+
+    // ATLAS-398: the vassal's band rides on two attributes, read by the shader's band.
+    it('carries each vertex’s band depth and distance for the shader', () => {
+      const layer = createFillLayer(
+        options({
+          fills: bandedPolities(),
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+          bandDepths: [0, 1],
+        })
+      )
+      const count = layer.object.geometry.getAttribute('position').count
+      expect(layer.object.geometry.getAttribute('bandDepth').count).toBe(count)
+      expect(layer.object.geometry.getAttribute('bandKm').count).toBe(count)
+      expect(layer.object.material.fragmentShader).toContain('bandOpacity')
       layer.dispose()
     })
 

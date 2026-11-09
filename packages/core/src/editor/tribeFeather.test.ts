@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { VASSAL_BAND_SHARE, VASSAL_BAND_WIDTH_KM } from '../data/vassalBand'
+
 import {
   BAND_SHARE,
   BEYOND_OUTLINE_KM,
@@ -329,5 +331,14 @@ describe('bandWidthKm', () => {
       const widths = SAMPLES.map(({ u, v }) => bandWidthKm(wild, u, v))
       expect([Math.max(...widths) <= REACH, Math.min(...widths) >= 0]).toEqual([true, true])
     })
+  })
+})
+
+// ATLAS-398, the dev, 2026-11-09: the vassals' band is the tribes' "regular" and "thinner" — the same half, a narrower
+// width. Held here, where both are in reach: `data/` may not import the editor.
+describe('the vassals’ band beside the tribes’', () => {
+  it('shares the tribes’ band share, and is thinner than their band', () => {
+    expect(VASSAL_BAND_SHARE).toBe(BAND_SHARE)
+    expect(VASSAL_BAND_WIDTH_KM).toBeLessThan(TRIBE_FEATHER.widthKm)
   })
 })

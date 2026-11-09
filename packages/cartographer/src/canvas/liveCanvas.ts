@@ -52,6 +52,7 @@ import type { RetraceView } from './tools/retrace'
 import type { GestureContext } from './tools/toolGestures'
 import type { SnapLayer, ToolSession, WaterWords } from './tools/toolSession'
 import type { TribeFeatherCache } from './tribeFeatherCache'
+import type { VassalBandCache } from './vassalBandCache'
 import type { PixelSize, Point } from '../viewport/viewport'
 import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
 
@@ -89,6 +90,8 @@ export interface LiveCanvas {
   anchors: AnchorCache
   /** The tribes' fading colour as images, recomputed only when the document changes (ATLAS-258). */
   tribeFeathers: TribeFeatherCache
+  /** The vassals' bands as images, by claim, recomputed only when the document changes (ATLAS-398). */
+  vassalBands: VassalBandCache
   /** Where the outlines overlap, and the last refusals said (CARTO-364). */
   overlaps: CanvasOverlaps
   /** Each city's alert on the map, recomputed only when the document or the cities change (CARTO-389). */

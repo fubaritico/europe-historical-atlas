@@ -47,13 +47,14 @@ async function runYearCommand(
 ): Promise<{ payload: ComputePayload; transfer: Transferable[] }> {
   switch (command.kind) {
     case 'cutFills': {
-      const fills = await compute.cutFills(command.regions, command.grid)
-      // Megabytes of triangles nobody here reads again: handed over, not copied.
+      const fills = await compute.cutFills(command.regions, command.grid, command.band)
+      // Megabytes of triangles nobody here reads again — and a vassal's distances: handed over, not copied.
       return {
         payload: { kind: 'fills', fills },
-        transfer: fills.flatMap(({ vertices, indices }) => [
+        transfer: fills.flatMap(({ vertices, indices, bandKm }) => [
           ...transferable(vertices),
           ...transferable(indices),
+          ...(bandKm === undefined ? [] : transferable(bandKm)),
         ]),
       }
     }

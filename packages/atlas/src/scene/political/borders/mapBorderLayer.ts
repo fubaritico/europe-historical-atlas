@@ -4,6 +4,7 @@
  */
 
 import { pairKey } from '@europe-historical-atlas/core/data/atlasBorders'
+import { VASSAL_HAND_WEIGHT } from '@europe-historical-atlas/core/data/borderHands'
 import { borderPatternFor } from '@europe-historical-atlas/core/data/borderStyles'
 
 import { disposeHandle } from '../../layers/disposeHandle'
@@ -22,6 +23,20 @@ import type { BorderPattern } from '@europe-historical-atlas/core/data/borderSty
  * with no depth to arbitrate, this is the sole thing keeping a core stroke above its own edging.
  */
 export const BORDER_RENDER_ORDER = 10
+
+/**
+ * A border between vassals at weight one, in CSS pixels — the values of the dev panel's former sliders (the dev,
+ * 2026-10-29: *« entre vassaux plus fin »*), taken off the panel on 2026-11-09 (*"we don't do settings like that any
+ * more"*). Drawn at core's `VASSAL_HAND_WEIGHT`, which the Cartographer's stroke reads too: 2.25, 2.25 and 3.75 px.
+ */
+export const VASSAL_BORDER_PX = {
+  /** The stroke's width. */
+  width: 1.5,
+  /** Each dot's length along the line — about the width, so a dash reads as a point. */
+  dot: 1.5,
+  /** The gap between two dots. */
+  gap: 2.5,
+} as const
 
 /**
  * How a border group is drawn: its hand when the year is authored, else looked up by name in the editorial
@@ -120,7 +135,7 @@ export function rebuildBorders(context: LayerContext): void {
  * @param dev - the live tunables
  * @returns the stroke style
  */
-function borderStrokeStyle(dev: DevState): Parameters<typeof buildBorderStrokes>[1] {
+export function borderStrokeStyle(dev: DevState): Parameters<typeof buildBorderStrokes>[1] {
   return {
     coreColor: dev.political.borderColor,
     coreWidth: dev.political.borderWidth,
@@ -138,9 +153,11 @@ function borderStrokeStyle(dev: DevState): Parameters<typeof buildBorderStrokes>
     frontierSideWidth: dev.political.frontierSideWidth,
     frontierFadeShare: dev.political.frontierFadeShare,
     vassalColor: dev.political.vassalBorderColor,
-    vassalWidth: dev.political.vassalBorderWidth,
-    vassalDotSize: dev.political.vassalDotSize,
-    vassalDotGap: dev.political.vassalDotGap,
+    // The vassals' border at core's weight (ATLAS-398): its width, its dot and its gap alike, so the dots keep their
+    // proportion.
+    vassalWidth: VASSAL_BORDER_PX.width * VASSAL_HAND_WEIGHT,
+    vassalDotSize: VASSAL_BORDER_PX.dot * VASSAL_HAND_WEIGHT,
+    vassalDotGap: VASSAL_BORDER_PX.gap * VASSAL_HAND_WEIGHT,
     dashSize: dev.political.borderDashSize,
     gapSize: dev.political.borderDashGap,
     doubleGap: dev.political.borderDoubleGap,

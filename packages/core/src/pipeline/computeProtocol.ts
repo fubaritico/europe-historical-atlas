@@ -12,6 +12,7 @@ import type { IndexedFill } from './indexFill'
 import type {
   ComputePhase,
   ComputeSources,
+  FillBand,
   FillRegion,
   PoliticalRequest,
   PoliticalResult,
@@ -32,7 +33,13 @@ export type ComputeCommand =
   | { kind: 'deriveBorders'; id: number; smoothing: number }
   | { kind: 'bakeTerrain'; id: number; options: TerrainTextureOptions }
   | { kind: 'placeNames'; id: number; request: YearNamesRequest }
-  | { kind: 'cutFills'; id: number; regions: readonly FillRegion[]; grid: FillGrid }
+  | {
+      kind: 'cutFills'
+      id: number
+      regions: readonly FillRegion[]
+      grid: FillGrid
+      band: FillBand | null
+    }
   | { kind: 'cutTribes'; id: number; tribes: readonly TribeOutline[]; request: TribeCutRequest }
   | { kind: 'settleYear'; id: number; request: SettleRequest }
   | { kind: 'dispose'; id: number }

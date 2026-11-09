@@ -160,18 +160,24 @@ describe('mapComputeOver', () => {
         payload: { kind: 'fills', fills: FILLS },
       }))
       const region = { rings: [[{ u: 0, v: 0 }]], name: 'Aragon', colour: '#c00' }
+      // ATLAS-398: a vassal's flag crosses with its outline, and the band's frame and reach with the grid.
+      const vassal = { rings: [[{ u: 1, v: 1 }]], name: 'Urgell', banded: true }
       const grid = { segX: 2, segY: 2 }
-      await expect(mapComputeOver(cut.send, vi.fn()).cutFills([region], grid)).resolves.toBe(FILLS)
+      const band = { bounds: { west: 0, south: 40, east: 10, north: 50 }, reachKm: 30 }
+      await expect(
+        mapComputeOver(cut.send, vi.fn()).cutFills([region, vassal], grid, band)
+      ).resolves.toBe(FILLS)
       expect(cut.sent.mock.calls[0]?.[0]).toEqual({
         kind: 'cutFills',
         id: 7,
-        regions: [{ rings: region.rings }],
+        regions: [{ rings: region.rings }, { rings: vassal.rings, banded: true }],
         grid,
+        band,
       })
       const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
-      await expect(mapComputeOver(acked.send, vi.fn()).cutFills([region], grid)).rejects.toThrow(
-        /answered a fills request with ack/
-      )
+      await expect(
+        mapComputeOver(acked.send, vi.fn()).cutFills([region], grid, null)
+      ).rejects.toThrow(/answered a fills request with ack/)
     })
 
     // ATLAS-333 (review): the ground's ids and outlines alone cross the wire, and an answer of another kind is refused.

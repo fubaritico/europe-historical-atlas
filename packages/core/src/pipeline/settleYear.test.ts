@@ -51,6 +51,25 @@ describe('settleAuthoredYear', () => {
       expect(settled.tintLevels).toEqual([own.map(() => own[france]), own])
     })
 
+    // ATLAS-398: the vassal's region carries its depth, for the band's reveal; the sovereign's none.
+    it('gives the vassal’s region its depth of homage for the band, the sovereign’s nought', () => {
+      const request = requestFor(franceAndAquitaine())
+      const settled = settleAuthoredYear(request, null)
+      expect(settled.bandDepths).toEqual(
+        request.regions.map((region) => (region.polityId === 'aquitaine' ? 1 : 0))
+      )
+    })
+
+    // ATLAS-398: a vassal that is a tribe keeps the tribe's look — no vassals' band. Mutation: `isBandedVassal`
+    // reading the suzerain alone gives Aquitaine a depth here.
+    it('gives a vassal that is a tribe no band', () => {
+      const year = franceAndAquitaine()
+      const aquitaine = year.registry.polities.find((polity) => polity.id === 'aquitaine')
+      if (aquitaine) aquitaine.rank = 'tribe'
+      const settled = settleAuthoredYear(requestFor(year), null)
+      expect(settled.bandDepths.every((depth) => depth === 0)).toBe(true)
+    })
+
     it('draws the borders from the anchors, each group with its pattern and level', () => {
       const settled = settleAuthoredYear(requestFor(franceAndAquitaine()), null)
       expect(settled.borders.between.length).toBeGreaterThan(0)

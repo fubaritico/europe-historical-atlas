@@ -26,19 +26,28 @@ export interface BorderHand {
 }
 
 /**
+ * The weight of a border between a vassal and its suzerain, or between two vassals of one lord — **half again a
+ * sovereign's** (ATLAS-398, the dev, 2026-11-09: *"a bit thicker"*, so that beside the vassals' band the white dotted
+ * border reads). Read by both applications: the Cartographer multiplies its stroke and its dots by it, the atlas its
+ * vassal border's width, dot and gap (`scene/political/borders/mapBorderLayer`). It was `1` before.
+ */
+export const VASSAL_HAND_WEIGHT = 1.5
+
+/**
  * The hand of each relation (`s08`):
  * - between two sovereigns, solid and cased;
  * - between a vassal and its suzerain, dotted — the relation crosses the hierarchy;
  * - between two vassals of one lord, **the same stroke as a vassal against its lord** — the dev's call,
  *   2026-10-15: a vassal is dotted against its lord and against its peers under that lord, at the same
- *   weight; only a limit against another lineage is solid. It was solid and lighter from 2026-09-27 (`s08`);
+ *   weight; only a limit against another lineage is solid. It was solid and lighter from 2026-09-27 (`s08`). Both
+ *   at {@link VASSAL_HAND_WEIGHT} since 2026-11-09;
  * - against ground nobody claims, the frontier: one dark stroke, as the atlas draws it today;
  * - a coastline, nothing.
  */
 export const RELATION_HANDS: Readonly<Record<BorderRelation, BorderHand>> = {
   sovereign: { pattern: 'solid', cased: true, weight: 1 },
-  vassal: { pattern: 'dotted', cased: true, weight: 1 },
-  'co-vassal': { pattern: 'dotted', cased: true, weight: 1 },
+  vassal: { pattern: 'dotted', cased: true, weight: VASSAL_HAND_WEIGHT },
+  'co-vassal': { pattern: 'dotted', cased: true, weight: VASSAL_HAND_WEIGHT },
   unclaimed: { pattern: 'solid', cased: false, weight: 1 },
   coastline: { pattern: 'none', cased: false, weight: 1 },
 }

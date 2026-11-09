@@ -43,6 +43,9 @@ const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }
 /** A year without a tribe. */
 const NO_TRIBES: ReadonlySet<string> = new Set()
 
+/** No vassal's band (ATLAS-398): every fill flat. */
+const NO_BANDS = { images: new Map(), viewport: NATIVE }
+
 /**
  * Inputs with whatever a test needs.
  * @param overrides - the parts this test cares about
@@ -62,6 +65,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     borders: [],
     layers: DEFAULT_LAYERS,
     tribeFeathers: [],
+    vassalBands: new Map(),
     colours: new Map<string, string>(),
     cities: [],
     citiesAsPoints: false,
@@ -325,7 +329,7 @@ describe('projectedFills', () => {
         ['hre', '#00aa00'],
       ])
       expect(
-        projectedFills(sharedBorderDocument(), anchors, colours, NO_TRIBES).map(
+        projectedFills(sharedBorderDocument(), anchors, colours, NO_TRIBES, NO_BANDS).map(
           (fill) => fill.colour
         )
       ).toEqual(['#aa0000', '#00aa00'])
@@ -338,9 +342,36 @@ describe('projectedFills', () => {
         sharedBorderDocument(),
         anchors,
         new Map([['hre', '#00aa00']]),
-        NO_TRIBES
+        NO_TRIBES,
+        NO_BANDS
       )
       expect(fills[0]?.rings[0]?.[0]).toEqual(anchors[1])
+    })
+
+    // ATLAS-398: a vassal's band is laid on the fill of its very claim, its box through the view; the others stay flat.
+    it('lays a band on the fill of the claim it was made for, through the view, and none on the others', () => {
+      const document = sharedBorderDocument()
+      const claim = document.claims.find((each) => each.polity === 'hre')
+      if (claim === undefined) throw new Error('test: the HRE’s claim')
+      const image = {} as CanvasImageSource
+      const view: Viewport = { scale: 2, originX: 10, originY: 20 }
+      const fills = projectedFills(
+        document,
+        anchors,
+        new Map([
+          ['fr-couronne', '#aa0000'],
+          ['hre', '#00aa00'],
+        ]),
+        NO_TRIBES,
+        {
+          images: new Map([[claim, { image, box: { x: 5, y: 6, width: 7, height: 8 } }]]),
+          viewport: view,
+        }
+      )
+      expect(fills.map((fill) => fill.band)).toEqual([
+        undefined,
+        { image, rect: { x: 20, y: 32, width: 14, height: 16 } },
+      ])
     })
   })
 
@@ -348,7 +379,9 @@ describe('projectedFills', () => {
     // A claim whose polity has no colour names a polity the registry lacks; it is not painted in an
     // invented one.
     it('skips a claim with no colour', () => {
-      expect(projectedFills(sharedBorderDocument(), anchors, new Map(), NO_TRIBES)).toEqual([])
+      expect(
+        projectedFills(sharedBorderDocument(), anchors, new Map(), NO_TRIBES, NO_BANDS)
+      ).toEqual([])
     })
   })
 
@@ -356,7 +389,13 @@ describe('projectedFills', () => {
     // L4: N/A — pure arithmetic over arrays; an index past the table is dropped by projectedRings.
     it('returns nothing for a document with no claims', () => {
       expect(
-        projectedFills({ ...sharedBorderDocument(), claims: [] }, anchors, new Map(), NO_TRIBES)
+        projectedFills(
+          { ...sharedBorderDocument(), claims: [] },
+          anchors,
+          new Map(),
+          NO_TRIBES,
+          NO_BANDS
+        )
       ).toEqual([])
     })
   })
@@ -465,7 +504,7 @@ describe('tribes in the scene', () => {
   describe('happy path', () => {
     it('fills every polity but the tribe', () => {
       expect(
-        projectedFills(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities)).map(
+        projectedFills(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities), NO_BANDS).map(
           (fill) => fill.colour
         )
       ).toEqual(['#aa0000'])
@@ -521,7 +560,7 @@ describe('tribes in the scene', () => {
   describe('managed errors', () => {
     it('fills no tribe, even one with no colour', () => {
       expect(
-        projectedFills(withTribe(), anchors, new Map(), tribeIds(withTribe().polities))
+        projectedFills(withTribe(), anchors, new Map(), tribeIds(withTribe().polities), NO_BANDS)
       ).toEqual([])
     })
   })

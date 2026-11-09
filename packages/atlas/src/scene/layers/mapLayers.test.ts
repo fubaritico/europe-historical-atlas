@@ -117,7 +117,11 @@ const AUTHORED = {
       ],
     },
   ],
-  authored: {},
+  // A registry with no vassal: no fill wears the band (ATLAS-398).
+  authored: {
+    bbox: { west: -10, south: 35, east: 10, north: 60 },
+    year: { registry: { polities: [] } },
+  },
 } as unknown as RegionSet
 
 /** A city's name drawn at once, 40 × 18 CSS pixels, the point 8 pixels left of it — no face, no canvas to wait for. */
@@ -149,6 +153,8 @@ function build(
     sources.heightmap = DEM
     sources.landMask = createElevationLandMask(DEM, 0)
     sources.regionSet = REGIONS
+    // One region, wearing no vassals' band — what the settling gives an authored year of one sovereign (ATLAS-398).
+    sources.bandDepths = [0]
     sources.derivedBorders = BORDERS
     refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
   }
@@ -174,7 +180,10 @@ const TRIBE_RING = [
  */
 function withTribe(): ReturnType<typeof build> {
   const built = build()
-  built.sources.regionSet = { ...AUTHORED, authored: { bbox: META.bbox } } as unknown as RegionSet
+  built.sources.regionSet = {
+    ...AUTHORED,
+    authored: { bbox: META.bbox, year: { registry: { polities: [] } } },
+  } as unknown as RegionSet
   built.sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
   built.sources.tribes = [{ polity: 'prussians', colour: '#41580b', rings: [TRIBE_RING] }]
   built.layers.rebuildRelief()
@@ -650,7 +659,7 @@ describe('createMapLayers', () => {
       sources.regionSet = {
         ...AUTHORED,
         regions: [...AUTHORED.regions],
-        authored: { bbox: META.bbox },
+        authored: { bbox: META.bbox, year: { registry: { polities: [] } } },
       } as unknown as RegionSet
       layers.rebuildFills()
       expect(measured).toHaveBeenCalledTimes(2)
@@ -663,7 +672,7 @@ describe('createMapLayers', () => {
       sources.regionSet = {
         ...AUTHORED,
         regions,
-        authored: { bbox: { ...META.bbox, north: 61 } },
+        authored: { bbox: { ...META.bbox, north: 61 }, year: { registry: { polities: [] } } },
       } as unknown as RegionSet
       layers.rebuildFills()
       expect(measured).toHaveBeenCalledTimes(2)

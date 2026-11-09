@@ -772,6 +772,37 @@ describe('painter — fills and handles', () => {
       expect(ctx.globalCompositeOperation).toBe('source-over')
     })
 
+    // ATLAS-398: a vassal's band is its image, clipped by its own outline, in the fills' blend and opacity — the fill's
+    // edge stays the vector's. Mutation: drawing the image unclipped would spill its box's corners over the neighbours.
+    it('draws a vassal’s band as its image clipped by its outline, in the fills’ blend, and fills it no flat colour', () => {
+      const { ctx, calls } = recordingContext()
+      const image = {} as CanvasImageSource
+      const layers = { ...DEFAULT_LAYERS, fills: { ...DEFAULT_LAYERS.fills, opacity: 40 } }
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({
+          fills: [
+            {
+              rings: [SQUARE],
+              colour: '#54719b',
+              band: { image, rect: { x: 90, y: 90, width: 120, height: 120 } },
+            },
+          ],
+          layers,
+        }),
+        STYLE
+      )
+      const order = ops(calls)
+      const drawn = calls.findIndex((call) => call.op === 'drawImage' && call.args[0] === image)
+      expect(order.lastIndexOf('clip', drawn)).toBeGreaterThan(order.lastIndexOf('save', drawn))
+      expect(order.indexOf('restore', drawn)).toBeGreaterThan(drawn)
+      expect(calls[drawn]?.args.slice(1)).toEqual([90, 90, 120, 120])
+      expect(calls[drawn]?.globalCompositeOperation).toBe(STYLE.fillBlend)
+      expect(calls[drawn]?.globalAlpha).toBeCloseTo(0.4)
+      expect(calls.some((call) => call.op === 'fill' && call.fillStyle === '#54719b')).toBe(false)
+    })
+
     // As the atlas bakes it: the tint on the relief, the coastline drawn over the tint.
     it('fills before it strokes the coastline, so the shore is not tinted', () => {
       const { ctx, calls } = recordingContext()

@@ -13,17 +13,17 @@ import { extractRegionBorders } from '../data/regionBorders'
 import { pinnedRegionColor } from '../data/regionPalette'
 import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
-import { fillTriangles } from './fillTriangles'
-import { indexFill } from './indexFill'
 import { settleAuthoredYear } from './settleYear'
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
 import { tribePatches } from './tribePatches'
+import { cutYearFills } from './vassalBands'
 import { placeYearNames } from './yearNames'
 
 import type { FillGrid } from './fillTriangles'
 import type { IndexedFill } from './indexFill'
 import type {
   ComputeSources,
+  FillBand,
   FillRegion,
   MapCompute,
   PoliticalRequest,
@@ -328,8 +328,12 @@ function statelessJobs(
     placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {
       return announcedNames(request, announcer(onProgress, yieldControl))
     },
-    cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<IndexedFill[]> {
-      return Promise.resolve(fillTriangles(regions, grid).map((fill) => indexFill(fill)))
+    cutFills(
+      regions: readonly FillRegion[],
+      grid: FillGrid,
+      band: FillBand | null
+    ): Promise<IndexedFill[]> {
+      return Promise.resolve(cutYearFills(regions, grid, band))
     },
   }
 }

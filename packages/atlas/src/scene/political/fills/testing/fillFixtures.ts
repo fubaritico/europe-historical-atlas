@@ -6,8 +6,10 @@
 import { DataTexture, Raycaster, Vector3 } from 'three'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
+import { VASSAL_BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import { indexFill } from '@europe-historical-atlas/core/pipeline/indexFill'
+import { measureVassalBands } from '@europe-historical-atlas/core/pipeline/vassalBands'
 
 import {
   createReliefMesh,
@@ -90,31 +92,38 @@ export const texture = (): DataTexture => new DataTexture(new Uint8Array(16), 2,
  * @param over - what to change
  * @returns the options
  */
-export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions => ({
-  fills: fillTriangles(
-    [
-      {
-        rings: [
-          [
-            { u: 0.1, v: 0.1 },
-            { u: 0.9, v: 0.2 },
-            { u: 0.4, v: 0.85 },
+export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions => {
+  const fills =
+    over.fills ??
+    fillTriangles(
+      [
+        {
+          rings: [
+            [
+              { u: 0.1, v: 0.1 },
+              { u: 0.9, v: 0.2 },
+              { u: 0.4, v: 0.85 },
+            ],
           ],
-        ],
-      },
-    ],
-    GRID
-  ).map((fill) => indexFill(fill)),
-  tintLevels: [[{ r: 200, g: 40, b: 10 }]],
-  grid: GRID,
-  nodes: meshNodeHeights(relief),
-  worldWidth: WORLD_WIDTH,
-  worldDepth: DEPTH,
-  map: texture(),
-  mode: 'overlay',
-  strength: 1,
-  ...over,
-})
+        },
+      ],
+      GRID
+    ).map((fill) => indexFill(fill))
+  return {
+    fills,
+    tintLevels: [[{ r: 200, g: 40, b: 10 }]],
+    // No polity wears the vassals' band unless a test says so.
+    bandDepths: fills.map(() => 0),
+    grid: GRID,
+    nodes: meshNodeHeights(relief),
+    worldWidth: WORLD_WIDTH,
+    worldDepth: DEPTH,
+    map: texture(),
+    mode: 'overlay',
+    strength: 1,
+    ...over,
+  }
+}
 
 /**
  * Two polities, one per triangle: a suzerain and its vassal.
@@ -150,3 +159,31 @@ export const LORD = { r: 10, g: 20, b: 30 }
 
 /** Its vassal's own tint, shown when the zoom reveals it. */
 export const VASSAL = { r: 200, g: 100, b: 50 }
+
+/**
+ * The suzerain and its vassal of {@link twoPolities}, the vassal measured for its band as the worker measures it
+ * (ATLAS-398) — over the elevation frame, the vassal's vertices carrying their distance to its outline.
+ * @returns their triangles, the vassal's with its distances
+ */
+export const bandedPolities = (): FillLayerOptions['fills'] => {
+  const [lord, vassal] = twoPolities()
+  if (lord === undefined || vassal === undefined) throw new Error('fixture: two polities')
+  const [measured] = measureVassalBands(
+    [vassal],
+    [
+      {
+        rings: [
+          [
+            { u: 0.6, v: 0.6 },
+            { u: 0.9, v: 0.6 },
+            { u: 0.6, v: 0.9 },
+          ],
+        ],
+        banded: true,
+      },
+    ],
+    { bounds: META.bbox, reachKm: VASSAL_BAND_REACH_KM }
+  )
+  if (measured === undefined) throw new Error('fixture: the vassal measured')
+  return [lord, measured]
+}

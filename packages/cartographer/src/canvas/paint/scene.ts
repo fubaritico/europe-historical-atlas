@@ -71,6 +71,11 @@ export interface SceneInputs {
    * version of the document by the caller (`canvas/tribeFeatherCache`), remapped through the view here.
    */
   tribeFeathers: readonly { image: CanvasImageSource; box: Rect }[]
+  /**
+   * Each vassal's band as an image over its box **in backdrop pixels**, by the claim it fills (ATLAS-398) — made once
+   * per version by the caller (`canvas/vassalBandCache`), laid on that claim's fill here.
+   */
+  vassalBands: ReadonlyMap<YearDocument['claims'][number], { image: CanvasImageSource; box: Rect }>
   /** The baked terrain, or `null` while it is still being baked. */
   backdropImage: CanvasImageSource | null
   /**
@@ -221,14 +226,26 @@ function colouredClaims(
   colours: ReadonlyMap<string, string>,
   tribal: ReadonlySet<string>,
   tribes: boolean
-): { rings: Point[][]; colour: string }[] {
-  const out: { rings: Point[][]; colour: string }[] = []
+): { claim: YearDocument['claims'][number]; rings: Point[][]; colour: string }[] {
+  const out: { claim: YearDocument['claims'][number]; rings: Point[][]; colour: string }[] = []
   for (const claim of claimsInPaintOrder(document)) {
     const colour = colours.get(claim.polity)
     if (colour === undefined || tribal.has(claim.polity) !== tribes) continue
-    out.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
+    out.push({ claim, rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
   }
   return out
+}
+
+/**
+ * A band's box on screen, through the view.
+ * @param box - the box, in backdrop pixels
+ * @param viewport - the current view
+ * @returns the rectangle, in screen pixels
+ */
+function boxOnScreen(box: Rect, viewport: Viewport): Rect {
+  const [left, top] = backdropToScreen(viewport, [box.x, box.y])
+  const [right, bottom] = backdropToScreen(viewport, [box.x + box.width, box.y + box.height])
+  return { x: left, y: top, width: right - left, height: bottom - top }
 }
 
 /**
@@ -238,15 +255,30 @@ function colouredClaims(
  * @param anchors - the projected anchor table, parallel to `document.anchors`
  * @param colours - each polity's colour, by id
  * @param tribes - the ids of the year's tribes (`tribeIds`), built once per scene
- * @returns one fill per claim of a polity that is not a tribe
+ * @param bands - each vassal claim's band (ATLAS-398) and the view it is laid through
+ * @param bands.images - each band, in backdrop pixels, by the claim it fills; a claim with none is filled whole
+ * @param bands.viewport - the current view, for the bands' boxes
+ * @returns one fill per claim of a polity that is not a tribe, a vassal's with its band
  */
 export function projectedFills(
   document: YearDocument,
   anchors: readonly Point[],
   colours: ReadonlyMap<string, string>,
-  tribes: ReadonlySet<string>
-): { rings: Point[][]; colour: string }[] {
-  return colouredClaims(document, anchors, colours, tribes, false)
+  tribes: ReadonlySet<string>,
+  bands: { images: SceneInputs['vassalBands']; viewport: Viewport }
+): CanvasScene['fills'][number][] {
+  return colouredClaims(document, anchors, colours, tribes, false).map(
+    ({ claim, rings, colour }) => {
+      const band = bands.images.get(claim)
+      return band === undefined
+        ? { rings, colour }
+        : {
+            rings,
+            colour,
+            band: { image: band.image, rect: boxOnScreen(band.box, bands.viewport) },
+          }
+    }
+  )
 }
 
 /**
@@ -260,11 +292,7 @@ export function projectedTribeFeathers(
   feathers: SceneInputs['tribeFeathers'],
   viewport: Viewport
 ): CanvasScene['tribeFeathers'] {
-  return feathers.map(({ image, box }) => {
-    const [left, top] = backdropToScreen(viewport, [box.x, box.y])
-    const [right, bottom] = backdropToScreen(viewport, [box.x + box.width, box.y + box.height])
-    return { image, rect: { x: left, y: top, width: right - left, height: bottom - top } }
-  })
+  return feathers.map(({ image, box }) => ({ image, rect: boxOnScreen(box, viewport) }))
 }
 
 /**
@@ -365,7 +393,10 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
         : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
     rings: projectedRings(document, anchors, 'closed'),
     openRings: projectedRings(document, anchors, 'open'),
-    fills: projectedFills(document, anchors, inputs.colours, tribes),
+    fills: projectedFills(document, anchors, inputs.colours, tribes, {
+      images: inputs.vassalBands,
+      viewport: inputs.viewport,
+    }),
     tribeFeathers: projectedTribeFeathers(inputs.tribeFeathers, inputs.viewport),
     anchors,
     borders: projectedBorders(inputs.borders, anchors, tribes),

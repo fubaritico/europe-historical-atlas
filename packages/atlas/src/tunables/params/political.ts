@@ -98,15 +98,6 @@ export interface PoliticalDevParams {
   frontierFadeShare: number
   /** Colour of a border between vassals — the dev, 2026-10-29: *« passe les frontières entre vassaux en blanc »*. */
   vassalBorderColor: string
-  /** Width of a border between vassals, in CSS pixels (the dev, 2026-10-29: *« entre vassaux plus fin »*). */
-  vassalBorderWidth: number
-  /**
-   * Length of each dot of a border between vassals, in screen pixels — about its width, so the dash reads as a point
-   * (*« essayer de n'avoir que des points, pas de tirets »*).
-   */
-  vassalDotSize: number
-  /** Gap between two dots of a border between vassals, in screen pixels. */
-  vassalDotGap: number
   /**
    * Dash length in screen pixels for the borders `data/borderStyles` marks as broken — a personal union is
    * a border the map should admit is a fiction.
@@ -228,9 +219,6 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   frontierSideWidth: 2.25,
   frontierFadeShare: 0.5,
   vassalBorderColor: '#ffffff',
-  vassalBorderWidth: 1.5,
-  vassalDotSize: 1.5,
-  vassalDotGap: 2.5,
   // Screen pixels, the same size at every zoom: in world units (0.018, some 16 km) the dashes grew as the
   // camera came in, *« trop allongés »* (the dev, 2026-10-16). Retuned by the dev on 2026-10-18, with the
   // borders made more visible: short dashes, a gap half their length.
@@ -290,15 +278,6 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     label: 'frontier width afar (px)',
   },
   vassalBorderColor: { kind: 'hexColor', label: 'vassal border colour' },
-  vassalBorderWidth: {
-    kind: 'number',
-    min: 0.5,
-    max: 4,
-    step: 0.25,
-    label: 'vassal border width (px)',
-  },
-  vassalDotSize: { kind: 'number', min: 0.5, max: 6, step: 0.25, label: 'vassal dot length (px)' },
-  vassalDotGap: { kind: 'number', min: 0.5, max: 10, step: 0.25, label: 'vassal dot gap (px)' },
   frontierFadeShare: {
     kind: 'number',
     min: 0,
@@ -395,15 +374,7 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
   },
   {
     title: '4 \u00b7 border types',
-    keys: [
-      'borderDashSize',
-      'borderDashGap',
-      'borderDoubleGap',
-      'vassalBorderColor',
-      'vassalBorderWidth',
-      'vassalDotSize',
-      'vassalDotGap',
-    ],
+    keys: ['borderDashSize', 'borderDashGap', 'borderDoubleGap', 'vassalBorderColor'],
   },
   {
     title: '5 \u00b7 frontier (unclaimed land)',
@@ -470,9 +441,6 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'borderDashGap',
   'borderDoubleGap',
   'vassalBorderColor',
-  'vassalBorderWidth',
-  'vassalDotSize',
-  'vassalDotGap',
   'palette1',
   'palette2',
   'palette3',
@@ -522,9 +490,6 @@ const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
   'borderDashGap',
   'borderDoubleGap',
   'vassalBorderColor',
-  'vassalBorderWidth',
-  'vassalDotSize',
-  'vassalDotGap',
   'borderWidthZoomOut',
   'borderOpacityZoomOut',
   'borderInlayZoom',

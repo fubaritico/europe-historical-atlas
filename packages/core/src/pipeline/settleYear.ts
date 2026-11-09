@@ -10,12 +10,16 @@
  * **Homage as a level of detail** (ATLAS-253): the tints come by level — a vassal in its suzerain's colour from afar —
  * and the border groups carry their split level. The homage is read once and handed to both. The deepest level is
  * the editor's own colours, so fully zoomed in the map is the one it was before levels.
+ *
+ * **A vassal's band** (ATLAS-398): each region's depth of homage when it wears the band, read off the same homage — what
+ * the fill shader reveals the band by, as it reveals the vassal's colour.
  */
 
 import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
 import { authoredTintLevels, polityColours } from '../data/polityColours'
 import { tribeIds } from '../data/tribes'
+import { bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
 
 import type { BorderPattern } from '../data/borderStyles'
@@ -69,6 +73,11 @@ export interface SettledYear {
   readonly levels: ReadonlyMap<string, number>
   /** Each tribe's ground, in its colour; empty for a year with no tribe. */
   readonly tribes: SettledTribe[]
+  /**
+   * Each region's band depth (ATLAS-398, `data/vassalBand`): its polity's depth of homage when it wears the vassals'
+   * band, `0` for a sovereign or a tribe — one per region, in the fills' order.
+   */
+  readonly bandDepths: number[]
 }
 
 /**
@@ -98,6 +107,7 @@ export function settleAuthoredYear(
     patterns: exact.patterns,
     levels: exact.levels,
     tribes: colouredTribes(year, regions, colours),
+    bandDepths: regionBandDepths(regions, bandedVassalIds(year.registry.polities), homage),
   }
 }
 

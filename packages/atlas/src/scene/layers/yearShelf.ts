@@ -24,6 +24,7 @@ type YearSourceKey =
   | 'regionTints'
   | 'tintLevels'
   | 'homageDepth'
+  | 'bandDepths'
   | 'derivedBorders'
   | 'borderPatterns'
   | 'borderLevels'
@@ -179,6 +180,7 @@ function takeSources(sources: MapSources): YearSources {
     regionTints: sources.regionTints,
     tintLevels: sources.tintLevels,
     homageDepth: sources.homageDepth,
+    bandDepths: sources.bandDepths,
     derivedBorders: sources.derivedBorders,
     borderPatterns: sources.borderPatterns,
     borderLevels: sources.borderLevels,
@@ -191,6 +193,7 @@ function takeSources(sources: MapSources): YearSources {
     regionTints: null,
     tintLevels: null,
     homageDepth: 0,
+    bandDepths: null,
     derivedBorders: null,
     borderPatterns: null,
     borderLevels: null,

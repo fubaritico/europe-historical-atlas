@@ -10,6 +10,7 @@ import {
   LORD,
   VASSAL,
   WORLD_WIDTH,
+  bandedPolities,
   nodeY,
   options,
   raycastHeight,
@@ -124,6 +125,27 @@ describe('fillBuffers', () => {
       expect(drawn).toEqual(cut)
     })
 
+    // ATLAS-398: the vassal's band depth and distances over its own run; the lord's run stays nought, unread.
+    it('writes the vassal’s band depth and distances over its own vertices, the lord’s left at nought', () => {
+      const fills = bandedPolities()
+      const { bandDepth, bandKm } = fillBuffers(
+        options({
+          fills,
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+          bandDepths: [0, 1],
+        })
+      )
+      const lordVertices = Math.floor((fills[0]?.vertices.length ?? 0) / 2)
+      expect(lordVertices).toBeGreaterThan(0)
+      expect(Array.from(bandDepth.slice(0, lordVertices)).every((depth) => depth === 0)).toBe(true)
+      expect(Array.from(bandDepth.slice(lordVertices)).every((depth) => depth === 1)).toBe(true)
+      expect(Array.from(bandKm.slice(lordVertices))).toEqual(Array.from(fills[1]?.bandKm ?? []))
+      expect(Array.from(bandKm.slice(0, lordVertices)).every((km) => km === 0)).toBe(true)
+    })
+
     it('starts the indices at the first written vertex when the polity before is unfilled', () => {
       const { indices } = fillBuffers(
         options({
@@ -162,6 +184,30 @@ describe('fillBuffers', () => {
   describe('unmanaged errors', () => {
     it('throws when no level is given', () => {
       expect(() => fillBuffers(options({ tintLevels: [] }))).toThrow(/no tint level/)
+    })
+
+    // ATLAS-398. Mutation: reading a missing distance as nought would put the whole vassal in its band, silently.
+    it('throws when a vassal of the settling was cut without its band’s distances', () => {
+      expect(() =>
+        fillBuffers(
+          options({
+            fills: twoPolities(),
+            tintLevels: [
+              [LORD, LORD],
+              [LORD, VASSAL],
+            ],
+            bandDepths: [0, 1],
+          })
+        )
+      ).toThrow(/was cut without its band/)
+    })
+
+    it('throws when a filled polity has no band depth', () => {
+      expect(() =>
+        fillBuffers(
+          options({ fills: twoPolities(), tintLevels: [[LORD, VASSAL]], bandDepths: [0] })
+        )
+      ).toThrow(/polity 1 is filled but has no band depth/)
     })
 
     it('throws when a filled polity has no tint at a lower level', () => {

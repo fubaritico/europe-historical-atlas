@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { createMapSources } from '../../../sources/mapSources'
+import { VASSAL_HAND_WEIGHT } from '@europe-historical-atlas/core/data/borderHands'
 
-import { levelForPair, patternForPair } from './mapBorderLayer'
+import { createMapSources } from '../../../sources/mapSources'
+import { createDevState } from '../../../tunables/devState'
+
+import { VASSAL_BORDER_PX, borderStrokeStyle, levelForPair, patternForPair } from './mapBorderLayer'
 
 import type { MapSources } from '../../../sources/mapSources'
 import type { LayerContext } from '../../layers/layerContext'
@@ -104,4 +107,29 @@ describe('levelForPair', () => {
       expect(levelForPair(contextOver(createMapSources()), [0, 1])).toBe(0)
     })
   })
+})
+
+// ATLAS-398, the dev, 2026-11-09: the vassals' dotted border "a bit thicker", at core's weight — no panel setting.
+describe('borderStrokeStyle', () => {
+  describe('happy path', () => {
+    it('draws the vassals’ border at core’s weight: 2.25 px wide, 2.25 px dots, 3.75 px gaps', () => {
+      const style = borderStrokeStyle(createDevState())
+      expect([style.vassalWidth, style.vassalDotSize, style.vassalDotGap]).toEqual([
+        2.25, 2.25, 3.75,
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    // Mutation: the width scaled and the dots left at weight one would turn the dots into dashes.
+    it('keeps the dots in proportion to the width', () => {
+      const style = borderStrokeStyle(createDevState())
+      expect(style.vassalDotSize / style.vassalWidth).toBe(
+        VASSAL_BORDER_PX.dot / VASSAL_BORDER_PX.width
+      )
+      expect(style.vassalWidth).toBe(VASSAL_BORDER_PX.width * VASSAL_HAND_WEIGHT)
+    })
+  })
+
+  // L3–L5: N/A — constants multiplied, nothing to refuse, no async, no boundary.
 })

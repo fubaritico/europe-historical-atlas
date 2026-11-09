@@ -224,8 +224,8 @@ target.z)` would be coherent with the navigation that already exists.
   a dead slider, on a dev tool. **Remedy if it bites**: grey the controls while the installed year is
   authored — which needs the year's kind to reach the panel after it is built. **Severity: cosmetic.**
 - **What the atlas does not yet draw of an authored year's borders** (2026-10-13, declared in
-  `core/data/atlasBorders.ts` and pinned by its tests): a hand's **weight** (a limit between two vassals of
-  one lord is drawn as heavy as a sovereign one), a **dotted** hand (drawn dashed — no dot pattern yet), and
+  `core/data/atlasBorders.ts` and pinned by its tests): a hand's **weight** from the table (the vassals' dotted
+  border alone follows `VASSAL_HAND_WEIGHT` since 2026-11-09, ATLAS-398 — every other hand is drawn at one weight), a **dotted** hand (drawn dashed — no dot pattern yet), and
   an authored style on a **frontier** against unclaimed land (drawn in the frontier stroke, warned once per
   derivation). **Trigger**: the border-style session the dev announced on 2026-10-13. **Severity: worth knowing.**
 - **With `exact fills` off, a tribe is still filled** (2026-10-16, review ARCH-101). Tribes lose their tint in
@@ -363,3 +363,10 @@ target.z)` would be coherent with the navigation that already exists.
   (`prepareAside.ts`) lay the year's sources, cuts, fills, borders and events in the same order. A new layer added to
   one must be added to the other. **Remedy at a third copy**: one `layYear`, with the timing and the settling as seams.
   **Severity: worth knowing.**
+- **A suzerain's band would run along a sub-vassal it still wears the colour of** (2026-11-09, ATLAS-398,
+  `core/pipeline/vassalBands`): a vassal's band is measured against its own outline, and a sub-vassal is carved out of
+  it — so at the level where the sub-vassal still wears its suzerain's colour, the suzerain's half-colour band would
+  outline it before its border shows. **No year has a sub-vassal** (1100 and 1200 measured the same day: depth 1 at
+  most). **Remedy the day one appears**: one distance per level — at level `L`, measured against the union of the
+  polities wearing the same colour (shared edges cancelled), mixed across levels as the tints are. **Severity: worth
+  knowing.**

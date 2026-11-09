@@ -30,7 +30,8 @@ import type { GeoBounds } from '../geo/mercator'
  * side the author put it.
  *
  * **What the atlas does not draw yet, said here and at run time**: a hand's **weight** — the atlas's widths
- * being one per kind of line — and an authored hand on a **frontier**, which the atlas draws in its one dark
+ * being one per kind of line, the vassals' border drawn at `borderHands`' `VASSAL_HAND_WEIGHT` since 2026-11-09
+ * (ATLAS-398, its own line kind) — and an authored hand on a **frontier**, which the atlas draws in its one dark
  * stroke whatever the author chose. The latter is warned once per derivation.
  *
  * **A tribe has no borders of its own** — as in the Cartographer (`tribes.ts`): a border between two tribes,

@@ -46,6 +46,35 @@ Scenario: afar a vassal wears its suzerain's colour
 > (`frameLayers.frameDetail`). **1100 has two levels**: 84 polities with no suzerain, 56 direct vassals, no sub-vassal
 > (measured 18/10).
 
+```gherkin
+Scenario: a vassal's band
+  Given the Duchy of Normandy, a vassal of the Kingdom of France
+  When I cross into the second level
+  Then from Normandy's outline inwards, a band of half its colour, 10 km wide, even all along, then its full colour deeper
+  And the band runs along all its outline: against France, against its other neighbours and along the sea
+  And the band comes in with Normandy's own colour, in the level's fade — at the first level Normandy is filled whole
+  And its border with France stays the white dotted line, half again as thick as a border between two sovereigns
+
+Scenario: the vassal's band in the Cartographer
+  Given the same year open in the Cartographer
+  Then Normandy shows the same band, at every zoom, its fill's edge still the outline's own
+
+Scenario: a vassal that is a tribe
+  Given a tribe that owes homage
+  Then it keeps the tribes' undulating band, and no vassal's band
+```
+
+> **Built 2026-11-09 (ATLAS-398), not walked yet.** The dev: *"for vassals I want a regular band, and thinner than the
+> tribes'"*, *"that will make the white border stand out"*; the vassal's colour the same as its suzerain's later, set by
+> him in the data, not the code. **One width, 10 km, a constant in core** (`core/data/vassalBand`) — no setting in the
+> panel, his call the same day (*"we don't do settings like that any more"*). The atlas measures each vassal vertex's
+> distance to its outline in the worker beside its cut (`core/pipeline/vassalBands`; on 1200, 13–17 ms over a 181–202 ms
+> cut, under Node) and reveals the band by the same `detail` as the colour (`fills/fillShader`). The Cartographer draws
+> it as an image clipped by the vector outline (`canvas/paint/vassalBands`). The vassals' dotted border is drawn at
+> `VASSAL_HAND_WEIGHT` (1.5) in both applications: 2.25 px wide with 2.25 px dots and 3.75 px gaps in the atlas, before
+> 1.5 / 1.5 / 2.5 — taken off the settings panel. **A sub-vassal's suzerain** is banded along the sub-vassal's edge
+> from the second level, before the sub-vassal shows apart: no year has a sub-vassal today (1100, 1200 measured 09/11).
+
 ## The borders
 
 ```gherkin
@@ -68,8 +97,9 @@ Scenario: a border's hand
   Then the atlas draws it dashed, its dashes sized in screen pixels
 ```
 
-> **Not drawn yet** (`core/editor/atlasBorders.ts`): a hand's weight — a limit between two vassals of one lord is as heavy
-> as a sovereign one — and a dotted hand, drawn dashed (`rules/known-issues/atlas.md`).
+> **Not drawn yet** (`core/editor/atlasBorders.ts`): a hand's weight from the table — the atlas draws the vassals' border
+> at `VASSAL_HAND_WEIGHT` since 09/11 (ATLAS-398), its other hands at one weight — and a dotted hand, drawn dashed
+> (`rules/known-issues/atlas.md`).
 
 ## The tribes
 

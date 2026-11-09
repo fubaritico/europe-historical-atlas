@@ -18,6 +18,11 @@ export interface IndexedFill {
   readonly vertices: Float32Array
   /** Three indices into `vertices` per triangle, in the order the triangles came. */
   readonly indices: Uint32Array
+  /**
+   * Each vertex's signed distance to its polity's outline, km, negative inside — a vassal's alone, for its band
+   * (`vassalBands`, ATLAS-398). **Absent for a polity that wears no band**, which is what it means, not a value missing.
+   */
+  readonly bandKm?: Float32Array
 }
 
 /** Steps of the grid two vertices are matched on, per unit of `u` and of `v`. */

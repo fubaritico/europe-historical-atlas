@@ -1,6 +1,11 @@
 import { createGridProjection, sameSignature, tribeFeatherPlans } from './paint/tribeFeathers'
 
-import type { FeatherGround, FeatherSignature, TribeFeatherRaster } from './paint/tribeFeathers'
+import type {
+  FeatherGround,
+  FeatherSignature,
+  TribeFeatherPlan,
+  TribeFeatherRaster,
+} from './paint/tribeFeathers'
 import type { Rect } from '../geometry/marquee'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
@@ -57,14 +62,55 @@ export interface TribeFeatherCache {
  */
 export type RasterToImage = (raster: TribeFeatherRaster) => CanvasImageSource
 
-/** One tribe as last made: what its raster read, and its image — `null` when it had nothing to draw. */
-interface MadeFeather {
-  /** The tribe's id. */
+/** A raster to make, as a plan says it: whose, what it reads, and how to measure it — a tribe's fade or a vassal's band. */
+export interface RasterPlan {
+  /** The polity's id. */
   polity: string
-  /** What its raster read. */
+  /** What its raster reads — compared with the last one's before measuring again. */
   signature: FeatherSignature
-  /** Its image, or `null` when there was nothing to draw or its fade was not a number. */
+  /**
+   * Measure it.
+   * @returns the raster, or `null` when there is nothing to draw
+   */
+  raster: () => TribeFeatherRaster | null
+}
+
+/** One plan as last made: its plan, and its image — `null` when it had nothing to draw. */
+export interface MadeRaster<P extends RasterPlan> {
+  /** The plan it was made from, or the earlier one it was matched to. */
+  plan: P
+  /** Its image, or `null` when there was nothing to draw or its measure was not a number. */
   image: TribeFeatherImage | null
+}
+
+/**
+ * Make each plan's image, reusing the last one made from the same polity and the same signature — the reuse both the
+ * tribes' fades and the vassals' bands are cached by. The plan kept is always the new one, so what it points at (a
+ * claim) is the document's of now.
+ * @param plans - this version's plans, in painting order
+ * @param previous - the last version's, consumed as each is matched
+ * @param toImage - how a raster becomes an image
+ * @returns one entry per plan, in the same order
+ */
+export function makeFromPlans<P extends RasterPlan>(
+  plans: readonly P[],
+  previous: MadeRaster<P>[],
+  toImage: RasterToImage
+): MadeRaster<P>[] {
+  return plans.map((plan) => {
+    const index = previous.findIndex(
+      (last) =>
+        last.plan.polity === plan.polity && sameSignature(last.plan.signature, plan.signature)
+    )
+    const reused = previous[index]
+    if (reused !== undefined) {
+      // Taken once: a polity with two claims of the same signature is matched to each in turn.
+      previous.splice(index, 1)
+      return { plan, image: reused.image }
+    }
+    const raster = plan.raster()
+    return { plan, image: raster === null ? null : { image: toImage(raster), box: raster.box } }
+  })
 }
 
 /**
@@ -90,29 +136,12 @@ export function createTribeFeatherCache(
   // `null` rather than empty, so the first call is a miss even for a document with no tribe.
   let images: readonly TribeFeatherImage[] | null = null
   let at = Number.NaN
-  let made: MadeFeather[] = []
+  let made: MadeRaster<TribeFeatherPlan>[] = []
   const projection = createGridProjection(ground.frame)
   return {
     feathersOf(document, version, colours) {
       if (images !== null && version === at) return images
-      const previous = made
-      made = tribeFeatherPlans(document, colours, ground, projection).map((plan) => {
-        const index = previous.findIndex(
-          (last) => last.polity === plan.polity && sameSignature(last.signature, plan.signature)
-        )
-        const reused = previous[index]
-        if (reused !== undefined) {
-          // Taken once: a polity with two claims of the same signature is matched to each in turn.
-          previous.splice(index, 1)
-          return reused
-        }
-        const raster = plan.raster()
-        return {
-          polity: plan.polity,
-          signature: plan.signature,
-          image: raster === null ? null : { image: toImage(raster), box: raster.box },
-        }
-      })
+      made = makeFromPlans(tribeFeatherPlans(document, colours, ground, projection), made, toImage)
       const next = made.flatMap((entry) => (entry.image === null ? [] : [entry.image]))
       // The same array when every image is the one already handed out: nothing was made again.
       if (images === null || !sameImages(images, next)) images = next

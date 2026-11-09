@@ -233,13 +233,44 @@ describe('createWorkerMapCompute', () => {
         { u: 0.25, v: 0.75 },
       ]
       const grid = { segX: 4, segY: 4 }
-      const fills = await client.cutFills([{ rings: [square] }], grid)
+      const fills = await client.cutFills([{ rings: [square] }], grid, null)
       expect(fills).toEqual(
         fillTriangles([{ rings: [square] }], grid).map((fill) => indexFill(fill))
       )
       expect(link.transfers.at(-1)).toEqual(
         fills.flatMap((fill) => [fill.vertices.buffer, fill.indices.buffer])
       )
+    })
+
+    // ATLAS-398: a vassal's distances come back with its fill, handed over too; a sovereign's carry none.
+    it('cuts a vassal beside a sovereign across the wire, the vassal with its distances, all three buffers handed over', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      const left = [
+        { u: 0.1, v: 0.25 },
+        { u: 0.45, v: 0.25 },
+        { u: 0.45, v: 0.75 },
+        { u: 0.1, v: 0.75 },
+      ]
+      const right = left.map(({ u, v }) => ({ u: u + 0.45, v }))
+      const grid = { segX: 8, segY: 8 }
+      const band = { bounds: { west: 0, south: 40, east: 10, north: 50 }, reachKm: 30 }
+      const [sovereign, vassal] = await client.cutFills(
+        [{ rings: [left] }, { rings: [right], banded: true }],
+        grid,
+        band
+      )
+      if (sovereign === undefined || vassal?.bandKm === undefined)
+        throw new Error('test: a sovereign and a measured vassal')
+      expect(sovereign.bandKm).toBeUndefined()
+      expect(vassal.bandKm.length).toBe(vassal.vertices.length / 2)
+      expect(link.transfers.at(-1)).toEqual([
+        sovereign.vertices.buffer,
+        sovereign.indices.buffer,
+        vassal.vertices.buffer,
+        vassal.indices.buffer,
+        vassal.bandKm.buffer,
+      ])
     })
 
     // ATLAS-333: the year settled across the wire, as the main thread would settle it.

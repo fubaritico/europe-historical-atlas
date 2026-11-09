@@ -58,6 +58,11 @@ export interface MapSources {
   tintLevels: (RgbColor | null)[][] | null
   /** The deepest level of homage of the year on screen — `0` for a payload year, or before one. */
   homageDepth: number
+  /**
+   * Each polity's band depth, in `regionSet` order (ATLAS-398, `core/data/vassalBand`): its depth of homage when it
+   * wears the vassals' band, `0` otherwise; `null` for a payload year, which the fills never draw, or before a year.
+   */
+  bandDepths: number[] | null
   /** The river centrelines, empty until they land. */
   riverData: River[]
   /** The contribution's events (CMS-224), empty until they land or when there are none. */
@@ -161,6 +166,7 @@ export function createMapSources(): MapSources {
     regionTints: null,
     tintLevels: null,
     homageDepth: 0,
+    bandDepths: null,
     riverData: [],
     events: [],
     cities: [],

@@ -132,6 +132,7 @@ function repaint(it: LiveCanvas): void {
     // From the cache keyed on the edition's version: a pan repaints per pointer move, and never measures
     // a distance again.
     tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
+    vassalBands: it.vassalBands.bandsOf(state.document, state.version, coloursOf(it)),
     cities: citiesToPaint(state, it.cityAlerts),
     citiesAsPoints: state.citiesAsPoints,
     overlaps: overlapsToPaint(it),

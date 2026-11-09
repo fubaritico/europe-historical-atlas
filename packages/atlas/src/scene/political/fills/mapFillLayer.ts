@@ -2,8 +2,8 @@
  * How an authored year's polities are laid on the relief as geometry (`fillLayer`), and when they are.
  */
 
-import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
-import { indexFill } from '@europe-historical-atlas/core/pipeline/indexFill'
+import { VASSAL_BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
+import { bandedFillRegions, cutYearFills } from '@europe-historical-atlas/core/pipeline/vassalBands'
 
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
@@ -16,6 +16,8 @@ import { createFillLayer } from './fillLayer'
 
 import type { LayerContext } from '../../layers/layerContext'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
+import type { AuthoredYear } from '@europe-historical-atlas/core/data/yearFormat'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 
 /**
@@ -30,9 +32,38 @@ function missingForFills(relief: unknown, texture: unknown): string {
 }
 
 /**
- * The fills of a year on a grid, cut once and kept until either changes.
+ * Everything of the year the fills are built from, once it has all come in — or `null` while any of it is still loading.
+ * @param sources - what has been loaded
+ * @returns the regions, the authored year, the tints by level, the band depths and the elevation; `null` when one is missing
+ */
+function yearToFill(sources: LayerContext['sources']): {
+  regions: readonly Region[]
+  authored: NonNullable<NonNullable<LayerContext['sources']['regionSet']>['authored']>
+  tintLevels: NonNullable<LayerContext['sources']['tintLevels']>
+  bandDepths: NonNullable<LayerContext['sources']['bandDepths']>
+  heightmap: NonNullable<LayerContext['sources']['heightmap']>
+} | null {
+  const { regionSet, tintLevels, bandDepths, heightmap } = sources
+  const authored = regionSet?.authored
+  if (!regionSet || !authored || !tintLevels || !bandDepths || !heightmap) return null
+  return { regions: regionSet.regions, authored, tintLevels, bandDepths, heightmap }
+}
+
+/** An authored year as its fills are cut: its regions, its registry and its frame. */
+interface FillYear {
+  /** The year's polities, in the order the fills are laid. */
+  readonly regions: readonly Region[]
+  /** Its registry, which says who wears the vassals' band. */
+  readonly polities: AuthoredYear['registry']['polities']
+  /** The frame its rings were projected against. */
+  readonly bounds: GeoBounds
+}
+
+/**
+ * The fills of a year on a grid, cut once and kept until either changes — each vassal measured for its band, as the
+ * worker measures it (`prepareYear`).
  * @param context - the layers, whose handles hold the last cut
- * @param regions - the year's polities
+ * @param year - the year's polities, its registry and its frame
  * @param grid - the relief's subdivision
  * @param grid.segX - cells across
  * @param grid.segY - cells down
@@ -40,15 +71,19 @@ function missingForFills(relief: unknown, texture: unknown): string {
  */
 function cutFills(
   context: LayerContext,
-  regions: readonly Region[],
+  year: FillYear,
   grid: { segX: number; segY: number }
 ): IndexedFill[] {
   // Reuse the last cut when neither the year's polities nor the grid has changed.
+  const { regions } = year
   const last = context.handles.fillCut
   if (last?.regions === regions && last.segX === grid.segX && last.segY === grid.segY)
     return last.fills
   // Otherwise cut anew, and keep the cut for next time.
-  const fills = fillTriangles(regions, grid).map((fill) => indexFill(fill))
+  const fills = cutYearFills(bandedFillRegions(regions, year.polities), grid, {
+    bounds: year.bounds,
+    reachKm: VASSAL_BAND_REACH_KM,
+  })
   primeFillCut(context, regions, grid, fills)
   return fills
 }
@@ -93,9 +128,8 @@ export function rebuildFills(context: LayerContext): void {
   // Everything the fills are built from; any of it may still be loading.
   const relief = handles.relief
   const texture = handles.texture
-  const regions = sources.regionSet?.regions
-  const tintLevels = sources.tintLevels
-  if (!relief || !texture || !regions || !tintLevels || !sources.heightmap) {
+  const year = yearToFill(sources)
+  if (!relief || !texture || year === null) {
     // The bake has already dropped the tint for this year, so no fill means no colour at all: said, not
     // swallowed (rules/error-handling.md).
     console.warn(
@@ -103,17 +137,23 @@ export function rebuildFills(context: LayerContext): void {
     )
     return
   }
+  const { regions, authored, tintLevels, bandDepths, heightmap } = year
   // The relief's own subdivision, and its vertex heights read straight from its mesh.
-  const { segX, segY } = meshVertexGrid(sources.heightmap.meta, dev.relief.segments)
+  const { segX, segY } = meshVertexGrid(heightmap.meta, dev.relief.segments)
   const grid = { segX, segY }
   // Build the layer, scale it with the relief's exaggeration, and add it to the scene.
   handles.fills = createFillLayer({
-    fills: cutFills(context, regions, grid),
+    fills: cutFills(
+      context,
+      { regions, polities: authored.year.registry.polities, bounds: authored.bbox },
+      grid
+    ),
     tintLevels,
+    bandDepths,
     grid,
     nodes: meshNodeHeights(relief),
     worldWidth: WORLD_WIDTH,
-    worldDepth: meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH),
+    worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH),
     map: texture,
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,

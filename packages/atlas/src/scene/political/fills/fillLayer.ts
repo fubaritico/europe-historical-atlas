@@ -20,6 +20,12 @@
  * around a `detail` uniform the zoom sets. Zooming writes one float; no buffer is rewritten and no triangle
  * recut. The tint is constant over a polity, so mixing per vertex is exact. The level count is compiled
  * into the shader; each level costs one attribute, against WebGL's floor of 16 per vertex.
+ *
+ * **A vassal's band** (ATLAS-398): two more attributes — the polity's depth of homage when it wears the band, and each
+ * vertex's distance to its outline, measured in the worker (`core/pipeline/vassalBands`); the width is core's constant,
+ * compiled into the shader (the dev, 2026-11-09: no panel setting for it).
+ * The band's colour is laid at half over the terrain the fragment reads, so nothing becomes transparent; it is revealed
+ * by the same `detail` that reveals the vassal's colour, so from afar a vassal is filled whole in its suzerain's.
  */
 
 import {
@@ -88,10 +94,13 @@ export interface FillLayer {
  */
 export function createFillLayer(options: FillLayerOptions): FillLayer {
   // The geometry: the positions, and one tint attribute per level of homage.
-  const { positions, tints, indices } = fillBuffers(options)
+  const { positions, tints, bandDepth, bandKm, indices } = fillBuffers(options)
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geometry.setIndex(new Uint32BufferAttribute(indices, 1))
+  // The vassals' band (ATLAS-398): each vertex's depth of homage, read as a number, and its distance to the outline.
+  geometry.setAttribute('bandDepth', new Uint8BufferAttribute(bandDepth, 1, false))
+  geometry.setAttribute('bandKm', new Float32BufferAttribute(bandKm, 1))
   tints.forEach((bytes, level) => {
     geometry.setAttribute(tintAttribute(level), new Uint8BufferAttribute(bytes, 3, true))
   })

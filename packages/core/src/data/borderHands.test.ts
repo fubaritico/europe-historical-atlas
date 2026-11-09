@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { RELATION_HANDS, handFor } from './borderHands'
+import { RELATION_HANDS, VASSAL_HAND_WEIGHT, handFor } from './borderHands'
 
 describe('handFor', () => {
   describe('happy path', () => {
@@ -21,6 +21,15 @@ describe('handFor', () => {
         handFor({ relation: 'vassal', hand: null })
       )
       expect(handFor({ relation: 'unclaimed', hand: null }).cased).toBe(false)
+    })
+
+    // ATLAS-398, the dev, 2026-11-09: the vassals' dotted border "a bit thicker" — half again a sovereign's.
+    it('draws a vassal’s and a co-vassal’s limit half again as heavy as a sovereign’s', () => {
+      expect(VASSAL_HAND_WEIGHT).toBe(1.5)
+      expect(handFor({ relation: 'vassal', hand: null }).weight).toBe(
+        handFor({ relation: 'sovereign', hand: null }).weight * VASSAL_HAND_WEIGHT
+      )
+      expect(handFor({ relation: 'co-vassal', hand: null }).weight).toBe(VASSAL_HAND_WEIGHT)
     })
 
     it('draws nothing on a coast — the coastline is drawn already', () => {

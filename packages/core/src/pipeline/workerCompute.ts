@@ -12,6 +12,7 @@ import type { FillGrid } from './fillTriangles'
 import type { IndexedFill } from './indexFill'
 import type {
   ComputeSources,
+  FillBand,
   FillRegion,
   MapCompute,
   PoliticalRequest,
@@ -132,10 +133,17 @@ function isKind<K extends ComputePayload['kind']>(
  */
 function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes' | 'settleYear'> {
   return {
-    async cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<IndexedFill[]> {
-      // The outlines alone cross over: a region's other fields are nothing the cut reads, and all copied.
-      const outlines = regions.map(({ rings }) => ({ rings }))
-      const event = await send((id) => ({ kind: 'cutFills', id, regions: outlines, grid }))
+    async cutFills(
+      regions: readonly FillRegion[],
+      grid: FillGrid,
+      band: FillBand | null
+    ): Promise<IndexedFill[]> {
+      // The outlines and the band's flag alone cross over: a region's other fields are nothing the cut reads, and all
+      // copied.
+      const outlines = regions.map(({ rings, banded }) =>
+        banded === true ? { rings, banded } : { rings }
+      )
+      const event = await send((id) => ({ kind: 'cutFills', id, regions: outlines, grid, band }))
       return answerOf(event, 'fills', 'fills').fills
     },
 
