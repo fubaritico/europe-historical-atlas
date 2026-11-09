@@ -5,8 +5,8 @@
 
 **The whole chain, in the dev's words** (2026-11-09): a public **substrate** — Cliopatria, OpenHistoricalMap from 1700
 (*"comme tout le monde"*) — plus **Wikipedia** (*"comme tout le monde aussi"*), then what sets us apart: **corrections
-from references** (the verification layers, below), **books mined** on JSTOR and the BnF, and **index references** from
-those books, given by the dev or deduced (`/find-sources`, « A book's index, systematically »). Not historical-basemaps:
+from references** (the verification layers, below), **books mined** on archive.org, JSTOR and the BnF, and **index references** from
+those books — index after index, Wikipedia's footnotes starting the same chain — given by the dev or deduced (`/find-sources`, « A book's index, systematically »). Not historical-basemaps:
 it is GPL-3.0, set aside in September.
 
 ## 1. The base layer — imported, then run through the passes

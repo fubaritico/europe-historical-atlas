@@ -79,16 +79,20 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
    way from a book to the pages on our places; read it, never the book from the start.
    1. **Which books**: the ones the dev names (with his page numbers, or not), and the ones deduced — cited by a note or
       a bibliography read in step 6, or found by title in the libraries of steps 4 and 9.
-   2. **Find the index**: the last pages of the text (archive.org `_djvu.txt`, Gallica's text mode), or the page images
-      on JSTOR or the BnF; its language and spellings are the book's own.
+   2. **Find the index**, in the three places that hold the books, combined (the dev, 2026-11-09: *"archive.org aussi,
+      avec JSTOR, la BnF"*): **archive.org** — the last pages of `_djvu.txt`, free, the old books and regional
+      histories; **JSTOR** and the **BnF** — the page images, behind the dev's accounts (step 9); Gallica's text mode.
+      A book missing from one is looked for in the two others. Its language and spellings are the book's own.
    3. **Search it for every name of step 1** — the place in each language, the polity, the holder, the neighbouring
       places of the lot. Each entry found is an **index reference**: book, entry, pages.
    4. **Write each reference down before reading it**, in the lot's file (`files/plans/sources/<year>.md`, a table
       *Index references*: book, entry, pages, given by the dev or deduced, read or not). Nothing is read twice, nothing
       found is forgotten; a reference never read is said in the report.
    5. **Read every page it gives** — step 5: the passage, the sentence copied, verified on the text or the image.
-   6. **The index leads to other books** too: an entry pointing to a source (a charter, a chronicle, a study) goes back
-      to step 6.
+   6. **Index after index** (the dev: *"index (+ index)"*): an entry pointing to a source — a charter, a chronicle, a
+      study — is a new book, whose own index is read the same way, and so on; Wikipedia starts the same chain, its
+      footnotes giving the first books (step 2). **The chain stops** for a lot when a round brings no new reference to
+      its places, or when its question has two independent witnesses (Claude's rule, 2026-11-09, to confirm).
 8. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
    that ended before the date → who replaced it → who held the place; a neighbouring town of the same district.
 9. **Behind an account — the BnF in every lot** (the dev, 2026-11-08: *"I pay for that subscription. We have to use it,
