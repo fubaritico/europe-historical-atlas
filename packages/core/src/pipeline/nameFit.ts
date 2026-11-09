@@ -137,7 +137,8 @@ export function fittingOf(space: NameSpace, bite = 0): Fitting {
  *
  * A crop with no such cell — an island alone in the sea — is bounded by nothing: every cell is given a distance
  * farther than any in the crop. A finite one, since the fit reads it between cells, where `Infinity` times nought
- * would be `NaN`.
+ * would be `NaN`. **A crop of such cells only** — a realm whose whole crop another name or a neighbour covers (1300,
+ * 2026-11-09) — is the mirror case: every cell deeper inside than any in the crop.
  * @param space - the space and its blocked cells
  * @param kind - the kind: a neighbour's, or another name's
  * @returns the distances, row-major
@@ -145,6 +146,8 @@ export function fittingOf(space: NameSpace, bite = 0): Fitting {
 function boundOf(space: NameSpace, kind: number): Float32Array {
   const { blocked, width, height } = space
   if (!blocked.includes(kind)) return new Float32Array(blocked.length).fill(width + height)
+  if (blocked.every((cell) => cell === kind))
+    return new Float32Array(blocked.length).fill(-(width + height))
   const open = blocked.map((cell) => (cell === kind ? 0 : 1))
   const away = distanceToOutside(open, width, height)
   const inside = distanceToOutside(

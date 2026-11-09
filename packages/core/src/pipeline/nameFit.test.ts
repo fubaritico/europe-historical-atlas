@@ -136,6 +136,13 @@ describe('fittingOf', () => {
   // L3, L4: N/A — a mask from `piecesOf`, which checks its grid.
 
   describe('edge cases', () => {
+    // 1300, 2026-11-09: a realm whose whole crop another name covers stopped the site's build.
+    it('reads a crop wholly covered by another name as deep inside it everywhere, rather than refusing it', () => {
+      const covered = { ...ISLAND.space, blocked: ISLAND.space.blocked.map(() => COVERED) }
+      const { covered: distance, space } = fittingOf(covered)
+      expect(Array.from(distance).every((d) => d === -(space.width + space.height))).toBe(true)
+    })
+
     it('keeps the inside distances the lines are drawn from beside the signed ones', () => {
       const { distances, edge } = band(10, 4, 3)
       expect(distances.every((d, at) => d === 0 || d - 0.5 === edge[at])).toBe(true)
