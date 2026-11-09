@@ -45,14 +45,14 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
    one language misses the literature of the others (Siurana is *Šiurāna*; Lleida is *Lārida*, *Lérida*, *Ilerda*).
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
    list the works its footnotes cite; those works are what the next steps look for.
-3. **The dev's atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
+3. **The atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
    one's status and licence: `files/plans/sources/bibliotheque.md`). Extract their text into the scratchpad once per
    session (`pypdf` in a scratchpad venv; Read cannot render single pages without poppler, so split a scan into
    four-page PDFs and read each whole), search it for every name of the place, read the map's legend and date on the
    page image. Kind `historian-atlas`. **An atlas in copyright is a reference**: its facts are cited, its plates never
    traced (Shepherd 1911 and the 1909 *Atlas of European History* are public domain). Forgotten on 07/11 until the dev
    reminded me — the reason this step stands before the libraries.
-   **His paper atlases** (same file, « Ordered or owned »: García de Cortázar for Iberia, Nicolle for Islam, the Duby…):
+   **The paper atlases** (same file, « Ordered or owned »: García de Cortázar for Iberia, Nicolle for Islam, the Duby…):
    I cannot open them — ask him for a photo of the plate, its legend and its date, read from `~/Desktop`.
 4. **Search the open libraries, in this order**, stopping a library when it has given what it has:
 
