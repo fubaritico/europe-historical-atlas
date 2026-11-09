@@ -46,6 +46,22 @@ click after a hover unread.
   neighbour first — its border moves, yours keeps its points, a grey gap appears — then retrace yours **replaying the same
   clicks** on its new anchors. Measured on the Tagus and at Alzira, 2026-11-08.
 
+## Where a land border meets the coast — the junction point (the dev's method, shown on Sardinia, 2026-11-08)
+
+> *"Le but, c'est de créer un point qui soit décalé par rapport à la côte … ça te laisse aller où tu veux sur la côte
+> rejoindre le point qui est dans les terres pour fermer ton tracé. Ensuite, la frontière du voisin, tu ramènes un de ses
+> points et tu l'aimantes vers le point qui est sur la côte."* — *"il n'y a pas d'autre moyen"*.
+
+1. **A point inland on the land border**, a few kilometres back from the shore: it is shared by both polities (inserted
+   into their common border).
+2. **The first polity's coast** is retraced from that point: to the shore, along it as far as needed, and back to its
+   inland point at the other end. The old junction (Cliopatria's, often offshore) leaves with the run.
+3. **The neighbour** is then joined on the shore: one of its border points welded onto the first polity's coast point —
+   or, retraced from the same inland point, its first coast click lands on that coast point and the snap shares it.
+
+Without the inland point the run cannot meet the old junction: it sits off the coast, and the retrace either refuses or
+swallows the wrong side. The pilot (`scripts/pilot.js`) does it this way, and checks every retrace in the document.
+
 ## Moving, deleting, giving
 
 - **The snap merges points that are too close** (the dev, 2026-11-08): a click on an existing point reuses it — drawing
