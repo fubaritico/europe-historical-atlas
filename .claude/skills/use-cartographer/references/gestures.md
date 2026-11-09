@@ -36,6 +36,8 @@ click after a hover unread.
   clicks. Where two witnesses sit on either bank 1 km from a river, every point between them snaps: zoom further.
 - **A run's start anchor on a coast is not a coast click**: click the coast once more just beside it.
 - **‹Backspace›** takes back the last point; **‹Escape›** abandons the run; **‹⌘Z›** undoes a whole gesture.
+- **Never cancel a gesture that did part of the job** (the dev, 2026-11-09: *"what is done is time gained, it can be
+  iterated"*): finish it, then correct it with the next gesture.
 
 ## Retracing a border ‹R›
 
@@ -59,8 +61,34 @@ click after a hover unread.
 3. **The neighbour** is then joined on the shore: one of its border points welded onto the first polity's coast point —
    or, retraced from the same inland point, its first coast click lands on that coast point and the snap shares it.
 
+**Make room first** (the dev, 2026-11-09): the inland point goes at **each end** of the predicted run, and the existing
+path between them may be simplified before — fewer points near the shore leave room for the snap to land where meant.
+
 Without the inland point the run cannot meet the old junction: it sits off the coast, and the retrace either refuses or
 swallows the wrong side. The pilot (`scripts/pilot.js`) does it this way, and checks every retrace in the document.
+
+## A messy path — simplify, or erase and draw again (the dev, 2026-11-09)
+
+- **Points too close together**: delete them — two points a few hundred metres apart on a coast add nothing but traps
+  for the snap.
+- **A path too complex for the correction asked**: simplify it first (delete points), then correct.
+- **A messy path — a coast, an island**: **never redraw over it**. Erase it and draw it again; that is often the
+  simplest way.
+- **An island to redraw: delete it, then draw it again** — never a retrace (the dev, 2026-11-09: *"ten times faster"*).
+  The pilot does it in one call, `redo`: the old ring erased, the coast loop drawn with the Pen.
+
+## A lake a border crosses (the dev's gesture, 2026-11-09)
+
+1. **A point on the border at each side of the lake**, where the border meets the shore — inserted with the Pen.
+2. **Delete the segment of path the two polities share** between those two points — the border over the water goes
+   (the white arrow on the edge, CARTO-397).
+3. **Outline the lake from one of the two points**: the Pen snaps on the lake's shore and follows it round, up to the
+   shore point nearest the second one.
+4. The two shore points this creates are snapped — they hold the second side when the other polity's part of the lake
+   is outlined the same way.
+
+The pilot's `crossLake` (2026-11-08) erases the border's edges over the water and closes each side along its shore; it
+does not insert the two points on the shore first. Reported to the dev, lake by lake, before any series.
 
 ## Moving, deleting, giving
 

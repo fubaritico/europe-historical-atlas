@@ -149,9 +149,11 @@ export function meanKmTo(from, line) {
  * A free run matched to the coast: the stretch of coast between its two ends, the way round that runs along it.
  * @param {readonly LonLat[]} run - the run's points, first and last its shared anchors
  * @param {readonly { points: LonLat[], closed: boolean }[]} contours - the coast
+ * @param {{ endKm?: number, alongKm?: number }} [limits] - how far an end and the run may lie from the coast;
+ *   {@link END_KM} and {@link ALONG_KM} by default
  * @returns {{ path: LonLat[], km: number } | { refused: string }} the coast path, and how far the run lies from it
  */
-export function matchRun(run, contours) {
+export function matchRun(run, contours, { endKm = END_KM, alongKm = ALONG_KM } = {}) {
   // The coast near both ends at once: an end can lie nearer an islet than the mainland it runs along (Norway's
   // skerries, Portugal's Berlengas), so the nearest coast of each end, taken apart, can be two coasts.
   /** @type {{ contour: number, index: number, km: number } | null} */
@@ -161,7 +163,7 @@ export function matchRun(run, contours) {
   contours.forEach((contour, c) => {
     const a = nearestCoast(run[0], [contour])
     const b = nearestCoast(run[run.length - 1], [contour])
-    if (a.km > END_KM || b.km > END_KM) return
+    if (a.km > endKm || b.km > endKm) return
     if (first === null || last === null || a.km + b.km < first.km + last.km) {
       first = { ...a, contour: c }
       last = { ...b, contour: c }
@@ -181,7 +183,7 @@ export function matchRun(run, contours) {
     if (best === null || km < best.km) best = { path, km }
   }
   if (best === null) return { refused: 'no way along the coast' }
-  if (best.km > ALONG_KM) return { refused: `it runs ${best.km.toFixed(0)} km from the coast` }
+  if (best.km > alongKm) return { refused: `it runs ${best.km.toFixed(0)} km from the coast` }
   return best
 }
 

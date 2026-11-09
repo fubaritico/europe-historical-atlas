@@ -1,0 +1,402 @@
+import { areaBetween, edgeHolders, junctionPoint, matchRun } from './coasts.mjs'
+import { kmBetween, kmToSegment, sampleSegment } from './geo.mjs'
+import { OFF_COAST_KM, ON_SHORE_KM, SHORE_REACH_KM, SHORT_OF_SHORE_KM } from './thresholds.mjs'
+
+/**
+ * The stretches of a polity's edge that run out over the sea, off the shore — whatever the gap (the dev,
+ * 2026-11-09: the north of the Black Sea, the Aegean coast of Turkey, Holland, left by the coast pass without a word).
+ *
+ * The coast pass planned only a run whose ends lay within 15 km of the shore and which ran within 25 km of it; a sea
+ * crossing only when over 10 km and 90 % water. Whatever fell between was dropped silently. This measure follows the
+ * edges themselves, sampled every kilometre, against the shore's segments: an edge no other polity draws, with a sample
+ * **on the water** farther than {@link OFF_COAST_KM} from the shore, is off. Consecutive ones make a stretch, to erase
+ * and redraw on the mask. A sample on land is never counted: an edge short of the shore and a border with nobody's
+ * ground look the same from the edge — that one is measured from the shore (`unclaimedShores`). Pure.
+ */
+
+/**
+ * @typedef {import('./geo.mjs').LonLat} LonLat
+ * @typedef {import('./yearMap.mjs').YearMap} YearMap
+ */
+
+/** The side of a cell of the shore's index, in degrees — wider than {@link SHORE_REACH_KM} needs at 60° N. */
+const CELL = 1
+
+/**
+ * A grid of the shore's segments, so a distance is measured against the few segments nearby.
+ * @param {readonly { points: readonly LonLat[], closed: boolean }[]} shores - the shore contours
+ * @returns {(p: LonLat) => number} the distance from a point to the nearest shore segment, in km; `Infinity` beyond a
+ *   cell around it
+ */
+export function shoreDistance(shores) {
+  /** @type {Map<string, [LonLat, LonLat][]>} */
+  const cells = new Map()
+  const cellOf = (/** @type {number} */ x, /** @type {number} */ y) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`
+  for (const shore of shores) {
+    const n = shore.points.length
+    const last = shore.closed ? n : n - 1
+    for (let i = 0; i < last; i++) {
+      const a = shore.points[i]
+      const b = shore.points[(i + 1) % n]
+      const keys = new Set([cellOf(a[0], a[1]), cellOf(b[0], b[1])])
+      for (const key of keys) {
+        const list = cells.get(key) ?? []
+        list.push([a, b])
+        cells.set(key, list)
+      }
+    }
+  }
+  return (p) => {
+    const cx = Math.floor(p[0] / CELL)
+    const cy = Math.floor(p[1] / CELL)
+    let best = Infinity
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (const [a, b] of cells.get(`${cx + dx}:${cy + dy}`) ?? []) best = Math.min(best, kmToSegment(p, a, b))
+      }
+    }
+    return best
+  }
+}
+
+/**
+ * Every stretch of edges off the shore.
+ * @param {YearMap} map - the map
+ * @param {(p: LonLat) => number} distance - from {@link shoreDistance}
+ * @param {(p: LonLat) => boolean} isLand - the mask the Pen follows
+ * @param {Set<number[]>} [skip] - rings to leave out (from {@link ringsOnContours})
+ * @returns {{ polity: string, ring: number, from: number, to: number, edges: number, km: number, worstKm: number,
+ *   at: LonLat }[]} each stretch, from its first anchor to its last, its length, its worst gap and where it is
+ */
+export function offCoastStretches(map, distance, isLand, skip = new Set()) {
+  const holders = edgeHolders(map)
+  const found = []
+  for (const claim of map.claims) {
+    claim.rings.forEach((ring, index) => {
+      if (skip.has(ring)) return
+      const n = ring.length
+      /** @type {({ worst: number, at: LonLat, km: number } | null)[]} */
+      const off = ring.map((a, k) => {
+        const b = ring[(k + 1) % n]
+        if ((holders.get(a < b ? `${a}-${b}` : `${b}-${a}`)?.size ?? 0) !== 1) return null
+        const [pa, pb] = [map.anchors[a], map.anchors[b]]
+        let worst = 0
+        /** @type {LonLat} */
+        let at = pa
+        for (const p of sampleSegment(pa, pb, 1)) {
+          if (isLand(p)) continue
+          const d = distance(p)
+          if (d > worst && d <= SHORE_REACH_KM) {
+            worst = d
+            at = p
+          }
+        }
+        return worst > OFF_COAST_KM ? { worst, at, km: kmBetween(pa, pb) } : null
+      })
+      const start = off.findIndex((o) => o === null)
+      if (start < 0 && n > 0) {
+        // Every edge off: the whole ring is one stretch (an island never drawn on its coast).
+        let worst = { worst: 0, at: map.anchors[ring[0]] }
+        let km = 0
+        for (const o of off) {
+          if (o === null) continue
+          km += o.km
+          if (o.worst > worst.worst) worst = o
+        }
+        found.push({ polity: claim.polity, ring: index, from: ring[0], to: ring[0], edges: n, km, worstKm: worst.worst,
+          at: worst.at })
+        return
+      }
+      for (let k = start + 1; k <= start + n; ) {
+        if (off[k % n] === null) {
+          k++
+          continue
+        }
+        const first = k
+        let km = 0
+        let worst = { worst: 0, at: map.anchors[ring[first % n]] }
+        while (k < start + n + 1 && off[k % n] !== null) {
+          const o = /** @type {{ worst: number, at: LonLat, km: number }} */ (off[k % n])
+          km += o.km
+          if (o.worst > worst.worst) worst = o
+          k++
+        }
+        found.push({ polity: claim.polity, ring: index, from: ring[first % n], to: ring[k % n], edges: k - first,
+          km, worstKm: worst.worst, at: worst.at })
+      }
+    })
+  }
+  return found
+}
+
+/**
+ * A grid of every polity's edges, so the nearest polity to a point is found among the few edges nearby.
+ * @param {YearMap} map - the map
+ * @returns {(p: LonLat) => { km: number, polity: string | null }} the nearest edge's distance and polity; `Infinity`
+ *   and `null` beyond a cell around the point
+ */
+export function edgeDistance(map) {
+  /** @type {Map<string, { a: LonLat, b: LonLat, polity: string }[]>} */
+  const cells = new Map()
+  const cellOf = (/** @type {LonLat} */ p) => `${Math.floor(p[0] / CELL)}:${Math.floor(p[1] / CELL)}`
+  for (const claim of map.claims) {
+    for (const ring of claim.rings) {
+      ring.forEach((anchor, k) => {
+        const a = map.anchors[anchor]
+        const b = map.anchors[ring[(k + 1) % ring.length]]
+        for (const key of new Set([cellOf(a), cellOf(b)])) {
+          const list = cells.get(key) ?? []
+          list.push({ a, b, polity: claim.polity })
+          cells.set(key, list)
+        }
+      })
+    }
+  }
+  return (p) => {
+    const [cx, cy] = [Math.floor(p[0] / CELL), Math.floor(p[1] / CELL)]
+    let best = { km: Infinity, polity: /** @type {string | null} */ (null) }
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (const e of cells.get(`${cx + dx}:${cy + dy}`) ?? []) {
+          const km = kmToSegment(p, e.a, e.b)
+          if (km < best.km) best = { km, polity: e.polity }
+        }
+      }
+    }
+    return best
+  }
+}
+
+/**
+ * The point a kilometre inland of a shore point, square to the shore — never across a fjord or a strait, where a point
+ * taken in a fixed direction lands on the other bank (round 2 of 1300, 2026-11-09: 199 retraces planned in Norway's
+ * fjords, each changing nothing).
+ * @param {readonly LonLat[]} pts - the shore's points
+ * @param {number} k - the point's position
+ * @param {boolean} closed - whether the shore loops
+ * @param {(p: LonLat) => boolean} isLand - the mask
+ * @returns {LonLat | undefined} the inland point; none when neither side a kilometre off is land
+ */
+export function inlandOf(pts, k, closed, isLand) {
+  const n = pts.length
+  const prev = pts[closed ? (k - 1 + n) % n : Math.max(0, k - 1)]
+  const next = pts[closed ? (k + 1) % n : Math.min(n - 1, k + 1)]
+  const p = pts[k]
+  const cos = Math.cos((p[1] * Math.PI) / 180)
+  // The tangent in kilometres, then its two normals, a kilometre long, back in degrees.
+  const tx = (next[0] - prev[0]) * cos
+  const ty = next[1] - prev[1]
+  const len = Math.hypot(tx, ty)
+  if (len === 0) return undefined
+  const km = 1 / 111.32
+  return /** @type {LonLat[]} */ ([
+    [p[0] + ((-ty / len) * km) / cos, p[1] + (tx / len) * km],
+    [p[0] + ((ty / len) * km) / cos, p[1] - (tx / len) * km],
+  ]).find(isLand)
+}
+
+/**
+ * The shores nobody holds while a polity stands just behind them — a coast drawn short of the sea (the Aegean coast of
+ * Turkey in 1300: 35 of 56 shore samples nobody's). Each shore point is tested a kilometre inland; a run of points held by
+ * nobody, the nearest polity's edge within {@link SHORT_OF_SHORE_KM}, is a stretch whose coast is to be pushed out to the
+ * shore. Farther, the shore is truly empty (the Arctic, a desert's coast) and is left alone.
+ * @param {YearMap} map - the map
+ * @param {readonly { points: readonly LonLat[], closed: boolean }[]} shores - the sea's shores
+ * @param {(p: LonLat) => boolean} isLand - the mask
+ * @param {(p: LonLat) => string[]} holders - who holds a point (`holdersAt` bound to the map)
+ * @returns {{ polity: string, from: LonLat, to: LonLat, points: number, km: number, worstKm: number,
+ *   shore: LonLat[] }[]} each stretch, by the polity behind it, its two ends on the shore, its length, its widest gap and
+ *   its shore points
+ */
+export function unclaimedShores(map, shores, isLand, holders) {
+  const nearest = edgeDistance(map)
+  const found = []
+  for (const shore of shores) {
+    const pts = shore.points
+    /** @type {({ polity: string, gap: number } | null)[]} */
+    const state = pts.map((p, k) => {
+      const inland = inlandOf(pts, k, shore.closed, isLand)
+      if (inland === undefined || holders(inland).length > 0) return null
+      const near = nearest(inland)
+      return near.polity !== null && near.km <= SHORT_OF_SHORE_KM ? { polity: near.polity, gap: near.km } : null
+    })
+    let k = 0
+    while (k < pts.length) {
+      const s = state[k]
+      if (s === null) {
+        k++
+        continue
+      }
+      const first = k
+      let km = 0
+      let worst = s.gap
+      while (k + 1 < pts.length && state[k + 1]?.polity === s.polity) {
+        km += kmBetween(pts[k], pts[k + 1])
+        worst = Math.max(worst, /** @type {{ gap: number }} */ (state[k + 1]).gap)
+        k++
+      }
+      if (k > first) {
+        found.push({ polity: s.polity, from: pts[first], to: pts[k], points: k - first + 1, km, worstKm: worst,
+          shore: pts.slice(first, k + 1) })
+      }
+      k++
+    }
+  }
+  return found
+}
+
+/**
+ * A planned retrace, in the shape the pilot's `junction` takes.
+ * @typedef {{ polity: string, startAt: LonLat, startEdge: LonLat[] | null, endAt: LonLat, endEdge: LonLat[] | null,
+ *   interior: number, interiorAt: LonLat[], path: LonLat[], km: number, expectedKm2: number }} ShoreRetrace
+ */
+
+/**
+ * The retraces that put the measured stretches back on the shore — each on **its own stretch only** (the dev,
+ * 2026-11-09: *"simplify, so the retouch is as simple as possible"*). Round 2 retraced whole free runs, hundreds of
+ * anchors already on the coast, and the retrace tool lost its way on them.
+ *
+ * A stretch is the run of the polity's ring from one anchor to another: for one over the sea, its own anchors; for a
+ * shore nobody holds, the polity's anchors nearest its two ends, the way between them that is the shorter. Each end on
+ * the shore stays as it is; an end off it takes a junction point inland on the ring (the dev's method, `gestures.md`),
+ * so neither a neighbour nor a shore anchor is needed — a ring alone (the Aegean coast of Turkey) is planned like any
+ * other. A retrace that would change nothing (no anchor replaced, the coast within {@link OFF_COAST_KM} of the edge all
+ * along) is not planned.
+ * @param {YearMap} map - the map
+ * @param {readonly { points: LonLat[], closed: boolean }[]} shores - the sea's shores
+ * @param {(p: LonLat) => number} distance - from {@link shoreDistance}
+ * @param {(p: LonLat) => boolean} isLand - the mask
+ * @param {readonly { polity: string, ring: number, from: number, to: number }[]} out - from {@link offCoastStretches}
+ * @param {readonly { polity: string, from: LonLat, to: LonLat }[]} short - from {@link unclaimedShores}
+ * @returns {{ runs: ShoreRetrace[], refused: { polity: string, at: LonLat, why: string }[], unchanged: number }} one
+ *   retrace per stretch, each once; the stretches left, with why; how many would have changed nothing
+ */
+export function shoreRetraces(map, shores, distance, isLand, out, short) {
+  const onShore = (/** @type {number} */ a) => distance(map.anchors[a]) <= ON_SHORE_KM
+  /** @type {Map<string, ShoreRetrace>} */
+  const runs = new Map()
+  /** @type {{ polity: string, at: LonLat, why: string }[]} */
+  const refused = []
+  let unchanged = 0
+  /**
+   * The retrace of a ring's stretch, forward from position i to position j.
+   * @param {string} polity - the polity
+   * @param {number[]} ring - its ring
+   * @param {number} i - the first anchor's position
+   * @param {number} j - the last anchor's position
+   * @returns {void}
+   */
+  const plan = (polity, ring, i, j) => {
+    const n = ring.length
+    const key = `${polity}:${ring[i]}-${ring[j]}`
+    if (runs.has(key)) return
+    /** @type {number[]} */
+    const anchors = []
+    for (let k = i; ; k = (k + 1) % n) {
+      anchors.push(ring[k])
+      if (k === j) break
+    }
+    const ends = [
+      { pos: i, away: /** @type {-1} */ (-1) },
+      { pos: j, away: /** @type {1} */ (1) },
+    ].map(({ pos, away }) =>
+      onShore(ring[pos])
+        ? { point: map.anchors[ring[pos]], edge: null, passed: [], own: true }
+        : (() => {
+            const found =
+              junctionPoint(map, ring, pos, away, shores, isLand) ?? junctionPoint(map, ring, pos, away, shores, isLand, 1)
+            return found === null ? null : { ...found, own: false }
+          })()
+    )
+    const [start, end] = ends
+    if (start === null || end === null) {
+      refused.push({ polity, at: map.anchors[ring[i]], why: 'no junction point inland within reach' })
+      return
+    }
+    // An end of its own on the shore is kept: the retrace starts from it. An end off the shore leaves with the run.
+    const leaving = [
+      ...[...start.passed].reverse(),
+      ...anchors.slice(start.own ? 1 : 0, end.own ? -1 : anchors.length),
+      ...end.passed,
+    ]
+    const old = [start.point, ...leaving.map((a) => map.anchors[a]), end.point]
+    const match = matchRun(old, shores, { endKm: SHORE_REACH_KM, alongKm: SHORE_REACH_KM })
+    if ('refused' in match) {
+      refused.push({ polity, at: old[0], why: match.refused })
+      return
+    }
+    // Nothing replaced and the coast within reach of the edge all along: the edge already lies on the shore, by the
+    // measure's own threshold — a retrace would only add points.
+    const offEdge = (/** @type {LonLat} */ q) =>
+      Math.min(...old.slice(1).map((b, k) => kmToSegment(q, old[k], b))) > OFF_COAST_KM
+    if (leaving.length === 0 && !match.path.some(offEdge)) {
+      unchanged++
+      return
+    }
+    runs.set(key, {
+      polity,
+      startAt: start.point,
+      startEdge: start.edge === null ? null : start.edge.map((a) => map.anchors[a]),
+      endAt: end.point,
+      endEdge: end.edge === null ? null : end.edge.map((a) => map.anchors[a]),
+      interior: leaving.length,
+      interiorAt: leaving.map((a) => map.anchors[a]),
+      path: match.path,
+      km: match.km,
+      expectedKm2: areaBetween(old, match.path),
+    })
+  }
+  for (const s of out) {
+    const ring = map.claims.find((c) => c.polity === s.polity)?.rings[s.ring]
+    if (ring === undefined) continue
+    plan(s.polity, ring, ring.indexOf(s.from), ring.indexOf(s.to))
+  }
+  for (const s of short) {
+    const claim = map.claims.find((c) => c.polity === s.polity)
+    // The polity's anchors nearest the stretch's two ends, on one ring, within reach of it.
+    /** @type {{ ring: number[], a: number, b: number, gap: number } | null} */
+    let best = null
+    for (const ring of claim?.rings ?? []) {
+      const near = (/** @type {LonLat} */ q) =>
+        ring.reduce((b, a, k) => (kmBetween(map.anchors[a], q) < kmBetween(map.anchors[ring[b]], q) ? k : b), 0)
+      const a = near(s.from)
+      const b = near(s.to)
+      const gap = Math.max(kmBetween(map.anchors[ring[a]], s.from), kmBetween(map.anchors[ring[b]], s.to))
+      if (a !== b && gap <= SHORT_OF_SHORE_KM && (best === null || gap < best.gap)) best = { ring, a, b, gap }
+    }
+    if (best === null) {
+      refused.push({ polity: s.polity, at: s.from, why: 'no two anchors of the polity near its ends' })
+      continue
+    }
+    const { ring, a, b } = best
+    const n = ring.length
+    // The way between them that is the shorter: the polity's edge behind this stretch, not the rest of its outline.
+    const along = (/** @type {number} */ x, /** @type {number} */ y) => {
+      let km = 0
+      for (let k = x; k !== y; k = (k + 1) % n) km += kmBetween(map.anchors[ring[k]], map.anchors[ring[(k + 1) % n]])
+      return km
+    }
+    if (along(a, b) <= along(b, a)) plan(s.polity, ring, a, b)
+    else plan(s.polity, ring, b, a)
+  }
+  return { runs: [...runs.values()], refused, unchanged }
+}
+
+/**
+ * The rings lying wholly on a traced contour — an island drawn on its coast, a lake carved on its shore. They are the
+ * passes' work, not faults: the measures of waste and of edges off the shore leave them out (the run from zero of
+ * 2026-11-09 counted 598 « lint » and 17,763 km « out » that were islands and lakes just drawn).
+ * @param {YearMap} map - the map
+ * @param {(p: LonLat) => number} distance - from {@link shoreDistance}, over every contour, lakes included
+ * @returns {Set<number[]>} the rings, by identity
+ */
+export function ringsOnContours(map, distance) {
+  /** @type {Set<number[]>} */
+  const on = new Set()
+  for (const claim of map.claims) {
+    for (const ring of claim.rings) {
+      if (ring.every((a) => distance(map.anchors[a]) <= ON_SHORE_KM)) on.add(ring)
+    }
+  }
+  return on
+}

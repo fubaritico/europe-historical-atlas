@@ -50,6 +50,7 @@ const LABELS = [
   { name: 'épique · interface atlas', color: 'pink_dark' },
   { name: 'épique · icônes', color: 'yellow_light' },
   { name: 'épique · trois couches', color: 'red_dark' },
+  { name: 'épique · vingt cartes', color: 'sky_dark' },
   // status
   BLOCKED,
 ]

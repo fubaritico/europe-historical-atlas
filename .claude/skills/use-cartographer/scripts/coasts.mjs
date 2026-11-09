@@ -2,7 +2,7 @@
 import { writeFileSync } from 'node:fs'
 
 import { formatLonLat } from './lib/args.mjs'
-import { loadLand, traceCoast } from './lib/coast.mjs'
+import { loadLand, seaShores, traceCoast } from './lib/coast.mjs'
 import { junctionRuns, lobeCuts, seaCuts } from './lib/coasts.mjs'
 import { REPO_ROOT, commandLine, folderOf, print, readJson } from './lib/system.mjs'
 import { readYearMap } from './lib/yearMap.mjs'
@@ -27,8 +27,9 @@ const { values } = commandLine(
   USAGE
 )
 const map = readYearMap(folderOf(String(values.map)), readJson)
-// Every shore: a closed sea (the Black Sea, the Caspian) is a loop of water at this grid, its shore a coast all the same.
-const contours = await traceCoast(REPO_ROOT)
+// Every shore of the sea: a closed sea (the Black Sea, the Caspian) is a loop of water at this grid, its shore a coast
+// all the same; a lake's shore is not — it goes to the lakes' plan (`lakes.mjs`), coasts first (the dev, 2026-11-09).
+const contours = seaShores(await traceCoast(REPO_ROOT))
 // With --lobes, the islands `within` a mainland ring (from `islands.mjs --json`): one retrace per lobe to cut.
 if (values.sea) {
   const cut = seaCuts(map, contours, await loadLand(REPO_ROOT))

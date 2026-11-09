@@ -9,7 +9,7 @@
  *
  * The rules learnt the hard way (journal, 2026-11-08): read the bar after every click; a closing click draws a
  * straight segment, so the last click before closing is the coast point next to the first; check « closed » in the
- * result; one island first, a capture, then a series that stops at the first miss.
+ * result; one item first, then the series — a miss is set aside with its cause, never a stop (`runSeries`).
  */
 
 /**
@@ -373,6 +373,40 @@ async function series(islands) {
 }
 
 /**
+ * Draw islands one after the other, a miss set aside, never a stop (the dev, 2026-11-09): an island not drawn exactly
+ * on its coast is taken back — the open run by ‹Backspace›, a wrong ring by one undo — and listed with its cause.
+ * @param {readonly { id: number, owner: string, points: LonLat[] }[]} islands - from `islands.mjs --json`
+ * @param {{ i: number, done: number, aside: { id: number, owner: string, why: string }[] }} [progress] - updated as it
+ *   goes, so a long series can be watched from outside
+ * @returns {Promise<{ i: number, done: number, aside: { id: number, owner: string, why: string }[] }>} the report
+ */
+async function drawIslands(islands, progress = { i: 0, done: 0, aside: [] }) {
+  for (const item of islands) {
+    const before = ringsOf(item.owner).length
+    let why
+    try {
+      await island(item.owner, item.points)
+      await frameDone()
+      why = check(item.owner, item.points, before)
+    } catch (error) {
+      why = `threw: ${String(error)}`
+    }
+    if (why !== null) {
+      if (ringsOf(item.owner).length === before) await takeBack(item.points.length + 2)
+      else {
+        reach().store.getState().undo()
+        await frameDone()
+      }
+      const back = ringsOf(item.owner).length === before
+      progress.aside.push({ id: item.id, owner: item.owner, why: back ? why : `${why} — TAKE-BACK FAILED` })
+      if (!back) break
+    } else progress.done += 1
+    progress.i += 1
+  }
+  return progress
+}
+
+/**
  * Hover a position and read the bar, the ‹alt› key held or not.
  * @param {LonLat} p - the position
  * @param {boolean} alt - ‹alt› held
@@ -717,7 +751,135 @@ async function seaCut(plan) {
   return null
 }
 
+/**
+ * Every ring of the page's document, as `polity:anchor,anchor,…`, in the document's order — what a gesture of a series
+ * is checked against.
+ * @returns {string[]} the rings
+ */
+function ringKeys() {
+  const { store } = reach()
+  return store
+    .getState()
+    .document.claims.flatMap((/** @type {{ polity: string, rings: number[][] }} */ c) =>
+      c.rings.map((r) => `${c.polity}:${r.join(',')}`)
+    )
+}
+
+/**
+ * A series that sets aside instead of stopping (the dev, 2026-11-09: stopping at the first miss forces one more round
+ * per miss — a miss is to identify, understand and improve). Each item is planned (`plan` says what the map must be
+ * after it, or why it cannot be done — nothing touched then), done, then checked against the whole map; a gesture that
+ * changed anything else is undone, alone, and set aside. The causes come back grouped, for the measure or the script
+ * to be improved, and only the items set aside are run again.
+ * @template T
+ * @param {readonly T[]} items - the items, in the plan's order
+ * @param {(item: T, before: string[]) => { expected: string[] } | { why: string }} plan - the map after the item, or
+ *   why it is set aside before any gesture
+ * @param {(item: T) => void} act - the gesture
+ * @param {(item: T) => string} name - how the item is named in the report
+ * @returns {{ done: number, aside: { item: string, why: string }[], causes: Record<string, number> }} the report
+ */
+function runSeries(items, plan, act, name) {
+  const { store } = reach()
+  let done = 0
+  /** @type {{ item: string, why: string }[]} */
+  const aside = []
+  for (const item of items) {
+    const before = ringKeys()
+    const planned = plan(item, before)
+    if ('why' in planned) {
+      aside.push({ item: name(item), why: planned.why })
+      continue
+    }
+    act(item)
+    const after = ringKeys()
+    if (after.length !== planned.expected.length || after.some((k, i) => k !== planned.expected[i])) {
+      store.getState().undo()
+      const back = ringKeys()
+      const restored = back.length === before.length && back.every((k, i) => k === before[i])
+      aside.push({
+        item: name(item),
+        why: restored ? 'the gesture changed more than planned — undone' : 'the gesture changed more than planned — UNDO FAILED',
+      })
+      if (!restored) break
+      continue
+    }
+    done++
+  }
+  /** @type {Record<string, number>} */
+  const causes = {}
+  for (const a of aside) causes[a.why] = (causes[a.why] ?? 0) + 1
+  return { done, aside, causes }
+}
+
+/**
+ * Remove the lint of a map, ring by ring (the dev, 2026-11-09: the cleaning pass, nothing redrawn): each ring deleted
+ * whole through the white arrow's ‹delete› with its polity aimed, so its points stay with every other ring holding them
+ * (`core/editor/anchorEdits.removeAnchors`). A ring that is not the planned one, or whose removal changes any other
+ * ring, is set aside ({@link runSeries}).
+ * @param {readonly { polity: string, anchors: readonly number[] }[]} rings - the rings, by their exact anchors
+ * @returns {ReturnType<typeof runSeries>} the report
+ */
+function removeRings(rings) {
+  const { store } = reach()
+  return runSeries(
+    rings,
+    (item, before) => {
+      const target = `${item.polity}:${item.anchors.join(',')}`
+      return before.includes(target)
+        ? { expected: before.filter((k) => k !== target) }
+        : { why: 'not the planned ring' }
+    },
+    (item) => {
+      store.getState().aimAt(item.polity)
+      store
+        .getState()
+        .deleteAnchors([...item.anchors], { kind: 'delete-anchor', label: `Delete ${item.anchors.length} anchors` }, item.polity)
+    },
+    (item) => `${item.polity} [${item.anchors[0]}…]`
+  )
+}
+
+/**
+ * Take an island out of the mainland's path it was joined to (the dev, 2026-11-09): the points of the polity's ring that
+ * lie on the island, deleted in one ‹delete› with the polity aimed — the path then runs straight across the strait, the
+ * mainland's coast is retraced after, the island redrawn on its own. An island whose points are not all in one ring of
+ * the polity, or whose removal changes anything but that ring losing exactly those points, is set aside.
+ * @param {readonly { polity: string, anchors: readonly number[] }[]} items - per island, its polity and the points
+ * @returns {ReturnType<typeof runSeries>} the report
+ */
+function removePoints(items) {
+  const { store } = reach()
+  return runSeries(
+    items,
+    (item, before) => {
+      const gone = new Set(item.anchors)
+      const holds = (/** @type {string} */ k) => k.slice(k.indexOf(':') + 1).split(',').some((a) => gone.has(Number(a)))
+      const holders = before.filter(holds)
+      if (holders.length !== 1 || !holders[0].startsWith(`${item.polity}:`))
+        return { why: `${holders.length} rings hold the points, not one of the polity` }
+      const kept = `${item.polity}:${holders[0]
+        .slice(item.polity.length + 1)
+        .split(',')
+        .filter((a) => !gone.has(Number(a)))
+        .join(',')}`
+      if (kept.split(',').length < 3) return { why: 'fewer than three points would be left' }
+      return { expected: before.map((k) => (k === holders[0] ? kept : k)) }
+    },
+    (item) => {
+      store.getState().aimAt(item.polity)
+      store
+        .getState()
+        .deleteAnchors([...item.anchors], { kind: 'delete-anchor', label: `Delete ${item.anchors.length} anchors` }, item.polity)
+    },
+    (item) => `${item.polity} [${item.anchors.length} points from ${item.anchors[0]}]`
+  )
+}
+
 window.pilot = {
+  drawIslands,
+  removePoints,
+  removeRings,
   seaCut,
   crossLake,
   junction,

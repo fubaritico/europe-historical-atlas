@@ -7,8 +7,8 @@
 
 ## ▶ ON REPREND ICI — après la nuit du 08 au 09/11 : ATLAS-399, les chevauchements hachurés dans l'atlas
 
-**`main` a quatre commits non poussés** (`0bef68c` les cartes 1100 et 1200, `4cb9cdf` la skill, `58e3575` + `ce9a8d3`
-ATLAS-398) — **pousser seulement à son mot** (il a dit *« non »* le 09/11). Dans l'arbre de `main`, **ses** retouches non
+**`main` est poussé** jusqu'à `bf4a579` (vérifié par `git ls-remote` le 09/11 à 12 h : le distant égale `HEAD`) — les
+quatre commits de la nuit (`0bef68c`, `4cb9cdf`, `58e3575`, `ce9a8d3`) sont en ligne. Dans l'arbre de `main`, **ses** retouches non
 commitées de `years/1100`, `years/1200` et `content/events.json` : ne pas y toucher, ne jamais les ajouter avec les miennes.
 Le worktree `historian` et ses branches sont supprimés (sa demande) ; le recréer pour dessiner.
 

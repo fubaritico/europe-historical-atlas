@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { samplesInside } from './islands.mjs'
+import { ringAreaKm2 } from './lint.mjs'
+import { SEA_MIN_KM2 } from './thresholds.mjs'
 
 /**
  * The coastline the Pen follows, traced as the Cartographer traces it — the same mask, the same width, the same
@@ -39,6 +41,17 @@ export async function loadLand(root) {
   const mask = createPackedLandMask(meta, new Uint8Array(readFileSync(`${base}.bin`)))
   return (/** @type {import('./geo.mjs').LonLat} */ p) =>
     mask.isLand(longitudeToHorizontal(p[0], meta.bbox), latitudeToVertical(p[1], meta.bbox))
+}
+
+/**
+ * The shores of the sea: the continents' open runs, the islands' loops, and the loops of water as large as a closed sea
+ * — never a lake's shore.
+ * @template {{ points: import('./geo.mjs').LonLat[], land: boolean, closed: boolean }} T
+ * @param {readonly T[]} contours - every contour of the mask
+ * @returns {T[]} the ones that face the sea
+ */
+export function seaShores(contours) {
+  return contours.filter((c) => !c.closed || c.land || ringAreaKm2(c.points) >= SEA_MIN_KM2)
 }
 
 /**
