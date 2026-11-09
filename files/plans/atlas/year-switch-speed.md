@@ -138,7 +138,22 @@ relief: **the bare relief is never shown alone, and there is one bar, never two.
 **Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
 bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
 
-## Where we stopped — 2026-11-08, evening (the resume point of this work)
+## Where we stopped — 2026-11-09, past midnight (ATLAS-396, the resume point of this work)
+
+**Branch `atlas-396-speed`, worktree `baked-years`, two commits tested by the dev, NOT merged into `main`, not
+pushed**: `53eb792` (a prepared map sent to the GPU unseen — first visit 43 ms → one frame) and `14887af` (a year's
+countries cut, shared and laid in the worker — countries on the page 156–243 → 85–95 ms on 1200). **First thing**:
+bring them into `main` and push (rebase onto `main` first).
+
+**Uncommitted in the worktree, on hold**: the tribes measured and laid in the worker (`layTribes`, `tribeBuffers` in
+core, the land and the relief read before the wait — review done, 3 findings fixed). **No gain measured**: 1200 has no
+tribe; on 1100 the countries' step at startup, same minute, 170–192 ms before, 139–186 ms after — within what the
+machine alone varies (the borders, untouched, moved 4× between series). **Next, the dev agreeing**: fine
+`performance.measure` marks inside the countries' step (dispose, build, bounds, add, tribes) to see where the time goes
+before moving more code; drop the tribes' change if they weigh nothing. Then the borders (~250 ms) and the names
+(~150 ms block). **Measure only on a quiet machine** — the historian's scripts and gates ran the load to 24 tonight.
+
+## Where we stopped — 2026-11-08, evening
 
 **ATLAS-333 is done, merged into `main` and pushed** (the branch `atlas-baked-years` rebased onto `0e2aec6`, the
 historian's day included; one conflict, an import in `core/editor/retrace.ts`). Tried by the dev on the built site:

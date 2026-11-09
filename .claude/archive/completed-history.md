@@ -37,18 +37,18 @@ Une plage, **07/11 18:57 → 20:19** (1 h 22) ; le chantier ouvert le 05/10 tota
 non poussé** : `c6096fe` (CARTO-370), `b6d0a2a` (la skill), et le commit de clôture ; l'historien a commité `a070c03` et
 `d7b6276` (ses notes de sources).
 
-- **CARTO-370 fait, essayé et validé par lui** (*« c'est beaucoup plus pratique comme ça »*, *« je valide le 370 »*) :
+- **CARTO-370 fait, essayé et validé par lui** (_« c'est beaucoup plus pratique comme ça »_, _« je valide le 370 »_) :
   l'entonnoir (son dessin, de son projet React Native) ouvre « Filtres avancés » ; à ma proposition, prise par lui
-  (*« plus on peut visualiser les choses mieux, c'est tout l'intérêt de ce panneau »*), la rubrique « Pas encore sur la
-  carte » et « Sans détenteur » ; après son essai, **le filtre en tête de la fenêtre** (*« il nous faut le quick filter
-  pour les listes longues »*). Revue à cinq relecteurs, constats corrigés ; essayé par moi sur 1100 (le comté de Barcelone,
+  (_« plus on peut visualiser les choses mieux, c'est tout l'intérêt de ce panneau »_), la rubrique « Pas encore sur la
+  carte » et « Sans détenteur » ; après son essai, **le filtre en tête de la fenêtre** (_« il nous faut le quick filter
+  pour les listes longues »_). Revue à cinq relecteurs, constats corrigés ; essayé par moi sur 1100 (le comté de Barcelone,
   12 villes, toutes à déclarer).
-- **La skill `/use-cartographer`** (`b6d0a2a`), à sa demande (*« une skill »*, des mots déclencheurs « dessine »,
+- **La skill `/use-cartographer`** (`b6d0a2a`), à sa demande (_« une skill »_, des mots déclencheurs « dessine »,
   « retouche ») : le mode d'emploi vérifié contre le code — une carte s'enregistre seule deux secondes après chaque geste,
   d'où un seul agent par carte et une copie avant d'y toucher ; le journal `drawing-as-claude.md` déplacé dans
   `references/journal.md`, **toujours local** (sa décision du 12/10).
-- **Ses décisions** : l'historien **peut lire une copie en ligne** d'un livre sous droits (*« peu importe la manière, on a
-  besoin de références »*), jamais liée dans la base (`/find-sources`) ; la bulle du détenteur et de son suzerain au survol
+- **Ses décisions** : l'historien **peut lire une copie en ligne** d'un livre sous droits (_« peu importe la manière, on a
+  besoin de références »_), jamais liée dans la base (`/find-sources`) ; la bulle du détenteur et de son suzerain au survol
   du point (CARTO-367). Nouveaux tickets : CARTO-381 (panneau flottant hors de la fenêtre), CARTO-382 (le tri, dans
   l'épique), REPO-383 (des ports fixes).
 - **L'historien** : les lots « Navarre et Aragon » et la source 286 (Monsalvo Antón) vérifiés en lecture seule ; Horta
@@ -62,12 +62,12 @@ non poussé** : `c6096fe` (CARTO-370), `b6d0a2a` (la skill), et le commit de cl�
 Deux plages, **06/11 11:26 → 15:24 et 17:30 → 18:22** (4 h 49) ; le chantier ouvert le 05/10 totalise **216 h 48 sur 38
 plages**. **Sur `main`, poussé** : `b02ce87` (1100 depuis Cliopatria) et le commit de clôture.
 
-- **Le tableau relu ticket par ticket avec lui** (*« le board est ta mémoire »*) : une quinzaine de tickets archivés — sans
+- **Le tableau relu ticket par ticket avec lui** (_« le board est ta mémoire »_) : une quinzaine de tickets archivés — sans
   objet (CARTO-182, 183, 185, 186, 187, CORE-211, ATLAS-143…), doublons, faux problèmes au regard du couplage lâche
   (CARTO-173, 175, 177, 178) ; réécrits avec leurs scénarios (CARTO-188, 189, 192) ; des tickets de correction
   (ATLAS-373, CARTO-375, 377, 380, CARTO-180) ; de nouvelles épiques (ATLAS-329, ATLAS-153 « les trois couches »).
 - **Ses règles du jour** : une erreur s'affiche dans une fenêtre, la console gardée (`rules/error-handling.md`) ; la fiche
-  porte le détenteur le plus probable avec son QID ; la recherche continue jusqu'au nom (*« insister, insister »*,
+  porte le détenteur le plus probable avec son QID ; la recherche continue jusqu'au nom (_« insister, insister »_,
   `/enter-in-cms`, et `/find-sources` de l'historien) ; la vérification d'une année ne bloque jamais, même la CI ;
   `/trello` compare le tableau au code et aux commits à chaque début et fin de session.
 - **1100 refaite depuis Cliopatria, publiée** (`b02ce87`) — celle partie d'Euratlas reste dans l'historique, son choix.
@@ -80,19 +80,19 @@ plages**. **Sur `main`, poussé** : `b02ce87` (1100 depuis Cliopatria) et le com
 La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (12 h 26) ; le chantier ouvert le 05/10 totalise
 **211 h 34 sur 36 plages**. **Sur `main`, poussé** jusqu'au commit de clôture (`49b115a` → `62309fd`).
 
-- **CARTO-345 fait** : les points quelconques copiés et fondus par les plus proches, ‹⌘A›, les tracés ouverts (*« dès que
-  tu sors du tracé, ça le valide, et tu peux le reprendre »*), le vassal refusé sur un suzerain ouvert dans une fenêtre
-  d'avertissement à son icône, la fiche collée champ par champ, des libellés courts (*« dix fois trop longs »*) — **essayé
-  par lui** : Venise, Lori, les Seldjoukides (*« bonne surprise »*). La copie à part supprimée à sa demande.
+- **CARTO-345 fait** : les points quelconques copiés et fondus par les plus proches, ‹⌘A›, les tracés ouverts (_« dès que
+  tu sors du tracé, ça le valide, et tu peux le reprendre »_), le vassal refusé sur un suzerain ouvert dans une fenêtre
+  d'avertissement à son icône, la fiche collée champ par champ, des libellés courts (_« dix fois trop longs »_) — **essayé
+  par lui** : Venise, Lori, les Seldjoukides (_« bonne surprise »_). La copie à part supprimée à sa demande.
 - **Les villes en points** (`be59d43`, CARTO-193) : la couleur du détenteur selon les sources — essayé sur Sarkel.
-- **CARTO-364 fait** (`f56678e`) : les chevauchements hachurés, N couleurs (*« ça n'arrivera jamais, mais il faut le
-  calculer comme ça »*), une forme refusée dite dans une fenêtre d'erreur — *« le principe, il marche »* ; les bandes
+- **CARTO-364 fait** (`f56678e`) : les chevauchements hachurés, N couleurs (_« ça n'arrivera jamais, mais il faut le
+  calculer comme ça »_), une forme refusée dite dans une fenêtre d'erreur — _« le principe, il marche »_ ; les bandes
   bougent au zoom : **CARTO-365**. Le contrôle des versions (8 failles, toutes dans le CMS ; le kit MCP forcé à la
-  prochaine relance). Une dette des tests réglée (`62309fd`, *« une erreur de débutant »*).
-- **Les chantiers deviennent des épiques** (*« ce sont des épiques »*) ; l'épique des villes, **CARTO-363**, et ses six
+  prochaine relance). Une dette des tests réglée (`62309fd`, _« une erreur de débutant »_).
+- **Les chantiers deviennent des épiques** (_« ce sont des épiques »_) ; l'épique des villes, **CARTO-363**, et ses six
   tickets, CARTO-370 en tête. L'historien : lots 3 à 6 vérifiés dans la base.
-- **Mes fautes** : sa demande sur le panneau Villes rangée dans Idées (*« c'est pas une idée, c'est un truc à faire »*) ;
-  une déclaration analytique collée aux hachures (*« tout de suite, tu fonces »*) ; une fusion au lieu d'un rebase, qui
+- **Mes fautes** : sa demande sur le panneau Villes rangée dans Idées (_« c'est pas une idée, c'est un truc à faire »_) ;
+  une déclaration analytique collée aux hachures (_« tout de suite, tu fonces »_) ; une fusion au lieu d'un rebase, qui
   l'a perdu ; des bandes à largeur fixe à l'écran, qui bougent au zoom.
 
 ### 2026-11-05 après-midi — le collage d'un pays entier et d'un tronçon, branchés et fusionnés
@@ -103,16 +103,16 @@ l'historien), et le commit de clôture.
 
 - **CARTO-345, le pays entier** : la fiche, les points en place sous leur source, en haut de {Polities}, le suzerain retrouvé
   **par son nom** (sa décision, sur une mesure : 9 vassaux sur 56 par l'identifiant, 29 par le nom), la soudure à 2 km — le
-  tracé suit le voisin entre deux soudures (sa décision) ; **pas de découpe ni de creusement** (*« quand tu colles, tu
-  colles »*). Branché sur ‹⌘V› et Édition — **essayé par lui : la Livonie a marché**.
+  tracé suit le voisin entre deux soudures (sa décision) ; **pas de découpe ni de creusement** (_« quand tu colles, tu
+  colles »_). Branché sur ‹⌘V› et Édition — **essayé par lui : la Livonie a marché**.
 - **Le tronçon** : un tracé entier copié comme un tronçon fermé, collé comme un contour de plus ; une partie fondue dans le
   tracé comme ⟨retracer⟩. Branché et fusionné **sans essai**, à sa demande. « Coller le tracé » retiré du menu. La sélection
-  de plusieurs pays, remise à plus tard (*« un par un, c'est déjà pas mal »*). Son idée de fin : CARTO-360, une recherche
+  de plusieurs pays, remise à plus tard (_« un par un, c'est déjà pas mal »_). Son idée de fin : CARTO-360, une recherche
   dans {Polities} et {Cities}.
-- **Mes fautes** : un collage resté dans `core` sans rien à essayer, une heure durant (*« y'a toujours pas d'UI »*,
-  *« ça avance pas »*) — l'ordre « tout dans `core` d'abord » était le sien, mais je n'ai pas dit à temps que rien ne
+- **Mes fautes** : un collage resté dans `core` sans rien à essayer, une heure durant (_« y'a toujours pas d'UI »_,
+  _« ça avance pas »_) — l'ordre « tout dans `core` d'abord » était le sien, mais je n'ai pas dit à temps que rien ne
   serait essayable avant longtemps ; « tout l'écran » qui l'a perdu ; une décision du 03/11 qu'il ne se rappelait pas
-  (*« tu me prêtes des décisions »*), dite comme si elle allait de soi.
+  (_« tu me prêtes des décisions »_), dite comme si elle allait de soi.
 
 ### 2026-11-05 — les trois collages tranchés, la frise d'après Peters, la v2 de Claude Design
 
@@ -120,16 +120,16 @@ Plage **05/11 12:48 → 14:20** (1 h 32) ; le chantier ouvert le 05/10 totalise 
 des décisions, écrites dans les plans, et le commit de clôture, **non poussé**.
 
 - **CARTO-345, ses décisions** (plan `copy-paste-between-maps.md`, scénarios `s22` réécrits) : un nom déjà dans la carte
-  est refusé par une boîte de dialogue ; **pas de remplacement de tracé** — on supprime, on colle (*« restons simple dans
-  la mécanique : on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »*) ; une partie de tracé se fond
-  dans le tracé (*« il faut un merge, une fusion »*), un tracé entier se superpose à l'ancien ; on colle des points, pas
+  est refusé par une boîte de dialogue ; **pas de remplacement de tracé** — on supprime, on colle (_« restons simple dans
+  la mécanique : on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »_) ; une partie de tracé se fond
+  dans le tracé (_« il faut un merge, une fusion »_), un tracé entier se superpose à l'ancien ; on colle des points, pas
   leur rôle. **Tous les collages dans `core` avant l'interface** (son ordre).
-- **ATLAS-358, la frise** : son scan reconnu — Arno Peters, *Synchronoptische Weltgeschichte* ; **cinq couches**, un nom et
-  des dates, jamais de texte, les mêmes événements que la carte (*« c'est ce que j'attendais »*). Le texte pour Claude
+- **ATLAS-358, la frise** : son scan reconnu — Arno Peters, _Synchronoptische Weltgeschichte_ ; **cinq couches**, un nom et
+  des dates, jamais de texte, les mêmes événements que la carte (_« c'est ce que j'attendais »_). Le texte pour Claude
   Design donné ; la v2 rangée dans `files/resources/claude-design/` (sa décision), la v1 à la corbeille. Ses prompts du
   logo par époque notés dans `ornament-by-era.md` ; les ornements, il les dessine.
-- **Mes fautes** : « tronçon » et « bouts » l'ont perdu deux fois (*« je ne sais pas ce qu'est un morceau de
-  frontière »*) — l'exemple de sa Pologne a fait comprendre ; j'avais gardé mon idée du 03/11, le tronçon qui remplace,
+- **Mes fautes** : « tronçon » et « bouts » l'ont perdu deux fois (_« je ne sais pas ce qu'est un morceau de
+  frontière »_) — l'exemple de sa Pologne a fait comprendre ; j'avais gardé mon idée du 03/11, le tronçon qui remplace,
   contre sa règle du jour.
 
 ### 2026-11-04 soir → 05/11 nuit — la barre de menus fusionnée, Playwright en épopée, l'interface de l'atlas par Claude Design
@@ -138,18 +138,18 @@ Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chan
 35 plages**. **Sur `main`**, la fusion `cc242a0` (`carto-345`, étapes 1 et 2 du copier-coller) et le commit de clôture,
 **non poussés**.
 
-- **CMS-335 fait** (*« validé et testé, l'information est affichée dans le Cartographe »*). **CARTO-345** : la branche
+- **CMS-335 fait** (_« validé et testé, l'information est affichée dans le Cartographe »_). **CARTO-345** : la branche
   fusionnée à sa demande, contrôles verts (6 142 tests) ; son essai : copier sans coller ne lui donne rien à faire —
-  *« si on ne peut pas coller, c'est pas fini »* ; l'ordre inversé, le pays entier d'abord.
+  _« si on ne peut pas coller, c'est pas fini »_ ; l'ordre inversé, le pays entier d'abord.
 - **Playwright** (sa demande) : l'épopée REPO-346, l'installation REPO-347 et dix lots en Backlog, le plan
   `files/plans/e2e/playwright.md` ; le piège trouvé : le dossier des cartes en dur, un test écrirait sa 1100.
 - **L'interface de l'atlas** : la recherche des ornements par époque (`ornament-by-era.md`, par un agent) ; la maquette
   d'ambiance de Claude Design, bureau puis tablette et téléphone, mes retours écran par écran ; ses décisions —
   l'atlas jusqu'à 1900, un habillage par époque, la frise synchronoptique (ATLAS-358), le nom des mers (ATLAS-359).
-  Ses mots : *« j'ai hâte de voir ça sur un grand écran. Très hâte. »*
+  Ses mots : _« j'ai hâte de voir ça sur un grand écran. Très hâte. »_
 - **Mes fautes** : lui donner à essayer une étape qui ne finissait aucun geste (copier sans coller), puis expliquer au
-  lieu d'écouter — *« tu me fais chier, en fait »* (mémoire `ship-a-whole-gesture`) ; une première réponse sur la
-  rosace hors de son propos (*« des éléments décoratifs, tu comprends ça ? »*) ; juger le contenu inventé d'une maquette
+  lieu d'écouter — _« tu me fais chier, en fait »_ (mémoire `ship-a-whole-gesture`) ; une première réponse sur la
+  rosace hors de son propos (_« des éléments décoratifs, tu comprends ça ? »_) ; juger le contenu inventé d'une maquette
   d'ambiance.
 
 ### 2026-11-03 — la clé du CMS, le copier-coller entre cartes (étapes 1 et 2), l'interface de l'atlas pour Claude Design
@@ -159,18 +159,18 @@ commits **non poussés** (`49a623d` → le commit de clôture) ; **sur la branch
 cinq commits, **non fusionnés** : le dev les essaie d'abord.
 
 - **Le CMS par le MCP** : la clé créée et branchée (`claude mcp add`, la clé dans `.env.local`) ; la skill `/enter-in-cms` porte
-  toute la méthode de l'historien (sa demande : *« la première fois ça va ; si ce n'est pas englobé dans une skill, vous
-  finissez par oublier »*) ; la clé lit aussi les raisons d'importance (`49a623d`). Le serveur s'est figé sur un index déjà
+  toute la méthode de l'historien (sa demande : _« la première fois ça va ; si ce n'est pas englobé dans une skill, vous
+  finissez par oublier »_) ; la clé lit aussi les raisons d'importance (`49a623d`). Le serveur s'est figé sur un index déjà
   créé : mesuré sur une copie de la base, rien à réécrire, relancé ; README du CMS et tableau des pannes (`534871e`).
-- **CARTO-345, le copier-coller** : le plan, ses décisions une à une (collage en place, sans aperçu — *« tu colles, c'est
-  tout ; si problème, ctrl+Z »* —, la carte d'arrivée garde son terrain, les dates ignorées, soudure à 2 km, plusieurs
+- **CARTO-345, le copier-coller** : le plan, ses décisions une à une (collage en place, sans aperçu — _« tu colles, c'est
+  tout ; si problème, ctrl+Z »_ —, la carte d'arrivée garde son terrain, les dates ignorées, soudure à 2 km, plusieurs
   entités dans `{Polities}` jamais éditées ensemble), la barre de menus (CARTO-239) et le convertisseur de raccourcis
   (`390e543`). Construit : le presse-papier et ‹cmd+C› (`d231fdb`), une table de touches pour tout (`bea262b`), la barre
   Fichier / Édition (`3e1eadc`), essayée par moi dans mon propre Cartographe (`2714cb0`). Trois revues, tous les constats
   traités ou laissés ouverts par décision dite.
 - **L'interface de l'atlas pour Claude Design** (ATLAS-329) : la consigne et ses six lots d'images, le ton (camaïeu, boutons
   bruns, ornement, légers dégradés), la recherche sur l'ornement du XVIIᵉ siècle (`files/plans/atlas/ornament-17th-century.md`).
-  Ses mots : il tombe dans *« le design XVIIᵉ, Versailles, Louis XIV »* qu'il voulait éviter — d'où son idée de designs par époque.
+  Ses mots : il tombe dans _« le design XVIIᵉ, Versailles, Louis XIV »_ qu'il voulait éviter — d'où son idée de designs par époque.
 - **Mes fautes** : un `cd` (deux fois) ; une étape du ticket cochée par erreur, décochée (verbe `uncheck` ajouté) ; le texte à
   coller donné en citation, ses barres partant avec la copie ; une cause du blocage du CMS affirmée avant d'être mesurée,
   corrigée ; deux messages de commit trop longs.
@@ -185,11 +185,11 @@ La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l’après-mid
   une année n'affiche que ses événements (`c4b0352`, `ee03156`, `eb15874`, ATLAS-333).
 - **Le Cartographe** (`a316444`) : le panneau Villes et son verdict par identifiant Wikidata (CARTO-193) ; la carte
   enregistrée d'elle-même, en plus de la copie `.autosave` ; les panneaux déplaçables, aimantés, redimensionnables
-  (CARTO-342 — *« ça marche très bien »*), le chrome non sélectionnable.
+  (CARTO-342 — _« ça marche très bien »_), le chrome non sélectionnable.
 - **La mesure** : à 25 471 points, passer à 1100 prenait 5,5 s — la tribu Kimek-Kipchak seule, 5,1 s, mesurant tous ses
   voisins. **La bande intérieure** (son idée, le décalage d'Illustrator, puis irrégulière) la ramène à 0,34 s
-  (`116415d`, ATLAS-344). Ses mots : *« c'est super beau »*, *« on a créé un langage cartographique, la notion
-  d'incertitude, elle est bien représentée »*.
+  (`116415d`, ATLAS-344). Ses mots : _« c'est super beau »_, _« on a créé un langage cartographique, la notion
+  d'incertitude, elle est bien représentée »_.
 - **Deux revues** : la première, lancée sur cinquante fichiers, n'a rien lu ; refaite par lots, elle a trouvé un vrai
   défaut (les événements d'une année ratée revenaient sur l'ancienne carte), corrigé.
 - **Mes fautes** : un `cd` ; le dossier `Editor/utils` supprimé avec mon fichier, restauré de git ; une commande refusée
@@ -202,18 +202,18 @@ Plage **02/11 15:03 → 19:44** (4 h 40) ; le chantier ouvert le 05/10 totalise 
 poussés**, de `9359e29` à `55d7a23`. Deux instances : moi le code, l'historien sur `files/plans/sources/`.
 
 - **La vitesse** (ATLAS-333, étape 1, `9359e29`) : mesuré qu'un changement d'année recuisait le terrain nu et calculait une
-  grille inutile (~6 s) ; sauté pour une année du Cartographe. Ses mots : *« ça charge plus vite »*. L'étape 2 (le cache des
+  grille inutile (~6 s) ; sauté pour une année du Cartographe. Ses mots : _« ça charge plus vite »_. L'étape 2 (le cache des
   noms) est écrite, **non commitée**. Le plan : `files/plans/atlas/year-switch-speed.md`.
 - **Le Cartographe, à sa demande pendant qu'il redessine les côtes** : ‹Q› / ‹W› doublent ‹P› / ‹R› ; le zoom monte à 128 ;
-  Cliopatria réexporté **avec ses propres côtes** (5 489 points au lieu de 57 229 : *« on ne peut pas corriger des tracés avec
-  50 000 points, c'est injouable »*).
+  Cliopatria réexporté **avec ses propres côtes** (5 489 points au lieu de 57 229 : _« on ne peut pas corriger des tracés avec
+  50 000 points, c'est injouable »_).
 - **Une carte est un dossier** (CARTO-340, `5b823d5`, scénario `s19`) : « Ouvrir… » liste les dossiers dans un cadre
   sélectionnable avec icônes, sa question avant d'ouvrir, la vue gardée ; « Enregistrer sous… », « Enregistrer une copie » ;
   l'enregistrement automatique `<carte>.autosave.<date>` dans `years/`, gardé ; instantanés et brouillon retirés. Revue : une
-  haute corrigée (« Ouvrir… » n'aurait rien listé). Ses mots : *« voilà, ça c'est bien »*.
+  haute corrigée (« Ouvrir… » n'aurait rien listé). Ses mots : _« voilà, ça c'est bien »_.
 - **Mes fautes** : le plan des deux instances pointait un fichier inexistant ; les côtes de Natural Earth imposées la nuit
   d'avant, injouables à retoucher ; un commit qui a emporté d'autres fichiers (défait aussitôt, rien poussé) ; ma question
-  noyée sous les rapports — *« QUEL RÉPONSE »*.
+  noyée sous les rapports — _« QUEL RÉPONSE »_.
 
 ### 2026-11-01 soir → 02/11 matin — l'audit, les concurrents, Cliopatria, « Open… », deux instances pour demain
 
@@ -222,13 +222,13 @@ poussés**, de `6580917` à `40baea1` ; `years/` (Cliopatria 1100 et 1200) volon
 
 - **L'audit des instructions** (`/doctor prompt-audit`) appliqué retour par retour ; `/repo-version-manager` créé ; `/opensrc` écrit pour
   la vraie commande de la 0.6 (sans `path`).
-- **Les concurrents** (YearMaps, Borders of Time, HistorIQly…) : il a failli arrêter — *« ce n'est pas une démo, ce sera publié, j'ai
-  dépensé de l'argent »*. Ce qui l'a retenu : sur Cliopatria importé, **la pose des villes et des noms marche**. Sa décision : la
+- **Les concurrents** (YearMaps, Borders of Time, HistorIQly…) : il a failli arrêter — _« ce n'est pas une démo, ce sera publié, j'ai
+  dépensé de l'argent »_. Ce qui l'a retenu : sur Cliopatria importé, **la pose des villes et des noms marche**. Sa décision : la
   vitesse et de vraies cartes d'abord (ATLAS-333, CARTO-334, CMS-335, CARTO-193, CARTO-336, CORE-337), l'interface en pause (s11 → s15).
-- **Cliopatria** (CC BY 4.0) importé : sa règle *« le plus récent l'emporte »*, trouvée sur YearMaps, a supprimé tout chevauchement ;
+- **Cliopatria** (CC BY 4.0) importé : sa règle _« le plus récent l'emporte »_, trouvée sur YearMaps, a supprimé tout chevauchement ;
   côtes de Natural Earth ; 1100 et 1200 sur le disque pour son nettoyage, sa 1100 d'avant archivée.
 - **« Open… »** construit, revu (une haute corrigée), commité ; **les domaines** achetés et branchés, la page d'attente en ligne ; le
-  gestionnaire de sources écrit (CMS-332), *« tout tel qu'écrit, c'est toi qui le construis »* ; deux instances pour demain
+  gestionnaire de sources écrit (CMS-332), _« tout tel qu'écrit, c'est toi qui le construis »_ ; deux instances pour demain
   (`files/plans/maps-1100-1200-code-and-historian.md`).
 - **Mes fautes** : **le certificat cassé** en lui faisant retirer un domaine qui marchait, pour un détail ; Mourom-Riazan déclaré
   anachronique sur une seule source ; le budget zéro opposé à un achat qu'il voulait ; Chronas et les concurrents montrés six
@@ -240,13 +240,13 @@ Plage **01/11 01:51 → 03:06**, le prolongement de celle ouverte le 31/10 à 17
 totalise **168 h 23 sur 30 plages**. **Un commit, non poussé** : `5202b43`.
 
 - **ATLAS-324** : `files/plans/atlas/scenarii/`, sur le modèle du Cartographe — l'index, **dix scénarios** (de l'ouverture aux
-  langues), chacun avec son *construit le* (commit, ticket) et son *parcouru* ; **quatorze trous** dans `s99` (A-01 → A-14) ;
+  langues), chacun avec son _construit le_ (commit, ticket) et son _parcouru_ ; **quatorze trous** dans `s99` (A-01 → A-14) ;
   chaque ligne de plan contredite barrée avec une note datée (`03-camera-ux`, `01-foundations`, `focus-mode`, `vassal-lod`,
   `country-names`, `detail-levels`, `cities`…) ; deux termes au glossaire ; la skill `/scenarii-to-code` à jour.
-- **Décidé par lui** : trois tickets de correction — ATLAS-326 (*« si c'est juste un mouseleave et un window blur, on y va »*),
+- **Décidé par lui** : trois tickets de correction — ATLAS-326 (_« si c'est juste un mouseleave et un window blur, on y va »_),
   ATLAS-327 (A-01), ATLAS-328 (A-12) ; **ses citations en anglais** dans les fichiers neufs (mémoire notée) ; la suite,
-  **l'interface au-dessus de la carte décrite en scénarios pour Claude Design**, puis retour au code. Ses mots : *« je pense que tu
-  n'as rien oublié »*.
+  **l'interface au-dessus de la carte décrite en scénarios pour Claude Design**, puis retour au code. Ses mots : _« je pense que tu
+  n'as rien oublié »_.
 - **Ma faute** : les noms des pays écrits « en capitales » d'après un commentaire de `cityLabel.ts`, sans lire la valeur
   (`capitals` est éteint) — recopié dans trois fichiers avant de le voir ; corrigé, et le commentaire noté (A-13).
 
@@ -262,14 +262,14 @@ poussés**, de `8808863` à `6c23c15`, CI verte jusqu'au déploiement.
   défilement à crans, quatre paliers, fondu de 0,6 s, deux seuils (`files/plans/atlas/detail-levels.md`) ; noms selon la distance à
   la caméra ; ATLAS-322 (ordre des couches par palier), **ATLAS-323** (un point de capitale sur un nom de pays cède — testé par lui),
   **ATLAS-325** (noms plus grands, plus gras, nets — testé), passés en Fait. Ses retouches de 1100 commitées.
-- **Décidé par lui** : *« le religieux et la politique, c'est la même chose »* (l'archevêché est une importance politique) ; *« des
-  scroll top »* ; *« c'est le nom du pays qui est le plus important »* — après mon essai de faire contourner les capitales par les
-  noms, retiré avant commit : *« c'est mieux comme ça »*.
+- **Décidé par lui** : _« le religieux et la politique, c'est la même chose »_ (l'archevêché est une importance politique) ; _« des
+  scroll top »_ ; _« c'est le nom du pays qui est le plus important »_ — après mon essai de faire contourner les capitales par les
+  noms, retiré avant commit : _« c'est mieux comme ça »_.
 - **Les scénarios de l'atlas** : l'inventaire fait (`files/plans/atlas/scenarios-inventory.md`), le découpage accepté, ATLAS-324 en
   tête d'À faire — la session suivante reprend là.
 - **Mes fautes** : l'heure de reprise lue par `tail` sans la comparer à la date (19 h annoncées « 6 minutes ») — règle ajoutée à
   `start-session` ; les villes dessinées sans test de profondeur, l'épingle passée derrière ; un changement des noms annoncé sans
-  vérifier qu'il s'était appliqué (*« c'est pas assez grand »* — rien n'avait changé) ; trois `cd`.
+  vérifier qu'il s'était appliqué (_« c'est pas assez grand »_ — rien n'avait changé) ; trois `cd`.
 
 ### 2026-10-30 — l'écran « Ville à une date », une seule règle du formulaire à l'export, l'admin du CMS en sombre
 
@@ -282,17 +282,17 @@ loin de l'écran** — je testais dans Chrome et lui envoyais les captures ; le 
 - **L'écran « Ville à une date »** (ATLAS-295) : notre formulaire à la place de celui de Payload — valide à la saisie, bouton
   grisé, lieu et source cherchés dans la base à chaque frappe, refus d'une fiche en double pendant la saisie, raisons en choix
   multiple (fubaritico-ds 0.9.0, livré par son Claude dans la soirée), lignes de sources ; **une seule règle** dans `core`
-  pour le formulaire, le serveur et l'export. Ses mots : *« Il faut le griser, oui. Évidemment »*.
-- **L'export écrit les villes** dans le fichier de l'atlas, **préparées à l'export** — sa décision : *« les données, elles
-  arrivent préparées, comme en GraphQL »* ; l'atlas ne les dessine pas encore.
+  pour le formulaire, le serveur et l'export. Ses mots : _« Il faut le griser, oui. Évidemment »_.
+- **L'export écrit les villes** dans le fichier de l'atlas, **préparées à l'export** — sa décision : _« les données, elles
+  arrivent préparées, comme en GraphQL »_ ; l'atlas ne les dessine pas encore.
 - **Décidé par lui** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire n'a pas de capitale, aucune
-  symbolique (*« Charlemagne, il est mort depuis 300 ans »*) ; une chapelle d'Aix en 3D un jour (ATLAS-321, Idées).
+  symbolique (_« Charlemagne, il est mort depuis 300 ans »_) ; une chapelle d'Aix en 3D un jour (ATLAS-321, Idées).
 - **Un compte de test** `claude-test@localhost.test` dans sa base, avec son accord, pour tester à sa place.
-- **Mes fautes** : un numéro à la place d'une chose (« décision 8 », « v5 ») — *« je te l'interdis »*, règle notée ; l'export
+- **Mes fautes** : un numéro à la place d'une chose (« décision 8 », « v5 ») — _« je te l'interdis »_, règle notée ; l'export
   annoncé court alors qu'il n'exportait aucune ville ; « aucune jointure » quand l'export en est une ; mon choix de
   recopier les enregistrements (25/10) écrit comme une décision ; un commentaire disant qu'un crochet passe après les règles
-  des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — *« toute cette branlette
-  intellectuelle »*.
+  des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — _« toute cette branlette
+  intellectuelle »_.
 
 ### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
 
@@ -301,20 +301,20 @@ Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈
 
 - **Le tableau** : ATLAS-301, 145 et 302 passés en Fait avec leur commentaire de clôture ; ATLAS-304 renvoyé dans À faire
   (R3, dessiner au besoin) ; l'étape 5 des noms devient ATLAS-319 ; le CMS bilingue devient CMS-320.
-- **Les villes (ATLAS-295, en cours)** — à sa demande, les icônes suivantes attendent : *« on a beaucoup imité une
-  présentation de jeux vidéo […] il faut retrouver des règles cartographiques »*. Huit décisions dans
+- **Les villes (ATLAS-295, en cours)** — à sa demande, les icônes suivantes attendent : _« on a beaucoup imité une
+  présentation de jeux vidéo […] il faut retrouver des règles cartographiques »_. Huit décisions dans
   `files/plans/atlas/cities.md` : le point et le nom ensemble, par importance ; le filigrane des pays au dernier ordre de
-  villes ; l'importance datée et **jamais tirée de la population** (*« une ville peut être peu peuplée et être très
-  importante »*) ; deux formulaires, le lieu et la ville à une date ; une date ou une durée ; aucune fiche ne chevauche une
+  villes ; l'importance datée et **jamais tirée de la population** (_« une ville peut être peu peuplée et être très
+  importante »_) ; deux formulaires, le lieu et la ville à une date ; une date ou une durée ; aucune fiche ne chevauche une
   autre du même lieu, **validée à la saisie** ; l'écran fait de Formik + Zod + son design system.
 - **Les sources** : Bosker 2013, Buringh 2021, Chandler par Reba 2016, en amalgame, une colonne par source
   (`files/spikes/city-sources/`) ; une première liste des villes de 1100 (`cities-1100.md`).
 - **Le CMS** : « Villes à une date » et « Raisons d'importance » ; le refus de chevauchement en une phrase, fr/en ; un texte
-  sous chaque champ. Testé par lui : *« c'est vérifié »*.
-- **Mes fautes** : le formulaire livré sans aucun texte (*« on comprend rien à ta merde ! Y'a pas de texte, y'a rien ! »*) ;
+  sous chaque champ. Testé par lui : _« c'est vérifié »_.
+- **Mes fautes** : le formulaire livré sans aucun texte (_« on comprend rien à ta merde ! Y'a pas de texte, y'a rien ! »_) ;
   le message anglais de Payload laissé tel quel ; un test demandé sans les valeurs à saisir ; une phrase de réponse
-  incompréhensible (*« le pourquoi est au clic… »*) ; une durée proposée puis retirée puis remise — il le sentait : *« un
-  trou dans la raquette »*.
+  incompréhensible (_« le pourquoi est au clic… »_) ; une durée proposée puis retirée puis remise — il le sentait : _« un
+  trou dans la raquette »_.
 
 ### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
 
@@ -324,7 +324,7 @@ plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé av
 - **Les noms** : la construction unique (ATLAS-301), puis ATLAS-308 (sous les icônes 3D), 309 (Venise), 310 (les pays sans
   place, dits en console) ; le nom court saisi dans le Cartographe (CARTO-307) ; un nom coupé qui se décale sur la terre
   libre (ATLAS-314) ; l'étiquette déportée sur la mer, ou sur un voisin avec sa ligne de points (ATLAS-315) ; les tribus en
-  blanc sur liseré brun, gardé très fin de près (*« là c'est parfait »*) ; la case « Toujours le nom court » (CARTO-318).
+  blanc sur liseré brun, gardé très fin de près (_« là c'est parfait »_) ; la case « Toujours le nom court » (CARTO-318).
 - **Le reste** : le flou derrière un contrat (ATLAS-304/305) ; le halo des épingles (ATLAS-306) ; aucune frontière le long du
   bord (CORE-313) ; ‹Entrée› ouvre la fiche (CARTO-312) ; le relief d'abord puis tout en fondu (ATLAS-316) ; le panneau et le
   compteur sous `pnpm dev` seulement (ATLAS-317) ; le relief à 0,2 de près, son réglage ; le commentaire de clôture d'un
@@ -333,11 +333,11 @@ plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé av
   sa demande : les 21 corrections sûres (`a9e3c0d` — le CMS entre dans les contrôles de sécurité, `/review` relit le travail
   non commité, cinq paquets) et les 31 probables (`cdbf930` — le ton, l'historique, les contradictions) ; `reliefWorldY`
   inscrit (`5c36f35`).
-- **Mes fautes** : sa demande sur le démarrage mal lue (*« c'est épuisant de devoir répéter »*) ; trois `cd` ; un remède
-  faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; *« c'est
-  exactement ce que je veux »* pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
+- **Mes fautes** : sa demande sur le démarrage mal lue (_« c'est épuisant de devoir répéter »_) ; trois `cd` ; un remède
+  faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; _« c'est
+  exactement ce que je veux »_ pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
   la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande. Puis une question posée sans arbitrage derrière
-  (*« Mais quelle décision ! »*), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
+  (_« Mais quelle décision ! »_), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
 
 ### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
 
@@ -350,12 +350,12 @@ et script Trello à commiter. Sur Fable, effort maximal.
   rafraîchissement (8 ms de GPU au repos — la chauffe), les ombres des icônes sur le CPU (10–14 ms, 13 fois/s, hors champ
   comprises), la géométrie entière à chaque image (≈ 5,5 ms fixes), 2,2 s de fil principal bloqué au démarrage. Tout dans
   `files/plans/atlas/performance.md` (mesures, hypothèses marquées, remèdes non décidés, la recette de la sonde) et, en
-  français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — *« un ticket de fixe
-  […] en résonance avec ton MD »*.
+  français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — _« un ticket de fixe
+  […] en résonance avec ton MD »_.
 - **Le script Trello** envoie description et commentaires dans le corps de la requête (9 ko dans l'URL : 414 de CloudFront) ;
   un verbe `attachments` lit et enregistre les captures d'un ticket ; « rendu à la demande » entre au glossaire.
-- **Les noms des pays (ATLAS-301), à 4 h, à sa demande** — *« Opus tournait en rond, chaque retouche avec des effets de
-  bord »* : les deux captures du ticket, l'atlas et l'algorithme lus côte à côte ; cinq écarts de construction (longueur
+- **Les noms des pays (ATLAS-301), à 4 h, à sa demande** — _« Opus tournait en rond, chaque retouche avec des effets de
+  bord »_ : les deux captures du ticket, l'atlas et l'algorithme lus côte à côte ; cinq écarts de construction (longueur
   enchaînée à la taille, l'espace = la terre et non l'enveloppe, la comparaison à sept poids, deux lignes, courbure et pente
   pénalisées) et six axes, dans le plan des noms et en commentaire sur le ticket. Rien de codé.
 - **Mes fautes** : deux sondes empilées dans un onglet (leurs chronomètres GPU se brisent, résultats nuls) ;
@@ -370,18 +370,18 @@ sur 25 plages**. **Poussé** : `ff2cc69`, `6a6cc21`, `f158f73` (noms, étapes 1 
 à ATLAS-301, ATLAS-145 et ATLAS-302.
 
 - **Les noms** (ATLAS-301) : Fondamento, multiply 75 % ; un nom par morceau, le complet s'il tient, sinon le court —
-  *« Kingdom of France → K. of France »* ; placement ~30 s → ~5 s ; débordement sur la mer et un peu sur les voisins, jamais
-  sur un autre nom ; *« je veux des noms, qu'on lit, qu'on comprend »* (aucune abréviation) ; *« dès que les vassaux ils
-  apparaissent, tout apparaît »* (aucune apparition progressive). Leçon pour la contribution : un nom d'usage court dès la
+  _« Kingdom of France → K. of France »_ ; placement ~30 s → ~5 s ; débordement sur la mer et un peu sur les voisins, jamais
+  sur un autre nom ; _« je veux des noms, qu'on lit, qu'on comprend »_ (aucune abréviation) ; _« dès que les vassaux ils
+  apparaissent, tout apparaît »_ (aucune apparition progressive). Leçon pour la contribution : un nom d'usage court dès la
   saisie, comme Crusader Kings.
 - **La séance des frontières** (ATLAS-145) : parchemin fin de loin ; brun + filet clair de près ; la frontière non revendiquée
   en brun fin, parchemin côté non revendiqué, parchemin à 50 % au-delà ; vassaux en pointillés blancs.
 - **Le flou** (ATLAS-302) : un flou d'image sur les frontières, l'encre des noms et les icônes 3D, chacun son réglage, ombres
-  nettes (*« le marron, le blanc et le marron, ils se fondent un petit peu […] sans être plus épais »*) ; le filigrane des
+  nettes (_« le marron, le blanc et le marron, ils se fondent un petit peu […] sans être plus épais »_) ; le filigrane des
   noms à 40 % au zoom maximal, pour les villes.
-- **Mes fautes** : l'empilement de règles qui l'a perdu (abréviations « DAN », vagues, seuil de lisibilité) — *« j'ai
-  l'impression qu'on ne peut pas y arriver »* ; deux chiffres devinés dans des tests ; un `cd` ; une demande répétée après
-  un refus prise pour une nouvelle (*« pas again »*) ; un dégradé posé dans chaque trait alors qu'il voulait un flou d'image.
+- **Mes fautes** : l'empilement de règles qui l'a perdu (abréviations « DAN », vagues, seuil de lisibilité) — _« j'ai
+  l'impression qu'on ne peut pas y arriver »_ ; deux chiffres devinés dans des tests ; un `cd` ; une demande répétée après
+  un refus prise pour une nouvelle (_« pas again »_) ; un dégradé posé dans chaque trait alors qu'il voulait un flou d'image.
 
 ### 2026-10-27 (nuit) — l'épingle, ses couleurs par type, les ombres portées
 
@@ -390,16 +390,16 @@ court de **22:01 à 23:26**. Le chantier ouvert le 05/10 totalise **131 h 08 sur
 le plan des noms et le glossaire commités à la fermeture.
 
 - **ATLAS-298 → Fait** : l'épingle éclairée (« B », la troisième sur quatre), deux fois plus petite, sans spéculaire
-  (*« plus de contraste sans qu'il y ait un spéculaire »*), des couleurs vives ; **une couleur par type d'événement**
+  (_« plus de contraste sans qu'il y ait un spéculaire »_), des couleurs vives ; **une couleur par type d'événement**
   choisie dans le CMS (format v4 ; seed et export passés sur sa base après une copie) ; l'image plate « A » de loin
-  (*« j'aime bien la version penchée, mais on va faire la A »*) ; des ombres du nord-ouest à 20 % pour les épingles, le
-  trébuchet et les épées (*« même type d'ombre, même force »*), d'un seul bloc et floues. *« On a réussi notre test de
-  rendu »* ; les icônes manquantes viendront au fil de l'eau.
+  (_« j'aime bien la version penchée, mais on va faire la A »_) ; des ombres du nord-ouest à 20 % pour les épingles, le
+  trébuchet et les épées (_« même type d'ombre, même force »_), d'un seul bloc et floues. _« On a réussi notre test de
+  rendu »_ ; les icônes manquantes viendront au fil de l'eau.
 - **ATLAS-301** créé, en tête d'À faire : le nom de chaque pays dans l'espace qu'il occupe — plan
   `files/plans/atlas/country-names.md`, à démarrer le 28/10.
-- **Mes fautes** : la tige épaissie sans qu'il le demande (*« non non non… »*) ; l'ombre projetée livrée en plusieurs
-  morceaux nets avant l'ombre rastérisée ; la couleur par type proposée puis oubliée — *« je ne vois que des épingles
-  rouges »*.
+- **Mes fautes** : la tige épaissie sans qu'il le demande (_« non non non… »_) ; l'ombre projetée livrée en plusieurs
+  morceaux nets avant l'ombre rastérisée ; la couleur par type proposée puis oubliée — _« je ne vois que des épingles
+  rouges »_.
 
 ### 2026-10-27 (soir) — le siège devient un trébuchet animé
 
@@ -407,15 +407,15 @@ Même plage au journal que les deux entrées du 27/10 — **11:06 → 21:54**, c
 court de **19:59 à 21:54**. Le chantier ouvert le 05/10 totalise **129 h 36 sur 24 plages**. **Tout poussé** :
 `072efa5..2eebda1`, six commits.
 
-- **ATLAS-286 → Fait**, renommé *« une pièce d'artillerie, selon l'époque »* : plus de tour au siège. Pour 1100, le
-  trébuchet à traction — en 3D, il charge, lance, la pierre part presque droit et s'efface (*« le mouvement du trébuchet
-  est bon »*, *« très très bien »*), fixe en trois quarts face à gauche, deux fois la taille de la tour ; de loin, une
+- **ATLAS-286 → Fait**, renommé _« une pièce d'artillerie, selon l'époque »_ : plus de tour au siège. Pour 1100, le
+  trébuchet à traction — en 3D, il charge, lance, la pierre part presque droit et s'efface (_« le mouvement du trébuchet
+  est bon »_, _« très très bien »_), fixe en trois quarts face à gauche, deux fois la taille de la tour ; de loin, une
   silhouette de profil juste après le lâcher (« C2 », bâti C, les triangles de la charpente ouverts). La tour en réserve,
   3D et à plat. Le liseré des images plates suit la largeur du dessin. **ATLAS-299** (Backlog) : l'engin selon l'époque.
 - La skill `/tune-icon` → **`/make-event-icon`** ; sa règle nouvelle, le **cadre 44 × 44** pour toute image plate.
-- **Mes fautes** : le premier trébuchet livré sans passer par le banc (*« pourquoi tu ne fais pas comme on a l'habitude
-  de faire »*) — et à l'envers de ses photos ; le glossaire rempli de ce qui n'y va pas (*« ça se transforme en
-  dictionnaire »*) ; le liseré deux fois plus fin sur le trébuchet, vu par lui (*« est-ce que tu es sûr »*).
+- **Mes fautes** : le premier trébuchet livré sans passer par le banc (_« pourquoi tu ne fais pas comme on a l'habitude
+  de faire »_) — et à l'envers de ses photos ; le glossaire rempli de ce qui n'y va pas (_« ça se transforme en
+  dictionnaire »_) ; le liseré deux fois plus fin sur le trébuchet, vu par lui (_« est-ce que tu es sûr »_).
 
 ### 2026-10-27 (fin d'après-midi) — les icônes devant le relief, les engins de siège dans la contribution
 
@@ -423,17 +423,17 @@ Même plage au journal que l'entrée suivante : **27/10 11:06 → 18:37 (7 h 31)
 05/10 totalise **126 h 19 sur 24 plages**. **2 commits poussés** (`0b9ca67`, `072efa5`), CI verte jusqu'à Sonar ; le reste
 **dans l'arbre, non commité**.
 
-- **ATLAS-296** → Fait : épées, halo **et images plates** devant le relief (*« ça doit être pareil pour les sprites »*). La
-  côte abaissée (`shoreLift` 0,002, *« un peu trop hauts »*).
-- **ATLAS-297** (un calque par type d'icône, *« on sépare »*) écrit, validé, en Backlog ; **ATLAS-298** sa nouvelle idée —
-  une épingle de couleur dédiée et une légende, *« ce qu'il y a de mieux »* — en Idées.
-- **ATLAS-286, les engins de siège** : le siège = une tour **et** son artillerie selon l'époque ; *« il faut que ce soit
-  présent dans la contribution et que tu cites »*. Plan `files/plans/contribution/siege-engines.md` ; ses choix : le plus
+- **ATLAS-296** → Fait : épées, halo **et images plates** devant le relief (_« ça doit être pareil pour les sprites »_). La
+  côte abaissée (`shoreLift` 0,002, _« un peu trop hauts »_).
+- **ATLAS-297** (un calque par type d'icône, _« on sépare »_) écrit, validé, en Backlog ; **ATLAS-298** sa nouvelle idée —
+  une épingle de couleur dédiée et une légende, _« ce qu'il y a de mieux »_ — en Idées.
+- **ATLAS-286, les engins de siège** : le siège = une tour **et** son artillerie selon l'époque ; _« il faut que ce soit
+  présent dans la contribution et que tu cites »_. Plan `files/plans/contribution/siege-engines.md` ; ses choix : le plus
   récent en usage, la tour seule hors période, des dates **prudentes**. Étapes 1–4 codées (format v3, collection, export,
   seed passé sur sa base après sauvegarde). La tour 3D au sol, immobile, ronde, **taille validée**.
-- **Mes fautes** : l'anglais, plusieurs fois (*« t'oublies systématiquement la langue »*) ; des backticks dans un `perl -e`
+- **Mes fautes** : l'anglais, plusieurs fois (_« t'oublies systématiquement la langue »_) ; des backticks dans un `perl -e`
   qui ont **lancé le seed sur sa base** — intacte, vérifiée en lecture puis sur une copie ; une planche de lisibilité faite
-  hors du banc, la méthode des épées oubliée → la skill `/tune-icon`. *« Tu réagis comme si tu avais la tête à l'envers »*.
+  hors du banc, la méthode des épées oubliée → la skill `/tune-icon`. _« Tu réagis comme si tu avais la tête à l'envers »_.
 
 ### 2026-10-27 — l'atlas rangé, les icônes instanciées
 
@@ -441,14 +441,14 @@ Une plage au journal, l'après-midi du 27/10, jusqu'à 15 h 55. Commits jusqu'à
 l'arbre, non commité.
 
 - **ATLAS-291** : l'atlas rangé par le sens comme le Cartographe (`app/`, `loading/`, `sources/`, `tunables/`, `devPanel/`,
-  `scene/` par familles, les modèles 3D dans `meshes/`), des commentaires dans le corps des fonctions — *« Moi, tout ce que je
-  veux, c'est que le code soit organisé »*. Plan : `files/plans/atlas/src-layout.md`. **ATLAS-293** : les points laissés
+  `scene/` par familles, les modèles 3D dans `meshes/`), des commentaires dans le corps des fonctions — _« Moi, tout ce que je
+  veux, c'est que le code soit organisé »_. Plan : `files/plans/atlas/src-layout.md`. **ATLAS-293** : les points laissés
   ouverts par les revues. **REPO-294** : Dependabot à zéro.
 - **ATLAS-289** : une géométrie et une matière par type d'icône, puis les halos et les images plates en instances
-  (*« pour que vraiment on ait terminé le sujet »*). Il a mesuré : 1 000 / 10 000 icônes à 16,7 ms, 100 000 vers 200 ms.
+  (_« pour que vraiment on ait terminé le sujet »_). Il a mesuré : 1 000 / 10 000 icônes à 16,7 ms, 100 000 vers 200 ms.
 - **ATLAS-296** ouvert à sa demande (les épées qui se fondent dans le relief) : codé, gate verte, review et test à faire.
-- **Mes fautes** : des récapitulatifs qui renvoyaient à « point N » et à des mots privés (« poignée », « feuille ») — *« plus
-  jamais ce genre de récap bidon »* ; une tartine pour expliquer les draw calls ; deux fois du contenu absurde écrit dans un
+- **Mes fautes** : des récapitulatifs qui renvoyaient à « point N » et à des mots privés (« poignée », « feuille ») — _« plus
+  jamais ce genre de récap bidon »_ ; une tartine pour expliquer les draw calls ; deux fois du contenu absurde écrit dans un
   test ; un `rm -rf` glissé dans une commande, refusé ; le contexte épuisé avant la review.
 
 ### 2026-10-26 — le premier événement qui se voit : l'icône bataille
@@ -456,17 +456,17 @@ l'arbre, non commité.
 Une plage au journal : **26/10 20:33 → 23:45 (3 h 12)** ; le chantier ouvert le 05/10 totalise **118 h 46 sur 23 plages**.
 **4 commits** `8a3ad38`..`dd39fd0`, **tous poussés** (avec les 6 du 25/10).
 
-- **Le tableau** : CMS-219, 220 (sa question : *qu'est-ce qu'un lieu*), 221 (*« à la louche »*, à réitérer), 224 et CORE-252
+- **Le tableau** : CMS-219, 220 (sa question : _qu'est-ce qu'un lieu_), 221 (_« à la louche »_, à réitérer), 224 et CORE-252
   → Fait.
-- *« Je ne sais même plus où j'en suis… je ne sais pas comment les lier »* → tout se lie dans l'événement. *« C'est toi
-  qui vas saisir »* → le seed de 1100 depuis la page Wikipédia, 11 événements, les Q lus aux liens de la page.
-- *« Il faut que je voie quelque chose »* : les épingles (CMS-224) existaient, l'atlas ne tournait pas — le port 5173
+- _« Je ne sais même plus où j'en suis… je ne sais pas comment les lier »_ → tout se lie dans l'événement. _« C'est toi
+  qui vas saisir »_ → le seed de 1100 depuis la page Wikipédia, 11 événements, les Q lus aux liens de la page.
+- _« Il faut que je voie quelque chose »_ : les épingles (CMS-224) existaient, l'atlas ne tournait pas — le port 5173
   servait un autre de ses projets. Sous les frontières → corrigé.
-- **ATLAS-156, l'icône bataille**, réglée à l'œil toute la soirée : épées à 90° *« dans un carré »*, relevées, face à la
-  caméra, balancement, contre-jour qui suit la caméra (*« le même type de problème qu'avec les reliefs »*), halo ; de
-  loin l'image plate « C2 », choisie sur une planche de lisibilité (*« trop de détails »*), en fondu. Validée. *« Une
-  icône à la fois, chacune ses spécificités »* → ATLAS-286..288 ; ATLAS-289 (*« une centaine de choses… c'est
-  prioritaire »*) et CMS-290 en tête d'À faire.
+- **ATLAS-156, l'icône bataille**, réglée à l'œil toute la soirée : épées à 90° _« dans un carré »_, relevées, face à la
+  caméra, balancement, contre-jour qui suit la caméra (_« le même type de problème qu'avec les reliefs »_), halo ; de
+  loin l'image plate « C2 », choisie sur une planche de lisibilité (_« trop de détails »_), en fondu. Validée. _« Une
+  icône à la fois, chacune ses spécificités »_ → ATLAS-286..288 ; ATLAS-289 (_« une centaine de choses… c'est
+  prioritaire »_) et CMS-290 en tête d'À faire.
 - **Mes fautes** : le pommeau réduit sur la 3D quand il parlait du SVG ; des icônes qui copiaient l'orientation de la
   caméra au lieu de se tourner vers elle (balancement décentré) ; un `cd` ; des tests du lecteur restés en version 1,
   vus par la seule gate complète ; deux sabotages ratés sur une ligne coupée par Prettier.
@@ -476,19 +476,19 @@ Une plage au journal : **26/10 20:33 → 23:45 (3 h 12)** ; le chantier ouvert l
 Une plage au journal : **25/10 14:43 → 17:37 (2 h 53)** ; le chantier ouvert le 05/10 totalise **115 h 25 sur 22 plages**.
 **5 commits** `d7aa9d2`..`e4d1015`, **non poussés**.
 
-- **Sa décision** : CORE-252 passe avant CORE-270 — *« il faut pouvoir contribuer »*, *« la véracité de ce qu'on saisit, on
-  verra ça après »*. Ce qui compte, c'est saisir quelque part, puis l'afficher dans l'atlas.
-- **Le CMS** — son nom : *« un système de contribution mutualisée »* ; `CONTRIB` devient `CMS` partout (21 tickets, l'étiquette,
+- **Sa décision** : CORE-252 passe avant CORE-270 — _« il faut pouvoir contribuer »_, _« la véracité de ce qu'on saisit, on
+  verra ça après »_. Ce qui compte, c'est saisir quelque part, puis l'afficher dans l'atlas.
+- **Le CMS** — son nom : _« un système de contribution mutualisée »_ ; `CONTRIB` devient `CMS` partout (21 tickets, l'étiquette,
   les fichiers). Payload, cinq collections, le bouton « Chercher dans Wikidata » sur un lieu (position, existence P571/P576
   avec la précision lue en « vers » et marge), l'export, les épingles dans l'atlas → CMS-219..224, CORE-252 en À valider.
-- **Ses demandes en cours de route** : un lieu existe dans le temps (*« s'il n'y a pas de date de fin, c'est que ça existe
-  encore »*) et a des périodes (CMS-281) ; seeder et voir le schéma ; sauvegarder et réimporter un contenu fourni.
+- **Ses demandes en cours de route** : un lieu existe dans le temps (_« s'il n'y a pas de date de fin, c'est que ça existe
+  encore »_) et a des périodes (CMS-281) ; seeder et voir le schéma ; sauvegarder et réimporter un contenu fourni.
 - **Le chantier CMS-285** : socle, outillage CMS-276..280 (plan `files/plans/contribution/cms-tooling.md`), écrans, atlas, en
   ligne. CMS-222 archivé (dépassé par la saisie par langue du 23/10).
-- **Mes fautes** : *« l'endroit dans la source est facultatif »* écrit dans les plans et attribué à lui (*« j'ai rien dit de
-  ça moi »*, défait) ; un changement de schéma sans migration → la question de Payload a bloqué son serveur, base supprimée
+- **Mes fautes** : _« l'endroit dans la source est facultatif »_ écrit dans les plans et attribué à lui (_« j'ai rien dit de
+  ça moi »_, défait) ; un changement de schéma sans migration → la question de Payload a bloqué son serveur, base supprimée
   avec son accord ; mes relances du serveur pendant qu'il l'utilisait (« Failed to fetch ») ; le générateur de Payload lancé
-  dans la racine du dépôt ; un `rm -rf` glissé dans une commande, refusé. *« Au bout de 10 minutes déjà, tu me fais chier »* —
+  dans la racine du dépôt ; un `rm -rf` glissé dans une commande, refusé. _« Au bout de 10 minutes déjà, tu me fais chier »_ —
   il voulait construire, je théorisais.
 
 ### 2026-10-23 → 24/10 (nuit) — ses décisions en attente, l'audit, REPO-275, les toasts
@@ -499,17 +499,17 @@ ouvert le 05/10 totalise **112 h 24 sur 21 plages**. **12 commits** `9c67b15`..`
 - **Ses décisions** : CARTO-237 → Backlog (le chantier de 1100 est loin d'être fini), CARTO-122 → Fait, CARTO-116 → une
   idée (un gestionnaire automatique des sauvegardes). **CMS-218 tranché** → Fait (Payload 3.x, thème léger, nos
   écrans avec le DS, une saisie par langue, le registre des sources comme le « periodis » d'Euratlas). **CORE-270, les
-  questions 2 à 6 tranchées**. Idées CORE-271 (généalogie) et CARTO-272 (radar, *« appuyée, pas vraie »*).
+  questions 2 à 6 tranchées**. Idées CORE-271 (généalogie) et CARTO-272 (radar, _« appuyée, pas vraie »_).
 - **`/doctor prompt-audit`** appliqué ; OWASP adapté et lu par `/review` à chaque diff.
 - **REPO-275 → Fait** : actions épinglées, CSP, Dependabot, délai de 10 s sur les lectures ; une écriture n'est jamais
-  coupée (*« si on n'a pas la confirmation, c'est qu'il y a un truc qui va pas »*). Après son test de `?slow=save` :
-  *« c'est pas une poubelle la barre de statut »* → toasts et modale d'alarme, le DS en 0.8.0, la pile en bas au centre ;
-  `?slow=save` gardé (*« très utile de garder ces flags »*).
+  coupée (_« si on n'a pas la confirmation, c'est qu'il y a un truc qui va pas »_). Après son test de `?slow=save` :
+  _« c'est pas une poubelle la barre de statut »_ → toasts et modale d'alarme, le DS en 0.8.0, la pile en bas au centre ;
+  `?slow=save` gardé (_« très utile de garder ces flags »_).
 - Les avertissements du chargeur natif de Vite levés (`35e7888`) ; ses saisies Wikidata de 1100 commitées (`5cb4b11`).
-- **Les Khazars** : deux entités (le khaganat, le reste d'après 969), pas de phases — *« on va se passer de ce taux de
-  complexité »* ; une date vague est un `circa` à marge large.
-- **Feature flags** (CARTO-268) : le panorama fait ; OpenFeature comme standard, Flagsmith lui plaît, budget zéro ; *pas
-  encore* — surtout pour l'atlas, décrits d'abord en scénarios.
+- **Les Khazars** : deux entités (le khaganat, le reste d'après 969), pas de phases — _« on va se passer de ce taux de
+  complexité »_ ; une date vague est un `circa` à marge large.
+- **Feature flags** (CARTO-268) : le panorama fait ; OpenFeature comme standard, Flagsmith lui plaît, budget zéro ; _pas
+  encore_ — surtout pour l'atlas, décrits d'abord en scénarios.
 - **Mes fautes** : avoir dit que toutes les copies de 1100 étaient les miennes (son 1100 d'avant le test en était) ; le
   hand-off cherché dans le dépôt du DS alors qu'il était à la racine du nôtre — le point de `theme.test.ts` manqué au
   premier passage ; un premier lot de commandes avec `rm -rf` refusé.
@@ -518,15 +518,15 @@ ouvert le 05/10 totalise **112 h 24 sur 21 plages**. **12 commits** `9c67b15`..`
 
 Plage au journal **22/10 16:53 → 19:43 (2 h 49, 151 actions)** ; le chantier ouvert le 05/10 totalise **106 h 08 sur
 19 plages**. **7 commits** `403a72a`..`2e26931`, **non poussés**. La seconde moitié s'est faite **à distance** (Remote
-Control) : le dev l'a jugée *« ingérable »* et a fermé la session.
+Control) : le dev l'a jugée _« ingérable »_ et a fermé la session.
 
 - **CARTO-267** testé, commité, mergé, worktree supprimé avec sa permission → Fait. **ATLAS-159** testé en cinq gestes
-  écrits pour lui (la première consigne, floue, l'a fâché : *« faut surtout pas être précis »*) → Fait.
+  écrits pour lui (la première consigne, floue, l'a fâché : _« faut surtout pas être précis »_) → Fait.
 - **`?break=<zone>`** (sa demande) : chaque boundary a une zone typée et stable ; en développement seulement, vérifié dans
   le build. Idée des feature flags → CARTO-268.
 - **« entité politique »** remplace « pays » dans le Cartographe — sa décision ; le rang `country` et l'atlas gardent
   « pays », mon choix, noté comme tel au glossaire.
-- **Les sources** : sa règle, *« on ne peut pas fermer la porte derrière nous »* — chaque année cite toutes ses sources ;
+- **Les sources** : sa règle, _« on ne peut pas fermer la porte derrière nous »_ — chaque année cite toutes ses sources ;
   liste sur ATLAS-152, skill `/create-data-mention` (sa demande), bibliothèque de ses atlas `files/plans/sources/`. La
   carte des Chaddadides (CC BY-SA) se déclare redessinée de Hewsen 2001 → référence, pas calque.
 - **Planification** (sa demande, à distance) : palier 2 de DESIGN-262 conçu → CORE-270 (Backlog), barème des sources
@@ -541,34 +541,34 @@ Le journal ne compte que **13:16 → 13:56 (78 actions)** ; le travail a duré p
 journalisée — aucune durée inventée ici. Fait dans un **worktree** (`~/Desktop/WebstormProjects/europe-map-ui`, branche
 `ui-folder`), **indexé, pas commité** : le dev testera à la reprise.
 
-- **Sa demande** : *« pour qu'il n'y ait pas 50 dossiers à la racine du projet »*, tout ce qui est React dans `ui/`, et
-  voir ce qui sert dehors. Puis, sur la fiabilité : *« si vraiment un script est fiable, tu utilises un script »* — prouvé :
+- **Sa demande** : _« pour qu'il n'y ait pas 50 dossiers à la racine du projet »_, tout ce qui est React dans `ui/`, et
+  voir ce qui sert dehors. Puis, sur la fiabilité : _« si vraiment un script est fiable, tu utilises un script »_ — prouvé :
   le graphe des imports (résolu par le compilateur) après le déplacement est celui d'avant passé par la table, 1 234 liens ;
   les mêmes tests par fichier ; gate verte, 4 620 tests.
 - **Ses décisions** : les couches ne peuvent plus importer `ui/` (lint, gardé dans `boundaries.test.ts`) ; tout `ui/` refuse
-  `main` et l'atelier ; *« les CSS, c'est de l'UI »* → `focusOrigin` dans `MapArea/utils`.
+  `main` et l'atelier ; _« les CSS, c'est de l'UI »_ → `focusOrigin` dans `MapArea/utils`.
 - **Mes fautes** : un premier traceur à expressions régulières qui ratait les `?raw` ; une première règle (« ce qui ne sert
   qu'à l'UI y va ») qui avalait tout `canvas/`, remplacée par « une couche reste entière » ; un `why` du lint cassé.
 
 ### 2026-10-22 — tout le Cartographe en fr/en, des catalogues JSON par portée, la langue par un provider
 
 Une plage au journal, **22/10 10:20 → 13:14 (2 h 53, 376 actions)** ; le chantier ouvert le 05/10 totalise **102 h 25 sur
-18 plages**. **1 commit, `bc0be07`, non poussé** à la demande du dev (*« tu commites, tu ne pousses pas »*). Le dev
+18 plages**. **1 commit, `bc0be07`, non poussé** à la demande du dev (_« tu commites, tu ne pousses pas »_). Le dev
 n'a pas lancé le Cartographe : il réorganisait le dépôt du design system en parallèle.
 
-- **ATLAS-159, 3b et 3c d'un bloc** — après une première revue, le dev : *« il ne faut pas qu'il y ait de mélange entre
-  les langues […] c'est qu'il n'y a pas eu extraction de label »*. Tout texte vient d'un catalogue : panneaux,
+- **ATLAS-159, 3b et 3c d'un bloc** — après une première revue, le dev : _« il ne faut pas qu'il y ait de mélange entre
+  les langues […] c'est qu'il n'y a pas eu extraction de label »_. Tout texte vient d'un catalogue : panneaux,
   dialogues, barres, rail, carte, canevas, noms d'étapes, couche disque, sélecteur de couleur du DS (ses `labels` et un
   `describeColour` porté de ses seuils, testé mot pour mot contre l'original). La raison technique d'un échec va à la
   console, la phrase le dit (ma décision, présentée). Chaque `select` fermé nomme tous ses membres : le test a trouvé
   une soudure sur une frontière juste par hasard.
-- **Ses quatre remarques de structure, appliquées** : pourquoi des hooks et des `useMemo` pour traduire, *« elle est où la
-  locale ? »* → un `LocaleProvider` sur un store, plus de memo (`core` garde ses traducteurs) ; les fonctions à côté des
+- **Ses quatre remarques de structure, appliquées** : pourquoi des hooks et des `useMemo` pour traduire, _« elle est où la
+  locale ? »_ → un `LocaleProvider` sur un store, plus de memo (`core` garde ses traducteurs) ; les fonctions à côté des
   composants → `<Composant>/utils/` ; `components/shared/` → dissous, ce qui sert à plusieurs remonte à côté de
   `components/` ; fr et en dans un même fichier → `i18n/fr.json` + `en.json` par portée, livrés tous deux. Mémoire
   `scope-everything-to-its-component`.
-- **Mes fautes** : trois `cd` ; une règle de lint inventée pour imposer sa convention (*« qu'est-ce que c'est encore que ce
-  truc »*) ; des `useMemo` et des mots figés dans la langue de départ ; `errorReason.ts` supprimé sans chercher dans les
+- **Mes fautes** : trois `cd` ; une règle de lint inventée pour imposer sa convention (_« qu'est-ce que c'est encore que ce
+  truc »_) ; des `useMemo` et des mots figés dans la langue de départ ; `errorReason.ts` supprimé sans chercher dans les
   `.tsx` ; un sabotage de vérification qui modifiait les deux langues ; un exemple de couleur calculé en HSV au lieu de HSL.
 
 ### 2026-10-21, le soir — le design system 0.7.0, la date historique, l'internationalisation maison
@@ -582,14 +582,14 @@ environ 3 h 30)** ; le chantier ouvert le 05/10 totalise **99 h 28 sur 17 plages
   Vite lancé avant la montée servait encore la 0.6.0 : relancé.
 - **CORE-217** — `core/src/time/` : instant ou intervalle, « vers », l'an zéro refusé à la lecture avec la raison, Julien ↔
   Grégorien par le jour julien. Décidé par le dev : une date mal formée est refusée en disant pourquoi.
-- **ATLAS-159, deux étapes et demie sur trois** — le dev : *« pas possible de mettre des labels en dur »*, tout de suite.
+- **ATLAS-159, deux étapes et demie sur trois** — le dev : _« pas possible de mettre des labels en dur »_, tout de suite.
   Un moteur ICU maison (`core/src/i18n/`, sans dépendance) ; l'atlas tire chaque phrase d'un catalogue fr/en, sa table
   d'accords disparaît (testé par lui dans les deux langues, en ligne) ; dans le Cartographe, la langue à la racine,
   `useTranslation` (son nom), une ErrorBoundary par zone. **Ses décisions** : le Cartographe aussi en fr/en, avec ses
   propres fichiers ; la langue du navigateur, l'anglais sinon, l'atlas compris ; plus tard `localStorage` → navigateur →
   anglais (ATLAS-266, en Idées) ; une valeur manquante lève ; des boundaries dans chaque zone, Réessayer sur la carte.
 - **Mes fautes** : du jargon qu'il n'a pas compris (« liste de saisie » pour le Typeahead, « l'anglais en tête des pages ») —
-  *« tout ça pour ça »*, *« de quoi tu parles ? »* ; le worktree supprimé juste après lui avoir dit de l'ouvrir ; un
+  _« tout ça pour ça »_, _« de quoi tu parles ? »_ ; le worktree supprimé juste après lui avoir dit de l'ouvrir ; un
   commentaire Trello disant qu'il n'avait pas testé ; la boundary de la carte d'abord oubliée ; un sabotage resté sans
   effet (`sed` de macOS) avant d'être refait ; un composant écrit de mémoire, vérifié dans la doc de React à sa demande.
 
@@ -601,13 +601,13 @@ de production touché — un délai de test dans `core`, la CI, la configuration
 
 - **REPO-264** — parti d'une conversation du dev avec Gemini sur les `CLAUDE.md` par dossier. Mesuré : 126 Ko chargés à chaque
   session, dont six règles que `CLAUDE.md` disait « NOT auto-loaded ». Retenu : des règles et des tranches de known-issues
-  à `paths:` (52 Ko au lancement), un hook qui nomme les règles d'après ses mots — *« je veux que ça soit automatique »* —,
-  `/rules` en filet, `claude-config.md` pour lire la doc de Claude Code avant de la configurer. Le dev : *« je ne comprends
-  pas que tu n'aies pas le réflexe »* de signaler les bonnes pratiques ; d'où la règle. `/review` apprend désormais **en
+  à `paths:` (52 Ko au lancement), un hook qui nomme les règles d'après ses mots — _« je veux que ça soit automatique »_ —,
+  `/rules` en filet, `claude-config.md` pour lire la doc de Claude Code avant de la configurer. Le dev : _« je ne comprends
+  pas que tu n'aies pas le réflexe »_ de signaler les bonnes pratiques ; d'où la règle. `/review` apprend désormais **en
   concertation** (étape 9), critères compris.
 - **`/doctor prompt-audit`** : ~60 constats, la section A appliquée, la B point par point par le dev (quatre skills Basic
   Memory retirées, `find-skills` qui demande avant d'installer, `/commit` sur sa pratique ; l'accessibilité, l'insistance et
-  les résumés de revue gardés — *« on va pas commencer à tout effacer »*). Le plus lourd : `/review` ne voyait aucun `.tsx`,
+  les résumés de revue gardés — _« on va pas commencer à tout effacer »_). Le plus lourd : `/review` ne voyait aucun `.tsx`,
   et `draw-from-plate` disait `years/` jamais commité.
 - **REPO-265** — Node 24, à sa demande ; vérifié sous la 24 sans cache, testé par lui. Le calendrier : 26 devient LTS le 28/10.
 - **La CI était rouge depuis le 19/10** : un test lent sous couverture faisait échouer Sonar, et une condition `if:` du
@@ -623,22 +623,22 @@ Une plage au journal, **19/10 16:10 → 19:34 (3 h 24, 121 actions)** ; le chant
 16 plages**. **5 commits** `be2abdf`..`3c93e05`, **tous poussés** à la demande du dev, plus celui de cet état. Aucun code
 de production touché ; la gate a tourné à chaque commit (hooks), verte.
 
-- **Le sujet de départ, CORE-217 (la date historique), est devenu accessoire — assumé par le dev** : *« c'est très très
-  bien, c'est assumé […] j'ai pas perdu le fil »*. Il devient le premier palier d'autre chose.
+- **Le sujet de départ, CORE-217 (la date historique), est devenu accessoire — assumé par le dev** : _« c'est très très
+  bien, c'est assumé […] j'ai pas perdu le fil »_. Il devient le premier palier d'autre chose.
 - **Mesuré** : Wikidata ne donne pas d'arbre de vassalité (France 1400 : 9 vassaux, moitié faux ; Anjou, Champagne, Blois
-  sans lien) ; les infobox de Wikipédia en anglais, 3 fiefs sur 6. Le dev : *« on n'a que dalle […] à part Euratlas »*.
-- **DESIGN-262, la gestion de l'incertitude** — une **initiative**, au-dessus des épiques : *« un système pour choisir »*,
-  *« une réflexion très lourde derrière pour un résultat simple et attractif devant »*. Plan `files/plans/evidence-system.md`
+  sans lien) ; les infobox de Wikipédia en anglais, 3 fiefs sur 6. Le dev : _« on n'a que dalle […] à part Euratlas »_.
+- **DESIGN-262, la gestion de l'incertitude** — une **initiative**, au-dessus des épiques : _« un système pour choisir »_,
+  _« une réflexion très lourde derrière pour un résultat simple et attractif devant »_. Plan `files/plans/evidence-system.md`
   (concepts, principes, décisions du dev, paliers, lectures graduées) ; 15 termes au glossaire. Le tableau gagne une
   colonne **Chantiers**, le périmètre `[DESIGN]`, l'étiquette « chantier · incertitude » ; REPO-261 (les vassaux directs
   d'un territoire à une date) en Idées.
 - **Le dépôt prêt à passer en public** : audit propre (ni Euratlas, ni GPL, ni `.env`, historique compris) ; le README
   réécrit comme la présentation de l'œuvre, sur la convention de ses autres dépôts ; **licence PolyForm Strict** pour le
-  code, le corpus et les années réservés — *« je ne veux pas qu'il y ait de produit commercial à partir de mon travail »*.
+  code, le corpus et les années réservés — _« je ne veux pas qu'il y ait de produit commercial à partir de mon travail »_.
 - **Mes fautes** : « les plans sont gitignorés » affirmé sur la foi d'un CLAUDE.md périmé (corrigé) ; l'AGPL présentée comme
   protectrice alors qu'elle n'empêche pas la vente ; un commit refusé par commitlint dont les fichiers sont partis sous le
   message suivant (refait par `reset --soft`) ; deux `cd` (un sous-shell, un égaré) ; une requête SPARQL fausse donnée
-  d'abord sans l'exécuter ; *« comme un livre »* lu de travers (*« reviens sur ce que je t'ai écrit avant »*) ; une
+  d'abord sans l'exécuter ; _« comme un livre »_ lu de travers (_« reviens sur ce que je t'ai écrit avant »_) ; une
   question sur l'IA perdue en fin de message.
 
 ### 2026-10-18 — le code d'équerre, les vassaux par le zoom, les tribus au bord évanoui, un relief plus fin
@@ -650,23 +650,23 @@ Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le cha
 - **Le tableau** : l'audit d'Idées/Backlog (aucun fait, 9 en partie, passés en cours par le dev) ; la comparaison avec
   Euratlas, ~33–37 % retracé (CARTO-237).
 - **Le Cartographe** : CARTO-121, CARTO-122 (la demande au design system rédigée), CARTO-195 (**la zone éditoriale
-  supprimée** — je l'avais inventée : *« n'en invente pas. Par pitié »*), CARTO-238 (la garde contre l'écrasement, les
+  supprimée** — je l'avais inventée : _« n'en invente pas. Par pitié »_), CARTO-238 (la garde contre l'écrasement, les
   snapshots), CARTO-257 (l'aimant au bord de la carte), CARTO-233 commité à 20 km, le fond gris de la page.
 - **Le code remis d'équerre, à la demande du dev** : un dossier par composant (`hooks/`, `internal/`, barrel) et quatre
-  règles de lint ; **zéro import circulaire**, types compris — son principe, *l'enfant déclare son type, celui du parent en
-  hérite* — tenu par `eha/no-import-cycle` ; le JSDoc imposé par `eslint-plugin-jsdoc` (286 manques documentés) ; Node
+  règles de lint ; **zéro import circulaire**, types compris — son principe, _l'enfant déclare son type, celui du parent en
+  hérite_ — tenu par `eha/no-import-cycle` ; le JSDoc imposé par `eslint-plugin-jsdoc` (286 manques documentés) ; Node
   22.14 → 22.23 ; `viewport/`, `canvas/{tools,paint,history}`, `persistence/draft/`, `loaders/` ; plus aucun fichier non suivi
-  hors le sien. *« pas de dette, rien »*.
-- **L'atlas** : ATLAS-253 (de loin un vassal porte la couleur de son suzerain ; hommage limité à 8 niveaux) — *« ça réagit
-  bien »* ; ATLAS-258 (les tribus au bord évanoui, pareil dans les deux applis ; à travers une tribu un État montre sa
-  frontière) — *« les frontières sont respectées »* ; ses réglages (fleuves toujours visibles, frontières plus visibles) ;
-  le relief au niveau 6 sur 1 920, en ligne pour mesurer le chargement (2 560 : *« c'est trop »*).
+  hors le sien. _« pas de dette, rien »_.
+- **L'atlas** : ATLAS-253 (de loin un vassal porte la couleur de son suzerain ; hommage limité à 8 niveaux) — _« ça réagit
+  bien »_ ; ATLAS-258 (les tribus au bord évanoui, pareil dans les deux applis ; à travers une tribu un État montre sa
+  frontière) — _« les frontières sont respectées »_ ; ses réglages (fleuves toujours visibles, frontières plus visibles) ;
+  le relief au niveau 6 sur 1 920, en ligne pour mesurer le chargement (2 560 : _« c'est trop »_).
 - **Idée notée** : ATLAS-259 (deux tribus voisines mêlant leurs couleurs).
 - **Mes fautes** : deux remplacements Perl ratés — le nom nu `vectorLayers` réécrit dans le code, puis quatre lignes collées
   en tête d'`atlasBorders.ts` — rattrapés avant commit ; une consigne trop large qui a donné à une tribu une frontière
-  d'État ; un test cassé masqué par le cache de Turbo ; sa page rechargée sans fin par mes agents (*« c'est lourd »*,
-  règle du worktree notée) ; *« le fond de la page »* lu d'abord comme le canevas ; trop de délégation à son goût
-  (*« dis-moi pas que t'as encore délégué »*) ; « 13 cycles » annoncés pour 12 paires.
+  d'État ; un test cassé masqué par le cache de Turbo ; sa page rechargée sans fin par mes agents (_« c'est lourd »_,
+  règle du worktree notée) ; _« le fond de la page »_ lu d'abord comme le canevas ; trop de délégation à son goût
+  (_« dis-moi pas que t'as encore délégué »_) ; « 13 cycles » annoncés pour 12 paires.
 
 ### 2026-10-17 — Trello, la sauvegarde automatique, la Norvège rapide, le suzerain tapé, Wikidata, le double-clic
 
@@ -693,10 +693,10 @@ Une plage au journal, **17/10 14:43 → 22:03 (7 h 19, 486 actions)** ; le chant
 **Suite de la même plage, 17/10 22:39 → 18/10 01:19 (2 h 40)** — la plage entière fait **10 h 35, 560 actions** ; le chantier
 **79 h 54**. **4 commits** `d85bdb4`..`f10ac04`, tous poussés à sa demande. **3 642 tests** (977 · 1 699 · 884 · 82).
 
-- **CARTO-248** livré et testé (*« ça fonctionne. Aucun problème. »*) : le suzerain daté de Wikidata pour l'année éditée.
-  Sa 1100 commitée trois fois dans la soirée (`133dbfc`, `b53912d`, `f10ac04`) : *« ce sera tout pour ce soir »*.
-- **Fermés sur son verdict** : CARTO-235 (‹P›/‹A› répondent, sans code), REPO-234, CARTO-114 (*« là, j'arrive vraiment à
-  être rapide »*).
+- **CARTO-248** livré et testé (_« ça fonctionne. Aucun problème. »_) : le suzerain daté de Wikidata pour l'année éditée.
+  Sa 1100 commitée trois fois dans la soirée (`133dbfc`, `b53912d`, `f10ac04`) : _« ce sera tout pour ce soir »_.
+- **Fermés sur son verdict** : CARTO-235 (‹P›/‹A› répondent, sans code), REPO-234, CARTO-114 (_« là, j'arrive vraiment à
+  être rapide »_).
 - **Le point sur le tableau, et deux objectifs** : la **contribution des événements** et l'**interface de l'atlas** — à plat
   (son zonage, puis Claude Design sur une capture où des événements sont déjà posés) et en 3D dans la carte (des essais
   jetables). Le Cartographe est en pause. « À faire » ordonné par dépendance, de CORE-217 à CONTRIB-225 ; le Backlog en
@@ -716,14 +716,14 @@ sur 13 plages**. **10 commits** `0566243`..`5c96eaf`, plus celui de cet état, *
   le trait de côte reste dessus. Le relief à la résolution du DEM (`3869822`), l'atlas s'ouvre sur 1100 (`ac97836`).
 - **Les remplissages exacts** (`1818096`, `ed5ee1a`) : chaque pays découpé en triangles posés à plat sur le relief,
   teinte mélangée dans le shader ; frontières et fleuves coupés aux mailles du relief (`pipeline/gridDrape`). Le dev :
-  *« On a un rendu magnifique … Là, on est avec les grands. »* L'étape « couper les teintes en mer » : plus rien à faire.
+  _« On a un rendu magnifique … Là, on est avec les grands. »_ L'étape « couper les teintes en mer » : plus rien à faire.
 - **Les tribus dans l'atlas comme dans le Cartographe** (`3ba62ee`) : pas de teinte, contour en tirets ; tirets en
-  pixels écran (8/4 px), *« on va rester comme ça »*. Parité écrite dans `architecture.md` (`cfea532`).
-- **L'empilement au clavier** (`5c96eaf`, demandé en priorité, testé par le dev : *« c'est bon »*) : ‹cmd+↑/↓›,
+  pixels écran (8/4 px), _« on va rester comme ça »_. Parité écrite dans `architecture.md` (`cfea532`).
+- **L'empilement au clavier** (`5c96eaf`, demandé en priorité, testé par le dev : _« c'est bon »_) : ‹cmd+↑/↓›,
   ‹⇧› jusqu'au bout, affichés dans le menu ; la carte ne défile plus sur une flèche modifiée.
 - **Le dev a fini la Rus'** et retouche l'Angleterre, puis Écosse, Irlande, Byzance. Publication de 1100 souhaitée ;
-  la licence Euratlas reprise **quand il montrera la carte finie** (*« il faut se calmer là »*).
-- **Mes fautes** : des réponses trop techniques (*« de quoi tu me parles ? »*) ; `main.tsx` modifié pendant qu'il
+  la licence Euratlas reprise **quand il montrera la carte finie** (_« il faut se calmer là »_).
+- **Mes fautes** : des réponses trop techniques (_« de quoi tu me parles ? »_) ; `main.tsx` modifié pendant qu'il
   dessinait, deux rechargements Vite de sa page (mémoire [[never-reload-the-devs-page]] renforcée).
 
 ### 2026-10-15 (soir) — l'étendue, le creusement, la dérivation par côté, les tribus
@@ -742,14 +742,14 @@ du dev**. **3 294 tests** (904 `core`, 1 503 Cartographe, 805 atlas, 82 plugin),
 - **Les tribus** (`220ae18`) : le rang `tribe` → pas de remplissage, le contour en tirets dans sa couleur, ses frontières
   dérivées retirées (`core/editor/tribes.ts`). Le rang `people` de la nuit du 14/10 renommé `tribe` dans `years/1100`
   (15 tribus, 14 au dernier enregistrement du dev). Le menu « Rank » propose `tribe` et **tous les rangs de l'année** —
-  il n'en offrait que cinq, le dev : *« qu'est-ce qui empêche les choses ? »*. **L'atlas les remplit encore.**
+  il n'en offrait que cinq, le dev : _« qu'est-ce qui empêche les choses ? »_. **L'atlas les remplit encore.**
 - **Quinze vassaux recreusés à la main** dans `years/1100` (Champagne, Frise, Bohême, Toulouse, Provence, Gênes, les
   marches saxonnes, Chester, Durham, Shrewsbury, Hereford, Roussillon) : dessinés la nuit du test, avant que la plume
   sache creuser. Copies de secours dans le brouillon de la session (`backup-2240`, `-2245`, `-2253`).
-- **La Rus' de 1100** : trois cartes trouvées (Shepherd 1097, domaine public ; *Principalities of Kievan Rus'
-  1054-1132*, CC BY-SA, référence seule ; EGO) ; les 72 noms traduits et croisés avec le registre dans
+- **La Rus' de 1100** : trois cartes trouvées (Shepherd 1097, domaine public ; _Principalities of Kievan Rus'
+  1054-1132_, CC BY-SA, référence seule ; EGO) ; les 72 noms traduits et croisés avec le registre dans
   `~/Desktop/rus-1100-correspondances.md`.
-- **Mes fautes** : des réponses trop longues et trop techniques pendant qu'il dessinait (*« je comprends rien »*) ;
+- **Mes fautes** : des réponses trop longues et trop techniques pendant qu'il dessinait (_« je comprends rien »_) ;
   **deux corrections écrasées par son ‹ctrl+s›**, la page tenant l'ancien état — je ne l'avais pas prévenu de recharger
   sans enregistrer ; une commande à coller trop longue, coupée en trois au collage ; un `cd` (vers `/dev/null`, sans
   effet) ; le mode automatique a bloqué l'écrasement de son fichier deux fois, passé par un script qu'il a lancé.
@@ -762,16 +762,17 @@ sous-compté (un `cd` vers 10:40). Le chantier ouvert le 05/10 totalise **57 h 1
 **3204 tests** au soir (860 `core`, 1457 Cartographe).
 
 **L'après-midi, le dev corrige ses îles et le Nil, et chaque gêne devient une règle** (`f709e57`, `b3f4e20`) :
+
 - **Supprimer un anneau entier** (toutes ses ancres + ‹suppr›), le voisin gardant les points partagés.
-- **Aucune suppression refusée** (*« y'a rien qui doit m'empêcher d'enlever des points. Rien. »*) : un contour du
+- **Aucune suppression refusée** (_« y'a rien qui doit m'empêcher d'enlever des points. Rien. »_) : un contour du
   pays visé sous trois ancres part entier ; celui d'un voisin garde ses points, nommé dans la barre.
 - **Le clic de fermeture suit l'eau** jusqu'à la première ancre, prévisualisé (`canvas/waterClosing.ts`).
 - **La plume ne pose jamais un tronçon deux fois** : sur une boucle, le plus court sauf s'il repasse, alors l'autre
   sens (le Nil) ; sur une ligne ouverte, seul le sommet.
-- **La flèche blanche n'insère plus**, seule la plume (`arrow-insert` retiré) — *« beaucoup plus cohérent »*.
+- **La flèche blanche n'insère plus**, seule la plume (`arrow-insert` retiré) — _« beaucoup plus cohérent »_.
 - **Souder point par point** (`H-37`, moitié) : une ancre tirée seule près de l'ancre ou du tronçon d'un voisin
-  s'aimante, et le relâchement fusionne (`core/editor/anchorWeld.ts`, `canvas/weldGestures.ts`). Le dev : *« ce
-  sera déjà une grosse avancée »*. **Pas encore marché dans l'appli, pas revu à quatre agents** (commit demandé).
+  s'aimante, et le relâchement fusionne (`core/editor/anchorWeld.ts`, `canvas/weldGestures.ts`). Le dev : _« ce
+  sera déjà une grosse avancée »_. **Pas encore marché dans l'appli, pas revu à quatre agents** (commit demandé).
 - **Mes fautes de l'après-midi** : un onglet Chrome piloté par moi ouvert pendant son test, et sa page a cessé de
   répondre jusqu'à ce que je le ferme (mémoire [[no-automation-tab-while-he-tests]]) ; des fichiers écrits pendant
   qu'il testait (risque de rechargement Vite) ; des tests aux comptes faux du premier coup, recomptés.
@@ -785,12 +786,12 @@ Le matin :
 - **⟨retracer⟩, le premier outil de correction** (`ad09e4c`, `1b2e89e`, `719dc89`) : ‹R›, une ancre du pays visé, un
   tracé à la plume (côte, fleuve, voisin, points libres, crayon), une autre ancre du même contour ; tirets rouges
   avant le clic, ‹alt› l'autre côté. **Trois règles sorties de la marche du dev** : l'arrivée suit l'eau
-  (Formentor) ; *« c'est les Obotrites qui comptent »* — un voisin qui ne fait que toucher le tronçon garde ses
+  (Formentor) ; _« c'est les Obotrites qui comptent »_ — un voisin qui ne fait que toucher le tronçon garde ses
   points, dit dans la barre ; le côté remplacé est **le plus petit changement** (surface), la règle « le plus près »
   ayant choisi toute l'île de la Rana. Corrigé à l'usage : Majorque, Minorque, l'Empire, les Obotrites, la Rana.
 - **‹espace› donne la main de partout** au-dessus de la carte, comme Illustrator (focus arrivé par un clic ; par
   ‹Tab› il reste au contrôle, A11Y-001).
-- **La liste `{Polities}` glisse vers le pays visé** (`27e1d10`) — le dev : *« on gagne énormément d'ergonomie »* ;
+- **La liste `{Polities}` glisse vers le pays visé** (`27e1d10`) — le dev : _« on gagne énormément d'ergonomie »_ ;
   **son en-tête garde ses 24 px** (`73fd1a5`).
 - **Une coquille `Panel` pour les quatre panneaux** (`b754b11`), décidée par le dev ; rien ne bouge à l'écran. La
   revue m'a corrigé : le redimensionnement ira dans un `Dock`, pas dans la coquille.
@@ -805,7 +806,7 @@ Une plage, **13/10 14:28 → 14/10 02:11 (11 h 42, 991 actions)**, nuit comprise
 totalise **50 h 42 sur 9 plages**. **10 commits** `997cbb1`..`4de406c`, **aucun poussé** (le dev pousse), gate
 verte et revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
 
-- **La nuit, seul, à la demande du dev** (*« tu dessines tout ce que tu peux dessiner, vassaux, sous-vassaux »*) :
+- **La nuit, seul, à la demande du dev** (_« tu dessines tout ce que tu peux dessiner, vassaux, sous-vassaux »_) :
   **137 pays d'Euratlas 1100** dans `years/1100/`, îles comprises, rang / statut / suzerain / couleur posés.
   Manques déclarés : au nord de 60°N, à l'est de 45°E, au sud de 32°N (aucune planche). **23 défauts de l'outil**
   relevés dans `files/plans/cartographer/general-test-defects.md`, chacun avec l'outil qui l'aurait corrigé →
@@ -817,15 +818,15 @@ verte et revue à quatre agents à chaque pas de code, chaque garde prouvée par
   `{Line}`, `{Overrides}` (`997cbb1`..`2b9caf0`).
 - **L'atlas montre une année dessinée telle qu'elle est dessinée** (`b85714f`) : frontières exactes depuis
   les ancres (`core/editor/atlasBorders.ts`), plus de débordement des pays (~20 km) hors du tracé, et les
-  **couleurs du Cartographe** (`authoredRegionColours`) — le dev : *« les couleurs doivent être pareilles,
-  c'est tout l'intérêt de l'éditeur »*. Pas encore dessiné, déclaré : l'épaisseur d'un style, le pointillé.
-- **Le test général** (*« une répétition générale, il faut qu'on voie ce que l'appli a dans le ventre »*) :
+  **couleurs du Cartographe** (`authoredRegionColours`) — le dev : _« les couleurs doivent être pareilles,
+  c'est tout l'intérêt de l'éditeur »_. Pas encore dessiné, déclaré : l'épaisseur d'un style, le pointillé.
+- **Le test général** (_« une répétition générale, il faut qu'on voie ce que l'appli a dans le ventre »_) :
   16 pays d'Euratlas 1100 dessinés dans le Cartographe. Précision mesurée : 0,5 km médian sur la frontière
   Francs–Empire. **`H-36` rectifié** (`a44d4b9`) — un point de voisin visé pile l'emporte sur l'eau ; **`H-43`
   trouvé** — deux pays tiennent les deux points cliqués, la plume en suit un sans dire lequel.
 - **La skill `/draw-from-plate`** (`3e849ff`) : la méthode lente et ses scripts, pour ne jamais repartir de
   zéro.
-- **Mes fautes** : dessiner trop vite et refaire trois fois la Navarre (*« prends ton temps »*) ; des tracés
+- **Mes fautes** : dessiner trop vite et refaire trois fois la Navarre (_« prends ton temps »_) ; des tracés
   au script sans regarder le résultat ; un `cd` en début de session ; le mot « main » employé sans le
   définir.
 
@@ -839,10 +840,10 @@ le code naïf. Le dev, absent de l'écran, m'a laissé **conduire son Chrome** e
 - **Enregistrer et rouvrir, en mode local** (`H-28` tranché local) : le serveur de dev du Cartographe écrit
   `years/<année>/` (`PUT /__years/<année>`, même machine, validé par le schéma de `core`, fichiers `.tmp` puis
   renommés, manifeste en dernier) ; ‹ctrl+s› partout ; l'année s'ouvre au démarrage. **Les années ne sont
-  jamais commitées** (*« ils sont pour nous pour travailler »*), les traces gardées en copies suffixées
+  jamais commitées** (_« ils sont pour nous pour travailler »_), les traces gardées en copies suffixées
   (`1100.bourgogne-v1/`). Allers-retours identiques à l'octet (md5).
 - **La France 1100 et la Bourgogne dessinées par moi**, enregistrées, rouvertes — d'où mon carnet de dessin
-  (`files/plans/cartographer/drawing-as-claude.md`) et des scénarios *Walked for real* dans `s02`/`s15`.
+  (`files/plans/cartographer/drawing-as-claude.md`) et des scénarios _Walked for real_ dans `s02`/`s15`.
 - **Les outils attendent le zoom** (`H-34`, `s17`) : de trop loin (portée d'accroche > 10 km au sol) la plume,
   le crayon et les touches qui modifient des points refusent, le curseur et la barre d'état le disent.
 - **Les fleuves suivis d'un morceau à l'autre** (`H-35`, `mendRivers`, 591 → 398 polylignes) et **dessinés
@@ -874,13 +875,13 @@ par le code naïf.
   séquentielles). Plan : `files/plans/eslint-plugin-eha/plan.md`.
 - **Trouvé en route** : Turbo rejouait un lint vert après un changement de règle ou de config racine —
   `globalDependencies` + `lint` → `^lint`.
-- **La règle du dev, mémorisée** : *« un système, pas des exceptions »* — une règle qui n'en tient que par des
+- **La règle du dev, mémorisée** : _« un système, pas des exceptions »_ — une règle qui n'en tient que par des
   exceptions est abandonnée, mesure à l'appui.
 - **Le menu de pile** : un seul filet (`--line`), libellés centrés.
 - **La plume trouve la côte et les fleuves** (`s02`) : la plume simple et le crayon s'accrochent au plus
   proche des deux, la plume bascule en mode côte ou fleuve ; le premier clic qu'aucune eau ne prend rend le
   mode de départ ; d'une eau à l'autre, bascule directe ; le crayon s'arrête sur l'eau. **‹ctrl+z› ne rend
-  pas le mode** — *« pas d'annulation pour l'instant »*. `s02` écrit aussi le crayon, jamais spécifié.
+  pas le mode** — _« pas d'annulation pour l'instant »_. `s02` écrit aussi le crayon, jamais spécifié.
 - **La barre d'actions de `{Polities}`** : plan décidé (D1–D5), étape 1 écrite (`s07`, `H-17` fermé). Les
   icônes : longue enquête sur la netteté ; **verdict du dev** — le flou des outils est accepté, la barre prend
   **ses dessins en pixels** (le `+` encadré de pointillés, la poubelle à trois lamelles) posés sur des pixels
@@ -981,7 +982,7 @@ la CI est passée entière, déploiement compris. Livré : les pas 1 à 4 du pla
   cassait**, ils restaient sur le disque ; une install neuve aurait fait tomber tous les tests de
   composants. Déclarés au catalogue, et la CI l'a prouvé au push.
 - **Ma propre erreur de plan, bloquante, trouvée en appliquant le pas 2** : le plan disait que le reset
-  devait seulement *venir en premier*. Faux — **une règle hors layer bat toute règle d'un layer, quel
+  devait seulement _venir en premier_. Faux — **une règle hors layer bat toute règle d'un layer, quel
   que soit l'ordre**, et la peau du DS est dans `@layer ui.components`. Notre `*{border-width:0}` aurait
   effacé chaque bordure. Le reset vit dans `@layer ui.reset`, la place que le DS réserve.
 - **Et le premier jet du test qui le garde passait sur une chaîne vide** : Vitest vide les `.css`, même
@@ -1034,16 +1035,16 @@ plan d'intégration du design system.
 
 - **La leçon du soir, et elle est neuve : un test peut cesser d'exercer quoi que ce soit sans jamais
   devenir rouge.** Dix tests de molette envoyaient `deltaY: -1`. Après le passage au zoom
-  proportionnel, ça vaut **+0,095 %** — ils passaient toujours, puisqu'ils assèrent une *direction*.
+  proportionnel, ça vaut **+0,095 %** — ils passaient toujours, puisqu'ils assèrent une _direction_.
   Le test-vedette « le point reste sous le pointeur » était devenu trivialement vrai. **Un test vert
   n'est pas un test qui garde** : c'est la même famille que la garde qui ne garde rien, vue quatre
-  fois le 07/10, mais par l'autre bout — ici c'est le *stimulus* qui s'est éteint, pas l'assertion.
+  fois le 07/10, mais par l'autre bout — ici c'est le _stimulus_ qui s'est éteint, pas l'assertion.
 - **Le défaut le plus coûteux était invisible pour moi et évident pour lui : tout était à moitié
   trop petit.** Le canevas est dimensionné en `clientWidth × devicePixelRatio` et rien ne met le
   contexte à l'échelle — volontairement, l'arithmétique de `view/` étant en pixels d'appareil, donc
   les **positions** tombent juste. Mais chaque valeur que le design déclare en pixels **d'écran**
   était utilisée comme pixel d'appareil : sur un 2×, le label de 11 px rendait **5,5**, les filets de
-  1 px **un demi**, les poignées de 8 px **4**. *Positions justes, tailles de moitié* — ça se lit
+  1 px **un demi**, les poignées de 8 px **4**. _Positions justes, tailles de moitié_ — ça se lit
   « le design est trop petit » et pas « il y a un bug ». **Et c'est invisible pour qui travaille sur
   un écran 1×.** `inDevicePixels(style, ratio)` met le style à l'échelle **une fois** ; sa garde est
   écrite **sur l'objet** et non sur une liste de champs, parce qu'une liste serait le même oubli un
@@ -1053,7 +1054,7 @@ plan d'intégration du design system.
   120 par seconde. Le même geste valait **1,1 sur l'une et 1,1³⁰ ≈ 17× sur l'autre** — aucune
   constante ne peut être juste pour les deux, il fallait une autre arithmétique. Exponentiel dans la
   course, donc il compose : cinquante petits événements et un grand de même course tombent sur la
-  même échelle. Et **`deltaMode` est lu** : une molette qui rapporte des *lignes* est ordinaire
+  même échelle. Et **`deltaMode` est lu** : une molette qui rapporte des _lignes_ est ordinaire
   (Firefox/Windows), et lue comme des pixels elle serait seize fois plus douce ailleurs.
 - **Le clignotement au redimensionnement avait une cause exacte** : assigner `node.width` **efface le
   canevas immédiatement** (c'est ce que dit la spec), pendant que le repaint attend le
@@ -1068,7 +1069,7 @@ plan d'intégration du design system.
 - **Un trou non enregistré, tranché par le dev : d'où vient l'id d'une polity ?** Trois documents
   pointaient dans trois directions — `format.md` montre `fr-couronne`, `s02` ne demande pas d'id,
   `s07` exige qu'un renommage ne le change pas. Sa décision : **proposé, éditable**, parce que c'est
-  la seule des trois règles sous laquelle `fr-couronne` est atteignable depuis *« Reaume de France »*.
+  la seule des trois règles sous laquelle `fr-couronne` est atteignable depuis _« Reaume de France »_.
   Inscrit en **H-31**.
 - **Ma fixture a divergé en moins d'une heure.** `AQUITAINE` écrite dans deux suites, les deux
   copies déjà en désaccord sur `colour`, et **aucun test ne tombait**. Trouvé **indépendamment par
@@ -1086,61 +1087,61 @@ plan d'intégration du design system.
   capture : `body` gardait sa marge de 8 px, donc `.shell` à `100dvh` commençait 8 px plus bas et la
   barre d'état passait sous le pli.
 - **Le cover, sa décision, et sa moitié manquante.** Une échelle minimale promet seulement que le fond
-  est *assez grand* ; rien n'empêche un pan de le faire glisser. D'où `clampToCover` — le clamp que
-  `viewport.ts` avait **refusé d'inventer** (*« les vrais chiffres appartiennent à l'appelant »*), et
+  est _assez grand_ ; rien n'empêche un pan de le faire glisser. D'où `clampToCover` — le clamp que
+  `viewport.ts` avait **refusé d'inventer** (_« les vrais chiffres appartiennent à l'appelant »_), et
   ici ils sont réels. **Un seul `settle()`** par lequel passe chaque changement de vue : un maintien
   posé à trois endroits sur quatre rate le quatrième.
 - **Et ma JSDoc a survendu deux fois dans la même journée.** `openingView` disait « centre » la zone,
-  alors qu'elle la centre *puis la maintient* — la zone commençant à −45°, exactement là où le fond
+  alors qu'elle la centre _puis la maintient_ — la zone commençant à −45°, exactement là où le fond
   commence, elle ne peut **jamais** être centrée horizontalement. Un test écrit depuis cette
-  affirmation a accusé du code qui avait raison. Et `fitWhole` se réclamait de `s01` *« the whole
-  frame is visible »*, qui est le `Given` d'un **autre** scénario et jamais une spécification de
+  affirmation a accusé du code qui avait raison. Et `fitWhole` se réclamait de `s01` _« the whole
+  frame is visible »_, qui est le `Given` d'un **autre** scénario et jamais une spécification de
   l'ouverture. Les deux corrigées.
 - **Les curseurs, et le fait qui porte toute la séquence de zones** : `cursor` est une propriété
   d'**élément**, donc posée sur le canvas elle s'applique là et nulle part ailleurs — le navigateur
-  restitue le pointeur alentour tout seul. *« Quand je sors du canevas ça redevient la flèche »*
+  restitue le pointeur alentour tout seul. _« Quand je sors du canevas ça redevient la flèche »_
   n'est **pas du code à écrire**, et c'est nécessaire plutôt que cosmétique : le geste qui donne un
   sujet à la plume est **un clic dans le chrome**. Vérifié par le dev **dans Illustrator**.
 - **Trois frictions levées par lui sur les curseurs** : pas d'outil de zoom (les boutons `[+]/[−]`
   suffisent, donc « deux outils et seulement deux » tient) · pas d'onzième curseur (le refus est le
   `not-allowed` natif) · la flèche blanche à bord noir **existe déjà**. Et le refus vaut pour
   ⟨edit⟩ autant que pour ⟨draw⟩ — la moitié que le handoff n'avait jamais posée et qu'il a posée :
-  *« tu sélectionnes les points de qui ? »*
+  _« tu sélectionnes les points de qui ? »_
 - **Les dix curseurs pesaient 82 615 octets dont ~94 % de manifeste C2PA** embarqué par l'outil de
   design. Nettoyés : **5 265 octets**, ce qui les met sous le seuil d'inlining de Vite — donc des
   `data:` URI, aucune requête, **aucun 404** que le repli CSS aurait traduit en simple croix. Un test
   assère qu'aucun manifeste n'a suivi.
 - **L'interface du Cartographe passe en anglais** (sa décision), l'atlas reste en français. Dix
-  chaînes, `lang="en"`, et **sept assertions de test** — dont un test nommé *« names the phase in
-  French »*. La distinction à ne pas perdre : **le chrome est en anglais, le contenu non** — un nom
-  de polity est une donnée, *« Reaume de France »* est une graphie d'époque.
+  chaînes, `lang="en"`, et **sept assertions de test** — dont un test nommé _« names the phase in
+  French »_. La distinction à ne pas perdre : **le chrome est en anglais, le contenu non** — un nom
+  de polity est une donnée, _« Reaume de France »_ est une graphie d'époque.
 - **Qui parle quelle langue, tranché et consigné dans `plan.md` P8** : atlas FR **et** EN le français
   d'abord, Cartographe EN seul, Payload **EN et FR dans le même formulaire**. Et **deux choses se
-  contribueront** : le contenu *et* les labels de l'application. La chaîne qu'il a déjà fait tourner :
+  contribueront** : le contenu _et_ les labels de l'application. La chaîne qu'il a déjà fait tourner :
   `Payload → un script d'export → du JSON → la couche de traduction → ICU`. Le JSON est **généré,
-  jamais lu à l'exécution** — ce qui découle de la contrainte déjà écrite : *une chaîne qui décrit une
-  panne ne doit pas pouvoir échouer*. **Le script d'export n'avait jamais été nommé** : Payload garde
+  jamais lu à l'exécution** — ce qui découle de la contrainte déjà écrite : _une chaîne qui décrit une
+  panne ne doit pas pouvoir échouer_. **Le script d'export n'avait jamais été nommé** : Payload garde
   ses données en base, et c'est la raison même pour laquelle il avait choisi JSON.
-- **Trois documents affirmaient une bannière permanente ; elle est transitoire.** *« Un petit peu
-  comme une sting bar »* — 5 secondes puis elle se retire. Et **ça renverse laquelle des deux pièces
+- **Trois documents affirmaient une bannière permanente ; elle est transitoire.** _« Un petit peu
+  comme une sting bar »_ — 5 secondes puis elle se retire. Et **ça renverse laquelle des deux pièces
   porte la garantie** : la barre d'état, elle, reste, donc c'est **elle** qui garde les quatre cents
   ancres dans le bon pays. La barre nomme désormais **l'action et sur qui elle porte**, et l'action et
-  un résultat transitoire s'affichent **en même temps** — *« je ne vois pas pourquoi l'un prendrait la
-  place de l'autre »*.
+  un résultat transitoire s'affichent **en même temps** — _« je ne vois pas pourquoi l'un prendrait la
+  place de l'autre »_.
 - **`CURSORS.md` posait encore quatre questions tranchées le 22/09.** Le document qu'on ouvre pour
   construire demandait des réponses déjà données — la faute que `known-issues.md` consigne sur
   lui-même, retrouvée ailleurs.
-- **Trois reproches du dev, tous justes.** *« Quand tu dégueules du contenu comme ça, je ne le lis
-  même plus »* — mes réponses étaient des murs. *« Tu peux arrêter avec tes choix là ? »* — j'ai
+- **Trois reproches du dev, tous justes.** _« Quand tu dégueules du contenu comme ça, je ne le lis
+  même plus »_ — mes réponses étaient des murs. _« Tu peux arrêter avec tes choix là ? »_ — j'ai
   posé des questions à cocher au lieu de trancher. Et une phrase en franglais si mal traduite qu'elle
-  ne voulait rien dire (*« une action mute le document… un copieur qui lève »*), réécrite en français
+  ne voulait rien dire (_« une action mute le document… un copieur qui lève »_), réécrite en français
   dans `known-issues.md`.
 - **Deux fautes de procédure, de moi.** Un `rm -rf` dans une commande, refusé par la garde — la règle
   demande une permission explicite **à chaque fois**. Et un message de commit aplati en une ligne de
   500 caractères, faute d'avoir mis la ligne vide après le sujet.
 - **Le budget de lisibilité a eu raison une cinquième fois** (`startCanvasController` à 55 lignes,
   d'où `watchStore`), jamais désactivé. **`attach.ts` renommé `controller.ts`** à sa demande :
-  *« attach »* disait que quelque chose était fixé à quelque chose et jamais quoi, ni par qui.
+  _« attach »_ disait que quelque chose était fixé à quelque chose et jamais quoi, ni par qui.
 - **Mesures du soir** : Cartographe 247,36 → **253,78 ko / 80,12 ko gzip**, plus **3,30 ko de CSS**
   (1,39 gzip). Worker **13 490 o au même hash que l'atlas**, toujours.
 
@@ -1159,10 +1160,10 @@ la moitié de `(b)`, et deux passes de performance demandées par le dev.
   décimation, écrit **pour** son piège, ne le distinguait pas — dans ma fixture l'écart cumulé restait
   aussi sous le seuil, donc les deux implémentations répondaient pareil. (4) Rendre le repaint asynchrone
   n'a fait tomber **aucun** test. **La règle tient, et c'est sa quatrième et cinquième occurrence
-  documentée** : vérifier que *ce* test-là tombe, pas que la suite tombe.
+  documentée** : vérifier que _ce_ test-là tombe, pas que la suite tombe.
 - **Le bug le plus coûteux, trouvé deux fois indépendamment par la revue (ARCH-014 = QUAL-203), et il
   n'aurait mordu qu'en dev — donc là où le dev travaille.** Un garde « charger une seule fois » écrit
-  comme un **booléen** est faux sous `StrictMode` : le cycle *setup → cleanup → setup* est synchrone, le
+  comme un **booléen** est faux sous `StrictMode` : le cycle _setup → cleanup → setup_ est synchrone, le
   second setup sort sur le drapeau sans rien enregistrer, et le seul `.then` reste lié à la fermeture que
   le cleanup fantôme vient d'annuler. Les deux assets se chargeaient, le terrain cuisait, **et la réponse
   partait à la poubelle** : « Préparation du fond de carte… » pour toujours. Mesuré : `originX` 123 → 96,49.
@@ -1193,12 +1194,12 @@ la moitié de `(b)`, et deux passes de performance demandées par le dev.
   le port rapportait. Le littéral survit en **fixture de test**, et un test interdit à la production de
   l'importer.
 - **La décision du dev sur les assets, et ma question était trop large.** J'avais proposé « le relief
-  bloquant, le masque dégradé » ; il a tranché **les deux bloquants**, puis corrigé mon périmètre : *« ça
-  n'empêche pas l'application de se lancer »*. Seule la **zone canevas** est bloquée ; les autres zones
+  bloquant, le masque dégradé » ; il a tranché **les deux bloquants**, puis corrigé mon périmètre : _« ça
+  n'empêche pas l'application de se lancer »_. Seule la **zone canevas** est bloquée ; les autres zones
   s'affichent à l'état de repos, ce que le `Background` de `s00` spécifie déjà. Et l'ordre qu'il a posé :
   **le fond cuit d'abord, l'année posée dessus ensuite.**
-- **La côte sort en nuage et doit être chaînée — pas d'abord pour la vitesse.** `s02` insère *« le
-  sous-chemin de côte entre les deux clics »*, ce qui n'a aucun sens dans 95 212 segments sans ordre : il
+- **La côte sort en nuage et doit être chaînée — pas d'abord pour la vitesse.** `s02` insère _« le
+  sous-chemin de côte entre les deux clics »_, ce qui n'a aucun sens dans 95 212 segments sans ordre : il
   n'y a pas de « entre ». Chaînés : **2 029 contours**, 47× moins de sous-chemins et moitié moins de
   points. **Sans epsilon**, et c'est une propriété du producteur : deux cellules voisines calculent leur
   arête partagée depuis les mêmes valeurs par la même expression, donc au bit près. Une tolérance
@@ -1207,11 +1208,11 @@ la moitié de `(b)`, et deux passes de performance demandées par le dev.
   repeignais **dans le gestionnaire d'événement**, donc 60 à 120 fois par seconde. Coalescence sur
   `requestAnimationFrame`. Puis l'élagage au viewport et la décimation au pixel écran : de 95 233 points,
   une repeinture en trace **26 619** à l'ouverture (28 %) et **45 574** au pire cas, l'échelle 2 (48 %).
-  **2 à 3,6×, pas un ordre de grandeur** — dit tel quel. Verdict du dev : *« beaucoup mieux, acceptable »*.
+  **2 à 3,6×, pas un ordre de grandeur** — dit tel quel. Verdict du dev : _« beaucoup mieux, acceptable »_.
 - **Le plafond de zoom reposait sur un argument emprunté à l'autre application.** Je l'avais calibré sur
   les cellules de 1,9 km du raster politique — **qui est celui de l'atlas**. Le Cartographe stocke des
-  degrés à six décimales et dérive ses frontières des ancres *partagées*, exactement. Porté à **32**
-  (~240 m par pixel écran) à la demande du dev, et **mesuré** : c'est *moins cher* à dessiner que la vue
+  degrés à six décimales et dérive ses frontières des ancres _partagées_, exactement. Porté à **32**
+  (~240 m par pixel écran) à la demande du dev, et **mesuré** : c'est _moins cher_ à dessiner que la vue
   d'ouverture, l'élagage mordant d'autant plus qu'on est zoomé.
 - **Deux fois mon test a accusé du code qui avait raison.** Le critère de décimation est le **pixel
   écran**, pas le niveau de zoom : à l'échelle 8, des points à un dixième de pixel de fond sont encore à
@@ -1240,22 +1241,22 @@ gate verte à chaque pas, tout poussé. Livré : `4a` (le store), `4b` (`view/`)
 (le canevas dessine et navigue), `4d-3` à moitié, deux skills, et le test qui tient les frontières ESLint.
 
 - **La leçon de la soirée, et elle est arrivée trois fois : ce qu'on voit d'abord n'est pas la cause.**
-  Le test-vedette du zoom — *« le point reste sous le pointeur »*, toute la spec de `s01` — **laisse
+  Le test-vedette du zoom — _« le point reste sous le pointeur »_, toute la spec de `s01` — **laisse
   passer l'implémentation naïve**, qui passe 88 tests sur 90 ; ce qui l'attrape, ce sont les deux tests de
   butée. Mon test écrit **pour** le piège des polylignes ne l'attrapait pas (le pointeur était placé là où
   la première ligne n'avait aucun sommet en portée) — c'est le test du cas dense qui l'a eu, par accident.
-  Et le message Sonar affiché en gros (*« compatibility criteria »*) n'était pas la cause, qui était
-  derrière *View details*. **La règle qui en sort** : vérifier que **ce** test-là tombe contre le code
+  Et le message Sonar affiché en gros (_« compatibility criteria »_) n'était pas la cause, qui était
+  derrière _View details_. **La règle qui en sort** : vérifier que **ce** test-là tombe contre le code
   naïf, pas que la suite tombe. Un sabotage attrapé par un autre test ne dit rien de qui garde quoi.
 - **ARCH-101, ma faute la plus coûteuse, et c'est elle qui a fait naître une skill.** Ma JSDoc de `4b`
-  affirmait que la projection *« tourne une fois par changement de viewport, en cache, et le cache
-  appartient à l'appelant (étape 4d) »*. **L'appelant de l'étape 4d, c'était moi**, et `4d-1` n'avait
+  affirmait que la projection _« tourne une fois par changement de viewport, en cache, et le cache
+  appartient à l'appelant (étape 4d) »_. **L'appelant de l'étape 4d, c'était moi**, et `4d-1` n'avait
   aucun cache : chaque `pointermove` d'un pan reprojetait la table entière à travers un `log(tan())` par
   ancre — 16 579 à 1100. **Une promesse écrite dans un commentaire que personne ne rouvre.** D'où la
   demande du dev et `/scenarii-to-code`, dont c'est la règle centrale : une promesse va dans `next.md` ou
   `known-issues.md`, les deux seuls fichiers relus à chaque session.
-- **Le dev a retourné le store, et il a attrapé le nom avant moi.** *« Si j'avais fait ça avec Redux il y
-  aurait une slice par zone »*, et *« YearStore c'est bizarre — une année, c'est toute l'app »*. Les deux
+- **Le dev a retourné le store, et il a attrapé le nom avant moi.** _« Si j'avais fait ça avec Redux il y
+  aurait une slice par zone »_, et _« YearStore c'est bizarre — une année, c'est toute l'app »_. Les deux
   justes. **Ma correction au passage** : le découpage se fait par **propriétaire d'état**, pas par
   panneau — le document est lu par le canevas **et** `{Polities}`, `{Details}`, `{Overrides}`, donc aucun
   panneau ne le possède. Et une slice n'est pas toujours la réponse : un état avec un seul écrivain et un
@@ -1267,7 +1268,7 @@ gate verte à chaque pas, tout poussé. Livré : `4a` (le store), `4b` (`view/`)
   neuf à chaque fois ; React refuse. Et `History` lui-même est une référence **stable**, donc un sélecteur
   dessus ne tire jamais. **Les deux échouent**, d'où l'instantané plat pris à l'action.
 - **Le piège dans le piège, qui a fait échouer un sabotage** : `Object.assign` et le spread **évaluent
-  les getters et en copient la valeur**. Donc mettre des getters dans l'état *marche par accident*, et le
+  les getters et en copient la valeur**. Donc mettre des getters dans l'état _marche par accident_, et le
   sabotage qui le fait ne casse **aucun test**. Ce qui fait tomber la garde (9 tests), c'est un `publish`
   qui n'incrémente que le compteur sans relire la ligne.
 - **La ligne ESLint qui ne gardait rien, et c'est le plus gros défaut de méthode du soir.** Une ligne de
@@ -1295,30 +1296,30 @@ gate verte à chaque pas, tout poussé. Livré : `4a` (le store), `4b` (`view/`)
   fond à 45°N, donc la condition est `scale > 1`. Une constante aurait été fausse deux fois — latitude et
   regénération du fond.
 - **Le fond se cuit sans rien nettoyer.** `bakeTerrainPixels(dem, mask, options, **null**)` : le dernier
-  argument est l'année installée, et un `null` cuit le terrain **nu**. Donc *« avec le tint politique
-  retiré »*, que `s99` liste parmi les choses tranchées, s'obtient **en ne l'installant jamais** — pas
+  argument est l'année installée, et un `null` cuit le terrain **nu**. Donc _« avec le tint politique
+  retiré »_, que `s99` liste parmi les choses tranchées, s'obtient **en ne l'installant jamais** — pas
   d'état à nettoyer, pas de `clearPolitical` à oublier. Lu dans la signature.
 - **L'ajout du dev : offline et online**, et le principe qui rend les deux modes supportables — **le geste
   est identique, seule la destination change**. L'auteur fait ‹ctrl+s› et n'a pas à savoir où il est, ce
   qui en fait un **câblage** et non deux produits. Écriture en ligne par une **Netlify Function** qui
-  commite, et le refus argumenté d'un *blob store* pour les années publiées : la donnée sortirait du
+  commite, et le refus argumenté d'un _blob store_ pour les années publiées : la donnée sortirait du
   build, donc les deux gardes CI cesseraient de la couvrir, et git porte la provenance qu'un bucket ne
   porte pas. `s15-offline-and-online.md`, **14 scénarios d'intégration** — les premiers du jeu dont le
   `Given` est un état du système — et **quatre trous neufs, H-27 à H-30**.
-- **Sa question qui a remis le sujet à l'endroit** : *« les borders, on n'est pas censé les générer grâce
-  à l'outil ? »* Oui — `public/borders/` est l'**entrée héritée** de l'atlas, 21 payloads GPL condamnés, et
+- **Sa question qui a remis le sujet à l'endroit** : _« les borders, on n'est pas censé les générer grâce
+  à l'outil ? »_ Oui — `public/borders/` est l'**entrée héritée** de l'atlas, 21 payloads GPL condamnés, et
   le Cartographe n'en a **aucun besoin**. Ce qu'il lui faut est `heightmaps/`, `masks/`, `rivers/`, tous
   propres. Déclencheur inscrit : le jour où 1100 est dessiné, `borders/` et son lecteur `unauthored`
-  partent — c'est le moment où le dépôt cesse d'avoir du GPL *sur la machine*.
+  partent — c'est le moment où le dépôt cesse d'avoir du GPL _sur la machine_.
 - **La licence, et trois positions successives dont deux fausses.** La skill React de Vercel n'est **pas**
   commitée, et c'est le bon appel : aucun fichier de licence, la seule mention `MIT` étant une ligne de
   frontmatter écrite par un empaqueteur inconnu. Mais sur le `publicDir`, j'ai d'abord affirmé que le
   raccourci **publierait du GPL** — **faux** : les fichiers étant gitignorés, ils n'atteignent jamais le
   checkout de la CI. Ce qu'il fait réellement, c'est **étendre une surface que la garde ne couvre pas**,
-  et le remède tient en une ligne. Et sa question *« on n'a plus rien sous licence ? »* appelait une
+  et le remède tient en une ligne. Et sa question _« on n'a plus rien sous licence ? »_ appelait une
   réponse en deux temps : vrai **du dépôt**, faux **de sa machine** — 21 fichiers, 6,5 Mo, gitignorés.
-- **Deux erreurs de moi corrigées en mesurant, sur l'archive des skills.** J'ai dit *« 3 810 lignes, trop
-  gros pour une skill »* — **mauvais fichier** : c'était son `AGENTS.md` généré, son `SKILL.md` fait 7 ko
+- **Deux erreurs de moi corrigées en mesurant, sur l'archive des skills.** J'ai dit _« 3 810 lignes, trop
+  gros pour une skill »_ — **mauvais fichier** : c'était son `AGENTS.md` généré, son `SKILL.md` fait 7 ko
   sur **70 règles adressables**, soit exactement la forme que le dev décrivait. Et j'ai condamné
   `state-storage` sur son **périmètre sans l'avoir lu**, alors qu'il porte le piège
   `useSyncExternalStore`/slice dérivée qui **confirme de source indépendante** ma trouvaille sur
@@ -1328,8 +1329,8 @@ gate verte à chaque pas, tout poussé. Livré : `4a` (le store), `4b` (`view/`)
   `attachCanvas` à 87 lignes puis encore 53. Décomposés en fonctions nommées, **jamais désactivés** — et
   la décomposition de `attachCanvas` est celle qu'ARCH-012 demande, le câblage d'un côté, chaque geste
   lisible seul de l'autre.
-- **Sonar a buté sur le quota, exactement comme prédit le 24/09** — *« Number of lines exceeded… the total
-  number of lines of code in **your organization** »*. **Non bloquant par décision** : `validate.yml` dit
+- **Sonar a buté sur le quota, exactement comme prédit le 24/09** — _« Number of lines exceeded… the total
+  number of lines of code in **your organization** »_. **Non bloquant par décision** : `validate.yml` dit
   lui-même qu'un échec Sonar est un problème de disponibilité et non un verdict sur le code. Le levier
   n'est pas ce dépôt (~7 500 lignes contre 42 666 pour les autres projets de l'organisation).
 - **Trois `cd` de ma part**, que `CLAUDE.md` interdit parce que le hook du journal écrit relativement à
@@ -1342,19 +1343,19 @@ Une plage : **22:21 → 00:34 (2 h 12, 214 actions)**, après ~46 h de coupure. 
 34 fichiers, **1392 → 1399 tests**. Le chantier ouvert le 27/09 totalise **9 h 34** sur 3 plages. La
 première heure a été perdue par ma faute et le dev a **tout remis à zéro** avant qu'on reprenne pas à pas.
 
-- **Ma faute principale, et elle est simple** : il a dit *« quand tu fais une surcharge, tu la crées dans le
-  paquet concerné »*. Je l'ai mise **dans la config racine**, puis j'ai argumenté la mesure au lieu de faire
+- **Ma faute principale, et elle est simple** : il a dit _« quand tu fais une surcharge, tu la crées dans le
+  paquet concerné »_. Je l'ai mise **dans la config racine**, puis j'ai argumenté la mesure au lieu de faire
   ce qu'il demandait. Il a tout supprimé — l'arbre est revenu à `2690397` — et on a repris **étape par
   étape, en s'arrêtant à chaque fois**, sur sa consigne.
 - **La cause de l'erreur est documentable, et c'est la leçon** : j'ai ouvert **un seul** de ses sept dépôts
   voisins (`vite-mf-monorepo`), j'y ai vu **une** config à la racine, et j'ai généralisé. En cherchant
   vraiment : `find` sur les sept rend **9 configs par paquet** dans `vite-mf-monorepo` et
-  `react-and-react-native-financial-app`. Les exemples étaient là. *Regarder un échantillon et conclure
-  n'est pas vérifier.*
+  `react-and-react-native-financial-app`. Les exemples étaient là. _Regarder un échantillon et conclure
+  n'est pas vérifier._
 - **Trois autres reproches, tous justes.** J'ai posé **trois questions** qui n'avaient pas d'arbitrage (le
-  catalogue, `jest-dom`, le placement de la config) — *« qu'est-ce que t'as là ? »*. J'ai **réécrit des
-  fichiers que `4a` n'avait pas à toucher**. Et sur le `format:check` : *« c'est quoi la décision qu'il y a
-  à prendre là ? »* — il n'y en avait aucune, quatre lignes contre un trou réel.
+  catalogue, `jest-dom`, le placement de la config) — _« qu'est-ce que t'as là ? »_. J'ai **réécrit des
+  fichiers que `4a` n'avait pas à toucher**. Et sur le `format:check` : _« c'est quoi la décision qu'il y a
+  à prendre là ? »_ — il n'y en avait aucune, quatre lignes contre un trou réel.
 - **La surcharge, dans sa forme à lui** : `packages/cartographer/eslint.config.js` **réimporte** la racine
   puis empile React, hooks, jsx-a11y et react-refresh — exactement ce que fait son `apps/home`. Mesuré
   avant d'écrire : **flat config n'a aucune cascade**, ESLint résout **une** config depuis le **répertoire
@@ -1437,8 +1438,8 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
 - **Générique sur l'état, et ce n'est pas de l'abstraction gratuite** : `s03` exige qu'un undo rende la
   **sélection**, qui vivra dans le chrome. Une ligne qui connaîtrait `YearDocument` ne pourrait pas la
   porter. C'est ce qui permet à l'étape 3 d'atterrir dans `core` **du tout**.
-- **Copie à l'entrée ET à la sortie.** La version plausible ne fait que la première, et alors *annuler →
-  éditer → refaire* rejoue un état que l'édition a réécrit en place. Vérifié en retirant les deux : trois
+- **Copie à l'entrée ET à la sortie.** La version plausible ne fait que la première, et alors _annuler →
+  éditer → refaire_ rejoue un état que l'édition a réécrit en place. Vérifié en retirant les deux : trois
   tests tombent, dont un non prévu (le test du copieur qui lève garde aussi l'entrée).
 - **`cloneYearDocument` est le seul endroit qui connaît la forme du document**, et `openYearDocument` lui
   délègue sa copie. Un champ oublié dans un endroit au lieu de deux, gardé par un test qui parcourt les clés.
@@ -1452,7 +1453,7 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
   exact — migré. `derivedBorders.test.ts` garde son échelle 0–20, qui rend ses assertions géométriques
   lisibles ; la réécrire n'achèterait rien. Et une preuve citait le mauvais fichier.
 - **Le panneau historique, sur capture du dev** (`2487895`). Ce qu'il garde : la liste, nom + icône, le rang
-  courant, et **cliquer un rang y va** — *« naviguer plus vite sans avoir fait 10 fois undo »*. Ce qu'il
+  courant, et **cliquer un rang y va** — _« naviguer plus vite sans avoir fait 10 fois undo »_. Ce qu'il
   refuse : la case à cocher et **la poubelle**.
 - **Ma prémisse a été vérifiée contre la source et la sienne était fausse** : un instantané Photoshop est un
   **seul état d'image**, pas une pile, et y revenir efface même les états listés. **Mais son idée est
@@ -1465,18 +1466,18 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
   d'affichage — les 9 regex de couleur et l'ordre Royaume-Uni-avant-Irlande.
 - **« Branche » était un mot de moi, jamais défini**, et le dev a dû demander ce que ça voulait dire. Ajouté
   au glossaire avec `jalon`, `kind` et `{History}`. La décision (pas d'arbre) est la sienne.
-- **Les références à l'autre logiciel retirées** (`1cbe7b8`), à sa demande : *« ça reprend pas tout
-  complètement »*. Les trois raisons réécrites sur leur propre fondement, et deux se lisent mieux.
-- **Zustand décidé, après que j'aie recommandé l'inverse.** Son critère — *« Jotai je connais, Zustand
-  non ; du code que je ne lis pas, je ne peux pas le corriger »* — était plus fort que mon argument
+- **Les références à l'autre logiciel retirées** (`1cbe7b8`), à sa demande : _« ça reprend pas tout
+  complètement »_. Les trois raisons réécrites sur leur propre fondement, et deux se lisent mieux.
+- **Zustand décidé, après que j'aie recommandé l'inverse.** Son critère — _« Jotai je connais, Zustand
+  non ; du code que je ne lis pas, je ne peux pas le corriger »_ — était plus fort que mon argument
   technique, et je l'ai dit. Il a lu le snippet puis la doc, et a tranché Zustand. Sources chargées dans
   `opensrc` (v5.0.15) : le store entier fait **~30 lignes**, aucun Provider, et `create()` fait
   `Object.assign(useBoundStore, api)` — le hook porte `getState`/`setState`/`subscribe`.
 - **Une collision que la source a confirmée** : le document est **muté en place** (décision de l'étape 2) et
   Zustand détecte par identité de référence. Donc un **compteur de version** n'est pas une précaution, c'est
   la seule chose qui marche.
-- **Trois reproches du dev, tous justes.** *« T'en as écrit des plâtrés »* / *« je voudrais répondre à une
-  chose à la fois »* — mes réponses étaient des murs et il a décroché. Et *« tu m'attaques rien du tout »*
+- **Trois reproches du dev, tous justes.** _« T'en as écrit des plâtrés »_ / _« je voudrais répondre à une
+  chose à la fois »_ — mes réponses étaient des murs et il a décroché. Et _« tu m'attaques rien du tout »_
   quand j'ai commencé à explorer la config pour `4a` alors qu'il n'avait pas dit d'y aller.
 - **context7 existe sur sa machine mais n'était pas branché ici** — il l'était pour trois autres projets.
   Ajouté par le dev en fin de session ; il faut un redémarrage pour que je le voie. **Vérifié au
@@ -1484,7 +1485,7 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
   donc la source vendue reste l'autorité sur un point de comportement fin, context7 sert aux patterns.
 - **Il existe une skill officielle pour Zustand, et c'est du routage, pas un mode d'emploi.** Poimandres
   publie `pmndrs/claude-code-plugin` (MIT), qui embarque une skill `docs` et le serveur MCP
-  `docs.pmnd.rs/api/mcp`. Sa description nomme explicitement zustand, *« store patterns, migrations »*, et
+  `docs.pmnd.rs/api/mcp`. Sa description nomme explicitement zustand, _« store patterns, migrations »_, et
   ce qu'elle fait est d'**interdire la réponse de mémoire** : lire l'index, choisir la route, charger la
   page. Prouvée de bout en bout avant d'y croire — `docs://zustand/index` rend 41 pages.
 - **Installée au niveau du dépôt, et c'était le bon choix.** Elle atterrit dans
@@ -1495,11 +1496,11 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
   pour économiser une ligne de description.
 - **Aucune des trois skills téléchargées n'était officielle**, contrairement à ce qu'on croyait : une
   signée d'un tiers, une marquée `source: community`, une sans auteur. **Trois sont devenues une.**
-  `zustand-store-creator` n'avait aucun contenu (*« provides step-by-step guidance for zustand store
-  creator »*) ; `zustand-store-ts` renvoyait à un `assets/template.ts` **qui n'existe pas** et à
+  `zustand-store-creator` n'avait aucun contenu (_« provides step-by-step guidance for zustand store
+  creator »_) ; `zustand-store-ts` renvoyait à un `assets/template.ts` **qui n'existe pas** et à
   `src/frontend/src/store/`, l'arborescence de quelqu'un d'autre.
-- **L'erreur qui aurait mordu à `4a`.** La skill la plus fournie affirmait *« 5.x — improved type
-  inference »* et donnait `create((set, get) => ({...}))` sans paramètre de type. **Faux** : le currying
+- **L'erreur qui aurait mordu à `4a`.** La skill la plus fournie affirmait _« 5.x — improved type
+  inference »_ et donnait `create((set, get) => ({...}))` sans paramètre de type. **Faux** : le currying
   `create<T>()(...)` reste obligatoire — c'est un contournement de `microsoft/TypeScript#10571`, `T` étant
   à la fois en position covariante et contravariante — et sans lui TS infère `unknown`. C'est exactement
   la ligne que j'aurais appliquée en écrivant le store.
@@ -1507,7 +1508,7 @@ touché aucun code du projet : elle a réparé l'outillage avec lequel on va éc
   `setState(initialState, true)` pour réinitialiser entre les tests. Lu ensuite à `vanilla.ts:76` : avec
   `replace` vrai, l'état **devient** l'objet passé, donc un littéral de `YearState` **efface toutes les
   actions** et l'appel suivant échoue. C'est la forme fusionnante qu'il faut. Écrire la règle ne suffit
-  pas — il faut lire la source *pendant* qu'on l'écrit.
+  pas — il faut lire la source _pendant_ qu'on l'écrit.
 - **Trois faits tirés de la source v5.0.15, qu'aucune des trois skills ne portait** : `useShallow` vit à
   `zustand/react/shallow` (`zustand/shallow` + second argument est la forme v4) · `subscribeWithSelector`
   accepte `{ equalityFn, fireImmediately }`, et **`fireImmediately` est exactement ce que veut un canevas
@@ -1530,41 +1531,41 @@ Une seule plage : **20:46 → 01:17 (4 h 30, 236 actions)**, après 2 jours de c
 
 - **Le registre par année, et c'est le dev qui a retourné ma factorisation.** `format.md` annonçait un
   registre partagé par les 21 siècles avec des noms datés — **mon argument, inscrit comme sa décision**,
-  exactement ce que la colonne `by` existe pour empêcher. Sa position : *« une année c'est une année »*.
+  exactement ce que la colonne `by` existe pour empêcher. Sa position : _« une année c'est une année »_.
   Ça **supprime** les noms datés, les relations datées et tout le problème d'identité inter-siècles.
   Un dossier par année, trois fichiers dedans.
 - **Et la mesure l'a confirmé avant la discussion.** Le spike `build-registry` a regroupé les 2 059
   relations OHM par Q-id et **éclaté le Royaume de France en quatre** — OHM donne un Q-id par période, donc
-  il identifie *une polity pendant une période*, pas une polity. Deux autres trouvailles : la France vivante
-  en 1100 (relation 2810170, *« Reaume de France »*) n'a **ni Q-id ni `name:fr`**, ce qui contredit `s02` sur
+  il identifie _une polity pendant une période_, pas une polity. Deux autres trouvailles : la France vivante
+  en 1100 (relation 2810170, _« Reaume de France »_) n'a **ni Q-id ni `name:fr`**, ce qui contredit `s02` sur
   le cas central ; et le catalogue `admin_level=2` remonte à la culture de Cernavodă en −4000, soit **748
   polities dont 52 vivantes en 1100**.
 - **La frontière se dérive des ancres partagées, et c'est sa déduction.** Je défendais le contraire en
   citant notre propre document, qui disait « le bord des aplats ». Sa version est **exacte** au lieu d'une
   marche de 1,9 km, et retire les 825 ms de raster entre « je ferme un anneau » et « je vois la frontière ».
-- **Son cas du vassal a cassé ma règle le jour même.** L'Aquitaine dessinée *dans* la France ne partage
+- **Son cas du vassal a cassé ma règle le jour même.** L'Aquitaine dessinée _dans_ la France ne partage
   aucune ancre, donc « tenue par un tracé », donc ma règle dessinait une frontière contre le vide au milieu
   de la France. Ce qui répond est l'**inclusion** — ce contour est-il dans celui-là. Le compte répond au cas
   côte à côte ; il ne répond pas au cas imbriqué.
-- **`containment` renommé `inclusion` partout**, à sa demande, avec sa raison : *« on comprend rien »*. Le
+- **`containment` renommé `inclusion` partout**, à sa demande, avec sa raison : _« on comprend rien »_. Le
   mot ne se lisait pas, et ce corpus est relu par une seule personne. `inclusion` marche dans les deux
   langues, donc code et glossaire partagent enfin un vocabulaire. `dériver` ajouté au glossaire aussi —
   employé pendant des heures sans jamais avoir été défini.
 - **Deux vassaux côte à côte : le poids suit la profondeur du plus proche suzerain commun.** Ferme **H-23**
   avec la même arithmétique, et corrige le scénario « colorer par suzerain » qui donnait la main de vassal à
-  *toutes* les frontières internes — donc affirmait un hommage inexistant, au pire moment (couleurs
+  _toutes_ les frontières internes — donc affirmait un hommage inexistant, au pire moment (couleurs
   fusionnées, l'encre est tout ce qui reste au lecteur).
-- **L'arbre de vassalité dans `{Polities}`**, son idée : un vassal se crée *dans* son suzerain, comme un
+- **L'arbre de vassalité dans `{Polities}`**, son idée : un vassal se crée _dans_ son suzerain, comme un
   sous-calque. Ça ferme la vulnérabilité du champ suzerain qu'on oublie — il n'y a plus de champ. Trois
   garde-fous écrits : l'allure d'Illustrator mais pas son sens (imbriquer déclare un hommage, pas un ordre
   d'empilement), l'union personnelle hors de l'arbre, et l'inclusion qui garde un rôle plus petit.
-- **`s13-overrides.md`, sa contrainte tenue entière** : *« je veux pouvoir surcharger. »* Précédence
+- **`s13-overrides.md`, sa contrainte tenue entière** : _« je veux pouvoir surcharger. »_ Précédence
   complète — un **bout d'ancres** bat une paire de pays bat la règle déduite. Et sa correction sur la
   sélection : **une marquise**, les segments viennent avec les ancres, le geste décide. J'avais inventé un
   clic-sur-segment et une « unité naturelle de ligne » ; supprimés tous les deux.
 - **Zod, et la question qui valait 19 ko.** J'ai cité **8 Mo** — le paquet npm sur disque, dont rien n'est
-  embarqué — puis mesuré zéro, sans jamais poser sa question : *« n'y a-t-il pas moyen d'utiliser juste ce
-  qu'il faut ? »* Il y en a un, ça s'appelle `zod/mini`, et c'est mesuré : **+25,10 ko** pour l'API classique
+  embarqué — puis mesuré zéro, sans jamais poser sa question : _« n'y a-t-il pas moyen d'utiliser juste ce
+  qu'il faut ? »_ Il y en a un, ça s'appelle `zod/mini`, et c'est mesuré : **+25,10 ko** pour l'API classique
   contre **+6,39 ko** pour mini. Total du format entier câblé : **+9,15 ko gzip**, et le chunk worker
   **identique à l'octet** (hash inchangé).
 - **Le manifeste plutôt qu'un 404.** `years/index.json` liste les années dessinées. Un 404 est aussi ce que
@@ -1579,19 +1580,19 @@ Une seule plage : **20:46 → 01:17 (4 h 30, 236 actions)**, après 2 jours de c
   faisant importer `editor/` depuis `data/` — refusé. **Et ça a révélé un défaut** : le message d'erreur
   parlait du renderer, parce que j'avais ajouté l'interdit sans toucher l'explication.
 - **Un bug de symétrie trouvé par un test qui contredisait mon code.** Le poids d'une frontière était compté
-  depuis *le premier argument*, donc la même frontière sortait à deux épaisseurs selon qui posait la
+  depuis _le premier argument_, donc la même frontière sortait à deux épaisseurs selon qui posait la
   question. C'est la profondeur du suzerain commun désormais, symétrique par construction.
 - **Et la leçon qui vaut pour la suite : mes deux premiers sabotages n'ont pas fait tomber le test-vedette.**
   Celui qui garantit que l'aller-retour conserve le partage passait alors que la sauvegarde était cassée.
   Ce qui le fait tomber, c'est **l'implémentation naïve plausible** — chaque pays emportant sa propre copie
   de ses points, ce que fait `RegionPayload`. Consigné en mémoire : pour vérifier un test, écrire le code
   que quelqu'un écrirait vraiment, pas une casse arbitraire.
-- **Trois reproches du dev, tous justes.** *« Tu fais flipper, tu donnes pas de solution »* — j'ai cité une
-  règle au lieu d'expliquer un mécanisme. *« Tu vas t'arrêter ? »* — j'ai enchaîné des scénarios alors qu'il
-  demandait de s'arrêter. Et *« tu me donnes pas d'ordre »* — j'ai décidé de clore la session à sa place.
+- **Trois reproches du dev, tous justes.** _« Tu fais flipper, tu donnes pas de solution »_ — j'ai cité une
+  règle au lieu d'expliquer un mécanisme. _« Tu vas t'arrêter ? »_ — j'ai enchaîné des scénarios alors qu'il
+  demandait de s'arrêter. Et _« tu me donnes pas d'ordre »_ — j'ai décidé de clore la session à sa place.
 - **Deux fautes de procédure, de moi.** J'ai utilisé `cd` alors que `CLAUDE.md` l'interdit, et c'est ce qui a
   cassé la commande de renommage. Et j'ai laissé l'arbre **rouge** en étendant `AssetKind` sans lancer la
-  gate — la casse était prévisible et je l'ai annoncée *après*.
+  gate — la casse était prévisible et je l'ai annoncée _après_.
 
 ### 2026-09-24 — Le dépôt existe, l'atlas est en ligne, et 21 fichiers GPL en sont sortis
 
@@ -1599,7 +1600,7 @@ Une seule plage : **14:56 → 23:48 (8 h 52, 278 actions)**, **30 commits**, **1
 verte à chaque pas. Le chantier ouvert depuis le 22/09 totalise **16 h 16**. Livrable :
 **https://europe-historical-atlas.netlify.app**, et le dépôt `fubaritico/europe-historical-atlas`, privé.
 
-- **Le monorepo, et `core` sans three.js *par contrat*.** 139 fichiers déplacés, 106 specifiers réécrits,
+- **Le monorepo, et `core` sans three.js _par contrat_.** 139 fichiers déplacés, 106 specifiers réécrits,
   zéro changement de comportement. La propriété n'a pas été créée, elle a été **relevée puis rendue
   opposable** : les quatre dossiers de `core` étaient déjà three-free, tests compris. Câblage prouvé par
   une **sonde jetable** avant de bouger quoi que ce soit — `exports: { "./*": "./src/*.ts" }`, pas de
@@ -1635,20 +1636,20 @@ verte à chaque pas. Le chantier ouvert depuis le 22/09 totalise **16 h 16**. Li
   classique des GitHub Actions. Passé par l'environnement, sujet seul.
 - **Sonar opérationnel, après avoir cessé d'analyser des données.** `europe-rivers.json` pesait **33 352
   lignes, 82 % de l'analyse**, et consommait à lui seul le quota de l'organisation. Le principe est écrit
-  dans le fichier plutôt que le chemin : *une donnée générée n'est pas du code source*. Et un token dédié
+  dans le fichier plutôt que le chemin : _une donnée générée n'est pas du code source_. Et un token dédié
   au projet a réglé un 403 que le token global ne passait pas.
 - **Les secrets d'organisation n'atteignent pas un dépôt privé en plan Free** — mur documenté, pas
   réglage. Le piège est en aval : `SONAR_TOKEN` vide → le job se saute → **pipeline vert sans analyser
-  une ligne**. Ce qui sauve, c'est le *skip notice* qui le dit à voix haute.
+  une ligne**. Ce qui sauve, c'est le _skip notice_ qui le dit à voix haute.
 - **Netlify ne construit pas.** La CI construit une fois, contrôle la sortie, et déploie **ces octets-là**
   — les deux gardes ne valent que si ce qui est contrôlé est ce qui est servi. Vérifié : l'empreinte du
   bundle en ligne est celle du build local. `_headers` voyage **dans** l'artefact, parce qu'en
   `--no-build` le `netlify.toml` est résolu depuis un répertoire facile à se tromper, et silencieusement.
 - **Le déploiement a coûté trois heures pour une cause triviale** : des jetons Netlify périmés. En chemin,
   le dev a testé avec l'ID du site à la place du jeton — et c'était probablement le même mélange dans les
-  secrets. À retenir : un `Unauthorized` ne dit pas *lequel* des deux est en cause.
-- **La capture d'écran du README est différée à P5**, décision du dev avec sa raison : *un relief sans
-  couche politique se lit comme un rendu de terrain*. Ça donne un déclencheur au lieu d'une intention.
+  secrets. À retenir : un `Unauthorized` ne dit pas _lequel_ des deux est en cause.
+- **La capture d'écran du README est différée à P5**, décision du dev avec sa raison : _un relief sans
+  couche politique se lit comme un rendu de terrain_. Ça donne un déclencheur au lieu d'une intention.
 - **Deux reproches du dev, tous deux justes.** J'ai inventé « Payload n'est jamais déployé » — qu'il n'a
   jamais dit — et je l'ai inscrit sous « décisions non rouvrables ». Le tableau porte désormais une
   colonne **`by`** : les lignes `dev` sont acquises, les lignes `inferred` sont mes arguments. Et le
@@ -1666,8 +1667,8 @@ verte à chaque pas. Le chantier ouvert depuis le 22/09 totalise **16 h 16**. Li
   bloquante. Tout le système de notices n'écoutait que les échecs **anticipés**. Le titre ne dit rien de
   la cause, volontairement — prétendre en savoir plus est ce qui a fait accuser le JSON pour un fichier
   absent. Neuf tests, vérifiés en commentant l'écouteur : cinq sont tombés.
-- **L'accord grammatical des notices était faux partout**, découvert en production : *« Les frontières
-  historiques **a** échoué »*. Et **un test existant exigeait la faute** — c'est ainsi qu'elle a été
+- **L'accord grammatical des notices était faux partout**, découvert en production : _« Les frontières
+  historiques **a** échoué »_. Et **un test existant exigeait la faute** — c'est ainsi qu'elle a été
   livrée avec une suite verte.
 
 ### 2026-09-22 (soir) — Dix trous fermés, le format écrit, les écrans du Cartographe
@@ -1677,14 +1678,14 @@ Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, apr�
 `cartographer-ui-inventory.md`, le spike `terrain-bitmap`, et `files/plans/cartographer/design/`
 (5 écrans + 10 curseurs).
 
-- **Le dev a reconnu Illustrator dans les scénarios** — *« la flèche blanche qui sélectionne des points (A)
-  et l'outil plume (P) »* — et le Cartographe n'a plus que **deux outils**. Pas de Bézier, pas d'outil V,
-  **pas de boîte de transformation** : *« nous ne voulons juste que dessiner »*. Une ancre est **blanche à
+- **Le dev a reconnu Illustrator dans les scénarios** — _« la flèche blanche qui sélectionne des points (A)
+  et l'outil plume (P) »_ — et le Cartographe n'a plus que **deux outils**. Pas de Bézier, pas d'outil V,
+  **pas de boîte de transformation** : _« nous ne voulons juste que dessiner »_. Une ancre est **blanche à
   bord bleu, pleine en bleu quand sélectionnée** ; la marquise ne laisse **aucun cadre** au relâchement.
-- **H-06 fermé par un geste, pas par un modèle.** *« On duplique un tracé et on aura des tracés
-  concomitants, c'est tout. »* La condition d'implémentation est tout : **on duplique la liste, jamais les
+- **H-06 fermé par un geste, pas par un modèle.** _« On duplique un tracé et on aura des tracés
+  concomitants, c'est tout. »_ La condition d'implémentation est tout : **on duplique la liste, jamais les
   points**. Un tracé est une liste ordonnée de références vers des ancres ; deux tracés sur les mêmes
-  indices *sont* collés. Copier les ancres ferait revenir le liseré que `extractRegionBorders` avait
+  indices _sont_ collés. Copier les ancres ferait revenir le liseré que `extractRegionBorders` avait
   aboli au rendu.
 - **Ma formulation « ça devient impossible » l'a fait tiquer, à raison** : rien n'est interdit, c'est le
   **défaut** qui devient impossible. Corrigé dans les docs.
@@ -1692,8 +1693,8 @@ Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, apr�
   l'échelle continentale, et c'est juste) · H-05a (**un vassal dans son suzerain n'est pas un
   chevauchement**, le plus spécifique peint, ce qui remplace le « dernier index gagne » et répare
   `colorBySuzerain`) · H-07 (**la containment décide** : contenu = trou, disjoint = exclave, plus aucune
-  question) · H-09 (supprimé : on déplace des points, pas des tracés) · H-10 (un geste = un pas ; *« les
-  412 points disparaissent d'un coup »*) · H-11 (**chaque année dessinée est indépendante**) · H-14 (une
+  question) · H-09 (supprimé : on déplace des points, pas des tracés) · H-10 (un geste = un pas ; _« les
+  412 points disparaissent d'un coup »_) · H-11 (**chaque année dessinée est indépendante**) · H-14 (une
   année, un fichier) · H-22 (plus de parent, donc plus d'arbre) · H-26 (à moitié : le trou est attribué
   **au moment où il naît**).
 - **H-12 écrit** — `files/plans/cartographer/format.md`. Deux fichiers : `registry.json` (identités,
@@ -1702,8 +1703,8 @@ Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, apr�
   nœuds — **aucun des trois ne servait**.
 - **Le format est petit parce que ses décisions l'ont vidé** : H-11 retire les références croisées, H-06
   le modèle topologique, le registre partagé les noms répétés dans 21 fichiers.
-- **Le registre est séparé, avec des noms datés** — *regnum Francorum* → *regnum Franciae* vers 1190, une
-  polity, un identifiant. Ça ne contredit pas H-11 : *« chaque année **dessinée** est indépendante »*, et
+- **Le registre est séparé, avec des noms datés** — _regnum Francorum_ → _regnum Franciae_ vers 1190, une
+  polity, un identifiant. Ça ne contredit pas H-11 : _« chaque année **dessinée** est indépendante »_, et
   un nom n'est pas dessiné. Retire les deux entrées `Spain` de 1700, les 9 regex de couleur et l'ordre
   Royaume-Uni-avant-Irlande.
 - **Le scénario le plus banal manquait** : sélectionner un pays et rouvrir son formulaire. Trouvé par le
@@ -1711,13 +1712,13 @@ Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, apr�
 - **« Enregistrer sous » est tout le mécanisme de déclinaison** — ferme le fichier, charge la copie,
   **demande l'année** (sinon un fichier nommé 1110 se déclare 1100). Ça a **réécrit s05 aux trois quarts**.
   Et l'écrasement d'une année existante **renomme l'ancienne** plutôt que de la détruire.
-- **Deux reprises du dev, toutes deux justes.** *« Pourquoi 50 corrections, ça sort d'où ? »* — de moi, et
+- **Deux reprises du dev, toutes deux justes.** _« Pourquoi 50 corrections, ça sort d'où ? »_ — de moi, et
   le chiffre était faux (21 cartes, pas 50) et mon exemple aussi (la côte vient de Natural Earth, elle
-  n'est pas dans les fichiers). *« Tes règles, c'est des contraintes »* — vrai : elles sont des **défauts
+  n'est pas dans les fichiers). _« Tes règles, c'est des contraintes »_ — vrai : elles sont des **défauts
   surchargeables**, écrit en tête de `s00`. Il ne reste que **deux contraintes réelles** : les ancres
   partagées et la licence.
-- **Le critère de justesse de l'atlas a changé de nature**, et c'est de lui : *« ce qui serait gênant,
-  c'est qu'une ville ne soit pas du bon côté »*. Donc **les villes sont l'instrument de mesure**, pas un
+- **Le critère de justesse de l'atlas a changé de nature**, et c'est de lui : _« ce qui serait gênant,
+  c'est qu'une ville ne soit pas du bon côté »_. Donc **les villes sont l'instrument de mesure**, pas un
   confort — ce qui rend l'absence de la Saône sans conséquence. Le remède le moins cher est gratuit :
   afficher chaque ville avec le pays qui la tient, le raster sait déjà répondre.
 - **La main d'une frontière est une donnée, sa géométrie jamais** — `{ between, hand }`, zéro coordonnée,
@@ -1756,12 +1757,12 @@ fichier de `src/` touché** — session entièrement de conception. Livrables : 
 - **Le repère temporel injecté au démarrage était faux** — le hook annonçait « chantier EN COURS,
   02:54 » alors que le rapport réel disait 4 jours de coupure. Vérifier le rapport, pas le hook.
 - **Le pipeline politique relevé du code, de bout en bout** (9 étapes, `file:line`), parce que le dev
-  demandait *« qu'est-ce que consomme la couche qui affiche les frontières, comment on génère ça »*. Le
+  demandait _« qu'est-ce que consomme la couche qui affiche les frontières, comment on génère ça »_. Le
   chapitre 06 conçoit les outils ; personne n'avait écrit ce que la machine mange aujourd'hui.
 - **Quatre manques du format, dont un que le chapitre 06 ne nommait pas** : une polity **est** sa chaîne
   de caractères. D'où les 9 regex de `REGION_COLOR_RULES`, l'ordre porteur qui teste le Royaume-Uni avant
   l'Irlande, la garde `a === b` de `borderPatternFor`, et **deux entrées `Spain`** dans le payload 1700.
-  *« Le code couleur ne peut pas être contribué tant que la clé est un nom d'affichage. »*
+  _« Le code couleur ne peut pas être contribué tant que la clé est un nom d'affichage. »_
 - **Décidé : format B, aligné sur OHM.** Une région porte son **rang**, **de qui elle dépend**, son
   **nom**, sa **couleur**. Le moment est le moins cher possible : 20 payloads sur 21 sont GPL et déjà
   condamnés, le 21e est régénérable par un spike.
@@ -1779,13 +1780,13 @@ fichier de `src/` touché** — session entièrement de conception. Livrables : 
 - **1100 comme première carte contribuée**, et la mesure a retourné la prémisse. OHM y assemble
   **51 polities sur 52 à 98,1 %, zéro chaîne ouverte** — aussi propre qu'à 1700 — mais ne couvre que
   **45 % de l'Europe** (contre 55 % à 1500, 89 % à 1700, même méthode). **Et le Royaume de France n'a
-  aucune géométrie** : il existe en relation *label-only*, avec son nom, son rang et son Q-id.
+  aucune géométrie** : il existe en relation _label-only_, avec son nom, son rang et son Q-id.
   **Pour le siècle et le pays au cœur du projet, OHM donne l'identité et rien de la géographie.**
 - **L'édition au point est praticable** — médiane **108 sommets** par polity, 36 sur 51 sous 300. Les
   cinq au-dessus de 1000 sont Byzance, Seldjoukides, Abbassides, Norvège, Fatimides, dont **trois sont
   hors-champ**.
 - **Le décalque est mort, remplacé par le report à vue** (décision du dev). Ça **retourne le chapitre
-  06**, qui dit du filigrane géoréférencé *« c'est ça, le Cartographe »*, et sort le spike `fetch-atlas`
+  06**, qui dit du filigrane géoréférencé _« c'est ça, le Cartographe »_, et sort le spike `fetch-atlas`
   du chemin critique après qu'il ait été flagué ultra important le 17/09. **Ce que ça débloque est plus
   grand que ce que ça supprime : Duby et Euratlas redeviennent utilisables**, puisque reporter ce qu'on
   lit est de l'extraction de faits. Et c'est mesuré : une planche 1:10M calée tombe à 3–5 km quand nos
@@ -1801,16 +1802,16 @@ fichier de `src/` touché** — session entièrement de conception. Livrables : 
   une frontière · round-trip · **dériver 1110 de 1100** · remplacer une année GPL · registre · vassalité
   · labels · contrôle avant publication · îles · hors-champ. Leur livrable est **`s99-holes.md`, 26 trous**.
 - **Ce qui sort des scénarios** : rien n'est dupliqué entre années (les tronçons sont partagés, sinon
-  50 cartes = 50 corrections) ; le copy-on-write demande *« la ligne était mal tracée »* ou *« la
-  frontière a bougé »*, et seul l'auteur sait ; un liseré est un **défaut**, la Bretagne non revendiquée
+  50 cartes = 50 corrections) ; le copy-on-write demande _« la ligne était mal tracée »_ ou _« la
+  frontière a bougé »_, et seul l'auteur sait ; un liseré est un **défaut**, la Bretagne non revendiquée
   un **fait** ; la taille d'un label suit le **rang** et jamais la surface, ce qui règle le Saint-Empire.
 - **Zone éditoriale décidée** (lon −45…60, lat 20…76), **distincte de la bbox de rendu** : 45 polities
   dedans à 1100, 6 dehors. Fatimides, Abbassides et Zirides **dedans**, ce qui est juste pour les
   Croisades. La zone est **datée** — élargie à partir du XVIIIe. Jamais de découpe de géométrie à la
   limite : ça inventerait une frontière.
-- **Deux reproches du dev, tous deux gravés.** *« Tes doutes, j'en ai rien à foutre »* → réponses en
-  solutions, criticité exprimée, remède attaché — dans `CLAUDE.md` et en mémoire. Et *« fais-moi un
-  glossaire »* après qu'il ait décroché sur du vocabulaire non défini → `files/plans/glossaire.md`,
+- **Deux reproches du dev, tous deux gravés.** _« Tes doutes, j'en ai rien à foutre »_ → réponses en
+  solutions, criticité exprimée, remède attaché — dans `CLAUDE.md` et en mémoire. Et _« fais-moi un
+  glossaire »_ après qu'il ait décroché sur du vocabulaire non défini → `files/plans/glossaire.md`,
   **tout mot nouveau y atterrit désormais**. La collision « chapitre 06 » / « scénario 06 » était de moi :
   les scénarios sont préfixés `s`.
 
@@ -1841,7 +1842,7 @@ production vérifiés à chaque pas.
   partagent un élément, **sans aucun seuil de distance**. Le simple clic venant de recevoir un sens,
   chaque relâchement de drag-pan aurait déclenché un vol de 1400 ms. `pointerDragged` décide **une seule
   fois, là où vit le drag**, sur le chemin parcouru en pixels contre 4 px de tolérance. Vérifié en
-  cassant la garde exprès. Corrige au passage un défaut antérieur : `mapControls` traitait *tout*
+  cassant la garde exprès. Corrige au passage un défaut antérieur : `mapControls` traitait _tout_
   micro-mouvement comme un drag.
 - **`prefers-reduced-motion` n'effondrait pas `flyDurationMs`** alors que sa propre JSDoc l'affirmait.
 - **Trois autres findings de revue** : `mapInteraction` dépendait des quinze membres de `MapControls`
@@ -1855,12 +1856,12 @@ production vérifiés à chaque pas.
   en flex `space-between`**, et l'espace entre les mots est un item **vide**, qui achète deux écarts là
   où il y en avait un. `EUROPE` à 42 px contre 15, non par emphase : à la même laisse, six lettres à
   15 px se retrouveraient séparées d'un mot entier. Sur la feuille, une ligne, canevas 1440 → 1680 px.
-- **Le nom vivait en deux littéraux indépendants**, signalé par l'agent qualité *sans être filé* faute de
+- **Le nom vivait en deux littéraux indépendants**, signalé par l'agent qualité _sans être filé_ faute de
   sévérité attribuable — et c'était le point le plus important des trois. `ATLAS_SUBJECT` /
   `ATLAS_TITLE` / `ATLAS_FULL_NAME` dans `utils/lettering`, plus le test qui verrouille la
   concaténation. C'est la forme qui a donné à ce projet des aplats et des frontières en désaccord.
 - **`aria-label` était posé sur un `<p>`**, qui n'offre aucun rôle auquel il s'applique de façon fiable.
-  Avec une lettre par span, un lecteur d'écran aurait épelé. Le nom est désormais *dans* l'élément.
+  Avec une lettre par span, un lecteur d'écran aurait épelé. Le nom est désormais _dans_ l'élément.
 - **Le plan a été retourné par le dev** : les villes ne sont pas du décor, ce sont des **données**, donc
   l'outillage de contribution passe **avant** tout le reste. Et **trois modes de caméra** sont acquis —
   normal, focus, pays — les gestes d'accès non.
@@ -1872,7 +1873,7 @@ Trois plages : **11:28 → 12:59 (1 h 30)**, **16:00 → 16:14 (14 min)**, **22:
 
 - **Budgets de lisibilité, sans exemption** (`e7fb2e7`, `a4159f1`) — `max-lines` **400** (code seul),
   `max-lines-per-function` **50**, `max-depth` 4, `complexity` 10. Déclenché par `main.ts` à 950 lignes :
-  *« je voulais relire la manière dont ça fonctionnait, ben on ne peut pas »*. **La liste d'exemptions
+  _« je voulais relire la manière dont ça fonctionnait, ben on ne peut pas »_. **La liste d'exemptions
   par fichier a été construite puis jetée** sur refus du dev — la règle s'applique partout sauf aux
   tests, et seulement pour les deux budgets de lignes. Correction due : `complexity` compte les chemins
   d'exécution, `max-depth` l'indentation ; le dev demandait la seconde en nommant la première.
@@ -1888,8 +1889,8 @@ Trois plages : **11:28 → 12:59 (1 h 30)**, **16:00 → 16:14 (14 min)**, **22:
   quatre. `toNdc` refuse un rect de taille nulle **dans `pick`** : un rayon non fini ne rate pas, three
   répond une intersection arbitraire — démontré par un test avant de retirer la garde. **Le dev a jugé
   le fly-to mauvais en fin de session ; c'est le premier point de la reprise.**
-- **Règle de traitement d'erreur** (`rules/error-handling.md`) — *« tout traitement d'erreur doit être
-  sujet à une discussion »*. Distinction porteuse : mode dégradé **déclaré** / propagation bruyante /
+- **Règle de traitement d'erreur** (`rules/error-handling.md`) — _« tout traitement d'erreur doit être
+  sujet à une discussion »_. Distinction porteuse : mode dégradé **déclaré** / propagation bruyante /
   **substitution silencieuse**, cette dernière étant la forme dangereuse parce que plausible.
 - **La carte est une feuille imprimée** (`c487144`..`565fe63`) — vélin, bordure graduée alternée sur les
   quatre côtés, filets, degrés écrits dans la marge (français, `30°O` et jamais de signe moins), grain
@@ -1908,12 +1909,12 @@ Trois plages : **11:28 → 12:59 (1 h 30)**, **16:00 → 16:14 (14 min)**, **22:
   opaques **du plus proche au plus lointain**, la tranche plus lointaine est dessinée après et l'efface.
   **La preuve était dans le screenshot : les chiffres ont survécu, le bandeau non, et la seule
   différence est leur opacité.** `FRAME_RENDER_ORDER` retire la question au curseur.
-- **La tranche est au mauvais endroit, et c'est mesuré.** La *planche* (jupon uniforme sous le niveau de
+- **La tranche est au mauvais endroit, et c'est mesuré.** La _planche_ (jupon uniforme sous le niveau de
   la mer, tout autour, océan compris) se projette dans la marge dès que la caméra s'incline : 0,06 de
   profondeur couvraient **23 px contre 17 px de bandeau**. Elle remplissait les blocs clairs de sa
   couleur. **Mes deux tours de « plus foncé » n'ont pas créé le problème, ils l'ont révélé** : à
   `#c9bb9c` le mur tombait sur la valeur du vélin et restait invisible. `edgeDepth` est à 0 ; la
-  *section* (coupe dans la terre, là où il y a de la terre au bord) reste.
+  _section_ (coupe dans la terre, là où il y a de la terre au bord) reste.
 - **Bug d'espace colorimétrique identifié, non corrigé** — les couleurs par sommet sont écrites en sRGB
   dans un attribut que three lit en linéaire. Diagnostiqué en décodant le PNG du dev et en comparant :
   `#5f5342` prédit à `(164,155,139)`, mesuré `(162,155,141)`.
@@ -1924,12 +1925,12 @@ Une seule plage : **23:55 → 01:55, 2 h 00, 277 actions, 14 commits** `0027343`
 **351 → 482 tests**, gate verte à chaque pas, build de production vérifié à chaque étape.
 
 - **Le pipeline politique tourne dans un worker** — le gel à 70 % traité à sa cause : la cuisson de
-  texture n'était pas *découpable*, elle devait quitter le thread. **Deux ports et non un**, contre le
+  texture n'était pas _découpable_, elle devait quitter le thread. **Deux ports et non un**, contre le
   plan consigné : la cuisson a cinq appelants et le politique n'en est qu'un ; un port unique aurait
   laissé une seconde cuisson pour les quatre autres. Bénéfice non prévu — **les curseurs de texture ont
   cessé de geler l'onglet**.
 - **L'extraction du compositeur était nécessaire, pas cosmétique.** Une frontière de worker est aussi une
-  frontière de *bundle* : `composeTerrainRgba` était pure mais sous un en-tête important `three`. Nouvelle
+  frontière de _bundle_ : `composeTerrainRgba` était pure mais sous un en-tête important `three`. Nouvelle
   couche `pipeline/`, dont la règle ESLint **refuse `three`** — vérifiée en la faisant échouer exprès.
   Chunk worker : **12,6 ko, zéro three.js**, contre 648 ko côté principal.
 - **Démarrage en deux temps voulus** au lieu de trois subis. La grille marron était **ma régression** :
@@ -1940,7 +1941,7 @@ Une seule plage : **23:55 → 01:55, 2 h 00, 277 actions, 14 commits** `0027343`
   en ASCII. Cadrage trouvé au troisième essai (Mercator étire le nord : 300×384, puis 454, puis 299).
   `HISTORICΛL ΛTLΛS`, nom accessible en clair. +4,3 ko gzippés.
 - **SEC-001 fermé, ses deux moitiés** (chapitre 07). Taxonomie porteuse — `transport | schema |
-  consistency | semantic` en **champs**, pas en chaîne — gardes écrites à la main, `boundsMatch` comme
+consistency | semantic` en **champs**, pas en chaîne — gardes écrites à la main, `boundsMatch` comme
   contrôle sémantique inter-assets, politique de mode dégradé **déclarée** (le relief est la carte),
   `role="alert"` bloquant / `role="status"` dégradé.
 - **Raster politique à 4× par défaut** — 1,9 km au lieu de 3,8. Écarté jusque-là pour 825 ms de blocage,
@@ -1958,8 +1959,8 @@ Une seule plage : **23:55 → 01:55, 2 h 00, 277 actions, 14 commits** `0027343`
 ### 2026-09-16 (midi + soirée) — Frontières dérivées du raster, types de frontières, doctrine de revue, overlay
 
 18 commits `df3390d`..`b8eeaa8`, **245 → 351 tests**, gate verte à chaque pas. Deux plages : une à midi
-(1 commit), une de **21:14 à 23:53 — 2 h 40, 17 commits**, coupure de 8 h 28 entre les deux. *Durées
-tirées de git : le journal d'activité a été installé en fin de session et ne la couvre pas.*
+(1 commit), une de **21:14 à 23:53 — 2 h 40, 17 commits**, coupure de 8 h 28 entre les deux. _Durées
+tirées de git : le journal d'activité a été installé en fin de session et ne la couvre pas._
 
 - **Cause racine des frontières interrompues** (`df3390d`) — ni la taille des polities, ni le relief, ni
   le diagnostic consigné la veille. `separatesRegions` sondait **2 cellules** de part et d'autre d'un ring
@@ -1970,7 +1971,7 @@ tirées de git : le journal d'activité a été installé en fin de session et n
   Chaikin. **Sans trou par construction.** Mesuré à 1700 : 6 960 segments bruts, 28 329 après deux tours,
   7–30 ms, contre ~42 661 sommets pour l'ancien chemin.
 - **Groupées par couple de polities et rendues en chaînes** (`61fbd52`) — pas en segments : un pointillé
-  doit courir *le long* d'une frontière, un décalage parallèle a besoin des voisins de chaque sommet.
+  doit courir _le long_ d'une frontière, un décalage parallèle a besoin des voisins de chaque sommet.
 - **Types de frontière** — `data/borderStyles` (`solid | dashed | double`), table éditoriale à côté des
   couleurs. Piège attrapé sur données réelles : `Poland-Lithuania` satisfait **les deux moitiés** de sa
   propre règle, donc deux fragments homonymes auraient été séparés d'un pointillé absurde.

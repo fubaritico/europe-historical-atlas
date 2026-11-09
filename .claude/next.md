@@ -24,16 +24,25 @@ geste.
 `lakes.mjs`) sans tests ; sept lacs traversés en plusieurs tronçons et deux îles de l'Égée laissés à sa main ; les îles de
 l'Égée données à Byzance de mémoire, à sourcer ; des retenues modernes dans le masque de terre.
 
-**L'instance principale (le code), la prochaine session** (sa décision, 08/11, transmise par elle) : elle travaille avec
-l'historien, qui tient l'entretien du contexte, et peut lui déléguer des tickets. **ATLAS-333, la vitesse du changement de
-carte, est dans `main` et poussée depuis le 08/11 au soir** (la branche `atlas-baked-years` fusionnée ; essayée par lui sur la
-version buildée : _« là, rien à redire »_) — l'écran d'accueil et sa barre mesurée jusqu'à la première carte entière, les
-découpes et le règlement d'une année dans le worker, les sommets partagés, **le tampon de trois cartes** (sa décision : la
-carte affichée, la précédente, la suivante, _« comme un buffer de lecteur vidéo »_), une préparation qui échoue qualifiée
-réparable ou irréversible. Mesures : une carte pas prête 0,3 à 0,4 s ; une voisine préparée, une image de 43 ms ; un retour,
-8 ms. **La suite, dans À faire, dans son ordre** : **ATLAS-396** (les trois points qui restent : les 43 ms, les tampons dans
-le worker, la carte d'une date), ATLAS-394 et 395 (l'écran d'erreur, la fenêtre d'erreur). Le détail : `files/plans/atlas/
-year-switch-speed.md`, « Where we stopped ».
+**L'instance principale (le code)** travaille avec l'historien, qui tient l'entretien du contexte (sa décision, 08/11).
+**ATLAS-333 est dans `main` et poussé** (`9c62019`, le tampon de trois cartes compris — `completed.md`).
+
+**▶ ON REPREND ICI, l'instance du code — ATLAS-396 (En cours), arrêté le 09/11 à 2 h, sa décision : « on reprendra par ce que
+tu étais en train de faire »**. Worktree **`.claude/worktrees/baked-years`**, branche **`atlas-396-speed`** :
+
+1. **D'abord ramener dans `main` et pousser** ses deux commits essayés (_« c'est bon »_) : `53eb792` (la carte préparée
+   envoyée d'avance à la carte graphique — premier passage 43 ms → une image) et `14887af` (les pays posés dans le worker —
+   156–243 → 85–95 ms sur la page). Rebaser sur `main` d'abord : son `main` local a deux commits non poussés (`0bef68c`,
+   `4cb9cdf`, à lui et à l'historien).
+2. **Puis des repères de temps fins dans l'étape « pays »** (effacer, construire, bornes, ajouter, tribus) : ce qui reste des
+   85 ms de 1200 n'est pas expliqué, et j'ai déplacé du code en devinant deux fois.
+3. **Puis décider des tribus** : codées dans le worker, revues (3 constats corrigés), **non commitées, aucun gain mesuré**
+   (1200 n'en a pas ; 1100, même minute : 170–192 ms avant, 139–186 après). Les retirer si les repères disent qu'elles ne
+   pèsent rien.
+4. Ensuite les frontières (~250 ms) et les noms (~150 ms), le troisième point (la carte d'une date) ; puis ATLAS-394 et 395.
+   **Mesurer seulement sur une machine calme** (les scripts et la gate de l'historien ont monté la charge à 24 cette nuit) et
+   trois fois, la version d'avant dans la même minute. Le détail : `files/plans/atlas/year-switch-speed.md`, « Where we stopped
+   — 2026-11-09 ».
 
 **L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
 montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
