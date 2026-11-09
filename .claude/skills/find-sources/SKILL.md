@@ -25,6 +25,10 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
   name, a title, a publisher included (06/11: four authors and two titles typed from memory, two of them wrong).
 - **A quotation is verified before it is kept**: found word for word in the downloaded text, or read by eye on the
   page image when the text is OCR. One that cannot be found is dropped and said — never "nearly" kept.
+- **Neutral, every hypothesis followed** (the dev, 2026-11-09: *"on lit ce qu'on veut bien lire, on oublie l'embranchement
+  où on aurait pu diverger — parce qu'on a été partial"*). A question has several hypotheses, more or less known: every
+  one is named before reading, and every one is searched — in the indexes, the notes, the libraries — with the same care.
+  A branch not followed is written down as such, never dropped; the report says which hypotheses were read and how far.
 - **A divergence is kept, never settled.** Two readings are two lines. The most probable holder is named (the rule of
   `/enter-in-cms`), the others stay with their sources. Agreement is computed later, never claimed here.
 - **Witnesses, not pages.** Sources that copy one another count once: a Wikipedia page and the book it cites are one
@@ -34,7 +38,9 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
 
 ## The order — from the claim to its witnesses
 
-1. **Name the claim and every name of the place.** Its names in each language it had (Latin, Arabic, Castilian,
+1. **Name the claim, its hypotheses, and every name of the place.** The hypotheses first — every holder, date or
+   course a source or a historian has put forward, the less known with the known (the frame: neutral).
+   Then the names: Its names in each language it had (Latin, Arabic, Castilian,
    Catalan, Aragonese, Occitan, French, German…), the polity's names, the date and the neighbouring years. A search in
    one language misses the literature of the others (Siurana is *Šiurāna*; Lleida is *Lārida*, *Lérida*, *Ilerda*).
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
@@ -83,10 +89,11 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
       avec JSTOR, la BnF"*): **archive.org** — the last pages of `_djvu.txt`, free, the old books and regional
       histories; **JSTOR** and the **BnF** — the page images, behind the dev's accounts (step 9); Gallica's text mode.
       A book missing from one is looked for in the two others. Its language and spellings are the book's own.
-   3. **Search it for every name of step 1** — the place in each language, the polity, the holder, the neighbouring
-      places of the lot. Each entry found is an **index reference**: book, entry, pages.
+   3. **Search it for every name of step 1, for every hypothesis** — the place in each language, the polity, **each**
+      candidate holder, the neighbouring places of the lot. Each entry found is an **index reference**: book, entry,
+      pages, and the hypothesis it bears on.
    4. **Write each reference down before reading it**, in the lot's file (`files/plans/sources/<year>.md`, a table
-      *Index references*: book, entry, pages, given by the dev or deduced, read or not). Nothing is read twice, nothing
+      *Index references*: book, entry, pages, hypothesis, given by the dev or deduced, read or not). Nothing is read twice, nothing
       found is forgotten; a reference never read is said in the report.
    5. **Read every page it gives** — step 5: the passage, the sentence copied, verified on the text or the image.
    6. **Index after index** (the dev: *"index (+ index)"*): an entry pointing to a source — a charter, a chronicle, a
