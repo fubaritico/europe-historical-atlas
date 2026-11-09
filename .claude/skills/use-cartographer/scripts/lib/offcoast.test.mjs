@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { inlandOf, offCoastStretches, ringsOnContours, shoreDistance, shoreRetraces, unclaimedShores } from './offcoast.mjs'
+import { inlandOf, offCoastStretches, ringsOnContours, segmentGrid, shoreDistance, shoreRetraces, unclaimedShores } from './offcoast.mjs'
 import { holdersAt, yearMapFrom } from './yearMap.mjs'
 
 /*
@@ -44,7 +44,7 @@ describe('shoreDistance', () => {
     assert.ok(distance([2, 44.5]) < 0.01)
   })
 
-  it('says nothing beyond the cells around a point', () => {
+  it('is Infinity beyond the shore reach', () => {
     assert.equal(distance([10, 44]), Infinity)
   })
 })
@@ -206,5 +206,26 @@ describe('ringsOnContours', () => {
     )
     const on = ringsOnContours(m, shoreDistance([{ points: loop, closed: true }]))
     assert.deepEqual([...on], [m.claims[0].rings[0]])
+  })
+})
+
+describe('segmentGrid', () => {
+  // One segment 4° long along 60° N, from 10 to 14° E.
+  const nearest = segmentGrid([{ a: [10, 60], b: [14, 60], item: 'shore' }])
+
+  it('finds a long segment from near its middle, cells away from both its ends', () => {
+    const found = nearest([12, 60.1], 50)
+    assert.equal(found.item, 'shore')
+    assert.ok(found.km > 10 && found.km < 12, String(found.km))
+  })
+
+  it('reaches as far in longitude as the reach asks, cells beyond the segment\u2019s last one at 60° N', () => {
+    // The segment's last cell is 14; the point is in cell 16, 2.2° east of its end: 123 km at 60° N. A search of one
+    // cell round the point (15 to 17) would miss it; a reach of 130 km searches three cells across.
+    assert.equal(nearest([16.2, 60], 130).item, 'shore')
+  })
+
+  it('finds nothing beyond the reach', () => {
+    assert.equal(nearest([16.2, 60], 100).item, null)
   })
 })

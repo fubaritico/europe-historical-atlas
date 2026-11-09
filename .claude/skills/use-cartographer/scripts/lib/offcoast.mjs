@@ -1,5 +1,5 @@
 import { areaBetween, edgeHolders, junctionPoint, matchRun } from './coasts.mjs'
-import { kmBetween, kmToSegment, sampleSegment } from './geo.mjs'
+import { KM_PER_DEGREE, kmBetween, kmToSegment, sampleSegment } from './geo.mjs'
 import { OFF_COAST_KM, ON_SHORE_KM, SHORE_REACH_KM, SHORT_OF_SHORE_KM } from './thresholds.mjs'
 
 /**
@@ -19,44 +19,79 @@ import { OFF_COAST_KM, ON_SHORE_KM, SHORE_REACH_KM, SHORT_OF_SHORE_KM } from './
  * @typedef {import('./yearMap.mjs').YearMap} YearMap
  */
 
-/** The side of a cell of the shore's index, in degrees — wider than {@link SHORE_REACH_KM} needs at 60° N. */
+/** The side of a cell of the segments' index, in degrees. */
 const CELL = 1
 
 /**
- * A grid of the shore's segments, so a distance is measured against the few segments nearby.
- * @param {readonly { points: readonly LonLat[], closed: boolean }[]} shores - the shore contours
- * @returns {(p: LonLat) => number} the distance from a point to the nearest shore segment, in km; `Infinity` beyond a
- *   cell around it
+ * The most cells searched across in longitude, near the pole where a degree is short: past it, a segment within the reach
+ * is not found. It bites above about 87° N for a reach of 100 km — never on this map, which stops at 77° N.
  */
-export function shoreDistance(shores) {
-  /** @type {Map<string, [LonLat, LonLat][]>} */
+const MAX_CELLS_ACROSS = 20
+
+/**
+ * A grid of segments, each filed in every cell its box covers — a long one is found from its middle too (review of
+ * 2026-11-09: filed only by its two ends, a point near the middle of a segment over a degree long missed it) — and
+ * searched as many cells round a point as a reach in kilometres needs at its latitude (one cell was 55 km in longitude
+ * at 60° N, for a reach of 100).
+ * @template T
+ * @param {readonly { a: LonLat, b: LonLat, item: T }[]} segments - the segments, each with what it stands for
+ * @returns {(p: LonLat, reachKm: number) => { km: number, item: T | null }} the nearest segment within the reach — its
+ *   distance and item; `Infinity` and `null` when none is
+ */
+export function segmentGrid(segments) {
+  /** @type {Map<string, { a: LonLat, b: LonLat, item: T }[]>} */
   const cells = new Map()
-  const cellOf = (/** @type {number} */ x, /** @type {number} */ y) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`
-  for (const shore of shores) {
-    const n = shore.points.length
-    const last = shore.closed ? n : n - 1
-    for (let i = 0; i < last; i++) {
-      const a = shore.points[i]
-      const b = shore.points[(i + 1) % n]
-      const keys = new Set([cellOf(a[0], a[1]), cellOf(b[0], b[1])])
-      for (const key of keys) {
+  for (const s of segments) {
+    const [x0, x1] = [Math.floor(Math.min(s.a[0], s.b[0]) / CELL), Math.floor(Math.max(s.a[0], s.b[0]) / CELL)]
+    const [y0, y1] = [Math.floor(Math.min(s.a[1], s.b[1]) / CELL), Math.floor(Math.max(s.a[1], s.b[1]) / CELL)]
+    for (let x = x0; x <= x1; x++) {
+      for (let y = y0; y <= y1; y++) {
+        const key = `${x}:${y}`
         const list = cells.get(key) ?? []
-        list.push([a, b])
+        list.push(s)
         cells.set(key, list)
       }
     }
   }
-  return (p) => {
+  return (p, reachKm) => {
     const cx = Math.floor(p[0] / CELL)
     const cy = Math.floor(p[1] / CELL)
-    let best = Infinity
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (const [a, b] of cells.get(`${cx + dx}:${cy + dy}`) ?? []) best = Math.min(best, kmToSegment(p, a, b))
+    const degLat = reachKm / KM_PER_DEGREE
+    const degLon = degLat / Math.max(Math.cos((p[1] * Math.PI) / 180), 1e-6)
+    const dy = Math.ceil(degLat / CELL)
+    const dx = Math.min(MAX_CELLS_ACROSS, Math.ceil(degLon / CELL))
+    /** @type {{ km: number, item: T | null }} */
+    let best = { km: Infinity, item: null }
+    const seen = new Set()
+    for (let x = cx - dx; x <= cx + dx; x++) {
+      for (let y = cy - dy; y <= cy + dy; y++) {
+        for (const s of cells.get(`${x}:${y}`) ?? []) {
+          if (seen.has(s)) continue
+          seen.add(s)
+          const km = kmToSegment(p, s.a, s.b)
+          if (km < best.km && km <= reachKm) best = { km, item: s.item }
+        }
       }
     }
     return best
   }
+}
+
+/**
+ * The distance from a point to the shore, within {@link SHORE_REACH_KM}.
+ * @param {readonly { points: readonly LonLat[], closed: boolean }[]} shores - the shore contours
+ * @returns {(p: LonLat) => number} the distance to the nearest shore segment, in km; `Infinity` beyond the reach
+ */
+export function shoreDistance(shores) {
+  /** @type {{ a: LonLat, b: LonLat, item: true }[]} */
+  const segments = []
+  for (const shore of shores) {
+    const n = shore.points.length
+    const last = shore.closed ? n : n - 1
+    for (let i = 0; i < last; i++) segments.push({ a: shore.points[i], b: shore.points[(i + 1) % n], item: true })
+  }
+  const nearest = segmentGrid(segments)
+  return (p) => nearest(p, SHORE_REACH_KM).km
 }
 
 /**
@@ -130,40 +165,25 @@ export function offCoastStretches(map, distance, isLand, skip = new Set()) {
 }
 
 /**
- * A grid of every polity's edges, so the nearest polity to a point is found among the few edges nearby.
+ * The nearest polity's edge to a point, within {@link SHORT_OF_SHORE_KM}.
  * @param {YearMap} map - the map
  * @returns {(p: LonLat) => { km: number, polity: string | null }} the nearest edge's distance and polity; `Infinity`
- *   and `null` beyond a cell around the point
+ *   and `null` beyond the reach
  */
 export function edgeDistance(map) {
-  /** @type {Map<string, { a: LonLat, b: LonLat, polity: string }[]>} */
-  const cells = new Map()
-  const cellOf = (/** @type {LonLat} */ p) => `${Math.floor(p[0] / CELL)}:${Math.floor(p[1] / CELL)}`
+  /** @type {{ a: LonLat, b: LonLat, item: string }[]} */
+  const segments = []
   for (const claim of map.claims) {
     for (const ring of claim.rings) {
       ring.forEach((anchor, k) => {
-        const a = map.anchors[anchor]
-        const b = map.anchors[ring[(k + 1) % ring.length]]
-        for (const key of new Set([cellOf(a), cellOf(b)])) {
-          const list = cells.get(key) ?? []
-          list.push({ a, b, polity: claim.polity })
-          cells.set(key, list)
-        }
+        segments.push({ a: map.anchors[anchor], b: map.anchors[ring[(k + 1) % ring.length]], item: claim.polity })
       })
     }
   }
+  const nearest = segmentGrid(segments)
   return (p) => {
-    const [cx, cy] = [Math.floor(p[0] / CELL), Math.floor(p[1] / CELL)]
-    let best = { km: Infinity, polity: /** @type {string | null} */ (null) }
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (const e of cells.get(`${cx + dx}:${cy + dy}`) ?? []) {
-          const km = kmToSegment(p, e.a, e.b)
-          if (km < best.km) best = { km, polity: e.polity }
-        }
-      }
-    }
-    return best
+    const found = nearest(p, SHORT_OF_SHORE_KM)
+    return { km: found.km, polity: found.item }
   }
 }
 
