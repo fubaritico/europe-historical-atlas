@@ -13,8 +13,10 @@ import {
 } from '@europe-historical-atlas/core/data/yearManifest'
 
 import { createFetchBakedNamesSource } from './bakedNamesSource'
+import { createFetchBakedOverlapsSource } from './bakedOverlapsSource'
 
 import type { BakedNamesSource } from './bakedNamesSource'
+import type { BakedOverlapsSource } from './bakedOverlapsSource'
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
@@ -49,6 +51,8 @@ export interface MapAssetSources {
   content: ContentSource
   /** Each year's names placed at the build, when the site has them (ATLAS-333). */
   bakedNames: BakedNamesSource
+  /** Each year's overlaps computed at the build, when the site has them (ATLAS-399). */
+  bakedOverlaps: BakedOverlapsSource
 }
 
 /**
@@ -75,6 +79,7 @@ export function createFetchAssets(): MapAssetSources {
       unauthored: createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`),
     }),
     bakedNames: createFetchBakedNamesSource(YEARS_BASE),
+    bakedOverlaps: createFetchBakedOverlapsSource(YEARS_BASE),
   }
 }
 

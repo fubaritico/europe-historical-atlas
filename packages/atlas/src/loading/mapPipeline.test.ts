@@ -4,8 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/contentFormat'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
+import * as yearOverlapsModule from '@europe-historical-atlas/core/data/yearOverlaps'
+import {
+  BAKED_OVERLAPS_VERSION,
+  overlapsKey,
+} from '@europe-historical-atlas/core/pipeline/bakedOverlaps'
 import * as fillBuffersModule from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import * as settleYearModule from '@europe-historical-atlas/core/pipeline/settleYear'
 import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { STARTUP_SLICES } from './startupBar'
@@ -30,6 +36,8 @@ import type { MapLayers } from '../scene/layers/mapLayers'
 import type { MeasuredTribes } from '../scene/political/tribes/mapTribeLayer'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { RiverSet } from '@europe-historical-atlas/core/data/riverSource'
+import type { BakedOverlaps } from '@europe-historical-atlas/core/pipeline/bakedOverlaps'
+import type { SettledYear } from '@europe-historical-atlas/core/pipeline/settleYear'
 
 beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -392,6 +400,31 @@ describe('createMapPipeline', () => {
       expect(lay.mock.calls[0]?.[0].heights).toBe(read.heights)
       const [key] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [{ relief: unknown }]
       expect(key.relief).toBe(RELIEF)
+    })
+
+    // ATLAS-399, review QUAL-001: the build's file read on the page reaches the settling, which takes it under the key.
+    it('hands the build’s overlaps of the year to the settling, which takes them rather than computing', async () => {
+      const authored = AUTHORED_YEAR.authored
+      if (authored === undefined) throw new Error('test: the fixture is not authored')
+      const baked: BakedOverlaps = {
+        version: BAKED_OVERLAPS_VERSION,
+        key: overlapsKey(authored.year),
+        overlaps: { pieces: [], refused: [] },
+      }
+      const settle = vi.spyOn(settleYearModule, 'settleAuthoredYear')
+      const computed = vi.spyOn(yearOverlapsModule, 'yearOverlaps')
+      const { pipeline } = build({
+        assets: fakeAssets({
+          regions: { load: () => Promise.resolve(AUTHORED_YEAR) },
+          bakedOverlaps: { load: () => Promise.resolve(baked) },
+        }),
+      })
+      await pipeline.start()
+      expect([
+        settle.mock.calls[0]?.[0].baked,
+        (settle.mock.results[0]?.value as SettledYear | undefined)?.overlapsFrom,
+        computed.mock.calls.length,
+      ]).toEqual([baked, 'build', 0])
     })
 
     // ATLAS-396 × ATLAS-398: the vassal is flagged on the page, measured in the compute, and its band comes back laid.

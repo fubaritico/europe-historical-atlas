@@ -16,6 +16,7 @@ import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
 import { installSettledYear, settleYearBorders } from '../yearBorders'
 import { startStep, timedStep } from '../yearTiming'
 
+import { bakedOverlapsFor, sayStaleOverlaps } from './bakedOverlaps'
 import { rebuildYearNames } from './names'
 import { rebuildTexture } from './texture'
 
@@ -261,15 +262,7 @@ export async function prepareYear(
   }
   const bounds = authored.bbox
   const grid = meshVertexGrid(heightmap.meta, dev.relief.segments)
-  // The palette read now: a change of it starts a newer year, which this one gives way to.
-  const settling = timedStep(context.clock, loaded.year, 'settle', () =>
-    context.box.compute.settleYear({
-      year: authored.year,
-      bbox: bounds,
-      regions: loaded.regions,
-      palette: politicalPalette(dev.political),
-    })
-  )
+  const settling = settleInWorker(context, loaded, authored)
   const { heights } = read
   const relief = { grid, heights, worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH) }
   const [, fillArrays, settled, tribes] = await Promise.all([
@@ -288,6 +281,34 @@ export async function prepareYear(
     settling.then((year) => measureTribes(context, loaded, year.tribes, { bounds, grid })),
   ])
   return { grid, fillArrays, relief: read.relief, tribes, settled }
+}
+
+/**
+ * Settle a year in the worker — its overlaps from the build when the site holds them for it (ATLAS-399), else computed
+ * there. The palette is read now: a change of it starts a newer year, which this one gives way to.
+ * @param context - the pipeline's world
+ * @param loaded - the year's polities
+ * @param authored - its files and its frame
+ * @returns the year settled
+ */
+async function settleInWorker(
+  context: PipelineContext,
+  loaded: RegionSet,
+  authored: NonNullable<RegionSet['authored']>
+): Promise<SettledYear> {
+  const palette = politicalPalette(context.dev.political)
+  const baked = await bakedOverlapsFor(context, loaded.year)
+  const settled = await timedStep(context.clock, loaded.year, 'settle', () =>
+    context.box.compute.settleYear({
+      year: authored.year,
+      bbox: authored.bbox,
+      regions: loaded.regions,
+      palette,
+      ...(baked === null ? {} : { baked }),
+    })
+  )
+  sayStaleOverlaps(loaded.year, baked, settled)
+  return settled
 }
 
 /**

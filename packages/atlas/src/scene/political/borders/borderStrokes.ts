@@ -3,8 +3,6 @@
  * shows with the zoom. Pure — the strokes are data, drawn by `composedLineLayer`.
  */
 
-import { clamp01 } from '@europe-historical-atlas/core/utils/math'
-
 import { offsetPolyline, polylinesToSegments } from '../../lines/polylines'
 
 import type { ComposedStroke } from './composedLineLayer'
@@ -61,26 +59,6 @@ export interface BorderStrokeStyle {
   gapSize: number
   /** Half the distance between the two runs of a doubled border, in normalized grid units. */
   doubleGap: number
-}
-
-/**
- * How strongly the light inlay shows at a given zoom.
- *
- * Ramps from nothing at full zoom-out to full strength at `fadeThreshold`. The dark edge is the constant
- * — a border is brown at every scale — and the light inlay is the refinement that appears as the camera
- * comes in. Below the threshold a plain dark line is all that remains, which is both what reads at
- * continent scale and what separates best from the lighter fills.
- *
- * The zero-threshold branch is **load-bearing, not defensive**: the dev-panel slider for this value goes
- * down to 0, and `0 / 0` is `NaN`, which `clamp01` passes straight through — both its comparisons are
- * false against `NaN`. A `NaN` opacity throws nothing and makes WebGL drop the draw, so the casing would
- * vanish silently at the default camera position.
- * @param zoom - the camera zoom, 0 at full zoom-out and 1 at full zoom-in
- * @param fadeThreshold - the zoom at which the inlay reaches full strength; 0 means never fade it
- * @returns a multiplier in `[0, 1]` for the inlay passes' opacity
- */
-export function inlayOpacityScale(zoom: number, fadeThreshold: number): number {
-  return fadeThreshold > 0 ? clamp01(zoom / fadeThreshold) : 1
 }
 
 /**

@@ -199,7 +199,8 @@ function levelNames(
  */
 export function placeYearNames(request: YearNamesRequest): YearNames {
   const { regions, gridWidth, gridHeight, names, options } = request
-  const cells = rasteriseRegions(regions, gridWidth, gridHeight).cells
+  // On contested ground the polity that was there keeps its name (ATLAS-399): the earlier keeps a shared cell.
+  const cells = rasteriseRegions(regions, gridWidth, gridHeight, 'earlier').cells
   const measure = tableMeasure(request.glyphs)
   const unnamed = new Set<string>()
   const levels = request.bearersByLevel.map((bearers): LevelNames => {

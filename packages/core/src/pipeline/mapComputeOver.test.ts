@@ -158,6 +158,7 @@ describe('mapComputeOver', () => {
         tints: [new Uint8Array(9)],
         bandDepth: new Uint8Array(3),
         bandKm: new Float32Array(3),
+        realmKm: new Float32Array(3),
         indices: Uint32Array.of(0, 1, 2),
       }
       const laid = answering((id) => ({

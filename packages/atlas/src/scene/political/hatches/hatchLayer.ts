@@ -69,10 +69,37 @@ export interface HatchLayer {
    */
   setLook: (mode: BlendMode, strength: number) => void
   /**
+   * Reveal a contested vassal's band as the zoom reveals the vassals, which needs no rebuild.
+   * @param detail - the display level, continuous — the fills'
+   * @returns nothing
+   */
+  setDetail: (detail: number) => void
+  /**
    * Free the geometry, the material and the stripe images; the terrain is the caller's. Remove the object first.
    * @returns nothing
    */
   dispose: () => void
+}
+
+/**
+ * The hatches' geometry: positions, triangles, each piece's colours and their count, and a contested vassal's band.
+ * @param arrays - the hatches laid on the relief
+ * @returns the geometry
+ */
+function hatchGeometry(arrays: HatchArrays): BufferGeometry {
+  const { positions, colours, counts, bandDepth, bandKm, realmKm, indices } = arrays
+  const geometry = new BufferGeometry()
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+  geometry.setIndex(new Uint32BufferAttribute(indices, 1))
+  colours.forEach((bytes, rank) => {
+    geometry.setAttribute(hatchColourAttribute(rank), new Uint8BufferAttribute(bytes, 3, true))
+  })
+  geometry.setAttribute('count', new Uint8BufferAttribute(counts, 1, false))
+  // A contested vassal's band (ATLAS-398): its depth of homage, read as a number, and each vertex's distance to the edge.
+  geometry.setAttribute('bandDepth', new Uint8BufferAttribute(bandDepth, 1, false))
+  geometry.setAttribute('bandKm', new Float32BufferAttribute(bandKm, 1))
+  geometry.setAttribute('realmKm', new Float32BufferAttribute(realmKm, 1))
+  return geometry
 }
 
 /**
@@ -81,14 +108,7 @@ export interface HatchLayer {
  * @returns the layer
  */
 export function createHatchLayer(options: HatchLayerOptions): HatchLayer {
-  const { positions, colours, counts, indices } = options.arrays
-  const geometry = new BufferGeometry()
-  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
-  geometry.setIndex(new Uint32BufferAttribute(indices, 1))
-  colours.forEach((bytes, rank) => {
-    geometry.setAttribute(hatchColourAttribute(rank), new Uint8BufferAttribute(bytes, 3, true))
-  })
-  geometry.setAttribute('count', new Uint8BufferAttribute(counts, 1, false))
+  const geometry = hatchGeometry(options.arrays)
   const stripes = createHatchTextures()
   const material = new ShaderMaterial({
     uniforms: {
@@ -97,6 +117,8 @@ export function createHatchLayer(options: HatchLayerOptions): HatchLayer {
       mode: { value: MODE_INDEX[options.mode] },
       plane: { value: [options.worldWidth, options.worldDepth] },
       stripeWorld: { value: options.stripeWorld },
+      // The deepest level until the zoom says otherwise, as the fills open.
+      detail: { value: Number.MAX_SAFE_INTEGER },
       stripes2: { value: stripes.two },
       stripes3: { value: stripes.three },
       stripes4: { value: stripes.four },
@@ -120,6 +142,9 @@ export function createHatchLayer(options: HatchLayerOptions): HatchLayer {
     setLook(mode: BlendMode, strength: number): void {
       setUniform(material, 'mode', MODE_INDEX[mode], 'hatch layer')
       setUniform(material, 'strength', strength, 'hatch layer')
+    },
+    setDetail(detail: number): void {
+      setUniform(material, 'detail', detail, 'hatch layer')
     },
     dispose(): void {
       geometry.dispose()

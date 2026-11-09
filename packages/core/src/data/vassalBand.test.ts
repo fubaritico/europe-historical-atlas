@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { homageLevels } from './homageLevels'
 import {
+  SOVEREIGN_BAND_WIDTH_KM,
   VASSAL_BAND_REACH_KM,
   VASSAL_BAND_SHARE,
   VASSAL_BAND_WIDTH_KM,
   bandedVassalIds,
   isBandedVassal,
   regionBandDepths,
+  sovereignBandWidthKm,
   vassalBandOpacity,
 } from './vassalBand'
 
@@ -91,5 +93,20 @@ describe('vassalBand', () => {
     it('leaves only the outline at half for a width of nought', () => {
       expect(vassalBandOpacity(-0.001, 0)).toBe(1)
     })
+  })
+})
+
+// The dev's trial, 2026-11-09: the sovereigns' band undulates as the tribes', at most its width.
+describe('sovereignBandWidthKm', () => {
+  it('reaches its width at the crest and a third of it in the trough', () => {
+    expect([sovereignBandWidthKm(1), sovereignBandWidthKm(-1)]).toEqual([
+      SOVEREIGN_BAND_WIDTH_KM,
+      SOVEREIGN_BAND_WIDTH_KM / 3,
+    ])
+  })
+
+  it('never passes its width between the two', () => {
+    for (const wave of [-0.5, 0, 0.5, 0.99])
+      expect(sovereignBandWidthKm(wave)).toBeLessThan(SOVEREIGN_BAND_WIDTH_KM)
   })
 })

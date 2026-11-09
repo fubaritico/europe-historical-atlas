@@ -13,6 +13,10 @@
  * (`canvas/paint/vassalBands`) ask the same question of the same signed distance (`geo/signedDistance`), with **one
  * width, a constant here** — no setting in the atlas's panel (the dev, 2026-11-09: *"we don't do settings like that any
  * more — that was for starting the project"*), so the two applications cannot differ.
+ *
+ * **The sovereigns' band, a trial of the same evening, in the atlas only**: every filled polity is banded — a sovereign
+ * at `SOVEREIGN_BAND_SHARE` over an undulating width, the realm together from afar. The Cartographer draws the vassals'
+ * band alone until the trial is kept.
  */
 
 import { isTribe } from './tribes'
@@ -26,15 +30,82 @@ import type { YearPolity } from './yearFormat'
  */
 export const VASSAL_BAND_SHARE = 0.5
 
+/**
+ * A sovereign's band — the dev's trial of 2026-11-09: the sovereign states banded as the vassals are; first three
+ * quarters of their colour (the vassals "twice as transparent"), then more transparent the same evening: 60 %, a vassal
+ * 50 %. Shown at every zoom; the vassals' comes with the zoom. The atlas only, for the trial.
+ */
+export const SOVEREIGN_BAND_SHARE = 0.6
+
 /** The band's width, km — thinner than a tribe's 30 (the dev, 2026-11-09: *"thinner"*). Read by both applications. */
 export const VASSAL_BAND_WIDTH_KM = 10
 
 /**
- * How deep a vassal's signed distance is computed, km — twice the width: deeper than this every point reads
+ * A sovereign's band width, km — the dev's trial of 2026-11-09: the vassals' band half the sovereigns' (*"deux fois plus
+ * petit que pour les états souverains"*). The atlas only, for the trial.
+ */
+export const SOVEREIGN_BAND_WIDTH_KM = 2 * VASSAL_BAND_WIDTH_KM
+
+/**
+ * How much a sovereign's band undulates — the tribes' irregularity (`editor/tribeFeather`'s `TRIBE_FEATHER`, which
+ * `data/` may not import), over the tribes' wavelength. The dev, 2026-11-09: the same undulation as the tribes, **at
+ * most {@link SOVEREIGN_BAND_WIDTH_KM}** — so the width runs from a third of it to the whole of it. The vassals stay
+ * regular.
+ */
+export const SOVEREIGN_BAND_IRREGULARITY = 0.5
+
+/** The undulation's wavelength, km — the tribes' `BAND_WAVE_KM`. */
+export const SOVEREIGN_BAND_WAVE_KM = 150
+
+/**
+ * A sovereign's band width where the undulation reads `wave`: {@link SOVEREIGN_BAND_WIDTH_KM} at the crest, a third of it
+ * in the trough — the tribes' proportions, scaled so the widest is today's width.
+ * @param wave - the undulation at the point, `-1..1` (the tribes' `bandWave`)
+ * @returns the width, km
+ */
+export function sovereignBandWidthKm(wave: number): number {
+  return (
+    (SOVEREIGN_BAND_WIDTH_KM * (1 + SOVEREIGN_BAND_IRREGULARITY * wave)) /
+    (1 + SOVEREIGN_BAND_IRREGULARITY)
+  )
+}
+
+/**
+ * How deep a vassal's signed distance is computed, km — twice its band's width: deeper than this every point reads
  * `-VASSAL_BAND_REACH_KM`, past the band and so at full colour. It must exceed the width, or no point would read deeper
  * than the band; the smaller, the cheaper the distance (its edges are filed in buckets the size of the reach).
  */
 export const VASSAL_BAND_REACH_KM = 2 * VASSAL_BAND_WIDTH_KM
+
+/**
+ * How deep the atlas's cut measures every filled polity, km — twice the widest band, the sovereigns' (the trial of
+ * 2026-11-09): the vassals' own reach would clip a sovereign's band. The Cartographer, which draws the vassals' band alone,
+ * keeps {@link VASSAL_BAND_REACH_KM} (review ARCH-003: twice the work for nothing).
+ */
+export const BAND_REACH_KM = 2 * SOVEREIGN_BAND_WIDTH_KM
+
+/**
+ * What an unmeasured fill's distances read, km — deeper than any band, so a polity cut with no band to measure wears its
+ * colour whole (review ARCH-002: a sovereign wears a band since the trial, and a distance of nought would put the whole
+ * of it in its band, with nothing said).
+ */
+export const UNMEASURED_BAND_KM = -1e6
+
+/**
+ * A polity's depth of homage when it wears the vassals' band, `0` otherwise — the one rule the fills' and the hatches'
+ * depths are read with (review ARCH-005).
+ * @param polityId - the polity, or none
+ * @param banded - the ids of the polities wearing the band ({@link bandedVassalIds})
+ * @param homage - the year's homage read as levels
+ * @returns its depth, `0` for none
+ */
+export function bandDepthOf(
+  polityId: string | undefined,
+  banded: ReadonlySet<string>,
+  homage: Pick<HomageLevels, 'chainOf'>
+): number {
+  return polityId !== undefined && banded.has(polityId) ? homage.chainOf(polityId).length - 1 : 0
+}
 
 /**
  * Whether a polity's fill wears the vassals' band: it owes homage (`suzerain` set — the definition `homageLevels`
@@ -71,9 +142,7 @@ export function regionBandDepths(
   banded: ReadonlySet<string>,
   homage: Pick<HomageLevels, 'chainOf'>
 ): number[] {
-  return regions.map(({ polityId }) =>
-    polityId !== undefined && banded.has(polityId) ? homage.chainOf(polityId).length - 1 : 0
-  )
+  return regions.map(({ polityId }) => bandDepthOf(polityId, banded, homage))
 }
 
 /**

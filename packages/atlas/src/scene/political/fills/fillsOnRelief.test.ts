@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
 
+import { UNMEASURED_BAND_KM } from '@europe-historical-atlas/core/data/vassalBand'
 import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
@@ -125,8 +126,9 @@ describe('fillBuffers', () => {
       expect(drawn).toEqual(cut)
     })
 
-    // ATLAS-398: the vassal's band depth and distances over its own run; the lord's run stays nought, unread.
-    it('writes the vassal’s band depth and distances over its own vertices, the lord’s left at nought', () => {
+    // ATLAS-398: the vassal's band depth and distances over its own run; the lord, unmeasured, reads deep inside — its
+    // colour whole, never a distance of nought that would band all of it (review ARCH-002, 2026-11-09).
+    it('writes the vassal’s band depth and distances over its own vertices, the unmeasured lord deep inside', () => {
       const fills = bandedPolities()
       const { bandDepth, bandKm } = fillBuffers(
         options({
@@ -143,7 +145,9 @@ describe('fillBuffers', () => {
       expect(Array.from(bandDepth.slice(0, lordVertices)).every((depth) => depth === 0)).toBe(true)
       expect(Array.from(bandDepth.slice(lordVertices)).every((depth) => depth === 1)).toBe(true)
       expect(Array.from(bandKm.slice(lordVertices))).toEqual(Array.from(fills[1]?.bandKm ?? []))
-      expect(Array.from(bandKm.slice(0, lordVertices)).every((km) => km === 0)).toBe(true)
+      expect(
+        Array.from(bandKm.slice(0, lordVertices)).every((km) => km === UNMEASURED_BAND_KM)
+      ).toBe(true)
     })
 
     it('starts the indices at the first written vertex when the polity before is unfilled', () => {

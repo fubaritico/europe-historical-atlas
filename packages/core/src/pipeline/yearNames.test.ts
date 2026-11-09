@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import * as rasterModule from '../data/regionRaster'
 
 import { placeYearNames, tableMeasure } from './yearNames'
 
@@ -96,6 +98,10 @@ describe('tableMeasure', () => {
   })
 })
 
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 describe('placeYearNames', () => {
   describe('happy path', () => {
     it('places the names of every level, by polity', () => {
@@ -108,6 +114,13 @@ describe('placeYearNames', () => {
   })
 
   describe('variants', () => {
+    // The dev, 2026-11-09: on contested ground the polity that was there keeps its name — the earlier keeps a shared cell.
+    it('asks the grid for the earlier of two polities covering a cell', () => {
+      const raster = vi.spyOn(rasterModule, 'rasteriseRegions')
+      placeYearNames(REQUEST)
+      expect(raster.mock.calls[0]?.[3]).toBe('earlier')
+    })
+
     it('moves the kingdom’s name into what the shown duchy leaves it', () => {
       const { levels, gridWidth } = placeYearNames(REQUEST)
       const kingdom = levels[1]?.placed.find(({ polity }) => polity === 'king')

@@ -4,6 +4,7 @@
  */
 
 import { hatchStripeWorld } from '@europe-historical-atlas/core/data/hatchStripes'
+import { BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
 import { hatchBuffers } from '@europe-historical-atlas/core/pipeline/hatchBuffers'
 
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
@@ -35,7 +36,8 @@ export function rebuildHatches(context: LayerContext, grid: { segX: number; segY
     { grid, nodes: meshNodeHeights(relief), worldWidth: WORLD_WIDTH, worldDepth },
     (message) => {
       console.warn(message)
-    }
+    },
+    { bounds, reachKm: BAND_REACH_KM }
   )
   handles.hatches = createHatchLayer({
     arrays,

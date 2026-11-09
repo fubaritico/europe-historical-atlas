@@ -4,6 +4,7 @@ import { createLandMask } from '../data/landMask'
 import { projectRegions } from '../data/regionSource'
 import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
 import { toRegionPayload } from '../data/toRegionPayload'
+import { UNMEASURED_BAND_KM } from '../data/vassalBand'
 
 import { serveCompute } from './computeServer'
 import { layFills } from './fillBuffers'
@@ -248,6 +249,7 @@ describe('createWorkerMapCompute', () => {
         arrays.indices.buffer,
         arrays.bandDepth.buffer,
         arrays.bandKm.buffer,
+        arrays.realmKm.buffer,
         ...arrays.tints.map((tint) => tint.buffer),
       ])
     })
@@ -293,7 +295,8 @@ describe('createWorkerMapCompute', () => {
       const sovereignKm = Array.from(arrays.bandKm).filter(
         (_, vertex) => arrays.bandDepth[vertex] === 0
       )
-      expect(sovereignKm.every((km) => km === 0)).toBe(true)
+      // The sovereign was not flagged in this request, so it reads deep inside: its colour whole.
+      expect(sovereignKm.every((km) => km === UNMEASURED_BAND_KM)).toBe(true)
     })
 
     // ATLAS-333: the year settled across the wire, as the main thread would settle it.

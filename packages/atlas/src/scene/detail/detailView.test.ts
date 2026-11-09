@@ -84,20 +84,21 @@ describe('viewOf', () => {
       cityNames: { capital: 0, 'large-city': 0, city: 0 },
       nameReach: Number.POSITIVE_INFINITY,
       citiesOverNames: false,
+      closeness: 0,
     })
   })
 
   it('shows at the second level the names at 40 %, the direct vassals and the capitals’ names', () => {
     expect(viewOf(entry(1), 2, true)).toMatchObject({
-      watermark: 0.4,
+      watermark: expect.closeTo(0.4) as number,
       vassals: 1,
       cityNames: { capital: 1, 'large-city': 0, city: 0 },
     })
   })
 
-  it('shows close the names at 25 %, every vassal and every city with its name', () => {
+  it('shows close the names at 40 %, every vassal and every city with its name', () => {
     expect(viewOf(entry(2), 2, true)).toMatchObject({
-      watermark: 0.25,
+      watermark: expect.closeTo(0.4) as number,
       vassals: 2,
       cityNames: { capital: 1, 'large-city': 1, city: 1 },
     })
@@ -153,17 +154,29 @@ describe('createDetailState', () => {
   it('starts on the first frame’s level with no fade', () => {
     const state = createDetailState()
 
-    expect(state.frame(0.9, 0, 1, true).watermark).toBe(0.25)
+    expect(state.frame(0.9, 0, 1, true, 100).watermark).toBeCloseTo(0.4)
   })
 
   it('fades to a new level over time, whatever the zoom does meanwhile', () => {
     const state = createDetailState()
-    state.frame(0, 0, 1, true)
+    state.frame(0, 0, 1, true, 100)
 
-    const mid = state.frame(0.9, DETAIL_FADE_SECONDS / 2, 1, true)
-    const end = state.frame(0.95, DETAIL_FADE_SECONDS * 2, 1, true)
+    const mid = state.frame(0.9, DETAIL_FADE_SECONDS / 2, 1, true, 100)
+    const end = state.frame(0.95, DETAIL_FADE_SECONDS * 2, 1, true, 100)
 
     expect(mid.cityNames.city).toBeCloseTo(0.5)
     expect(end.cityNames.city).toBe(1)
+  })
+
+  // The dev, 2026-11-09: the dashes crawled at every zoom — they lie still within a level, laid again at the next.
+  it('holds the dashes’ scale while the level lasts, and takes the new one at the next level', () => {
+    const state = createDetailState()
+    const scales = [
+      state.frame(0.1, 0, 1, true, 100),
+      state.frame(0.3, 0.1, 1, true, 180),
+      state.frame(0.9, 0.2, 1, true, 900),
+      state.frame(0.95, 0.3, 1, true, 1200),
+    ].map(({ dashPixelsPerUnit }) => dashPixelsPerUnit)
+    expect(scales).toEqual([100, 100, 900, 900])
   })
 })

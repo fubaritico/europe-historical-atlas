@@ -8,7 +8,9 @@
  * copies the GPU reads from afar — blend the colours rather than flicker between them.
  */
 
+import { BAND_OPACITY_GLSL, BAND_VERTEX_GLSL } from '../fills/fillShader'
 import { BLEND_GLSL } from '../tintOnRelief'
+import { BAND_WAVE_GLSL } from '../tribes/tribeShader'
 
 /**
  * The name of a hatch colour's attribute.
@@ -26,8 +28,18 @@ export const HATCH_VERTEX_SHADER = /* glsl */ `
   attribute vec3 colour2;
   attribute vec3 colour3;
   attribute float count;
+  attribute float bandDepth;
+  attribute float bandKm;
+  attribute float realmKm;
   uniform vec2 plane;
   uniform float stripeWorld;
+  uniform float detail;
+  varying float vBandKm;
+  varying float vBandShare;
+  varying float vRealmKm;
+  varying float vSovereign;
+  varying float vBandWidth;
+  varying float vBandReveal;
   varying vec2 vUv;
   varying float vStripe;
   varying vec3 vColour0;
@@ -45,6 +57,8 @@ export const HATCH_VERTEX_SHADER = /* glsl */ `
     vColour2 = colour2;
     vColour3 = colour3;
     vCount = count;
+    // A contested polity's band, as a fill's: a vassal's revealed with the zoom, a sovereign's always.
+    ${BAND_VERTEX_GLSL}
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `
@@ -67,7 +81,14 @@ export const HATCH_FRAGMENT_SHADER = /* glsl */ `
   varying vec3 vColour2;
   varying vec3 vColour3;
   varying float vCount;
+  varying float vBandKm;
+  varying float vBandShare;
+  varying float vRealmKm;
+  varying float vSovereign;
+  varying float vBandWidth;
+  varying float vBandReveal;
   ${BLEND_GLSL}
+  ${BAND_WAVE_GLSL}
   void main() {
     vec4 two = texture2D(stripes2, vec2(vStripe / 2.0, 0.5));
     vec4 three = texture2D(stripes3, vec2(vStripe / 3.0, 0.5));
@@ -75,7 +96,8 @@ export const HATCH_FRAGMENT_SHADER = /* glsl */ `
     vec4 weights = vCount < 2.5 ? two : (vCount < 3.5 ? three : four);
     vec3 tint = weights.r * vColour0 + weights.g * vColour1 + weights.b * vColour2 + weights.a * vColour3;
     vec3 base = toSrgb(texture2D(map, vUv).rgb);
-    vec3 tinted = base + (blend(base, tint) - base) * strength;
+    ${BAND_OPACITY_GLSL}
+    vec3 tinted = base + (blend(base, tint) - base) * strength * bandOpacity;
     gl_FragColor = vec4(toLinear(tinted), 1.0);
     #include <colorspace_fragment>
   }

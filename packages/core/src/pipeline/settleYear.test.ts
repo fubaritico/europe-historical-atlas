@@ -7,8 +7,10 @@ import { TWO_OVERLAPPING, squaresDocument } from '../data/testing/overlapFixture
 import { toRegionPayload } from '../data/toRegionPayload'
 import { saveYearDocument } from '../data/yearDocument'
 
+import { BAKED_OVERLAPS_VERSION, overlapsKey } from './bakedOverlaps'
 import { settleAuthoredYear } from './settleYear'
 
+import type { BakedOverlaps } from './bakedOverlaps'
 import type { SettleRequest } from './settleYear'
 import type { AuthoredYear } from '../data/yearFormat'
 
@@ -131,6 +133,33 @@ describe('settleAuthoredYear', () => {
         settled.hatches[0]?.colours[0],
         settled.hatchRefusals,
       ]).toEqual([[['test1', 'test2']], { r: 0xff, g: 0x20, b: 0x00 }, []])
+    })
+
+    it('takes the build’s overlaps under the year’s own key, rather than computing them', () => {
+      const year = { year: 1100, ...saveYearDocument(squaresDocument(TWO_OVERLAPPING)) }
+      const given = { pieces: [], refused: [{ a: 'test1', b: 'test2', reason: 'from the build' }] }
+      const baked: BakedOverlaps = {
+        version: BAKED_OVERLAPS_VERSION,
+        key: overlapsKey(year),
+        overlaps: given,
+      }
+      const settled = settleAuthoredYear({ ...requestFor(year), baked }, null)
+      expect([settled.hatches, settled.hatchRefusals, settled.overlapsFrom]).toEqual([
+        [],
+        given.refused,
+        'build',
+      ])
+    })
+
+    it('computes them again when the build’s file is for another version of the year', () => {
+      const year = { year: 1100, ...saveYearDocument(squaresDocument(TWO_OVERLAPPING)) }
+      const baked: BakedOverlaps = {
+        version: BAKED_OVERLAPS_VERSION,
+        key: 'another',
+        overlaps: { pieces: [], refused: [] },
+      }
+      const settled = settleAuthoredYear({ ...requestFor(year), baked }, null)
+      expect([settled.hatches.length, settled.overlapsFrom]).toEqual([1, 'computed'])
     })
 
     it('hatches nothing between a vassal and its suzerain', () => {

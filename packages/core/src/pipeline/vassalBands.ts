@@ -1,10 +1,11 @@
 /**
- * A year's fills cut on the relief's grid, **each vassal's vertices carrying their signed distance to its own outline**
- * — what the atlas's fill shader turns into the vassals' band (ATLAS-398, `data/vassalBand`).
+ * A year's fills cut on the relief's grid, **each filled polity's vertices carrying their signed distance to its own
+ * outline** — what the atlas's fill shader turns into the bands (ATLAS-398, `data/vassalBand`) — **and to its realm's**,
+ * its sovereign and every vassal under it together, for the band the realm wears from afar (the dev's trial of 2026-11-09).
  *
- * **Measured once per vertex, here, not per frame** — as a tribe's distance is (`tribePatches`): the band's width is a
- * uniform, so dragging it rewrites one float. **Only the vassals are measured**: a sovereign wears no band, and its
- * vertices carry nothing. **Against the region's own rings** — one claim, one region — so a vassal's band runs along
+ * **Measured once per vertex, here, not per frame** — as a tribe's distance is (`tribePatches`). **Every filled polity is
+ * measured** since the trial: the sovereigns wear a band too (`banded` means measured); a tribe is not filled, and is
+ * not. **Against the region's own rings** — one claim, one region — so a vassal's band runs along
  * every edge of its ground: against its suzerain, against a foreign realm and along the sea, as Illustrator's inner
  * offset runs along the whole path.
  *
@@ -12,7 +13,10 @@
  * within the straightness of a relief cell — the accuracy a tribe's band already has.
  */
 
-import { VASSAL_BAND_REACH_KM, bandedVassalIds } from '../data/vassalBand'
+import polygonClipping from 'polygon-clipping'
+
+import { tribeIds } from '../data/tribes'
+import { BAND_REACH_KM } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
 import { fillTriangles } from './fillTriangles'
@@ -23,6 +27,7 @@ import type { IndexedFill } from './indexFill'
 import type { UvPoint } from '../data/coastlineSource'
 import type { YearPolity } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
+import type { Polygon } from 'polygon-clipping'
 
 /** A polity's outline as the fills are cut from it — its rings in `(u, v)`, outer and holes alike. */
 export interface FillRegion {
@@ -30,13 +35,18 @@ export interface FillRegion {
   readonly rings: readonly (readonly UvPoint[])[]
   /** Whether it wears the vassals' band (`data/vassalBand`), its vertices then measured; absent, it does not. */
   readonly banded?: boolean
+  /**
+   * The realm it belongs to — the sovereign at the top of its homage — when it wears a band: the realms of several regions
+   * are measured against their outline together, for the band a realm wears from afar (the dev, 2026-11-09).
+   */
+  readonly realm?: string
 }
 
 /** What the vassals' band is measured with (ATLAS-398): the frame the rings were projected against, and the reach. */
 export interface FillBand {
   /** The frame — the year's, which is the DEM's. */
   readonly bounds: GeoBounds
-  /** How deep the distance is computed, km — `VASSAL_BAND_REACH_KM`, handed in. */
+  /** How deep the distance is computed, km — `BAND_REACH_KM`, handed in. */
   readonly reachKm: number
 }
 
@@ -44,7 +54,7 @@ export interface FillBand {
 export interface VassalBandCut {
   /** One region to cut per region of the year, in the same order. */
   readonly regions: FillRegion[]
-  /** The year's frame and the reach of the vassals' distance ({@link VASSAL_BAND_REACH_KM}). */
+  /** The year's frame and the reach of the distance (`BAND_REACH_KM`). */
   readonly band: FillBand
 }
 
@@ -62,10 +72,16 @@ function bandedFillRegions(
   }[],
   polities: readonly Pick<YearPolity, 'id' | 'suzerain' | 'rank'>[]
 ): FillRegion[] {
-  const banded = bandedVassalIds(polities)
-  return regions.map(({ rings, polityId }) =>
-    polityId !== undefined && banded.has(polityId) ? { rings, banded: true } : { rings }
-  )
+  // Every polity filled is measured since the sovereigns wear a band too (the dev's trial, 2026-11-09): the vassals and
+  // the sovereigns, never a tribe, which is not filled.
+  const tribes = tribeIds(polities)
+  const realmOf = realms(polities)
+  return regions.map(({ rings, polityId }) => {
+    const realm = polityId === undefined ? undefined : realmOf.get(polityId)
+    return realm !== undefined && polityId !== undefined && !tribes.has(polityId)
+      ? { rings, banded: true, realm }
+      : { rings }
+  })
 }
 
 /**
@@ -86,8 +102,73 @@ export function vassalBandCut(
 ): VassalBandCut {
   return {
     regions: bandedFillRegions(regions, polities),
-    band: { bounds, reachKm: VASSAL_BAND_REACH_KM },
+    band: { bounds, reachKm: BAND_REACH_KM },
   }
+}
+
+/**
+ * Each polity's realm: the sovereign at the top of its chain of homage, itself for a sovereign. A loop of homage — refused
+ * on reading — ends the walk where it closes.
+ * @param polities - the year's registry
+ * @returns the realm of every polity, by id
+ */
+function realms(polities: readonly Pick<YearPolity, 'id' | 'suzerain'>[]): Map<string, string> {
+  const suzerainOf = new Map(polities.map(({ id, suzerain }) => [id, suzerain]))
+  const out = new Map<string, string>()
+  for (const { id } of polities) {
+    let top = id
+    const seen = new Set([id])
+    for (
+      let next = suzerainOf.get(top) ?? null;
+      next !== null && suzerainOf.has(next) && !seen.has(next);
+      next = suzerainOf.get(top) ?? null
+    ) {
+      seen.add(next)
+      top = next
+    }
+    out.set(id, top)
+  }
+  return out
+}
+
+/**
+ * The outline of several regions together, in `(u, v)`: each region's rings even-odd, the regions united — so the
+ * limits a sovereign shares with its vassals vanish, and the realm's frontier remains.
+ * @param members - the realm's regions
+ * @returns the rings of their union, outer and holes alike
+ */
+function unionRings(members: readonly FillRegion[]): UvPoint[][] {
+  const shapes = members.flatMap(({ rings }) => {
+    const polygons: Polygon[] = rings
+      .filter((ring) => ring.length >= 3)
+      .map((ring) => [ring.map(({ u, v }): [number, number] => [u, v])])
+    const [first, ...rest] = polygons
+    return first === undefined ? [] : [polygonClipping.xor(first, ...rest)]
+  })
+  const [first, ...rest] = shapes
+  if (first === undefined) return []
+  return polygonClipping
+    .union(first, ...rest)
+    .flatMap((polygon) => polygon.map((ring) => ring.map(([u, v]) => ({ u, v }))))
+}
+
+/**
+ * Measure every vertex of a fill against a distance.
+ * @param fill - the fill
+ * @param distance - the signed distance
+ * @returns one distance per vertex, km
+ */
+function measured(fill: IndexedFill, distance: (u: number, v: number) => number): Float32Array {
+  const count = Math.floor(fill.vertices.length / 2)
+  const km = new Float32Array(count)
+  for (let vertex = 0; vertex < count; vertex++) {
+    // Indices the loop keeps in range (`noUncheckedIndexedAccess`): the `NaN` never stands in for anything.
+    km[vertex] = distance(
+      fill.vertices[2 * vertex] ?? Number.NaN,
+      fill.vertices[2 * vertex + 1] ?? Number.NaN
+    )
+  }
+  return km
 }
 
 /**
@@ -107,20 +188,30 @@ export function measureVassalBands(
     throw new Error(
       `vassal bands: ${String(fills.length)} fills for ${String(regions.length)} regions`
     )
+  // A realm of several regions measured against its outline together, once.
+  const members = new Map<string, FillRegion[]>()
+  for (const region of regions) {
+    if (region.banded !== true || region.realm === undefined) continue
+    const list = members.get(region.realm)
+    if (list === undefined) members.set(region.realm, [region])
+    else list.push(region)
+  }
+  const realmDistance = new Map(
+    [...members]
+      .filter(([, list]) => list.length > 1)
+      .map(([realm, list]) => [
+        realm,
+        signedDistanceField(unionRings(list), band.bounds, band.reachKm),
+      ])
+  )
   return fills.map((fill, index) => {
     const region = regions[index]
     if (region?.banded !== true) return fill
-    const distance = signedDistanceField(region.rings, band.bounds, band.reachKm)
-    const count = Math.floor(fill.vertices.length / 2)
-    const bandKm = new Float32Array(count)
-    for (let vertex = 0; vertex < count; vertex++) {
-      // Indices the loop keeps in range (`noUncheckedIndexedAccess`): the `NaN` never stands in for anything.
-      bandKm[vertex] = distance(
-        fill.vertices[2 * vertex] ?? Number.NaN,
-        fill.vertices[2 * vertex + 1] ?? Number.NaN
-      )
-    }
-    return { ...fill, bandKm }
+    const bandKm = measured(fill, signedDistanceField(region.rings, band.bounds, band.reachKm))
+    const realm = region.realm === undefined ? undefined : realmDistance.get(region.realm)
+    return realm === undefined
+      ? { ...fill, bandKm }
+      : { ...fill, bandKm, realmKm: measured(fill, realm) }
   })
 }
 

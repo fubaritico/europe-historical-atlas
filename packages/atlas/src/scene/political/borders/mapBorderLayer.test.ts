@@ -109,14 +109,15 @@ describe('levelForPair', () => {
   })
 })
 
-// ATLAS-398, the dev, 2026-11-09: the vassals' dotted border "a bit thicker", at core's weight — no panel setting.
+// ATLAS-398, the dev, 2026-11-09: the vassals' dotted border at core's weight — thicker first, then finer and its dots
+// closer the same evening; no panel setting.
 describe('borderStrokeStyle', () => {
   describe('happy path', () => {
-    it('draws the vassals’ border at core’s weight: 2.25 px wide, 2.25 px dots, 3.75 px gaps', () => {
+    it('draws the vassals’ border at core’s weight: 1.8 px wide, 1.8 px dots, 2.7 px gaps', () => {
       const style = borderStrokeStyle(createDevState())
-      expect([style.vassalWidth, style.vassalDotSize, style.vassalDotGap]).toEqual([
-        2.25, 2.25, 3.75,
-      ])
+      expect(
+        [style.vassalWidth, style.vassalDotSize, style.vassalDotGap].map((px) => +px.toFixed(6))
+      ).toEqual([1.8, 1.8, 2.7])
     })
   })
 

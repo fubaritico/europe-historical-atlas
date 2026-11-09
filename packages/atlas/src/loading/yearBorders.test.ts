@@ -291,6 +291,7 @@ function settled(
 }
 
 const HATCH = {
+  bandDepth: 0,
   polities: ['fr-couronne', 'hre'],
   colours: [RED, BLUE],
   rings: [

@@ -107,7 +107,7 @@ export interface FillLayer {
 export function createFillLayer(options: FillLayerOptions): FillLayer {
   // The geometry: the positions, one tint attribute per level of homage and the vassals' band — laid already, or laid
   // now.
-  const { positions, tints, bandDepth, bandKm, indices } =
+  const { positions, tints, bandDepth, bandKm, realmKm, indices } =
     'arrays' in options ? options.arrays : fillBuffers(options)
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
@@ -115,6 +115,8 @@ export function createFillLayer(options: FillLayerOptions): FillLayer {
   // The vassals' band (ATLAS-398): each vertex's depth of homage, read as a number, and its distance to the outline.
   geometry.setAttribute('bandDepth', new Uint8BufferAttribute(bandDepth, 1, false))
   geometry.setAttribute('bandKm', new Float32BufferAttribute(bandKm, 1))
+  // The realm's outline, for the band the realm wears from afar, its vassals in its colour.
+  geometry.setAttribute('realmKm', new Float32BufferAttribute(realmKm, 1))
   tints.forEach((bytes, level) => {
     geometry.setAttribute(tintAttribute(level), new Uint8BufferAttribute(bytes, 3, true))
   })

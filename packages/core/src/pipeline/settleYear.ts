@@ -23,9 +23,13 @@ import { homageLevels } from '../data/homageLevels'
 import { overlapHatches } from '../data/overlapHatches'
 import { authoredTintLevels, polityColours } from '../data/polityColours'
 import { tribeIds } from '../data/tribes'
-import { bandedVassalIds, regionBandDepths } from '../data/vassalBand'
+import { bandDepthOf, bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
+import { yearOverlaps } from '../data/yearOverlaps'
 
+import { overlapsKey } from './bakedOverlaps'
+
+import type { BakedOverlaps } from './bakedOverlaps'
 import type { BorderPattern } from '../data/borderStyles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { HomageLevels } from '../data/homageLevels'
@@ -51,6 +55,12 @@ export interface SettleRequest {
   readonly regions: readonly SettleRegion[]
   /** The automatic palette the year's colours are chosen from. */
   readonly palette: readonly [string, ...string[]]
+  /**
+   * The year's overlaps computed at the build, when the site holds a file for it (`bakedOverlaps`): taken when its key
+   * is this year's — checked here, off the page (~13 ms a year) — computed here otherwise (~1.3 s); absent, computed
+   * too: the dev server, a year added since the build (ATLAS-399).
+   */
+  readonly baked?: BakedOverlaps
 }
 
 /** A tribe's ground, in its colour. */
@@ -88,6 +98,8 @@ export interface SettledYear {
   readonly hatches: OverlapHatch[]
   /** The overlaps the geometry refused, left unhatched — said by the page, which reads them. */
   readonly hatchRefusals: OverlapRefusal[]
+  /** Where the overlaps came from: the build's file, or computed here — the page warns when a file was stale. */
+  readonly overlapsFrom: 'build' | 'computed'
 }
 
 /**
@@ -110,7 +122,11 @@ export function settleAuthoredYear(
   const exact = exactBordersOf(year, bbox, mask, warn, homage)
   const document = openYearDocument(year)
   const colours = polityColours(document, palette)
-  const overlaps = overlapHatches(document, bbox, colours)
+  const fromBuild = request.baked?.key === overlapsKey(year) ? request.baked.overlaps : null
+  const banded = bandedVassalIds(year.registry.polities)
+  const overlaps = overlapHatches(fromBuild ?? yearOverlaps(document), bbox, colours, (polity) =>
+    bandDepthOf(polity, banded, homage)
+  )
   const { deepest, levels } = tintsByLevel(year, regions, colours, homage)
   return {
     tints: deepest,
@@ -120,9 +136,10 @@ export function settleAuthoredYear(
     patterns: exact.patterns,
     levels: exact.levels,
     tribes: colouredTribes(year, regions, colours),
-    bandDepths: regionBandDepths(regions, bandedVassalIds(year.registry.polities), homage),
+    bandDepths: regionBandDepths(regions, banded, homage),
     hatches: overlaps.hatches,
     hatchRefusals: overlaps.refused,
+    overlapsFrom: fromBuild === null ? 'computed' : 'build',
   }
 }
 

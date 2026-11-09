@@ -49,10 +49,10 @@ async function runYearCommand(
     case 'layFills': {
       const arrays = await compute.layFills(command.request)
       // Megabytes of vertices nobody here reads again: handed over, not copied.
-      const { positions, tints, bandDepth, bandKm, indices } = arrays
+      const { positions, tints, bandDepth, bandKm, realmKm, indices } = arrays
       return {
         payload: { kind: 'fills', arrays },
-        transfer: [positions, indices, bandDepth, bandKm, ...tints].flatMap(transferable),
+        transfer: [positions, indices, bandDepth, bandKm, realmKm, ...tints].flatMap(transferable),
       }
     }
     case 'cutTribes': {

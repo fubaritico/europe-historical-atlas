@@ -1,9 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { VASSAL_BAND_SHARE, VASSAL_BAND_WIDTH_KM } from '../data/vassalBand'
+import {
+  SOVEREIGN_BAND_IRREGULARITY,
+  SOVEREIGN_BAND_WAVE_KM,
+  VASSAL_BAND_SHARE,
+  VASSAL_BAND_WIDTH_KM,
+} from '../data/vassalBand'
 
 import {
   BAND_SHARE,
+  BAND_WAVE_KM,
   BEYOND_OUTLINE_KM,
   FEATHER_MODES,
   TRIBE_FEATHER_REACH_KM as REACH,
@@ -340,5 +346,13 @@ describe('the vassals’ band beside the tribes’', () => {
   it('shares the tribes’ band share, and is thinner than their band', () => {
     expect(VASSAL_BAND_SHARE).toBe(BAND_SHARE)
     expect(VASSAL_BAND_WIDTH_KM).toBeLessThan(TRIBE_FEATHER.widthKm)
+  })
+
+  // The dev, 2026-11-09: the sovereigns' band undulates as the tribes' does — the same irregularity and wavelength.
+  it('gives the sovereigns’ band the tribes’ undulation', () => {
+    expect([SOVEREIGN_BAND_IRREGULARITY, SOVEREIGN_BAND_WAVE_KM]).toEqual([
+      TRIBE_FEATHER.irregularity,
+      BAND_WAVE_KM,
+    ])
   })
 })

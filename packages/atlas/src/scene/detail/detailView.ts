@@ -27,6 +27,8 @@ export interface DetailView {
   nameReach: number
   /** Whether the cities are drawn over the countries' names — an order, not faded: it turns at the level's change. */
   citiesOverNames: boolean
+  /** How close up the line work looks, `0` afar to `1` close — faded in time at a level's change, as the rest. */
+  closeness: number
 }
 
 const share = (orders: readonly CityImportance[]): Record<CityImportance, number> =>
@@ -53,6 +55,7 @@ export function viewOf(level: DetailLevel, deepest: number, vassalsByLevel: bool
     cityNames: share(level.cityNames),
     nameReach: level.nameReach[0],
     citiesOverNames: level.citiesOverNames,
+    closeness: level.closeness,
   }
 }
 
@@ -98,7 +101,18 @@ export function fadeView(
     // The reach is the zoom's, progressive within a level: it takes the target's at once.
     nameReach: target.nameReach,
     citiesOverNames: target.citiesOverNames,
+    closeness: toward(current.closeness, target.closeness, step),
   }
+}
+
+/** A frame's view of the level of detail, and the dashes' scale the level holds. */
+export interface DetailFrame extends DetailView {
+  /**
+   * Screen pixels per world unit the borders' dashes are measured with — **taken when the level is entered and held
+   * while it lasts** (the dev, 2026-11-09: the dashes crawled at every zoom; _"it must change by step with the rest"_):
+   * within a level the dashes lie fixed on the ground and grow with it, and they are laid again at the next level only.
+   */
+  dashPixelsPerUnit: number
 }
 
 /** The level of detail across frames: the level chosen, and the view fading toward it. */
@@ -109,9 +123,16 @@ export interface DetailState {
    * @param seconds - the time since the map started
    * @param deepest - the year's deepest level of homage
    * @param vassalsByLevel - the panel's switch for the vassals
-   * @returns the view
+   * @param pixelsPerUnit - screen pixels per world unit where the camera looks, this frame
+   * @returns the view, and the dashes' scale its level holds
    */
-  frame(zoom: number, seconds: number, deepest: number, vassalsByLevel: boolean): DetailView
+  frame(
+    zoom: number,
+    seconds: number,
+    deepest: number,
+    vassalsByLevel: boolean,
+    pixelsPerUnit: number
+  ): DetailFrame
 }
 
 /**
@@ -123,9 +144,12 @@ export function createDetailState(levels: readonly DetailLevel[] = DETAIL_LEVELS
   let level = 0
   let view: DetailView | null = null
   let last = 0
+  // The dashes' scale and the level it was taken at: `null` before the first frame.
+  let dashes: { level: number; scale: number } | null = null
   return {
-    frame(zoom, seconds, deepest, vassalsByLevel) {
+    frame(zoom, seconds, deepest, vassalsByLevel, pixelsPerUnit) {
       level = levelAt(zoom, level, levels)
+      if (dashes?.level !== level) dashes = { level, scale: pixelsPerUnit }
       const entry = levels[level]
       if (entry === undefined) throw new Error(`[Atlas] no level of detail ${String(level)}`)
       const target = {
@@ -134,7 +158,7 @@ export function createDetailState(levels: readonly DetailLevel[] = DETAIL_LEVELS
       }
       view = view === null ? target : fadeView(view, target, seconds - last, deepest)
       last = seconds
-      return view
+      return { ...view, dashPixelsPerUnit: dashes.scale }
     },
   }
 }

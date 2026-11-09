@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { VASSAL_BAND_REACH_KM } from '../data/vassalBand'
+import { BAND_REACH_KM } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
 import { fillTriangles } from './fillTriangles'
@@ -39,6 +39,35 @@ const REGISTRY: Pick<YearPolity, 'id' | 'suzerain' | 'rank'>[] = [
 ]
 
 describe('vassalBands', () => {
+  // The dev, 2026-11-09: from afar France is one block — its vassals measured with it against the realm's frontier.
+  describe('a realm of several regions', () => {
+    it('measures the king and his vassal against their outline together: their shared limit is deep inside it', () => {
+      // The two squares share the limit u = 0.5; a vertex on it lies on each one's own outline, deep in the realm's.
+      const king = { ...SOVEREIGN, banded: true, realm: 'crown' }
+      const duchy = { ...VASSAL, realm: 'crown' }
+      const [, vassal] = cutYearFills([king, duchy], GRID, BAND)
+      const onLimit = Array.from(
+        { length: (vassal?.vertices.length ?? 0) / 2 },
+        (_, k) => k
+      ).filter(
+        (k) =>
+          Math.abs((vassal?.vertices[2 * k] ?? 0) - 0.5) < 1e-6 &&
+          Math.abs((vassal?.vertices[2 * k + 1] ?? 0) - 0.3) < 0.05
+      )
+      const [k] = onLimit
+      if (k === undefined) throw new Error('test: no vertex on the shared limit')
+      expect([Math.abs(vassal?.bandKm?.[k] ?? 99) < 1, (vassal?.realmKm?.[k] ?? 0) < -10]).toEqual([
+        true,
+        true,
+      ])
+    })
+
+    it('measures a polity alone in its realm against its own outline only', () => {
+      const [alone] = cutYearFills([{ ...SOVEREIGN, banded: true, realm: 'crown' }], GRID, BAND)
+      expect(alone?.realmKm).toBeUndefined()
+    })
+  })
+
   describe('happy path', () => {
     it('measures each of a vassal’s vertices against its own outline, as the signed distance does', () => {
       const [, vassal] = cutYearFills([SOVEREIGN, VASSAL], GRID, BAND)
@@ -55,7 +84,8 @@ describe('vassalBands', () => {
 
   describe('variants', () => {
     // Mutation: a cut that bands every region whose polity has a suzerain bands the tribe too, which keeps its own band.
-    it('bands the vassal alone, never the sovereign, the tribe or a region of no polity', () => {
+    // The dev's trial, 2026-11-09: the sovereigns banded too.
+    it('bands the sovereign and the vassal, never the tribe or a region of no polity', () => {
       const rings = SOVEREIGN.rings
       const cut = vassalBandCut(
         [
@@ -67,16 +97,21 @@ describe('vassalBands', () => {
         REGISTRY,
         BOUNDS
       )
-      expect(cut.regions).toEqual([{ rings }, { rings, banded: true }, { rings }, { rings }])
+      expect(cut.regions).toEqual([
+        { rings, banded: true, realm: 'crown' },
+        { rings, banded: true, realm: 'crown' },
+        { rings },
+        { rings },
+      ])
     })
 
-    it('measures the band in the year’s frame, as deep as the vassals’ reach', () => {
+    it('measures the band in the year’s frame, as deep as the widest band’s reach', () => {
       const { band } = vassalBandCut([], REGISTRY, BOUNDS)
-      expect(band).toEqual({ bounds: BOUNDS, reachKm: VASSAL_BAND_REACH_KM })
+      expect(band).toEqual({ bounds: BOUNDS, reachKm: BAND_REACH_KM })
     })
 
-    // Mutation: measuring every region costs the sovereigns' distances for nothing.
-    it('measures no sovereign', () => {
+    // The cut measures what it is told to: the choice of who is banded is `vassalBandCut`'s (above).
+    it('leaves a region not flagged banded as it came, unmeasured', () => {
       const [sovereign] = cutYearFills([SOVEREIGN, VASSAL], GRID, BAND)
       expect(sovereign?.bandKm).toBeUndefined()
     })

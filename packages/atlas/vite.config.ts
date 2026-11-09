@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 
 import { namesBake } from './bake/namesBake'
+import { overlapsBake } from './bake/overlapsBake'
 
 /**
  * A path in the atlas's package.
@@ -18,7 +19,8 @@ const here = (path: string): string => fileURLToPath(new URL(path, import.meta.u
  * vendored three.js sources under `opensrc/` (its example `.html` files import many exotic packages that
  * aren't installed, which produced "could not be resolved" warnings). The watcher ignores them too.
  *
- * At build only, the countries' names of every year are placed ahead of the visit (`bake/namesBake.ts`, ATLAS-333).
+ * At build only, the countries' names of every year are placed ahead of the visit (`bake/namesBake.ts`, ATLAS-333), and
+ * its overlaps computed (`bake/overlapsBake.ts`, ATLAS-399).
  */
 export default defineConfig({
   server: {
@@ -32,5 +34,6 @@ export default defineConfig({
       face: here('./src/scene/political/names/face/fondamento.woff2'),
       heightmapMeta: here('./public/heightmaps/europe-dem-z6-1920.json'),
     }),
+    overlapsBake(here('./public')),
   ],
 })

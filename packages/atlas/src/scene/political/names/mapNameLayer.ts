@@ -5,6 +5,7 @@
 
 import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 
+import { NAME_OPACITY } from '../../detail/detailLevels'
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 
@@ -15,12 +16,6 @@ import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames
 
 /** The ink the names are written in — the dev's on the bench, 2026-10-28. */
 export const NAME_INK = '#3b2614'
-
-/**
- * The ink's opacity — 50 % on the bench, in multiply; raised by the dev on the atlas once the ink went to the ordinary
- * blend, 2026-10-28: *« moins de transparence sur les noms. Disons 75 % d'opacité »*.
- */
-export const NAME_OPACITY = 0.75
 
 /**
  * The white edge's opacity around the letters — the dev's, 2026-10-28: *« un bord blanc à 50 % au bord des lettres »*.

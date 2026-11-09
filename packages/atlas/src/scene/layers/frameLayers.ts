@@ -5,7 +5,6 @@
 
 import { lerp } from '@europe-historical-atlas/core/utils/math'
 
-import { inlayOpacityScale } from '../political/borders/borderStrokes'
 import { paintsExactFills } from '../political/paintsExactFills'
 
 import { layersWithRole } from './layerRoles'
@@ -83,6 +82,17 @@ function frameNames(
 }
 
 /**
+ * The level of homage the fills and the hatches show for this frame: a vassal's colour and band revealed (ATLAS-253,
+ * ATLAS-398), a contested vassal's band with them (ATLAS-399).
+ * @param handles - the layers on screen
+ * @param detail - the display level, continuous
+ */
+function frameTintDetail(handles: LayerContext['handles'], detail: number): void {
+  handles.fills?.setDetail(detail)
+  handles.hatches?.setDetail(detail)
+}
+
+/**
  * How far the year's layers have come in, for this frame: the fills' and the tribes' strength, the names' and the
  * events' opacity, each multiplied by the startup's fade — the borders take it in `frameBorders`.
  * @param context - the layers and what they read
@@ -104,11 +114,11 @@ function frameReveal(context: LayerContext): void {
  * @param at.zoom - its zoom in `[0, 1]`
  * @param at.detail - the homage the zoom shows
  * @param at.closeness - how close up the line work looks, `0..1`
- * @param at.pixelsPerUnit - screen pixels per world unit where it looks
+ * @param at.dashPixelsPerUnit - screen pixels per world unit the dashes are measured with, held for the level
  */
 function frameBorders(
   context: LayerContext,
-  at: { zoom: number; detail: number; closeness: number; pixelsPerUnit: number }
+  at: { zoom: number; detail: number; closeness: number; dashPixelsPerUnit: number }
 ): void {
   const { dev, handles } = context
   const { zoom, closeness } = at
@@ -130,8 +140,8 @@ function frameBorders(
   // The light blur grows with the close-up look (ATLAS-302); it reads the borders without the relief, so it is off
   // when the relief may hide them.
   handles.borders.setBlur(dev.political.borderOnTop ? dev.political.borderBlur * closeness : 0)
-  // The dash pattern is in pixels; the line's length is in world units.
-  handles.borders.setDashScale(at.pixelsPerUnit)
+  // The dash pattern is in pixels; the line's length is in world units — held per level, so the dashes lie still.
+  handles.borders.setDashScale(at.dashPixelsPerUnit)
 }
 
 /**
@@ -155,19 +165,26 @@ export function frameLineWork(
   const { dev, handles, sources } = context
   // The river ranks revealed for this zoom; the level of detail the zoom chooses, faded in time (ATLAS-295).
   handles.rivers?.setZoom(zoom)
-  const view = context.detail.frame(zoom, seconds, sources.homageDepth, dev.vassals.enabled)
+  const view = context.detail.frame(
+    zoom,
+    seconds,
+    sources.homageDepth,
+    dev.vassals.enabled,
+    pixelsPerUnit
+  )
   const detail = frameDetail(context, view)
   handles.events?.setDetailView?.(view)
-  handles.fills?.setDetail(detail)
+  frameTintDetail(handles, detail)
   frameReveal(context)
   // How close up the line work looks, `0` from afar: what crosses the borders to their close-up look and blurs them.
-  const closeness = inlayOpacityScale(zoom, dev.political.borderInlayZoom)
+  // By level, never with the zoom (the dev, 2026-11-09): the borders change look at the step, with the rest.
+  const closeness = view.closeness
   frameNames(context, zoom, { detail, watermark: view.watermark }, closeness)
   // The 3D icons blurred as the borders are, their shadows crisp (ATLAS-302).
   handles.events?.setBlur?.(dev.political.iconBlur * closeness)
   // The tribes' fade, from the panel's live trial: two uniforms, nothing rebuilt.
   handles.tribes?.setFeather(dev.tribes)
-  frameBorders(context, { zoom, detail, closeness, pixelsPerUnit })
+  frameBorders(context, { zoom, detail, closeness, dashPixelsPerUnit: view.dashPixelsPerUnit })
   // The coastline's opacity eased from its zoomed-out value to its zoomed-in one.
   handles.coastline?.setOpacity(lerp(dev.coast.opacity, dev.coast.opacityZoomIn, zoom))
   // The rhumb web fades as you zoom in, so it does not clutter the terrain it is drawn over.

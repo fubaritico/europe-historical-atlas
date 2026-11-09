@@ -27,15 +27,17 @@ export const BORDER_RENDER_ORDER = 10
 /**
  * A border between vassals at weight one, in CSS pixels — the values of the dev panel's former sliders (the dev,
  * 2026-10-29: *« entre vassaux plus fin »*), taken off the panel on 2026-11-09 (*"we don't do settings like that any
- * more"*). Drawn at core's `VASSAL_HAND_WEIGHT`, which the Cartographer's stroke reads too: 2.25, 2.25 and 3.75 px.
+ * more"*). Drawn at core's `VASSAL_HAND_WEIGHT`, which the Cartographer's stroke reads too: 1.8, 1.8 and 2.7 px — finer, the
+ * dots closer, since the dev's word of the same evening (*"un peu plus fines avec les points un peu plus serrés"*; 2.25,
+ * 2.25 and 3.75 before).
  */
 export const VASSAL_BORDER_PX = {
   /** The stroke's width. */
-  width: 1.5,
+  width: 1.2,
   /** Each dot's length along the line — about the width, so a dash reads as a point. */
-  dot: 1.5,
+  dot: 1.2,
   /** The gap between two dots. */
-  gap: 2.5,
+  gap: 1.8,
 } as const
 
 /**

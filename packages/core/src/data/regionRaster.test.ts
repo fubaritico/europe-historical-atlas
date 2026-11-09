@@ -113,6 +113,18 @@ describe('regionRaster', () => {
   })
 
   describe('variants', () => {
+    // An enclave drawn over the power around it keeps its ground.
+    it('gives a cell two polities cover to the later one by default', () => {
+      const raster = rasteriseRegions([box(0, 0, 1, 1), box(0, 0, 0.5, 0.5)], 4, 4)
+      expect(raster.indexAt(0.1, 0.1)).toBe(1)
+    })
+
+    // ATLAS-399: on contested ground the polity that was there keeps its name.
+    it('gives it to the earlier one when asked, the rest of the later one’s ground still its own', () => {
+      const raster = rasteriseRegions([box(0, 0, 0.5, 0.5), box(0, 0, 1, 1)], 4, 4, 'earlier')
+      expect([raster.indexAt(0.1, 0.1), raster.indexAt(0.7, 0.7)]).toEqual([0, 1])
+    })
+
     it('emits horizontal edges when the polities are stacked', () => {
       const segments = between(
         grid([

@@ -130,21 +130,29 @@ export function fillRowSpans(
  * vertices), whereas an index grid is one byte per cell per year, which would make switching centuries
  * an asset download instead of a millisecond of work.
  *
- * Later polities win on overlap, which keeps enclaves drawn on top of the power surrounding them.
+ * **Who keeps a cell two polities cover** is the caller's: by default the later one, which keeps enclaves drawn on top
+ * of the power surrounding them; the names ask for the earlier one — on ground two polities contest, the polity that
+ * was there keeps its name (the dev, 2026-11-09, ATLAS-399: _"the name does not change"_). Vassals are carved out of
+ * their suzerain, so they share no cell with it either way (measured 2026-11-09: none of 1100's 23, nor 1200's 20).
  * @param regions - the polities, in normalized grid coordinates
  * @param width - grid width in cells
  * @param height - grid height in cells
+ * @param overlap - which of two polities covering a cell keeps it: `'later'` (the default) or `'earlier'`
  * @returns the index grid
  */
 export function rasteriseRegions(
   regions: readonly Region[],
   width: number,
-  height: number
+  height: number,
+  overlap: 'later' | 'earlier' = 'later'
 ): RegionRaster {
   const cells = new Int16Array(width * height).fill(-1)
   if (width >= 2 && height >= 2) {
     const crossings: number[] = []
-    for (let index = 0; index < regions.length; index++) {
+    // The last written keeps a cell, so the earlier polities are written last when they are to keep it.
+    const order = regions.map((_, index) => index)
+    if (overlap === 'earlier') order.reverse()
+    for (const index of order) {
       const region = regions[index]
       if (!region) continue
       for (const [row, bucket] of bucketEdgesByRow(region, height)) {

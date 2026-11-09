@@ -35,6 +35,12 @@ export interface DetailLevel {
    * names gone to their watermark). The first piece of an order of the layers by level, widened at its second case.
    */
   readonly citiesOverNames: boolean
+  /**
+   * How close up the line work looks — the borders' inlay, their blur and the icons' — `0` afar, `1` close: **by level,
+   * never with the zoom** (the dev, 2026-11-09: _"it must change by step with the rest; there cannot be a fade"_ — the
+   * zoom's own scale left the borders between two looks between two steps).
+   */
+  readonly closeness: number
 }
 
 /** No reach: every name the level shows, wherever it stands. */
@@ -44,48 +50,71 @@ const EVERYWHERE = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY] as const
 const ALL_CITIES: readonly CityImportance[] = ['capital', 'large-city', 'city']
 
 /**
- * The pyramid, furthest first (the dev, 2026-10-31): afar, the countries and the capitals' points; then the watermark at
- * 40 %, the direct vassals, the capitals' names and the large cities' points — **a city enters by its point, its name a
- * level later**; then the watermark at 25 %, every vassal and every city with its name, near enough to the camera;
+ * The countries' names' own opacity, which each level's share is taken of — 50 % on the bench, in multiply; raised by
+ * the dev on the atlas once the ink went to the ordinary blend, 2026-10-28: *« moins de transparence sur les noms. Disons
+ * 75 % d'opacité »*. Here, beside the levels written against it.
+ */
+export const NAME_OPACITY = 0.75
+
+/**
+ * A level's countries' names written as **their opacity on screen**, `0..1` (the dev, 2026-11-09: a share of a share
+ * was one indirection too many): the share the level hands the names is that opacity over the names' own
+ * (`NAME_OPACITY`), which their white edge follows as well.
+ * @param opacity - the names' ink on screen at that level, `0..1`
+ * @returns the share of the names' opacity the level keeps
+ */
+function namesOnScreen(opacity: number): number {
+  return opacity / NAME_OPACITY
+}
+
+/**
+ * The pyramid, furthest first (the dev, 2026-10-31): afar, the countries and the capitals' points, the names at 75 % on
+ * screen; then the names at 30 %, the direct vassals, the capitals' names and the large cities' points — **a city enters
+ * by its point, its name a level later**, and the borders take their close-up look; then every vassal and every city with its name, near enough to the camera, the names still at 30 % (the
+ * dev, 2026-11-09 — about 19 % before);
  * closest, the same with a reach that tightens as the zoom closes in. The stops' zooms and the reaches are tuned on
  * sight; their history is in the plan.
  */
 export const DETAIL_LEVELS: readonly DetailLevel[] = [
   {
     from: 0,
-    watermark: 1,
+    watermark: namesOnScreen(0.75),
     vassals: 'none',
     cityPoints: ['capital'],
     cityNames: [],
     nameReach: EVERYWHERE,
     citiesOverNames: false,
+    closeness: 0,
   },
   {
     from: 0.45,
-    watermark: 0.4,
+    watermark: namesOnScreen(0.3),
     vassals: 'direct',
     cityPoints: ['capital', 'large-city'],
     cityNames: ['capital'],
     nameReach: EVERYWHERE,
     citiesOverNames: true,
+    closeness: 1,
   },
   {
     from: 0.65,
-    watermark: 0.25,
+    watermark: namesOnScreen(0.3),
     vassals: 'all',
     cityPoints: ALL_CITIES,
     cityNames: ALL_CITIES,
     nameReach: [1.5, 1.5],
     citiesOverNames: true,
+    closeness: 1,
   },
   {
     from: 0.8,
-    watermark: 0.25,
+    watermark: namesOnScreen(0.3),
     vassals: 'all',
     cityPoints: ALL_CITIES,
     cityNames: ALL_CITIES,
     nameReach: [1.45, 1.25],
     citiesOverNames: true,
+    closeness: 1,
   },
 ]
 

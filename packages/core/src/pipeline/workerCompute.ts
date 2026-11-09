@@ -131,10 +131,10 @@ function isKind<K extends ComputePayload['kind']>(
 function cutsOver(send: SendCommand): Pick<MapCompute, 'layFills' | 'cutTribes' | 'settleYear'> {
   return {
     async layFills(request: FillLayRequest): Promise<FillArrays> {
-      // Only each region's rings and its band's flag cross over: its other fields are nothing the cut reads, and would
-      // all be copied. The heights are copied, not handed over: the page keeps them for the next year.
-      const regions = request.regions.map(({ rings, banded }) =>
-        banded === true ? { rings, banded } : { rings }
+      // Only each region's rings, its band's flag and its realm cross over: its other fields are nothing the cut reads,
+      // and would all be copied. The heights are copied, not handed over: the page keeps them for the next year.
+      const regions = request.regions.map(({ rings, banded, realm }) =>
+        banded === true ? { rings, banded, ...(realm === undefined ? {} : { realm }) } : { rings }
       )
       const event = await send((id) => ({ kind: 'layFills', id, request: { ...request, regions } }))
       return answerOf(event, 'fills', 'fills').arrays

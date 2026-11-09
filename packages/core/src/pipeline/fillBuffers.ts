@@ -6,6 +6,8 @@
  * the relief held the page 156–243 ms (the built site, 2026-11-08); built in the worker, the page only wraps the arrays.
  */
 
+import { UNMEASURED_BAND_KM } from '../data/vassalBand'
+
 import { planeHeightIn } from './gridDrape'
 import { cutYearFills } from './vassalBands'
 
@@ -88,8 +90,13 @@ export interface FillArrays {
   tints: Uint8Array[]
   /** Each vertex's polity band depth, `0` for a sovereign — one byte a vertex. */
   bandDepth: Uint8Array
-  /** Each vertex's signed distance to its vassal's outline, km; `0` for a sovereign, whose depth says it is unread. */
+  /**
+   * Each vertex's signed distance to its polity's outline, km; `UNMEASURED_BAND_KM` for a polity cut with no band to
+   * measure, so it wears its colour whole.
+   */
   bandKm: Float32Array
+  /** Each vertex's signed distance to its realm's outline, km — its own outline's for a polity alone in its realm. */
+  realmKm: Float32Array
   /** Three indices per triangle. */
   indices: Uint32Array
 }
@@ -125,6 +132,7 @@ export function fillBuffers(options: FillGeometry): FillArrays {
   const tints = levels.map(() => new Uint8Array(vertices * 3))
   const bandDepth = new Uint8Array(vertices)
   const bandKm = new Float32Array(vertices)
+  const realmKm = new Float32Array(vertices)
   const indices = new Uint32Array(corners)
   // 3. Write each filled polity's triangles, vertices and tints, one polity after the other.
   let at = 0
@@ -133,10 +141,10 @@ export function fillBuffers(options: FillGeometry): FillArrays {
     if (!deepest[i]) return
     // Its triangles, shifted past the vertices of the polities written before it.
     for (const index of fill.indices) indices[corner++] = at + index
-    writeBand(fill, polityBandDepth(options.bandDepths, i), { bandDepth, bandKm }, at)
+    writeBand(fill, polityBandDepth(options.bandDepths, i), { bandDepth, bandKm, realmKm }, at)
     at = writeFill(fill.vertices, polityTints(levels, i), { positions, tints }, at, options)
   })
-  return { positions, tints, bandDepth, bandKm, indices }
+  return { positions, tints, bandDepth, bandKm, realmKm, indices }
 }
 
 /**
@@ -160,24 +168,36 @@ function polityBandDepth(depths: readonly number[], polity: number): number {
  * @param buffers - the buffers, written in place
  * @param buffers.bandDepth - one byte per vertex
  * @param buffers.bandKm - one float per vertex
+ * @param buffers.realmKm - one float per vertex, the realm's distance
  * @param at - the first vertex to write
  * @throws when a banded polity has no distances, or not one per vertex — its cut was not measured for the band
  */
 function writeBand(
   fill: IndexedFill,
   depth: number,
-  buffers: { bandDepth: Uint8Array; bandKm: Float32Array },
+  buffers: { bandDepth: Uint8Array; bandKm: Float32Array; realmKm: Float32Array },
   at: number
 ): void {
-  // A sovereign's run stays nought: its depth says the distance is not read.
-  if (depth === 0) return
   const count = Math.floor(fill.vertices.length / 2)
-  if (fill.bandKm?.length !== count)
+  // A sovereign measured wears its own band (depth nought, the dev's trial of 2026-11-09); a vassal must be measured.
+  if (fill.bandKm === undefined) {
+    if (depth > 0)
+      throw new Error(
+        `fill layer: a vassal of depth ${String(depth)} was cut without its band's distances`
+      )
+    // Unmeasured: deep inside, its colour whole — never a distance of nought, which would put it all in its band.
+    buffers.bandKm.fill(UNMEASURED_BAND_KM, at, at + count)
+    buffers.realmKm.fill(UNMEASURED_BAND_KM, at, at + count)
+    return
+  }
+  if (fill.bandKm.length !== count)
     throw new Error(
-      `fill layer: a vassal of depth ${String(depth)} was cut without its band's distances`
+      `fill layer: a polity's band holds ${String(fill.bandKm.length)} distances for ${String(count)} vertices`
     )
   buffers.bandDepth.fill(depth, at, at + count)
   buffers.bandKm.set(fill.bandKm, at)
+  // A polity alone in its realm: the realm's outline is its own.
+  buffers.realmKm.set(fill.realmKm ?? fill.bandKm, at)
 }
 
 /**

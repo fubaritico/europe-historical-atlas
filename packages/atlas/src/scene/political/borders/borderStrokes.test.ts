@@ -1,37 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  frontierStrokes,
-  groupSegmentsByPattern,
-  inlayOpacityScale,
-  patternStrokes,
-} from './borderStrokes'
+import { frontierStrokes, groupSegmentsByPattern, patternStrokes } from './borderStrokes'
 import { STYLE } from './testing/borderFixtures'
-
-describe('inlayOpacityScale', () => {
-  it('ramps from nothing at full zoom-out to full strength at the threshold', () => {
-    expect(inlayOpacityScale(0, 0.4)).toBe(0)
-    expect(inlayOpacityScale(0.2, 0.4)).toBeCloseTo(0.5)
-    expect(inlayOpacityScale(0.4, 0.4)).toBe(1)
-  })
-
-  it('holds at full strength beyond the threshold', () => {
-    expect(inlayOpacityScale(1, 0.4)).toBe(1)
-  })
-
-  it('never fades when the threshold is zero, instead of dividing by it', () => {
-    // The slider goes down to 0. `0 / 0` is NaN, and `clamp01` passes NaN straight through since both
-    // its comparisons are false against it — a NaN opacity throws nothing and WebGL drops the draw, so
-    // the casing would vanish silently at the default camera position.
-    expect(inlayOpacityScale(0, 0)).toBe(1)
-    expect(inlayOpacityScale(0.5, 0)).toBe(1)
-    expect(Number.isNaN(inlayOpacityScale(0, 0))).toBe(false)
-  })
-
-  it('clamps a negative threshold rather than inverting the ramp', () => {
-    expect(inlayOpacityScale(0.5, -1)).toBe(1)
-  })
-})
 
 describe('groupSegmentsByPattern', () => {
   const line = [

@@ -18,6 +18,9 @@ const ARRAYS = (): HatchArrays => ({
   positions: new Float32Array(9),
   colours: [0, 1, 2, 3].map(() => new Uint8Array(9)),
   counts: new Uint8Array([2, 2, 2]),
+  bandDepth: new Uint8Array(3),
+  bandKm: new Float32Array(3),
+  realmKm: new Float32Array(3),
   indices: Uint32Array.of(0, 1, 2),
 })
 
@@ -87,6 +90,21 @@ describe('createHatchLayer', () => {
         names.every((name) => HATCH_VERTEX_SHADER.includes(`attribute vec3 ${name};`)),
         material.uniforms.stripeWorld?.value,
       ]).toEqual([true, true, true, 0.75])
+      layer.dispose()
+    })
+  })
+
+  describe('a contested polity’s band', () => {
+    it('carries the band’s depth and distances as the shader names them, and reveals it with the zoom', () => {
+      const layer = createHatchLayer(options())
+      layer.setDetail(1.5)
+      const { geometry, material } = layer.object
+      expect([
+        ['bandDepth', 'bandKm', 'realmKm'].every((name) => name in geometry.attributes),
+        material.uniforms.detail?.value,
+        HATCH_VERTEX_SHADER.includes('attribute float realmKm;'),
+        HATCH_FRAGMENT_SHADER.includes('* strength * bandOpacity'),
+      ]).toEqual([true, 1.5, true, true])
       layer.dispose()
     })
   })

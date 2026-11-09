@@ -179,7 +179,8 @@ describe('frameLineWork', () => {
     frameLineWork(context, 0.9, 120, 10)
 
     expect(handles.names.setWatermark.mock.calls.map(([share]) => share as number)).toEqual([
-      1, 0.25,
+      1,
+      expect.closeTo(0.4),
     ])
     expect(handles.fills.setDetail.mock.calls.map(([detail]) => detail as number)).toEqual([0, 1])
     expect(handles.events.setDetailView).toHaveBeenCalledTimes(2)
@@ -190,11 +191,11 @@ describe('frameLineWork', () => {
   })
 
   // ATLAS-302: the blur reads the borders without the relief, so it must be off when the relief may hide them.
-  it('blurs the borders by the panel’s reach times the closeness, and not at all when the relief may hide them', () => {
+  // The dev, 2026-11-09: the closeness is the level's, never the zoom's — whole from the second level, nought afar.
+  it('blurs the borders by the panel’s reach times the level’s closeness, and not at all when the relief may hide them', () => {
     const setBlur = vi.fn()
     const dev = createDevState()
     dev.political.borderBlur = 2
-    dev.political.borderInlayZoom = 0.4
     const borders = {
       setDetail: vi.fn(),
       setWidthScale: vi.fn(),
@@ -219,11 +220,39 @@ describe('frameLineWork', () => {
       reveal: { value: 1 },
       detail: createDetailState(),
     } as unknown as LayerContext
-    frameLineWork(context, 0.2, 120, 0)
-    expect(setBlur).toHaveBeenLastCalledWith(1)
+    frameLineWork(context, 0.9, 120, 0)
+    expect(setBlur).toHaveBeenLastCalledWith(2)
     dev.political.borderOnTop = false
-    frameLineWork(context, 0.2, 120, 0)
+    frameLineWork(context, 0.9, 120, 0)
     expect(setBlur).toHaveBeenLastCalledWith(0)
+  })
+
+  it('keeps the borders’ far look between two zooms of the first level: no look between two', () => {
+    const borders = {
+      setDetail: vi.fn(),
+      setWidthScale: vi.fn(),
+      setOpacityScale: vi.fn(),
+      setCloseness: vi.fn(),
+      setDashScale: vi.fn(),
+      setBlur: vi.fn(),
+    }
+    const context = {
+      dev: createDevState(),
+      sources: createMapSources(),
+      handles: { borders } as unknown as LayerHandles,
+      reveal: { value: 1 },
+      detail: createDetailState(),
+    } as unknown as LayerContext
+    frameLineWork(context, 0.1, 120, 0)
+    frameLineWork(context, 0.3, 300, 1)
+    expect([
+      borders.setCloseness.mock.calls.map(([closeness]) => closeness as number),
+      // The dashes keep the scale the level was entered with: they lie still on the ground (the dev, 2026-11-09).
+      borders.setDashScale.mock.calls.map(([scale]) => scale as number),
+    ]).toEqual([
+      [0, 0],
+      [120, 120],
+    ])
   })
 
   // The dev, 2026-10-29: everything but the relief fades in together at startup.
@@ -233,7 +262,7 @@ describe('frameLineWork', () => {
       rivers: null,
       fills: { setDetail: vi.fn(), setLook: vi.fn() },
       tribes: { setLook: vi.fn(), setFeather: vi.fn() },
-      hatches: { setLook: vi.fn() },
+      hatches: { setLook: vi.fn(), setDetail: vi.fn() },
       borders: null,
       coastline: null,
       rhumb: null,
@@ -254,6 +283,8 @@ describe('frameLineWork', () => {
       detail: createDetailState(),
     } as unknown as LayerContext
     frameLineWork(context, 0.5, 120, 0)
+    // A contested vassal's band shows at the fills' own level of homage.
+    expect(handles.hatches.setDetail.mock.lastCall).toEqual(handles.fills.setDetail.mock.lastCall)
     expect([
       handles.fills.setLook.mock.lastCall,
       handles.tribes.setLook.mock.lastCall,

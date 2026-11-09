@@ -117,11 +117,6 @@ export interface PoliticalDevParams {
    * fills it is meant to divide; easing it back lets the colours carry the map and the line support it.
    */
   borderOpacityZoomOut: number
-  /**
-   * Zoom fraction at which the close-up line work is whole, fading in from the furthest zoom — the brown edge, its
-   * cream inlay and the frontier's two strokes — while the parchment line seen from afar fades out (29/10).
-   */
-  borderInlayZoom: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
   colorBySuzerain: boolean
   /**
@@ -229,7 +224,6 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderDoubleGap: 0.0002,
   borderWidthZoomOut: 0.45,
   borderOpacityZoomOut: 0.6,
-  borderInlayZoom: 0.4,
   colorBySuzerain: false,
   snapToCoast: 12,
   // The shared automatic palette — the Cartographer previews with the same eight (see its JSDoc).
@@ -316,13 +310,6 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     step: 0.05,
     label: 'opacity @ zoom-out',
   },
-  borderInlayZoom: {
-    kind: 'number',
-    min: 0,
-    max: 1,
-    step: 0.05,
-    label: 'close-up line work whole at zoom',
-  },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
   palette1: { kind: 'hexColor', label: 'palette 1' },
@@ -369,7 +356,6 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
       'frontierFarWidth',
       'borderWidthZoomOut',
       'borderOpacityZoomOut',
-      'borderInlayZoom',
     ],
   },
   {
@@ -436,7 +422,6 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierFarWidth',
   'borderWidthZoomOut',
   'borderOpacityZoomOut',
-  'borderInlayZoom',
   'borderDashSize',
   'borderDashGap',
   'borderDoubleGap',
@@ -492,7 +477,6 @@ const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
   'vassalBorderColor',
   'borderWidthZoomOut',
   'borderOpacityZoomOut',
-  'borderInlayZoom',
 ]
 
 /** Tunables that change the border *geometry*, but not the grid it is traced from. */

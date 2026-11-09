@@ -167,6 +167,7 @@ export function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAsse
     content: {
       load: () => Promise.resolve({ version: CONTENT_FORMAT_VERSION, events: [], cities: [] }),
     },
+    bakedOverlaps: { load: () => Promise.resolve(null) },
     ...over,
   }
 }

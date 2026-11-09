@@ -1441,6 +1441,7 @@ const LAID = (): FillArrays => ({
   tints: [new Uint8Array(9)],
   bandDepth: new Uint8Array(3),
   bandKm: new Float32Array(3),
+  realmKm: new Float32Array(3),
   indices: Uint32Array.of(0, 1, 2),
 })
 
@@ -1610,6 +1611,7 @@ describe('primeTribeCut', () => {
 // ATLAS-399: the overlaps hatched with the fills and the tribes, on the same relief, and cleared with them.
 /** A piece of common ground in the fixture's frame, red and blue in turn. */
 const HATCH = {
+  bandDepth: 0,
   polities: ['a', 'b'],
   colours: [
     { r: 255, g: 0, b: 0 },

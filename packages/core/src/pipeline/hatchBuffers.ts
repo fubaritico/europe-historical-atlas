@@ -13,11 +13,18 @@ import { fillBuffers } from './fillBuffers'
 import { cutYearFills } from './vassalBands'
 
 import type { FillSurface } from './fillBuffers'
+import type { FillBand } from './vassalBands'
 import type { OverlapHatch } from '../data/overlapHatches'
 import type { RgbColor } from '../utils/color'
 
 /** The hatches' geometry, ready to be wrapped in buffers. */
 export interface HatchArrays {
+  /** Each vertex's band depth — its piece's vassal's depth of homage, `0` for none (ATLAS-398) — one byte a vertex. */
+  bandDepth: Uint8Array
+  /** Each vertex's signed distance to its piece's outline, km. */
+  bandKm: Float32Array
+  /** The same — a contested piece is its own realm's outline, from afar as close up. */
+  realmKm: Float32Array
   /** Three floats per vertex, in world space. */
   positions: Float32Array
   /** Three bytes per vertex for each of the {@link HATCH_MAX_COLOURS} colours, the first polity's first. */
@@ -48,24 +55,28 @@ function paint(bytes: Uint8Array, colour: RgbColor, from: number, count: number)
  * @param hatches - the pieces of common ground, in their polities' colours
  * @param surface - the relief they are laid on
  * @param warn - where a piece of more than {@link HATCH_MAX_COLOURS} polities is said: its first ones take turns
+ * @param band - the frame and the reach a vassal's piece is measured with — against the piece's own outline, which is
+ *   the vassal's when the whole of it is contested (the dev's case, 2026-11-09); `null` measures none
  * @returns the hatches' arrays
  */
 export function hatchBuffers(
   hatches: readonly OverlapHatch[],
   surface: FillSurface,
-  warn: (message: string) => void
+  warn: (message: string) => void,
+  band: FillBand | null
 ): HatchArrays {
   const fills = cutYearFills(
-    hatches.map(({ rings }) => ({ rings })),
+    // Every piece measured: a sovereigns' piece wears the sovereigns' band, a vassal's the vassals' (the dev's trial).
+    hatches.map(({ rings }) => (band === null ? { rings } : { rings, banded: true })),
     surface.grid,
-    null
+    band
   )
   // The fills' own laying, every piece in one placeholder tint, so the positions and indices are the fills' exactly.
-  const { positions, indices } = fillBuffers({
+  const { positions, indices, bandDepth, bandKm, realmKm } = fillBuffers({
     ...surface,
     fills,
     tintLevels: [hatches.map(() => ({ r: 0, g: 0, b: 0 }))],
-    bandDepths: hatches.map(() => 0),
+    bandDepths: band === null ? hatches.map(() => 0) : hatches.map(({ bandDepth }) => bandDepth),
   })
   const vertices = positions.length / 3
   const colours = Array.from({ length: HATCH_MAX_COLOURS }, () => new Uint8Array(vertices * 3))
@@ -88,5 +99,5 @@ export function hatchBuffers(
     counts.fill(taken.length, at, at + run)
     at += run
   })
-  return { positions, colours, counts, indices }
+  return { positions, colours, counts, bandDepth, bandKm, realmKm, indices }
 }

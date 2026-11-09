@@ -7,6 +7,8 @@
 import { bakedNamesPath, readBakedNames } from '@europe-historical-atlas/core/pipeline/bakedNames'
 import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
+import { fetchBakedFile } from './bakedFile'
+
 import type { BakedNames } from '@europe-historical-atlas/core/pipeline/bakedNames'
 import type { FetchLike } from '@europe-historical-atlas/core/utils/fetchWithin'
 
@@ -32,16 +34,6 @@ export function createFetchBakedNamesSource(
   fetchFile: FetchLike = fetchWithin
 ): BakedNamesSource {
   return {
-    async load(year) {
-      const url = bakedNamesPath(yearsBase, year)
-      const response = await fetchFile(url)
-      // No file: the names are placed in the page.
-      if (response.status === 404) return null
-      if (!response.ok) throw new Error(`${url}: HTTP ${String(response.status)}`)
-      // Vite's dev server may answer a path it does not hold with its own page, as HTML: no file either.
-      const type = response.headers.get('content-type')
-      if (!type?.includes('json')) return null
-      return readBakedNames(await response.json(), url)
-    },
+    load: (year) => fetchBakedFile(bakedNamesPath(yearsBase, year), readBakedNames, fetchFile),
   }
 }
