@@ -5,24 +5,24 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — tout de suite après le 08/11 au soir : nettoyer 1200 à sa date, puis le pré-nettoyage
+## ▶ ON REPREND ICI — après la nuit du 08 au 09/11 : ATLAS-399, les chevauchements hachurés dans l'atlas
 
-**Je suis l'historien, dans le worktree `.claude/worktrees/historian`** (branche `historian-1108`, sur `main` à `196eed5`).
-**Son programme, dans l'ordre** (dicté le 08/11 au soir) :
+**`main` a quatre commits non poussés** (`0bef68c` les cartes 1100 et 1200, `4cb9cdf` la skill, `58e3575` + `ce9a8d3`
+ATLAS-398) — **pousser seulement à son mot** (il a dit *« non »* le 09/11). Dans l'arbre de `main`, **ses** retouches non
+commitées de `years/1100`, `years/1200` et `content/events.json` : ne pas y toucher, ne jamais les ajouter avec les miennes.
+Le worktree `historian` et ses branches sont supprimés (sa demande) ; le recréer pour dessiner.
 
-1. **Restaurer 1200** dans le worktree : `years/1200/` y est abîmée par ma série automatique (Skye → toute la Grande-Bretagne
-   donnée à Mann, restes de contours aux Lofoten, Samsø effacée) ; la copie d'avant est `years/1200.before-claude-2026-11-08`
-   — la recopier par-dessus, **mon serveur coupé**, puis vérifier avec `shape.mjs`. Rien de cela n'est commité ; `main` a la bonne.
-2. **Trouver le script qui ne garde que les pays d'une année** — 1200 superpose des pays de plusieurs années (vu par lui :
-   Kingdom of Mann, Kingdom of Alba, Old Kingdom of Norway), alors qu'il la croyait déjà nettoyée. **Demander à l'instance
-   principale** (`europe-map-e1`), qui l'a fait avec lui ; piste : `files/spikes/cliopatria-import/` (`resolve.py`, `convert.ts`).
-   Comprendre comment il a été lancé et pourquoi des superpositions restent.
-3. **Nettoyer 1200 à la date fixe 1200**, puis la publier comme 1100 (commit dans `main`, poussé).
-4. **Reprendre le pré-nettoyage** sur la carte nettoyée : **détourer les îles, les côtes de chaque pays, les lacs** — une île
-   se refait en effaçant son contour et trois clics (côte, côte, fermer), son conseil. Avec **le pilote par script** (les clics
-   envoyés au canevas depuis la page) **corrigé avant toute série** : vérifier « closed » après la fermeture ; ne jamais garder
-   un suivi de côte qui sort de l'emprise de l'île (Skye) ; effacer par contour, jamais par un cadre qui en prend une partie ;
-   une île à la fois avec une capture, avant de lancer une série. Le ranger dans la skill comme script réutilisable.
+**ATLAS-399, en cours** (lui ou l'instance principale, *« ton N+1 »*) : la mesure et l'approche sont **dans le ticket** —
+25 chevauchements en 1100, 16 en 1200, ~1,3 s chacune ; calcul au build, zone hachurée retirée des deux remplissages,
+rayures au sol par cran de zoom, traits gardés. **Lui présenter l'approche d'abord** : rien n'est validé.
+
+**Ouvert à sa décision** (revue ATLAS-398, ARCH-004 Carto) : la bande d'un vassal qui n'est pas un nombre — le vassal est
+rempli en entier, dit en console seulement ; la tribu, elle, n'est pas dessinée. Garder, ou la fenêtre d'erreur à la fin du
+geste.
+
+**Dettes de la nuit, à savoir** : les nouvelles bibliothèques de la skill (`lib/coast.mjs`, `islands.mjs`, `coasts.mjs`,
+`lakes.mjs`) sans tests ; sept lacs traversés en plusieurs tronçons et deux îles de l'Égée laissés à sa main ; les îles de
+l'Égée données à Byzance de mémoire, à sourcer ; des retenues modernes dans le masque de terre.
 
 **L'instance principale (le code), la prochaine session** (sa décision, 08/11, transmise par elle) : elle travaille avec
 l'historien, qui tient l'entretien du contexte, et peut lui déléguer des tickets. **ATLAS-333, la vitesse du changement de
@@ -40,8 +40,6 @@ montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : u
 reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
 reprendre la retouche des frontières dans le Cartographe.
 
-**Publier une année n'est plus bloqué** (le dev, 08/11 : _« il n'y a rien de bloquant dans le fait d'ajouter des
-années, des cartes »_) : 1100 retouchée par l'historien (la Catalogne) et 1200 sont commitées et poussées le 08/11 au soir.
 **Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
 
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
