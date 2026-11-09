@@ -628,3 +628,19 @@ function insideRingEO(p, ring) {
   }
   return within
 }
+
+/**
+ * The lobes' refusals, each placed on its island — never at 0,0 (review of 2026-11-09).
+ * @param {readonly { island: number, why: string }[]} refused - from {@link lobeCuts}
+ * @param {readonly { id: number, points: readonly LonLat[] }[]} islands - the islands it was given
+ * @returns {{ polity: string, at: LonLat, why: string }[]} each refusal, named by its island, at its first coast point
+ * @throws when a refusal names an island not given: a defect of the measure, said aloud
+ */
+export function placeLobeRefusals(refused, islands) {
+  const placeOf = new Map(islands.map((i) => [i.id, i.points[0]]))
+  return refused.map((r) => {
+    const at = placeOf.get(r.island)
+    if (at === undefined) throw new Error(`[use-cartographer] lobeCuts refused island #${r.island}, not one of the islands given`)
+    return { polity: `island #${r.island}`, at, why: r.why }
+  })
+}

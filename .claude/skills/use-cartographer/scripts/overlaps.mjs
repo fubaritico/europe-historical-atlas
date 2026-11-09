@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { join } from 'node:path'
 
-import { formatLonLat, parseBox } from './lib/args.mjs'
+import { formatLonLat, parseBox, parseNumbers } from './lib/args.mjs'
 import { overlapZones } from './lib/overlaps.mjs'
 import { REPO_ROOT, commandLine, folderOf, print, readJson } from './lib/system.mjs'
 import { readYearMap } from './lib/yearMap.mjs'
@@ -18,7 +18,8 @@ const USAGE = `packages/core/node_modules/.bin/tsx overlaps.mjs --map 1300 [--bo
 const { values } = commandLine({ 'min-km2': { type: 'string' } }, USAGE)
 const map = readYearMap(folderOf(String(values.map)), readJson)
 const box = values.box === undefined ? undefined : parseBox(String(values.box))
-const minKm2 = Number(values['min-km2'] ?? '0.1')
+// A mistyped number is refused, never read as a filter that lists nothing (review of 2026-11-09).
+const [minKm2] = parseNumbers(String(values['min-km2'] ?? '0.1'), 1, '--min-km2')
 const api = await import(join(REPO_ROOT, 'packages/core/src/data/overlaps.ts'))
 
 const { zones, refused } = overlapZones(map, api)

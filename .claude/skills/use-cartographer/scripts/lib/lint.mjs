@@ -150,7 +150,8 @@ export function crumbs(map, only = {}) {
  * grid's steps — with {@link STAIR_MIN_TREADS} flat treads or more. A run on a shared border is listed once, with every
  * polity holding it.
  * @param {YearMap} map - the map
- * @param {{ polity?: string, box?: readonly number[] }} [only] - one polity; a box the run's first point lies in
+ * @param {{ polity?: string, box?: readonly number[], skip?: Set<number[]> }} [only] - one polity; a box the run's
+ *   first point lies in; rings to leave out (an island or a lake drawn on its contour)
  * @returns {{ polities: string[], from: number, to: number, treads: number, anchors: number, km: number, at: LonLat }[]}
  *   each run from its first anchor to its last, the longest first; `anchors` counts the points between them
  */
@@ -160,6 +161,7 @@ export function stairs(map, only = {}) {
   for (const claim of map.claims) {
     if (only.polity !== undefined && claim.polity !== only.polity) continue
     for (const ring of claim.rings) {
+      if (only.skip?.has(ring)) continue
       const points = ringPoints(map, ring)
       if (points.length <= LEFTOVER_MAX_POINTS || isPixelRing(points)) continue
       const n = ring.length

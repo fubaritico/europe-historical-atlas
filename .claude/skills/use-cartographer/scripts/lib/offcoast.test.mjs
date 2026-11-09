@@ -147,14 +147,14 @@ describe('shoreRetraces', () => {
     assert.equal(runs[0].endEdge, null)
   })
 
-  it('refuses, saying why, a stretch with no land within reach to take a junction from', () => {
+  it('sends a ring wholly off the shore to the islands\u2019 ledger, never a retrace of one anchor', () => {
     const lone = yearMapFrom(
       { year: 1300, anchors: [[2.3, 44], [3, 44], [3, 46], [2.3, 46]], claims: [{ polity: 'p', rings: [[0, 1, 2, 3]] }] },
       { polities: [{ id: 'p', name: 'P' }] }
     )
     const r = shoreRetraces(lone, shore, distance, isLand, offCoastStretches(lone, distance, isLand), [])
     assert.equal(r.runs.length, 0)
-    assert.match(r.refused[0].why, /no junction point inland/)
+    assert.match(r.refused[0].why, /whole ring is off the shore/)
   })
 
   it('brings a polity that stops short of the sea out to it, through a junction inland at each end', () => {
@@ -227,5 +227,76 @@ describe('segmentGrid', () => {
 
   it('finds nothing beyond the reach', () => {
     assert.equal(nearest([16.2, 60], 100).item, null)
+  })
+})
+
+describe('the review of 2026-11-09, second round', () => {
+  // The shore every 0.1°, as dense as the traced one: the coast's own search looks 0.3° round a point.
+  const shoreLine = [{ points: Array.from({ length: 21 }, (_, k) => /** @type {[number, number]} */ ([2, 44 + k / 10])), closed: false }]
+  const landWest = (/** @type {readonly [number, number]} */ p) => p[0] < 2
+
+  it('plans the stretch on the ring of its own claim, when a polity holds two claims', () => {
+    // Two claims of p: the first far inland, the second bulging out to sea between 44.5 and 45.5° N.
+    const m = yearMapFrom(
+      {
+        year: 1300,
+        anchors: [[-5, 40], [-4, 40], [-4, 41], [0, 44], [2, 44], [2, 44.5], [2.3, 45], [2, 45.5], [2, 46], [0, 46]],
+        claims: [
+          { polity: 'p', rings: [[0, 1, 2]] },
+          { polity: 'p', rings: [[3, 4, 5, 6, 7, 8, 9]] },
+        ],
+      },
+      { polities: [{ id: 'p', name: 'P' }] }
+    )
+    const distance = shoreDistance(shoreLine)
+    const out = offCoastStretches(m, distance, landWest)
+    assert.equal(out[0].claim, 1)
+    const { runs } = shoreRetraces(m, shoreLine, distance, landWest, out, [])
+    assert.equal(runs.length, 1)
+    assert.deepEqual(runs[0].startAt, [2, 44.5])
+  })
+
+  it('walks a closed shore round, so a stretch across its first point is one stretch', () => {
+    // A closed sea, its shore a square from (4,44) round; p holds the land west of it, 16 km short of the shore's west
+    // side, which runs through the shore's first point.
+    const sea = { points: /** @type {[number, number][]} */ ([[4, 45], [4, 44], [6, 44], [6, 46], [4, 46], [4, 45.5]]), closed: true }
+    const land = (/** @type {readonly [number, number]} */ p) => p[0] < 4 || p[0] > 6 || p[1] < 44 || p[1] > 46
+    const m = yearMapFrom(
+      { year: 1300, anchors: [[0, 43], [3.8, 43], [3.8, 47], [0, 47]], claims: [{ polity: 'p', rings: [[0, 1, 2, 3]] }] },
+      { polities: [{ id: 'p', name: 'P' }] }
+    )
+    const found = unclaimedShores(m, [sea], land, (q) => holdersAt(m, q))
+    assert.equal(found.filter((f) => f.polity === 'p').length, 1)
+  })
+})
+
+describe('the review of 2026-11-09, third round', () => {
+  it('refuses a stretch whose anchors are not in its ring any more, never walking it round', () => {
+    const shore = [{ points: Array.from({ length: 21 }, (_, k) => /** @type {[number, number]} */ ([2, 44 + k / 10])), closed: false }]
+    const m = yearMapFrom(
+      { year: 1300, anchors: [[0, 44], [2, 44], [2, 46], [0, 46], [9, 9]], claims: [{ polity: 'p', rings: [[0, 1, 2, 3]] }] },
+      { polities: [{ id: 'p', name: 'P' }] }
+    )
+    const stale = [{ polity: 'p', claim: 0, ring: 0, from: 1, to: 4, whole: false }]
+    const r = shoreRetraces(m, shore, shoreDistance(shore), (p) => p[0] < 2, stale, [])
+    assert.match(r.refused[0].why, /not in the map any more/)
+  })
+
+  it('takes a closed shore wholly short of one polity as one stretch round, its closing segment counted', () => {
+    // A small closed sea inside p's ground, p's hole drawn 16 km short of its shore all round.
+    const sea = { points: /** @type {[number, number][]} */ ([[4, 44], [6, 44], [6, 46], [4, 46]]), closed: true }
+    const land = (/** @type {readonly [number, number]} */ p) => p[0] < 4 || p[0] > 6 || p[1] < 44 || p[1] > 46
+    const m = yearMapFrom(
+      {
+        year: 1300,
+        anchors: [[0, 40], [10, 40], [10, 50], [0, 50], [3.8, 43.85], [6.2, 43.85], [6.2, 46.15], [3.8, 46.15]],
+        claims: [{ polity: 'p', rings: [[0, 1, 2, 3], [4, 5, 6, 7]] }],
+      },
+      { polities: [{ id: 'p', name: 'P' }] }
+    )
+    const found = unclaimedShores(m, [sea], land, (q) => holdersAt(m, q))
+    assert.equal(found.length, 1)
+    assert.equal(found[0].points, 4)
+    assert.ok(found[0].km > 600, String(found[0].km))
   })
 })

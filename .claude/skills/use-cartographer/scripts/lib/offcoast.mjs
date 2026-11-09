@@ -100,13 +100,15 @@ export function shoreDistance(shores) {
  * @param {(p: LonLat) => number} distance - from {@link shoreDistance}
  * @param {(p: LonLat) => boolean} isLand - the mask the Pen follows
  * @param {Set<number[]>} [skip] - rings to leave out (from {@link ringsOnContours})
- * @returns {{ polity: string, ring: number, from: number, to: number, edges: number, km: number, worstKm: number,
- *   at: LonLat }[]} each stretch, from its first anchor to its last, its length, its worst gap and where it is
+ * @returns {{ polity: string, claim: number, ring: number, from: number, to: number, edges: number, km: number,
+ *   worstKm: number, at: LonLat, whole: boolean }[]} each stretch, by its claim's and ring's positions in the map, from its
+ *   first anchor to its last, its length, its worst gap and where it is; `whole` when every edge of the ring is off — an
+ *   island never drawn on its coast, for the ledger, not a retrace
  */
 export function offCoastStretches(map, distance, isLand, skip = new Set()) {
   const holders = edgeHolders(map)
   const found = []
-  for (const claim of map.claims) {
+  map.claims.forEach((claim, claimAt) => {
     claim.rings.forEach((ring, index) => {
       if (skip.has(ring)) return
       const n = ring.length
@@ -133,13 +135,12 @@ export function offCoastStretches(map, distance, isLand, skip = new Set()) {
         // Every edge off: the whole ring is one stretch (an island never drawn on its coast).
         let worst = { worst: 0, at: map.anchors[ring[0]] }
         let km = 0
-        for (const o of off) {
-          if (o === null) continue
+        for (const o of /** @type {{ worst: number, at: LonLat, km: number }[]} */ (off)) {
           km += o.km
           if (o.worst > worst.worst) worst = o
         }
-        found.push({ polity: claim.polity, ring: index, from: ring[0], to: ring[0], edges: n, km, worstKm: worst.worst,
-          at: worst.at })
+        found.push({ polity: claim.polity, claim: claimAt, ring: index, from: ring[0], to: ring[0], edges: n, km,
+          worstKm: worst.worst, at: worst.at, whole: true })
         return
       }
       for (let k = start + 1; k <= start + n; ) {
@@ -156,11 +157,11 @@ export function offCoastStretches(map, distance, isLand, skip = new Set()) {
           if (o.worst > worst.worst) worst = o
           k++
         }
-        found.push({ polity: claim.polity, ring: index, from: ring[first % n], to: ring[k % n], edges: k - first,
-          km, worstKm: worst.worst, at: worst.at })
+        found.push({ polity: claim.polity, claim: claimAt, ring: index, from: ring[first % n], to: ring[k % n],
+          edges: k - first, km, worstKm: worst.worst, at: worst.at, whole: false })
       }
     })
-  }
+  })
   return found
 }
 
@@ -240,9 +241,26 @@ export function unclaimedShores(map, shores, isLand, holders) {
       const near = nearest(inland)
       return near.polity !== null && near.km <= SHORT_OF_SHORE_KM ? { polity: near.polity, gap: near.km } : null
     })
-    let k = 0
-    while (k < pts.length) {
-      const s = state[k]
+    // A closed shore (the Black Sea, the Caspian) is walked round from a point held or empty, so a stretch across its
+    // first point is one stretch, and its closing segment counts (review of 2026-11-09).
+    const n = pts.length
+    // Start where a stretch cannot be running: a point no polity is short of, or where the polity behind changes.
+    const breakAt = state.findIndex((st, i) => st === null || st.polity !== state[(i - 1 + n) % n]?.polity)
+    if (shore.closed && breakAt < 0 && state[0] !== null) {
+      // The whole closed shore short of one polity: one stretch round, its closing segment counted.
+      const s0 = /** @type {{ polity: string, gap: number }} */ (state[0])
+      let km = 0
+      for (let i = 0; i < n; i++) km += kmBetween(pts[i], pts[(i + 1) % n])
+      const worst = Math.max(...state.map((st) => st?.gap ?? 0))
+      found.push({ polity: s0.polity, from: pts[0], to: pts[0], points: n, km, worstKm: worst, shore: [...pts, pts[0]] })
+      continue
+    }
+    const begin = shore.closed ? Math.max(0, breakAt) : 0
+    const end = shore.closed ? begin + n : n
+    const at = (/** @type {number} */ i) => i % n
+    let k = begin
+    while (k < end) {
+      const s = state[at(k)]
       if (s === null) {
         k++
         continue
@@ -250,14 +268,16 @@ export function unclaimedShores(map, shores, isLand, holders) {
       const first = k
       let km = 0
       let worst = s.gap
-      while (k + 1 < pts.length && state[k + 1]?.polity === s.polity) {
-        km += kmBetween(pts[k], pts[k + 1])
-        worst = Math.max(worst, /** @type {{ gap: number }} */ (state[k + 1]).gap)
+      while (k + 1 < end && state[at(k + 1)]?.polity === s.polity) {
+        km += kmBetween(pts[at(k)], pts[at(k + 1)])
+        worst = Math.max(worst, /** @type {{ gap: number }} */ (state[at(k + 1)]).gap)
         k++
       }
       if (k > first) {
-        found.push({ polity: s.polity, from: pts[first], to: pts[k], points: k - first + 1, km, worstKm: worst,
-          shore: pts.slice(first, k + 1) })
+        const shorePts = []
+        for (let i = first; i <= k; i++) shorePts.push(pts[at(i)])
+        found.push({ polity: s.polity, from: pts[at(first)], to: pts[at(k)], points: k - first + 1, km, worstKm: worst,
+          shore: shorePts })
       }
       k++
     }
@@ -286,7 +306,8 @@ export function unclaimedShores(map, shores, isLand, holders) {
  * @param {readonly { points: LonLat[], closed: boolean }[]} shores - the sea's shores
  * @param {(p: LonLat) => number} distance - from {@link shoreDistance}
  * @param {(p: LonLat) => boolean} isLand - the mask
- * @param {readonly { polity: string, ring: number, from: number, to: number }[]} out - from {@link offCoastStretches}
+ * @param {readonly { polity: string, claim: number, ring: number, from: number, to: number, whole: boolean }[]} out -
+ *   from {@link offCoastStretches}
  * @param {readonly { polity: string, from: LonLat, to: LonLat }[]} short - from {@link unclaimedShores}
  * @returns {{ runs: ShoreRetrace[], refused: { polity: string, at: LonLat, why: string }[], unchanged: number }} one
  *   retrace per stretch, each once; the stretches left, with why; how many would have changed nothing
@@ -367,16 +388,29 @@ export function shoreRetraces(map, shores, distance, isLand, out, short) {
     })
   }
   for (const s of out) {
-    const ring = map.claims.find((c) => c.polity === s.polity)?.rings[s.ring]
-    if (ring === undefined) continue
-    plan(s.polity, ring, ring.indexOf(s.from), ring.indexOf(s.to))
+    if (s.whole) {
+      refused.push({ polity: s.polity, at: map.anchors[s.from], why: 'the whole ring is off the shore: an island to redraw' })
+      continue
+    }
+    const ring = map.claims[s.claim]?.rings[s.ring]
+    if (ring === undefined || map.claims[s.claim].polity !== s.polity) {
+      refused.push({ polity: s.polity, at: map.anchors[s.from], why: 'its ring is not in the map any more' })
+      continue
+    }
+    const [i, j] = [ring.indexOf(s.from), ring.indexOf(s.to)]
+    // Both ends must be in the ring, or `plan` would walk it round for an end it never meets.
+    if (i < 0 || j < 0) {
+      refused.push({ polity: s.polity, at: map.anchors[s.from], why: 'its ring is not in the map any more' })
+      continue
+    }
+    plan(s.polity, ring, i, j)
   }
   for (const s of short) {
-    const claim = map.claims.find((c) => c.polity === s.polity)
+    const rings = map.claims.filter((c) => c.polity === s.polity).flatMap((c) => c.rings)
     // The polity's anchors nearest the stretch's two ends, on one ring, within reach of it.
     /** @type {{ ring: number[], a: number, b: number, gap: number } | null} */
     let best = null
-    for (const ring of claim?.rings ?? []) {
+    for (const ring of rings) {
       const near = (/** @type {LonLat} */ q) =>
         ring.reduce((b, a, k) => (kmBetween(map.anchors[a], q) < kmBetween(map.anchors[ring[b]], q) ? k : b), 0)
       const a = near(s.from)

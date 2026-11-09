@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { formatLonLat } from './lib/args.mjs'
+import { formatLonLat, parseNumbers } from './lib/args.mjs'
 import { writeFileSync } from 'node:fs'
 
 import { loadLand, seaShores, traceCoast } from './lib/coast.mjs'
@@ -25,7 +25,8 @@ const USAGE = `packages/core/node_modules/.bin/tsx offcoast.mjs --map 1300 [--mi
 
 const { values } = commandLine({ 'min-km': { type: 'string' }, plan: { type: 'string' } }, USAGE)
 const map = readYearMap(folderOf(String(values.map)), readJson)
-const minKm = Number(values['min-km'] ?? '0')
+// A mistyped number is refused, never read as a filter that lists nothing (review of 2026-11-09).
+const [minKm] = parseNumbers(String(values['min-km'] ?? '0'), 1, '--min-km')
 const contours = await traceCoast(REPO_ROOT)
 const shores = seaShores(contours)
 const isLand = await loadLand(REPO_ROOT)
