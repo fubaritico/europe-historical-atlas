@@ -156,7 +156,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59c0b0",
+      "colour": "#c09359",
       "wikidata": "Q335088"
     },
     {
@@ -189,7 +189,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c0599f",
+      "colour": "#1a7904",
       "wikidata": "Q160307"
     },
     {
@@ -257,7 +257,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b259c0",
+      "colour": "#bfbebf",
       "wikidata": "Q55502"
     },
     {
@@ -389,7 +389,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#74ba04",
+      "colour": "#67a308",
       "wikidata": "Q1483430"
     },
     {
@@ -433,7 +433,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#578907",
+      "colour": "#67a308",
       "wikidata": "Q1322662"
     },
     {
@@ -444,7 +444,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#73b608",
+      "colour": "#67a308",
       "wikidata": "Q83546"
     },
     {
@@ -455,7 +455,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59c098",
+      "colour": "#c09c59",
       "wikidata": "Q1252942"
     },
     {
@@ -631,7 +631,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59c0a1",
+      "colour": "#67a308",
       "wikidata": "Q4350658"
     },
     {
@@ -906,7 +906,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#61c059",
+      "colour": "#67a308",
       "wikidata": "Q680472"
     },
     {
@@ -961,7 +961,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#afc059",
+      "colour": "#c05963",
       "wikidata": "Q577867"
     },
     {
@@ -1038,7 +1038,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#528205",
+      "colour": "#67a308",
       "wikidata": "Q1108445"
     },
     {
@@ -1218,6 +1218,94 @@
       "existsTo": null,
       "colour": null,
       "wikidata": "Q3556991"
+    },
+    {
+      "id": "latvians",
+      "name": "Latvians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#0d8e63",
+      "wikidata": null
+    },
+    {
+      "id": "lithuanians",
+      "name": "Lithuanians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#65391e",
+      "wikidata": null
+    },
+    {
+      "id": "prussians",
+      "name": "Prussians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#41580b",
+      "wikidata": null
+    },
+    {
+      "id": "sudovians",
+      "name": "Sudovians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#5a741d",
+      "wikidata": null
+    },
+    {
+      "id": "zhmuds",
+      "name": "Zhmuds",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#305156",
+      "wikidata": null
+    },
+    {
+      "id": "semigallians",
+      "name": "Semigallians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#36134b",
+      "wikidata": null
+    },
+    {
+      "id": "curonians",
+      "name": "Curonians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#4a8c24",
+      "wikidata": null
+    },
+    {
+      "id": "test1",
+      "name": "test1",
+      "rank": "kingdom",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#ff0000",
+      "wikidata": null
     }
   ]
 }

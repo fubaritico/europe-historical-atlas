@@ -10,7 +10,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c07e59",
+      "colour": "#7c4424",
       "wikidata": "Q171150"
     },
     {
@@ -32,7 +32,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b259c0",
+      "colour": "#bfbebf",
       "wikidata": "Q55502"
     },
     {
@@ -54,7 +54,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c05f59",
+      "colour": "#67a308",
       "wikidata": "Q3403551"
     },
     {
@@ -87,7 +87,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59c0b9",
+      "colour": "#7105a0",
       "wikidata": "Q112039853"
     },
     {
@@ -120,7 +120,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#a459c0",
+      "colour": "#1a7904",
       "wikidata": "Q180114"
     },
     {
@@ -153,7 +153,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#61c059",
+      "colour": "#67a308",
       "wikidata": "Q680472"
     },
     {
@@ -203,7 +203,7 @@
     {
       "id": "halych-volhynia-occupation",
       "name": "Halych-Volhynia occupation",
-      "rank": null,
+      "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -219,7 +219,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c059bc",
+      "colour": "#c09c59",
       "wikidata": "Q241748"
     },
     {
@@ -285,7 +285,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c0598b",
+      "colour": "#009900",
       "wikidata": "Q3708094"
     },
     {
@@ -307,7 +307,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59c0b0",
+      "colour": "#c09359",
       "wikidata": "Q335088"
     },
     {
@@ -318,7 +318,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#9cc059",
+      "colour": "#54a0f1",
       "wikidata": "Q4948"
     },
     {
@@ -351,7 +351,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#5966c0",
+      "colour": "#67a308",
       "wikidata": "Q1483430"
     },
     {
@@ -362,7 +362,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#8459c0",
+      "colour": "#67a308",
       "wikidata": "Q2662372"
     },
     {
@@ -384,7 +384,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c059b4",
+      "colour": "#67a308",
       "wikidata": "Q671362"
     },
     {
@@ -439,7 +439,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c059af",
+      "colour": "#67a308",
       "wikidata": "Q2596884"
     },
     {
@@ -483,7 +483,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b659c0",
+      "colour": "#cea140",
       "wikidata": "Q756617"
     },
     {
@@ -527,7 +527,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b959c0",
+      "colour": "#59c09a",
       "wikidata": "Q568638"
     },
     {
@@ -560,7 +560,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c05a59",
+      "colour": "#67a308",
       "wikidata": "Q1483495"
     },
     {
@@ -571,7 +571,7 @@
       "suzerain": "duchy-of-sandomierz",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#5974c0",
+      "colour": "#c05963",
       "wikidata": "Q11750543"
     },
     {
@@ -659,7 +659,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c059aa",
+      "colour": "#c05980",
       "wikidata": "Q202266"
     },
     {
@@ -852,12 +852,12 @@
     {
       "id": "kimek-kipchak-confederation",
       "name": "Kimek-Kipchak confederation",
-      "rank": null,
+      "rank": "tribe",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#6ac059",
+      "existsFrom": 743,
+      "existsTo": 1220,
+      "colour": "#a8644e",
       "wikidata": "Q2477776"
     },
     {
@@ -934,7 +934,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c0596a",
+      "colour": "#62c059",
       "wikidata": "Q83546"
     },
     {
@@ -989,7 +989,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#6ac059",
+      "colour": "#9e8447",
       "wikidata": "Q1991742"
     },
     {
@@ -1011,7 +1011,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#59bcc0",
+      "colour": "#04a233",
       "wikidata": "Q269109"
     },
     {
@@ -1022,7 +1022,7 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#66c059",
+      "colour": "#67a308",
       "wikidata": "Q1322662"
     },
     {
@@ -1044,18 +1044,18 @@
       "suzerain": "kievan-rus",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c0596c",
+      "colour": "#67a308",
       "wikidata": "Q1261908"
     },
     {
       "id": "volga-bulgaria",
       "name": "Volga Bulgaria",
-      "rank": null,
+      "rank": "tribe",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#59c05c",
+      "existsFrom": 601,
+      "existsTo": 1240,
+      "colour": "#dc8265",
       "wikidata": "Q185488"
     },
     {
@@ -1088,7 +1088,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c0ab59",
+      "colour": "#5368de",
       "wikidata": "Q34"
     },
     {
@@ -1099,7 +1099,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#61c059",
+      "colour": "#67a308",
       "wikidata": "Q1108445"
     },
     {
