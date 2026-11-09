@@ -818,7 +818,7 @@
       "reasons": [],
       "testimonies": [],
       "holder": null,
-      "showInAtlas": false
+      "showInAtlas": true
     },
     {
       "id": "340",
@@ -849,7 +849,7 @@
       "reasons": [],
       "testimonies": [],
       "holder": null,
-      "showInAtlas": false
+      "showInAtlas": true
     },
     {
       "id": "339",
