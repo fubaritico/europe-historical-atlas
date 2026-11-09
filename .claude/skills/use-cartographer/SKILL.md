@@ -27,7 +27,7 @@ table (never re-decide what is decided).
 ## Where a map comes from — the layers (the dev, 2026-11-09: *"c'est systématique"*)
 
 One public **base layer** (Cliopatria before 1700, OpenHistoricalMap from 1700) imported and run through the passes
-below; **verification layers** read against it (Shepherd, public domain, may be traced; the dev's other atlases help
+below; **verification layers** read against it (Shepherd, public domain, may be traced; other atlases, not free, help
 derive the public map — read and compared, never traced); the **cities** settle where they disagree; every map used is
 **mentioned**. The whole method: [`references/layers.md`](references/layers.md).
 

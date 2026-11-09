@@ -83,7 +83,7 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
 7. **A book's index, systematically** (the dev, 2026-11-09: *"des références d'index à partir de ces livres — soit je te
    les dis, soit tu les déduis ; il faut en décrire la démarche pour que ce soit systématique"*). An index is the shortest
    way from a book to the pages on our places; read it, never the book from the start.
-   1. **Which books**: the ones the dev names (with his page numbers, or not), and the ones deduced — cited by a note or
+   1. **Which books**: the ones handed in as a reading (with their pages, or not), and the ones deduced — cited by a note or
       a bibliography read in step 6, or found by title in the libraries of steps 4 and 9.
    2. **Find the index**, in the three places that hold the books, combined (the dev, 2026-11-09: *"archive.org aussi,
       avec JSTOR, la BnF"*): **archive.org** — the last pages of `_djvu.txt`, free, the old books and regional
@@ -93,7 +93,7 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
       candidate holder, the neighbouring places of the lot. Each entry found is an **index reference**: book, entry,
       pages, and the hypothesis it bears on.
    4. **Write each reference down before reading it**, in the lot's file (`files/plans/sources/<year>.md`, a table
-      *Index references*: book, entry, pages, hypothesis, given by the dev or deduced, read or not). Nothing is read twice, nothing
+      *Index references*: book, entry, pages, hypothesis, given or deduced, read or not). Nothing is read twice, nothing
       found is forgotten; a reference never read is said in the report.
    5. **Read every page it gives** — step 5: the passage, the sentence copied, verified on the text or the image.
    6. **Index after index** (the dev: *"index (+ index)"*): an entry pointing to a source — a charter, a chronicle, a

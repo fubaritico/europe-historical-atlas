@@ -6,7 +6,7 @@
 **The whole chain, in the dev's words** (2026-11-09): a public **substrate** — Cliopatria, OpenHistoricalMap from 1700
 (*"comme tout le monde"*) — plus **Wikipedia** (*"comme tout le monde aussi"*), then what sets us apart: **corrections
 from references** (the verification layers, below), **books mined** on archive.org, JSTOR and the BnF, and **index references** from
-those books — index after index, Wikipedia's footnotes starting the same chain — given by the dev or deduced (`/find-sources`, « A book's index, systematically »). Not historical-basemaps:
+those books — index after index, Wikipedia's footnotes starting the same chain — given or deduced (`/find-sources`, « A book's index, systematically »). Not historical-basemaps:
 it is GPL-3.0, set aside in September.
 
 ## 1. The base layer — imported, then run through the passes
@@ -24,7 +24,7 @@ in rounds, islands from the ledger, lakes. The geometry of the published year is
 | map | licence | use |
 | --- | --- | --- |
 | **Shepherd**, *Historical Atlas* (1911, 1923) | public domain | **calque**: may be traced, georeferenced under the canvas (`/draw-from-plate`) — a second base where Cliopatria is coarse |
-| the dev's other atlases (Euratlas, Duby, …) | not free | **reference**: they help derive the public map — read, compared, the gaps found and corrected **on our own geometry**, never traced (`/create-data-mention`, RÉFÉRENCE) |
+| other atlases, not free (Euratlas, Duby, …) | not free | **reference**: they help derive the public map — read, compared, the gaps found and corrected **on our own geometry**, never traced (`/create-data-mention`, RÉFÉRENCE) |
 
 A gap between the base and a verification layer is a question, not an answer: it goes to step 3.
 
