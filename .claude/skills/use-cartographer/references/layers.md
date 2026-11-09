@@ -3,6 +3,12 @@
 > The dev: *"c'est systématique"*. Every year is built the same way, from one public base layer, checked against
 > other maps, settled by the cities. Epic ATLAS-153 (*les trois couches*); the licences are `/create-data-mention`'s.
 
+**The whole chain, in the dev's words** (2026-11-09): a public **substrate** — Cliopatria, OpenHistoricalMap from 1700
+(*"comme tout le monde"*) — plus **Wikipedia** (*"comme tout le monde aussi"*), then what sets us apart: **corrections
+from references** (the verification layers, below), **books mined** on JSTOR and the BnF, and **index references** from
+those books, given by the dev or deduced (`/find-sources`, « A book's index, systematically »). Not historical-basemaps:
+it is GPL-3.0, set aside in September.
+
 ## 1. The base layer — imported, then run through the passes
 
 | years | base layer | licence | how it comes in |
