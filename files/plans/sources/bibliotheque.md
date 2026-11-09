@@ -7,6 +7,12 @@
 > Filled from his eBay summary of 2026-10-20. A `?` is a gap the summary does not fill — completed with the book
 > in hand or by a search at its first mention, **never from memory**. First names marked † were added from memory
 > and are not yet checked.
+>
+> **The layers of a map** (the dev, 2026-11-09): every map has a base traced from **Cliopatria** and from
+> **Shepherd's _Historical Atlas_ (1911)** — both tracings, _"layers to review the whole and rough it out"_ (epic
+> ATLAS-153) — then the detail, from the historian's sources: _"as many levels of detail as resources, and justification
+> and legitimation of our project"_. Shepherd's public-domain status is as listed below; checked at its first mention.
+> The provenance of each year is one ticket a year (ATLAS-152 for 1100, ATLAS-408 for 1300).
 
 ## Coverage
 
