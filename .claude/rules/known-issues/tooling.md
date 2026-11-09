@@ -47,6 +47,9 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   les deux tests suivants tombés avec elle — la frappe du test interrompu continuait dans leur page. **Réglé le 08/11** : le job
   `test` de `validate.yml` lance les paquets un par un (`turbo test --concurrency=1`), comme Sonar ; et le test du CMS colle
   son texte libre au lieu de le taper touche par touche.
+  **Réglé le 09/11 au contrôle avant commit** : `.husky/pre-commit` lance `turbo test --concurrency=1`, comme la CI — trois
+  refus de suite sur trois tests différents, verts seuls, la charge à 97 (ATLAS-399). Sa règle le même jour : le contrôle
+  complet avant livraison seulement, le paquet touché pendant le travail.
   **Revenu le 29/10 au contrôle avant commit** (`.husky/pre-commit` lance `pnpm run test`, les cinq suites ensemble) : des
   tests du Cartographe au-delà de 5 s, verts seuls ; le même commit relancé une fois est passé (Turbo rejoue de son cache les
   paquets déjà verts). Relancer **une** fois, jamais `--no-verify`.

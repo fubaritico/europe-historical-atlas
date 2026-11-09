@@ -1,3 +1,5 @@
 pnpm exec lint-staged
 pnpm run type-check
-pnpm run test
+# One package at a time, as the CI does since 2026-11-08: five suites at once on every core saturate the machine and
+# time out tests that pass alone (REPO-260; load 97, 2026-11-09).
+pnpm exec turbo test --concurrency=1

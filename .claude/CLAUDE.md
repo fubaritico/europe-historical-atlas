@@ -95,8 +95,10 @@ When the dev proposes something:
   Bring what breaks, who learns that it happened, and what the alternative costs. See
   `rules/error-handling.md`. Touching a file re-opens the error handling already in it.
 - **Always write tests** after any module/util/hook/fix (see `rules/tests.md`).
-- **Always run** the checks after every change —
-  `pnpm type-check && pnpm lint && pnpm test` — then `/review`.
+- **The checks, in two sizes** (the dev, 2026-11-09: _"otherwise we will never get through, it will really slow the
+  workflow"_). **While working**: the type-check, the lint and the tests of the package touched — then `/review`.
+  **The whole check** (`pnpm type-check && pnpm lint && pnpm test`, the packages one at a time) **before a delivery**
+  — bringing a branch into `main`, a push — or at a step the dev and I judge important. The commit hook runs it too.
 - **Always ask** the dev to run `pnpm dev` (Vite server) after changing the 3D rendering.
 - **Knowledge base — one home per kind of fact** (the dev's call, 2026-10-17). This project's decisions go in
   its plans and `.claude/*.md`; the tasks on the Trello board (`/trello`); how to work with the dev in the file
