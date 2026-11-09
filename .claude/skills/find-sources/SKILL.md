@@ -15,6 +15,9 @@ sources online other than Wikipedia to support a fact — which polity a place b
 texts"*, *"evidence, even contradictory, and bring back the sources."* What it finds is entered by `/enter-in-cms`;
 the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts: `files/plans/evidence-system.md`.
 
+Where this research sits in the making of a year: the cities it sources settle the borders where the base layer and the
+verification layers disagree — `/use-cartographer`, `references/layers.md`.
+
 ## The frame — never crossed
 
 - **Nothing from memory.** What a model "knows" is not a source: it cannot be checked. Every fact comes from a text

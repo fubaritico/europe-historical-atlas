@@ -16,6 +16,10 @@ for another year, ask the dev which ticket is its provenance ticket before writi
 
 ## What decides everything: CALQUE or RÉFÉRENCE
 
+Where each kind of map sits in the making of a year (base layer, verification layers, the cities): `/use-cartographer`,
+`references/layers.md`.
+
+
 | | the dev… | the source's licence | the mention |
 | --- | --- | --- | --- |
 | **CALQUE** | traces its geometry | **passes to the year**: CC BY-SA makes the year CC BY-SA | « adapté de … — modifications : … » |

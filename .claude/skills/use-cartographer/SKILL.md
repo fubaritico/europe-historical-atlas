@@ -24,6 +24,13 @@ table (never re-decide what is decided).
 | draw | [`references/gestures.md`](references/gestures.md) — the Pen's roles, retracing, moving, giving a territory |
 | record | [`references/journal.md`](references/journal.md) — local, never committed; a dated section per session |
 
+## Where a map comes from — the layers (the dev, 2026-11-09: *"c'est systématique"*)
+
+One public **base layer** (Cliopatria before 1700, OpenHistoricalMap from 1700) imported and run through the passes
+below; **verification layers** read against it (Shepherd, public domain, may be traced; the dev's other atlases help
+derive the public map — read and compared, never traced); the **cities** settle where they disagree; every map used is
+**mentioned**. The whole method: [`references/layers.md`](references/layers.md).
+
 ## Before anything
 
 1. **One writer per map.** A map open in a tab saves itself two seconds after every gesture. Two tabs on one map

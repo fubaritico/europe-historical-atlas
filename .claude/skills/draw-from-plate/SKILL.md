@@ -19,6 +19,10 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
 
 ## Licence — before anything
 
+A plate is one of the **verification layers** of a year — the whole method, base layer first: `/use-cartographer`,
+`references/layers.md`.
+
+
 **Every plate is a source of the year, and goes through `/create-data-mention` before the first stroke**: its licence
 decides whether it is a **calque** (traced: a public-domain or free plate, Shepherd 1911 for one) or a **référence**
 (read for the facts, the geometry drawn by us on the public-domain backdrop). Euratlas, the Duby atlas and every atlas
