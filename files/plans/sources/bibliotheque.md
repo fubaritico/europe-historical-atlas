@@ -37,27 +37,36 @@ Nearly all of Europe, by the dev's own reckoning — **except Scandinavia and It
 
 ### A digital copy instead of a scan — searched 2026-11-10
 
-Searched in the BnF catalogue (SRU), archive.org (its API) and by web search. **JSTOR and Gallica refuse scripted
-requests** (Cloudflare), so both were then searched by title in the dev's Chrome, the same day: **neither holds any of
-these books**. JSTOR has only reviews and citations of them (Balkans, Méditerranée, Sellier, Nicolle, Russia, Peters);
-Gallica has only mentions in periodicals or 19th-century namesakes, online and *intra muros* alike. No BnF record read
-carries a Gallica link: every one is print only. archive.org's loans (CDL, free account) are for reading, not
-tracing.
+**The answer: none of his books is on JSTOR or Gallica. Four can be borrowed on archive.org; the others have to be
+scanned.**
 
-| # | identified as (catalogue) | digital copy found |
-| --- | --- | --- |
-| 1 | Pen & Sword, 2011–2012, re-ed. 2023 | none (not at the BnF); a paid ebook (Perlego, Open Road) |
-| 2 | Planeta, Barcelona, 2005, 2nd ed. — [BnF](https://catalogue.bnf.fr/ark:/12148/cb399662890) | none |
-| 3 | Economica 2008, pref. François Cailleteau — [BnF](https://catalogue.bnf.fr/ark:/12148/cb41269311v) | English original [on archive.org](https://archive.org/details/palgraveconciseh0000hupc), **no longer lent** (print-disabled only) |
-| 4 | ESI, Paris — [BnF, the magazine](https://catalogue.bnf.fr/ark:/12148/cb424214962); no. 29 has no record of its own | none |
-| 5 | Jean Sellier, *… genèse d'un peuple*, maps Anne Le Fur, Bertrand de Brun, La Découverte, 1997 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb366981996) | none |
-| 6 | Odile Sassi, Mathilde Aycard, dir. Pierre Vallaud, Presses de l'Université Saint-Joseph and Fayard, 2009 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb421305854) | none |
-| 7 | ESI, same magazine as no. 4; no. 51 has no record of its own | none |
-| 8 | tr. Hervé and Claude Lauriot-Prévost — [BnF](https://catalogue.bnf.fr/ark:/12148/cb39959719q) | English original, *Historical Atlas of the Islamic World* (Checkmark, 2003), **lent** on [archive.org](https://archive.org/details/historicalatlaso0000nico) |
-| 9 | translation of *Cappelens historiske atlas* (Oddvar Bjørklund et al.) | **lent** on [archive.org](https://archive.org/details/historicalatlaso0000unse_h3s1) |
-| 11 | John Channon, Robert Hudson, Autrement, 1997, tr. Colette Prat — [BnF](https://catalogue.bnf.fr/ark:/12148/cb40612191m) | English original, *The Penguin Historical Atlas of Russia* (1995), **lent** on [archive.org](https://archive.org/details/penguinhistorica0000chan) |
-| 12 | *Histoire mondiale synchronoptique*, dir. Robert Minder, Éditions académiques de Suisse, Basel, 1962 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb33133857g) | none (a paid DVD-ROM, *Der Digitale Peters*, 2010) |
-| Duby | Larousse — [BnF, 1991](https://catalogue.bnf.fr/ark:/12148/cb40573355m) | **lent** on archive.org, five editions — [1978](https://archive.org/details/atlashistoriquel0000unse_r3l9), [1987](https://archive.org/details/isbn_9782035212146), [1988](https://archive.org/details/atlashistoriquel0000unse), [1991](https://archive.org/details/atlashistoriquel0000duby), [2000](https://archive.org/details/atlashistoriquem0000unse) |
+**Borrow on archive.org — no scan needed** (free account; a loan is for reading, never for tracing):
+
+- *Atlas historique* — Georges Duby, Larousse: five editions, [1978](https://archive.org/details/atlashistoriquel0000unse_r3l9),
+  [1987](https://archive.org/details/isbn_9782035212146), [1988](https://archive.org/details/atlashistoriquel0000unse),
+  [1991](https://archive.org/details/atlashistoriquel0000duby), [2000](https://archive.org/details/atlashistoriquem0000unse)
+- *Historical Atlas of the World* — Chambers, 1970 (a translation of *Cappelens historiske atlas*, Oddvar Bjørklund et
+  al.): [archive.org](https://archive.org/details/historicalatlaso0000unse_h3s1)
+- *Atlas historique de l'Islam* — David Nicolle: only its English original, *Historical Atlas of the Islamic World*
+  (Checkmark, 2003), [archive.org](https://archive.org/details/historicalatlaso0000nico)
+- *Atlas historique de la Russie* — John Channon and Robert Hudson (Autrement, 1997): only its English original, *The
+  Penguin Historical Atlas of Russia* (1995), [archive.org](https://archive.org/details/penguinhistorica0000chan)
+
+**To scan — no digital copy anywhere:**
+
+- *The Historical Atlas of the British Isles* — Ian Barnes, Alex Swanston (Pen & Sword, 2011–2012): only a paid ebook
+- *Atlas de historia de España* — Fernando García de Cortázar (Planeta, 2005)
+- *Les Balkans, atlas historique* — Dennis P. Hupchick, Harold E. Cox (Economica, 2008): its English original is on
+  archive.org but [no longer lent](https://archive.org/details/palgraveconciseh0000hupc)
+- *Atlas historique Napoléon Iᵉʳ* — the magazine *Comprendre l'histoire*, no. 29
+- *Atlas historique de l'Europe, de l'Empire romain à l'UE* — the same magazine, no. 51
+- *Atlas historique des provinces et régions de France* — Jean Sellier (La Découverte, 1997)
+- *Atlas historique de la Méditerranée* — Odile Sassi, Mathilde Aycard (Fayard, 2009)
+- *Histoire mondiale synchronoptique* — Arno Peters (Éditions académiques de Suisse, 1962): only a paid DVD-ROM
+
+**How it was searched**: the BnF catalogue (every book there is print only, no Gallica link), archive.org, and JSTOR and
+Gallica by title in the dev's Chrome. JSTOR holds only reviews of these books; Gallica only mentions in periodicals or
+19th-century namesakes.
 
 Cancelled: *Historical Atlas of Britain*, *The Family Tree Historical Atlas of Germany*.
 
