@@ -1,20 +1,23 @@
-import { useField, useForm, useFormFields } from '@payloadcms/ui'
+import { useFormFields } from '@payloadcms/ui'
 import { useState } from 'react'
 
-import { fetchCandidates, fetchPlace } from '../lookupClient'
+import { fetchCandidates, fetchLot, fetchPlace } from '../lookupClient'
 import { filledSummary } from '../utils/filledSummary'
+import { said, withoutChoice } from '../utils/lookupState'
+import { lotOutcome } from '../utils/lotOutcome'
 
+import { useLotFields } from './useLotFields'
+import { usePlaceFields } from './usePlaceFields'
+
+import type { NamedItem } from '../../../wikidata/placeLot'
 import type { WikidataCandidate } from '../../../wikidata/wikidataPlace'
-import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
+import type { LookupState } from '../utils/lookupState'
+import type { LotField } from '../utils/lotUpdates'
 
-/** Where the lookup stands: idle, waiting, a list to choose from, or a sentence. */
-export type LookupState =
-  | { kind: 'idle' }
-  | { kind: 'busy' }
-  | { kind: 'choose'; candidates: WikidataCandidate[] }
-  | { kind: 'said'; message: string; tone: 'info' | 'error' }
+export type { LookupState } from '../utils/lookupState'
+export type { LotField } from '../utils/lotUpdates'
 
-/** What the button and the list need. */
+/** What the button and the lists need. */
 export interface WikidataLookup {
   /** Where the lookup stands. */
   state: LookupState
@@ -24,61 +27,70 @@ export interface WikidataLookup {
    */
   search: () => Promise<void>
   /**
-   * Fill the position and the id from one item.
+   * Fill the position, the id and the lot from one item.
    * @param candidate - the item chosen
    * @returns once filled, or the sentence shown
    */
   choose: (candidate: WikidataCandidate) => Promise<void>
+  /**
+   * Fill a field of the lot from the item chosen in its list.
+   * @param field - `country` or `region`
+   * @param item - the item chosen
+   * @returns nothing
+   */
+  chooseLot: (field: LotField, item: NamedItem) => void
 }
 
-/** The form's fields of one end of a date, in the order they are filled. */
-const MOMENT_PARTS = ['year', 'month', 'day', 'circa', 'margin', 'calendar'] as const
-
 /**
- * The lookup's state and its two steps, wired to the place form's fields.
- * @returns the state, and what the button and the list call
+ * The lookup's state and its steps, wired to the place form's fields.
+ * @returns the state, and what the button and the lists call
  */
 export function useWikidataLookup(): WikidataLookup {
   const name = useFormFields(([fields]) => fields.name?.value)
-  const location = useField<[number, number]>({ path: 'location' })
-  const wikidata = useField<string>({ path: 'wikidata' })
-  const { dispatchFields, setModified } = useForm()
+  const fillPlace = usePlaceFields()
+  const lotFields = useLotFields()
   const [state, setState] = useState<LookupState>({ kind: 'idle' })
 
   const search = async (): Promise<void> => {
     if (typeof name !== 'string' || name.trim() === '') {
-      setState({ kind: 'said', message: 'Écrivez d’abord un nom.', tone: 'info' })
+      setState(said('Écrivez d’abord un nom.', 'info'))
       return
     }
     setState({ kind: 'busy' })
     const answer = await fetchCandidates(name)
-    if (!answer.ok) setState({ kind: 'said', message: answer.message, tone: 'error' })
-    else if (answer.data.length === 0) {
-      setState({ kind: 'said', message: `Aucun élément Wikidata pour « ${name} ».`, tone: 'info' })
-    } else setState({ kind: 'choose', candidates: answer.data })
-  }
-  const fillMoment = (group: string, moment: HistoricalMoment): void => {
-    for (const part of MOMENT_PARTS) {
-      // The calendar keeps the form's default when Wikidata gives no day: it only matters for one.
-      if (part === 'calendar' && moment.calendar === null) continue
-      dispatchFields({ type: 'UPDATE', path: `${group}.${part}`, value: moment[part] })
-    }
-    setModified(true)
+    if (!answer.ok) setState(said(answer.message, 'error'))
+    else if (answer.data.length === 0)
+      setState(said(`Aucun élément Wikidata pour « ${name} ».`, 'info'))
+    else setState({ kind: 'choose', candidates: answer.data })
   }
   const choose = async (candidate: WikidataCandidate): Promise<void> => {
     setState({ kind: 'busy' })
     const answer = await fetchPlace(candidate.id)
     if (!answer.ok) {
-      setState({ kind: 'said', message: answer.message, tone: 'error' })
+      setState(said(answer.message, 'error'))
       return
     }
     const place = answer.data
-    wikidata.setValue(place.wikidata)
-    if (place.coordinates !== null)
-      location.setValue([place.coordinates.lon, place.coordinates.lat])
-    if (place.existsFrom !== null) fillMoment('existsFrom', place.existsFrom)
-    if (place.existsTo !== null) fillMoment('existsTo', place.existsTo)
-    setState({ kind: 'said', message: filledSummary(candidate.id, place), tone: 'info' })
+    fillPlace(place)
+    const filled = filledSummary(candidate.id, place)
+    // The lot is asked apart: a failure there leaves the position filled, and says that the lot was not read.
+    const lot = await fetchLot(place.wikidata)
+    if (!lot.ok) {
+      setState(said(`${filled} Le pays et la région n’ont pas été lus : ${lot.message}`, 'error'))
+      return
+    }
+    const outcome = lotOutcome(lot.data)
+    const lotChoices = lotFields.apply(outcome)
+    setState({
+      kind: 'said',
+      message: `${filled} Lot : ${outcome.sentence}`,
+      tone: 'info',
+      lotChoices,
+    })
   }
-  return { state, search, choose }
+  const chooseLot = (field: LotField, item: NamedItem): void => {
+    lotFields.fill(field, item)
+    setState((current) => withoutChoice(current, field))
+  }
+  return { state, search, choose, chooseLot }
 }

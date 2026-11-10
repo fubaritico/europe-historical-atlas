@@ -1,4 +1,5 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
+import { countryField, regionField } from '../fields/lot'
 import { wikidataField } from '../fields/wikidata'
 import { placeEndpoints } from '../wikidata/placeEndpoints'
 
@@ -48,6 +49,8 @@ export const Places: CollectionConfig = {
       required: true,
     },
     wikidataField,
+    // Its geographic lot today, the unit the research of the cities is done by, century after century (CMS-414).
+    { type: 'row', fields: [countryField, regionField] },
     {
       type: 'row',
       fields: [

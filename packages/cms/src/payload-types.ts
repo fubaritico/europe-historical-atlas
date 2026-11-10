@@ -227,6 +227,20 @@ export interface Place {
    */
   wikidata?: string | null;
   /**
+   * Le lot de recherche du lieu. Rempli depuis Wikidata.
+   */
+  country?: {
+    name?: string | null;
+    wikidata?: string | null;
+  };
+  /**
+   * La région du pays où est le lieu. Remplie depuis Wikidata.
+   */
+  region?: {
+    name?: string | null;
+    wikidata?: string | null;
+  };
+  /**
    * Sa fondation, ou sa première mention.
    */
   existsFrom?: {
@@ -763,6 +777,18 @@ export interface PlacesSelect<T extends boolean = true> {
   name?: T;
   location?: T;
   wikidata?: T;
+  country?:
+    | T
+    | {
+        name?: T;
+        wikidata?: T;
+      };
+  region?:
+    | T
+    | {
+        name?: T;
+        wikidata?: T;
+      };
   existsFrom?:
     | T
     | {

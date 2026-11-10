@@ -34,7 +34,8 @@ export const MCP_COLLECTIONS = {
       // The plugin takes a point as an object and stores it as Payload's [longitude, latitude] tuple (3.92.0,
       // `utils/schemaConversion/transformPointFields.js`, `utils/transformPointDataToPayload.js`).
       'A place on the map: a city with its name, its position `location` as { longitude, latitude } — Wikidata ' +
-      'gives the latitude first — and its Wikidata id `wikidata`.',
+      'gives the latitude first — its Wikidata id `wikidata`, and its geographic lot today, `country` and ' +
+      '`region`, each `{ name, wikidata }` — the country (P17) and the first-level division Wikidata gives.',
   },
   [PlacePeriods.slug]: {
     enabled: ENTER_NEVER_DELETE,

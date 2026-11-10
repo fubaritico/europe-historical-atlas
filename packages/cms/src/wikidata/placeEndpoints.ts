@@ -1,5 +1,6 @@
 import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
+import { lotUrl, readLotAnswer } from './placeLot'
 import {
   WIKIDATA_ID,
   WIKIDATA_USER_AGENT,
@@ -115,8 +116,31 @@ export async function readPlace(
   return askWikidata(fetchFile, entityUrl(id), readPlaceEntity)
 }
 
-/** The two routes the place form calls: `/api/places/wikidata-search?name=…` and `/api/places/wikidata/:id`. */
+/**
+ * Read the lot one item lies in today — its countries and its regions, every one Wikidata gives (CMS-414). Signed-in
+ * contributors only.
+ * @param request - the request: `/wikidata/Q90/lot`
+ * @param fetchFile - how to fetch
+ * @returns the lot, or the reason it cannot be read
+ */
+export async function readPlaceLot(
+  request: LookupRequest,
+  fetchFile: FetchLike = fetchWithin
+): Promise<Response> {
+  if (request.user === null) return Response.json({ error: 'Non connecté.' }, { status: 401 })
+  const id = request.routeParams?.id
+  if (typeof id !== 'string' || !WIKIDATA_ID.test(id)) {
+    return Response.json({ error: 'Identifiant Wikidata invalide.' }, { status: 400 })
+  }
+  return askWikidata(fetchFile, lotUrl(id), readLotAnswer)
+}
+
+/**
+ * The three routes the place form calls: `/api/places/wikidata-search?name=…`, `/api/places/wikidata/:id` and
+ * `/api/places/wikidata/:id/lot`.
+ */
 export const placeEndpoints: Endpoint[] = [
   { path: '/wikidata-search', method: 'get', handler: (request) => searchPlaces(request) },
   { path: '/wikidata/:id', method: 'get', handler: (request) => readPlace(request) },
+  { path: '/wikidata/:id/lot', method: 'get', handler: (request) => readPlaceLot(request) },
 ]

@@ -3,6 +3,7 @@
  * sentence to show. No React here, so it is exercised with a stub fetch.
  */
 
+import type { PlaceLot } from '../../wikidata/placeLot'
 import type { WikidataCandidate, WikidataPlace } from '../../wikidata/wikidataPlace'
 
 /** What a lookup answers: the data, or the sentence the form shows instead. */
@@ -44,6 +45,19 @@ export function fetchCandidates(
   fetchFile: typeof fetch = fetch
 ): Promise<LookupAnswer<WikidataCandidate[]>> {
   return call(fetchFile, `/api/places/wikidata-search?name=${encodeURIComponent(name)}`)
+}
+
+/**
+ * The lot one item lies in today: its countries and its regions (CMS-414).
+ * @param id - the chosen item
+ * @param fetchFile - how to fetch
+ * @returns the lot, or the sentence to show
+ */
+export function fetchLot(
+  id: string,
+  fetchFile: typeof fetch = fetch
+): Promise<LookupAnswer<PlaceLot>> {
+  return call(fetchFile, `/api/places/wikidata/${encodeURIComponent(id)}/lot`)
 }
 
 /**

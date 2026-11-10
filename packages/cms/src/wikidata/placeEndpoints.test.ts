@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { fetchPlaceEntity, readPlace, searchPlaces } from './placeEndpoints'
+import { fetchPlaceEntity, readPlace, readPlaceLot, searchPlaces } from './placeEndpoints'
 import { WIKIDATA_USER_AGENT } from './wikidataPlace'
 
 import type { LookupRequest } from './placeEndpoints'
@@ -127,6 +127,64 @@ describe('placeEndpoints', () => {
 
     it('throws the status rather than answering for the form', async () => {
       await expect(fetchPlaceEntity('Q90', answering({}, false))).rejects.toThrow('HTTP 503')
+    })
+  })
+
+  describe('readPlaceLot — the country and the region today (CMS-414)', () => {
+    it('answers the lot of an item', async () => {
+      const body = {
+        results: {
+          bindings: [
+            {
+              country: { value: 'http://www.wikidata.org/entity/Q38' },
+              countryLabel: { value: 'Italie' },
+            },
+          ],
+        },
+      }
+      const response = await readPlaceLot(
+        request({ routeParams: { id: 'Q2656' } }),
+        answering(body)
+      )
+      expect(await response.json()).toEqual({
+        countries: [{ wikidata: 'Q38', name: 'Italie' }],
+        regions: [],
+      })
+    })
+
+    it('asks the query service, introducing itself', async () => {
+      const fetchFile = answering({ results: { bindings: [] } })
+      await readPlaceLot(request({ routeParams: { id: 'Q2656' } }), fetchFile)
+      expect([
+        String(fetchFile.mock.calls[0]?.[0]).startsWith('https://query.wikidata.org/sparql?'),
+        fetchFile.mock.calls[0]?.[1],
+      ]).toEqual([true, { headers: { 'User-Agent': WIKIDATA_USER_AGENT } }])
+    })
+
+    it('refuses a visitor who is not signed in', async () => {
+      const response = await readPlaceLot(
+        request({ user: null, routeParams: { id: 'Q90' } }),
+        answering({})
+      )
+      expect(response.status).toBe(401)
+    })
+
+    it('refuses a malformed id without asking Wikidata — it goes into the query', async () => {
+      const fetchFile = answering({})
+      const response = await readPlaceLot(
+        request({ routeParams: { id: 'Q1 } . ?x ?y ?z . {' } }),
+        fetchFile
+      )
+      expect([response.status, fetchFile.mock.calls.length]).toEqual([400, 0])
+    })
+
+    it('says Wikidata does not answer when the query service fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const response = await readPlaceLot(
+        request({ routeParams: { id: 'Q90' } }),
+        answering({}, false)
+      )
+      expect(response.status).toBe(502)
     })
   })
 })

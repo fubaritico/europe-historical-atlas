@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { fetchCandidates, fetchPlace } from './lookupClient'
+import { fetchCandidates, fetchLot, fetchPlace } from './lookupClient'
 
 /**
  * A fetch answering one response.
@@ -41,6 +41,14 @@ describe('lookupClient', () => {
       const fetchFile = answering(200, { wikidata: 'Q90', name: 'Paris', coordinates: null })
       await fetchPlace('Q90', fetchFile)
       expect(fetchFile).toHaveBeenCalledWith('/api/places/wikidata/Q90', { credentials: 'include' })
+    })
+
+    it('asks the lot of an item — its country and region today', async () => {
+      const fetchFile = answering(200, { countries: [], regions: [] })
+      await fetchLot('Q90', fetchFile)
+      expect(fetchFile).toHaveBeenCalledWith('/api/places/wikidata/Q90/lot', {
+        credentials: 'include',
+      })
     })
   })
 
