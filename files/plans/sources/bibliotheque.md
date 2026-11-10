@@ -31,13 +31,13 @@ Nearly all of Europe, by the dev's own reckoning — **except Scandinavia and It
 | 7 | *Atlas historique de l'Europe, de l'Empire romain à l'UE* | ? | *Comprendre l'histoire* no. 51 | Europe, general |
 | 8 | *Atlas historique de l'Islam* | David Nicolle | Succès du livre, 2004 | Islamic world, Iberia, the East |
 | 9 | *Historical Atlas of the World* | ? | Chambers, 1970 | world, general |
-| 10 | « Atlas historique » — title unknown | ? | ? | ? |
+| 10 | *Atlas historique* | W. De Vos, R. Geivers | Erasme, Namur — named by the dev 2026-11-10 | ? — to read in the book |
 | 11 | *Atlas historique de la Russie. Puissance et instabilité d'un empire européen* | ? | ? | Russia, mostly from Muscovy on |
 | 12 | *Synchronoptische Weltgeschichte*, French edition — not an atlas | Arno Peters (†2002) | 1952 for the original | the synchronoptic frieze (ATLAS-358): facts and dates only, in copyright until 2072 — identified 2026-11-05 from his scan |
 
 ### A digital copy instead of a scan — searched 2026-11-10
 
-**The answer: none of his books is on JSTOR or Gallica. Four can be borrowed on archive.org; the others have to be
+**The answer: none of his books is on JSTOR or Gallica. Five can be borrowed on archive.org; the others have to be
 scanned.**
 
 **Borrow on archive.org — no scan needed** (free account; a loan is for reading, never for tracing):
@@ -45,6 +45,8 @@ scanned.**
 - *Atlas historique* — Georges Duby, Larousse: five editions, [1978](https://archive.org/details/atlashistoriquel0000unse_r3l9),
   [1987](https://archive.org/details/isbn_9782035212146), [1988](https://archive.org/details/atlashistoriquel0000unse),
   [1991](https://archive.org/details/atlashistoriquel0000duby), [2000](https://archive.org/details/atlashistoriquem0000unse)
+- *Atlas historique* — W. De Vos, R. Geivers (Erasme, Namur): two editions, [1984](https://archive.org/details/bwb_p8-agu-115)
+  and [1990](https://archive.org/details/atlashistorique0000unse_r9f5) (Le grand livre du mois); not in the BnF catalogue
 - *Historical Atlas of the World* — Chambers, 1970 (a translation of *Cappelens historiske atlas*, Oddvar Bjørklund et
   al.): [archive.org](https://archive.org/details/historicalatlaso0000unse_h3s1)
 - *Atlas historique de l'Islam* — David Nicolle: only its English original, *Historical Atlas of the Islamic World*
