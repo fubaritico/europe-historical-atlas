@@ -2,6 +2,27 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-08 soir → 09 nuit — 1200 nettoyée, l'arête effacée, la bande des vassaux
+
+La même plage que l'entrée suivante, prolongée : **08/11 14:03 → 09/11 02:54** (12 h 50, dont ~7 h 40 depuis 19 h 13) ; le
+chantier ouvert le 05/10 totalise **239 h 37 sur 40 plages**. **Sur `main`, non poussé** (sa réponse : *« non »*) :
+`0bef68c`, `4cb9cdf`, `58e3575`, `ce9a8d3` ; poussés plus tôt : `0e2aec6`, `a8aa3b4`. Worktree `historian` et ses branches supprimés à sa demande.
+
+- **1200 nettoyée à sa date** : les trois chevauchements de l'import à la main (`0e2aec6`) ; puis côtes, îles et lacs, en
+  grande partie par le pilote, **finis par lui à la main** (*« on est en train de bouffer du token pour rien »*) ; 1100
+  retouchée par lui (`0bef68c`). Sa méthode de la jonction, apprise : un point décalé de la côte, le point du voisin aimanté.
+- **CARTO-397, effacer une arête** (`a8aa3b4`, Fait) : *« C'est magnifique, c'est exactement de ça dont on avait besoin »* ;
+  une arête partagée part des deux pays — sa décision, pour les lacs.
+- **La skill `/use-cartographer`** (`4cb9cdf`) : îles, côtes, lacs mesurés ; le pilote les dessine.
+- **ATLAS-398, la bande des vassaux** (`58e3575`, revue `ce9a8d3`, Fait) : *« beaucoup plus clair comme ça, beaucoup plus
+  sobre »* ; un seul niveau de vassalité, *« en camaïeu … pas gérable »*. Sa règle : **plus aucun réglage dans le panneau**
+  (mémoire `no-more-dev-panel-tunables`).
+- **ATLAS-399 ouvert** à son constat (la Baltique de 1200 : les chevauchements se mélangent dans l'atlas) : mesuré, approche
+  proposée sur le ticket, pas encore validée.
+- **Mes fautes** : un recul par `goTo` faussé par le plafond de 50 pas de l'historique (Mann resté ouvert, réparé) ; un chemin
+  de 478 775 km² autour de la mer Noire pour Halych (défait depuis la copie) ; « sans frontière dedans » écrit sur ATLAS-399
+  comme sa décision alors que c'était ma lecture (corrigé sur le ticket).
+
 ### 2026-11-08 → 09 nuit — l'instance du code : ATLAS-333 dans `main`, le tampon de trois cartes, ATLAS-396 entamé
 
 Une plage, **08/11 14:03 → 09/11 01:59** (11 h 55, partagée avec l'historien dans son worktree) ; le chantier ouvert le
