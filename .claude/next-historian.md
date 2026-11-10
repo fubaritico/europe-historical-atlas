@@ -5,6 +5,20 @@
 > it. The tasks are the board (`/trello`); this file holds where the historian stopped. Its readings are the team's,
 > never attributed to a person (memory `a-reading-is-never-attributed-to-the-dev`).
 
+## ▶ D'ABORD — le rattrapage du lot géographique (CMS-414), prêt, à lancer dans une session neuve
+
+Le pays et la région d'aujourd'hui de chaque lieu (`ec9adc6`, `e0ddd40`) : les champs, le bouton et la lecture sont
+commités et essayés par le dev sur Ortona. **Le rattrapage n'est pas écrit** : la session du 10/11 gardait l'outil
+`updatePlaces` d'avant les champs (même après `/mcp` et la relance de son CMS — le serveur, lui, les connaît). Tout est
+prêt dans `files/resources/lot-backfill/` (ignoré par git) : `BRIEF.md`, quatre paquets `updates-1..4.json` (699 lieux,
+665 avec leur région, lus dans Wikidata « aujourd'hui seulement »), `to-decide.json` (41 cas pour le dev : plusieurs
+pays — Jérusalem, Prizren, Lipljan, Rome, Derbent, Arnedo —, aucun pays, plusieurs ou aucune région). D'abord vérifier
+que `updatePlaces` a bien `country` et `region` ; puis un agent par paquet ; relire la base en lecture seule ; le
+ticket CMS-414 à « À valider » avec la liste des 41.
+
+**L'Italie de 1100 est dans sa base** (357 villes, 272 sources, `files/plans/sources/1100-italy.md`) ; à corriger : quatre
+lignes du nord-ouest saisies avant la règle de date (Turin, Rivalta, Novare, Alba).
+
 ## ▶ ON REPREND ICI — 10/11, après la nuit des sept cartes
 
 **Où je travaille** : le worktree `.claude/worktrees/historian`, branche `historian-1109`, **jamais l'arbre de `main`**
