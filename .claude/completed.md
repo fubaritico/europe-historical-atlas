@@ -2,6 +2,33 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-09 → 10 nuit — l'instance du code : les hachures cuites, la carte par palier, 1300 publiée
+
+Deux plages, **09/11 11:46 → 18:50 et 23:35 → 01:13** (8 h 41) ; le chantier ouvert le 05/10 totalise **248 h 28 sur 42
+plages**. Worktree `baked-years`, branche `atlas-396-speed` fusionnée dans `main`. **Sur `main`, poussé, CI verte, site
+déployé** (`5581f21` ; puis des commits de doc jusqu'à `1575d36`).
+
+- **ATLAS-396** : ses deux points essayés (`53eb792`, `14887af`) rebasés sur `main` et réunis avec la bande des vassaux —
+  la bande mesurée dans le worker (`17f17c6`).
+- **ATLAS-399, Fait** : les chevauchements hachurés, une rayure par pays à 45°, **cuites sur le sol** (sa règle : _« pas de
+  largeur fixe, ça vibre »_), 25 km (_« c'est la bonne taille »_) ; calculés à la publication ; sur un terrain contesté
+  **le nom ne change pas** ; un vassal contesté garde sa bande (`accdf7c`, `09f8f50`).
+- **ATLAS-409, Fait** : la carte **par palier** (_« il peut pas y avoir de fondu »_) — l'aspect des frontières et les
+  pointillés, les noms à 30 % au plus près, les frontières des vassaux affinées ; **l'essai de la bande des souverains**,
+  le royaume d'un bloc de loin. Son coût mesuré (0,4 → 2 s la découpe) : **ATLAS-407**, sa décision de le commiter tel quel.
+- **Le contrôle avant commit lance les paquets un par un** (`f4f6673`, REPO-260) ; **sa règle des contrôles** : le paquet
+  touché en travaillant, le contrôle complet et la revue à chaque commit, la revue dès qu'un changement important tient
+  (`874fc44`) — et **jamais `--no-verify`**, qu'il a refusé.
+- **Publié sur sa demande** : 1300 (`3c9e335`, après un correctif des noms qui bloquait sa construction, `1ef160b`), ses
+  1100 et 1200 (`fe2dfe9`), deux villes du CMS (`c7d9ae9`), la skill de l'historien et ses corrections de relecture
+  (`1827358`, `6e613c4`, `609b414`), ses docs (couches, index, neutralité, numérisation, son point de reprise).
+- **Ses décisions** : les couches d'une carte — Cliopatria et Shepherd en calque, le détail de l'historien ; une provenance
+  par année (ATLAS-408, Cliopatria v0.2.1 citée) ; chaque arbre de travail suit `main`.
+- **Mes fautes** : sa zone d'essai test1 publiée dans 1100 (retirée par lui, `5581f21`) ; le `next.md` d'une autre instance
+  glissé dans un commit (défait avant l'envoi) ; une fixture de données dépliée par Prettier lancé hors de la racine (remise) ;
+  un `--no-verify` demandé ; « une largeur fixe par cran » proposée quand il avait dit « cuit » ; la bande des souverains
+  « à tous les zooms » décidée par moi ; deux `cd` interdits.
+
 ### 2026-11-08 soir → 09 nuit — 1200 nettoyée, l'arête effacée, la bande des vassaux
 
 La même plage que l'entrée suivante, prolongée : **08/11 14:03 → 09/11 02:54** (12 h 50, dont ~7 h 40 depuis 19 h 13) ; le
@@ -23,54 +50,4 @@ chantier ouvert le 05/10 totalise **239 h 37 sur 40 plages**. **Sur `main`, non 
   de 478 775 km² autour de la mer Noire pour Halych (défait depuis la copie) ; « sans frontière dedans » écrit sur ATLAS-399
   comme sa décision alors que c'était ma lecture (corrigé sur le ticket).
 
-### 2026-11-08 → 09 nuit — l'instance du code : ATLAS-333 dans `main`, le tampon de trois cartes, ATLAS-396 entamé
-
-Une plage, **08/11 14:03 → 09/11 01:59** (11 h 55, partagée avec l'historien dans son worktree) ; le chantier ouvert le
-05/10 totalise **238 h 42 sur 40 plages**. Worktree `baked-years`. **Sur `main`, poussé, CI verte, site vérifié** : ATLAS-333
-jusqu'à `9c62019`. **Sur la branche `atlas-396-speed`, non fusionné** : `53eb792`, `14887af`. **Non commité** : l'essai des
-tribus dans le worker.
-
-- **ATLAS-333 fini** (essayé par lui sur la version buildée : _« là, rien à redire »_) : les sommets des pays partagés
-  (`43fb59a`), puis **le tampon de trois cartes** (`ba3a8aa`, sa décision : _« suivante, précédente, comme un buffer de
-  lecteur vidéo »_, _« il faut avoir l'esprit de compromis »_) ; une préparation qui échoue **qualifiée** avant toute décision
-  à l'écran — réparable retentée, irréversible dite en console (sa règle, `rules/error-handling.md`). Rebasé sur le travail de
-  l'historien (un conflit, un import), fusionné et poussé.
-- **ATLAS-396 entamé** (les trois points restants, ticket créé à sa demande) : la carte préparée envoyée d'avance à la carte
-  graphique, premier passage 43 ms → une image (`53eb792`) ; les pays découpés et posés dans le worker, 156–243 → 85–95 ms
-  sur la page (`14887af`). Les deux essayés par lui (_« c'est bon »_). Les tribus : codées, revues, **aucun gain mesuré** —
-  en attente, non commitées.
-- **Ses décisions** : 1200 dans l'index et en ligne avec 1100 (_« je ne te demande pas ton avis »_) ; des années emblématiques
-  et des suites de focus pays, donc beaucoup de cartes — le tampon se compte en cartes, jamais en Mo.
-- **Mes fautes** : une règle « ne jamais commiter 1200 » inventée et prêtée à lui (rayée) ; annoncé « sans limite » un cache
-  que j'avais plafonné le matin ; « instantané » dit avant de mesurer (152 ms de noms) ; deux hypothèses de mesure fausses
-  (la charge de la machine, puis les tribus — 1200 n'en a pas) ; un `--no-verify` tenté, refusé ; une commande aux accents
-  graves envoyée au shell, refusée ; un serveur laissé tourner après la mesure.
-
-### 2026-11-08 — l'historien au laboratoire : la Catalogne de 1100 finie et publiée, le retracé libéré, 1200 en ligne
-
-Une plage, **08/11 14:03 → 19:13** (5 h 09) ; le chantier ouvert le 05/10 totalise **231 h 56 sur 40 plages**. Instance
-historien, worktree `historian` (branche `historian-1108`, synchronisée sur `main`). **Sur `main`, poussé, CI verte, site
-vérifié** (`196eed5`).
-
-- **La Catalogne de 1100, finie** : Lérida creusée autour d'Almenar, la lame de Pilzán soudée, Balaguer à Lérida ; **lui** a
-  passé Sidamon, Torregrossa, L'Espluga et Barberà à Barcelone, puis Camarasa en enclave (son arbitrage, `sources/1100.md`).
-  Restent Tamarit (dans la mer, une source) et Tarragone (vide) : rien dessiné, par la règle. Publiée (`3a33012`).
-- **Sa méthode, après une heure à se battre avec l'outil** : _le pays qui subit d'abord, puis le pays visé, sur les mêmes
-  points_ — un seul pays par geste (skill `gestures.md`, mémoire `collateral-polity-first`).
-- **Le retracé libéré** (`5b8c0c0`), à sa demande (_« faut rien interdire »_, _« tu bascules de mode au clic sur un point »_) :
-  plus de refus « repasse par une ancre que garde… » (les boucles parasites coupées, `core/editor/strayLoops.ts`) ; le point
-  sous le pointeur prime sur la côte ; un clic sur la frontière du pays visé fait avancer le départ. Revue : 10 constats, 8
-  corrigés, 2 ouverts (`known-issues/cartographer.md`).
-- **`/use-cartographer` 2.0** (`11f7267`) : mesurer → décider → dessiner, sept scripts `.mjs` (74 tests), la table des
-  décisions ; glossaire, plan des frontières.
-- **1200 publiée** (`196eed5`, sa décision : _« rien de bloquant dans le fait d'ajouter des années »_) ; les règles qui
-  l'interdisaient réécrites, `.gitignore` dit comment publier une année.
-- **Le pilote par script** (à sa question _« qu'est-ce qui t'empêche d'aller vite ? »_) : les clics envoyés au canevas depuis
-  la page, la barre lue après chacun — l'Islande (1 170 points) et Bornholm redessinées en secondes. **Puis ma série
-  automatique a abîmé 1200** (Skye : toute la Grande-Bretagne donnée à Mann ; restes de contours aux Lofoten ; Samsø effacée) —
-  stoppée par moi, puis par lui ; rien de commité, la copie d'avant intacte.
-- **Ce qu'il a vu en arrêtant** : 1200 superpose des pays de plusieurs années (Mann, Alba, Norvège) — à nettoyer d'abord.
-- **Mes fautes** : neuf corrections au coup par coup qui déplaçaient le piège au lieu de l'ôter ; la barre de statut
-  proposée comme signal alors qu'il ne la lit jamais ; une série lancée sans vérifier « closed » ni l'emprise de l'île.
-
-> Older sessions (2026-09-12 → 2026-11-07) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-08) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

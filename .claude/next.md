@@ -9,44 +9,30 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session démarre « en tant qu'historien » (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après la nuit du 08 au 09/11 : ATLAS-399, les chevauchements hachurés dans l'atlas
+## ▶ ON REPREND ICI — le 10/11, après la session du 09/11 (hachures, paliers, 1300 publiée)
 
-**`main` est poussé** jusqu'à `bf4a579` (vérifié par `git ls-remote` le 09/11 à 12 h : le distant égale `HEAD`) — les
-quatre commits de la nuit (`0bef68c`, `4cb9cdf`, `58e3575`, `ce9a8d3`) sont en ligne. Dans l'arbre de `main`, **ses** retouches non
-commitées de `years/1100`, `years/1200` et `content/events.json` : ne pas y toucher, ne jamais les ajouter avec les miennes.
-Le worktree `historian` et ses branches sont supprimés (sa demande) ; le recréer pour dessiner.
+**À lui rappeler à l'ouverture** (sa demande, 10/11 à 1 h) : **demander à l'historien si les livres qu'il possède se trouvent
+à la BnF** — ceux qu'on n'y trouve pas, il les numérise (la recette : `find-sources/references/scanning.md`).
+**Lire aussi `.claude/next-historian.md`** — même contexte que l'historien (ses cartes 1000 → 1700, ses sources, ses scans).
 
-**ATLAS-399, en cours** (lui ou l'instance principale, *« ton N+1 »*) : la mesure et l'approche sont **dans le ticket** —
-25 chevauchements en 1100, 16 en 1200, ~1,3 s chacune ; calcul au build, zone hachurée retirée des deux remplissages,
-rayures au sol par cran de zoom, traits gardés. **Lui présenter l'approche d'abord** : rien n'est validé.
+**Le code, demain : ATLAS-407** (À faire) — les bandes des pays font passer la découpe d'une carte de ~0,4 s à ~2 s
+(mesuré sur 1100, 1200, 1300) : mesurer chaque partie, **décider avec lui si l'ondulation reste**, calculer les distances à
+la publication (une image par année, lue par le shader). Le plan : `files/plans/atlas/overlap-hatching.md`, « Built ».
 
-**Ouvert à sa décision** (revue ATLAS-398, ARCH-004 Carto) : la bande d'un vassal qui n'est pas un nombre — le vassal est
-rempli en entier, dit en console seulement ; la tribu, elle, n'est pas dessinée. Garder, ou la fenêtre d'erreur à la fin du
-geste.
+**L'état** : `main` = le dépôt distant = `1575d36`, CI verte et site déployé (vérifié sur `5581f21`, les commits suivants
+sont de la doc) ; mon worktree `baked-years` (branche `atlas-396-speed`) et celui de l'historien (`historian-1109`)
+**synchronisés sur `main`** — sa règle : chaque arbre suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se
+commitent pas** avant que lui et l'historien les aient nettoyées (1000 en copie non commitée dans l'arbre de `main`,
+ignorée par git). Les commits de l'historien arrivent sur sa branche ; je les avance dans `main` et je pousse.
 
-**Dettes de la nuit, à savoir** : les nouvelles bibliothèques de la skill (`lib/coast.mjs`, `islands.mjs`, `coasts.mjs`,
-`lakes.mjs`) sans tests ; sept lacs traversés en plusieurs tronçons et deux îles de l'Égée laissés à sa main ; les îles de
-l'Égée données à Byzance de mémoire, à sourcer ; des retenues modernes dans le masque de terre.
+**Sur le tableau** : En cours — ATLAS-396 (ses deux premiers points dans `main` ; restent les frontières et les noms dans le
+worker, la carte d'une date ; **l'essai des tribus dans le worker est dans une remise git du worktree**, « ATLAS-396 tribes
+laid in the worker… », aucun gain mesuré, à garder ou jeter), ATLAS-408 (la provenance de 1300 : Cliopatria v0.2.1,
+mention écrite) ; À faire — ATLAS-407 en bas, son ordre à lui. Rien en À valider.
 
-**L'instance principale (le code)** travaille avec l'historien, qui tient l'entretien du contexte (sa décision, 08/11).
-**ATLAS-333 est dans `main` et poussé** (`9c62019`, le tampon de trois cartes compris — `completed.md`).
-
-**▶ ON REPREND ICI, l'instance du code — ATLAS-396 (En cours), arrêté le 09/11 à 2 h, sa décision : « on reprendra par ce que
-tu étais en train de faire »**. Worktree **`.claude/worktrees/baked-years`**, branche **`atlas-396-speed`** :
-
-1. **D'abord ramener dans `main` et pousser** ses deux commits essayés (_« c'est bon »_) : `53eb792` (la carte préparée
-   envoyée d'avance à la carte graphique — premier passage 43 ms → une image) et `14887af` (les pays posés dans le worker —
-   156–243 → 85–95 ms sur la page). Rebaser sur `main` d'abord : son `main` local a deux commits non poussés (`0bef68c`,
-   `4cb9cdf`, à lui et à l'historien).
-2. **Puis des repères de temps fins dans l'étape « pays »** (effacer, construire, bornes, ajouter, tribus) : ce qui reste des
-   85 ms de 1200 n'est pas expliqué, et j'ai déplacé du code en devinant deux fois.
-3. **Puis décider des tribus** : codées dans le worker, revues (3 constats corrigés), **non commitées, aucun gain mesuré**
-   (1200 n'en a pas ; 1100, même minute : 170–192 ms avant, 139–186 après). Les retirer si les repères disent qu'elles ne
-   pèsent rien.
-4. Ensuite les frontières (~250 ms) et les noms (~150 ms), le troisième point (la carte d'une date) ; puis ATLAS-394 et 395.
-   **Mesurer seulement sur une machine calme** (les scripts et la gate de l'historien ont monté la charge à 24 cette nuit) et
-   trois fois, la version d'avant dans la même minute. Le détail : `files/plans/atlas/year-switch-speed.md`, « Where we stopped
-   — 2026-11-09 ».
+**Dettes du 09/11, à savoir** : les scénarios des hachures et des paliers pas écrits (`/scenarii-to-code` §7) ; la bande des
+souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; la règle d'arrêt
+de la recherche proposée par l'historien, entre lui et l'historien.
 
 **L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
 montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
@@ -134,7 +120,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**6 489 tests** sur `main` (1 849 `core` · 2 604 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 07/11, après CARTO-370), gate
+**7 144 tests** sur `main` le 09/11 (2 062 `core` · 1 696 atlas · 2 838 Cartographe · 379 CMS · 169 plugin), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
