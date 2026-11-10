@@ -11,6 +11,7 @@ import { UNMEASURED_BAND_KM } from '../data/vassalBand'
 import { planeHeightIn } from './gridDrape'
 import { cutYearFills } from './vassalBands'
 
+import type { BakedBands } from './bakedBands'
 import type { FillGrid } from './fillTriangles'
 import type { NodeHeights } from './gridDrape'
 import type { IndexedFill } from './indexFill'
@@ -41,6 +42,10 @@ export interface FillLayRequest {
   readonly bandDepths: readonly number[]
   /** The frame and the reach a banded region's vertices are measured with; `null` measures none. */
   readonly band: FillBand | null
+  /**
+   * The distances the build measured (ATLAS-407), laid instead of measuring; absent on the dev server, which measures.
+   */
+  readonly bakedBands?: BakedBands
   /** The relief's height at every grid node, one number a node, row by row from the north. */
   readonly heights: Float32Array
   /** World-space width of the map plane on X. */
@@ -59,7 +64,7 @@ export interface FillLayRequest {
  */
 export function layFills(request: FillLayRequest): FillArrays {
   const { regions, grid, tintLevels, bandDepths, band, heights, worldWidth, worldDepth } = request
-  const fills = cutYearFills(regions, grid, band)
+  const fills = cutYearFills(regions, grid, band, request.bakedBands ?? null)
   // One height a node: the heights are their own buffer, not a mesh's positions.
   const nodes = { array: heights, stride: 1, offset: 0 }
   return fillBuffers({ fills, tintLevels, bandDepths, grid, nodes, worldWidth, worldDepth })

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { BAND_STEPS_PER_KM, vertexPrint } from './bakedBands'
 import { layFills } from './fillBuffers'
+import { cutYearFills } from './vassalBands'
 
 const SQUARE = [
   { u: 0.25, v: 0.25 },
@@ -49,6 +51,27 @@ describe('layFills', () => {
       const heights = Float32Array.from({ length: 25 }, (_, node) => (node < 10 ? 0 : 8))
       const ys = layFills(request({ heights })).positions.filter((_, k) => k % 3 === 1)
       expect([Math.min(...ys), Math.max(...ys)]).toEqual([0, 8])
+    })
+
+    // ATLAS-407: on the built site the request carries the build's distances, laid rather than measured — values the cut
+    // could not measure, so the test fails if the request's file is dropped on the way to the cut.
+    it('lays the distances of the build’s file on a banded polity, not the ones the cut would measure', () => {
+      const regions = [{ rings: [SQUARE], banded: true, realm: 'alone' }]
+      const band = { bounds: { west: 0, east: 10, south: 40, north: 50 }, reachKm: 40 }
+      const [cut] = cutYearFills(regions, { segX: 4, segY: 4 }, null)
+      if (cut === undefined) throw new Error('test: the square was not cut')
+      const count = cut.vertices.length / 2
+      const bakedBands = {
+        grid: { segX: 4, segY: 4 },
+        polities: [{ count, print: vertexPrint(cut) }],
+        own: new Int8Array(count).fill(-100),
+        realm: new Int8Array(count).fill(-50),
+      }
+      const { bandKm, realmKm } = layFills(request({ regions, band, bakedBands }))
+      expect([new Set(bandKm), new Set(realmKm)]).toEqual([
+        new Set([Math.fround(-100 / BAND_STEPS_PER_KM)]),
+        new Set([Math.fround(-50 / BAND_STEPS_PER_KM)]),
+      ])
     })
 
     it('shares the vertices of the cut, three indices a triangle', () => {

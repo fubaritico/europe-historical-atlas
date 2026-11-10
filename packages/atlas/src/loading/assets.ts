@@ -12,9 +12,11 @@ import {
   readYearManifest,
 } from '@europe-historical-atlas/core/data/yearManifest'
 
+import { MEASURED_BANDS, createFetchBakedBandsSource } from './bakedBandsSource'
 import { createFetchBakedNamesSource } from './bakedNamesSource'
 import { createFetchBakedOverlapsSource } from './bakedOverlapsSource'
 
+import type { BakedBandsSource } from './bakedBandsSource'
 import type { BakedNamesSource } from './bakedNamesSource'
 import type { BakedOverlapsSource } from './bakedOverlapsSource'
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
@@ -53,6 +55,8 @@ export interface MapAssetSources {
   bakedNames: BakedNamesSource
   /** Each year's overlaps computed at the build, when the site has them (ATLAS-399). */
   bakedOverlaps: BakedOverlapsSource
+  /** Each year's band distances measured at the build (ATLAS-407) — read on the built site, none on the dev server. */
+  bakedBands: BakedBandsSource
 }
 
 /**
@@ -80,7 +84,19 @@ export function createFetchAssets(): MapAssetSources {
     }),
     bakedNames: createFetchBakedNamesSource(YEARS_BASE),
     bakedOverlaps: createFetchBakedOverlapsSource(YEARS_BASE),
+    // None by default — the dev server's and the tests' — the built site's chosen by the composition root (`bandsSource`).
+    bakedBands: MEASURED_BANDS,
   }
+}
+
+/**
+ * Where the band distances come from (ATLAS-407): the build's files on the built site, none on the dev server — the
+ * composition root says which, from Vite's `import.meta.env.DEV`. No fallback between the two (the dev, 2026-11-10).
+ * @param built - whether the page runs from the site's build
+ * @returns the source
+ */
+export function bandsSource(built: boolean): BakedBandsSource {
+  return built ? createFetchBakedBandsSource(YEARS_BASE) : MEASURED_BANDS
 }
 
 /**

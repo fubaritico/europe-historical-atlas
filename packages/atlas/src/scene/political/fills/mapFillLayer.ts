@@ -62,7 +62,8 @@ interface FillYear {
 
 /**
  * The fills of a year on a grid, cut once and kept until either changes — each vassal measured for its band, as the
- * worker measures it (`prepareYear`).
+ * worker measures it on the dev server (`prepareYear`); on the built site the worker lays the build's distances instead
+ * (ATLAS-407), a third of a kilometre apart at most from these.
  * @param context - the layers, whose handles hold the last cut
  * @param year - the year's polities, its registry and its frame
  * @param grid - the relief's subdivision

@@ -5,6 +5,7 @@ import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/conte
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 import * as yearOverlapsModule from '@europe-historical-atlas/core/data/yearOverlaps'
+import { encodeBakedBands, readBakedBands } from '@europe-historical-atlas/core/pipeline/bakedBands'
 import {
   BAKED_OVERLAPS_VERSION,
   overlapsKey,
@@ -13,6 +14,7 @@ import * as fillBuffersModule from '@europe-historical-atlas/core/pipeline/fillB
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import * as settleYearModule from '@europe-historical-atlas/core/pipeline/settleYear'
 import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
+import * as vassalBandsModule from '@europe-historical-atlas/core/pipeline/vassalBands'
 
 import { STARTUP_SLICES } from './startupBar'
 import { stubNameFace } from './testing/nameFaceStubs'
@@ -448,6 +450,58 @@ describe('createMapPipeline', () => {
       ]
       const banded = Array.from(arrays.bandKm).filter((_, vertex) => arrays.bandDepth[vertex] === 1)
       expect(banded.length > 0 && banded.some((km) => km !== 0)).toBe(true)
+    })
+
+    // ATLAS-407: on the built site the year's distances come from the build, laid by the compute instead of measured.
+    it('lays the build’s distances of a vassal’s year, not the ones it would measure', async () => {
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      // The year cut once as the dev server cuts it, for the file the build would write of it.
+      const first = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(VASSAL_YEAR) } }),
+      })
+      await first.pipeline.start()
+      const request = lay.mock.calls[0]?.[0]
+      if (request === undefined) throw new Error('test: the compute laid nothing')
+      const measuredFills = vassalBandsModule.cutYearFills(
+        request.regions,
+        request.grid,
+        request.band
+      )
+      const read = readBakedBands(
+        encodeBakedBands(measuredFills, request.grid).slice().buffer,
+        'bands.bin'
+      )
+      // Distances no measure would give — 20 steps everywhere — so the arrays can only have them from the file.
+      const baked = { ...read, own: read.own.fill(-20), realm: read.realm.fill(-20) }
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          regions: { load: () => Promise.resolve(VASSAL_YEAR) },
+          bakedBands: { load: () => Promise.resolve(baked) },
+        }),
+      })
+      await pipeline.start()
+      const [, arrays] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [
+        unknown,
+        { bandDepth: Uint8Array; bandKm: Float32Array },
+      ]
+      const banded = Array.from(arrays.bandKm).filter((_, vertex) => arrays.bandDepth[vertex] === 1)
+      expect([
+        lay.mock.calls[1]?.[0].bakedBands,
+        banded.length > 0 && banded.every((km) => km === Math.fround(-20 / 3)),
+      ]).toEqual([baked, true])
+    })
+
+    // ATLAS-407, the dev, 2026-11-10: no fallback — on the built site a file that does not arrive fails the year.
+    it('fails the year, never measures it, when the build’s distances do not arrive', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          regions: { load: () => Promise.resolve(VASSAL_YEAR) },
+          bakedBands: { load: () => Promise.reject(new Error('/years/1100/bands.bin: HTTP 404')) },
+        }),
+      })
+      await pipeline.start()
+      expect(asMock(deps.layers.primeFillArrays).mock.calls.length).toBe(0)
+      expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', expect.any(Error))
     })
 
     it('asks the compute to lay nothing before the relief is built: the page lays the fills once it is', async () => {

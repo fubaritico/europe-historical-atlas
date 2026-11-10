@@ -8,35 +8,18 @@
  * A year that does not read stops the build: the page would refuse it too.
  */
 
-import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import {
-  authoredYearRegions,
-  parseYearManifest,
-} from '@europe-historical-atlas/core/data/yearManifest'
-import {
-  parseYearBorders,
-  parseYearPolities,
-  parseYearRegistry,
-} from '@europe-historical-atlas/core/data/yearSource'
+import { parseYearManifest } from '@europe-historical-atlas/core/data/yearManifest'
 import { bakedOverlapsPath } from '@europe-historical-atlas/core/pipeline/bakedOverlaps'
 
 import { bakeYearOverlaps } from './bakeYearOverlaps'
+import { readJson, readYearOnDisk } from './yearOnDisk'
 
 import type { Plugin } from 'vite'
 
 /** The folder of the years in the site's output — the page reads them under `/years`. */
 const OUTPUT_YEARS = 'years'
-
-/**
- * Read a JSON file.
- * @param path - the file
- * @returns its parsed content
- */
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, 'utf8'))
-}
 
 /**
  * The plugin that writes every year's overlaps into the site at build.
@@ -54,28 +37,9 @@ export function overlapsBake(publicDir: string): Plugin {
         '/years/index.json'
       )
       for (const year of manifest.years) {
-        const folder = `/years/${String(year)}`
-        const disk = resolve(years, String(year))
         const started = performance.now()
         // The page's own reading chain, so the key the build writes is the one the page computes.
-        const { authored } = authoredYearRegions(
-          {
-            registry: parseYearRegistry(
-              readJson(resolve(disk, 'registry.json')),
-              `${folder}/registry.json`
-            ),
-            polities: parseYearPolities(
-              readJson(resolve(disk, 'polities.json')),
-              `${folder}/polities.json`
-            ),
-            borders: parseYearBorders(
-              readJson(resolve(disk, 'borders.json')),
-              `${folder}/borders.json`
-            ),
-          },
-          folder,
-          manifest.bbox
-        )
+        const { authored } = readYearOnDisk(years, year, manifest.bbox)
         const baked = bakeYearOverlaps(authored.year)
         this.emitFile({
           type: 'asset',

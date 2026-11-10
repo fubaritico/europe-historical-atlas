@@ -168,6 +168,8 @@ export function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAsse
       load: () => Promise.resolve({ version: CONTENT_FORMAT_VERSION, events: [], cities: [] }),
     },
     bakedOverlaps: { load: () => Promise.resolve(null) },
+    // The dev server's: nothing baked, the compute measures the bands (ATLAS-407).
+    bakedBands: { load: () => Promise.resolve(null) },
     ...over,
   }
 }

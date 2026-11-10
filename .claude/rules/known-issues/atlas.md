@@ -374,7 +374,7 @@ target.z)` would be coherent with the navigation that already exists.
 - **After a year laid in the worker, the first fill rebuild from the dev panel cuts on the page** (review ARCH-002 of
   2026-11-08, ATLAS-396, `scene/political/fills/mapFillLayer.ts`): the worker hands back the fills' arrays, not their
   cut, so the page's cut cache (`fillCut`) is empty until a fill is laid here; a height-curve slider or a fill switch then
-  pays one cut (~0.45 s on 1100), the slides after it reuse it. **Only the dev panel reaches it.** **Remedy if it bites**:
+  pays one cut (~0.45 s on 1100, ~1.5 s since the bands are measured on the page — ATLAS-407 bakes them for the worker only), the slides after it reuse it. **Only the dev panel reaches it.** **Remedy if it bites**:
   the worker keeps the year's cut and lays it again on new heights. **Severity: cosmetic.**
 - **The overlaps are computed at the build; the dev server still computes them in the settling** (2026-11-09,
   ATLAS-399, reviews ARCH-002 and ARCH-001): `bake/overlapsBake` writes `years/<year>/overlaps.json` (1100: 26 pieces,
@@ -388,3 +388,14 @@ target.z)` would be coherent with the navigation that already exists.
   cached like the fills' and tribes' cuts nor laid in the worker. A handful of small pieces a year (25 in 1100), not
   measured. **Remedy if a height-curve slider stutters**: keep the last cut in a handle, as `fillCut`. **Severity:
   cosmétique.**
+- **The bands' distances are measured at the build; the dev server still measures them** (2026-11-10, ATLAS-407):
+  `bake/bandsBake` writes `years/<year>/bands.bin`, gzipped (308–399 kB), and the built site lays it — the cut back at
+  0.35–0.42 s from 1.3–1.7 s. On the dev server (`bandsSource(false)`, `main.ts`) the worker measures them, ~1 to 1.3 s
+  more a map. **No fallback on the site** (the dev, 10/11): a file that does not arrive fails the year. **The file is the
+  cut's**: written for the default subdivision (1280), refused loudly on another — so a relief made finer or coarser for
+  the machine (ATLAS-165, ATLAS-305) needs one file per level. **Severity: worth knowing.**
+- **The host serves a `.bin` uncompressed** — ATLAS-411 (checked 2026-11-10 with `curl -I`, `Accept-Encoding: br, gzip`): the relief
+  `europe-dem-z6-1920.bin` leaves the site at its **6.7 MB** raw, no `content-encoding` — Netlify compresses only the types
+  it knows as text. The land mask's `.bin` likely the same, not checked. **Remedy**: the bands' own (gzip at the build,
+  `DecompressionStream` in the page), or a `Content-Type` the host compresses, set for `*.bin` in its headers — to measure
+  first: an elevation grid gzips less well than the bands. **Severity: gênant** for the first visit on a slow connection.

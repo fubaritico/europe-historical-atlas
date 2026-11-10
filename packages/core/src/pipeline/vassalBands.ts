@@ -19,9 +19,11 @@ import { tribeIds } from '../data/tribes'
 import { BAND_REACH_KM } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
+import { applyBakedBands } from './bakedBands'
 import { fillTriangles } from './fillTriangles'
 import { indexFill } from './indexFill'
 
+import type { BakedBands } from './bakedBands'
 import type { FillGrid } from './fillTriangles'
 import type { IndexedFill } from './indexFill'
 import type { UvPoint } from '../data/coastlineSource'
@@ -176,22 +178,27 @@ function measured(fill: IndexedFill, distance: (u: number, v: number) => number)
  * @param fills - each region's fill, in the regions' order (`indexFill`)
  * @param regions - the regions, their rings and whether they wear the band
  * @param band - the frame the rings were projected against, and how deep the distance is computed
+ * @param only - the regions to measure, by index — those whose baked distances did not match (ATLAS-407); all the banded
+ *   ones when absent
  * @returns the fills, a banded one with its `bandKm`; the others as they came
  * @throws when the fills and the regions do not pair up — one fill per region is the cut's contract, so a defect
  */
 export function measureVassalBands(
   fills: readonly IndexedFill[],
   regions: readonly FillRegion[],
-  band: FillBand
+  band: FillBand,
+  only?: ReadonlySet<number>
 ): IndexedFill[] {
   if (fills.length !== regions.length)
     throw new Error(
       `vassal bands: ${String(fills.length)} fills for ${String(regions.length)} regions`
     )
-  // A realm of several regions measured against its outline together, once.
+  const wanted = (index: number): boolean => only === undefined || only.has(index)
+  // A realm of several regions measured against its outline together, once — only a realm a wanted region belongs to.
+  const asked = new Set(regions.filter((_, index) => wanted(index)).map(({ realm }) => realm))
   const members = new Map<string, FillRegion[]>()
   for (const region of regions) {
-    if (region.banded !== true || region.realm === undefined) continue
+    if (region.banded !== true || region.realm === undefined || !asked.has(region.realm)) continue
     const list = members.get(region.realm)
     if (list === undefined) members.set(region.realm, [region])
     else list.push(region)
@@ -206,7 +213,7 @@ export function measureVassalBands(
   )
   return fills.map((fill, index) => {
     const region = regions[index]
-    if (region?.banded !== true) return fill
+    if (region?.banded !== true || !wanted(index)) return fill
     const bandKm = measured(fill, signedDistanceField(region.rings, band.bounds, band.reachKm))
     const realm = region.realm === undefined ? undefined : realmDistance.get(region.realm)
     return realm === undefined
@@ -221,13 +228,26 @@ export function measureVassalBands(
  * @param regions - the polities' outlines, in the order the fills are laid, each saying whether it wears the band
  * @param grid - the relief's subdivision
  * @param band - the frame and the reach the vassals are measured with; `null` measures none
+ * @param baked - the distances the build measured (ATLAS-407), laid instead of measuring — a polity whose cut differs
+ *   from the build's measured here, it alone; `null` on the dev server, which has no build and measures
  * @returns each region's fill, a banded one with its distances when a band is given
+ * @throws what {@link applyBakedBands} throws — distances written for another cut, a defect
  */
 export function cutYearFills(
   regions: readonly FillRegion[],
   grid: FillGrid,
-  band: FillBand | null
+  band: FillBand | null,
+  baked: BakedBands | null = null
 ): IndexedFill[] {
   const fills = fillTriangles(regions, grid).map((fill) => indexFill(fill))
-  return band === null ? fills : measureVassalBands(fills, regions, band)
+  if (band === null) return fills
+  if (baked === null) return measureVassalBands(fills, regions, band)
+  const laid = applyBakedBands(fills, regions, grid, baked)
+  if (laid.unmatched.length === 0) return laid.fills
+  // Node and the browser round the projection apart in its last digit, which can move a vertex of the cut: those
+  // polities are measured here, exactly, the rest laid from the build (CORE-412 would make this needless).
+  console.warn(
+    `[atlas] bands: ${String(laid.unmatched.length)} of ${String(regions.filter((region) => region.banded === true).length)} polities measured here — their cut differs from the build's by a rounding`
+  )
+  return measureVassalBands(laid.fills, regions, band, new Set(laid.unmatched))
 }

@@ -25,6 +25,7 @@ import type { DevState } from '../../tunables/devState'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
+import type { BakedBands } from '@europe-historical-atlas/core/pipeline/bakedBands'
 import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import type {
@@ -263,16 +264,23 @@ export async function prepareYear(
   const bounds = authored.bbox
   const grid = meshVertexGrid(heightmap.meta, dev.relief.segments)
   const settling = settleInWorker(context, loaded, authored)
+  // The bands' distances from the build on the built site, fetched beside the settling; none on the dev server, where
+  // the worker measures them (ATLAS-407). A file that does not arrive fails the year, as any of its files.
+  const bands = context.assets.bakedBands.load(loaded.year)
   const { heights } = read
   const relief = { grid, heights, worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH) }
   const [, fillArrays, settled, tribes] = await Promise.all([
     bake,
-    // Each vassal measured for its band beside its cut (ATLAS-398), off this thread like it.
-    settling.then((year) =>
+    // Each polity measured for its band beside its cut (ATLAS-398), off this thread like it — or its distances laid.
+    Promise.all([settling, bands]).then(([year, baked]) =>
       layYearFills(
         context,
         loaded,
-        { year, cut: vassalBandCut(loaded.regions, authored.year.registry.polities, bounds) },
+        {
+          year,
+          cut: vassalBandCut(loaded.regions, authored.year.registry.polities, bounds),
+          baked,
+        },
         relief
       )
     ),
@@ -319,6 +327,7 @@ async function settleInWorker(
  * @param settled - the year as the worker settled it, and its regions as the band cuts them
  * @param settled.year - the settled year: its tints and its band depths
  * @param settled.cut - the regions flagged for the band, and the band's frame and reach
+ * @param settled.baked - the distances the build measured, laid instead of measuring; `null` on the dev server
  * @param relief - the relief they are laid on
  * @param relief.grid - its subdivision
  * @param relief.heights - its height at every node
@@ -328,16 +337,17 @@ async function settleInWorker(
 function layYearFills(
   context: PipelineContext,
   loaded: RegionSet,
-  settled: { year: SettledYear; cut: VassalBandCut },
+  settled: { year: SettledYear; cut: VassalBandCut; baked: BakedBands | null },
   relief: { grid: FillGrid; heights: Float32Array; worldDepth: number }
 ): Promise<FillArrays> {
-  const { year, cut } = settled
+  const { year, cut, baked } = settled
   return timedStep(context.clock, loaded.year, 'cut', () =>
     context.box.compute.layFills({
       regions: cut.regions,
       tintLevels: year.tintLevels,
       bandDepths: year.bandDepths,
       band: cut.band,
+      ...(baked === null ? {} : { bakedBands: baked }),
       worldWidth: WORLD_WIDTH,
       ...relief,
     })

@@ -21,7 +21,7 @@ import { createViewport } from './app/viewport'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
 import { ATLAS_MESSAGES } from './i18n'
-import { fetchAuthoredYears } from './loading/assets'
+import { bandsSource, fetchAuthoredYears } from './loading/assets'
 import { createMapBuffer } from './loading/mapBuffer'
 import { createMapPipeline } from './loading/mapPipeline'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
@@ -164,6 +164,23 @@ function startYearSwitch(deps: {
 }
 
 /**
+ * The page's pipeline: the map's collaborators, with what only the page gives — its worker, its frame, and the bands'
+ * distances from the build on the built site, measured in the worker on the dev server (ATLAS-407).
+ * @param deps - the map's collaborators
+ * @returns the pipeline
+ */
+function pagePipeline(
+  deps: Omit<Parameters<typeof createMapPipeline>[0], 'spawn' | 'afterPaint' | 'assets'>
+): ReturnType<typeof createMapPipeline> {
+  return createMapPipeline({
+    ...deps,
+    spawn: () => new ComputeWorker(),
+    afterPaint: pageAfterPaint,
+    assets: { bakedBands: bandsSource(!import.meta.env.DEV) },
+  })
+}
+
+/**
  * Assemble the map and start it.
  * @returns the teardown, which frees every GPU resource and stops the worker
  */
@@ -186,16 +203,7 @@ function bootstrap(): () => void {
   const translate = createTranslator(ATLAS_MESSAGES, locale)
   const ui = createMapUi({ host: document.body, isDisposed, translate })
   const layers = createLayers(view.scene, dev, sources, view.uploadUnseen)
-  const pipeline = createMapPipeline({
-    dev,
-    sources,
-    layers,
-    ui,
-    translate,
-    spawn: () => new ComputeWorker(),
-    afterPaint: pageAfterPaint,
-    isDisposed,
-  })
+  const pipeline = pagePipeline({ dev, sources, layers, ui, translate, isDisposed })
   const interaction = createMapInteraction({
     element: canvas,
     picker: createSurfacePicker({ camera: view.camera, target: layers.pickTarget }),
