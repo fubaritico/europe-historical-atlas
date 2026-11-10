@@ -1,4 +1,4 @@
-# Europe — Historical Atlas
+# <img src=".github/brand-mark.png" width="32" height="32" alt="" align="absmiddle"> Europe — Historical Atlas
 
 An interactive **3D historical atlas of Europe**: the relief of the continent drawn as an old printed sheet,
 navigated like a grand-strategy map, with one political map per period. Clicking a region is meant to tell
