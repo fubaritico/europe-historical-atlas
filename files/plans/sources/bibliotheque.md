@@ -35,6 +35,30 @@ Nearly all of Europe, by the dev's own reckoning — **except Scandinavia and It
 | 11 | *Atlas historique de la Russie. Puissance et instabilité d'un empire européen* | ? | ? | Russia, mostly from Muscovy on |
 | 12 | *Synchronoptische Weltgeschichte*, French edition — not an atlas | Arno Peters (†2002) | 1952 for the original | the synchronoptic frieze (ATLAS-358): facts and dates only, in copyright until 2072 — identified 2026-11-05 from his scan |
 
+### A digital copy instead of a scan — searched 2026-11-10
+
+Searched in the BnF catalogue (SRU), archive.org (its API) and by web search. **JSTOR and Gallica refuse scripted
+requests** (Cloudflare), so both were then searched by title in the dev's Chrome, the same day: **neither holds any of
+these books**. JSTOR has only reviews and citations of them (Balkans, Méditerranée, Sellier, Nicolle, Russia, Peters);
+Gallica has only mentions in periodicals or 19th-century namesakes, online and *intra muros* alike. No BnF record read
+carries a Gallica link: every one is print only. archive.org's loans (CDL, free account) are for reading, not
+tracing.
+
+| # | identified as (catalogue) | digital copy found |
+| --- | --- | --- |
+| 1 | Pen & Sword, 2011–2012, re-ed. 2023 | none (not at the BnF); a paid ebook (Perlego, Open Road) |
+| 2 | Planeta, Barcelona, 2005, 2nd ed. — [BnF](https://catalogue.bnf.fr/ark:/12148/cb399662890) | none |
+| 3 | Economica 2008, pref. François Cailleteau — [BnF](https://catalogue.bnf.fr/ark:/12148/cb41269311v) | English original [on archive.org](https://archive.org/details/palgraveconciseh0000hupc), **no longer lent** (print-disabled only) |
+| 4 | ESI, Paris — [BnF, the magazine](https://catalogue.bnf.fr/ark:/12148/cb424214962); no. 29 has no record of its own | none |
+| 5 | Jean Sellier, *… genèse d'un peuple*, maps Anne Le Fur, Bertrand de Brun, La Découverte, 1997 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb366981996) | none |
+| 6 | Odile Sassi, Mathilde Aycard, dir. Pierre Vallaud, Presses de l'Université Saint-Joseph and Fayard, 2009 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb421305854) | none |
+| 7 | ESI, same magazine as no. 4; no. 51 has no record of its own | none |
+| 8 | tr. Hervé and Claude Lauriot-Prévost — [BnF](https://catalogue.bnf.fr/ark:/12148/cb39959719q) | English original, *Historical Atlas of the Islamic World* (Checkmark, 2003), **lent** on [archive.org](https://archive.org/details/historicalatlaso0000nico) |
+| 9 | translation of *Cappelens historiske atlas* (Oddvar Bjørklund et al.) | **lent** on [archive.org](https://archive.org/details/historicalatlaso0000unse_h3s1) |
+| 11 | John Channon, Robert Hudson, Autrement, 1997, tr. Colette Prat — [BnF](https://catalogue.bnf.fr/ark:/12148/cb40612191m) | English original, *The Penguin Historical Atlas of Russia* (1995), **lent** on [archive.org](https://archive.org/details/penguinhistorica0000chan) |
+| 12 | *Histoire mondiale synchronoptique*, dir. Robert Minder, Éditions académiques de Suisse, Basel, 1962 — [BnF](https://catalogue.bnf.fr/ark:/12148/cb33133857g) | none (a paid DVD-ROM, *Der Digitale Peters*, 2010) |
+| Duby | Larousse — [BnF, 1991](https://catalogue.bnf.fr/ark:/12148/cb40573355m) | **lent** on archive.org, five editions — [1978](https://archive.org/details/atlashistoriquel0000unse_r3l9), [1987](https://archive.org/details/isbn_9782035212146), [1988](https://archive.org/details/atlashistoriquel0000unse), [1991](https://archive.org/details/atlashistoriquel0000duby), [2000](https://archive.org/details/atlashistoriquem0000unse) |
+
 Cancelled: *Historical Atlas of Britain*, *The Family Tree Historical Atlas of Germany*.
 
 Also owned before: the Duby *Atlas historique mondial* (Larousse) — memory `duby-atlas-is-a-reference-not-a-tracing-source`.
