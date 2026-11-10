@@ -13,7 +13,8 @@
     "type-check": "tsc --noEmit && tsc --noEmit -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "favicon": "tsx bake/favicon.ts"
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
@@ -27,6 +28,7 @@
     "eslint-plugin-eha": "workspace:*",
     "fontkit": "catalog:",
     "jsdom": "catalog:",
+    "tsx": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
   }

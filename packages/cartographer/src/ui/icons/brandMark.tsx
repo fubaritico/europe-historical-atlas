@@ -26,8 +26,8 @@ const GEOMETRY = brandMarkGeometry(MARK_SIZE)
  * pixels; the tile itself is. Its geometry, measured here, lives in `core` since the CMS draws it too.
  *
  * A text glyph rather than a traced path: the face is the reader's own, and tracing it would ship its
- * outlines. The atlas's favicon chose a stroked path for the opposite reason — at 16 px a missing Greek
- * face falls back to a box; here the fallback is the stack's Palatino or Georgia, both of which carry Λ.
+ * outlines; the fallback is the stack's Palatino or Georgia, both of which carry Λ. The three applications'
+ * tab icon is the same text glyph since 2026-11-10, drawn by core's `utils/brandMark` (REPO-415).
  *
  * Coloured by `--mark-ground` and `--mark-ink`, the atlas's vellum and border brown (`theme.css`).
  * @returns the SVG

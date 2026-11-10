@@ -13,6 +13,8 @@ autoInstallPeers: false
 # here is React: the Cartographer needs it now and the Payload admin will need it next, and two Reacts at
 # different versions in one workspace give hook errors that read like application bugs.
 catalog:
+  # Runs a TypeScript script of the repository — the atlas's tab icon written from core (REPO-415).
+  tsx: ^4.23.15
   # React
   react: ^19.3.0
   react-dom: ^19.3.0

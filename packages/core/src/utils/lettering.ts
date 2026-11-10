@@ -43,7 +43,8 @@ export function withLambdaForA(text: string): string {
 
 /**
  * The applications' mark: the capital lambda that stands in for the A in HISTORICΛL ΛTLΛS, set in `MAP_TYPEFACE` on a
- * vellum tile. Drawn by the Cartographer's top bar and by the CMS's admin, at different sides.
+ * vellum tile. Drawn by the Cartographer's top bar, by the CMS's admin, and as the three applications' tab icon
+ * (`utils/brandMark`, REPO-415), at different sides.
  */
 export const BRAND_GLYPH = 'Λ'
 
@@ -52,7 +53,7 @@ export const BRAND_MARK_WEIGHT = 500
 
 /**
  * The mark's two colours, the atlas's own: its vellum and its border brown. The Cartographer's `theme.css` repeats
- * them as `--mark-ground` and `--mark-ink` (a stylesheet cannot read this module), as does the atlas's favicon.
+ * them as `--mark-ground` and `--mark-ink` (a stylesheet cannot read this module); the tab icon reads them here.
  */
 export const BRAND_MARK_COLOURS = { ground: '#efe6d2', ink: '#5c3a2e' } as const
 

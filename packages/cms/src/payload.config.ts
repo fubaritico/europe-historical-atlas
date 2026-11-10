@@ -6,6 +6,8 @@ import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { buildConfig } from 'payload'
 
+import { TAB_MARK_SIDE } from '@europe-historical-atlas/core/utils/brandMark'
+
 import { ATLAS_NAME } from './atlasName'
 import { Actors } from './collections/Actors'
 import { Events } from './collections/Events'
@@ -30,9 +32,6 @@ const NAV_MARK_SIDE = 24
 
 /** The mark on the login page, in place of Payload's logo. */
 const LOGIN_MARK_SIDE = 96
-
-/** The side the tab's icon is drawn at; the browser scales it to its 16 or 32 px. */
-const TAB_MARK_SIDE = 32
 
 /**
  * Read a setting `.env` must provide.
