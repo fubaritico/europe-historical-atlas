@@ -138,6 +138,35 @@ relief: **the bare relief is never shown alone, and there is one bar, never two.
 **Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
 bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
 
+## The maps ahead are not ready when the reader reaches them — 2026-11-10 (ATLAS-396 reopened)
+
+**What the dev sees**: from 1100 to 1200, then 1300 at once — 1300 seems to load from nothing; the same backwards, 1300 →
+1200 → 1100. The window aims right (after 1200 going forward: 1300 first, then 1100 — `mapsToPrepare`), so the fault is
+in when and how the preparation runs. **Read in the code, not measured in his browser**:
+
+1. **It starts only when the mouse is still.** `mapBuffer.tryOne` waits for `whenQuiet` before anything —
+   `app/quietTime.ts:13` counts `pointermove` as a gesture, so 800 ms without moving the mouse, then an idle callback.
+   Moving the mouse to the next button postpones it: clicked within two or three seconds, the next map was never started.
+2. **A click on a map being prepared starts it over.** The click runs `rebuildPolitical`, a whole load of its own; the
+   preparation in flight is not joined, and the two share the one worker — the click waits longer than with no
+   preparation at all.
+
+Not measured yet: how long a preparation takes in his browser (in Node: ~1 s on the built site, ~4 s on the dev server,
+where the bands and the names are computed live).
+
+**The dev's model, 2026-11-10**: _"this loading should start at once"_, and _"an object that streams — it pauses, it
+resumes, so nothing is lost"_. Agreed, applied where a pause means something:
+
+| step | thread | what it becomes |
+| --- | --- | --- |
+| read the year, settle it, cut the fills, measure the tribes | the worker | **starts at once** when a map is shown, never waits for quiet, runs to its end — it does not touch the page |
+| lay it aside: the arrays to the GPU, the layers built (countries, tribes, borders, names) | the page | **a job that pauses and resumes**: cut into small pieces, laid between the reader's gestures; a gesture pauses it, quiet resumes it where it was — nothing done twice |
+| the reader asks for a map being prepared | — | **joins the preparation in flight**, from where it stands, instead of a load of its own |
+
+To discuss with the dev before coding (his word: talk first): how small a piece of the lay (one layer? a time budget a
+frame?), whether `pointermove` should pause the lay at all or only a press, a wheel and a key; and to measure first, in
+his browser, the lay's pieces and a preparation's whole time on the site and on the dev server.
+
 ## Where we stopped — 2026-11-09, past midnight (ATLAS-396, the resume point of this work)
 
 **Branch `atlas-396-speed`, worktree `baked-years`, two commits tested by the dev, NOT merged into `main`, not
