@@ -5,6 +5,10 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
+
+**L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
+plus de celui-ci quand une session démarre « en tant qu'historien » (sa décision, 10/11).
+
 ## ▶ ON REPREND ICI — après la nuit du 08 au 09/11 : ATLAS-399, les chevauchements hachurés dans l'atlas
 
 **`main` est poussé** jusqu'à `bf4a579` (vérifié par `git ls-remote` le 09/11 à 12 h : le distant égale `HEAD`) — les

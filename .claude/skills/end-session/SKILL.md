@@ -28,6 +28,8 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
    - `.claude/completed.md` — append this session's account (keep existing entries)
    - `.claude/next.md` — replace with the resume point: where we stopped, what is mid-flight, and the cards in
      À valider par le développeur / En cours / top of À faire — never a list of tasks (that is the board)
+   - **as the historian**: `.claude/next-historian.md` instead — the maps, the sources, the scans; `next.md` is the
+     code instance's, touched only for one line pointing to it (the dev, 2026-11-10)
    - the known-issues slices `.claude/rules/known-issues/<package>.md` — add new entries; a closed one moves to
      `.claude/archive/known-issues-closed.md`, never deleted
 5. **Keep each file loaded at launch under 200 lines** — the documented target (code.claude.com/docs/en/memory). Run
