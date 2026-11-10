@@ -9,30 +9,29 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session démarre « en tant qu'historien » (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — le 10/11, après la session du 09/11 (hachures, paliers, 1300 publiée)
+## ▶ ON REPREND ICI — après la session du 10/11 (bandes cuites, cartes suivantes, la carte qui s'arrête, l'icône)
 
-**À lui rappeler à l'ouverture** (sa demande, 10/11 à 1 h) : **demander à l'historien si les livres qu'il possède se trouvent
-à la BnF** — ceux qu'on n'y trouve pas, il les numérise (la recette : `find-sources/references/scanning.md`).
-**Lire aussi `.claude/next-historian.md`** — même contexte que l'historien (ses cartes 1000 → 1700, ses sources, ses scans).
+**Le 11/11 est férié** (lui : _« quartier libre … peut-être qu'on travaillera un petit peu »_) : rien d'urgent.
+**Lire aussi `.claude/next-historian.md`** — même contexte que l'historien. **Depuis le 10/11 : moi l'atlas, l'historien les
+recherches et le Cartographe** (mémoire `roles-atlas-vs-historian`).
 
-**Le code, demain : ATLAS-407** (À faire) — les bandes des pays font passer la découpe d'une carte de ~0,4 s à ~2 s
-(mesuré sur 1100, 1200, 1300) : mesurer chaque partie, **décider avec lui si l'ondulation reste**, calculer les distances à
-la publication (une image par année, lue par le shader). Le plan : `files/plans/atlas/overlap-hatching.md`, « Built ».
+**L'état** : `main` = le dépôt distant = `622b77f`, CI verte, site déployé (sa 1100 en ligne, vérifiée octet pour octet).
+Mon worktree `baked-years` (branche `atlas-396-speed`) et celui de l'historien (`historian-1109`) **synchronisés sur
+`main`** — sa règle : chaque arbre suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant
+d'être nettoyées (1000 copiée dans l'arbre de `main` par l'historien, **non listée** dans `index.json` — sa décision du 10/11,
+on travaille avec en local). `tsx` est au catalogue depuis `f70b725` : `pnpm install` fait par lui.
 
-**L'état** : `main` = le dépôt distant = `1575d36`, CI verte et site déployé (vérifié sur `5581f21`, les commits suivants
-sont de la doc) ; mon worktree `baked-years` (branche `atlas-396-speed`) et celui de l'historien (`historian-1109`)
-**synchronisés sur `main`** — sa règle : chaque arbre suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se
-commitent pas** avant que lui et l'historien les aient nettoyées (1000 en copie non commitée dans l'arbre de `main`,
-ignorée par git). Les commits de l'historien arrivent sur sa branche ; je les avance dans `main` et je pousse.
+**Sur le tableau** : En cours — **ATLAS-396** (restent : la pose en morceaux qui se met en pause, **à mesurer d'abord** —
+`atlas year <année> aside` dans son navigateur, ~0,15 s le 08/11 ; puis les frontières et les noms dans le calculateur ; l'essai
+des tribus dans le worker reste dans une remise git du worktree, aucun gain mesuré), ATLAS-408 (la provenance de 1300).
+À valider — **CMS-414** (le lot géographique de l'historien, 41 cas à lui). À faire — **CORE-412** en bas (la projection
+identique partout). Idées — **ATLAS-411** (le relief à 6,7 Mo non compressé). ATLAS-394 porte le point de la coupure réseau
+pendant une préparation en arrière-plan.
 
-**Sur le tableau** : En cours — ATLAS-396 (ses deux premiers points dans `main` ; restent les frontières et les noms dans le
-worker, la carte d'une date ; **l'essai des tribus dans le worker est dans une remise git du worktree**, « ATLAS-396 tribes
-laid in the worker… », aucun gain mesuré, à garder ou jeter), ATLAS-408 (la provenance de 1300 : Cliopatria v0.2.1,
-mention écrite) ; À faire — ATLAS-407 en bas, son ordre à lui. Rien en À valider.
-
-**Dettes du 09/11, à savoir** : les scénarios des hachures et des paliers pas écrits (`/scenarii-to-code` §7) ; la bande des
-souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; la règle d'arrêt
-de la recherche proposée par l'historien, entre lui et l'historien.
+**Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
+souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README
+(`.github/brand-mark.png`) ne se régénère pas seul — à refaire si la marque change (dessiné par Core Graphics depuis
+`brandMarkSvg(64)`).
 
 **L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
 montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre

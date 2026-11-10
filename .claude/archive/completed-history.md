@@ -2,6 +2,33 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-09 → 10 nuit — l'instance du code : les hachures cuites, la carte par palier, 1300 publiée
+
+Deux plages, **09/11 11:46 → 18:50 et 23:35 → 01:13** (8 h 41) ; le chantier ouvert le 05/10 totalise **248 h 28 sur 42
+plages**. Worktree `baked-years`, branche `atlas-396-speed` fusionnée dans `main`. **Sur `main`, poussé, CI verte, site
+déployé** (`5581f21` ; puis des commits de doc jusqu'à `1575d36`).
+
+- **ATLAS-396** : ses deux points essayés (`53eb792`, `14887af`) rebasés sur `main` et réunis avec la bande des vassaux —
+  la bande mesurée dans le worker (`17f17c6`).
+- **ATLAS-399, Fait** : les chevauchements hachurés, une rayure par pays à 45°, **cuites sur le sol** (sa règle : _« pas de
+  largeur fixe, ça vibre »_), 25 km (_« c'est la bonne taille »_) ; calculés à la publication ; sur un terrain contesté
+  **le nom ne change pas** ; un vassal contesté garde sa bande (`accdf7c`, `09f8f50`).
+- **ATLAS-409, Fait** : la carte **par palier** (_« il peut pas y avoir de fondu »_) — l'aspect des frontières et les
+  pointillés, les noms à 30 % au plus près, les frontières des vassaux affinées ; **l'essai de la bande des souverains**,
+  le royaume d'un bloc de loin. Son coût mesuré (0,4 → 2 s la découpe) : **ATLAS-407**, sa décision de le commiter tel quel.
+- **Le contrôle avant commit lance les paquets un par un** (`f4f6673`, REPO-260) ; **sa règle des contrôles** : le paquet
+  touché en travaillant, le contrôle complet et la revue à chaque commit, la revue dès qu'un changement important tient
+  (`874fc44`) — et **jamais `--no-verify`**, qu'il a refusé.
+- **Publié sur sa demande** : 1300 (`3c9e335`, après un correctif des noms qui bloquait sa construction, `1ef160b`), ses
+  1100 et 1200 (`fe2dfe9`), deux villes du CMS (`c7d9ae9`), la skill de l'historien et ses corrections de relecture
+  (`1827358`, `6e613c4`, `609b414`), ses docs (couches, index, neutralité, numérisation, son point de reprise).
+- **Ses décisions** : les couches d'une carte — Cliopatria et Shepherd en calque, le détail de l'historien ; une provenance
+  par année (ATLAS-408, Cliopatria v0.2.1 citée) ; chaque arbre de travail suit `main`.
+- **Mes fautes** : sa zone d'essai test1 publiée dans 1100 (retirée par lui, `5581f21`) ; le `next.md` d'une autre instance
+  glissé dans un commit (défait avant l'envoi) ; une fixture de données dépliée par Prettier lancé hors de la racine (remise) ;
+  un `--no-verify` demandé ; « une largeur fixe par cran » proposée quand il avait dit « cuit » ; la bande des souverains
+  « à tous les zooms » décidée par moi ; deux `cd` interdits.
+
 ### 2026-11-08 soir → 09 nuit — 1200 nettoyée, l'arête effacée, la bande des vassaux
 
 La même plage que l'entrée suivante, prolongée : **08/11 14:03 → 09/11 02:54** (12 h 50, dont ~7 h 40 depuis 19 h 13) ; le

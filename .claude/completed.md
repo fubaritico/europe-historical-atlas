@@ -2,6 +2,35 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-10 — l'instance du code : les bandes cuites, les cartes suivantes tout de suite, la carte qui s'arrête, une icône
+
+Une plage, **10/11 12:06 → 19:00** (6 h 54, partagée avec la session de l'historien) ; le chantier ouvert le 05/10 totalise
+**255 h 27 sur 43 plages**. Worktree `baked-years`, branche `atlas-396-speed`. **Sur `main`, poussé, CI verte, site déployé**
+(`622b77f`).
+
+- **ATLAS-407, Fait** (`763ad97`) : mesuré — l'ondulation ne coûte rien, la distance de chaque point à sa frontière
+  0,8–1,2 s ; les distances calculées à la publication (`bands.bin`, compressé : l'hébergeur ne compresse pas un `.bin`,
+  ATLAS-411). **Pas de secours** (sa question : _« pourquoi le fichier manquerait ? »_). À son test, Chrome et Node
+  arrondissent la projection autrement : **contrôle pays par pays** (8 pays sur 106 recalculés dans Chrome) ; et
+  **CORE-412**, une projection identique partout (_« ça veut dire qu'on maîtrise vraiment tout »_).
+- **ATLAS-396** (`d83dbb8`, `f0e32e5`, reste En cours) : sa remarque — _« ça fait tout depuis le début »_. Le registre des
+  préparations en cours, le clic qui reprend la préparation, le calcul tout de suite, son modèle d'un objet _« qui se met
+  en pause, qui reprend »_ ; seule la pose attend le calme : un appui **sur la carte**, la molette, une touche (_« cibler
+  l'événement »_, la réglette se fera glisser bouton tenu). La pose en morceaux, à mesurer d'abord. _« Ça marche très
+  bien »_.
+- **ATLAS-326, Fait** (`c4f957a`) : la carte s'arrête quand le pointeur sort de la page ou la fenêtre perd la main —
+  _« ça soulage »_.
+- **REPO-415, Fait** (`f70b725`, `442dacf`, `2628809`) : une seule icône d'onglet, celle du CMS, dessinée par `core` ; et
+  dans le titre du README.
+- **Publié sur sa demande** : sa 1100 (`2ccd7d1`), l'export du CMS (`622b77f`), le style d'un bouton du CMS (`86798e4`).
+  Vérifié en lecture seule : l'Italie de 1100 et le lot géographique saisis par l'historien.
+- **Sa décision** : moi l'atlas, l'historien les recherches et le Cartographe (mémoire `roles-atlas-vs-historian`).
+- **Mes fautes** : 6–12 s mesurés dans mon onglet au démarrage présentés comme la durée d'une préparation (il vit 2,5 s,
+  corrigé sur le ticket) ; un secours proposé pour un fichier qui ne manque jamais (mémoire `real-problems-only`) ; le
+  gain d'ATLAS-407 surestimé d'après Node (Chrome : 1,5 → 1 s, pas 0,4) ; trois tests qui ne prouvaient rien (un espion
+  posé après la fermeture, deux que le bord du monde faisait passer), corrigés ; un commit tenté avant son test de l'appui
+  ciblé, arrêté par lui ; un `cd`.
+
 ### 2026-11-10 — l'historien : les livres hors ligne, 1000 retouchée, l'Italie de 1100 saisie, le lot géographique
 
 Une plage, **10/11 12:06 → 17:02** (4 h 55) ; le chantier ouvert le 05/10 totalise **253 h 29 sur 43 plages**. Session
@@ -25,31 +54,4 @@ Une plage, **10/11 12:06 → 17:02** (4 h 55) ; le chantier ouvert le 05/10 tota
   qui a laissé 25 fiches de Campanie sans ligne (corrigées) et quatre du nord-ouest à reprendre ; une première lecture
   Wikidata qui prenait les pays disparus (corrigée, `e0ddd40`).
 
-### 2026-11-09 → 10 nuit — l'instance du code : les hachures cuites, la carte par palier, 1300 publiée
-
-Deux plages, **09/11 11:46 → 18:50 et 23:35 → 01:13** (8 h 41) ; le chantier ouvert le 05/10 totalise **248 h 28 sur 42
-plages**. Worktree `baked-years`, branche `atlas-396-speed` fusionnée dans `main`. **Sur `main`, poussé, CI verte, site
-déployé** (`5581f21` ; puis des commits de doc jusqu'à `1575d36`).
-
-- **ATLAS-396** : ses deux points essayés (`53eb792`, `14887af`) rebasés sur `main` et réunis avec la bande des vassaux —
-  la bande mesurée dans le worker (`17f17c6`).
-- **ATLAS-399, Fait** : les chevauchements hachurés, une rayure par pays à 45°, **cuites sur le sol** (sa règle : _« pas de
-  largeur fixe, ça vibre »_), 25 km (_« c'est la bonne taille »_) ; calculés à la publication ; sur un terrain contesté
-  **le nom ne change pas** ; un vassal contesté garde sa bande (`accdf7c`, `09f8f50`).
-- **ATLAS-409, Fait** : la carte **par palier** (_« il peut pas y avoir de fondu »_) — l'aspect des frontières et les
-  pointillés, les noms à 30 % au plus près, les frontières des vassaux affinées ; **l'essai de la bande des souverains**,
-  le royaume d'un bloc de loin. Son coût mesuré (0,4 → 2 s la découpe) : **ATLAS-407**, sa décision de le commiter tel quel.
-- **Le contrôle avant commit lance les paquets un par un** (`f4f6673`, REPO-260) ; **sa règle des contrôles** : le paquet
-  touché en travaillant, le contrôle complet et la revue à chaque commit, la revue dès qu'un changement important tient
-  (`874fc44`) — et **jamais `--no-verify`**, qu'il a refusé.
-- **Publié sur sa demande** : 1300 (`3c9e335`, après un correctif des noms qui bloquait sa construction, `1ef160b`), ses
-  1100 et 1200 (`fe2dfe9`), deux villes du CMS (`c7d9ae9`), la skill de l'historien et ses corrections de relecture
-  (`1827358`, `6e613c4`, `609b414`), ses docs (couches, index, neutralité, numérisation, son point de reprise).
-- **Ses décisions** : les couches d'une carte — Cliopatria et Shepherd en calque, le détail de l'historien ; une provenance
-  par année (ATLAS-408, Cliopatria v0.2.1 citée) ; chaque arbre de travail suit `main`.
-- **Mes fautes** : sa zone d'essai test1 publiée dans 1100 (retirée par lui, `5581f21`) ; le `next.md` d'une autre instance
-  glissé dans un commit (défait avant l'envoi) ; une fixture de données dépliée par Prettier lancé hors de la racine (remise) ;
-  un `--no-verify` demandé ; « une largeur fixe par cran » proposée quand il avait dit « cuit » ; la bande des souverains
-  « à tous les zooms » décidée par moi ; deux `cd` interdits.
-
-> Older sessions (2026-09-12 → 2026-11-09) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-10 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
