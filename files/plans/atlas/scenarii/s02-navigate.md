@@ -96,11 +96,22 @@ Scenario: the pointer leaves the window by that edge
   Given the pointer resting against the right edge, the map sliding
   When it leaves the window through that edge
   Then the map stops, after its glide
+  When I come back into the window far from the edges
+  Then nothing moves
+
+Scenario: the window loses the focus while I hold a key or the map
+  Given I hold ‹→›, the map sliding
+  When I switch to another application (cmd+tab)
+  Then the map stops, after its glide
+  When I come back
+  Then it does not start again
+  And a drag whose button was let go in the other application has ended
 ```
 
-> **Not true today** — the page keeps the last position it saw, so the map goes on sliding. **Decided by the dev on
-> 2026-11-01** (*"if it's just a mouseleave and a window blur, let's go"*): ATLAS-326, in *À faire*, with the arrow
-> held through a cmd+tab, which stays pressed today. [s99](s99-holes.md) A-08.
+> **Built 2026-11-10** (ATLAS-326, the dev's call of 2026-11-01: *"if it's just a mouseleave and a window blur, let's
+> go"*): the position forgotten when the pointer leaves the page (`pointerout` with no element entered), the keys held and
+> the drag forgotten when the window loses the focus — `controls/mapControlsInput.ts`, `createLeaveListeners`; held by
+> `mapControls.test.ts`, *the reader leaves the page*.
 
 ## The limits
 

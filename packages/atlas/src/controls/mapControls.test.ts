@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { PerspectiveCamera } from 'three'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createMapControls } from './mapControls'
 import { driveOrGlide, easeOutDecay } from './mapControlsDrive'
@@ -321,6 +321,108 @@ describe('MapControls', () => {
       window.dispatchEvent(makeMouse('pointermove', 220, 100))
       window.dispatchEvent(makeMouse('pointerup', 220, 100))
       expect(controls.target.x).toBe(x0)
+    })
+  })
+})
+
+/**
+ * Controls that edge-scroll, settled.
+ * @returns the controls
+ */
+function edgeScrolling(): MapControls {
+  const options = baseOptions()
+  options.enableEdgeScroll = true
+  const { controls } = setup(options)
+  run(controls, 10)
+  return controls
+}
+
+/**
+ * The pointer leaving to an element, or out of the page when none.
+ * @param to - the element entered; `null` out of the page
+ */
+function pointerOut(to: Element | null): void {
+  window.dispatchEvent(new MouseEvent('pointerout', { relatedTarget: to }))
+}
+
+/**
+ * The window's leave and blur listeners among a spy's calls, as `[type, function]`.
+ * @param calls - the spy's calls
+ * @returns the pairs
+ */
+const pairs = (calls: unknown[][]): unknown[][] =>
+  calls.filter(([type]) => type === 'pointerout' || type === 'blur').map(([type, fn]) => [type, fn])
+
+// ATLAS-326: the reader goes elsewhere — out by an edge, or to another application — and the map stops.
+describe('MapControls when the reader leaves the page', () => {
+  describe('happy path', () => {
+    // Against a map whose pointer stays: the world's edge stops both in the end, so the gap is what is measured.
+    it('stops edge-scrolling once the pointer leaves the page by that edge, where a map left alone goes on', () => {
+      const moved = [true, false].map((leaves) => {
+        const controls = edgeScrolling()
+        window.dispatchEvent(makeMouse('pointermove', 3, 400))
+        run(controls, 5)
+        if (leaves) pointerOut(null)
+        const before = controls.target.x
+        run(controls, 30)
+        return before - controls.target.x
+      })
+      const [left = Number.NaN, stayed = Number.NaN] = moved
+      expect(left).toBeLessThan(stayed / 2)
+    })
+
+    it('stops a held arrow key when the window loses the focus, where a key still held goes on', () => {
+      const moved = [true, false].map((blurs) => {
+        const { controls, keyTarget } = setup()
+        run(controls, 10)
+        keyDown(keyTarget, 'ArrowRight')
+        run(controls, 5)
+        if (blurs) window.dispatchEvent(new Event('blur'))
+        const before = controls.target.x
+        run(controls, 30)
+        keyUp(keyTarget, 'ArrowRight')
+        return controls.target.x - before
+      })
+      const [blurred = Number.NaN, held = Number.NaN] = moved
+      expect(blurred).toBeLessThan(held / 2)
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps edge-scrolling while the pointer only moves from one element to another', () => {
+      const controls = edgeScrolling()
+      window.dispatchEvent(makeMouse('pointermove', 3, 400))
+      run(controls, 20)
+      pointerOut(document.body)
+      const before = controls.target.x
+      run(controls, 20)
+      expect(controls.target.x).toBeLessThan(before)
+    })
+
+    it('ends a drag whose release went to another window', () => {
+      const { controls, dom } = setup()
+      run(controls, 10)
+      dom.dispatchEvent(makeMouse('pointerdown', 100, 100))
+      window.dispatchEvent(new Event('blur'))
+      const before = controls.target.x
+      window.dispatchEvent(makeMouse('pointermove', 220, 100))
+      expect(controls.target.x).toBe(before)
+    })
+  })
+
+  // L3, L4: N/A — two listeners that forget, no input refused nor any value that can fail.
+
+  describe('edge cases', () => {
+    // Review QUAL-001: the very function added is the one removed, not a namesake.
+    it('takes both listeners off the window when disposed, the very ones it added', () => {
+      const added = vi.spyOn(window, 'addEventListener')
+      const removed = vi.spyOn(window, 'removeEventListener')
+      const { controls } = setup()
+      controls.dispose()
+      const [on, off] = [pairs(added.mock.calls), pairs(removed.mock.calls)]
+      added.mockRestore()
+      removed.mockRestore()
+      expect([on.length, off]).toEqual([2, expect.arrayContaining(on)])
     })
   })
 })

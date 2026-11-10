@@ -1,6 +1,6 @@
 /**
  * What the map listens to: the arrow and zoom keys, the wheel, and a press-drag-release — and the one rule that tells
- * a click from a drag.
+ * a click from a drag; and, on the window, the pointer leaving the page and the focus lost (ATLAS-326).
  */
 
 import { isEditableFocused } from '../utils/editableFocus'
@@ -125,11 +125,41 @@ function createPointerListeners(state: ControlsState): {
 }
 
 /**
+ * What the page loses track of when the reader goes elsewhere (ATLAS-326, the dev, 2026-11-01: _"if it is just a
+ * mouseleave and a window blur, let's go"_): the pointer leaving the page by an edge — its last position, a few pixels
+ * from the edge, would scroll the map on and on — and the window losing the focus, a held key's release then never heard.
+ * @param state - the controls' state
+ * @returns the listeners, by event name
+ */
+function createLeaveListeners(state: ControlsState): {
+  pointerout: (e: Event) => void
+  blur: () => void
+} {
+  return {
+    pointerout: (e: Event): void => {
+      // Out of the page altogether — not from one element to another: no element is entered.
+      if ((e as PointerEvent).relatedTarget !== null) return
+      // The position forgotten, as before the first move: edge scrolling reads none (`mapControlsDrive`).
+      state.pointerX = Number.NaN
+      state.pointerY = Number.NaN
+    },
+    blur: (): void => {
+      // A key or a press held when the reader switched away: its release went to another window.
+      state.pressed.clear()
+      state.dragging = false
+      // The drag cut off, its last moves not yet turned into a glide: dropped, or the next drag would start with them.
+      state.dragMovedX = 0
+      state.dragMovedZ = 0
+    },
+  }
+}
+
+/**
  * Attach every input listener, and hand back the one call that removes them all.
  *
- * Paired here rather than spelled out twice: six `addEventListener` calls answered by six
+ * Paired here rather than spelled out twice: eight `addEventListener` calls answered by eight
  * `removeEventListener` calls, kept in step by hand, is a listener leak waiting for someone to add a
- * seventh — and the map binds keys on `window`, so a leaked one outlives the canvas.
+ * ninth — and the map binds keys on `window`, so a leaked one outlives the canvas.
  * @param state - the controls' state
  * @param keyTarget - where keyboard input is read from
  * @returns a call that detaches everything
@@ -137,15 +167,18 @@ function createPointerListeners(state: ControlsState): {
 export function bindListeners(state: ControlsState, keyTarget: EventTarget): () => void {
   const keys = createKeyListeners(state)
   const pointer = createPointerListeners(state)
+  const leave = createLeaveListeners(state)
   const { domElement } = state
   // Keys on the key target, wheel and press on the map; move and release on the window, so a
-  // drag carries on when the pointer leaves the canvas.
+  // drag carries on when the pointer leaves the canvas; and the window's leave and blur, which forget.
   keyTarget.addEventListener('keydown', keys.keydown)
   keyTarget.addEventListener('keyup', keys.keyup)
   domElement.addEventListener('wheel', pointer.wheel, { passive: false })
   domElement.addEventListener('pointerdown', pointer.pointerdown)
   window.addEventListener('pointermove', pointer.pointermove)
   window.addEventListener('pointerup', pointer.pointerup)
+  window.addEventListener('pointerout', leave.pointerout)
+  window.addEventListener('blur', leave.blur)
   // The detach call mirrors each listener above, and forgets any key still held.
   return (): void => {
     keyTarget.removeEventListener('keydown', keys.keydown)
@@ -154,6 +187,8 @@ export function bindListeners(state: ControlsState, keyTarget: EventTarget): () 
     domElement.removeEventListener('pointerdown', pointer.pointerdown)
     window.removeEventListener('pointermove', pointer.pointermove)
     window.removeEventListener('pointerup', pointer.pointerup)
+    window.removeEventListener('pointerout', leave.pointerout)
+    window.removeEventListener('blur', leave.blur)
     state.pressed.clear()
   }
 }

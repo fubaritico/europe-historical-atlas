@@ -61,11 +61,10 @@ end goal (a region clicked shows an event). **Way out**: ATLAS-147 (who holds th
 `{target, zoom}` is restored, the focus is not; ‹escape› then does nothing (`controls/mapControls.ts`). **Severity:
 cosmetic.** **Way out**: keep the mode and its way back with the view, or reopen out of focus at the remembered view.
 
-### A-08 · The pointer leaving the window by an edge may keep the map scrolling — ATLAS-326
+### A-08 · The pointer leaving the window by an edge may keep the map scrolling — ATLAS-326 — **closed 2026-11-10**
 
-> **Settled 2026-11-01** by the dev: *"if it's just a mouseleave and a window blur, let's go"* — the pointer
-> forgotten when it leaves the page, the held keys forgotten when the window loses the focus (a held arrow at a
-> cmd+tab stays pressed today, same family). Ticket in *À faire*.
+> **Closed** — built as the dev settled it on 2026-11-01: [s02](s02-navigate.md), *The window's edges*. Kept below as it
+> was found.
 
 Edge scrolling within 24 px of the window's edge listens to no `pointerleave` — **inferred from the code**; **the dev, 2026-11-01**:
 *"even [in Total War], there's the same problem"* — the behaviour is known to him, and a strategy game of reference shares
