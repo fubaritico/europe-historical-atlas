@@ -61,6 +61,10 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   is corrected by `update`, or reported to the dev, who deletes by hand in the admin.
 - **Every fact with its source.** A value with no source is not entered. A fact *de mémoire* is never entered — it is
   researched first (climb the chain of reference: the quotation, then the work Wikipedia or the page cites).
+- **A line speaks of the sheet's date** (the dev, 2026-11-10). A quotation is a line of the 1100 sheet when the holding
+  it states runs through 1100: a span (« from 1097 to 1105 »), or a tenure begun earlier and not ended before 1100
+  (Muggia given to the patriarch in 931). A single event at another date (consuls in 1179, a fire in 1110, a coronation
+  in 1102) is never a line — *« pour l'instant, à moins qu'on trouve d'autres sources ; ça me paraît raisonnable »*.
 - **A divergence is kept, never settled.** Two sources that disagree are two lines, each with its own value. The dev
   arbitrates; the concordance is computed, never typed (`evidence-system.md`).
 - **The sheet shows the most probable holder, with its QID — even where the sources diverge** (the dev, 2026-11-06:

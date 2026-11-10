@@ -13,8 +13,17 @@ Naples, Brescia), 272 sources. Each sheet's holder is the polity **at the map's 
 normande Q74011, Comté de Sicile, États pontificaux, Duché de Naples…), the one the Cartographer compares with the polity
 drawn; the finer holder each source names (Matilda, a bishop, the County of Loritello…) is on its line. A quotation about
 another date is never a 1100 line; a town with no line of its own carries its district's witness for 1100. Left out:
-Termoli (no witness names its holder in 1100), Ottaviano (sheet without holder nor line — no witness). To correct: four
-lines of the northwest lot entered before the dating rule (Turin, Rivalta, Novara, Alba).
+Termoli (no witness names its holder in 1100), Ottaviano (sheet without holder nor line — no witness).
+
+**The northwest lines entered before the dating rule — corrected 2026-11-10** (the dev's « go »): Alba loses the EI line on
+the consuls of 1179 (its two Boniface del Vasto lines stay); Novara loses the EAM line on Henry V in 1110, and its EAM
+line on Otto III in 1000 — also Trecate's district line — is replaced by a witness of 1100: F. Savio, *Gli antichi vescovi
+d'Italia. Il Piemonte*, 1898, pp. 266-267 (public domain, archive.org `gliantichivesco00savigoog`), bishop Anselm
+(1087-1108) investing land « in Novara » on 9 December 1099 and at Gozzano in 1100. Savio calls him *invasore* of the see
+(the diptych of San Gaudenzio) and records his condemnation in contumacy by a council of Milan in 1098 — the reform party
+did not recognise him; the sheet's holder (Holy Roman Empire) is unchanged. Turin's four lines speak of c. 1097-1100 and
+stay; Rivalta's two (an 11th-century castrum, Humbert II keeping only Aosta and Susa) are loose but not of another date,
+kept. The two sources left cited by no line — EAM « Novara » and EI « Alba » — were deleted by the dev in the admin, same day.
 
 | lot | existed | not yet | unknown | disagree with the map |
 | --- | --- | --- | --- | --- |

@@ -16,8 +16,22 @@ pays — Jérusalem, Prizren, Lipljan, Rome, Derbent, Arnedo —, aucun pays, pl
 que `updatePlaces` a bien `country` et `region` ; puis un agent par paquet ; relire la base en lecture seule ; le
 ticket CMS-414 à « À valider » avec la liste des 41.
 
-**L'Italie de 1100 est dans sa base** (357 villes, 272 sources, `files/plans/sources/1100-italy.md`) ; à corriger : quatre
-lignes du nord-ouest saisies avant la règle de date (Turin, Rivalta, Novare, Alba).
+**L'Italie de 1100 est dans sa base** (357 villes, 272 sources, `files/plans/sources/1100-italy.md`) ; les lignes du
+nord-ouest d'avant la règle de date corrigées le 10/11 (Novare et Trecate sur Savio 1898) ; les deux sources sans ligne
+(EAM « Novara », EI « Alba ») supprimées par lui dans l'admin le même jour.
+
+## ▶ EN COURS — l'Adriatique de 1100 (sa demande du 10/11 au soir : « toutes les villes que Venise tenait en 1100 »)
+
+Candidates lues dans Wikidata (pas Google) : les lieux habités à moins de 30 km de la mer, **≥ 1 000 habitants
+aujourd'hui** (les dates de Wikidata sont trop rares pour filtrer : 13 lieux datés), **le Monténégro entier** (sa
+demande), **une ville par île** — celle qu'une source atteste en 1100, pas la plus peuplée (Osor, pas Cres) ; les îles
+de la mer Égée **plus tard** (65 îles listées, `islands-aegean.json` dans le scratchpad, à refaire). Quartiers, monuments
+et doublons retirés. Tout est dans `files/resources/adriatic-1100-research/` (git-ignoré) : `BRIEF.md`, `candidates.json`,
+26 lots, `reports/`, `sources/`. **Fait le 10/11** : les 26 lots, 393 lieux (74 existaient en 1100), 2 231 citations
+revérifiées, **saisis** (70 lieux, 69 fiches, 90 sources) ; la synthèse et les écarts avec la carte :
+`files/plans/sources/1100-adriatic.md`. La règle de date tranchée par lui (une tenure commencée avant 1100 et pas
+finie compte, écrit dans `/enter-in-cms`). **À lui** : l'écart majeur — pas de royaume de Croatie sur la carte de 1100 ; le QID faux de `byzantine-empire`
+dans le registre (Q112039853 → Q12544). Non commité : ce fichier, `1100-italy.md`, `1100-adriatic.md`.
 
 ## ▶ ON REPREND ICI — 10/11, après la nuit des sept cartes
 
