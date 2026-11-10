@@ -42,10 +42,16 @@ export const FIRST_LEVEL_DIVISION = 'Q10864048'
  * @returns the query service's URL, asking for JSON
  */
 export function lotUrl(id: string): string {
+  // Today only: a country statement with an end (P582) or a country dissolved (P576) is history — Éphèse also gives the
+  // Roman Empire, Győr Austria-Hungary; a dissolved division too — Mantua's Mincio department (measured on 706 places,
+  // 2026-11-10). A division Wikidata leaves undated (the Papal States' delegations) still comes: several, then a list.
   const query =
     `SELECT ?country ?countryLabel ?region ?regionLabel WHERE {` +
-    ` OPTIONAL { wd:${id} wdt:P17 ?country . }` +
-    ` OPTIONAL { wd:${id} wdt:P131* ?region . ?region wdt:P31/wdt:P279* wd:${FIRST_LEVEL_DIVISION} . }` +
+    ` OPTIONAL { wd:${id} p:P17 ?statement . ?statement ps:P17 ?country ; wikibase:rank ?rank .` +
+    ` FILTER(?rank != wikibase:DeprecatedRank)` +
+    ` FILTER NOT EXISTS { ?statement pq:P582 [] } FILTER NOT EXISTS { ?country wdt:P576 [] } }` +
+    ` OPTIONAL { wd:${id} wdt:P131* ?region . ?region wdt:P31/wdt:P279* wd:${FIRST_LEVEL_DIVISION} .` +
+    ` FILTER NOT EXISTS { ?region wdt:P576 [] } }` +
     ` SERVICE wikibase:label { bd:serviceParam wikibase:language "fr,en". } }`
   return `https://query.wikidata.org/sparql?${new URLSearchParams({ query, format: 'json' }).toString()}`
 }

@@ -49,12 +49,22 @@ describe('placeLot', () => {
     it('asks the query service for the item’s country and first-level division, in JSON', () => {
       const url = new URL(lotUrl('Q2656'))
       const query = url.searchParams.get('query') ?? ''
-      expect([
-        url.host,
-        url.searchParams.get('format'),
-        query.includes('wd:Q2656 wdt:P17'),
-      ]).toEqual(['query.wikidata.org', 'json', true])
+      expect([url.host, url.searchParams.get('format'), query.includes('wd:Q2656 p:P17')]).toEqual([
+        'query.wikidata.org',
+        'json',
+        true,
+      ])
       expect(query).toContain(`wd:${FIRST_LEVEL_DIVISION}`)
+    })
+
+    it('asks for today only — a country statement ended, a country or a division dissolved are left out', () => {
+      const query = new URL(lotUrl('Q2656')).searchParams.get('query') ?? ''
+      expect([
+        query.includes('FILTER NOT EXISTS { ?statement pq:P582 [] }'),
+        query.includes('FILTER NOT EXISTS { ?country wdt:P576 [] }'),
+        query.includes('FILTER NOT EXISTS { ?region wdt:P576 [] }'),
+        query.includes('wikibase:DeprecatedRank'),
+      ]).toEqual([true, true, true, true])
     })
   })
 
