@@ -5,8 +5,16 @@ Research of 2026-11-10, at the dev's request (« toutes les villes d'Italie de p
 every quotation re-checked by the historian against the text the agent saved (1,579 quotations, none missing).
 
 **Where it lives**: the reports and every text read are in `files/resources/italy-1100-research/` (git-ignored) —
-`reports/<lot>.md` (one block per town, its witnesses and quotations) and `reports/<lot>.json`. Not yet in the CMS:
-the dev's CMS server was down on 2026-11-10; to enter with `/enter-in-cms`, the `existed` towns only.
+`reports/<lot>.md` (one block per town, its witnesses and quotations) and `reports/<lot>.json`.
+
+**In the CMS since 2026-11-10** (`/enter-in-cms`, one agent per lot, the record of each in `entered/<lot>.json`): the
+`existed` towns only — 357 places and 1100 sheets created, 7 sheets updated (Rome, Palermo, Venice, Salerno, Milan,
+Naples, Brescia), 272 sources. Each sheet's holder is the polity **at the map's level** (Saint-Empire Q12548, Italie
+normande Q74011, Comté de Sicile, États pontificaux, Duché de Naples…), the one the Cartographer compares with the polity
+drawn; the finer holder each source names (Matilda, a bishop, the County of Loritello…) is on its line. A quotation about
+another date is never a 1100 line; a town with no line of its own carries its district's witness for 1100. Left out:
+Termoli (no witness names its holder in 1100), Ottaviano (sheet without holder nor line — no witness). To correct: four
+lines of the northwest lot entered before the dating rule (Turin, Rivalta, Novara, Alba).
 
 | lot | existed | not yet | unknown | disagree with the map |
 | --- | --- | --- | --- | --- |
