@@ -19,6 +19,7 @@ async function settle(): Promise<void> {
  */
 function buffer(outcomes: Record<number, PrepareOutcome[]> = {}) {
   const prepared: number[] = []
+  const computed: number[] = []
   const slept: number[] = []
   const deps: MapBufferDeps = {
     years: YEARS,
@@ -27,13 +28,15 @@ function buffer(outcomes: Record<number, PrepareOutcome[]> = {}) {
       return Promise.resolve(outcomes[year]?.shift() ?? { kind: 'ready' })
     }),
     keepOnly: vi.fn(),
-    whenQuiet: () => Promise.resolve(),
+    compute: vi.fn((year: number) => {
+      computed.push(year)
+    }),
     sleep: (ms) => {
       slept.push(ms)
       return Promise.resolve()
     },
   }
-  return { map: createMapBuffer(deps), deps, prepared, slept }
+  return { map: createMapBuffer(deps), deps, prepared, computed, slept }
 }
 
 afterEach(() => {
@@ -157,12 +160,20 @@ describe('createMapBuffer', () => {
   })
 
   describe('edge cases', () => {
-    it('prepares nothing once disposed', async () => {
+    // ATLAS-396, review ARCH-001: both maps of the window computed at once, before either is laid.
+    it('starts the compute of every map of the window at once', () => {
+      const { map, computed, prepared } = buffer()
+      map.shown(1200)
+      expect([computed, prepared]).toEqual([[1300, 1100], [1300]])
+    })
+
+    // ATLAS-396: the first map of the window starts at once; disposed, nothing is tried again.
+    it('tries nothing again once disposed', async () => {
       const { map, prepared } = buffer({ 1200: [{ kind: 'later', why: 'busy' }] })
       map.shown(1100)
       map.dispose()
       await settle()
-      expect(prepared).toEqual([])
+      expect(prepared).toEqual([1200])
     })
 
     it('waits at most thirty seconds between two tries', () => {

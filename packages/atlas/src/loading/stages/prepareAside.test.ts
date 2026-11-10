@@ -2,12 +2,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { httpError } from '@europe-historical-atlas/core/data/assetError'
+import * as fillBuffersModule from '@europe-historical-atlas/core/pipeline/fillBuffers'
 
 import { stubNameFace } from '../testing/nameFaceStubs'
 import { asMock, build, deferred, fakeAssets, shelvingLayers } from '../testing/pipelineStubs'
 import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+
+/** A map always quiet: the laying never waits in these tests, unless one says so. */
+const QUIET = (): Promise<void> => Promise.resolve()
 
 /**
  * The test's authored year under another year's number — its own files, as on disk: the names are cached by the year's
@@ -64,7 +68,9 @@ describe('prepareAside', () => {
     it('lays 1200 aside behind 1100, and puts 1100 back as it was', async () => {
       const { deps, pipeline } = await startedOn1100()
       const fillsBefore = asMock(deps.layers.rebuildFills).mock.calls.length
-      await expect(pipeline.prepareAside(1200, () => true)).resolves.toEqual({ kind: 'ready' })
+      await expect(pipeline.prepareAside(1200, () => true, QUIET)).resolves.toEqual({
+        kind: 'ready',
+      })
       expect(asMock(deps.layers.shelveYear).mock.calls).toEqual([[1100], [1200]])
       expect(asMock(deps.layers.restoreYear)).toHaveBeenLastCalledWith(1100)
       expect(asMock(deps.layers.rebuildFills).mock.calls.length).toBe(fillsBefore + 1)
@@ -73,10 +79,83 @@ describe('prepareAside', () => {
   })
 
   describe('variants', () => {
+    // ATLAS-396, the dev, 2026-11-10: a click on a map being prepared joins it — one read, one cut, never two.
+    // Review QUAL-003: the decision itself — the compute does not wait for quiet, only the laying does.
+    it('computes 1200 before the map is quiet, and sets nothing aside until it is', async () => {
+      const { deps, pipeline, loads } = await startedOn1100()
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      const quiet = deferred<undefined>()
+      const preparing = pipeline.prepareAside(
+        1200,
+        () => true,
+        () => quiet.promise
+      )
+      await vi.waitFor(() => {
+        expect(lay).toHaveBeenCalled()
+      })
+      const asideBeforeQuiet = asMock(deps.layers.shelveYear).mock.calls.some(([y]) => y === 1200)
+      quiet.resolve(undefined)
+      expect([loads, asideBeforeQuiet, await preparing]).toEqual([
+        [1100, 1200],
+        false,
+        { kind: 'ready' },
+      ])
+    })
+
+    it('lays 1200 for the click from its preparation in flight, read and cut once', async () => {
+      const { deps, dev, pipeline, loads } = await startedOn1100()
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      const quiet = deferred<undefined>()
+      const preparing = pipeline.prepareAside(
+        1200,
+        () => true,
+        () => quiet.promise
+      )
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      quiet.resolve(undefined)
+      expect([loads, lay.mock.calls.length, deps.sources.askedYear, await preparing]).toEqual([
+        [1100, 1200],
+        1,
+        1200,
+        { kind: 'ready' },
+      ])
+    })
+
+    // The read the preparation did not get through is the year's failure, told as an ordinary load tells it.
+    it('tells the click the very error the read of its preparation threw', async () => {
+      const offline = new TypeError('Failed to fetch')
+      const { deps, dev, pipeline, loads } = await startedOn1100((year) =>
+        year === 1200 ? Promise.reject(offline) : Promise.resolve(authoredIn(year))
+      )
+      const preparing = pipeline.prepareAside(1200, () => true, QUIET)
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect([loads, await preparing]).toEqual([
+        [1100, 1200],
+        { kind: 'failed', recoverable: true, error: offline },
+      ])
+      expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', offline)
+    })
+
+    it('loads the year whole when its preparation was computed under other settings', async () => {
+      const { deps, dev, pipeline, loads } = await startedOn1100()
+      const quiet = deferred<undefined>()
+      void pipeline.prepareAside(
+        1200,
+        () => true,
+        () => quiet.promise
+      )
+      asMock(deps.layers.yearStamp).mockReturnValue('another relief')
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(loads).toEqual([1100, 1200, 1200])
+    })
+
     // ATLAS-396: its first showing was one frame of 43 ms on the built site, the buffers sent to the GPU then.
     it('sends 1200 to the GPU unseen once it is aside, before 1100 comes back', async () => {
       const { deps, pipeline } = await startedOn1100()
-      await pipeline.prepareAside(1200, () => true)
+      await pipeline.prepareAside(1200, () => true, QUIET)
       expect(asMock(deps.layers.uploadYear).mock.calls).toEqual([[1200]])
       const [, aside] = asMock(deps.layers.shelveYear).mock.invocationCallOrder
       const [upload] = asMock(deps.layers.uploadYear).mock.invocationCallOrder
@@ -98,15 +177,15 @@ describe('prepareAside', () => {
         namedWhenAside[year] = names !== null && names !== shownNames
         shelve(year)
       })
-      await pipeline.prepareAside(1200, () => true)
+      await pipeline.prepareAside(1200, () => true, QUIET)
       expect(namedWhenAside[1200]).toBe(true)
     })
 
     it('reads nothing for the map shown, nor for one already aside', async () => {
       const { pipeline, loads } = await startedOn1100()
-      await pipeline.prepareAside(1200, () => true)
-      await pipeline.prepareAside(1100, () => true)
-      await pipeline.prepareAside(1200, () => true)
+      await pipeline.prepareAside(1200, () => true, QUIET)
+      await pipeline.prepareAside(1100, () => true, QUIET)
+      await pipeline.prepareAside(1200, () => true, QUIET)
       expect(loads).toEqual([1100, 1200])
     })
 
@@ -117,7 +196,7 @@ describe('prepareAside', () => {
       )
       dev.political.year = 1300
       const change = pipeline.rebuildPolitical()
-      await expect(pipeline.prepareAside(1200, () => true)).resolves.toEqual({
+      await expect(pipeline.prepareAside(1200, () => true, QUIET)).resolves.toEqual({
         kind: 'later',
         why: 'a change of year is being drawn',
       })
@@ -127,7 +206,9 @@ describe('prepareAside', () => {
 
     it('lays nothing aside once the map is no longer wanted', async () => {
       const { deps, pipeline } = await startedOn1100()
-      await expect(pipeline.prepareAside(1200, () => false)).resolves.toEqual({ kind: 'dropped' })
+      await expect(pipeline.prepareAside(1200, () => false, QUIET)).resolves.toEqual({
+        kind: 'dropped',
+      })
       expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
     })
 
@@ -139,14 +220,27 @@ describe('prepareAside', () => {
   })
 
   describe('managed errors', () => {
+    it('answers a compute that broke irreversible — a defect, never tried again', async () => {
+      const { pipeline } = await startedOn1100()
+      const defect = new Error('the cut broke')
+      vi.spyOn(fillBuffersModule, 'layFills').mockImplementation(() => {
+        throw defect
+      })
+      await expect(pipeline.prepareAside(1200, () => true, QUIET)).resolves.toEqual({
+        kind: 'failed',
+        recoverable: false,
+        error: defect,
+      })
+    })
+
     it('qualifies a network failure recoverable, an absent file irreversible', async () => {
       const { pipeline } = await startedOn1100((year) => {
         if (year === 1200) return Promise.reject(new TypeError('Failed to fetch'))
         if (year === 1300) return Promise.reject(httpError('yearPolities', '/years/1300', 404))
         return Promise.resolve(authoredIn(year))
       })
-      const network = await pipeline.prepareAside(1200, () => true)
-      const absent = await pipeline.prepareAside(1300, () => true)
+      const network = await pipeline.prepareAside(1200, () => true, QUIET)
+      const absent = await pipeline.prepareAside(1300, () => true, QUIET)
       expect(network).toMatchObject({ kind: 'failed', recoverable: true })
       expect(absent).toMatchObject({ kind: 'failed', recoverable: false })
     })
@@ -155,7 +249,7 @@ describe('prepareAside', () => {
       const { deps, pipeline } = await startedOn1100((year) =>
         Promise.resolve(year === 1200 ? { ...YEAR, year } : authoredIn(year))
       )
-      await expect(pipeline.prepareAside(1200, () => true)).resolves.toEqual({
+      await expect(pipeline.prepareAside(1200, () => true, QUIET)).resolves.toEqual({
         kind: 'skipped',
         why: 'its countries are painted in the texture',
       })
@@ -170,7 +264,7 @@ describe('prepareAside', () => {
       asMock(deps.layers.rebuildBorders).mockImplementationOnce(() => {
         throw new Error('defect')
       })
-      await expect(pipeline.prepareAside(1200, () => true)).rejects.toThrow('defect')
+      await expect(pipeline.prepareAside(1200, () => true, QUIET)).rejects.toThrow('defect')
       expect(asMock(deps.layers.discardYear)).toHaveBeenCalledOnce()
       expect(asMock(deps.layers.restoreYear)).toHaveBeenLastCalledWith(1100)
       expect([deps.sources.askedYear, deps.sources.regionSet?.year]).toEqual([1100, 1100])
@@ -179,20 +273,59 @@ describe('prepareAside', () => {
   })
 
   describe('edge cases', () => {
-    // Review ARCH-002: busy before any work is put off at once, nothing read nor cut to be thrown away.
-    it('reads nothing while the names of the map shown are not laid', async () => {
+    // ATLAS-396: computed at once even while the map shown is busy, laid later — and the try again reads nothing twice,
+    // the compute kept in the register.
+    it('computes while the names of the map shown are not laid, and lays it later without reading it again', async () => {
       const { deps, pipeline, loads } = await startedOn1100()
+      const names = deps.sources.yearNames
       deps.sources.yearNames = null
-      await expect(pipeline.prepareAside(1200, () => true)).resolves.toEqual({
-        kind: 'later',
-        why: 'the names of the map shown are not laid yet',
-      })
-      expect(loads).toEqual([1100])
+      const first = await pipeline.prepareAside(1200, () => true, QUIET)
+      deps.sources.yearNames = names
+      const second = await pipeline.prepareAside(1200, () => true, QUIET)
+      expect([first, second, loads]).toEqual([
+        { kind: 'later', why: 'the names of the map shown are not laid yet' },
+        { kind: 'ready' },
+        [1100, 1200],
+      ])
+    })
+
+    it('lays nothing when the window moved on while it waited for quiet', async () => {
+      const { deps, pipeline } = await startedOn1100()
+      let wanted = true
+      const preparing = pipeline.prepareAside(
+        1200,
+        () => wanted,
+        () => {
+          wanted = false
+          return Promise.resolve()
+        }
+      )
+      expect(await preparing).toEqual({ kind: 'dropped' })
+      expect(asMock(deps.layers.shelveYear).mock.calls.some(([y]) => y === 1200)).toBe(false)
+    })
+
+    // Reviews ARCH-004, QUAL-001: settings changed during the wait — never laid as the map's own, computed again.
+    it('computes 1200 again when the map changed while it waited for quiet', async () => {
+      const { deps, pipeline, loads } = await startedOn1100()
+      const first = await pipeline.prepareAside(
+        1200,
+        () => true,
+        () => {
+          asMock(deps.layers.yearStamp).mockReturnValue('another relief')
+          return Promise.resolve()
+        }
+      )
+      const second = await pipeline.prepareAside(1200, () => true, QUIET)
+      expect([first, second, loads]).toEqual([
+        { kind: 'later', why: 'the map changed while it was computed' },
+        { kind: 'ready' },
+        [1100, 1200, 1200],
+      ])
     })
 
     it('holds the prepared map aside and the shown one on screen, never the reverse', async () => {
       const { deps, pipeline } = await startedOn1100()
-      await pipeline.prepareAside(1200, () => true)
+      await pipeline.prepareAside(1200, () => true, QUIET)
       expect([asMock(deps.layers.holdsYear)(1200), asMock(deps.layers.holdsYear)(1100)]).toEqual([
         true,
         false,

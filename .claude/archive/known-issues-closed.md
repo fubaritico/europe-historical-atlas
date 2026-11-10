@@ -364,3 +364,12 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   **Closed 2026-11-07 by the dev's call, with CARTO-371** (*"si le navigateur refuse, on ne le fait pas"*): the page's
   storage goes through `persistence/guardedStorage` — a refusal keeps nothing, the Cartographer carries on as at first,
   the console says it once. The cities' filters use the same guard.
+
+- **A map prepared in the background may be stamped with settings changed during its cut** (review ARCH-006 of
+  2026-11-08, ATLAS-333, `loading/stages/prepareAside.ts`): the cut reads the grid, the palette and the tribes' settings
+  before the worker's wait, the shelf stamps the map when it is laid. A setting of the dev panel moved during that wait,
+  its own rebuild done, leaves a neighbour built under the old one and taken for current. **Only the dev panel reaches
+  it** — no reader can. **Remedy if it bites**: read the stamp before the cut and hand it to the shelf. **Severity:
+  cosmetic.**
+  **Closed 2026-11-10 (ATLAS-396, reviews ARCH-004 and QUAL-001)**: the compute ahead carries the stamp it was started
+  under, and `prepareAside` compares it with the map's before laying — changed, the compute is let go and computed again.

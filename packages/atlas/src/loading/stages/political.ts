@@ -13,6 +13,7 @@ import { meshVertexGrid, meshWorldDepth } from '../../scene/relief/reliefMesh'
 import { WORLD_WIDTH } from '../../scene/world'
 import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
+import { AheadReadFailure } from '../workerCut'
 import { installSettledYear, settleYearBorders } from '../yearBorders'
 import { startStep, timedStep } from '../yearTiming'
 
@@ -23,6 +24,7 @@ import { rebuildTexture } from './texture'
 import type { MeasuredTribes } from '../../scene/political/tribes/mapTribeLayer'
 import type { DevState } from '../../tunables/devState'
 import type { PipelineContext } from '../pipelineContext'
+import type { AheadYear, WorkerCut } from '../workerCut'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 import type { BakedBands } from '@europe-historical-atlas/core/pipeline/bakedBands'
@@ -86,8 +88,16 @@ async function drawYear(
     endRestore()
     return { loaded: restored, restored: true }
   }
-  // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
-  const loaded = await timedStep(clock, asked, 'fetch', () => context.assets.regions.load(asked))
+  // 1. The year's polities: from its compute in flight when the map was being prepared — joined where it stands, never
+  //    a second load beside it on the one worker (ATLAS-396) — fetched otherwise. Drop out if torn down or overtaken.
+  const ahead = context.computed.take(asked, context.layers.yearStamp())
+  const { loaded, cut } =
+    ahead === null
+      ? {
+          loaded: await timedStep(clock, asked, 'fetch', () => context.assets.regions.load(asked)),
+          cut: null,
+        }
+      : await timedStep(clock, asked, 'join', () => joinAhead(ahead))
   if (context.isDisposed() || !isCurrent()) return null
   // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it,
   //    its polities then cut in the worker (said on the bar before the wait).
@@ -102,7 +112,22 @@ async function drawYear(
         scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
       )
   if (context.isDisposed() || !isCurrent()) return null
-  return installYear(context, { asked, loaded, result }, isCurrent, report)
+  return installYear(context, { asked, loaded, result, cut }, isCurrent, report)
+}
+
+/**
+ * A compute in flight, awaited for the reader who asked for its map: its read failure told as the year's own — the
+ * error the read threw, as an ordinary load would tell it.
+ * @param ahead - the compute
+ * @returns the year and the worker's cut
+ * @throws what the read threw, or what the compute threw
+ */
+async function joinAhead(ahead: Promise<AheadYear>): Promise<AheadYear> {
+  try {
+    return await ahead
+  } catch (error: unknown) {
+    throw error instanceof AheadReadFailure ? error.cause : error
+  }
 }
 
 /**
@@ -114,23 +139,24 @@ async function drawYear(
  * @param year.loaded - its polities
  * @param year.result - its tints and traced lines from the grid; `null` for a year the fills paint, settled in the
  *   worker
+ * @param year.cut - what the worker prepared when the year was computed ahead; `null` to prepare it now
  * @param isCurrent - whether this year is still the newest asked for
  * @param report - where its progress goes
  * @returns the year drawn; `null` when torn down or overtaken during the bake
  */
 async function installYear(
   context: PipelineContext,
-  year: { asked: number; loaded: RegionSet; result: PoliticalResult | null },
+  year: { asked: number; loaded: RegionSet; result: PoliticalResult | null; cut: WorkerCut | null },
   isCurrent: () => boolean,
   report: ProgressReport
 ): Promise<DrawnYear | null> {
   const { dev, sources, layers } = context
   const { asked, loaded, result } = year
   // 3. The bake, the cuts and the settling, all off this thread, side by side — the last wait: none reads the year on
-  //    screen, so nothing of it is touched before them.
-  const cut = await timedStep(context.clock, asked, 'prepare', () =>
-    prepareYear(context, loaded, report)
-  )
+  //    screen, so nothing of it is touched before them. Done already when the year was computed ahead (ATLAS-396).
+  const cut =
+    year.cut ??
+    (await timedStep(context.clock, asked, 'prepare', () => prepareYear(context, loaded, report)))
   if (context.isDisposed() || !isCurrent()) return null
   // 4. Lay the year — this thread's own work, held in one block: its step is said and painted first (ATLAS-333).
   report(yearPaintsExactFills(dev, loaded) ? EXACT_SPLIT.cut : POLITICAL_SPLIT.bake, 'borders')
@@ -211,20 +237,6 @@ export function primeWorkerCut(context: PipelineContext, loaded: RegionSet, cut:
   }
   layers.primeFillArrays(key, cut.fillArrays)
   if (cut.tribes !== null) layers.primeTribeCut(cut.grid, cut.tribes)
-}
-
-/** A year prepared in the worker: its fills laid, its tribes measured, the year settled, and the grid they lie on. */
-export interface WorkerCut {
-  /** The relief's subdivision. */
-  readonly grid: FillGrid
-  /** Its fills laid on the relief, in the settled tints — arrays ready to be wrapped (ATLAS-396). */
-  readonly fillArrays: FillArrays
-  /** The relief they were laid on — read with its heights, before the wait (reviews QUAL-001, ARCH-001). */
-  readonly relief: object
-  /** The tribes' patches, measured in the worker too, with their settings; `null` for a year with no tribe. */
-  readonly tribes: MeasuredTribes | null
-  /** Its colours, tints by level, exact lines and tribes. */
-  readonly settled: SettledYear
 }
 
 /**

@@ -72,6 +72,7 @@ export function fakeLayers(): MapLayers {
     'shelveYear',
     'restoreYear',
     'holdsYear',
+    'yearStamp',
     'keepYears',
     'discardYear',
     'uploadYear',
@@ -79,7 +80,10 @@ export function fakeLayers(): MapLayers {
     'reliefHeights',
     'primeTribeCut',
   ]
-  return Object.fromEntries(names.map((n) => [n, vi.fn()])) as unknown as MapLayers
+  const layers = Object.fromEntries(names.map((n) => [n, vi.fn()])) as unknown as MapLayers
+  // One stamp for the test's life: the settings never change under a test unless it says so.
+  asMock(layers.yearStamp).mockReturnValue('stamp')
+  return layers
 }
 
 /**

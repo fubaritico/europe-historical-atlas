@@ -163,9 +163,38 @@ resumes, so nothing is lost"_. Agreed, applied where a pause means something:
 | lay it aside: the arrays to the GPU, the layers built (countries, tribes, borders, names) | the page | **a job that pauses and resumes**: cut into small pieces, laid between the reader's gestures; a gesture pauses it, quiet resumes it where it was — nothing done twice |
 | the reader asks for a map being prepared | — | **joins the preparation in flight**, from where it stands, instead of a load of its own |
 
-To discuss with the dev before coding (his word: talk first): how small a piece of the lay (one layer? a time budget a
-frame?), whether `pointermove` should pause the lay at all or only a press, a wheel and a key; and to measure first, in
-his browser, the lay's pieces and a preparation's whole time on the site and on the dev server.
+**Decided by the dev, 2026-11-10**: the lay pauses on **a press of the mouse, a click, the wheel and the keyboard** —
+not on the mouse moving (`pointermove` leaves the gestures that pause it). The pieces of the lay: the countries, the
+tribes, the borders, the names, each in an idle slot. And measured in his browser, on a quiet page — not in an automation
+tab at startup, whose 6–12 s of 2026-11-10 counted the cut's wait behind the other work and are void (he lives ~2.5 s).
+
+**The ingredients, in order**: (1) a register of the preparations in flight, beside the shelf; (2) a click reads it — a
+map shelved comes back at once, one in flight is awaited and laid, none is loaded whole; (3) the map clicked has
+priority — never dropped when the window moves, never waiting for quiet; (4) the preparation in two times, the worker's
+part at once, the lay alone waiting; (5) the lay paused and resumed; (6) the preparation's measures in the page; (7) tests
+checked against the naive code. Untouched: the window of three maps, its order, the rule of failures.
+
+**Built, 2026-11-10** (worktree `baked-years`, not committed yet):
+
+- **the register** — `loading/computedYears.ts`, in the pipeline's context: a year's read and worker compute
+  (`prepareAside.computeAhead`, measured `ahead`) registered under the map's stamp (`MapLayers.yearStamp`, the shelf's);
+  let go when the window moves, when the map is set aside, or when it fails;
+- **the click joins it** — `political.drawYear` takes the year's compute in flight (measured `join`) instead of fetching
+  and cutting again; its read failure told as the year's own error; one started under other settings is let go and the
+  year loaded whole;
+- **at once** — `mapBuffer.tryOne` no longer waits for quiet; `prepareAside` computes, then waits for quiet before its
+  block alone (measured `aside`); a map busy at the end answers `later` and its try again reuses the compute;
+- **the gestures** — `app/quietTime.ts`: a press, a click, the wheel, a key; the mouse moving no longer counts; a button
+  held keeps the map busy however long (a drag of the map is a press that lasts — the dev's _"mouse down"_). **A press
+  counts on the map alone** (the dev, same day, _"target the event"_): the frieze's slider will move by a drag, the button
+  held all along — a press on the interface holds nothing off, so the maps keep being laid aside while the slider moves.
+  The maps the slider reaches are shown by the click's own path, which never waits for quiet.
+
+**Not built — the lay in pieces (ingredient 5)**: the block cannot be cut as it stands — it sets the map shown aside,
+lays the prepared one in the same layers, sets it aside and puts the shown one back, and the screen must never draw in
+between (the reader would see the prepared map). Pausing between pieces needs the layers built off the scene, a year at
+a time — a change of `MapLayers` itself. **First measure the block** (`atlas year <year> aside` in his browser): ~150 ms
+measured on 08/11; if so, a press during it waits a tenth of a second, and the pieces are not worth that change.
 
 ## Where we stopped — 2026-11-09, past midnight (ATLAS-396, the resume point of this work)
 

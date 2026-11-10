@@ -4,7 +4,9 @@
  */
 
 import type { MapAssetSources } from './assets'
+import type { ComputedYears } from './computedYears'
 import type { NameCache } from './nameCache'
+import type { AheadYear } from './workerCut'
 import type { YearClock } from './yearTiming'
 import type { MapUi } from '../app/mapUi'
 import type { AtlasMessageKey } from '../i18n'
@@ -86,6 +88,8 @@ export interface PipelineContext extends MapPipelineDeps {
   held: { grid: boolean; bareTexture: boolean; drawing: number }
   /** The names already placed, by year content and settings — a year seen again comes back without its placement. */
   nameCache: NameCache
+  /** The years being computed ahead, so a click on one joins its compute rather than starting another (ATLAS-396). */
+  computed: ComputedYears<AheadYear>
   /** Where a change of year's steps are measured, the default filled in. */
   clock: YearClock
 }

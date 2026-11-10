@@ -16,11 +16,12 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 
 import { createFetchAssets } from './assets'
 import { createCompute, createNameCompute } from './compute'
+import { createComputedYears } from './computedYears'
 import { loadContent } from './mapContent'
 import { createNameCache } from './nameCache'
 import { rebuildYearNames } from './stages/names'
 import { rebuildPolitical } from './stages/political'
-import { prepareAside } from './stages/prepareAside'
+import { prepareAside, startAhead } from './stages/prepareAside'
 import { loadRivers } from './stages/rivers'
 import { startup } from './stages/startup'
 import { pushSources, rebuildTexture } from './stages/texture'
@@ -60,14 +61,26 @@ export interface MapPipeline {
    */
   rebuildBorderGeometry: () => Promise<void>
   /**
-   * Prepare a map in the background and set it aside, never shown (ATLAS-333, the maps kept ready around the one shown).
+   * Prepare a map in the background and set it aside, never shown (ATLAS-333, the maps kept ready around the one shown):
+   * computed at once, laid only once the map is quiet (ATLAS-396).
    * @param year - the map
    * @param isCurrent - whether it is still wanted
+   * @param whenQuiet - resolves when the map is quiet, the reader not acting on it
    * @returns how it ended
    */
-  prepareAside: (year: number, isCurrent: () => boolean) => Promise<PrepareOutcome>
+  prepareAside: (
+    year: number,
+    isCurrent: () => boolean,
+    whenQuiet: () => Promise<void>
+  ) => Promise<PrepareOutcome>
   /**
-   * Free every map set aside but these.
+   * Start a map's read and compute in the background, unless it is at hand — its laying left to `prepareAside`.
+   * @param year - the map
+   * @returns nothing
+   */
+  computeAhead: (year: number) => void
+  /**
+   * Free every map set aside but these, and every compute ahead but theirs.
    * @param years - the maps to keep
    * @returns nothing
    */
@@ -118,13 +131,13 @@ async function retraceBorders(context: PipelineContext): Promise<void> {
 }
 
 /**
- * Build the pipeline. Nothing is fetched until {@link MapPipeline.start} is called.
- * @param deps - the tunables, the sources, the layers, the interface and the worker factory
- * @returns the pipeline
+ * The pipeline's world: the host's deps, with the default ports under any the host replaced, its gates, its caches and
+ * its register of years computed ahead — the computes installed after, once it exists.
+ * @param deps - the host's deps
+ * @returns the context
  */
-export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
-  // The pipeline's world: the host's deps, with the default ports under any the host replaced.
-  const context: PipelineContext = {
+function createContext(deps: MapPipelineDeps): PipelineContext {
+  return {
     ...deps,
     assets: { ...createFetchAssets(), ...deps.assets },
     // Two gates, because two independent results race: a dev-panel slider fires a bake per change, and a
@@ -137,9 +150,19 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     pendingRivers: { set: null },
     held: { grid: false, bareTexture: false, drawing: 0 },
     nameCache: createNameCache(),
+    computed: createComputedYears(),
     // The browser's own clock and measures: a change of year's steps are read in its Performance panel.
     clock: deps.clock ?? performance,
   }
+}
+
+/**
+ * Build the pipeline. Nothing is fetched until {@link MapPipeline.start} is called.
+ * @param deps - the tunables, the sources, the layers, the interface and the worker factory
+ * @returns the pipeline
+ */
+export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
+  const context = createContext(deps)
   installComputes(context)
 
   return {
@@ -168,11 +191,14 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     rebuildBorderGeometry(): Promise<void> {
       return retraceBorders(context)
     },
-    prepareAside(year: number, isCurrent: () => boolean): Promise<PrepareOutcome> {
-      return prepareAside(context, year, isCurrent)
+    prepareAside: (year, isCurrent, whenQuiet) =>
+      prepareAside(context, year, { isCurrent, whenQuiet }),
+    computeAhead(year: number): void {
+      startAhead(context, year)
     },
     keepYears(years: readonly number[]): void {
       deps.layers.keepYears(years)
+      context.computed.keepOnly(years)
     },
     dispose(): void {
       // Terminate before anything else: the worker is the only part of this that outlives the page's own

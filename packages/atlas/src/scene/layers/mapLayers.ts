@@ -227,6 +227,12 @@ export interface MapLayers {
    */
   holdsYear: (year: number) => boolean
   /**
+   * What a year's layers are built under now — the settings and the very relief and texture (`yearStamp`): a year
+   * computed ahead under another one is not laid (ATLAS-396).
+   * @returns the stamp
+   */
+  yearStamp: () => string
+  /**
    * Free every year set aside but these — the maps either side of the one shown (the dev's video buffer, 2026-11-08).
    * @param years - the years to keep, if they are aside
    * @returns nothing
@@ -362,6 +368,7 @@ function layerYears(
   | 'shelveYear'
   | 'restoreYear'
   | 'holdsYear'
+  | 'yearStamp'
   | 'keepYears'
   | 'discardYear'
   | 'uploadYear'
@@ -383,12 +390,12 @@ function layerYears(
       if (!shelf.restore(year, stamp())) return false
       const { size } = viewport
       if (size !== null) handles.borders?.setResolution(size.width, size.height)
-      // A year left before the contribution landed was set aside with no events, and the contribution pinned only the
-      // year then shown (`loadContent`): pinned now — only then, so a return keeps its frame (review R1).
+      // Set aside before the contribution landed, a year has no events (`loadContent` pinned the year shown): pinned now.
       if (handles.events === null) rebuildEvents(context)
       return true
     },
     holdsYear: (year: number): boolean => shelf.holds(year, stamp()),
+    yearStamp: stamp,
     keepYears: shelf.keepOnly,
     discardYear: shelf.discard,
     uploadYear(year: number): void {
@@ -400,9 +407,7 @@ function layerYears(
     primeTribeCut(grid, measured): void {
       primeTribeCut(context, grid, measured)
     },
-    disposeYears(): void {
-      shelf.dispose()
-    },
+    disposeYears: shelf.dispose,
   }
 }
 

@@ -36,7 +36,7 @@ import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
 import { mountYearSwitch } from './ui/yearSwitch'
 
-import type { QuietTime } from './app/quietTime'
+import type { QuietMap, QuietTime } from './app/quietTime'
 import type { DevTools } from './devPanel/devTools'
 import type { AtlasMessageKey } from './i18n'
 import type { MapBuffer } from './loading/mapBuffer'
@@ -95,11 +95,13 @@ function bufferOver(
 ): MapBuffer {
   return createMapBuffer({
     years,
-    prepare: (year, isCurrent) => pipeline.prepareAside(year, isCurrent),
+    prepare: (year, isCurrent) => pipeline.prepareAside(year, isCurrent, quiet.whenQuiet),
+    compute: (year) => {
+      pipeline.computeAhead(year)
+    },
     keepOnly: (kept) => {
       pipeline.keepYears(kept)
     },
-    whenQuiet: quiet.whenQuiet,
     sleep: quiet.sleep,
   })
 }
@@ -114,6 +116,7 @@ function bufferOver(
  * @param deps.translate - the reader's language
  * @param deps.isDisposed - whether the map was torn down meanwhile
  * @param deps.sources - the map's sources, whose year drawn the maps kept ready follow
+ * @param deps.map - the map's canvas, where a press holds the maps' laying off (ATLAS-396)
  * @returns the switch's teardown, safe before it is mounted
  */
 function startYearSwitch(deps: {
@@ -123,10 +126,11 @@ function startYearSwitch(deps: {
   translate: Translate<AtlasMessageKey>
   isDisposed: () => boolean
   sources: Pick<MapSources, 'askedYear'>
+  map: QuietMap
 }): { dispose: () => void } {
   let mounted: YearSwitch | null = null
   let buffer: MapBuffer | null = null
-  const quiet = createQuietTime(window, () => performance.now())
+  const quiet = createQuietTime(window, deps.map, () => performance.now())
   void deps.pipeline
     .start()
     .then(() => fetchAuthoredYears())
@@ -222,7 +226,15 @@ function bootstrap(): () => void {
   window.addEventListener('resize', onResize)
 
   // Temporary (ATLAS-333), to be removed with the atlas's own timeline (ATLAS-134).
-  const yearSwitch = startYearSwitch({ dev, pipeline, tools, translate, isDisposed, sources })
+  const yearSwitch = startYearSwitch({
+    dev,
+    pipeline,
+    tools,
+    translate,
+    isDisposed,
+    sources,
+    map: canvas,
+  })
   const stopLoop = startFrameLoop(view, layers, tools.stats)
 
   return (): void => {

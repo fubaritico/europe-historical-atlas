@@ -7,7 +7,9 @@
  * shown has its buffers on the GPU only (`releaseAfterUpload`); one prepared and not yet shown was never drawn, so its
  * buffers are still the page's — they go to the GPU, and leave the page, the first time it is shown (review ARCH-003).
  *
- * The maps are tried in turn, one laid at a time; one waiting to be tried again lets the next go first.
+ * The maps are tried in turn, one laid at a time; one waiting to be tried again lets the next go first. **A try starts at
+ * once** (the dev, 2026-11-10: _"it should start at once"_): its compute runs in the worker whatever the reader does, and
+ * only its laying waits for the map to be quiet (`prepareAside`).
  *
  * **A preparation that fails is qualified before anything is decided** (the dev, same evening): recoverable — the
  * network — is tried again until it works, waiting longer each time (1 s doubling to 30 s), at once when the browser is
@@ -44,12 +46,17 @@ export interface MapBufferDeps {
    */
   readonly prepare: (year: number, isCurrent: () => boolean) => Promise<PrepareOutcome>
   /**
+   * Start a map's read and compute at once, without laying it — every map of the window together, so the second does
+   * not wait for the first to be laid (ATLAS-396, review ARCH-001). Its failure is the try's to say, which meets it.
+   * @param year - the map
+   * @returns nothing to wait for
+   */
+  readonly compute: (year: number) => void
+  /**
    * Free every map set aside but these.
    * @param years - the window
    */
   readonly keepOnly: (years: readonly number[]) => void
-  /** Resolves when the map is quiet: the page idle, the reader not acting on it. */
-  readonly whenQuiet: () => Promise<void>
   /**
    * Resolves after a while — sooner when the network comes back.
    * @param ms - the wait
@@ -150,8 +157,9 @@ function afterTry(outcome: PrepareOutcome, item: Pending, memory: Memory): numbe
 }
 
 /**
- * Try one map of the window: wait what it must, then for quiet, then prepare it.
- * @param deps - what prepares, waits and sleeps
+ * Try one map of the window: wait what it must, then prepare it at once — the preparation itself waits for quiet before
+ * laying it, never before computing it (ATLAS-396).
+ * @param deps - what prepares and sleeps
  * @param item - the map
  * @param isCurrent - whether the window still wants it
  * @returns how the try ended; `dropped` when the window moved meanwhile
@@ -162,8 +170,6 @@ async function tryOne(
   isCurrent: () => boolean
 ): Promise<PrepareOutcome> {
   if (item.wait > 0) await deps.sleep(item.wait)
-  if (!isCurrent()) return { kind: 'dropped' }
-  await deps.whenQuiet()
   if (!isCurrent()) return { kind: 'dropped' }
   try {
     return await deps.prepare(item.year, isCurrent)
@@ -176,7 +182,7 @@ async function tryOne(
 /**
  * Prepare the maps of a window in turn — one laid at a time, each block of the page alone — until each is ready, given
  * up, or the window moves. A map waiting to be tried again lets the next one go first (review QUAL-003).
- * @param deps - what prepares, waits and sleeps
+ * @param deps - what prepares and sleeps
  * @param window - the maps, the one the reader heads for first
  * @param isCurrent - whether the window still stands
  * @param memory - what was said and given up
@@ -215,6 +221,7 @@ export function createMapBuffer(deps: MapBufferDeps): MapBuffer {
       last = year
       const window = mapsToPrepare(year, direction, deps.years, 1)
       deps.keepOnly([year, ...window])
+      for (const ahead of window) if (!memory.givenUp.has(ahead)) deps.compute(ahead)
       const mine = ++generation
       void prepareWindow(deps, window, () => mine === generation, memory)
     },

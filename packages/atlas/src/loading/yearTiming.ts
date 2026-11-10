@@ -8,7 +8,9 @@
 
 /**
  * The steps of a change of year that are measured — and, at the startup, the three before the year: the relief and the
- * mask downloaded (`terrain`), the bare terrain baked (`texture`), the sheet, relief and decor built (`scene`).
+ * mask downloaded (`terrain`), the bare terrain baked (`texture`), the sheet, relief and decor built (`scene`). And a map
+ * prepared in the background (ATLAS-396): read and computed in the worker (`ahead`), laid aside in its block (`aside`),
+ * and a click waiting for a compute in flight (`join`).
  */
 export type YearStep =
   | 'terrain'
@@ -22,6 +24,9 @@ export type YearStep =
   | 'fills'
   | 'borders'
   | 'restore'
+  | 'ahead'
+  | 'aside'
+  | 'join'
   | 'names'
   | 'events'
   | 'total'

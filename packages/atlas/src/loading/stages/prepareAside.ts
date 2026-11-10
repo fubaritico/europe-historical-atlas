@@ -6,8 +6,11 @@
  * names placed into their cache. **Then one block, with no wait in it**: the map shown set aside, the prepared one laid
  * where it was, set aside in turn, and the map shown put back — the screen never draws between two lines of it, so the
  * reader never sees the prepared map. The block costs the page what laying a year does (~100 ms, its countries and
- * borders) and what sending it to the GPU unseen does (ATLAS-396 — what its first showing paid before, 43 ms): it runs
- * only when the map is quiet (`mapBuffer`).
+ * borders) and what sending it to the GPU unseen does (ATLAS-396 — what its first showing paid before, 43 ms).
+ *
+ * **Computed at once, laid when quiet** (ATLAS-396, the dev, 2026-11-10: _"it should start at once"_): the read and the
+ * worker's compute start when the map is shown, and register in `context.computed` — a click on that map joins them
+ * there (`political.drawYear`); only the block waits for the map to be quiet, a press, a wheel or a key holding it off.
  *
  * **What it refuses, and why**: a map not to be laid now — a change of year being drawn, or the shown map's names not
  * landed yet, which setting it aside would give up — answers `later`; a year the texture carries, or a map shown through
@@ -18,13 +21,15 @@
 import { isRecoverableLoadFailure } from '@europe-historical-atlas/core/data/assetError'
 
 import { yearPaintsExactFills } from '../../scene/political/paintsExactFills'
+import { AheadReadFailure } from '../workerCut'
 import { installSettledYear } from '../yearBorders'
+import { startStep, timedStep } from '../yearTiming'
 
 import { layWarmNames, warmYearNames } from './names'
 import { prepareYear, primeWorkerCut, setShownYearAside, shownYearToShelve } from './political'
 
 import type { PipelineContext } from '../pipelineContext'
-import type { WorkerCut } from './political'
+import type { AheadYear, WorkerCut } from '../workerCut'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 
 /** How a preparation ended. */
@@ -135,19 +140,6 @@ function atHand(context: PipelineContext, year: number): boolean {
 }
 
 /**
- * What ends a preparation before any work: the map at hand already, or the map busy now — put off rather than computed
- * and thrown away (review ARCH-002); busy is read again at the end, a change of year may start during the waits.
- * @param context - the pipeline's world
- * @param year - the map
- * @returns the outcome, or `null` to go on
- */
-function beforeAnyWork(context: PipelineContext, year: number): PrepareOutcome | null {
-  if (atHand(context, year)) return READY
-  const busy = busyBecause(context)
-  return busy === null ? null : { kind: 'later', why: busy }
-}
-
-/**
  * Why a year read cannot be set aside, if it cannot.
  * @param context - the pipeline's world
  * @param loaded - the year read
@@ -163,73 +155,130 @@ function cannotSetAside(context: PipelineContext, loaded: RegionSet): string | n
 }
 
 /**
- * Read a year, its failure qualified.
+ * A year read and computed in the worker, registered so that a click on it joins it (ATLAS-396). Nothing of the map shown
+ * is touched: the worker cuts, the page waits.
  * @param context - the pipeline's world
  * @param year - the year
- * @returns its polities, or the failed outcome
+ * @returns its polities and the worker's cut — the one in flight when there is one
+ * @throws an {@link AheadReadFailure} when the year cannot be read, what the compute throws otherwise
  */
-async function readYear(
+export function computeAhead(context: PipelineContext, year: number): Promise<AheadYear> {
+  const stamp = context.layers.yearStamp()
+  return context.computed.start(year, stamp, () =>
+    timedStep(context.clock, year, 'ahead', async () => {
+      const loaded = await context.assets.regions.load(year).catch((error: unknown) => {
+        throw new AheadReadFailure(error)
+      })
+      // A year the texture carries, or a map shown that cannot take one aside: nothing to cut ahead — no bake started
+      // for a map nobody asked for (`prepareYear` would tint the texture).
+      if (cannotSetAside(context, loaded) !== null) return { loaded, cut: null, stamp }
+      return { loaded, cut: await prepareYear(context, loaded, () => undefined), stamp }
+    })
+  )
+}
+
+/**
+ * Start a year's compute ahead, unless its map is at hand — a map the window will try, started with the others (review
+ * ARCH-001). Its failure leaves the register on its own and is said by the try that meets it.
+ * @param context - the pipeline's world
+ * @param year - the year
+ */
+export function startAhead(context: PipelineContext, year: number): void {
+  if (atHand(context, year)) return
+  // The register's own handler takes the failure off it; the try that awaits the compute says it.
+  void computeAhead(context, year)
+}
+
+/**
+ * A year computed ahead, its failure qualified: a read the network broke is tried again, a compute that broke is not.
+ * @param context - the pipeline's world
+ * @param year - the year
+ * @returns the year and its cut, or the failed outcome
+ */
+async function computed(
   context: PipelineContext,
   year: number
-): Promise<{ loaded: RegionSet } | PrepareOutcome> {
+): Promise<{ ahead: AheadYear } | PrepareOutcome> {
   try {
-    return { loaded: await context.assets.regions.load(year) }
+    return { ahead: await computeAhead(context, year) }
   } catch (error: unknown) {
-    return { kind: 'failed', recoverable: isRecoverableLoadFailure(error), error }
+    if (error instanceof AheadReadFailure)
+      return {
+        kind: 'failed',
+        recoverable: isRecoverableLoadFailure(error.cause),
+        error: error.cause,
+      }
+    return { kind: 'failed', recoverable: false, error }
   }
 }
 
 /**
- * Its countries cut and its lines settled in the worker, its names placed ahead.
+ * Lay a year computed ahead aside, the map quiet — when nothing has moved since: read at the last moment, a change of
+ * year may have started during the waits, or the panel changed what the map shown is drawn with — passing states both,
+ * so tried again later, never given up (review QUAL-001).
  * @param context - the pipeline's world
- * @param loaded - the year read
- * @param isCurrent - whether it is still wanted
- * @returns the worker's cut, or the outcome that ends the preparation
+ * @param year - the year
+ * @param ahead - its polities, its cut and the stamp it was computed under
+ * @returns `ready` once laid, or `later`
+ * @throws what laying it throws — a defect
  */
-async function computeYear(
+function layWhenFree(
   context: PipelineContext,
-  loaded: RegionSet,
-  isCurrent: () => boolean
-): Promise<{ cut: WorkerCut } | PrepareOutcome> {
-  let cut: WorkerCut | null
-  try {
-    cut = await prepareYear(context, loaded, () => undefined)
-  } catch (error: unknown) {
-    return { kind: 'failed', recoverable: false, error }
+  year: number,
+  ahead: AheadYear & { cut: WorkerCut }
+): PrepareOutcome {
+  const { loaded, cut, stamp } = ahead
+  // The compute stays registered, so a try again lays it without computing it twice.
+  const busy = busyBecause(context) ?? cannotSetAside(context, loaded)
+  if (busy !== null) return { kind: 'later', why: busy }
+  if (atHand(context, year)) return READY
+  // Computed under settings or a relief that changed during the wait: never laid as the map's own — computed again
+  // (reviews ARCH-004, QUAL-001).
+  if (stamp !== context.layers.yearStamp()) {
+    context.computed.forget(year)
+    return { kind: 'later', why: 'the map changed while it was computed' }
   }
-  if (cut === null) return { kind: 'skipped', why: 'no relief to cut it on' }
-  await warmNames(context, loaded, isCurrent)
-  return { cut }
+  // Set aside, the year is the shelf's: the register lets its arrays go, or the page would hold them twice.
+  context.computed.forget(year)
+  const endAside = startStep(context.clock, year, 'aside')
+  layAside(context, year, loaded, cut)
+  endAside()
+  return READY
 }
 
 /**
  * Prepare a map and set it aside, without showing it.
  * @param context - the pipeline's world
  * @param year - the year to prepare
- * @param isCurrent - whether it is still wanted — the window of maps moves with the reader
+ * @param wait - whether it is still wanted — the window of maps moves with the reader — and when the map is quiet
+ * @param wait.isCurrent - whether it is still wanted
+ * @param wait.whenQuiet - resolves when the reader is not acting on the map
  * @returns how it ended
  */
 export async function prepareAside(
   context: PipelineContext,
   year: number,
-  isCurrent: () => boolean
+  wait: { isCurrent: () => boolean; whenQuiet: () => Promise<void> }
 ): Promise<PrepareOutcome> {
+  const { isCurrent } = wait
   const gone = (): boolean => context.isDisposed() || !isCurrent()
-  const first = beforeAnyWork(context, year)
-  if (first !== null) return first
-  const read = await readYear(context, year)
-  if ('kind' in read) return read
-  if (gone()) return DROPPED
-  const why = cannotSetAside(context, read.loaded)
-  if (why !== null) return { kind: 'skipped', why }
-  const computed = await computeYear(context, read.loaded, isCurrent)
-  if ('kind' in computed) return computed
-  if (gone()) return DROPPED
-  // Read at the last moment: a change of year may have started during the waits, or the panel changed what the map
-  // shown is drawn with — passing states both, so tried again later, never given up (review QUAL-001).
-  const busy = busyBecause(context) ?? cannotSetAside(context, read.loaded)
-  if (busy !== null) return { kind: 'later', why: busy }
   if (atHand(context, year)) return READY
-  layAside(context, year, read.loaded, computed.cut)
-  return READY
+  // At once, never waiting for quiet: the worker's part touches nothing of the page.
+  const result = await computed(context, year)
+  if ('kind' in result) return result
+  const { loaded, cut, stamp } = result.ahead
+  if (cut === null) {
+    context.computed.forget(year)
+    // A year the texture carries never will be set aside; the map shown, or a relief not in yet, may let it later
+    // (review QUAL-002) — computed again then.
+    return yearPaintsExactFills(context.dev, loaded)
+      ? { kind: 'later', why: cannotSetAside(context, loaded) ?? 'no relief to cut it on yet' }
+      : { kind: 'skipped', why: 'its countries are painted in the texture' }
+  }
+  await warmNames(context, loaded, isCurrent)
+  if (gone()) return DROPPED
+  // The block alone waits for the map to be quiet.
+  await wait.whenQuiet()
+  if (gone()) return DROPPED
+  return layWhenFree(context, year, { loaded, cut, stamp })
 }
