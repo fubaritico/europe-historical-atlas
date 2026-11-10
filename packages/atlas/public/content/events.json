@@ -783,6 +783,4993 @@
   ],
   "cities": [
     {
+      "id": "767",
+      "place": {
+        "id": "776",
+        "name": {
+          "fr": "Korčula",
+          "en": null
+        },
+        "lon": 17.135833333333,
+        "lat": 42.961666666667,
+        "wikidata": "Q13289",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "663",
+            "title": "« Korčula » (otok) (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/korcula-otok"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/korcula-otok",
+          "quotation": "Oko 1000. Mlečani su nakratko zavladali otokom. Izvori za razdoblje 1000–1254. vrlo su oskudni, ali je u XI. i XII. st. stanovništvo otoka vjerojatno priznavalo vlast Zahumlja, a potom i Duklje. Od 1125–29. do 1180. drugi je put bila pod mletačkom vlašću",
+          "subject": "holder",
+          "holder": {
+            "name": "Zachlumie, puis Dioclée (probablement, aux XIe et XIIe siècles)",
+            "wikidata": "Q1311704"
+          }
+        },
+        {
+          "source": {
+            "id": "668",
+            "title": "« Korčula » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Korčula"
+          },
+          "where": "https://en.wikipedia.org/wiki/Korčula, History",
+          "quotation": "Afterwards Korčula came under the control of the Great Principality of [[Zachlumia]].",
+          "subject": "holder",
+          "holder": {
+            "name": "Grande-principauté de Zachlumie (après la brève prise vénitienne vers 1000)",
+            "wikidata": "Q1311704"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Zachlumie (Hum)",
+        "wikidata": "Q1311704"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "766",
+      "place": {
+        "id": "775",
+        "name": {
+          "fr": "Imotski",
+          "en": null
+        },
+        "lon": 17.216666666667,
+        "lat": 43.45,
+        "wikidata": "Q397656",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "667",
+            "title": "« Imotski » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Imotski"
+          },
+          "where": "History",
+          "quotation": "Imotski was in [[Kingdom of Croatia (925–1102)|Kingdom of Croatia]]",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (925–1102)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "765",
+      "place": {
+        "id": "774",
+        "name": {
+          "fr": "Makarska",
+          "en": null
+        },
+        "lon": 17.02,
+        "lat": 43.293055555556,
+        "wikidata": "Q272009",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "659",
+            "title": "« Makarska » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/makarska"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/makarska",
+          "quotation": "U drugoj polovici XI. st. kralj Petar Krešimir IV. je makarsko primorje, zajedno s cijelim neretvanskim područjem, pripojio Hrvatskoj te je od tada područje priznavalo vrhovništvo hrvatskih, odn. hrvatsko-ugarskih vladara do 1324.",
+          "subject": "holder",
+          "holder": {
+            "name": "souverains croates, puis croato-hongrois (le littoral de Makarska, de la seconde moitié du XIe siècle à 1324)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "656",
+            "title": "« Paganija » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/paganija"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/paganija",
+          "quotation": "a dijelom Hrvatskoga Kraljevstva postala je najkasnije u drugoj polovici XI. st.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (la Paganie, au plus tard dans la seconde moitié du XIe siècle)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "764",
+      "place": {
+        "id": "773",
+        "name": {
+          "fr": "Stari Grad",
+          "en": null
+        },
+        "lon": 16.583333333333,
+        "lat": 43.183333333333,
+        "wikidata": "Q220383",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "657",
+            "title": "« Hvar » (otok) (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/hvar"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/hvar",
+          "quotation": "Hrvatske (XI. st. do 1102), Hrvatsko-Ugarskoga Kraljevstva (1102–45., 1180–1278., 1358–90., 1393–1403), Mletačke Republike (1145–64., 1278–1358)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (du XIe siècle à 1102)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "763",
+      "place": {
+        "id": "772",
+        "name": {
+          "fr": "Brela",
+          "en": null
+        },
+        "lon": 16.933333,
+        "lat": 43.368611,
+        "wikidata": "Q12628333",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "659",
+            "title": "« Makarska » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/makarska"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/makarska",
+          "quotation": "U drugoj polovici XI. st. kralj Petar Krešimir IV. je makarsko primorje, zajedno s cijelim neretvanskim područjem, pripojio Hrvatskoj te je od tada područje priznavalo vrhovništvo hrvatskih, odn. hrvatsko-ugarskih vladara do 1324.",
+          "subject": "holder",
+          "holder": {
+            "name": "souverains croates, puis croato-hongrois (le littoral de Makarska, de la seconde moitié du XIe siècle à 1324)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "656",
+            "title": "« Paganija » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/paganija"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/paganija",
+          "quotation": "a dijelom Hrvatskoga Kraljevstva postala je najkasnije u drugoj polovici XI. st.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (la Paganie, au plus tard dans la seconde moitié du XIe siècle)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "762",
+      "place": {
+        "id": "771",
+        "name": {
+          "fr": "Povlja",
+          "en": null
+        },
+        "lon": 16.838888888889,
+        "lat": 43.333333333333,
+        "wikidata": "Q949970",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "658",
+            "title": "« Brač » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/brac"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/brac",
+          "quotation": "Brač je vjerojatno u drugoj polovici XI. st. ušao u sastav srednjovjekovne hrvatske države.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (Brač, probablement depuis la seconde moitié du XIe siècle)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "666",
+            "title": "« Brač » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Brač"
+          },
+          "where": "History, The end of Byzantine claim (1000-1186)",
+          "quotation": "Early in his reign, Peter expanded Croatia to its largest extend, also including Brač and the other islands.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (Brač et les autres îles, sous le roi Pierre)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "761",
+      "place": {
+        "id": "770",
+        "name": {
+          "fr": "Hvar",
+          "en": null
+        },
+        "lon": 16.441944444444,
+        "lat": 43.171388888889,
+        "wikidata": "Q6031",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "657",
+            "title": "« Hvar » (otok) (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/hvar"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/hvar",
+          "quotation": "Hrvatske (XI. st. do 1102), Hrvatsko-Ugarskoga Kraljevstva (1102–45., 1180–1278., 1358–90., 1393–1403), Mletačke Republike (1145–64., 1278–1358)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (du XIe siècle à 1102)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "760",
+      "place": {
+        "id": "769",
+        "name": {
+          "fr": "Omiš",
+          "en": null
+        },
+        "lon": 16.688333333333,
+        "lat": 43.445833333333,
+        "wikidata": "Q397600",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "656",
+            "title": "« Paganija » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/paganija"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/paganija",
+          "quotation": "a dijelom Hrvatskoga Kraljevstva postala je najkasnije u drugoj polovici XI. st.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (la Paganie, au plus tard dans la seconde moitié du XIe siècle)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "759",
+      "place": {
+        "id": "768",
+        "name": {
+          "fr": "Jesenice",
+          "en": null
+        },
+        "lon": 16.598,
+        "lat": 43.462,
+        "wikidata": "Q6458033",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "660",
+            "title": "« Poljica » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/poljica"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/poljica",
+          "quotation": "U ranosrednjovjekovnoj hrvatskoj državi područje Poljica bilo je u sastavu Primorske županije, a u sastavu hrvatske države tada se nalazilo i Primorje između rijeka Žrnovnice i Cetine.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (le Primorje entre la Žrnovnica et la Cetina)",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "758",
+      "place": {
+        "id": "767",
+        "name": {
+          "fr": "Stobreč",
+          "en": null
+        },
+        "lon": 16.522222222222,
+        "lat": 43.499444444444,
+        "wikidata": "Q1280557",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "661",
+            "title": "« Stobreč » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/stobrec"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/stobrec",
+          "quotation": "Početkom VII. st. grad je bio razoren u slavensko-avarskoj provali te se s vremenom pretvorio u ruralno naselje koje je postalo dio starohrvatske županije sa središtem u Klisu.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (joupanie vieille-croate de Klis)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "626",
+            "title": "Poviest Hrvata za kraljeva iz doma Arpadovića (1102-1301), prvi dio (1102-1205)",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/poviest_hrvata_za_kraljeva_iz_doma_arpadovica_prvi_dio_1102-1205-ferdo_sisic_1944"
+          },
+          "where": "ch. I, p. 20 (between the running heads « 20 Prvo poglavlje » and « Koloman 21 »)",
+          "quotation": "Međutim uzpostavi na proljeće 1097. godine kralj Koloman vlast svoju u Hrvatskoj, ali nije Almošu tom prilikom po¬ vratio hrvatskoga priestolja.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (pouvoir rétabli en Croatie au printemps 1097)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "757",
+      "place": {
+        "id": "766",
+        "name": {
+          "fr": "Žrnovnica",
+          "en": null
+        },
+        "lon": 16.559,
+        "lat": 43.521,
+        "wikidata": "Q612175",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "660",
+            "title": "« Poljica » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/poljica"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/poljica",
+          "quotation": "U ranosrednjovjekovnoj hrvatskoj državi područje Poljica bilo je u sastavu Primorske županije, a u sastavu hrvatske države tada se nalazilo i Primorje između rijeka Žrnovnice i Cetine.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (le Primorje entre la Žrnovnica et la Cetina)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "626",
+            "title": "Poviest Hrvata za kraljeva iz doma Arpadovića (1102-1301), prvi dio (1102-1205)",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/poviest_hrvata_za_kraljeva_iz_doma_arpadovica_prvi_dio_1102-1205-ferdo_sisic_1944"
+          },
+          "where": "ch. I, p. 20 (between the running heads « 20 Prvo poglavlje » and « Koloman 21 »)",
+          "quotation": "Međutim uzpostavi na proljeće 1097. godine kralj Koloman vlast svoju u Hrvatskoj, ali nije Almošu tom prilikom po¬ vratio hrvatskoga priestolja.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (pouvoir rétabli en Croatie au printemps 1097)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "756",
+      "place": {
+        "id": "765",
+        "name": {
+          "fr": "Vranjic",
+          "en": null
+        },
+        "lon": 16.4724,
+        "lat": 43.5306,
+        "wikidata": "Q3443678",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "669",
+            "title": "« Kingdom of Croatia (925–1102) » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Kingdom_of_Croatia_(925–1102)"
+          },
+          "where": "https://en.wikipedia.org/wiki/Kingdom_of_Croatia_(925–1102) — section Succession crisis",
+          "quotation": "It took several more years before the Croatian nobility recognised Coloman as the king.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (la noblesse croate ne reconnaît pas encore Koloman)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "662",
+            "title": "« Klis » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/klis"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/klis",
+          "quotation": "U doba narodnih vladara Klis je bio središte starohrvatske županije koju u X. st. spominje Konstantin Porfirogenet pod imenom Parathalassia, a koja se prostirala od trogirskoga zaleđa do Poljica.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (joupanie de Klis, au temps des souverains nationaux)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 622–623",
+          "quotation": "Pobjedom kod Gvozda i pogibijom kralja Petra, Koloman je postao gospodarom Hrvatske od Gvozda do morske obale.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (maître de la Croatie depuis 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "626",
+            "title": "Poviest Hrvata za kraljeva iz doma Arpadovića (1102-1301), prvi dio (1102-1205)",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/poviest_hrvata_za_kraljeva_iz_doma_arpadovica_prvi_dio_1102-1205-ferdo_sisic_1944"
+          },
+          "where": "ch. I p. 20",
+          "quotation": "uzpostavi na proljeće 1097. godine kralj Koloman vlast svoju u Hrvatskoj",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (pouvoir rétabli en Croatie au printemps 1097)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "755",
+      "place": {
+        "id": "764",
+        "name": {
+          "fr": "Solin",
+          "en": null
+        },
+        "lon": 16.494722222222,
+        "lat": 43.531666666667,
+        "wikidata": "Q642828",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "669",
+            "title": "« Kingdom of Croatia (925–1102) » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Kingdom_of_Croatia_(925–1102)"
+          },
+          "where": "https://en.wikipedia.org/wiki/Kingdom_of_Croatia_(925–1102) — section Succession crisis",
+          "quotation": "It took several more years before the Croatian nobility recognised Coloman as the king.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (la noblesse croate ne reconnaît pas encore Koloman)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "662",
+            "title": "« Klis » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/klis"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/klis",
+          "quotation": "U doba narodnih vladara Klis je bio središte starohrvatske županije koju u X. st. spominje Konstantin Porfirogenet pod imenom Parathalassia, a koja se prostirala od trogirskoga zaleđa do Poljica.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie (joupanie de Klis, au temps des souverains nationaux)",
+            "wikidata": "Q858841"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 622–623",
+          "quotation": "Pobjedom kod Gvozda i pogibijom kralja Petra, Koloman je postao gospodarom Hrvatske od Gvozda do morske obale.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (maître de la Croatie depuis 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "626",
+            "title": "Poviest Hrvata za kraljeva iz doma Arpadovića (1102-1301), prvi dio (1102-1205)",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/poviest_hrvata_za_kraljeva_iz_doma_arpadovica_prvi_dio_1102-1205-ferdo_sisic_1944"
+          },
+          "where": "ch. I p. 20",
+          "quotation": "uzpostavi na proljeće 1097. godine kralj Koloman vlast svoju u Hrvatskoj",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (pouvoir rétabli en Croatie au printemps 1097)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Croatie",
+        "wikidata": "Q858841"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "754",
+      "place": {
+        "id": "763",
+        "name": {
+          "fr": "Split",
+          "en": null
+        },
+        "lon": 16.44,
+        "lat": 43.51,
+        "wikidata": "Q1663",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII « Hrvati i madžarski kralj Koloman (1097.—1102.) », pp. 624–626",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise (protection des villes et îles dalmates depuis mai 1097)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 625 note 3 — the undated oath of Split, Rački, Documenta no. 178 (codex Trevisanus), quoted by Šišić",
+          "quotation": "Nos Spalatini, pri- ores, scilicet senior et iunior, cum cuncto populo, maioribus et minoribus, promittimus vobis domino nostro Vitali Michaeli, glorioso duci Venetie (et Dalmatie) atque Chroatie et im- periali protosevasto",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel (serment des prieurs et du peuple de Split)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 626 note 4 — Byzantine sovereignty kept: Venice held the towns in the emperor's name",
+          "quotation": "Da su Mlečani okupirali Dalmaciju 1097. u ime vizantijskoga cara Aleksija",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (l'empereur Alexis, au nom de qui Venise occupe la Dalmatie depuis 1097)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "654",
+            "title": "Pregled povijesti hrvatskoga naroda od najstarijih dana do 1. decembra 1918.",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/pregled_povijesti_hrvatskoga_naroda_1920-ferdo_sisic"
+          },
+          "where": "p. 135, « Hrvatski kralj Petar (1093.—1097.) »",
+          "quotation": "Bitka kod Gvozda i zauzeće Biograda učiniše kralja Kolomana susjedom Venecije i njoj povjerenih dalmatinskih gradova.",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise (les villes dalmates qui lui sont confiées)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "665",
+            "title": "« Split, Croatia » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Split,_Croatia"
+          },
+          "where": "https://en.wikipedia.org/wiki/Split,_Croatia — infobox of rulers; cites Šišić 1920 p. 153 for 1096: copy of the Šišić witness",
+          "quotation": "[[Republic of Venice]] (1096–1105)",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise (1096–1105)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "753",
+      "place": {
+        "id": "762",
+        "name": {
+          "fr": "Trogir",
+          "en": null
+        },
+        "lon": 16.25,
+        "lat": 43.516666666667,
+        "wikidata": "Q189161",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "655",
+            "title": "Documenta historiae chroaticae periodum antiquam illustrantia",
+            "author": "Franjo Rački (éd.)",
+            "url": "https://archive.org/details/documentahistori00raki"
+          },
+          "where": "nr. 139, p. 179",
+          "quotation": "nos Jo(h)annes, dei gratia tragurensis episcopus, cum nostris successoribus, una cum Drago priore et Petro Bela, cum cunctis nostris conciuibus, maioribus et minoribus, (et) cum nostris heredibus, promittimus uobis domino nostro Vitali Michaeli, duci Venetie et Dalmatie atque Chroatie et imperiali protoseuastori, ut ammodo sine uestro uolon- tario consensu...",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel (serment de Trogir, mai 1097)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "664",
+            "title": "« Coloman, King of Hungary » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Coloman,_King_of_Hungary"
+          },
+          "where": "section on Croatia (cites Stephenson 2000 p. 197; Fine 1991 p. 284)",
+          "quotation": "Threatened by the advance of Coloman's army, the citizens of the towns of [[Trogir]] and [[Split, Croatia|Split]] swore fidelity to the [[doge of Venice]], [[Vitale Michiel]], who had sailed to [[Dalmatia]].",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel (fidélité jurée par Trogir et Split)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "752",
+      "place": {
+        "id": "761",
+        "name": {
+          "fr": "Neviđane",
+          "en": null
+        },
+        "lon": 15.33333333,
+        "lat": 43.98333333,
+        "wikidata": "Q6962133",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 625–626 (Trogir and Split charters of May 1097, Rački Doc. 178–179)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise (protection des villes et îles dalmates depuis mai 1097)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "751",
+      "place": {
+        "id": "760",
+        "name": {
+          "fr": "Skradin",
+          "en": null
+        },
+        "lon": 15.922222222222,
+        "lat": 43.816666666667,
+        "wikidata": "Q400036",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII « Hrvati i madžarski kralj Koloman (1097.—1102.) », pp. 622–623",
+          "quotation": "Pobjedom kod Gvozda i pogibijom kralja Petra, Koloman je postao gospodarom Hrvatske od Gvozda do morske obale.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (maître de la Croatie depuis 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 622–623 (citing Gaufredus Malaterra)",
+          "quotation": "u susret do Belgrada, stare hrvatske prijestolnice, koja je poslije Kolomanove pobjede došla u njegovu vlast.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (Biograd en son pouvoir depuis sa victoire de 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, p. 627–628 (convenientia amicitie, end 1097 or early 1098)",
+          "quotation": "kojom bi objema strankama bio zajamčen nedavno stečeni posjed, naime duždu Dalmacija, a Kolomanu Hrvatska.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (la Croatie lui est garantie par la convenientia avec le doge)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "750",
+      "place": {
+        "id": "759",
+        "name": {
+          "fr": "Šibenik",
+          "en": null
+        },
+        "lon": 15.895555555556,
+        "lat": 43.733888888889,
+        "wikidata": "Q3549",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII « Hrvati i madžarski kralj Koloman (1097.—1102.) », pp. 622–623",
+          "quotation": "Pobjedom kod Gvozda i pogibijom kralja Petra, Koloman je postao gospodarom Hrvatske od Gvozda do morske obale.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (maître de la Croatie depuis 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 622–623 (citing Gaufredus Malaterra)",
+          "quotation": "u susret do Belgrada, stare hrvatske prijestolnice, koja je poslije Kolomanove pobjede došla u njegovu vlast.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (Biograd en son pouvoir depuis sa victoire de 1097)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, p. 627–628 (convenientia amicitie, end 1097 or early 1098)",
+          "quotation": "kojom bi objema strankama bio zajamčen nedavno stečeni posjed, naime duždu Dalmacija, a Kolomanu Hrvatska.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (la Croatie lui est garantie par la convenientia avec le doge)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "749",
+      "place": {
+        "id": "758",
+        "name": {
+          "fr": "Biograd na Moru",
+          "en": null
+        },
+        "lon": 15.433333333333,
+        "lat": 43.933333333333,
+        "wikidata": "Q399139",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 622–623 (citing Gaufredus Malaterra)",
+          "quotation": "u susret do Belgrada, stare hrvatske prijestolnice, koja je poslije Kolomanove pobjede došla u njegovu vlast.",
+          "subject": "holder",
+          "holder": {
+            "name": "Koloman, roi de Hongrie (Biograd en son pouvoir depuis sa victoire de 1097)",
+            "wikidata": "Q171150"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "748",
+      "place": {
+        "id": "757",
+        "name": {
+          "fr": "Zadar",
+          "en": null
+        },
+        "lon": 15.2275,
+        "lat": 44.11416666666667,
+        "wikidata": "Q3370",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII, pp. 625–626 (Trogir and Split charters of May 1097, Rački Doc. 178–179)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise (protection des villes et îles dalmates depuis mai 1097)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "747",
+      "place": {
+        "id": "756",
+        "name": {
+          "fr": "Nin",
+          "en": null
+        },
+        "lon": 15.181111111111,
+        "lat": 44.239722222222,
+        "wikidata": "Q396372",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "626",
+            "title": "Poviest Hrvata za kraljeva iz doma Arpadovića (1102-1301), prvi dio (1102-1205)",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/poviest_hrvata_za_kraljeva_iz_doma_arpadovica_prvi_dio_1102-1205-ferdo_sisic_1944"
+          },
+          "where": "ch. «Koloman», p. ~21 (txt offset ~39800)",
+          "quotation": "uzpostavi na proljeće 1097. godine kralj Koloman vlast svoju u Hrvatskoj",
+          "subject": "holder",
+          "holder": {
+            "name": "roi Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 628 (treaty Coloman - Vitale Michiel, end 1097 / early 1098)",
+          "quotation": "kojom bi objema strankama bio zajamčen nedavno stečeni posjed, naime duždu Dalmacija, a Kolomanu Hrvatska",
+          "subject": "holder",
+          "holder": {
+            "name": "Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "631",
+            "title": "« Koloman » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/koloman"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/koloman",
+          "quotation": "nakon pobjede nad hrvatskim kraljem Petrom na Gvozdu 1097. nastavio je osvajanje Hrvatske do Jadranskoga mora. Hrvatsku je napustio 1099.",
+          "subject": "holder",
+          "holder": {
+            "name": "roi Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "627",
+            "title": "Dalmatia, the Quarnero and Istria, vol. I",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero01jack_1"
+          },
+          "where": "ch. I, p. 42",
+          "quotation": "Coloman, his nephew and successor, was so far master of Croatia that in 1097 we find him at the Croatian city of Belgrad (Zara Vecchia)",
+          "subject": "holder",
+          "holder": {
+            "name": "Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "627",
+            "title": "Dalmatia, the Quarnero and Istria, vol. I",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero01jack_1"
+          },
+          "where": "ch. I, p. 42",
+          "quotation": "The Croats rose once more in arms to recover their independence, but were finally crushed by a fresh invasion of the Hungarians, and in 1102 Coloman was formally crowned at Belgrad king of Dalmatia and Croatia.",
+          "subject": "holder",
+          "holder": {
+            "name": "Croates insurgés",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "746",
+      "place": {
+        "id": "755",
+        "name": {
+          "fr": "Lukoran",
+          "en": null
+        },
+        "lon": 15.158888888889,
+        "lat": 44.103055555556,
+        "wikidata": "Q477996",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "646",
+            "title": "« Lukoran » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/lukoran"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/lukoran",
+          "quotation": "Prvi put u pisanim vrelima Lukoran se spominje u XI. st. pod nazivima Laucarani, Lukarano, Luko. U srednjem vijeku bio je posjed benediktinaca samostana sv. Krševana u Zadru.",
+          "subject": "holder",
+          "holder": {
+            "name": "monastère Saint-Chrysogone de Zadar",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 626-627, footnote (txt l. ~138900)",
+          "quotation": "O otočnoj Dalmaciji nemamo nikaka svjedočanstva, ali za Zadar znamo po- uzdano, da je 1099. bio pod mletačkom zaštitom",
+          "subject": "holder",
+          "holder": {
+            "name": "Venise (protection)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "630",
+            "title": "Translatio S. Nicolai Venetiam (Recueil des historiens des croisades, Historiens occidentaux, t. V)",
+            "author": "Monachus Littorensis",
+            "url": "https://archive.org/details/ldpd_10824499_000"
+          },
+          "where": "cap. III (txt l. 29053); the Venetian crusade fleet at Zadar, summer 1099; MS d reads «de proposito itinere» for «de suo regno»",
+          "quotation": "veloci cursu, et aspera29 Dalmatiae littora carpentes, Jaderam applicuerunt. Quae autem ibi de suo regno30 tractaverint31 et ordinaverint",
+          "subject": "holder",
+          "holder": {
+            "name": "Venise",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 627, footnote, reading the Historia ducum Veneticorum (MGH SS XIV, 73)",
+          "quotation": "taj isti car Ale- ksije predao je 1097. Veneciji samo privremeno dalmatinske gradove i ostrva u upravu i zaštitu.",
+          "subject": "holder",
+          "holder": {
+            "name": "empereur Alexis Iᵉʳ",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "629",
+            "title": "Storia della città di Zara",
+            "author": "Vitaliano Brunelli",
+            "url": "https://archive.org/details/BrunelliStoriaZara"
+          },
+          "where": "txt offset ~704000 (11th-c. Byzantine dating of Zadar charters)",
+          "quotation": "Indica tutto ciò una sovranità dei Veneti sulla Dalmazia ? Certo che la indica ; ma è una sovranità di riflesso, la sorgente della quale è sempre Costantinopoli.",
+          "subject": "holder",
+          "holder": {
+            "name": "Constantinople, dont les Vénitiens tiennent une souveraineté de reflet",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "627",
+            "title": "Dalmatia, the Quarnero and Istria, vol. I",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero01jack_1"
+          },
+          "where": "ch. III «Zara: History», p. 245",
+          "quotation": "Her submission to Pietro Orseolo II in 998 did not interfere with the nominal sovereignty of the Empire, which was only broken down by the Hungarian conquest of 1105.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "633",
+            "title": "« Zadar » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/zadar"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/zadar",
+          "quotation": "Nakon polustoljetne vlasti hrvatskih vladara, gašenjem hrvatske narodne dinastije, Zadar je 1105. priznao vlast hrvatsko-ugarskoga kralja Kolomana",
+          "subject": "holder",
+          "holder": {
+            "name": "souverains croates",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "745",
+      "place": {
+        "id": "754",
+        "name": {
+          "fr": "Novalja",
+          "en": null
+        },
+        "lon": 14.883333333333,
+        "lat": 44.55,
+        "wikidata": "Q396613",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "636",
+            "title": "« Rab (grad) » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/rab-grad"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/rab-grad",
+          "quotation": "bio je središte rapske komune, koja je obuhvaćala cijeli otok Rab, Novalju s Lunom na Pagu te niz manjih okolnih otočića",
+          "subject": "holder",
+          "holder": {
+            "name": "commune de Rab",
+            "wikidata": "Q13279"
+          }
+        },
+        {
+          "source": {
+            "id": "629",
+            "title": "Storia della città di Zara",
+            "author": "Vitaliano Brunelli",
+            "url": "https://archive.org/details/BrunelliStoriaZara"
+          },
+          "where": "cap. XVI, p. 297 n. 3",
+          "quotation": "Im Jahre 1097 sind ausser Jlrbe, rOeglia und Ossero aucb Zara, Trau, Spalato und vermutlich Zaravecchia im gesicherten fjesitze *Oencdigs.",
+          "subject": "holder",
+          "holder": {
+            "name": "Venise",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "synod of Zadar, March 1095 (txt l. ~136600)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 627, footnote, reading the Historia ducum Veneticorum (MGH SS XIV, 73)",
+          "quotation": "taj isti car Ale- ksije predao je 1097. Veneciji samo privremeno dalmatinske gradove i ostrva u upravu i zaštitu.",
+          "subject": "holder",
+          "holder": {
+            "name": "empereur Alexis Iᵉʳ",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "636",
+            "title": "« Rab (grad) » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/rab-grad"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/rab-grad",
+          "quotation": "Nakon kratkotrajne mletačke vlasti početkom XI. st., sredinom istoga stoljeća priznao je vlast hrvatskoga kralja.",
+          "subject": "holder",
+          "holder": {
+            "name": "roi de Croatie",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "744",
+      "place": {
+        "id": "753",
+        "name": {
+          "fr": "Barbat na Rabu",
+          "en": null
+        },
+        "lon": 14.803119444444,
+        "lat": 44.734269444444,
+        "wikidata": "Q790303",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "629",
+            "title": "Storia della città di Zara",
+            "author": "Vitaliano Brunelli",
+            "url": "https://archive.org/details/BrunelliStoriaZara"
+          },
+          "where": "cap. XVI, p. 297 n. 3",
+          "quotation": "Im Jahre 1097 sind ausser Jlrbe, rOeglia und Ossero aucb Zara, Trau, Spalato und vermutlich Zaravecchia im gesicherten fjesitze *Oencdigs.",
+          "subject": "holder",
+          "holder": {
+            "name": "Venise",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "ch. VIII «Hrvati i madžarski kralj Koloman (1097.-1102.)», p. 626 (txt l. ~138650)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "synod of Zadar, March 1095 (txt l. ~136600)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 627, footnote, reading the Historia ducum Veneticorum (MGH SS XIV, 73)",
+          "quotation": "taj isti car Ale- ksije predao je 1097. Veneciji samo privremeno dalmatinske gradove i ostrva u upravu i zaštitu.",
+          "subject": "holder",
+          "holder": {
+            "name": "empereur Alexis Iᵉʳ",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "636",
+            "title": "« Rab (grad) » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/rab-grad"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/rab-grad",
+          "quotation": "Nakon kratkotrajne mletačke vlasti početkom XI. st., sredinom istoga stoljeća priznao je vlast hrvatskoga kralja.",
+          "subject": "holder",
+          "holder": {
+            "name": "roi de Croatie",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "743",
+      "place": {
+        "id": "752",
+        "name": {
+          "fr": "Rab",
+          "en": null
+        },
+        "lon": 14.759960156402798,
+        "lat": 44.75697971262979,
+        "wikidata": "Q13279",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 614 (situation at the beginning of 1095)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 625 (May 1097; note quotes Rački, Documenta 179, the Trogir oath to doge Vitale Michiel)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "742",
+      "place": {
+        "id": "751",
+        "name": {
+          "fr": "Senj",
+          "en": null
+        },
+        "lon": 14.901388888889,
+        "lat": 44.990277777778,
+        "wikidata": "Q259466",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "631",
+            "title": "« Koloman » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/koloman"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/koloman",
+          "quotation": "nakon pobjede nad hrvatskim kraljem Petrom na Gvozdu 1097. nastavio je osvajanje Hrvatske do Jadranskoga mora. Hrvatsku je napustio 1099., vrativši se u Ugarsku",
+          "subject": "holder",
+          "holder": {
+            "name": "roi Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 627 (the 1097/1098 convenientia amicitie between Coloman and Vitale Michiel)",
+          "quotation": "nedavno stečeni posjed, naime duždu Dalmacija, a Kolomanu Hrvatska",
+          "subject": "holder",
+          "holder": {
+            "name": "Coloman",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "627",
+            "title": "Dalmatia, the Quarnero and Istria, vol. I",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero01jack_1"
+          },
+          "where": "vol. I, p. 42",
+          "quotation": "Jhc Croats rose once more in arms to recover",
+          "subject": "holder",
+          "holder": {
+            "name": "Croates insurgés",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "741",
+      "place": {
+        "id": "750",
+        "name": {
+          "fr": "Susak",
+          "en": null
+        },
+        "lon": 14.3028,
+        "lat": 44.51,
+        "wikidata": "Q3505551",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 614 (situation at the beginning of 1095)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 625 (May 1097; note quotes Rački, Documenta 179, the Trogir oath to doge Vitale Michiel)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 634 (Venice's 1099 expedition)",
+          "quotation": "Tada je i Venecija poduzela ljeti 1099. ekspediciju u Svetu zemlju i tom je prilikom primila i od dalmatinskih gradova, prema njihovoj ranijoj obavezi, nekoliko brodova",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "740",
+      "place": {
+        "id": "749",
+        "name": {
+          "fr": "Osor",
+          "en": null
+        },
+        "lon": 14.39268889,
+        "lat": 44.69324722,
+        "wikidata": "Q1082831",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 614 (situation at the beginning of 1095)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 625 (May 1097; note quotes Rački, Documenta 179, the Trogir oath to doge Vitale Michiel)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "628",
+            "title": "Dalmatia, the Quarnero and Istria, vol. III",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero03jackuoft"
+          },
+          "where": "vol. III, p. 91 (Cherso and Ossero: History)",
+          "quotation": "The counts of Ossero from this time forward, whether elected by the people or imposed by the senate, w^ere Venetian noblemen.",
+          "subject": "holder",
+          "holder": {
+            "name": "comtes d'Osor, nobles vénitiens",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "645",
+            "title": "« Cres » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/cres"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/cres",
+          "quotation": "Osim kratkotrajnih razdoblja vladavine hrvatskih kraljeva (Petar Krešimir IV., 1069) i hrvatsko-ugarskih kraljeva (Koloman, 1105), otok je pretežno pod mletačkom vlašću od XI. st. do 1358.",
+          "subject": "holder",
+          "holder": {
+            "name": "République de Venise",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "739",
+      "place": {
+        "id": "748",
+        "name": {
+          "fr": "Krk",
+          "en": null
+        },
+        "lon": 14.575555555556,
+        "lat": 45.026111111111,
+        "wikidata": "Q13274",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "644",
+            "title": "« Krk » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/krk-otok"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/krk-otok",
+          "quotation": "Ubrzo nakon Zvonimirove smrti došao je pod vlast Mlečana, koji su njime formalno vladali do 1358.",
+          "subject": "holder",
+          "holder": {
+            "name": "les Vénitiens",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 614 (situation at the beginning of 1095)",
+          "quotation": "To isto nesumnjivo važi još i za Split, Trogir, Krk, Osor i Rab, dakle za čitav dalmatinski temat",
+          "subject": "holder",
+          "holder": {
+            "name": "thème de Dalmatie (Empire byzantin)",
+            "wikidata": "Q1071751"
+          }
+        },
+        {
+          "source": {
+            "id": "625",
+            "title": "Povijest Hrvata u vrijeme narodnih vladara",
+            "author": "Ferdo Šišić",
+            "url": "https://archive.org/details/hrvatska_povijest_svezak_1_knjiga_1-3_za_narodnih_vladara_1925-ferdo_sisic"
+          },
+          "where": "p. 625 (May 1097; note quotes Rački, Documenta 179, the Trogir oath to doge Vitale Michiel)",
+          "quotation": "Dalma- tinski su gradovi i otoci dakle prešli u maju 1097. pod okrilje mletačkoga krilatog",
+          "subject": "holder",
+          "holder": {
+            "name": "doge Vitale Michiel",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "628",
+            "title": "Dalmatia, the Quarnero and Istria, vol. III",
+            "author": "Thomas Graham Jackson",
+            "url": "https://archive.org/details/dalmatiaquarnero03jackuoft"
+          },
+          "where": "vol. III, p. 126 (Veglia: History)",
+          "quotation": "the island seems to have become subject afterwards to the kings of Croatia",
+          "subject": "holder",
+          "holder": {
+            "name": "rois de Croatie",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "738",
+      "place": {
+        "id": "747",
+        "name": {
+          "fr": "Rijeka",
+          "en": null
+        },
+        "lon": 14.433333333333334,
+        "lat": 45.333333333333336,
+        "wikidata": "Q1647",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "623",
+            "title": "Memorie per la storia della liburnica città di Fiume, vol. I",
+            "author": "Giovanni Kobler",
+            "url": "https://archive.org/details/RovignoAtti-03-1978"
+          },
+          "where": "vol. I, chapter on feudalism, before « B. Il regno di Croazia nei secoli X e XI » (Gigante cites Kobler vol. I p. 60 for this)",
+          "quotation": "Fiume e Castua furono possedimenti nobili di carattere feudale, dei quali si legge nelle memorie storiche del Dr. Kandler, che sin dall’ anno 1028, e forse da tempo anteriore, erano dei vescovi di Pola, e che sin dall'anno 1139 furono subinfeudati ai signori di Duino.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "624",
+            "title": "Storia del comune di Fiume",
+            "author": "Silvino Gigante",
+            "url": "https://archive.org/details/GiganteStoriaComuneFiume"
+          },
+          "where": "chapter I, p. 18 (the page before « — 19 — »); his notes cite Benussi p. 95 and Kobler vol. I p. 60 — not independent of Kobler",
+          "quotation": "è che, o negli ultimi anni del secolo X o nei primi dell’XI, esso, insieme con Castua, Apriano e Moschiena, venne assog¬ gettato alla giurisdizione del vescovo di Fola, snffraganeo del patriarca d’Aquileia (3).",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "632",
+            "title": "« Istarska markgrofovija » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/istarska-markgrofovija"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/istarska-markgrofovija",
+          "quotation": "Tada je Istri priključeno i područje istočno od Raše do Rijeke, ali bez Trsta, koji je ostao pod upravom tršćanskih biskupa.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "737",
+      "place": {
+        "id": "746",
+        "name": {
+          "fr": "Labin",
+          "en": null
+        },
+        "lon": 14.116666666667,
+        "lat": 45.083333333333,
+        "wikidata": "Q375582",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "643",
+            "title": "« Labin » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/labin"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/labin",
+          "quotation": "Potkraj XI. st. postao je sastavnim dijelom Istarske markgrofovije, kojom su 1208–1420. vladali akvilejski patrijarsi.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "634",
+            "title": "« Istarska markgrofovija » (Istarska enciklopedija)",
+            "author": "Ivan Jurković",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/1222"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/1222",
+          "quotation": "Istočna Istra je pod upravu istarskog markgrofa došla tek u razdoblju nakon smrti posljednjega hrvatskog kralja iz dinastije Trpimirovića Stjepana II. (1091.) i dolaska Kolomana Arpadovića na hrvatsko prijestolje (1102.), najvjerojatnije u vrijeme markgrofovstva Ulrikova sina Popona (1090.–1101.).",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — margrave Poppon",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "632",
+            "title": "« Istarska markgrofovija » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/istarska-markgrofovija"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/istarska-markgrofovija",
+          "quotation": "Tada je Istri priključeno i područje istočno od Raše do Rijeke, ali bez Trsta, koji je ostao pod upravom tršćanskih biskupa.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "653",
+            "title": "« Labin » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Labin"
+          },
+          "where": "infobox",
+          "quotation": "[[Kingdom of Croatia (925–1102)|Kingdom of Croatia]] (925–1102)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "736",
+      "place": {
+        "id": "745",
+        "name": {
+          "fr": "Galižana",
+          "en": null
+        },
+        "lon": 13.869,
+        "lat": 44.933,
+        "wikidata": "Q763761",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "651",
+            "title": "« Galižana » (Istarska enciklopedija)",
+            "author": "Željko Bistrović",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/844"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/844",
+          "quotation": "U IX. st. pod upravom je puljskih biskupa, a od 1300. u posjedu akvilejskih patrijarha.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "652",
+            "title": "« Gallesano » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Gallesano"
+          },
+          "where": "https://it.wikipedia.org/wiki/Gallesano",
+          "quotation": "Nel IX secolo, Gallesano passa sotto l'amministrazione dei vescovi polesi e nel 1300 diventa un possedimento dei patriarchi di Aquileia.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "635",
+            "title": "« Pula » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/pula"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/pula",
+          "quotation": "Za vladavine frančkih vladara (od 788), kraljeva i careva Svetoga Rimskoga Carstva (od 962), te istarskih markgrofova (od sredine XI. st.) Pula se postupno preobrazila u gradsku zajednicu komunalnoga tipa.",
+          "subject": "holder",
+          "holder": {
+            "name": "margraves d'Istrie, sous les rois et empereurs du Saint-Empire",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "735",
+      "place": {
+        "id": "744",
+        "name": {
+          "fr": "Pula",
+          "en": null
+        },
+        "lon": 13.845555555555556,
+        "lat": 44.87027777777778,
+        "wikidata": "Q4656",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "635",
+            "title": "« Pula » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/pula"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/pula",
+          "quotation": "Za vladavine frančkih vladara (od 788), kraljeva i careva Svetoga Rimskoga Carstva (od 962), te istarskih markgrofova (od sredine XI. st.) Pula se postupno preobrazila u gradsku zajednicu komunalnoga tipa.",
+          "subject": "holder",
+          "holder": {
+            "name": "margraves d'Istrie, sous les rois et empereurs du Saint-Empire",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "ch. II § 55, p. 262 of the 1897 pagination (OCR text)",
+          "quotation": "come per qualche tempo, benchè forse ad intervalli, il vescovo vi abbia esercitata l’au- torità comitale.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula, autorité comtale",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "contents of ch. II §§ 33–36 (OCR text)",
+          "quotation": "e Vl’ Istria viene allora infeudata a Popone Ill ed Ulrico Il a. 1090.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — Poppon III et Ulrich II",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "734",
+      "place": {
+        "id": "743",
+        "name": {
+          "fr": "Kastav",
+          "en": null
+        },
+        "lon": 14.348980555556,
+        "lat": 45.372569444444,
+        "wikidata": "Q399425",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "642",
+            "title": "« Kastavština » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/kastavstina"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/kastavstina",
+          "quotation": "Potkraj VIII. st. Kastavština je bila u sastavu Franačke, a od polovice X. st. do 1060-ih pripadala je Hrvatskoj. Nakon toga njome su vladali pulski biskup, gospoda Devinska (od 1139), grofovi od Walseea (od 1399) i Habsburgovci (od 1466).",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III, 10, § 7, p. 495",
+          "quotation": "Castua, Veprinaz e Moschienizze (più esatto Moschiena) 499) furono donati, probabilmente dal re d’Italia Ugo, al vescovo di Pola:",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Pula",
+            "wikidata": "Q12640752"
+          }
+        },
+        {
+          "source": {
+            "id": "634",
+            "title": "« Istarska markgrofovija » (Istarska enciklopedija)",
+            "author": "Ivan Jurković",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/1222"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/1222",
+          "quotation": "Istočna Istra je pod upravu istarskog markgrofa došla tek u razdoblju nakon smrti posljednjega hrvatskog kralja iz dinastije Trpimirovića Stjepana II. (1091.) i dolaska Kolomana Arpadovića na hrvatsko prijestolje (1102.), najvjerojatnije u vrijeme markgrofovstva Ulrikova sina Popona (1090.–1101.).",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — margrave Poppon",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "650",
+            "title": "« Kastav » (Istarska enciklopedija)",
+            "author": "Marijan Bradanović",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/2496"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/2496",
+          "quotation": "Od IX. do kraja XI. ili početka XII. st. pripadao je Hrvatskoj, a nakon toga postaje dijelom Istarske markgrofovije u sastavu Njemačke .",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Croatie",
+            "wikidata": "Q858841"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "733",
+      "place": {
+        "id": "742",
+        "name": {
+          "fr": "Pazin",
+          "en": null
+        },
+        "lon": 13.938611111111,
+        "lat": 45.239166666667,
+        "wikidata": "Q211968",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "649",
+            "title": "« Pazin » (Istarska enciklopedija)",
+            "author": "Robert Matijašić, Ivan Matejčić",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/529"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/529",
+          "quotation": "Feud je 996. dobio akvilejski patrijarh , ali već 1060. predao ga je porečkome biskupu, koji je tako zaokružio svoj posjed u središtu Istre.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Poreč",
+            "wikidata": "Q31198468"
+          }
+        },
+        {
+          "source": {
+            "id": "641",
+            "title": "« Pazin » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/pazin"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/pazin",
+          "quotation": "kojom se utvrda (Castrum Pisinum) predavala u posjed porečkomu biskupu.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Poreč",
+            "wikidata": "Q31198468"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "732",
+      "place": {
+        "id": "741",
+        "name": {
+          "fr": "Rovinj",
+          "en": null
+        },
+        "lon": 13.633333333333,
+        "lat": 45.083333333333,
+        "wikidata": "Q5316",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "640",
+            "title": "« Rovinj » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/rovinj"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/rovinj",
+          "quotation": "Od X. do XII. st. uspješno je odolijevao pritisku Venecije i stekao autonomni status (s gradskom upravom i Velikim vijećem)",
+          "subject": "holder",
+          "holder": {
+            "name": "commune autonome de Rovinj",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "622",
+            "title": "Storia documentata di Rovigno",
+            "author": "Bernardo Benussi",
+            "url": "https://archive.org/details/storiadocumenta00benugoog"
+          },
+          "where": "p. 61",
+          "quotation": "anzi varie città istriane, pur rimanendo soggette al loro prin- cipe, s' erano poste sotto la protezione della Republica",
+          "subject": "holder",
+          "holder": {
+            "name": "leur prince, sous la protection de la République de Venise",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "731",
+      "place": {
+        "id": "740",
+        "name": {
+          "fr": "Buzet",
+          "en": null
+        },
+        "lon": 13.964722222222,
+        "lat": 45.407222222222,
+        "wikidata": "Q695767",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "648",
+            "title": "« Buzet » (Istarska enciklopedija)",
+            "author": "Đuro Fabjanović, Nataša Nefat",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/471"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/471",
+          "quotation": "Godine 1064. podjeljuje ga njemački kralj Henrik IV. istarskom markgrofu Ulriku , a njegov sin Ulrik II. , uz neke druge kule, 1102. poklanja ga akvilejskomu patrijarhu .",
+          "subject": "holder",
+          "holder": {
+            "name": "margrave Ulrich d'Istrie, puis son fils Ulrich II",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "730",
+      "place": {
+        "id": "739",
+        "name": {
+          "fr": "Poreč",
+          "en": null
+        },
+        "lon": 13.595223875761741,
+        "lat": 45.22717220088305,
+        "wikidata": "Q5323",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "639",
+            "title": "« Poreč » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/porec"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/porec",
+          "quotation": "konačno pod Francima (od 788), kada je ojačala vlast biskupa. Potkraj XII. st. uspostavljena je općina, ali je njezin razvoj bio usporen zbog blizine Venecije (1150. Poreč je potpisao sporazum o vjernosti).",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Poreč",
+            "wikidata": "Q31198468"
+          }
+        },
+        {
+          "source": {
+            "id": "621",
+            "title": "Parenzo nell'evo medio e moderno",
+            "author": "Bernardo Benussi",
+            "url": "https://archive.org/details/ParenzoEvoMedioEModerno"
+          },
+          "where": "ch. III, p. 7",
+          "quotation": "e dopo il 1040 un marchese (margravio) nominato dall’im¬ peratore.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — margrave nommé par l'empereur",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "729",
+      "place": {
+        "id": "738",
+        "name": {
+          "fr": "Tar",
+          "en": null
+        },
+        "lon": 13.625833333333,
+        "lat": 45.301111111111,
+        "wikidata": "Q3504616",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "634",
+            "title": "« Istarska markgrofovija » (Istarska enciklopedija)",
+            "author": "Ivan Jurković",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/1222"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/1222",
+          "quotation": "car Henrik IV. (1056.–1106.) u Istri se potpuno oslonio na Ulrika i njegove nasljednike",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — l'empereur Henri IV, Ulrich et ses héritiers",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "728",
+      "place": {
+        "id": "737",
+        "name": {
+          "fr": "Novigrad",
+          "en": null
+        },
+        "lon": 13.56,
+        "lat": 45.32,
+        "wikidata": "Q5395",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "647",
+            "title": "« Novigrad » (Istarska enciklopedija)",
+            "author": "R.",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/429"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/429",
+          "quotation": "Naselje je imalo naslov grada, u kojem je biskup bio najjači feudalac, s posjedima i u drugim dijelovima Istre, ali akvilejski su patrijarsi imali vrhovnu svjetovnu vlast.",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "638",
+            "title": "« Novigrad » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/novigrad"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/novigrad",
+          "quotation": "Od 827. Novigradska biskupija bila je podložna akvilejskomu patrijarhu, koji je imao i svjetovnu vlast.",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "727",
+      "place": {
+        "id": "736",
+        "name": {
+          "fr": "Buje",
+          "en": null
+        },
+        "lon": 13.65,
+        "lat": 45.4,
+        "wikidata": "Q397724",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III, 2, § 36, p. 373",
+          "quotation": "Popone IIl morì nel 1101 !4,), e l’imperatore, non tenendo conto degli eventuali diritti di Ulrico II, infeudò la marca d'Istria ad un certo Burcardo,",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — margrave Poppon III",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "637",
+            "title": "« Buje » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/buje"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/buje",
+          "quotation": "Kao posjed akvilejskih patrijarha (od X. st.)",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "726",
+      "place": {
+        "id": "735",
+        "name": {
+          "fr": "Umag",
+          "en": null
+        },
+        "lon": 13.517222222222,
+        "lat": 45.433611111111,
+        "wikidata": "Q221184",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. II, 3, § 45, pp. 255-256",
+          "quotation": "Di fatto però quella terra rimase allora subordinata al vescovo di Cittanova, non senza continue liti colla chiesa triestina,",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Novigrad",
+            "wikidata": "Q25112945"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. II, 3, § 45, pp. 255-256",
+          "quotation": "i vescovi di Trieste mantennero fermo il loro diritto di dominio sulla terra di Umago",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque de Trieste",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "634",
+            "title": "« Istarska markgrofovija » (Istarska enciklopedija)",
+            "author": "Ivan Jurković",
+            "url": "https://www.istrapedia.hr/hr/natuknice/article/1222"
+          },
+          "where": "https://www.istrapedia.hr/hr/natuknice/article/1222",
+          "quotation": "car Henrik IV. (1056.–1106.) u Istri se potpuno oslonio na Ulrika i njegove nasljednike",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie — l'empereur Henri IV, Ulrich et ses héritiers",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "725",
+      "place": {
+        "id": "734",
+        "name": {
+          "fr": "Ankaran",
+          "en": null
+        },
+        "lon": 13.737928,
+        "lat": 45.579314,
+        "wikidata": "Q387789",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III, §36-37, pp. 372-374 (txt l. 27593-27595)",
+          "quotation": "Popone III, adunque, resse il marchesato d'Istria sino al rio1, e morì il 3 gennaio",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Poppon III)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III §36, p. 372",
+          "quotation": "L'im- peratore Enrico IV infeudò nel 1090 la marca istriana ad ambidue i figli di Ulrico I, vale a dire a Popone III, e ad Ulrico Il, quali eredi paterni",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (Poppon III et Ulric II)",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "724",
+      "place": {
+        "id": "733",
+        "name": {
+          "fr": "Izola",
+          "en": null
+        },
+        "lon": 13.660405031,
+        "lat": 45.539545223,
+        "wikidata": "Q15877",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "611",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome III (1001–1100)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi03kosmuoft"
+          },
+          "where": "Uvod, p. XXV (txt l. 1164-1167)",
+          "quotation": "Leta 972. je ta kraj dobil Benečan Vital Candiano (Gr. II, št. 440), leta 977. ga je že imel oglejski patriarh Rodald (Gr. II, št. 457), leta 1031. pa samostan Marije Device tik Ogleja (št. 87).",
+          "subject": "holder",
+          "holder": {
+            "name": "monastère Sainte-Marie d'Aquilée",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. II, §8 (txt l. 22781-22783)",
+          "quotation": "Al monastero di S. Maria di Aquileia il patriarca Popone donò, nel luglio 1031, la località d’ Isola °°) con tutti i diritti e le giurisdizioni annesse",
+          "subject": "holder",
+          "holder": {
+            "name": "monastère Sainte-Marie d'Aquilée",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III, §36-37, pp. 372-374 (txt l. 27593-27595)",
+          "quotation": "Popone III, adunque, resse il marchesato d'Istria sino al rio1, e morì il 3 gennaio",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Poppon III)",
+            "wikidata": "Q3234139"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "723",
+      "place": {
+        "id": "732",
+        "name": {
+          "fr": "Koper",
+          "en": null
+        },
+        "lon": 13.7306571,
+        "lat": 45.547542728,
+        "wikidata": "Q1015",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "612",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome IV (1101–1200)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi04kosmuoft"
+          },
+          "where": "Uvod, p. LXXIX",
+          "quotation": "Pozneje so zopet prišli pod oblast rimskih cesarjev. Leta 1035. so še celo prosili cesarja Konrada II. pomoči zoper svoje nasprotnike (Gr. III, št. 92). Leta 1145. so Benečani iznova dobili Koper v svoje roke.",
+          "subject": "holder",
+          "holder": {
+            "name": "empereurs romains (Saint-Empire)",
+            "wikidata": "Q12548"
+          }
+        },
+        {
+          "source": {
+            "id": "619",
+            "title": "Nel medio evo. Pagine di storia istriana",
+            "author": "Bernardo Benussi",
+            "url": null
+          },
+          "where": "cap. III, §36-37, pp. 372-374 (txt l. 27593-27595)",
+          "quotation": "Popone III, adunque, resse il marchesato d'Istria sino al rio1, e morì il 3 gennaio",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Poppon III)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "611",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome III (1001–1100)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi03kosmuoft"
+          },
+          "where": "Uvod (introduction), p. XLVI approx. (txt l. 2195-2199)",
+          "quotation": "Ko je leta 1090. postal vojvoda karantanski, je Istro dobil Popon, sin tistega Udalrika, ki je bil pred letom 1070. gospodar po tej deželi (št. 221). Omenja se leta 1093. v nekem viru (št. 402). Leta 1101. je bil Burchard mejni grof istrski.",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Poppon)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "620",
+            "title": "Chronica (Andrea Dandolo)",
+            "author": "Andrea Dandolo",
+            "url": null
+          },
+          "where": "Benussi cap. II §17, note (txt l. 39367-39370)",
+          "quotation": "huic duci (Pietro Candiano II) urbem suam faedera- tam et censualem exibuerunt",
+          "subject": "holder",
+          "holder": {
+            "name": "doge de Venise Pietro Candiano II (ville fédérée et tributaire)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "722",
+      "place": {
+        "id": "731",
+        "name": {
+          "fr": "Piran",
+          "en": null
+        },
+        "lon": 13.568531066,
+        "lat": 45.527107649,
+        "wikidata": "Q1382",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "611",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome III (1001–1100)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi03kosmuoft"
+          },
+          "where": "no. 223 (1062-10-24, Augsburg; Henry IV grants fiscal estates at Piran to St Andrew of Freising, Latin extract)",
+          "quotation": "in marcha Histria in comitatu marchionis Ódalrici",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Ulric)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "615",
+            "title": "Istria (Enciclopedia Italiana)",
+            "author": "A. Lorenzi, C. Battisti, P. Sticotti et al.",
+            "url": "https://www.treccani.it/enciclopedia/istria_(Enciclopedia-Italiana)/"
+          },
+          "where": "article Istria, on the margraves of Istria",
+          "quotation": "Dal 1040 al 1208, ai Weimar Oriamünde succedettero, nel marchesato d'Istria, gli Eppenstein, gli Sponheim e infine gli Andechs-Merania",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (les Eppenstein)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "612",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome IV (1101–1200)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi04kosmuoft"
+          },
+          "where": "introduction, p. XXIV (margraves of Istria)",
+          "quotation": "V Istri je bil leta 1093, Popon za mejnega grofa (Gr. III, št. 402).",
+          "subject": "holder",
+          "holder": {
+            "name": "Marche d'Istrie (margrave Poppon)",
+            "wikidata": "Q3234139"
+          }
+        },
+        {
+          "source": {
+            "id": "616",
+            "title": "Pirano (Enciclopedia Italiana)",
+            "author": "C. Merlo, A. Riccoboni, A. Tamaro",
+            "url": "https://www.treccani.it/enciclopedia/pirano_(Enciclopedia-Italiana)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/pirano_(Enciclopedia-Italiana)/ — Storia",
+          "quotation": "Nel 1062 fu data in feudo ai vescovi bavaresi di Frisinga, i cui diritti giurisdizionali passarono poi ai conti d'Istria.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêques de Freising",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "617",
+            "title": "« Piran » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/piran"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/piran",
+          "quotation": "Od IX. st. samostalna je gradska komuna, koja je do ulaska u sastav Mletačke Republike 1283. nominalno priznavala vlast akvilejskoga patrijarha kao istarskoga markgrofa.",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée, margrave d'Istrie",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "618",
+            "title": "Pirano (Enciclopedia on line)",
+            "author": null,
+            "url": "https://www.treccani.it/enciclopedia/pirano/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/pirano/",
+          "quotation": "passò poi ai vescovi bavaresi di Frisinga (1062). Nel 1209 fu alle dipendenze feudali del patriarca di Aquileia",
+          "subject": "holder",
+          "holder": {
+            "name": "évêques de Freising",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "721",
+      "place": {
+        "id": "730",
+        "name": {
+          "fr": "Solkan",
+          "en": null
+        },
+        "lon": 13.645278,
+        "lat": 45.969444,
+        "wikidata": "Q543631",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "611",
+            "title": "Gradivo za zgodovino Slovencev v srednjem veku, tome III (1001–1100)",
+            "author": "Franc Kos",
+            "url": "https://archive.org/details/gradivozazgodovi03kosmuoft"
+          },
+          "where": "no. 327 (1077, Pavia; Henry IV grants the county of Friuli to Patriarch Sigehard, Latin extract)",
+          "quotation": "comitatum Forojulii et villam Lunzanigam dictam",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée (Sigeardo), comté de Frioul",
+            "wikidata": "Q23731257"
+          }
+        },
+        {
+          "source": {
+            "id": "613",
+            "title": "Sigeardo (Dizionario Biografico degli Italiani)",
+            "author": "Andrea Tilatti",
+            "url": "https://www.treccani.it/enciclopedia/sigeardo_(Dizionario-Biografico)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/sigeardo_(Dizionario-Biografico)/ — §1077",
+          "quotation": "All’inizio d’aprile del 1077, a Pavia, egli ricevette da Enrico la donazione del comitato del Friuli, con tutti i diritti pubblici",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée (Sigeardo), comté de Frioul",
+            "wikidata": "Q23731257"
+          }
+        },
+        {
+          "source": {
+            "id": "614",
+            "title": "Ulrich von Eppenstein (Neue Deutsche Biographie)",
+            "author": "Ernst Tremp",
+            "url": "https://www.deutsche-biographie.de/sfz52488.html"
+          },
+          "where": "https://www.deutsche-biographie.de/sfz52488.html — NDB biography",
+          "quotation": "Am 3. oder 16. 5. 1086 erhielt U. von Heinrich IV. für seine Verdienste im Kampf gegen die päpstl. Partei im Investiturstreit das Patriarchat von Aquileja übertragen, wo schon sein Bruder Heinrich die Vogtei innehatte und die Markgrafschaften Istrien und Krain leitete",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche Ulrich Ier d'Eppenstein (patriarcat d'Aquilée)",
+            "wikidata": "Q23731257"
+          }
+        },
+        {
+          "source": {
+            "id": "454",
+            "title": "Gorizia (Enciclopedia Italiana)",
+            "author": "Pier Silverio Leicht et al.",
+            "url": "https://www.treccani.it/enciclopedia/gorizia_(Enciclopedia-Italiana)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/gorizia_(Enciclopedia-Italiana)/ — \"La contea di Gorizia\" (P. S. Leicht)",
+          "quotation": "costoro però circa nel 1100, poco prima d'estinguersi, avevano subinfeudato il possesso goriziano a una famiglia oriunda della Baviera e imparentata col patriarca aquileiese Sigeardo.",
+          "subject": "holder",
+          "holder": {
+            "name": "une famille bavaroise apparentée au patriarche Sigeardo, en sous-fief",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "720",
+      "place": {
+        "id": "729",
+        "name": {
+          "fr": "Presicce",
+          "en": null
+        },
+        "lon": 18.262777777777778,
+        "lat": 39.90138888888889,
+        "wikidata": "Q52180",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "601",
+            "title": "La corografia fisica e storica della provincia di Terra d'Otranto",
+            "author": "Giacomo Arditi",
+            "url": "https://archive.org/details/lacorografiafisi00ardi"
+          },
+          "where": "Presicce, Cenno storico § 6, p. 488 (OCR, whitespace normalised)",
+          "quotation": "Un po' di luce riappare con la storia del suo infeudamento, poiché si sa con accerto eh' ei dapprima appartenne al Principato di Ta- ranto 1 , il quale incominciò nel 1088 , dopo la guerra rotta , e la divisione avvenuta tra i Principi Normanni, Boemondo e Ruggero fratelli consanguinei.",
+          "subject": "holder",
+          "holder": {
+            "name": "Principauté de Tarente",
+            "wikidata": "Q1078062"
+          }
+        },
+        {
+          "source": {
+            "id": "602",
+            "title": "« Presicce » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Presicce"
+          },
+          "where": "it.wikipedia.org/wiki/Presicce, Storia",
+          "quotation": "Nel 1088 Presicce entra a far parte del [[Principato di Taranto]]",
+          "subject": "holder",
+          "holder": {
+            "name": "Principauté de Tarente",
+            "wikidata": "Q1078062"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Italie normande",
+        "wikidata": "Q74011"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "719",
+      "place": {
+        "id": "728",
+        "name": {
+          "fr": "Tuturano",
+          "en": null
+        },
+        "lon": 17.946666666667,
+        "lat": 40.545,
+        "wikidata": "Q4000960",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "600",
+            "title": "« Tuturano » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Tuturano"
+          },
+          "where": "it.wikipedia.org/wiki/Tuturano, Storia e archeologia",
+          "quotation": "Il casale è poi documentato nel Medioevo come ''locus Tuturanus'' ([[1097]]) e ''vicus Tuturanus'' ([[1107]]) nelle donazioni effettuate dal conte [[Goffredo di Conversano|Goffredo]] conte di Conversano e dalla moglie Sichelgaita",
+          "subject": "holder",
+          "holder": {
+            "name": "comté de Conversano — comte Geoffroi et Sichelgaita",
+            "wikidata": "Q3688105"
+          }
+        },
+        {
+          "source": {
+            "id": "402",
+            "title": "Prime note su Goffredo di Conversano e l'architettura ecclesiastica (in Conversano e il territorio a Sud-Est della Terra di Bari tra Medioevo ed Età moderna, secoli XI-XV)",
+            "author": "Arianna Carannante ; L. Derosa, F. Panarelli, M. C. Rossi (éd. du volume)",
+            "url": null
+          },
+          "where": "p. 85 (PDF p. 86)",
+          "quotation": "I territori in suo possesso furono concessi dal duca Ruggero (†1101) a Boemondo († 1111), anche se quest’ultimo non vi esercitò mai un effettivo controllo7. Alla morte di Goffredo († 1100), Ales- sandro ereditò la signoria di Matera, Roberto le città di Conversa- no e Monopoli e Tancredi la contea di Brindisi e Oria8.",
+          "subject": "holder",
+          "holder": {
+            "name": "Geoffroi de Conversano († 1100), puis Tancrède, comté de Brindisi et d'Oria",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Italie normande",
+        "wikidata": "Q74011"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "718",
+      "place": {
+        "id": "727",
+        "name": {
+          "fr": "Urbino",
+          "en": null
+        },
+        "lon": 12.6372,
+        "lat": 43.725238888889,
+        "wikidata": "Q2759",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "598",
+            "title": "« Urbino » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Urbino"
+          },
+          "where": "it.wikipedia.org/wiki/Urbino, Storia > Antichità e Medioevo",
+          "quotation": "Comunque, il dominio pontificio fu per diversi secoli puramente formale e non effettivo, e per di più fu contrastato dall'[[Sacro Romano Impero|Impero]], anch'esso rivendicante (e detenente) il controllo della zona",
+          "subject": "holder",
+          "holder": {
+            "name": "Saint-Empire (l'Empire, qui détient le contrôle)",
+            "wikidata": "Q12548"
+          }
+        },
+        {
+          "source": {
+            "id": "599",
+            "title": "Urbino (Enciclopedia Italiana)",
+            "author": null,
+            "url": "https://www.treccani.it/enciclopedia/urbino_(Enciclopedia-Italiana)/"
+          },
+          "where": "treccani.it/enciclopedia/urbino_(Enciclopedia-Italiana)/, Storia",
+          "quotation": "fu poi compresa nelle donazioni dei Carolingi alla Chiesa che sempre ne pretese, e spesso riuscì ad averne, il dominio.",
+          "subject": "holder",
+          "holder": {
+            "name": "l'Église (États pontificaux)",
+            "wikidata": "Q170174"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "717",
+      "place": {
+        "id": "726",
+        "name": {
+          "fr": "Muggia",
+          "en": null
+        },
+        "lon": 13.766666666667,
+        "lat": 45.6,
+        "wikidata": "Q16937",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "596",
+            "title": "« Muggia » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Muggia"
+          },
+          "where": "it.wikipedia.org/wiki/Muggia, Storia",
+          "quotation": "Il primo documento certo in cui appare il nome di Muggia risale all’anno 931 e concerne la donazione fatta dai re d’Italia Ugo e Lotario al Patriarca di Aquileia del “''Castellum Mugla''“.",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée",
+            "wikidata": "Q836894"
+          }
+        },
+        {
+          "source": {
+            "id": "597",
+            "title": "Castello di Muggia (Consorzio Castelli FVG)",
+            "author": null,
+            "url": "https://consorziocastelli.it/castles/trieste/muggia"
+          },
+          "where": "consorziocastelli.it/castles/trieste/muggia",
+          "quotation": "In 931, following the occupation of Istria, it was granted by King Lothair of Italy to the Patriarch of Aquileia. Subjected to the jurisdiction of the Patriarch, the village grew around its harbour",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche d'Aquilée",
+            "wikidata": "Q836894"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "716",
+      "place": {
+        "id": "725",
+        "name": {
+          "fr": "Bibione",
+          "en": null
+        },
+        "lon": 13.05388889,
+        "lat": 45.63583333,
+        "wikidata": "Q3512102",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "590",
+            "title": "Cronache veneziane antichissime",
+            "author": "Giovanni Monticolo (éd.) ; Jean Diacre, Istoria Veneticorum",
+            "url": "https://archive.org/details/cronachevenezian00mont"
+          },
+          "where": "index, editor (file line 12494)",
+          "quotation": "Bibiones  (isola  del  ducato   veneziano già  tra  Caorle  e  Grado)",
+          "subject": "holder",
+          "holder": {
+            "name": "Duché de Venise",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "592",
+            "title": "Storia documentata di Venezia, tome 1",
+            "author": "Samuele Romanin",
+            "url": "https://archive.org/details/romanin-storia-documentata-di-venezia-v-1"
+          },
+          "where": "on the patriarch of Grado (file line 1745-1746)",
+          "quotation": "Nella stessa dipen- denza furono posti i lidi di Murano, di Bibbiono e di Fine,",
+          "subject": "holder",
+          "holder": {
+            "name": "patriarche de Grado",
+            "wikidata": "Q1319550"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "715",
+      "place": {
+        "id": "724",
+        "name": {
+          "fr": "Massa Fiscaglia",
+          "en": null
+        },
+        "lon": 12.0145,
+        "lat": 44.809388888889,
+        "wikidata": "Q95114",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "595",
+            "title": "« Massa Fiscaglia » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Massa_Fiscaglia"
+          },
+          "where": "Medioevo",
+          "quotation": "I giudici imperiali di [[Berengario del Friuli|Berengario I]] infine la riconoscono ''[[Stato Pontificio#Il Patrimonium Sancti Petri|Patrimonium Petri]]''",
+          "subject": "holder",
+          "holder": {
+            "name": "Patrimoine de saint Pierre (États pontificaux)",
+            "wikidata": "Q170174"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "714",
+      "place": {
+        "id": "723",
+        "name": {
+          "fr": "Adria",
+          "en": null
+        },
+        "lon": 12.05,
+        "lat": 45.05,
+        "wikidata": "Q34615",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "593",
+            "title": "Adria (Enciclopedia Italiana)",
+            "author": "Giuseppe Stefanini, Ettore Ghislanzoni, Roberto Cessi",
+            "url": "https://www.treccani.it/enciclopedia/adria_(Enciclopedia-Italiana)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/adria_(Enciclopedia-Italiana)/",
+          "quotation": "Tra il sec. V e il X, Adria è sempre il maggior castello che domina tra Adige e Po. La signoria episcopale le ridona ancora la sua importanza.",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque d'Adria (seigneurie épiscopale)",
+            "wikidata": "Q866766"
+          }
+        },
+        {
+          "source": {
+            "id": "594",
+            "title": "« Adria » (Wikipedia)",
+            "author": null,
+            "url": "https://it.wikipedia.org/wiki/Adria"
+          },
+          "where": "Medioevo e periodo veneziano",
+          "quotation": "Tra il VII e l'VIII secolo Adria divenne un [[feudo]] vescovile indipendente da quello di [[Ravenna]], ma l'autorità del vescovo fu lentamente soppiantata da quella del Comune, che mantenne l'autonomia locale fino a circa il 1250",
+          "subject": "holder",
+          "holder": {
+            "name": "évêque d'Adria (fief épiscopal), puis la commune",
+            "wikidata": "Q866766"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "713",
+      "place": {
+        "id": "722",
+        "name": {
+          "fr": "Heraclia",
+          "en": null
+        },
+        "lon": 12.658333333333,
+        "lat": 45.638055555556,
+        "wikidata": "Q35969205",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "592",
+            "title": "Storia documentata di Venezia, tome 1",
+            "author": "Samuele Romanin",
+            "url": "https://archive.org/details/romanin-storia-documentata-di-venezia-v-1"
+          },
+          "where": "note on the pact with Lothar, 840 (file line 7920-7923)",
+          "quotation": "Dalla parte dei Veneziani; gli abitanti di Rialto, Castell” Olivolo, Murano, Malamoeco, Albiola, Chioggia, Brondolo, Fossone, Lore- do, Torcello, Cittanuova, Fine, Equilio, Caorle, Grado, Capodargine.",
+          "subject": "holder",
+          "holder": {
+            "name": "Duché de Venise (les Vénitiens du pacte de Lothaire)",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "712",
+      "place": {
+        "id": "721",
+        "name": {
+          "fr": "Murano",
+          "en": null
+        },
+        "lon": 12.35361111111111,
+        "lat": 45.4575,
+        "wikidata": "Q52437",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "592",
+            "title": "Storia documentata di Venezia, tome 1",
+            "author": "Samuele Romanin",
+            "url": "https://archive.org/details/romanin-storia-documentata-di-venezia-v-1"
+          },
+          "where": "note on the pact with Lothar, 840 (file line 7920-7923)",
+          "quotation": "Dalla parte dei Veneziani; gli abitanti di Rialto, Castell” Olivolo, Murano, Malamoeco, Albiola, Chioggia, Brondolo, Fossone, Lore- do, Torcello, Cittanuova, Fine, Equilio, Caorle, Grado, Capodargine.",
+          "subject": "holder",
+          "holder": {
+            "name": "Duché de Venise (les Vénitiens du pacte de Lothaire)",
+            "wikidata": "Q4948"
+          }
+        },
+        {
+          "source": {
+            "id": "591",
+            "title": "Murano (Enciclopedia Italiana)",
+            "author": "Elio Migliorini, Gino Fogolari, Roberto Cessi",
+            "url": "https://www.treccani.it/enciclopedia/murano_(Enciclopedia-Italiana)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/murano_(Enciclopedia-Italiana)/",
+          "quotation": "Prima d'essere transitoriamente aggregata nel 1171 al sestiere di S. Croce, era retta, come le altre, da un gastaldo",
+          "subject": "holder",
+          "holder": {
+            "name": "Duché de Venise — un gastaldo",
+            "wikidata": "Q4948"
+          }
+        }
+      ],
+      "holder": {
+        "name": "République de Venise",
+        "wikidata": "Q4948"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "711",
+      "place": {
+        "id": "720",
+        "name": {
+          "fr": "Mestre",
+          "en": null
+        },
+        "lon": 12.238055555556,
+        "lat": 45.490555555556,
+        "wikidata": "Q541405",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "589",
+            "title": "Mestre (Enciclopedia Italiana)",
+            "author": "Elio Migliorini, Roberto Cessi",
+            "url": "https://www.treccani.it/enciclopedia/mestre_(Enciclopedia-Italiana)/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/mestre_(Enciclopedia-Italiana)/",
+          "quotation": "La sua sorte durante il regno italico, nell'età precomunale e in quella comunale, fu strettamente congiunta alle vicende del territorio trevigiano",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume d'Italie — territoire de Trévise",
+            "wikidata": "Q838931"
+          }
+        },
+        {
+          "source": {
+            "id": "590",
+            "title": "Cronache veneziane antichissime",
+            "author": "Giovanni Monticolo (éd.) ; Jean Diacre, Istoria Veneticorum",
+            "url": "https://archive.org/details/cronachevenezian00mont"
+          },
+          "where": "editor's note (file line 7247-7248)",
+          "quotation": "«  Mistrina  »    era  la  campagna presso  Mestre  nel  regno  italico.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume d'Italie",
+            "wikidata": "Q838931"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Saint-Empire romain germanique",
+        "wikidata": "Q12548"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "710",
+      "place": {
+        "id": "719",
+        "name": {
+          "fr": "Paramythiá",
+          "en": null
+        },
+        "lon": 20.5132,
+        "lat": 39.4652,
+        "wikidata": "Q673970",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "608",
+            "title": "« Nicopolis (theme) » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Nicopolis_(theme)"
+          },
+          "where": "§History",
+          "quotation": "Nicopolis survived as a theme until the [[Fourth Crusade]] in 1204.",
+          "subject": "holder",
+          "holder": {
+            "name": "Thème de Nicopolis (jusqu'en 1204)",
+            "wikidata": "Q1636636"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "709",
+      "place": {
+        "id": "718",
+        "name": {
+          "fr": "Kassiópi",
+          "en": null
+        },
+        "lon": 19.9207,
+        "lat": 39.7883,
+        "wikidata": "Q1735279",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "610",
+            "title": "« Corfu » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Corfu"
+          },
+          "where": "https://en.wikipedia.org/wiki/Corfu — History, Middle Ages",
+          "quotation": "From at least the early 9th century, Corfu and the other Ionian Islands formed part of the [[theme (Byzantine district)|theme]] of [[Cephallenia (theme)|Cephallenia]].",
+          "subject": "holder",
+          "holder": {
+            "name": "Thème de Céphalonie (l'île de Corfou, depuis le IXe siècle au moins)",
+            "wikidata": "Q767425"
+          }
+        },
+        {
+          "source": {
+            "id": "610",
+            "title": "« Corfu » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Corfu"
+          },
+          "where": "https://en.wikipedia.org/wiki/Corfu — History, Middle Ages",
+          "quotation": "The first Norman occupation from 1081 to 1084 ended only after the Byzantine emperor [[Alexios I Komnenos]] secured the aid of the [[Republic of Venice]], in exchange for wide-ranging commercial concessions to Venetian merchants.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — Alexis Ier Comnène, après la première occupation normande (1081–1084)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "708",
+      "place": {
+        "id": "717",
+        "name": {
+          "fr": "Corfou",
+          "en": null
+        },
+        "lon": 19.921388888889,
+        "lat": 39.623888888889,
+        "wikidata": "Q205832",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "610",
+            "title": "« Corfu » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Corfu"
+          },
+          "where": "https://en.wikipedia.org/wiki/Corfu — History, Middle Ages",
+          "quotation": "From at least the early 9th century, Corfu and the other Ionian Islands formed part of the [[theme (Byzantine district)|theme]] of [[Cephallenia (theme)|Cephallenia]].",
+          "subject": "holder",
+          "holder": {
+            "name": "Thème de Céphalonie (depuis le IXe siècle au moins)",
+            "wikidata": "Q767425"
+          }
+        },
+        {
+          "source": {
+            "id": "610",
+            "title": "« Corfu » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Corfu"
+          },
+          "where": "https://en.wikipedia.org/wiki/Corfu — History, Middle Ages",
+          "quotation": "The first Norman occupation from 1081 to 1084 ended only after the Byzantine emperor [[Alexios I Komnenos]] secured the aid of the [[Republic of Venice]], in exchange for wide-ranging commercial concessions to Venetian merchants.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — Alexis Ier Comnène, après la première occupation normande (1081–1084)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "707",
+      "place": {
+        "id": "716",
+        "name": {
+          "fr": "Gjirokastër",
+          "en": null
+        },
+        "lon": 20.13889,
+        "lat": 40.07583,
+        "wikidata": "Q173690",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "608",
+            "title": "« Nicopolis (theme) » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Nicopolis_(theme)"
+          },
+          "where": "https://en.wikipedia.org/wiki/Nicopolis_(theme), History (cites Soustal & Koder 1981, TIB 3, p. 56–60)",
+          "quotation": "Nicopolis survived as a theme until the [[Fourth Crusade]] in 1204.",
+          "subject": "holder",
+          "holder": {
+            "name": "Thème de Nicopolis (jusqu'en 1204)",
+            "wikidata": "Q1636636"
+          }
+        },
+        {
+          "source": {
+            "id": "609",
+            "title": "« Butrint » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Butrint"
+          },
+          "where": "https://en.wikipedia.org/wiki/Butrint, Byzantine and possible Slavic period (Hodges et al.)",
+          "quotation": "It remained an outpost of the Byzantine empire fending off assaults from the [[Normans]] until 1204",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (Butrint, poste avancé jusqu'en 1204)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "706",
+      "place": {
+        "id": "714",
+        "name": {
+          "fr": "Orikum",
+          "en": null
+        },
+        "lon": 19.47139,
+        "lat": 40.32528,
+        "wikidata": "Q947125",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "606",
+            "title": "Valona (Enciclopedia on line)",
+            "author": null,
+            "url": "https://www.treccani.it/enciclopedia/valona/"
+          },
+          "where": "https://www.treccani.it/enciclopedia/valona/",
+          "quotation": "La nuova V., sorta in epoca medievale 10 km a S dell’antico centro, fu occupata nel 1080 da Roberto il Guiscardo e tornò ai Bizantini nel 1085.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (Valona revenue aux Byzantins en 1085)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "584",
+            "title": "« Vlora » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/vlore"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/vlore",
+          "quotation": "a 1080–85. u vlasti Roberta Guiscarda, kojemu je služila kao uporište tijekom normanskoga prodora na Balkan. Pripadala je zatim ponovno Bizantu do 1204.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (Vlora, de nouveau byzantine jusqu'en 1204)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "705",
+      "place": {
+        "id": "713",
+        "name": {
+          "fr": "Ballsh",
+          "en": null
+        },
+        "lon": 19.7383800027773,
+        "lat": 40.596417706040036,
+        "wikidata": "Q743016",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "605",
+            "title": "Meletai peri tes dioiketikes diaireseos kai tes eparchiakes dioikeseos en to Byzantino kratei",
+            "author": "Dionysios A. Zakythinos",
+            "url": "https://hdl.handle.net/11615/19494"
+          },
+          "where": "p. 216, list of the doukes of Dyrrachium, no. 12 (OCR)",
+          "quotation": "Ίιοάννης Κομνηνός διφκησε τό θέμα Δυρραχίου από τοΰ 1091 μέχρι τοΰ 1107",
+          "subject": "holder",
+          "holder": {
+            "name": "Thème de Dyrrachium — le duc Jean Comnène (1091–1107)",
+            "wikidata": "Q168641"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "704",
+      "place": {
+        "id": "712",
+        "name": {
+          "fr": "Vlora",
+          "en": null
+        },
+        "lon": 19.483333333333,
+        "lat": 40.45,
+        "wikidata": "Q159610",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "607",
+            "title": "« Vlorë » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Vlorë"
+          },
+          "where": "History, timeline box",
+          "quotation": "{{Noflag|[[Byzantine Empire]]}}, 784–1204",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (784–1204)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "703",
+      "place": {
+        "id": "711",
+        "name": {
+          "fr": "Krujë",
+          "en": null
+        },
+        "lon": 19.7925,
+        "lat": 41.51083333333333,
+        "wikidata": "Q194164",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 116 (between the running heads of pp. 115 and 117), the borders of Dioclea",
+          "quotation": "in  denen  das  Bistum  von  Polatum  (altserb. Pilot)  samt  der  Landschaft  Arbanum  bei  Kroja  dem  byzantinischen Gebiete  angehörte",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (le pays d'Arbanum près de Kroja, territoire byzantin)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "604",
+            "title": "L'Albanie entre Orient et Occident aux XIe et XIIe siècles. Aspects politiques et économiques",
+            "author": "Alain Ducellier",
+            "url": "https://www.persee.fr/doc/ccmed_0007-9731_1976_num_19_73_2026"
+          },
+          "where": "p. 2 (continuing the sentence on Kroai)",
+          "quotation": "Byzance ne semble d'ailleurs avoir exercé qu'une sorte de protectorat",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — « une sorte de protectorat » seulement",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "702",
+      "place": {
+        "id": "710",
+        "name": {
+          "fr": "Lezhë",
+          "en": null
+        },
+        "lon": 19.6434,
+        "lat": 41.7805,
+        "wikidata": "Q169160",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "603",
+            "title": "Illyrisch-Albanische Forschungen, vol. I",
+            "author": "Ludwig von Thallóczy (éd.)",
+            "url": "https://archive.org/details/illyrischalbanis01thal"
+          },
+          "where": "p. 123",
+          "quotation": "Elissos  der  Byzantiner  (in  den  Bischofskatalogen,  bei  Konstantin Porphyrogennetos  und  Anna  Komnena)",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (« Elissos der Byzantiner »)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "604",
+            "title": "L'Albanie entre Orient et Occident aux XIe et XIIe siècles. Aspects politiques et économiques",
+            "author": "Alain Ducellier",
+            "url": "https://www.persee.fr/doc/ccmed_0007-9731_1976_num_19_73_2026"
+          },
+          "where": "p. 1",
+          "quotation": "Telle est la fonction de la forteresse de Lissos (Alessio, l'actuelle Lezha) qui, selon Anne Comnène, avait pour mission de couvrir Dyrrachion (Durazzo)",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (forteresse couvrant Dyrrachion)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "701",
+      "place": {
+        "id": "709",
+        "name": {
+          "fr": "Petrovac na Moru",
+          "en": null
+        },
+        "lon": 18.9425,
+        "lat": 42.205555555556,
+        "wikidata": "Q990088",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "580",
+            "title": "« Duklja » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/duklja"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/duklja",
+          "quotation": "U XI. st. pripadali su joj gradovi Skadar, Ulcinj, Budva i Kotor.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (les villes de la côte au XIe siècle)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "582",
+            "title": "« Bar » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/bar"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/bar",
+          "quotation": "Bar je do 989. pripadao Dračkoj temi, zatim temi Dalmaciji, nakon 1042. Zeti, 1183. osvojio ga je Stefan Nemanja",
+          "subject": "holder",
+          "holder": {
+            "name": "Zeta (Bar et sa côte, de 1042 à 1183)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "700",
+      "place": {
+        "id": "708",
+        "name": {
+          "fr": "Budva",
+          "en": null
+        },
+        "lon": 18.845277777778,
+        "lat": 42.284722222222,
+        "wikidata": "Q174237",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "585",
+            "title": "Istorija Crne Gore, knjiga prva : Od najstarijih vremena do kraja XII vijeka",
+            "author": "Comité de rédaction présidé par Milinko Đurović",
+            "url": "https://archive.org/details/IstorijaCrneGoreKnjiga1"
+          },
+          "where": "Jovan Kovačević, « Od dolaska Slovena do kraja XII vijeka », p. 410, « Slabljenje dukljanske države »",
+          "quotation": "стоница  државе,  а Будва  се  увијек  налазила  у њеном  склопу.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (Budva toujours dans l'État)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "580",
+            "title": "« Duklja » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/duklja"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/duklja",
+          "quotation": "U XI. st. pripadali su joj gradovi Skadar, Ulcinj, Budva i Kotor.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (XIe siècle)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      },
+      "showInAtlas": false
+    },
+    {
+      "id": "699",
+      "place": {
+        "id": "707",
+        "name": {
+          "fr": "Bijela",
+          "en": null
+        },
+        "lon": 18.655555555556,
+        "lat": 42.453333333333,
+        "wikidata": "Q2027553",
+        "existsFrom": {
+          "year": 809,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "580",
+            "title": "« Duklja » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/duklja"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/duklja",
+          "quotation": "U XI. st. pripadali su joj gradovi Skadar, Ulcinj, Budva i Kotor.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (Kotor et ses environs au XIe siècle)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "581",
+            "title": "« Kotor » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/kotor"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/kotor",
+          "quotation": "Do 1185. smjenjivalo se nad Kotorom vrhovništvo Bizanta i zetskih vladara.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (suzeraineté sur Kotor, en alternance avec les souverains de Zeta jusqu'en 1185)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "585",
+            "title": "Istorija Crne Gore, knjiga prva : Od najstarijih vremena do kraja XII vijeka",
+            "author": "Comité de rédaction présidé par Milinko Đurović",
+            "url": "https://archive.org/details/IstorijaCrneGoreKnjiga1"
+          },
+          "where": "ch. « Травунија, Хум и Подгорје од X до XII вијека », p. 405",
+          "quotation": "угушивањем ове побуне, заузећем Травуније и Захумља и погибијом Доманека осигурана је апсолутна превласг Дукље над Травунијом и ЗахумЈнем.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (suprématie sur la Travunie)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "585",
+            "title": "Istorija Crne Gore, knjiga prva : Od najstarijih vremena do kraja XII vijeka",
+            "author": "Comité de rédaction présidé par Milinko Đurović",
+            "url": "https://archive.org/details/IstorijaCrneGoreKnjiga1"
+          },
+          "where": "même chapitre, p. 405",
+          "quotation": "Ипак je Травунија задржала и за владе крал>а Бодина извјесну самосталност, кад се у н>у могао да повуче Радослав са синовима пред прогонима Бодиновим",
+          "subject": "holder",
+          "holder": {
+            "name": "Travunie, autonome sous le roi Bodin",
+            "wikidata": null
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      },
+      "showInAtlas": false
+    },
+    {
       "id": "698",
       "place": {
         "id": "706",
@@ -1177,8 +6164,8 @@
           "fr": "Ortona",
           "en": null
         },
-        "lon": 14.4036,
-        "lat": 42.3557,
+        "lon": 14.403594444444,
+        "lat": 42.355658333333,
         "wikidata": "Q51256",
         "existsFrom": null,
         "existsTo": null
@@ -21736,16 +26723,16 @@
       "testimonies": [
         {
           "source": {
-            "id": "327",
-            "title": "Novara (Enciclopedia dell'Arte Medievale)",
-            "author": null,
-            "url": "https://www.treccani.it/enciclopedia/novara_(Enciclopedia-dell'-Arte-Medievale)/"
+            "id": "579",
+            "title": "Gli antichi vescovi d'Italia dalle origini al 1300 descritti per regioni. Piemonte",
+            "author": "Fedele Savio",
+            "url": "https://archive.org/details/gliantichivesco00savigoog"
           },
-          "where": "history",
-          "quotation": "nel 1000 Ottone III (983-1002) ampliò ulteriormente la giurisdizione del vescovo Pietro III (993-1032), svincolandola ormai da ogni autorità feudale laica",
+          "where": "p. 266-267, XLIX bis, Anselmo",
+          "quotation": "1099. dicembre 9. Investe Uberto figlio di Ottone di Bremosello di un fondo in Novara […] 1100. Vescovo eletto, da un'investitura di beni in Gozzano",
           "subject": "holder",
           "holder": {
-            "name": "Évêque de Novare",
+            "name": "Évêque de Novare (Anselme, 1087-1108)",
             "wikidata": "Q873259"
           }
         }
@@ -22663,21 +27650,6 @@
             "name": "Boniface del Vasto (comté d'Alba)",
             "wikidata": "Q1770709"
           }
-        },
-        {
-          "source": {
-            "id": "345",
-            "title": "Alba (Enciclopedia Italiana)",
-            "author": null,
-            "url": "https://www.treccani.it/enciclopedia/alba_(Enciclopedia-Italiana)/"
-          },
-          "where": "Storia",
-          "quotation": "Compaiono così, il 18 maggio 1179, i consoli",
-          "subject": "holder",
-          "holder": {
-            "name": "Commune d'Alba (consuls en 1179)",
-            "wikidata": null
-          }
         }
       ],
       "holder": {
@@ -23568,32 +28540,17 @@
       "testimonies": [
         {
           "source": {
-            "id": "327",
-            "title": "Novara (Enciclopedia dell'Arte Medievale)",
-            "author": null,
-            "url": "https://www.treccani.it/enciclopedia/novara_(Enciclopedia-dell'-Arte-Medievale)/"
+            "id": "579",
+            "title": "Gli antichi vescovi d'Italia dalle origini al 1300 descritti per regioni. Piemonte",
+            "author": "Fedele Savio",
+            "url": "https://archive.org/details/gliantichivesco00savigoog"
           },
-          "where": "history",
-          "quotation": "nel 1000 Ottone III (983-1002) ampliò ulteriormente la giurisdizione del vescovo Pietro III (993-1032), svincolandola ormai da ogni autorità feudale laica",
+          "where": "p. 266-267, XLIX bis, Anselmo",
+          "quotation": "1099. dicembre 9. Investe Uberto figlio di Ottone di Bremosello di un fondo in Novara […] 1100. Vescovo eletto, da un'investitura di beni in Gozzano",
           "subject": "holder",
           "holder": {
-            "name": "Évêque de Novare",
+            "name": "Évêque de Novare (Anselme, 1087-1108)",
             "wikidata": "Q873259"
-          }
-        },
-        {
-          "source": {
-            "id": "327",
-            "title": "Novara (Enciclopedia dell'Arte Medievale)",
-            "author": null,
-            "url": "https://www.treccani.it/enciclopedia/novara_(Enciclopedia-dell'-Arte-Medievale)/"
-          },
-          "where": "history",
-          "quotation": "nel 1110 Enrico V (1106-1125) incendiò la città e ne distrusse le mura, privilegiando da allora come interlocutrice la comunità dei cives",
-          "subject": "holder",
-          "holder": {
-            "name": "Saint-Empire romain germanique (Henri V, 1110)",
-            "wikidata": "Q12548"
           }
         }
       ],
@@ -27015,6 +31972,66 @@
             "name": "Royaume de Dioclée (après 1101)",
             "wikidata": "Q1252942"
           }
+        },
+        {
+          "source": {
+            "id": "580",
+            "title": "« Duklja » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/duklja"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/duklja",
+          "quotation": "U XI. st. pripadali su joj gradovi Skadar, Ulcinj, Budva i Kotor.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (XIe siècle)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "581",
+            "title": "« Kotor » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/kotor"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/kotor",
+          "quotation": "Do 1185. smjenjivalo se nad Kotorom vrhovništvo Bizanta i zetskih vladara.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (suzeraineté en alternance avec les souverains de Zeta jusqu'en 1185)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "586",
+            "title": "Memorie storiche sulle Bocche di Cattaro",
+            "author": "Giuseppe Gelcich",
+            "url": "https://archive.org/details/memoriestoriches00gelc"
+          },
+          "where": "pp. 54-55 (djvu text, lines ~5340-5356)",
+          "quotation": "continuando a reggersi con proprio governo, con leggi proprie, indipendenti da qualsifosse straniera influenza",
+          "subject": "holder",
+          "holder": {
+            "name": "Commune de Kotor (gouvernement propre)",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "587",
+            "title": "« Котор » (Wikipedia)",
+            "author": null,
+            "url": "https://sr.wikipedia.org/wiki/Котор"
+          },
+          "where": "section « Котор у Зети и Српској земљи »",
+          "quotation": "Котор је делимично аутономан град и у Краљевини Зети, од 1078. године до првих деценија XII века.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Zeta (Kotor en partie autonome, de 1078 aux premières décennies du XIIe siècle)",
+            "wikidata": "Q1252942"
+          }
         }
       ],
       "holder": {
@@ -27063,6 +32080,51 @@
           "subject": "holder",
           "holder": {
             "name": "Royaume de Dioclée — évêché suffragant de Bar (1089), par l'Église seulement",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "583",
+            "title": "« Ulcinj » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/ulcinj"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/ulcinj",
+          "quotation": "U XI. st. bio je u sastavu Zete, a od 1183. pod Nemanjićima.",
+          "subject": "holder",
+          "holder": {
+            "name": "Zeta (XIe siècle, jusqu'en 1183)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "580",
+            "title": "« Duklja » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/duklja"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/duklja",
+          "quotation": "U XI. st. pripadali su joj gradovi Skadar, Ulcinj, Budva i Kotor.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (XIe siècle)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "588",
+            "title": "« Ulcinj » (Wikipedia)",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Ulcinj"
+          },
+          "where": "section History",
+          "quotation": "By 1040, ''archon'' [[Vojislav of Duklja|Stefan Vojislav]] of [[Duklja]] conquered the region. In 1183,",
+          "subject": "holder",
+          "holder": {
+            "name": "Dioclée — conquise par l'archonte Stefan Vojislav vers 1040",
             "wikidata": "Q1252942"
           }
         }
@@ -27128,6 +32190,36 @@
           "subject": "holder",
           "holder": {
             "name": "Royaume de Dioclée — serbe depuis les années 1040",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "582",
+            "title": "« Bar » (Hrvatska enciklopedija)",
+            "author": null,
+            "url": "https://www.enciklopedija.hr/clanak/bar"
+          },
+          "where": "https://www.enciklopedija.hr/clanak/bar",
+          "quotation": "Bar je do 989. pripadao Dračkoj temi, zatim temi Dalmaciji, nakon 1042. Zeti, 1183. osvojio ga je Stefan Nemanja",
+          "subject": "holder",
+          "holder": {
+            "name": "Zeta (de 1042 à 1183)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "pp. 212–213, the residences of the Diocleian kings",
+          "quotation": "in  der  Zupa  Prapratna  bei \nAntivari,  die  auch  der  Fortsetzer  des  Skylitzes  kennt",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — une résidence des rois dans la joupanie de Prapratna près d'Antivari",
             "wikidata": "Q1252942"
           }
         }
