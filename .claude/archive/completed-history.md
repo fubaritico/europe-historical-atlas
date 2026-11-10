@@ -2,6 +2,29 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-10 — l'historien : les livres hors ligne, 1000 retouchée, l'Italie de 1100 saisie, le lot géographique
+
+Une plage, **10/11 12:06 → 17:02** (4 h 55) ; le chantier ouvert le 05/10 totalise **253 h 29 sur 43 plages**. Session
+« historien ». **Sur `main`, non poussé** : `ec03d92`, `91fdede`, `ad6b915`, `90f22bd`, `b284805`, `ec9adc6`, `e0ddd40`,
+`c467259`.
+
+- **Ses livres** : aucun sur JSTOR ni Gallica (vérifié dans son Chrome) ; cinq empruntables sur archive.org (Duby, Chambers,
+  De Vos–Geivers, Nicolle et la Russie en anglais), huit à scanner (`files/plans/sources/bibliotheque.md`).
+- **1000 retouchée par le pilote** (CARTO-403) : les Hébrides (Skye à la Norvège, détroit de Kyle Rhea comblé par le masque),
+  Ardnamurchan, le Dornoch Firth, la reprise du Danemark (14 510 km²) et des Bouyides à Ormuz ; huit côtes refusées par le
+  pilote lui-même (journal de la skill). Ramenée dans l'arbre de `main` à sa demande, non commitée — il la finit.
+- **L'Italie de 1100** : 508 communes de plus de 20 000 habitants, dix lots, 1 579 citations revérifiées ; 357 villes et
+  272 sources saisies par le MCP, 63 désaccords avec la carte (`files/plans/sources/1100-italy.md`).
+- **CMS-414, le lot géographique** (sa demande : *« le pays d'aujourd'hui, c'est d'où on vient et vers où on va »*) : pays et
+  région lus dans Wikidata, une liste quand il y en a plusieurs (sa règle) ; essayé par lui sur Ortona. **Le rattrapage
+  attend une session neuve** : l'outil MCP de celle-ci ne voyait pas les champs (`next-historian.md`).
+- **Tickets créés à sa demande** : CARTO-413 (une ville à moins de 5 km de son pays, rattachée — mesuré : 18 villes),
+  CMS-414.
+- **Mes fautes** : Aoste mise dans le lot de la Sardaigne (région déduite de la longitude) ; un `heredoc` non protégé a envoyé
+  six mots entre accents graves au shell (rien n'a tourné, fichier réparé) ; une règle de date ajoutée en cours de saisie,
+  qui a laissé 25 fiches de Campanie sans ligne (corrigées) et quatre du nord-ouest à reprendre ; une première lecture
+  Wikidata qui prenait les pays disparus (corrigée, `e0ddd40`).
+
 ### 2026-11-09 → 10 nuit — l'instance du code : les hachures cuites, la carte par palier, 1300 publiée
 
 Deux plages, **09/11 11:46 → 18:50 et 23:35 → 01:13** (8 h 41) ; le chantier ouvert le 05/10 totalise **248 h 28 sur 42

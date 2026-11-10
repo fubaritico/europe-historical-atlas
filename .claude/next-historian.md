@@ -5,33 +5,50 @@
 > it. The tasks are the board (`/trello`); this file holds where the historian stopped. Its readings are the team's,
 > never attributed to a person (memory `a-reading-is-never-attributed-to-the-dev`).
 
-## ▶ D'ABORD — le rattrapage du lot géographique (CMS-414), prêt, à lancer dans une session neuve
+## ▶ ON REPREND ICI — 11/11 : finir l'Adriatique de 1100, l'arrière-pays croate et bosniaque d'abord — CARTO-417
 
-Le pays et la région d'aujourd'hui de chaque lieu (`ec9adc6`, `e0ddd40`) : les champs, le bouton et la lecture sont
-commités et essayés par le dev sur Ortona. **Le rattrapage n'est pas écrit** : la session du 10/11 gardait l'outil
-`updatePlaces` d'avant les champs (même après `/mcp` et la relance de son CMS — le serveur, lui, les connaît). Tout est
-prêt dans `files/resources/lot-backfill/` (ignoré par git) : `BRIEF.md`, quatre paquets `updates-1..4.json` (699 lieux,
-665 avec leur région, lus dans Wikidata « aujourd'hui seulement »), `to-decide.json` (41 cas pour le dev : plusieurs
-pays — Jérusalem, Prizren, Lipljan, Rome, Derbent, Arnedo —, aucun pays, plusieurs ou aucune région). D'abord vérifier
-que `updatePlaces` a bien `country` et `region` ; puis un agent par paquet ; relire la base en lecture seule ; le
-ticket CMS-414 à « À valider » avec la liste des 41.
+Sa demande du 10/11 au soir : *« on reprend et on termine cette question-là »*, sur cet inventaire. Tout le travail est dans
+`files/resources/adriatic-1100-research/` (git-ignoré) ; la synthèse, commitée, `files/plans/sources/1100-adriatic.md`.
 
-**L'Italie de 1100 est dans sa base** (357 villes, 272 sources, `files/plans/sources/1100-italy.md`) ; les lignes du
-nord-ouest d'avant la règle de date corrigées le 10/11 (Novare et Trecate sur Savio 1898) ; les deux sources sans ligne
-(EAM « Novara », EI « Alba ») supprimées par lui dans l'admin le même jour.
+**1. L'arrière-pays (Croatie et Bosnie hors de la bande côtière) — en cours, à finir.** Sa règle : *« des villes, des
+villes »*, ratisser large, **par la date de création, pas par la population**. Fait : le vivier, 13 358 localités de
+Croatie et de Bosnie pas encore étudiées (`inland/pool.json`) ; 424 forteresses de Wikidata (`inland/forts.json`, des
+repères) ; la collecte des articles hr, bs, sh, sr de chaque localité lancée (`inland/fetch.py`, reprend où elle s'est
+arrêtée : relancer `python3 -I inland/fetch.py inland`). **Reste** : extraire de chaque article la date de première
+mention (« prvi put se spominje 1103 », « u XI. stoljeću ») et garder ce qui est daté **avant 1150** ou du XIIᵉ siècle et
+avant ; y joindre les chefs-lieux de župa ; retirer quartiers et doublons ; lui donner le compte par région **avant** de
+lancer ; puis les lots (le `BRIEF.md` de la côte, plus la župa de chaque district), la revérification, la saisie.
 
-## ▶ EN COURS — l'Adriatique de 1100 (sa demande du 10/11 au soir : « toutes les villes que Venise tenait en 1100 »)
+**2. Les écarts avec sa carte de 1100 — à lui, dans le Cartographe** (le détail par ville : la synthèse) :
+- **pas de royaume de Croatie** (1097–1102, sans roi ; la Hongrie de Coloman est l'autre lecture, proche) — hachures, ou un
+  pays de plus ;
+- **l'Istrie au Saint-Empire, pas à Venise** : Pula, Poreč, Buje, Tar, Rovinj, Galižana ; le territoire de Piran (Lucija,
+  Seča) ; Rijeka et Kastav, sur la Hongrie dans la carte ;
+- **Split** (carte : Hongrie) à Venise pour Byzance de 1097 à 1105 ; **Biograd** (carte : Venise) croate ou hongroise ;
+  **Mestre** (carte : Venise) au royaume d'Italie ;
+- **les îles** : Brač, Hvar, Vis plutôt croates (carte : Venise) ; Korčula et Lastovo à la Zachlumie de Bodin ;
+- **la Serbie de la carte** sur Vrgorac, Ploče, Grude, Vau i Dejës, Shëngjin : aucune source ;
+- **la côte dessinée trop courte** : Zadar, Trogir, Murano, Bibione, Rab, Hvar, Makarska, Budva → Petrovac, Kassiopi,
+  Piran, Umag, Novigrad, Rovinj ;
+- **des lieux qui n'existaient pas** encore sur la carte : Pag ville (c'était Novalja), Kamen, Košute, Loreto.
 
-Candidates lues dans Wikidata (pas Google) : les lieux habités à moins de 30 km de la mer, **≥ 1 000 habitants
-aujourd'hui** (les dates de Wikidata sont trop rares pour filtrer : 13 lieux datés), **le Monténégro entier** (sa
-demande), **une ville par île** — celle qu'une source atteste en 1100, pas la plus peuplée (Osor, pas Cres) ; les îles
-de la mer Égée **plus tard** (65 îles listées, `islands-aegean.json` dans le scratchpad, à refaire). Quartiers, monuments
-et doublons retirés. Tout est dans `files/resources/adriatic-1100-research/` (git-ignoré) : `BRIEF.md`, `candidates.json`,
-26 lots, `reports/`, `sources/`. **Fait le 10/11** : les 26 lots, 393 lieux (74 existaient en 1100), 2 231 citations
-revérifiées, **saisis** (70 lieux, 69 fiches, 90 sources) ; la synthèse et les écarts avec la carte :
-`files/plans/sources/1100-adriatic.md`. La règle de date tranchée par lui (une tenure commencée avant 1100 et pas
-finie compte, écrit dans `/enter-in-cms`). **À lui** : l'écart majeur — pas de royaume de Croatie sur la carte de 1100 ; le QID faux de `byzantine-empire`
-dans le registre (Q112039853 → Q12544). Non commité : ce fichier, `1100-italy.md`, `1100-adriatic.md`.
+**3. À commiter après son coup d'œil** : les identifiants Wikidata corrigés dans `years/1100`, `1200`, `1300`
+`registry.json` (Empire byzantin Q12544 et les onze de `wikidata-1100.md`) — **1000 jamais** (sa décision) ; `1100/polities.json`
+modifié est à lui (son Cartographe).
+
+**4. Dans la base, à trancher ou compléter** : deux villes sans fiche de 1100 faute de source datée (Himarë, Biševo) ;
+Massa Fiscaglia, détenteur sans ligne qui le porte ; les détenteurs hors de la carte (« Royaume de Croatie » Q858841,
+« Zachlumie » Q1311704) que le Cartographe dira « à déclarer » ; les régions slovènes saisies avec le nom anglais de la
+commune ; la licence « domaine public » posée par un agent sur Monticolo, Romanin, Arditi (à vérifier) ; la source 619
+(Benussi) sans adresse.
+
+**5. Les pistes à lire dans son Chrome** (refusées aux scripts) : HRČAK (Ančić 1998 et 2011, Šišić sur Coloman), Stephenson
+2000, Budak 2018, Kandler, la *Tabula Imperii Byzantini* 3, Ducellier sur Persée — chaque rapport liste les siennes.
+
+**6. Ensuite** : les îles de la mer Égée (65 listées, `islands-aegean.json` dans le scratchpad du 10/11, à refaire) ;
+CMS-414, ses 41 cas ; CMS-416, un sujet de conversation (une fiche par détenteur, la taille de la base).
+
+**L'Italie de 1100 est dans sa base** (357 villes, `1100-italy.md`), le nord-ouest corrigé (Novare et Trecate sur Savio).
 
 ## ▶ ON REPREND ICI — 10/11, après la nuit des sept cartes
 

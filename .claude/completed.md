@@ -31,27 +31,26 @@ Une plage, **10/11 12:06 → 19:00** (6 h 54, partagée avec la session de l'his
   posé après la fermeture, deux que le bord du monde faisait passer), corrigés ; un commit tenté avant son test de l'appui
   ciblé, arrêté par lui ; un `cd`.
 
-### 2026-11-10 — l'historien : les livres hors ligne, 1000 retouchée, l'Italie de 1100 saisie, le lot géographique
+### 2026-11-10 soir — l'historien : l'Adriatique de 1100, Novare sur un témoin de 1100, le lot géographique saisi
 
-Une plage, **10/11 12:06 → 17:02** (4 h 55) ; le chantier ouvert le 05/10 totalise **253 h 29 sur 43 plages**. Session
-« historien ». **Sur `main`, non poussé** : `ec03d92`, `91fdede`, `ad6b915`, `90f22bd`, `b284805`, `ec9adc6`, `e0ddd40`,
-`c467259`.
+La session ouverte à 17:05, dans la plage du journal **10/11 12:06 → 20:59** (8 h 53, partagée avec l'instance du code) ;
+le chantier ouvert le 05/10 totalise **257 h 26 sur 43 plages**. **Sur `main`, non poussé** : `5a4859c`, `3462c6c`.
 
-- **Ses livres** : aucun sur JSTOR ni Gallica (vérifié dans son Chrome) ; cinq empruntables sur archive.org (Duby, Chambers,
-  De Vos–Geivers, Nicolle et la Russie en anglais), huit à scanner (`files/plans/sources/bibliotheque.md`).
-- **1000 retouchée par le pilote** (CARTO-403) : les Hébrides (Skye à la Norvège, détroit de Kyle Rhea comblé par le masque),
-  Ardnamurchan, le Dornoch Firth, la reprise du Danemark (14 510 km²) et des Bouyides à Ormuz ; huit côtes refusées par le
-  pilote lui-même (journal de la skill). Ramenée dans l'arbre de `main` à sa demande, non commitée — il la finit.
-- **L'Italie de 1100** : 508 communes de plus de 20 000 habitants, dix lots, 1 579 citations revérifiées ; 357 villes et
-  272 sources saisies par le MCP, 63 désaccords avec la carte (`files/plans/sources/1100-italy.md`).
-- **CMS-414, le lot géographique** (sa demande : *« le pays d'aujourd'hui, c'est d'où on vient et vers où on va »*) : pays et
-  région lus dans Wikidata, une liste quand il y en a plusieurs (sa règle) ; essayé par lui sur Ortona. **Le rattrapage
-  attend une session neuve** : l'outil MCP de celle-ci ne voyait pas les champs (`next-historian.md`).
-- **Tickets créés à sa demande** : CARTO-413 (une ville à moins de 5 km de son pays, rattachée — mesuré : 18 villes),
-  CMS-414.
-- **Mes fautes** : Aoste mise dans le lot de la Sardaigne (région déduite de la longitude) ; un `heredoc` non protégé a envoyé
-  six mots entre accents graves au shell (rien n'a tourné, fichier réparé) ; une règle de date ajoutée en cours de saisie,
-  qui a laissé 25 fiches de Campanie sans ligne (corrigées) et quatre du nord-ouest à reprendre ; une première lecture
-  Wikidata qui prenait les pays disparus (corrigée, `e0ddd40`).
+- **CMS-414, rattrapage fait** : 699 lieux sur 706 ont leur pays, 665 leur région ; 41 cas à lui (ticket en À valider).
+- **Le nord-ouest de l'Italie corrigé** (règle de date) : Alba sans sa ligne de 1179, Novare et Trecate sur **Savio 1898,
+  p. 266-267** (l'évêque Anselme en 1099-1100) ; deux sources orphelines supprimées par lui dans l'admin.
+- **CARTO-401, Fait** (1300, son « très satisfaisant » du 09/11).
+- **L'Adriatique de 1100** (sa demande : *« toutes les villes que Venise tenait en 1100 »*) : candidates lues dans Wikidata
+  (30 km de la mer, ≥ 1 000 hab., le Monténégro entier, une ville par île), 26 lots, 393 lieux, **74 existaient** ;
+  2 231 citations revérifiées ; **saisis** : 70 lieux, 69 fiches, 90 sources ; exportés (`3462c6c`). Les écarts avec sa
+  carte : `files/plans/sources/1100-adriatic.md`.
+- **Ses décisions** : la règle de date (*« pour l'instant, à moins qu'on trouve d'autres sources »* — une tenure commencée
+  avant et courant en 1100 compte), écrite dans `/enter-in-cms` ; les îles de la mer Égée plus tard ; ratisser large dans
+  l'arrière-pays, par la date et non la population (*« des villes, des villes, des villes »*).
+- **Les identifiants Wikidata des cartes corrigés** sur sa demande (1000, 1100, 1200, 1300 ; Empire byzantin Q12544 et les
+  onze de l'audit `wikidata-1100.md`) — **non commités**, après son coup d'œil.
+- **Tickets** : CMS-416 en Idées (une fiche par détenteur, la taille de la base).
+- **Mes fautes** : un `cd` dans une commande Python ; un premier filtre des quartiers qui jetait Rijeka et Herceg Novi
+  (repris) ; un message de commit trop long refusé par le contrôle ; deux agents qui ont mis un `cd`.
 
 > Older sessions (2026-09-12 → 2026-11-10 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
