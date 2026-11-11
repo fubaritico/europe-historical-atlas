@@ -26,9 +26,13 @@ Gather all necessary written context from previous session.
      chantier's state, and **compare « Maintenant » with `date` and the environment's date** before saying how
      long ago the last session ended. The hook's injected line can be stale (written at a `/clear` the night
      before).
-2. Work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md).
-   **Started as the historian** (*« en tant qu'historien »*): read **also** `.claude/next-historian.md` — the maps, the
-   sources, the scans; `next.md` stays read, for what the code instance is doing (the dev, 2026-11-10).
+2. **Take the role** — the argument names it (`/start-session coder`, `/start-session historian`, sent by the agent
+   file `.claude/agents/<role>.md` as the session's first prompt); none given means `coder`, the project's default
+   (the dev, 2026-11-11). **Read `.claude/roles/<role>.md` whole** and hold to it: what the role does, what it does
+   not, its tree. Say the role in the first line of the briefing.
+   Then work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md).
+   **As the historian**: read **also** `.claude/next-historian.md` — the maps, the sources, the scans; `next.md` stays
+   read, for what the coder is doing (the dev, 2026-11-10).
 3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (most rules are
    path-scoped and the prompt hook names the rest; no need to ask the dev which files)
 4. Say in one line which rules are loaded, so the dev can name what is missing

@@ -3,3 +3,6 @@ pnpm run type-check
 # One package at a time, as the CI does since 2026-11-08: five suites at once on every core saturate the machine and
 # time out tests that pass alone (REPO-260; load 97, 2026-11-09).
 pnpm exec turbo test --concurrency=1
+# Claude's own hooks and status line (2026-11-11, review ARCH-002): a guard that lets writes through stays green
+# otherwise. Named folders, never a recursive glob: .claude/worktrees/ holds whole copies of the repository.
+node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'

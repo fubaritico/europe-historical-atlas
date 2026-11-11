@@ -1,4 +1,4 @@
-// Run: node --test .claude/hooks/
+// Run: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'

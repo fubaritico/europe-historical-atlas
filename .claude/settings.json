@@ -1,4 +1,9 @@
 {
+  "agent": "coder",
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$(git rev-parse --show-toplevel)/.claude/statusline.mjs\""
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -11,6 +16,15 @@
       }
     ],
     "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-role.mjs\""
+          }
+        ]
+      },
       {
         "matcher": "compact|clear",
         "hooks": [
