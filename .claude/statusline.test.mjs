@@ -24,6 +24,9 @@ describe('statusline', () => {
   it('an unknown role is shown by its own name', () => {
     assert.match(statusLine({ agent: { name: 'reviewer' } }, 'main'), /^reviewer · /)
   })
+  it('the tree’s note wins over the agent: a sentence made the session historian', () => {
+    assert.match(statusLine({ agent: { name: 'coder' } }, 'main', 'historian'), /^historien · /)
+  })
   it('a branch git cannot tell reads as unknown', () => {
     assert.match(statusLine({}, null), /branche inconnue$/)
   })
@@ -32,7 +35,8 @@ describe('statusline', () => {
       input: JSON.stringify({ agent: { name: 'coder' }, workspace: { current_dir: here } }),
       encoding: 'utf8',
     })
-    assert.match(out, /^codeur · arbre main · branche \S+$/)
+    // The role is this tree's own note when it has one — codeur or historien, never « sans rôle » with an agent given.
+    assert.match(out, /^(codeur|historien) · arbre main · branche \S+$/)
     assert.doesNotMatch(out, /inconnue/)
   })
   it('run on input that is not JSON, it says the line cannot be read', () => {

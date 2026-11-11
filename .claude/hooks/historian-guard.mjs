@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * The historian's guard — a PreToolUse hook declared in `.claude/agents/historian.md`, so it runs only in a session
- * started with `claude --agent historian`. The historian researches, enters the CMS and draws in the Cartographer;
+ * The historian's guard — a PreToolUse hook declared in `.claude/settings.json`, which acts only when the session's
+ * role is the historian: the tree's role note (`role-state.mjs`, set by a sentence or by `claude --agent historian`),
+ * else the agent the session was started as. The historian researches, enters the CMS and draws in the Cartographer;
  * it never writes the code. Every Edit, Write or NotebookEdit aimed under `packages/` — of the main tree or of any
  * worktree — is denied, with the reason Claude reads and passes on.
  *
@@ -21,6 +22,8 @@
 import { readFileSync } from 'node:fs'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { DEFAULT_ROLE, readRole } from './role-state.mjs'
 
 /** The folder the historian never writes in, relative to a tree's root. */
 export const CODE_ROOT = 'packages'
@@ -55,12 +58,26 @@ export const isCodePath = (target, projectDir) => {
 }
 
 /**
+ * The session's role for the guard: the tree's note, else the agent it was started as, else the coder.
+ * @param {string | null} noted - The tree's role note.
+ * @param {unknown} input - The parsed hook input (`agent_type`).
+ * @returns {string} The role.
+ */
+export const sessionRole = (noted, input) => {
+  if (noted) return noted
+  const agent = typeof input === 'object' && input !== null ? input.agent_type : undefined
+  return agent === 'historian' ? 'historian' : DEFAULT_ROLE
+}
+
+/**
  * Builds the hook's answer for one tool call.
  * @param {unknown} input - The parsed hook input.
  * @param {string | undefined} projectDir - `CLAUDE_PROJECT_DIR`.
+ * @param {string} role - The session's role ({@link sessionRole}).
  * @returns {string | null} The reason to deny, or null to let the call go on through the normal permissions.
  */
-export const denialFor = (input, projectDir) => {
+export const denialFor = (input, projectDir, role) => {
+  if (role !== 'historian') return null
   if (!projectDir) return 'The historian guard cannot tell the project root (CLAUDE_PROJECT_DIR is unset): write refused.'
   const toolInput = typeof input === 'object' && input !== null ? input.tool_input : undefined
   const target = toolInput?.file_path ?? toolInput?.notebook_path
@@ -88,9 +105,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     input = JSON.parse(readFileSync(0, 'utf8'))
   } catch (error) {
+    const dir = process.env.CLAUDE_PROJECT_DIR
+    if (dir && sessionRole(readRole(dir), null) !== 'historian') process.exit(0)
     deny(`The historian guard could not read its input (${error instanceof Error ? error.message : String(error)}): write refused.`)
     process.exit(0)
   }
-  const reason = denialFor(input, process.env.CLAUDE_PROJECT_DIR)
+  const projectDir = process.env.CLAUDE_PROJECT_DIR
+  const reason = denialFor(input, projectDir, sessionRole(projectDir ? readRole(projectDir) : null, input))
   if (reason) deny(reason)
 }

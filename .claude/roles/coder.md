@@ -1,8 +1,10 @@
 # Role — the coder
 
-> Read by `/start-session coder`, the first prompt of a session started as `claude` (the project's default agent) or
-> `claude --agent coder` (`.claude/agents/coder.md`). The dev's call, 2026-11-11: one role per session, a role file
-> each, the default being the coder. Split of the work: the dev, 2026-11-10 (memory `roles-atlas-vs-historian`).
+> The role of every session that names no other: `claude` (the project's default agent) or `claude --agent coder`
+> (`.claude/agents/coder.md`, whose first prompt is `/start-session coder`); taken again mid-session by « prends le
+> rôle du codeur ». The hook `session-role.mjs` notes the role in the tree and hands this page over. The dev's calls,
+> 2026-11-11: one role per session, a role file each, the default the coder, a sentence as good as the command. Split
+> of the work: the dev, 2026-11-10 (memory `roles-atlas-vs-historian`).
 
 ## What the coder does
 

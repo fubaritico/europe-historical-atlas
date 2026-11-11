@@ -1,11 +1,14 @@
 // Run: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { describe, it } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-import { denialFor, isCodePath, mainRootOf } from './historian-guard.mjs'
+import { denialFor, isCodePath, mainRootOf, sessionRole } from './historian-guard.mjs'
+import { writeRole } from './role-state.mjs'
 
 const script = join(dirname(fileURLToPath(import.meta.url)), 'historian-guard.mjs')
 const root = '/repo'
@@ -68,39 +71,75 @@ describe('historian-guard', () => {
     })
   })
 
+  describe('sessionRole', () => {
+    it('the tree’s note wins over the agent the session was started as', () => {
+      assert.equal(sessionRole('historian', { agent_type: 'coder' }), 'historian')
+      assert.equal(sessionRole('coder', { agent_type: 'historian' }), 'coder')
+    })
+    it('without a note, a session started as the historian is the historian', () => {
+      assert.equal(sessionRole(null, { agent_type: 'historian' }), 'historian')
+    })
+    it('without a note or an agent, the session is the coder', () => {
+      assert.equal(sessionRole(null, {}), 'coder')
+      assert.equal(sessionRole(null, null), 'coder')
+    })
+  })
+
   describe('denialFor', () => {
-    it('denies an Edit under packages/ and names the coder session', () => {
-      const reason = denialFor({ tool_input: { file_path: '/repo/packages/atlas/src/main.ts' } }, root)
+    it('denies a historian’s Edit under packages/ and names the coder session', () => {
+      const reason = denialFor({ tool_input: { file_path: '/repo/packages/atlas/src/main.ts' } }, root, 'historian')
       assert.match(reason, /packages\/atlas\/src\/main\.ts is under packages\//)
       assert.match(reason, /claude --agent coder/)
     })
-    it('denies a notebook under packages/', () => {
-      assert.notEqual(denialFor({ tool_input: { notebook_path: 'packages/a.ipynb' } }, root), null)
+    it('lets the coder write under packages/', () => {
+      assert.equal(denialFor({ tool_input: { file_path: '/repo/packages/atlas/src/main.ts' } }, root, 'coder'), null)
     })
-    it('lets a note through', () => {
-      assert.equal(denialFor({ tool_input: { file_path: '/repo/files/plans/x.md' } }, root), null)
+    it('denies a historian’s notebook under packages/', () => {
+      assert.notEqual(denialFor({ tool_input: { notebook_path: 'packages/a.ipynb' } }, root, 'historian'), null)
     })
-    it('refuses when the project root is unknown', () => {
-      assert.match(denialFor({ tool_input: { file_path: '/repo/files/x.md' } }, undefined), /CLAUDE_PROJECT_DIR/)
+    it('lets a historian’s note through', () => {
+      assert.equal(denialFor({ tool_input: { file_path: '/repo/files/plans/x.md' } }, root, 'historian'), null)
     })
-    it('refuses when the input carries no path', () => {
-      assert.match(denialFor({ tool_input: {} }, root), /cannot read the path/)
+    it('refuses a historian’s write when the project root is unknown', () => {
+      assert.match(denialFor({ tool_input: { file_path: '/repo/files/x.md' } }, undefined, 'historian'), /CLAUDE_PROJECT_DIR/)
+    })
+    it('refuses a historian’s write when the input carries no path', () => {
+      assert.match(denialFor({ tool_input: {} }, root, 'historian'), /cannot read the path/)
     })
   })
 
   describe('as Claude Code runs it', () => {
-    it('prints a PreToolUse deny for a write under packages/', () => {
-      const out = JSON.parse(run({ tool_name: 'Edit', tool_input: { file_path: '/repo/packages/cms/a.ts' } }))
+    const treeWith = (role) => {
+      const tree = mkdtempSync(join(tmpdir(), 'guard-'))
+      if (role) writeRole(tree, role)
+      return tree
+    }
+    it('in a tree noted historian, prints a PreToolUse deny for a write under packages/', () => {
+      const tree = treeWith('historian')
+      const out = JSON.parse(run({ tool_name: 'Edit', tool_input: { file_path: join(tree, 'packages/cms/a.ts') } }, tree))
       assert.equal(out.hookSpecificOutput.hookEventName, 'PreToolUse')
       assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
     })
-    it('prints nothing for a write elsewhere', () => {
-      assert.equal(run({ tool_name: 'Write', tool_input: { file_path: '/repo/files/plans/a.md' } }), '')
+    it('in a tree noted coder, says nothing for a write under packages/', () => {
+      const tree = treeWith('coder')
+      assert.equal(run({ tool_name: 'Edit', tool_input: { file_path: join(tree, 'packages/cms/a.ts') } }, tree), '')
     })
-    it('denies when stdin is not JSON', () => {
-      const out = JSON.parse(run('not json'))
+    it('in a tree with no note, a session started as the historian is guarded', () => {
+      const tree = treeWith(null)
+      const out = JSON.parse(run({ agent_type: 'historian', tool_input: { file_path: join(tree, 'packages/a.ts') } }, tree))
+      assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
+    })
+    it('in a tree noted historian, says nothing for a write elsewhere', () => {
+      const tree = treeWith('historian')
+      assert.equal(run({ tool_name: 'Write', tool_input: { file_path: join(tree, 'files/plans/a.md') } }, tree), '')
+    })
+    it('in a tree noted historian, denies when stdin is not JSON', () => {
+      const out = JSON.parse(run('not json', treeWith('historian')))
       assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
       assert.match(out.hookSpecificOutput.permissionDecisionReason, /could not read its input/)
+    })
+    it('in a tree noted coder, says nothing when stdin is not JSON', () => {
+      assert.equal(run('not json', treeWith('coder')), '')
     })
   })
 })

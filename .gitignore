@@ -18,6 +18,9 @@ coverage
 # Tooling caches
 .nx
 
+# The role each tree's Claude sessions hold, noted by .claude/hooks/role-state.mjs — local to the tree.
+**/.claude/state/
+
 # Vendored dependency sources (opensrc skill) — for study only. Anchored: unanchored, it also matched
 # .claude/skills/opensrc/ and lint-staged refused to re-stage the skill (2026-10-21).
 /opensrc/
