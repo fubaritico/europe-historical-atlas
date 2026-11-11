@@ -16,7 +16,7 @@ plus de celui-ci quand une session démarre « en tant qu'historien » (sa déci
 recherches et le Cartographe** (mémoire `roles-atlas-vs-historian`).
 
 **L'état** : `main` = le dépôt distant = `622b77f`, CI verte, site déployé (sa 1100 en ligne, vérifiée octet pour octet).
-Mon worktree `baked-years` (branche `atlas-396-speed`) et celui de l'historien (`historian-1109`) **synchronisés sur
+Mon worktree `coder`, branche `coder` (renommés le 11/11 ; avant, `baked-years` et `atlas-396-speed`) et celui de l'historien (`historian-1109`) **synchronisés sur
 `main`** — sa règle : chaque arbre suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant
 d'être nettoyées (1000 copiée dans l'arbre de `main` par l'historien, **non listée** dans `index.json` — sa décision du 10/11,
 on travaille avec en local). `tsx` est au catalogue depuis `f70b725` : `pnpm install` fait par lui.
