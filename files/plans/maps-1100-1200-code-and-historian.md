@@ -22,7 +22,7 @@ otherwise in his first message, which always wins.
 | | **the code** (first instance) | **the historian** (second instance) |
 | --- | --- | --- |
 | **its work** | the Cartographer and the atlas: *Save as…* first (CARTO-340; *Open…* is CARTO-339, waiting on his test), then speed (ATLAS-333); then the cities' pivots in the Cartographer (CARTO-193), the panels (CARTO-336), the vote (CORE-337) | the dev's questions about a country at a date (1100, 1200), researched on Wikipedia, Wikidata and beyond; the sources by question and by year; who is vassal of whom in 1100 and 1200; then the CMS: each source linked to a year and to the question it proves (CMS-338), and « tenue par » (CMS-335) |
-| **where it works** | the repository's own folder, `~/Desktop/WebstormProjects/europe-map/` — the one the dev's servers serve, so he tests what it builds | **at first, only `files/plans/sources/`** — Markdown, no code: `1100.md`, `1200.md` (the questions), `vassals-1100.md`, `vassals-1200.md`. **For the CMS's code**, a separate copy of the repository, a git worktree on a branch (below), never the main folder |
+| **where it works** | the repository's own folder, `~/Desktop/WebstormProjects/europe-map/` — the one the dev's servers serve, so he tests what it builds | **at first, only `files/plans/sources/`** — Markdown, no code: `1100/questions.md`, `1200/questions.md` (the questions), `vassals-1100.md`, `vassals-1200.md`. **For the CMS's code**, a separate copy of the repository, a git worktree on a branch (below), never the main folder |
 | **its servers** | the dev's — it never starts one (`memory: one-dev-server`) | **none, ever**. It reads the dev's CMS base read-only when needed (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) |
 | **its tickets** | the ones it works on, moved to *En cours* | the same — one or two *En cours*, never the code's |
 
@@ -56,7 +56,7 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
    page; a page written from a book → cite **the book**: *"you climb the thread of the reference."* Wikipedia in fr, en
    and the country's own language; Wikidata; the declared source of a map. Never a fact from memory left ungraded.
 2. **It answers first**, short: the answer, and how sure — *lu sur la page*, *vérifié*, *de mémoire*.
-3. **It files it**, in the same breath, in the year's file (`files/plans/sources/1100.md`):
+3. **It files it**, in the same breath, in the year's file (`files/plans/sources/1100/questions.md`):
 
    ```markdown
    ## Mourom-Riazan — de qui dépend-il en 1100 ?
@@ -68,7 +68,8 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
    **Les sources divergent** : Wikipédia (fr) donne Mourom 989–1390 — à arbitrer par le dev.
    ```
 
-   **The year's file**, one per year (`1100.md`, `1200.md`): a short head saying what the file is, then **one section
+   **The year's file**, one per year (`1100/questions.md`, `1200/questions.md` — since 2026-11-12 a year's notes live
+   together in its own folder, the dev's call): a short head saying what the file is, then **one section
    per question**, newest at the bottom, titled by the entity and the question. Each holds the **answer** (one or two
    lines), its **certainty** (*lu sur la page* / *vérifié* / *de mémoire*), and **one line per source**: the work at the
    end of the chain (author, title, year, page when known), its **kind** (primary document, historian's atlas or book,
@@ -91,7 +92,7 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
    `copyOf`, but no year nor question). **The route, agreed by both instances and approved by the dev (2026-11-02
    evening)**: ~~CMS-338 adds the fields *year* and *question* to `Sources`~~ — **changed the same evening, on the dev's word**:
    what goes in first is what the Cartographer uses, the witness cities and their holder, « tenue par » (CMS-335,
-   `ecd33d8`); CMS-338 is parked, the questions stay in `sources/1100.md`. Then the branch installs `@payloadcms/plugin-mcp`
+   `ecd33d8`); CMS-338 is parked, the questions stay in `sources/1100/questions.md`. Then the branch installs `@payloadcms/plugin-mcp`
    (`3001afc`) (the dev's choice in `contribution/source-manager.md`, « Driven by
    voice »); once merged, he creates the API key in the admin and runs `claude mcp add` himself, and the historian enters
    each source through the MCP tools, one by one, seen in the admin. No skill parses the file; one may come later if the

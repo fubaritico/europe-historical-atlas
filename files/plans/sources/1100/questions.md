@@ -684,7 +684,7 @@ state, 1100 » cut at Granada; the two Penguin atlases have no text layer and we
   the map**: Valencia and Sagunto are « to declare ». Shepherd 1911 (pl. 66) and the *Roudh el-Kartas* put Valencia in the
   Almoravid dominions — kept as divergent lines.
 - **Byzantine Empire, Q12544** — Durazzo, Ragusa, Skopje, Prizren, Lipljan, Vranje, Niš, Belgrade, Braničevo. **The map's
-  registry carries Q112039853** (« Foreign relations of the Byzantine Empire », already noted in `wikidata-1100.md`): every
+  registry carries Q112039853** (« Foreign relations of the Byzantine Empire », already noted in `wikidata.md`): every
   Byzantine city will read « to declare » until the registry is corrected — the dev's call in the Cartographer.
 - **Kingdom of Duklja, Q1252942** — Scutari, Antivari, Dulcigno, Cattaro, Trebinje. **Zachlumia, Q1311704** — Ston; not on
   the map. **Kingdom of Hungary, Q171150** — Sirmium, Hungarian since 1071 (Fine).

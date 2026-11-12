@@ -8,7 +8,7 @@
 ## ▶ ON REPREND ICI — 11/11 : finir l'Adriatique de 1100, l'arrière-pays croate et bosniaque d'abord — CARTO-417
 
 Sa demande du 10/11 au soir : *« on reprend et on termine cette question-là »*, sur cet inventaire. Tout le travail est dans
-`files/resources/adriatic-1100-research/` (git-ignoré) ; la synthèse, commitée, `files/plans/sources/1100-adriatic.md`.
+`files/resources/adriatic-1100-research/` (git-ignoré) ; la synthèse, commitée, `files/plans/sources/1100/adriatic.md`.
 
 **1. L'arrière-pays (Croatie et Bosnie hors de la bande côtière) — en cours, à finir.** Sa règle : *« des villes, des
 villes »*, ratisser large, **par la date de création, pas par la population**. Fait : le vivier, 13 358 localités de
@@ -33,7 +33,7 @@ lancer ; puis les lots (le `BRIEF.md` de la côte, plus la župa de chaque distr
 - **des lieux qui n'existaient pas** encore sur la carte : Pag ville (c'était Novalja), Kamen, Košute, Loreto.
 
 **3. À commiter après son coup d'œil** : les identifiants Wikidata corrigés dans `years/1100`, `1200`, `1300`
-`registry.json` (Empire byzantin Q12544 et les onze de `wikidata-1100.md`) — **1000 jamais** (sa décision) ; `1100/polities.json`
+`registry.json` (Empire byzantin Q12544 et les onze de `1100/wikidata.md`) — **1000 jamais** (sa décision) ; `1100/polities.json`
 modifié est à lui (son Cartographe).
 
 **4. Dans la base, à trancher ou compléter** : deux villes sans fiche de 1100 faute de source datée (Himarë, Biševo) ;
@@ -48,7 +48,7 @@ commune ; la licence « domaine public » posée par un agent sur Monticolo, Rom
 **6. Ensuite** : les îles de la mer Égée (65 listées, `islands-aegean.json` dans le scratchpad du 10/11, à refaire) ;
 CMS-414, ses 41 cas ; CMS-416, un sujet de conversation (une fiche par détenteur, la taille de la base).
 
-**L'Italie de 1100 est dans sa base** (357 villes, `1100-italy.md`), le nord-ouest corrigé (Novare et Trecate sur Savio).
+**L'Italie de 1100 est dans sa base** (357 villes, `1100/italy.md`), le nord-ouest corrigé (Novare et Trecate sur Savio).
 
 ## ▶ ON REPREND ICI — 10/11, après la nuit des sept cartes
 

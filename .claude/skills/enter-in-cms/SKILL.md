@@ -65,6 +65,11 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   it states runs through 1100: a span (« from 1097 to 1105 »), or a tenure begun earlier and not ended before 1100
   (Muggia given to the patriarch in 931). A single event at another date (consuls in 1179, a fire in 1110, a coronation
   in 1102) is never a line — *« pour l'instant, à moins qu'on trouve d'autres sources ; ça me paraît raisonnable »*.
+  **Unless it bears on the sheet's date** (the dev, 2026-11-12): a quotation dated otherwise is kept as a line when it
+  proves, supports or corroborates the holding at the sheet's date — *"if it proves, supports or corroborates my claim,
+  you keep it"*. Lived on the county of Knin: « Knin joined the Croatian-Hungarian kingdom in 1102 » says Croatia was not
+  yet Hungarian in 1100, so it is a line of the 1100 sheet. A date that says nothing of the sheet's (consuls in 1179)
+  stays out.
 - **A divergence is kept, never settled.** Two sources that disagree are two lines, each with its own value. The dev
   arbitrates; the concordance is computed, never typed (`evidence-system.md`).
 - **The sheet shows the most probable holder, with its QID — even where the sources diverge** (the dev, 2026-11-06:
@@ -93,7 +98,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 - **Then decide.** When the search ends with no source naming the holder at the date, the most probable one is entered
   anyway, with its QID. **The line names the source it stands on** — the one that names the predecessor's or the
   neighbour's holder — with its quotation. The line does not announce a deduction; the reasoning is written in the
-  year's file (`files/plans/sources/1100.md`), the home of the questions.
+  year's file (`files/plans/sources/1100/questions.md`), the home of the questions.
 - **A source created is cited by a line of the same batch.** A source attached to nothing is a fault (06/11, « Sos,
   castillo », created and never cited).
 
@@ -132,7 +137,7 @@ that exists is reused (its id), never created again.
 2. **Send the code instance one message** (`ListAgents`, then `SendMessage`): the collection and the ids created or
    changed. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
    any fault to the dev; the historian then corrects it by `update`.
-3. **The year's file stays the home of the questions** (`files/plans/sources/1100.md`, `1200.md`): the question, the
+3. **The year's file stays the home of the questions** (`files/plans/sources/1100/questions.md`, `1200.md`): the question, the
    answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338).
 
 ## Gotchas

@@ -132,7 +132,7 @@ Scenario: nothing answers
 > - ~~**the city in red on the canvas** — the alert is in the list and the detail only;~~ — built 2026-11-08 by
 >   CARTO-389: as points, the status ring (« The city's status on its point », below);
 > - **the comparison is by Wikidata id**: a wrong id in the map's registry reads as a misplaced city — which is how it is
->   found (`files/plans/sources/wikidata-1100.md`, 11 wrong in 1100);
+>   found (`files/plans/sources/1100/wikidata.md`, 11 wrong in 1100);
 > - ~~**a double-click on the canvas**: the white arrow's double-click there opens the polity's form (CARTO-246), so a
 >   city is double-clicked in the list only — how to tell the two apart on the canvas is the dev's call;~~ — settled
 >   2026-11-07 by CARTO-384, below: on a city's point it opens the city's box, elsewhere in a fill the polity's form;

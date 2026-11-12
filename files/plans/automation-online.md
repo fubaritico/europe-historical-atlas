@@ -167,7 +167,7 @@ write the same files at once (the morning of 11/11 is the lesson).
 **So the rule proposed: a decision never waits in a conversation — it waits in the place that records it.** Two cases
 of 10–11/11 show why: the historian's « the dev decides » on the Byzantine Wikidata id waited in a message to the
 coder's session — a `/clear` and it was gone; its « to be confirmed by the dev » on the date rule waits in the middle of
-a note (`1100-adriatic.md`). One home per kind of decision:
+a note (`sources/1100/adriatic.md`). One home per kind of decision:
 
 | kind of decision | where it waits | who decides | how the dev learns it is there |
 | --- | --- | --- | --- |
