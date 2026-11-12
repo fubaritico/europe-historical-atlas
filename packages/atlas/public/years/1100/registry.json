@@ -343,10 +343,10 @@
       "rank": null,
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 395,
+      "existsTo": 1453,
       "colour": "#7105a0",
-      "wikidata": "Q112039853"
+      "wikidata": "Q12544"
     },
     {
       "id": "najahid-dynasty",
@@ -1294,6 +1294,17 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#4a8c24",
+      "wikidata": null
+    },
+    {
+      "id": "kingdom-of-croatia",
+      "name": "Kingdom of Croatia",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-hungary",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#ab3030",
       "wikidata": null
     }
   ]
