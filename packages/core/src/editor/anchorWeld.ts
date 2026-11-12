@@ -86,6 +86,11 @@ interface Welded {
  * A ring with one anchor replaced by another, consecutive repeats dropped — the closing pair included for a closed
  * ring. **An open outline whose two ends meet is closed** (`open-outlines.md`): its last anchor, now its first, is
  * dropped, and the line between them becomes its closing segment — never a segment lost in silence.
+ *
+ * **A spike folds back** (the dev, 2026-11-12, Zachlumia welded onto the Croatian border, which Serbia's ring ran
+ * over: *"think of Illustrator"*): where the weld leaves a ring going `a → b → a`, out to a point and back the same
+ * way, the stretch to `b` is dropped and the ring runs on from `a` — the neighbour lets go of a stretch its new
+ * neighbour now holds. Only a ring that comes back to a point by another way is a pinch, and refused.
  * @param ring - the ring's anchors
  * @param from - the anchor replaced
  * @param into - the anchor it becomes
@@ -94,10 +99,45 @@ interface Welded {
  */
 function welded(ring: readonly number[], from: number, into: number, open: boolean): Welded {
   const replaced = ring.map((at) => (at === from ? into : at))
-  const kept = replaced.filter((at, i) => i === 0 || at !== replaced[i - 1])
+  const kept = foldSpikes(withoutRepeats(replaced), open)
   const ends = kept.length > 1 && kept[0] === kept.at(-1)
   if (ends) kept.pop()
   return { ring: kept, closes: open && ends }
+}
+
+/**
+ * A run with its consecutive repeats dropped.
+ * @param run - the anchors
+ * @returns the run, each anchor differing from the one before
+ */
+function withoutRepeats(run: readonly number[]): number[] {
+  return run.filter((at, i) => i === 0 || at !== run[i - 1])
+}
+
+/**
+ * A ring with every `a → b → a` folded into `a`, until none is left — across the closing pair for a closed ring,
+ * between the two ends only for an open outline. A ring of two anchors is left as it is: the floor refuses it.
+ * @param ring - the anchors, without consecutive repeats
+ * @param open - whether the ring is an open outline
+ * @returns the ring folded
+ */
+function foldSpikes(ring: readonly number[], open: boolean): number[] {
+  const folded = [...ring]
+  let found = true
+  while (found && folded.length > 2) {
+    found = false
+    const n = folded.length
+    for (let i = open ? 1 : 0; i < (open ? n - 1 : n); i += 1) {
+      if (folded[(i - 1 + n) % n] !== folded[(i + 1) % n]) continue
+      // Drop the tip and the anchor that repeats the one before it.
+      const tip = i
+      const back = (i + 1) % n
+      folded.splice(0, n, ...folded.filter((_, at) => at !== tip && at !== back))
+      found = true
+      break
+    }
+  }
+  return folded
 }
 
 /**

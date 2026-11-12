@@ -29,6 +29,23 @@ describe('weldAnchor', () => {
       expect(ringsOf(doc, 'hre')).toEqual([[1, 5, 2]])
     })
 
+    // The dev, 2026-11-12: Zachlumia's corner welded onto the Croatian border, along which Serbia's ring ran out to
+    // that corner and back — Serbia lets go of the stretch instead of refusing.
+    it('folds a ring that would run out to a point and back the same way', () => {
+      const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'x', rings: [[0, 1, 2, 4, 5]] })
+      expect(weldAnchor(doc, 4, 1)).toEqual({ polities: ['fr-couronne', 'hre', 'x'] })
+      expect(ringsOf(doc, 'x')).toEqual([[0, 1, 5]])
+      expect(ringsOf(doc, 'hre')).toEqual([[1, 5, 2]])
+    })
+
+    it('folds a spike that runs across the closing pair of a closed ring', () => {
+      const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'x', rings: [[0, 3, 5, 1, 4]] })
+      weldAnchor(doc, 4, 3)
+      expect(ringsOf(doc, 'x')).toEqual([[5, 1, 3]])
+    })
+
     it('carries a dressed run and a deliberate gap onto the surviving anchor', () => {
       const doc = sharedBorderDocument()
       doc.runs.push({ hand: 'dotted', source: null, note: null, run: [3, 0, 1] })
@@ -40,11 +57,20 @@ describe('weldAnchor', () => {
   })
 
   describe('managed errors', () => {
-    // A ring visiting one point twice crosses itself there.
+    // A ring coming back to one point by another way crosses itself there — a loop, not a spike.
     it('refuses a weld that would make a ring visit the same anchor twice, writing nothing', () => {
       const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'x', rings: [[0, 4, 5, 2, 1, 3]] })
       const result = weldAnchor(doc, 0, 2)
       expect(result !== null && isWeldRefusal(result) ? result.refused : null).toBe('pinch')
+      expect(ringsOf(doc, 'fr-couronne')).toEqual([[0, 1, 2, 3]])
+      expect(ringsOf(doc, 'x')).toEqual([[0, 4, 5, 2, 1, 3]])
+    })
+
+    it('refuses a weld whose folded spike would leave a ring under three anchors', () => {
+      const doc = sharedBorderDocument()
+      const result = weldAnchor(doc, 0, 2)
+      expect(result !== null && isWeldRefusal(result) ? result.refused : null).toBe('collapse')
       expect(ringsOf(doc, 'fr-couronne')).toEqual([[0, 1, 2, 3]])
     })
 
