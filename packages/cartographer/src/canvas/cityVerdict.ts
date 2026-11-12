@@ -13,7 +13,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocume
  *
  * **Compared by Wikidata id**, the one key both sides carry: a map's polity has its `wikidata`, the sources' holder
  * its own (CMS-335). A wrong id in the map's registry therefore reads as a misplaced city — which is how such an id is
- * found (`files/plans/sources/wikidata-1100.md`).
+ * found (`files/plans/sources/1100/wikidata.md`).
  */
 
 /** The polity the map has under a city. */

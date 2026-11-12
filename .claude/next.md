@@ -23,6 +23,15 @@ Corrigé : une note par session (`.claude/state/roles/<id>`), passée d'une sess
 lui** : historien et codeur côte à côte, chacun le sien. **Reste à voir, sans couper l'historien** : à son prochain
 `/clear`, sa ligne doit rester « historien » — sinon, rouvrir ce point.
 
+**12/11 soir — CORE-421, une seule côte et la coupe par la terre** (en cours) : la couleur, les hachures et les frontières
+s'arrêtent sur la côte du masque, dans l'atlas et le Cartographe (un seul seuil, `core/data/landClip.COAST_COVERAGE`) ; la
+côte tracée sur le masque entier dans les deux ; le Cartographe cuit sur le relief de l'atlas. **1100, 1200 et 1300
+reconstruites** par `files/spikes/sea-zones/rebuild.ts` (inventaire des îles, nettoyage, attribution, surfaces en mer à
+15 km, union, lamelles retirées, compactage — cinq fois moins de points), validées par lui. **Reste** : le tracé de la côte
+et le masque à la publication (≈ 3 s de plus au démarrage du site d'ici là) ; l'image de la mer du Cartographe dans le
+calculateur ; les ouverts de la revue (`rules/known-issues/atlas.md`). **À lui** : les cinq défauts du registre de 1100
+relevés par l'historien (`files/plans/sources/1100/first-lot.md`).
+
 **À faire en ouvrant** :
 - **commiter** les deux plans réécrits avec des noms (`files/plans/automation.md`, `files/plans/automation-online.md`) et le
   glossaire (trois termes) — écrits le 11/11, non commités ;
@@ -43,9 +52,9 @@ suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas
 d'être nettoyées (1000 copiée dans l'arbre de `main` par l'historien, **non listée** dans `index.json` — sa décision du 10/11,
 on travaille avec en local). `tsx` est au catalogue depuis `f70b725` : `pnpm install` fait par lui.
 
-**Sur le tableau** : En cours — **ATLAS-396** (restent : la pose en morceaux qui se met en pause, **à mesurer d'abord** —
-`atlas year <année> aside` dans son navigateur, ~0,15 s le 08/11 ; puis les frontières et les noms dans le calculateur ; l'essai
-des tribus dans le worker reste dans une remise git du worktree, aucun gain mesuré), ATLAS-408 (la provenance de 1300).
+**Sur le tableau** : **ATLAS-396 fait le 12/11** (la pose mesurée en ligne, 327 ms, qu'il ne sent pas : _« ça marche très
+très bien »_) ; la pose en morceaux est **ATLAS-420** au Backlog ; frontières et noms dans le calculateur abandonnés ; l'essai
+des tribus reste dans une remise git, aucun gain mesuré. En cours — ATLAS-408 (la provenance de 1300).
 À valider — **CMS-414** (le lot géographique de l'historien, 41 cas à lui). À faire — **CORE-412** en bas (la projection
 identique partout). Idées — **ATLAS-411** (le relief à 6,7 Mo non compressé). ATLAS-394 porte le point de la coupure réseau
 pendant une préparation en arrière-plan.
@@ -67,7 +76,7 @@ reprendre la retouche des frontières dans le Cartographe.
 
 **À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
 `pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
-les lectures divergentes de l'historien (`files/plans/sources/1100.md`).
+les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
 
 **Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS ; **CARTO-365**, des hachures cuites comme
 une texture (_« sinon ça vibre »_).
