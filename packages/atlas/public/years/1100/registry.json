@@ -194,14 +194,14 @@
     },
     {
       "id": "norman-england",
-      "name": "Norman England",
+      "name": "Kingdom of England",
       "rank": null,
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 927,
+      "existsTo": 1707,
       "colour": "#c44242",
-      "wikidata": "Q200485"
+      "wikidata": "Q179876"
     },
     {
       "id": "county-of-osona",
@@ -530,8 +530,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 967,
+      "existsTo": 1314,
       "colour": "#297ef5",
       "wikidata": "Q546266"
     },
@@ -603,14 +603,14 @@
     },
     {
       "id": "principality-of-polotsky",
-      "name": "Principality of Polotsky",
+      "name": "Principality of Polotsk",
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 900,
+      "existsTo": 1397,
       "colour": "#bdca05",
-      "wikidata": "Q200797"
+      "wikidata": "Q517333"
     },
     {
       "id": "republic-of-pisa",
@@ -680,12 +680,12 @@
     },
     {
       "id": "county-of-blois",
-      "name": "County of Blôis",
+      "name": "County of Blois",
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 500,
+      "existsTo": 1660,
       "colour": "#5096f7",
       "wikidata": "Q19336869"
     },
@@ -695,8 +695,8 @@
       "rank": "duchy",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 841,
+      "existsTo": 1449,
       "colour": "#0768f0",
       "wikidata": "Q7703611"
     },
@@ -794,8 +794,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 778,
+      "existsTo": 1271,
       "colour": "#0768f0",
       "wikidata": "Q1334322"
     },
@@ -871,8 +871,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 930,
+      "existsTo": 1360,
       "colour": "#0a60d8",
       "wikidata": "Q2991084"
     },
@@ -948,8 +948,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 801,
+      "existsTo": 1789,
       "colour": "#065dd7",
       "wikidata": "Q2070440"
     },
@@ -959,8 +959,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1025,
+      "existsTo": 1385,
       "colour": "#c05963",
       "wikidata": "Q577867"
     },
@@ -1003,8 +1003,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 933,
+      "existsTo": 1378,
       "colour": "#0768f0",
       "wikidata": "Q3271735"
     },
@@ -1113,8 +1113,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 866,
+      "existsTo": 1797,
       "colour": "#639ded",
       "wikidata": "Q157070"
     },
@@ -1124,8 +1124,8 @@
       "rank": "duchy",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 939,
+      "existsTo": 1547,
       "colour": "#86aee5",
       "wikidata": "Q71747"
     },
@@ -1305,6 +1305,17 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#ab3030",
+      "wikidata": null
+    },
+    {
+      "id": "kingdom-of-bohemia",
+      "name": "Kingdom of Bohemia",
+      "rank": "kingdom",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#db9380",
       "wikidata": null
     }
   ]
