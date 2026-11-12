@@ -1,5 +1,24 @@
 # Next — archive
 
+## Moved out of next.md on 2026-11-11 (size), verbatim
+
+**Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
+
+**L'interface de l'atlas — l'épique ATLAS-329** : la maquette de Claude Design (v2, son contenu inventé, ne pas le juger)
+vit dans `files/resources/claude-design/`, une seule version. Je reprends son travail en jetons et styles dans
+`fubaritico-ds` ; lui dessine dans Illustrator ornements et cartouches. **Prochaine étape** : la découper en tickets, avec
+lui. Ornements par époque : `files/plans/atlas/ornament-by-era.md`.
+
+**Le gestionnaire de sources** (demandé le 30/10 : des sources pour toute saisie) : CMS-332, `files/plans/contribution/source-manager.md` — tout se construit tel qu'écrit, par
+moi, boîte mail comprise, chaque mail sur son clic, et piloté à la voix par le plugin MCP de Payload.
+
+**Les villes, où on en est** (ATLAS-295, en cours) : **113 villes de 1100** dans sa base et dans le fichier de l'atlas ; dessinées
+par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), noms selon la distance à la caméra, un point de capitale
+sur un nom de pays cède (ATLAS-323). **En attente, à lui de trancher un jour** : les sièges que ni Wikidata ni la carte de la Rus'
+ne datent (Roskilde, Nidaros) ; les villes qu'aucune des trois sources n'atteste (la Géorgie — Koutaïssi, Tbilissi —, Uppsala,
+Sigtuna, Ispahan) — une source de plus, ou Wikidata seul, jamais inventées.
+**L'incertitude** : n'en parler que quand un algorithme existe.
+
 ## Moved from next.md on 2026-11-05 (to keep it under 200 lines), verbatim
 
 **Des fautes de frappe dans ses données du CMS** : « pelrinage » dans « Raisons d'importance » (« évêché » corrigé le 31/10) ; le type d'événement « Polithique - Accession au trone » — à lui de les corriger.

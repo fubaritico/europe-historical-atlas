@@ -2,35 +2,6 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
-### 2026-11-10 — l'instance du code : les bandes cuites, les cartes suivantes tout de suite, la carte qui s'arrête, une icône
-
-Une plage, **10/11 12:06 → 19:00** (6 h 54, partagée avec la session de l'historien) ; le chantier ouvert le 05/10 totalise
-**255 h 27 sur 43 plages**. Worktree `baked-years`, branche `atlas-396-speed`. **Sur `main`, poussé, CI verte, site déployé**
-(`622b77f`).
-
-- **ATLAS-407, Fait** (`763ad97`) : mesuré — l'ondulation ne coûte rien, la distance de chaque point à sa frontière
-  0,8–1,2 s ; les distances calculées à la publication (`bands.bin`, compressé : l'hébergeur ne compresse pas un `.bin`,
-  ATLAS-411). **Pas de secours** (sa question : _« pourquoi le fichier manquerait ? »_). À son test, Chrome et Node
-  arrondissent la projection autrement : **contrôle pays par pays** (8 pays sur 106 recalculés dans Chrome) ; et
-  **CORE-412**, une projection identique partout (_« ça veut dire qu'on maîtrise vraiment tout »_).
-- **ATLAS-396** (`d83dbb8`, `f0e32e5`, reste En cours) : sa remarque — _« ça fait tout depuis le début »_. Le registre des
-  préparations en cours, le clic qui reprend la préparation, le calcul tout de suite, son modèle d'un objet _« qui se met
-  en pause, qui reprend »_ ; seule la pose attend le calme : un appui **sur la carte**, la molette, une touche (_« cibler
-  l'événement »_, la réglette se fera glisser bouton tenu). La pose en morceaux, à mesurer d'abord. _« Ça marche très
-  bien »_.
-- **ATLAS-326, Fait** (`c4f957a`) : la carte s'arrête quand le pointeur sort de la page ou la fenêtre perd la main —
-  _« ça soulage »_.
-- **REPO-415, Fait** (`f70b725`, `442dacf`, `2628809`) : une seule icône d'onglet, celle du CMS, dessinée par `core` ; et
-  dans le titre du README.
-- **Publié sur sa demande** : sa 1100 (`2ccd7d1`), l'export du CMS (`622b77f`), le style d'un bouton du CMS (`86798e4`).
-  Vérifié en lecture seule : l'Italie de 1100 et le lot géographique saisis par l'historien.
-- **Sa décision** : moi l'atlas, l'historien les recherches et le Cartographe (mémoire `roles-atlas-vs-historian`).
-- **Mes fautes** : 6–12 s mesurés dans mon onglet au démarrage présentés comme la durée d'une préparation (il vit 2,5 s,
-  corrigé sur le ticket) ; un secours proposé pour un fichier qui ne manque jamais (mémoire `real-problems-only`) ; le
-  gain d'ATLAS-407 surestimé d'après Node (Chrome : 1,5 → 1 s, pas 0,4) ; trois tests qui ne prouvaient rien (un espion
-  posé après la fermeture, deux que le bord du monde faisait passer), corrigés ; un commit tenté avant son test de l'appui
-  ciblé, arrêté par lui ; un `cd`.
-
 ### 2026-11-10 soir — l'historien : l'Adriatique de 1100, Novare sur un témoin de 1100, le lot géographique saisi
 
 La session ouverte à 17:05, dans la plage du journal **10/11 12:06 → 20:59** (8 h 53, partagée avec l'instance du code) ;
@@ -53,4 +24,32 @@ le chantier ouvert le 05/10 totalise **257 h 26 sur 43 plages**. **Sur `main`, n
 - **Mes fautes** : un `cd` dans une commande Python ; un premier filtre des quartiers qui jetait Rijeka et Herceg Novi
   (repris) ; un message de commit trop long refusé par le contrôle ; deux agents qui ont mis un `cd`.
 
-> Older sessions (2026-09-12 → 2026-11-10 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+### 2026-11-11 — l'instance du code, sans rôle : les rôles des sessions, l'identifiant byzantin, les plans d'automatisation
+
+Réveillée par le message de l'historien le **10/11 à 19:17**, puis une plage **11/11 20:57 → 23:45** (2 h 47) ; le
+chantier ouvert le 05/10 totalise **261 h 44 sur 44 plages**. Pas de `/start-session`, aucun rôle : la session a fait du
+management toute la journée (sa remarque). **Poussé** : `main` = `43e73f7`. **Sur `main`, non poussé** : `70d4760`,
+`8e4a7be`, `eb81084`, `a467cc7` ; les deux plans réécrits et le glossaire, **non commités**.
+
+- **L'Adriatique de l'historien vérifiée** en lecture seule dans le CMS : 70 lieux, 69 fiches, sources 579–669, 171 lignes
+  toutes citées ; Himarë sans fiche, voulu ; sa note dit 90 sources, la base en a 91.
+- **L'Empire byzantin porte `Q12544`** (vérifié sur Wikidata ; c'était `Q112039853`, ses relations extérieures) : en 1200 et
+  1300, **corrigé par lui** avec d'autres identifiants de l'audit, commité `43e73f7` ; en 1100, **corrigé par lui** dans sa 1100
+  en cours (la Croatie ajoutée), non commitée — ma correction `03d9f19` sur `coder` tombera d'elle-même.
+- **Les arbres renommés** : `baked-years` → `coder`, sa branche aussi (`70d4760`).
+- **Les rôles** (REPO-419 pour la suite) : `.claude/agents/{coder,historian}.md` (texte vide, `/start-session <rôle>`),
+  `.claude/roles/<rôle>.md`, le codeur par défaut ; **un rôle se prend aussi par une phrase** (« commence une session en
+  tant qu'historien », « prends le rôle du codeur »), noté par arbre dans `.claude/state/role` ; le garde-fou de l'historien
+  (aucune écriture sous `packages/`), le rôle rendu après `/clear`, la ligne d'état rôle · arbre · branche ; le contrôle du
+  commit lance les 74 tests de `.claude/` (`8e4a7be`, `eb81084`). Revue : neuf constats, le tableau donné.
+- **L'automatisation** (REPO-418) : `files/plans/automation.md` (les briques, où tourne une exécution, l'inventaire) et
+  `files/plans/automation-online.md` (l'agent contributeur, la chaîne des villes, les canaux, la validation). **Ses
+  décisions** : l'agent passe par la même porte qu'un contributeur ; une affirmation sans concurrente, à deux sources
+  indépendantes, passe « attestée, non arbitrée ». Trois termes au glossaire.
+- **Expliqué à sa demande** : le modèle, le harness, le provider, l'open-weight, OpenCode ; ce que coûte une requête et un
+  sous-agent ; les agents dans le cloud.
+- **Mes fautes** : des choses encore désignées par un numéro dans les deux plans (« stage 2 », « rung 2 », « row 6 »),
+  réécrits avec des noms ; des pages de la documentation de Claude Code citées comme des fichiers du dépôt ; une commande de
+  test fausse (`node --test` sur un dossier, sous Node 24) écrite avant d'être essayée ; un message de commit trop long.
+
+> Older sessions (2026-09-12 → 2026-11-10, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

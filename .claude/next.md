@@ -7,17 +7,40 @@
 
 
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
-plus de celui-ci quand une session démarre « en tant qu'historien » (sa décision, 10/11).
+plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après la session du 10/11 (bandes cuites, cartes suivantes, la carte qui s'arrête, l'icône)
+## ▶ ON REPREND ICI — après la session du 11/11 au soir (les rôles, l'identifiant byzantin, l'automatisation)
 
-**Le 11/11 est férié** (lui : _« quartier libre … peut-être qu'on travaillera un petit peu »_) : rien d'urgent.
-**Lire aussi `.claude/next-historian.md`** — même contexte que l'historien. **Depuis le 10/11 : moi l'atlas, l'historien les
-recherches et le Cartographe** (mémoire `roles-atlas-vs-historian`).
+**Les rôles existent depuis le 11/11** : `claude` démarre en codeur ; « commence une session en tant qu'historien » (ou
+`claude --agent historian`) donne l'historien, son garde-fou et sa ligne d'état ; `.claude/roles/<rôle>.md` dit ce que
+chacun fait. Une session déjà ouverte avant ces réglages affiche « sans rôle » — normal. **Pas encore essayé dans une vraie
+session neuve** : le premier lancement de demain est le test (la ligne d'état, la phrase, un refus sous `packages/`).
+**Sa question ouverte, REPO-419** : un **rôle de manager** — la session sans rôle du 11/11 a fait ce travail toute la
+journée ; peut-être le rôle par défaut. Mon avis lui est donné ; à trancher avec lui.
 
-**L'état** : `main` = le dépôt distant = `622b77f`, CI verte, site déployé (sa 1100 en ligne, vérifiée octet pour octet).
-Mon worktree `coder`, branche `coder` (renommés le 11/11 ; avant, `baked-years` et `atlas-396-speed`) et celui de l'historien (`historian-1109`) **synchronisés sur
-`main`** — sa règle : chaque arbre suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant
+**12/11 — le rôle noté par session (non commité, en attente de son essai)** : deux consoles dans l'arbre de `main` se
+volaient le rôle (une note par arbre). Corrigé : une note par session, passée d'une session à l'autre au `/clear`.
+**À lui rappeler en fin de session, ou avant une compaction** : quitter la console de l'historien, la relancer en
+historien, vérifier les deux lignes d'état (historien / codeur), puis `/clear` chez l'historien (doit rester historien) ;
+ensuite je commite.
+
+**À faire en ouvrant** :
+- **commiter** les deux plans réécrits avec des noms (`files/plans/automation.md`, `files/plans/automation-online.md`) et le
+  glossaire (trois termes) — écrits le 11/11, non commités ;
+- **pousser**, sur son accord : `70d4760`, `8e4a7be`, `eb81084`, `a467cc7` et ce commit ;
+- **sa 1100 en cours** (la Croatie ajoutée, l'Empire byzantin déjà en `Q12544`) est dans l'arbre de `main`, non commitée :
+  quand il la dit finie, la commiter, puis reprendre `coder` sur `main` — ma correction `03d9f19` y tombera d'elle-même.
+
+**L'automatisation, REPO-418** : les deux plans ci-dessus. **Décidé** (11/11) : l'agent passe par la même porte qu'un
+contributeur ; une affirmation sans concurrente, à deux sources indépendantes, passe « attestée, non arbitrée ». **Ouvert** :
+« une décision attend là où elle est enregistrée » (réexpliqué avec l'identifiant byzantin et la règle de date, pas encore
+accepté) ; un hook qui refuse les choses désignées par un numéro dans `files/plans/` et `.claude/` (proposé, pas décidé —
+il était trop tard). **La première automatisation proposée** : la synchronisation des arbres par un hook git.
+
+**L'état** : `main` = le dépôt distant = `43e73f7` (l'Adriatique de l'historien, ses identifiants de 1200 et 1300) ; quatre
+commits locaux devant. Mon worktree `coder`, branche `coder` (renommés le 11/11 ; avant, `baked-years` et
+`atlas-396-speed`), sur `main` + `03d9f19` ; celui de l'historien (`historian-1109`) **sur `main`** — sa règle : chaque arbre
+suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant
 d'être nettoyées (1000 copiée dans l'arbre de `main` par l'historien, **non listée** dans `index.json` — sa décision du 10/11,
 on travaille avec en local). `tsx` est au catalogue depuis `f70b725` : `pnpm install` fait par lui.
 
@@ -38,8 +61,6 @@ montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : u
 reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
 reprendre la retouche des frontières dans le Cartographe.
 
-**Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
-
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
@@ -52,26 +73,11 @@ les lectures divergentes de l'historien (`files/plans/sources/1100.md`).
 **Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS ; **CARTO-365**, des hachures cuites comme
 une texture (_« sinon ça vibre »_).
 
-**L'interface de l'atlas — l'épique ATLAS-329** : la maquette de Claude Design (v2, son contenu inventé, ne pas le juger)
-vit dans `files/resources/claude-design/`, une seule version. Je reprends son travail en jetons et styles dans
-`fubaritico-ds` ; lui dessine dans Illustrator ornements et cartouches. **Prochaine étape** : la découper en tickets, avec
-lui. Ornements par époque : `files/plans/atlas/ornament-by-era.md`.
-
 **En cours** : le tableau, `/trello` → `list` — il juge l'état, plusieurs sujets en parallèle ; la liste n'est pas recopiée
 ici.
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
-
-**Le gestionnaire de sources** (demandé le 30/10 : des sources pour toute saisie) : CMS-332, `files/plans/contribution/source-manager.md` — tout se construit tel qu'écrit, par
-moi, boîte mail comprise, chaque mail sur son clic, et piloté à la voix par le plugin MCP de Payload.
-
-**Les villes, où on en est** (ATLAS-295, en cours) : **113 villes de 1100** dans sa base et dans le fichier de l'atlas ; dessinées
-par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), noms selon la distance à la caméra, un point de capitale
-sur un nom de pays cède (ATLAS-323). **En attente, à lui de trancher un jour** : les sièges que ni Wikidata ni la carte de la Rus'
-ne datent (Roskilde, Nidaros) ; les villes qu'aucune des trois sources n'atteste (la Géorgie — Koutaïssi, Tbilissi —, Uppsala,
-Sigtuna, Ispahan) — une source de plus, ou Wikidata seul, jamais inventées.
-**L'incertitude** : n'en parler que quand un algorithme existe.
 
 **Décidé par lui, à garder en tête** : l'importance qui ordonne la carte est **politique**, et au Moyen Âge le religieux en est
 (_« le religieux et la politique, c'est la même chose »_) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
