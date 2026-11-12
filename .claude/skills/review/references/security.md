@@ -14,5 +14,7 @@ Summary of what `review-security` checks (see the agent for full detail):
 - **SEC-004** missing validation at trust boundaries (URL params, JSON, loaded assets) — no blind `as`.
 - **SEC-005** leaked internal error details; **SEC-006** logging sensitive data;
   **SEC-007** insecure URL scheme; **SEC-008** weak randomness / outdated crypto.
+- **SEC-009** an unpatched vulnerability of something reachable described in a tracked file — the repo is public; it
+  goes to a private GitHub security advisory until fixed.
 
 Finding schema: `schema.json`. Verify uncertain API behavior via `opensrc/` (authoritative — context7 can lag a version) or the web.

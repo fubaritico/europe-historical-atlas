@@ -118,6 +118,16 @@ application goes online and once a year.
 - **Files**: All
 - **Check**: No `Math.random()` for security-sensitive values; no deprecated crypto APIs
 
+### SEC-009: An unpatched vulnerability described in a published file
+
+- **Files**: All tracked files — code comments, `files/plans/**`, `.claude/**` (known-issues slices, `next.md`), and the
+  commit message when one is given
+- **Check**: The repository is public. A flaw still open in anything reachable (the site; the CMS or the email
+  collection once online) must not be described — what it is, where, how to trigger it. It belongs in a private GitHub
+  security advisory until fixed (CLAUDE.md, « An unpatched vulnerability is never published »). Not a finding: method
+  (OWASP checklists, review criteria), a flaw already fixed, dependency alerts the public lockfile already shows.
+- **Severity**: high
+
 ---
 
 # Review protocol (shared by every dimension)

@@ -18,14 +18,17 @@ coverage
 # Tooling caches
 .nx
 
-# The role each tree's Claude sessions hold, noted by .claude/hooks/role-state.mjs — local to the tree.
+# The role each Claude session holds, one note per session, written by .claude/hooks/role-state.mjs — local to the tree.
 **/.claude/state/
 
 # Vendored dependency sources (opensrc skill) — for study only. Anchored: unanchored, it also matched
 # .claude/skills/opensrc/ and lint-staged refused to re-stage the skill (2026-10-21).
 /opensrc/
 
-# Project material. Plans and spikes are the portfolio and DO ship; the rest must not.
+# Review and audit findings kept for later: they can describe an unpatched flaw, and the repo is public.
+**/review-results/
+
+# Project material. Plans and spikes DO ship; the rest must not.
 #   resources/  — 170 MB, proprietary Euratlas vectors
 #   spikes/*/out/ — the 21 GPL-3.0 world_*.geojson and other generated payloads
 #   session-log.jsonl — this machine's activity log

@@ -15,7 +15,8 @@
 | `rules/known-issues/cms.md` | the CMS (Payload): its schema and migrations, its server, its generated files | `packages/cms/**` |
 | `rules/known-issues/testing.md` | proving that a test guards something | `**/*.test.{ts,tsx}`, `**/vitest.setup.ts` |
 
-**A new entry goes in its slice**, never here. One that fits none — a process lesson that must hold before any
+**A new entry goes in its slice**, never here. **Except an unpatched vulnerability of anything reachable**: it goes to
+a private GitHub security advisory, and into its slice only once fixed (`CLAUDE.md`, the repo is public). One that fits none — a process lesson that must hold before any
 file is touched — goes below this table.
 
 **An older pointer that says "in `known-issues.md`"** (plans, scenarios, the README) means one of the slices:

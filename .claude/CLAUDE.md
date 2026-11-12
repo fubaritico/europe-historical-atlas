@@ -82,6 +82,12 @@ When the dev proposes something:
 - **Never hallucinate** — when uncertain, read the code first, search, bring sources via `opensrc`.
   **Verify three.js APIs against source** (`opensrc/`) or the web — never guess.
 - **Secrets** — in `.env*`, never in rules, memory, or code.
+- **An unpatched vulnerability is never published** (the dev, 2026-11-12: _« l'important, c'est qu'on soit blindé »_) —
+  the repo is public, so a flaw still open in anything reachable (the site, and the CMS or the email collection once
+  online) is never described in a tracked file: not in a plan, a known-issues slice, `next.md`, a commit message or a
+  code comment. It goes to a **private GitHub security advisory** (`gh api repos/:owner/:repo/security-advisories`), and
+  to the Trello board (visible to its members only); the public trace — known-issue, commit — is written **once
+  fixed**. Method (OWASP checklists, review criteria) and dependency alerts the public lockfile already shows stay public.
 - **Never `console.log`** — use `console.warn` / `console.error`.
 - **Never explicit `any`** — strict TypeScript (the `tsconfig` is already strict).
 - **JSDoc everywhere** — every exported function (`@param` + `@returns`), every type/interface with

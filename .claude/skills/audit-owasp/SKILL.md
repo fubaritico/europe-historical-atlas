@@ -152,6 +152,11 @@ For each critical/high finding, provide:
 
 Do NOT auto-fix. Present recommendations and let the user decide.
 
+**Where the findings go — never a tracked file** (CLAUDE.md, « An unpatched vulnerability is never published »): the
+report stays in the conversation; a finding left open on anything reachable becomes a private GitHub security advisory
+and a Trello ticket; a JSON kept for later goes under `review-results/` (ignored by git). Known-issues and commits
+describe it once fixed.
+
 ## Output Schema
 
 ```json
