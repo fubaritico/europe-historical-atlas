@@ -2,28 +2,6 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
-### 2026-11-10 soir — l'historien : l'Adriatique de 1100, Novare sur un témoin de 1100, le lot géographique saisi
-
-La session ouverte à 17:05, dans la plage du journal **10/11 12:06 → 20:59** (8 h 53, partagée avec l'instance du code) ;
-le chantier ouvert le 05/10 totalise **257 h 26 sur 43 plages**. **Sur `main`, non poussé** : `5a4859c`, `3462c6c`.
-
-- **CMS-414, rattrapage fait** : 699 lieux sur 706 ont leur pays, 665 leur région ; 41 cas à lui (ticket en À valider).
-- **Le nord-ouest de l'Italie corrigé** (règle de date) : Alba sans sa ligne de 1179, Novare et Trecate sur **Savio 1898,
-  p. 266-267** (l'évêque Anselme en 1099-1100) ; deux sources orphelines supprimées par lui dans l'admin.
-- **CARTO-401, Fait** (1300, son « très satisfaisant » du 09/11).
-- **L'Adriatique de 1100** (sa demande : *« toutes les villes que Venise tenait en 1100 »*) : candidates lues dans Wikidata
-  (30 km de la mer, ≥ 1 000 hab., le Monténégro entier, une ville par île), 26 lots, 393 lieux, **74 existaient** ;
-  2 231 citations revérifiées ; **saisis** : 70 lieux, 69 fiches, 90 sources ; exportés (`3462c6c`). Les écarts avec sa
-  carte : `files/plans/sources/1100-adriatic.md`.
-- **Ses décisions** : la règle de date (*« pour l'instant, à moins qu'on trouve d'autres sources »* — une tenure commencée
-  avant et courant en 1100 compte), écrite dans `/enter-in-cms` ; les îles de la mer Égée plus tard ; ratisser large dans
-  l'arrière-pays, par la date et non la population (*« des villes, des villes, des villes »*).
-- **Les identifiants Wikidata des cartes corrigés** sur sa demande (1000, 1100, 1200, 1300 ; Empire byzantin Q12544 et les
-  onze de l'audit `wikidata-1100.md`) — **non commités**, après son coup d'œil.
-- **Tickets** : CMS-416 en Idées (une fiche par détenteur, la taille de la base).
-- **Mes fautes** : un `cd` dans une commande Python ; un premier filtre des quartiers qui jetait Rijeka et Herceg Novi
-  (repris) ; un message de commit trop long refusé par le contrôle ; deux agents qui ont mis un `cd`.
-
 ### 2026-11-11 — l'instance du code, sans rôle : les rôles des sessions, l'identifiant byzantin, les plans d'automatisation
 
 Réveillée par le message de l'historien le **10/11 à 19:17**, puis une plage **11/11 20:57 → 23:45** (2 h 47) ; le
@@ -53,3 +31,26 @@ management toute la journée (sa remarque). **Poussé** : `main` = `43e73f7`. **
   test fausse (`node --test` sur un dossier, sous Node 24) écrite avant d'être essayée ; un message de commit trop long.
 
 > Older sessions (2026-09-12 → 2026-11-10, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+
+### 2026-11-12 — le codeur : le rôle par session, la sécurité, la coupe par la terre (CORE-421), trois cartes reconstruites
+
+Plage **12/11 13:36 → 21:34** (7 h 57) ; le chantier ouvert le 05/10 totalise **269 h 43 sur 45 plages**. **Poussé** : `main` =
+`b867422`. **Sur `main`, non poussé** : `fc72157`. **Non commité** : la Croatie sortie de la Hongrie dans la 1100.
+
+- **Les rôles** : une note par session au lieu d'une par arbre — ses deux consoles se volaient le rôle ; le pourcentage du
+  contexte dans la ligne d'état (60/75/85/95) ; `idleCompaction` coupé, par lui (`40f4e01`). Vérifié par lui côte à côte.
+- **La sécurité** : une faille ouverte n'est jamais écrite dans un fichier publié ; `SECURITY.md` ; le signalement privé de
+  GitHub activé, sur son accord (`a1d4b1e`). Le dépôt : un produit, plus un portfolio (mémoire corrigée).
+- **ATLAS-396, Fait** : la pose mesurée en ligne, 327 ms, qu'il ne sent pas ; la pose en morceaux en ATLAS-420 (Backlog).
+- **CORE-421** : la mesure des côtes ; la coupe par la terre dans les deux applications, une seule côte (`a1a7ea9`) ; 1100,
+  1200, 1300 reconstruites — îles nettoyées et réattribuées, surfaces en mer de 15 km, union, lamelles retirées, cinq fois
+  moins de points (`6638a30`) ; les scripts (`809d629`). Revue à cinq agents, tableau donné. Ses mots : *« on a frôlé le
+  rabbit hole »*, puis *« ton script fonctionne bien, je valide 1200 »*.
+- **L'historien vérifié** en lecture seule : l'arrière-pays croate (CARTO-417) et le premier lot de 1100 — propres.
+- **Le soir** : la Bohême et la Croatie creusées par script dans leurs suzerains ; CARTO-424 et CARTO-425 en À faire. Ses
+  mots : *« ton outil de merde »*, *« il commence à me prendre la tête »*.
+- **Mes fautes** : ATLAS-396 mesuré alors qu'il ne sentait rien ; deux `cd` ; une première fusion par « couture » qui
+  perdait 1,5 million de cases, mon contrôle ne mesurant la perte que sur les îles ; deux scripts qui sautaient Byzance et
+  Venise (le champ `open` mal lu) ; le masquage lancé dans mon Cartographe sans le prévenir ; le creusement écrit pendant que
+  sa page était ouverte (écrasé à la première tentative).
+

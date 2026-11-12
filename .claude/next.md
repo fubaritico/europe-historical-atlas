@@ -5,39 +5,36 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après la session du 11/11 au soir (les rôles, l'identifiant byzantin, l'automatisation)
+## ▶ ON REPREND ICI — après la session du 12/11 (la coupe par la terre, CORE-421 ; ses retours de dessin)
 
-**Les rôles existent depuis le 11/11** : `claude` démarre en codeur ; « commence une session en tant qu'historien » (ou
-`claude --agent historian`) donne l'historien, son garde-fou et sa ligne d'état ; `.claude/roles/<rôle>.md` dit ce que
-chacun fait. Une session déjà ouverte avant ces réglages affiche « sans rôle » — normal. **Pas encore essayé dans une vraie
-session neuve** : le premier lancement de demain est le test (la ligne d'état, la phrase, un refus sous `packages/`).
-**Sa question ouverte, REPO-419** : un **rôle de manager** — la session sans rôle du 11/11 a fait ce travail toute la
-journée ; peut-être le rôle par défaut. Mon avis lui est donné ; à trancher avec lui.
+**Il revient avec ses retours de dessin** sur les cartes reconstruites — il corrige en zoom très serré. Les écouter d'abord.
 
-**12/11 — le rôle noté par session** : deux consoles dans l'arbre de `main` se volaient le rôle (une note par arbre).
-Corrigé : une note par session (`.claude/state/roles/<id>`), passée d'une session à l'autre au `/clear`. **Vérifié par
-lui** : historien et codeur côte à côte, chacun le sien. **Reste à voir, sans couper l'historien** : à son prochain
-`/clear`, sa ligne doit rester « historien » — sinon, rouvrir ce point.
+**CORE-421, en cours** : la couleur, les hachures et les frontières s'arrêtent sur la côte du masque, dans l'atlas et le
+Cartographe (un seul seuil, `core/data/landClip.COAST_COVERAGE`) ; une seule côte, tracée sur le masque entier dans les
+deux ; le Cartographe cuit sur le relief de l'atlas (`a1a7ea9`). **1100, 1200, 1300 reconstruites** par
+`files/spikes/sea-zones/rebuild.ts` (`6638a30`) — validées par lui ; cinq fois moins de points. **Reste** : le tracé de la
+côte et le masque à la publication (≈ 3 s de plus au démarrage du site d'ici là) ; l'image de la mer du Cartographe dans le
+calculateur ; les ouverts de la revue (`rules/known-issues/atlas.md`, `cartographer.md`).
 
-**12/11 soir — CORE-421, une seule côte et la coupe par la terre** (en cours) : la couleur, les hachures et les frontières
-s'arrêtent sur la côte du masque, dans l'atlas et le Cartographe (un seul seuil, `core/data/landClip.COAST_COVERAGE`) ; la
-côte tracée sur le masque entier dans les deux ; le Cartographe cuit sur le relief de l'atlas. **1100, 1200 et 1300
-reconstruites** par `files/spikes/sea-zones/rebuild.ts` (inventaire des îles, nettoyage, attribution, surfaces en mer à
-15 km, union, lamelles retirées, compactage — cinq fois moins de points), validées par lui. **Reste** : le tracé de la côte
-et le masque à la publication (≈ 3 s de plus au démarrage du site d'ici là) ; l'image de la mer du Cartographe dans le
-calculateur ; les ouverts de la revue (`rules/known-issues/atlas.md`). **À lui** : les cinq défauts du registre de 1100
-relevés par l'historien (`files/plans/sources/1100/first-lot.md`).
+**Défauts du soir, en tickets** (À faire) : **CARTO-424** — un vassal collé n'est pas creusé dans son suzerain (la Bohême,
+creusée par `files/spikes/sea-zones/carve.ts`) ; **CARTO-425** — souder un point sur un autre refusé sans rien dire, entre
+la Croatie et la Hongrie de 1100 : **vérifier d'abord si mon script en est la cause** (points recréés par l'union ; la
+Hongrie retaillée par `subtract.ts` ne partage que 2 points avec la Croatie). Il était à bout (« ton outil de merde ») :
+réparer, pas expliquer.
 
-**À faire en ouvrant** :
-- **commiter** les deux plans réécrits avec des noms (`files/plans/automation.md`, `files/plans/automation-online.md`) et le
-  glossaire (trois termes) — écrits le 11/11, non commités ;
-- **pousser**, sur son accord : `70d4760`, `8e4a7be`, `eb81084`, `a467cc7` et ce commit ;
-- **sa 1100 en cours** (la Croatie ajoutée, l'Empire byzantin déjà en `Q12544`) est dans l'arbre de `main`, non commitée :
-  quand il la dit finie, la commiter, puis reprendre `coder` sur `main` — ma correction `03d9f19` y tombera d'elle-même.
+**Non commité dans l'arbre de `main`** : la 1100 avec la Croatie sortie de la Hongrie (`subtract.ts`, après `fc72157`) —
+la commiter avec ses prochaines retouches. **Non poussé** : `fc72157` (la 1100 avec la Bohême). Les scripts `carve.ts` et
+`subtract.ts` sont dans l'arbre `coder`, non commités ; `files/spikes/coast-push/` y est abandonné (approche remplacée).
+**L'arbre `coder`** porte encore les changements copiés dans `main` (non commités là) et `b5700ec` : à remettre sur `main`
+(avec son accord, c'est un `reset`).
+
+**À lui** : les cinq défauts du registre de 1100 (`files/plans/sources/1100/first-lot.md` : Norman England Q179876,
+Polotsk Q517333, Pologne duché Q108084610, Arles sous l'empereur, Rostov-Souzdal à chercher) ; la Croatie vassale de la
+Hongrie en 1100 alors que l'union date de 1102 (à l'historien) ; la source 762 à supprimer dans l'admin du CMS ; la Suède
+en Q34. **Le test du `/clear` de l'historien** (sa ligne doit rester « historien ») n'est pas encore fait.
 
 **L'automatisation, REPO-418** : les deux plans ci-dessus. **Décidé** (11/11) : l'agent passe par la même porte qu'un
 contributeur ; une affirmation sans concurrente, à deux sources indépendantes, passe « attestée, non arbitrée ». **Ouvert** :
@@ -45,19 +42,10 @@ contributeur ; une affirmation sans concurrente, à deux sources indépendantes,
 accepté) ; un hook qui refuse les choses désignées par un numéro dans `files/plans/` et `.claude/` (proposé, pas décidé —
 il était trop tard). **La première automatisation proposée** : la synchronisation des arbres par un hook git.
 
-**L'état** : `main` = le dépôt distant = `43e73f7` (l'Adriatique de l'historien, ses identifiants de 1200 et 1300) ; quatre
-commits locaux devant. Mon worktree `coder`, branche `coder` (renommés le 11/11 ; avant, `baked-years` et
-`atlas-396-speed`), sur `main` + `03d9f19` ; celui de l'historien (`historian-1109`) **sur `main`** — sa règle : chaque arbre
-suit `main` dès qu'il bouge. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant
-d'être nettoyées (1000 copiée dans l'arbre de `main` par l'historien, **non listée** dans `index.json` — sa décision du 10/11,
-on travaille avec en local). `tsx` est au catalogue depuis `f70b725` : `pnpm install` fait par lui.
+**L'état** : `main` = le dépôt distant = `b867422` ; `fc72157` devant, non poussé. Arbres : `coder` (à remettre sur
+`main`), `historian-1109`. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant d'être nettoyées.
 
-**Sur le tableau** : **ATLAS-396 fait le 12/11** (la pose mesurée en ligne, 327 ms, qu'il ne sent pas : _« ça marche très
-très bien »_) ; la pose en morceaux est **ATLAS-420** au Backlog ; frontières et noms dans le calculateur abandonnés ; l'essai
-des tribus reste dans une remise git, aucun gain mesuré. En cours — ATLAS-408 (la provenance de 1300).
-À valider — **CMS-414** (le lot géographique de l'historien, 41 cas à lui). À faire — **CORE-412** en bas (la projection
-identique partout). Idées — **ATLAS-411** (le relief à 6,7 Mo non compressé). ATLAS-394 porte le point de la coupure réseau
-pendant une préparation en arrière-plan.
+**Sur le tableau** : En cours — CORE-421, ATLAS-408 ; À valider — CMS-414 ; À faire — CARTO-424, CARTO-425 (le reste : `/trello`).
 
 **Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
 souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README
