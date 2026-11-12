@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import polygonClipping from 'polygon-clipping'
+import { describe, expect, it, vi } from 'vitest'
 
 import { createYearDocument } from '../data/yearDocument'
 import { pointInRings } from '../geo/pointInRing'
@@ -274,7 +275,8 @@ describe('carveOutOfSuzerain', () => {
       expect(doc.claims.find((claim) => claim.polity === 'france')?.rings[0]).toEqual(before)
     })
 
-    it('never carves a co-vassal it overlaps — only the suzerain’s own domain', () => {
+    // The dev, 2026-11-12, Hum over Serbia, both Duklja's: a co-vassal under the outline gives its ground too.
+    it('carves a co-vassal the outline covers, as it carves the suzerain', () => {
       const doc = france()
       addPolity(doc, polity('poitou', 'france'))
       const aquitaine = anchors(doc, [
@@ -295,18 +297,39 @@ describe('carveOutOfSuzerain', () => {
         ])
       )
 
-      expect(doc.claims.find((claim) => claim.polity === 'aquitaine')?.rings).toEqual([aquitaine])
+      expect(pointInRings([37, 7], domainOf(doc, 'aquitaine'))).toBe(false)
+      expect(pointInRings([32, 2], domainOf(doc, 'aquitaine'))).toBe(true)
+      expect(pointInRings([37, 7], domainOf(doc, 'poitou'))).toBe(true)
     })
-  })
 
-  describe('unmanaged errors', () => {
-    it('leaves the domain untouched and says so when the segments do not close', () => {
+    it('never carves a polity outside the suzerain’s extent', () => {
       const doc = france()
-      const claim = doc.claims.find((each) => each.polity === 'france')
-      const before = JSON.stringify(claim?.rings)
+      addPolity(doc, polity('empire'))
+      const empire = anchors(doc, [
+        [30, 0],
+        [40, 0],
+        [40, 10],
+        [30, 10],
+      ])
+      closeRing(doc, 'empire', empire)
+      closeAndCarve(
+        doc,
+        'aquitaine',
+        anchors(doc, [
+          [35, 5],
+          [45, 5],
+          [45, 15],
+          [35, 15],
+        ])
+      )
 
-      // The vassal's south side lies ON France's, between its anchors, sharing none: neither segment has
-      // the remaining domain on one side, so France's limit loses its ends at (0,0) and (10,0).
+      expect(doc.claims.find((claim) => claim.polity === 'empire')?.rings).toEqual([empire])
+    })
+
+    // Croatia in Hungary, Bosnia in Serbia (1100, 2026-11-12): a side running along the suzerain's limit between
+    // its anchors, sharing none, once left the walk of segments unclosed and the carving refused.
+    it('carves a vassal whose side runs along the suzerain’s limit between its anchors', () => {
+      const doc = france()
       const carving = closeAndCarve(
         doc,
         'aquitaine',
@@ -318,35 +341,51 @@ describe('carveOutOfSuzerain', () => {
         ])
       )
 
-      expect(carving).toHaveProperty('reason')
-      expect(JSON.stringify(claim?.rings)).toBe(before)
+      expect(carving).toEqual({ suzerain: 'france', crossings: 0, rings: 1 })
+      expect(frenchAt(doc, [5, 2])).toBe(false)
+      expect(frenchAt(doc, [5, 7])).toBe(true)
+      expect(frenchAt(doc, [1, 1])).toBe(true)
     })
   })
 
-  describe('unmanaged errors — after a crossing was placed', () => {
-    it('puts the document back as it was, crossing anchors included', () => {
+  describe('unmanaged errors', () => {
+    // A refusal on the second domain puts back the first one carved, and the crossings it placed.
+    it('puts the whole document back when the difference throws on a later domain', () => {
       const doc = france()
-      const before = JSON.stringify({ anchors: doc.anchors, claims: doc.claims })
-
-      // Its south side lies ON France's (the walk cannot close), its next side crosses France's east limit.
-      const carving = closeAndCarve(
+      addPolity(doc, polity('poitou', 'france'))
+      closeRing(
         doc,
-        'aquitaine',
+        'poitou',
         anchors(doc, [
-          [2, 0],
-          [8, 0],
+          [15, 5],
           [25, 5],
-          [25, 15],
-          [2, 15],
+          [25, 10],
+          [15, 10],
         ])
       )
-      const vassal = doc.claims.find((claim) => claim.polity === 'aquitaine')
-      const vassalRing = vassal?.rings[0] ?? []
-      doc.claims = doc.claims.filter((claim) => claim.polity !== 'aquitaine')
-      doc.anchors.length = 6
+      const outline = anchors(doc, [
+        [5, 2],
+        [30, 2],
+        [30, 8],
+        [5, 8],
+      ])
+      const before = JSON.stringify({ anchors: doc.anchors, claims: doc.claims })
+      const real = polygonClipping.difference
+      let calls = 0
+      const spy = vi.spyOn(polygonClipping, 'difference').mockImplementation((...args) => {
+        calls += 1
+        if (calls === 2) throw new Error('unreadable shape')
+        return real(...args)
+      })
 
-      expect(carving).toHaveProperty('reason')
-      expect(vassalRing).toHaveLength(5)
+      const carving = closeAndCarve(doc, 'aquitaine', outline)
+      spy.mockRestore()
+      doc.claims = doc.claims.filter((claim) => claim.polity !== 'aquitaine')
+
+      expect(carving).toEqual({
+        suzerain: 'france',
+        reason: 'the difference could not be computed: unreadable shape',
+      })
       expect(JSON.stringify({ anchors: doc.anchors, claims: doc.claims })).toBe(before)
     })
   })

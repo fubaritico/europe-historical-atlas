@@ -2,32 +2,35 @@
  * Carving a vassal's new outline out of its suzerain's own domain (the dev, 2026-10-15, `s08` *"A new vassal
  * carves its ground out of its suzerain"*).
  *
- * Every outline closed for a vassal takes the ground under it from its suzerain's **own domain** — never from
- * a co-vassal, which it overlaps, and nothing already drawn is recomputed. What lies outside the suzerain's
- * domain stays the vassal's, adding to the suzerain's extent.
+ * Every outline closed for a vassal takes the ground under it from its suzerain's **own domain and from every
+ * other vassal of that suzerain** it covers (the dev, 2026-11-12, Hum over Serbia, both Duklja's: *"it must carve
+ * the suzerain, or a vassal if the ground was held by a vassal"* — replacing the rule of 2026-10-15, which left a
+ * co-vassal overlapped). Nothing outside the suzerain's extent is carved: what lies there stays the vassal's,
+ * overlapping, hatched. Nothing already drawn is recomputed.
  *
- * Three steps, all on the document's own anchors so the new limit is **shared**, never copied:
+ * Two steps, on the document's own anchors so the new limit is **shared**, never copied:
  *
- * 1. **Crossings** — where the new outline crosses one of the suzerain's segments between two anchors, an
- *    anchor is placed at the crossing and inserted in every ring running over either segment.
- * 2. **Which segments bound what is left** — a segment of the suzerain or of the new outline is kept when
- *    the remaining domain (*in the suzerain, not in the new outline*) lies on exactly one side of it. A shared
- *    coast drops out; the vassal's limit inside the suzerain comes in; a segment outside the suzerain stays
- *    the vassal's alone.
- * 3. **Rings again** — the kept segments are walked into closed loops. The fill is even-odd, so any
- *    decomposition into loops encloses the same ground: no choice to make at a pinch, and an enclave comes
- *    out as a hole by itself.
+ * 1. **Crossings** — where the new outline crosses one of a domain's segments between two anchors, an anchor is
+ *    placed at the crossing and inserted in every ring running over either segment.
+ * 2. **The difference** — the domain's area minus the outline's, by `polygon-clipping` (the clipping the hatches
+ *    use), its vertices written back as the anchors they sit on. **It never refuses on a shape** (the dev, same
+ *    evening, *"think of Illustrator"*: Pathfinder's Minus Front): the walk of segments it replaces refused
+ *    Croatia in Hungary and Bosnia in Serbia, *"an anchor ends an odd number of segments"*, wherever a limit ran
+ *    along another without sharing its anchors.
  */
 
+import polygonClipping from 'polygon-clipping'
+
 import { MIN_RING_ANCHORS } from '../data/yearDocument'
-import { pointInRing, pointInRings } from '../geo/pointInRing'
 
 import { edgeAt, everyRing, runStepAt } from './anchorEdits'
 import { addAnchor, addOutline } from './documentEdits'
+import { extentMembers } from './extent'
 
 import type { OutlinePoint } from './documentEdits'
 import type { YearDocument } from '../data/yearDocument'
 import type { YearClaim } from '../data/yearFormat'
+import type { MultiPolygon, Polygon } from 'polygon-clipping'
 
 /** What a carving did — for the status bar, and for a test to read. */
 export interface Carving {
@@ -70,8 +73,17 @@ interface Crossing {
 /** How close to an end a crossing may sit before it is taken for the end itself. */
 const END_TOLERANCE = 1e-9
 
-/** How far either side of a segment its two sides are asked, as a fraction of its length. */
-const SIDE_STEP = 1e-3
+/** How close, in degrees, a vertex of the difference may sit to an anchor to be that anchor — about a millimetre. */
+const SAME_POINT_DEGREES = 1e-8
+
+/**
+ * Under this area, in km², a ring the difference leaves is a crumb of rounding between two limits that run side by
+ * side, and is dropped — the measure of the script that carved Croatia and Bosnia by hand on 2026-11-12.
+ */
+const CRUMB_KM2 = 0.5
+
+/** Kilometres in a degree of latitude, for a rough area. */
+const KM_PER_DEGREE = 111
 
 /**
  * The suzerain a vassal's outline could not be carved out of, because its own outline is open — asked **before** the
@@ -144,38 +156,236 @@ export function carveOutOfSuzerain(
 ): Carving | CarvingFault | CarvingHeld | null {
   const suzerain = doc.polities.find((polity) => polity.id === vassalId)?.suzerain ?? null
   if (suzerain === null) return null
-  const claim = ownDomainOf(doc, suzerain)
-  if (claim === null || 'held' in claim) return claim
+  const own = ownDomainOf(doc, suzerain)
+  if (own !== null && 'held' in own) return own
 
   const putBack = snapshotOf(doc)
-  const crossings = placeCrossings(doc, claim.rings, ring)
-  if (typeof crossings === 'string') {
-    putBack()
-    return { suzerain, reason: crossings }
+  let done: { crossings: number; carved: number } | string
+  try {
+    done = carveHosts(doc, hostsOf(doc, suzerain, vassalId), ring)
+  } catch (error) {
+    // polygon-clipping throws on a shape it cannot read: the gesture is refused whole, said as a fault.
+    done = clippingFault(error)
   }
+  if (typeof done === 'string') {
+    putBack()
+    return { suzerain, reason: done }
+  }
+  if (done.carved === 0) return null
+  return { suzerain, crossings: done.crossings, rings: own === null ? 0 : own.rings.length }
+}
+
+/**
+ * What a carving refused by the clipping says.
+ * @param error - what `polygon-clipping` threw
+ * @returns the fault's reason
+ */
+function clippingFault(error: unknown): string {
+  return `the difference could not be computed: ${error instanceof Error ? error.message : String(error)}`
+}
+
+/**
+ * Take an outline out of each domain it covers, in turn: its crossings placed, then the difference written.
+ * @param doc - the document
+ * @param hosts - the claims to carve
+ * @param ring - the outline
+ * @returns how many crossings were placed and domains carved, or why a crossing could not be placed — the caller
+ *   puts the document back
+ */
+function carveHosts(
+  doc: YearDocument,
+  hosts: readonly YearClaim[],
+  ring: number[]
+): { crossings: number; carved: number } | string {
+  let crossings = 0
+  let carved = 0
+  for (const host of hosts) {
+    if (!overlapsArea(doc, host.rings, ring)) continue
+    const placed = placeCrossings(doc, host.rings, ring)
+    if (typeof placed === 'string') return placed
+    crossings += placed
+    host.rings = differenceOf(doc, host.rings, ring)
+    carved += 1
+  }
+  return { crossings, carved }
+}
+
+/**
+ * The claims a vassal's new outline takes ground from: its suzerain's own domain, then every other vassal of
+ * that suzerain at any depth — never the vassal itself nor its own vassals (the dev, 2026-11-12: *"it must carve
+ * the suzerain, or a vassal if the ground was held by a vassal"*). A co-vassal whose outline is open reads no area,
+ * and is left as it is.
+ * @param doc - the document
+ * @param suzerain - the suzerain's id
+ * @param vassalId - the vassal whose outline was closed
+ * @returns the closed claims to carve, the suzerain's first
+ */
+function hostsOf(doc: YearDocument, suzerain: string, vassalId: string): YearClaim[] {
+  const own = new Set(extentMembers(doc, vassalId))
+  return extentMembers(doc, suzerain)
+    .filter((id) => !own.has(id))
+    .flatMap((id) => {
+      const claim = doc.claims.find((each) => each.polity === id)
+      return claim !== undefined && claim.rings.length > 0 && claim.open === undefined
+        ? [claim]
+        : []
+    })
+}
+
+/**
+ * Some rings as the region they fill by the even-odd rule, in the document's coordinates.
+ * @param doc - the document
+ * @param rings - the rings, as anchor indices
+ * @returns the region
+ */
+function regionOf(doc: YearDocument, rings: readonly number[][]): MultiPolygon {
   const at = (index: number): [number, number] | undefined => doc.anchors[index]
-  const domain = claim.rings.map((each) => resolve(each, at))
-  const outline = resolve(ring, at)
-  const remains = (point: [number, number]): boolean =>
-    pointInRings(point, domain) && !pointInRing(point, outline)
+  const polygons: Polygon[] = rings.flatMap((each) => {
+    const points = resolve(each, at)
+    const head = points[0]
+    return points.length >= MIN_RING_ANCHORS && head !== undefined ? [[[...points, head]]] : []
+  })
+  const [first, ...rest] = polygons
+  if (first === undefined) return []
+  return rest.length === 0 ? [first] : polygonClipping.xor(first, ...rest)
+}
 
-  const kept = candidateSegments([...claim.rings, ring]).filter(([from, to]) =>
-    bounds(at(from), at(to), remains)
-  )
-  // Compared with what the domain alone would keep, not with its rings: a zero-width spike of the domain
-  // bounds nothing either way, and must not be cleaned out by a vassal drawn beside it.
-  const alone = candidateSegments(claim.rings).filter(([from, to]) =>
-    bounds(at(from), at(to), (point) => pointInRings(point, domain))
-  )
-  if (crossings === 0 && sameSegments(alone, kept)) return null
+/**
+ * Whether an outline covers some of a domain's ground — touching along a limit is not covering.
+ * @param doc - the document
+ * @param rings - the domain's rings
+ * @param ring - the outline
+ * @returns `true` when the two share an area
+ */
+function overlapsArea(
+  doc: YearDocument,
+  rings: readonly number[][],
+  ring: readonly number[]
+): boolean {
+  const outline = regionOf(doc, [[...ring]])
+  const domain = regionOf(doc, rings)
+  if (outline.length === 0 || domain.length === 0) return false
+  return polygonClipping.intersection(domain, outline).some((polygon) => polygonArea(polygon) > 0)
+}
 
-  const loops = loopsOf(kept, (index) => positionKey(at(index), index))
-  if (loops === null) {
-    putBack()
-    return { suzerain, reason: 'an anchor of the carved domain ends an odd number of segments' }
+/**
+ * A domain's rings once an outline is taken out of them, written in the document's anchors: a vertex of the
+ * difference that is an anchor of either — the crossings placed before included — is that anchor, so the new
+ * limit is **shared** with the outline; one that is none (the clipping's own crossing of two lines the
+ * crossings did not see, along a shared line) becomes a new anchor, with the source of the nearest one. Rings the
+ * clipping leaves under `CRUMB_KM2` — where two limits run a rounding apart — are dropped.
+ * @param doc - the document, anchors added to
+ * @param rings - the domain's rings
+ * @param ring - the outline taken out
+ * @returns the domain's new rings
+ */
+function differenceOf(
+  doc: YearDocument,
+  rings: readonly number[][],
+  ring: readonly number[]
+): number[][] {
+  const result = polygonClipping.difference(regionOf(doc, rings), regionOf(doc, [[...ring]]))
+  const candidates = [...new Set([...rings.flat(), ...ring])]
+  const byPosition = new Map<string, number>()
+  for (const index of candidates) {
+    const point = doc.anchors[index]
+    if (point !== undefined) byPosition.set(`${String(point[0])},${String(point[1])}`, index)
   }
-  claim.rings = loops.filter((loop) => loop.length >= MIN_RING_ANCHORS)
-  return { suzerain, crossings, rings: claim.rings.length }
+  const anchorAt = (point: [number, number]): number => {
+    const found = byPosition.get(`${String(point[0])},${String(point[1])}`)
+    if (found !== undefined) return found
+    const nearest = nearestAnchor(doc, candidates, point)
+    if (nearest !== null && nearest.distance <= SAME_POINT_DEGREES) return nearest.index
+    const created = addAnchor(
+      doc,
+      point,
+      nearest === null ? 0 : (doc.anchorSource[nearest.index] ?? 0)
+    )
+    byPosition.set(`${String(point[0])},${String(point[1])}`, created)
+    return created
+  }
+  return result
+    .flatMap((polygon) =>
+      polygon.map((each) =>
+        withoutRepeats(each.slice(0, -1).map((point) => anchorAt([point[0], point[1]])))
+      )
+    )
+    .filter((each) => each.length >= MIN_RING_ANCHORS && ringKm2(doc, each) >= CRUMB_KM2)
+}
+
+/**
+ * The anchor among some candidates nearest a point.
+ * @param doc - the document
+ * @param candidates - the anchor indices to look among
+ * @param point - the point
+ * @returns the nearest anchor and its distance in degrees, or `null` with no candidate
+ */
+function nearestAnchor(
+  doc: YearDocument,
+  candidates: readonly number[],
+  point: [number, number]
+): { index: number; distance: number } | null {
+  let best: { index: number; distance: number } | null = null
+  for (const index of candidates) {
+    const at = doc.anchors[index]
+    if (at === undefined) continue
+    const distance = Math.hypot(at[0] - point[0], at[1] - point[1])
+    if (best === null || distance < best.distance) best = { index, distance }
+  }
+  return best
+}
+
+/**
+ * A run of anchors with its consecutive repeats dropped, the closing pair included.
+ * @param run - the anchors
+ * @returns the run, no anchor equal to the one before it
+ */
+function withoutRepeats(run: readonly number[]): number[] {
+  const kept = run.filter((at, i) => i === 0 || at !== run[i - 1])
+  while (kept.length > 1 && kept[0] === kept.at(-1)) kept.pop()
+  return kept
+}
+
+/**
+ * A polygon's area in square degrees, its holes taken out.
+ * @param polygon - the outer ring then its holes, each closed
+ * @returns the area, never negative
+ */
+function polygonArea(polygon: Polygon): number {
+  const [outer, ...holes] = polygon.map((each) => Math.abs(shoelace(each)))
+  return Math.max(0, (outer ?? 0) - holes.reduce((sum, hole) => sum + hole, 0))
+}
+
+/**
+ * A ring's signed area by the shoelace formula, in the units of its points.
+ * @param points - the ring's points, closed or not
+ * @returns the signed area
+ */
+function shoelace(points: readonly (readonly number[])[]): number {
+  let sum = 0
+  points.forEach((point, k) => {
+    const next = points[(k + 1) % points.length]
+    if (next !== undefined)
+      sum += (point[0] ?? 0) * (next[1] ?? 0) - (next[0] ?? 0) * (point[1] ?? 0)
+  })
+  return sum / 2
+}
+
+/**
+ * A ring's area in km², roughly — enough to tell a crumb of rounding from ground.
+ * @param doc - the document
+ * @param ring - the ring, as anchor indices
+ * @returns the area
+ */
+function ringKm2(doc: YearDocument, ring: readonly number[]): number {
+  const points = resolve(ring, (index) => doc.anchors[index])
+  const latitude = points[0]?.[1] ?? 0
+  return (
+    Math.abs(shoelace(points)) *
+    KM_PER_DEGREE *
+    KM_PER_DEGREE *
+    Math.cos((latitude * Math.PI) / 180)
+  )
 }
 
 /**
@@ -187,9 +397,12 @@ export function carveOutOfSuzerain(
 function snapshotOf(doc: YearDocument): () => void {
   const rings = everyRing(doc).map((live) => [live, [...live]] as const)
   const runs = doc.runs.map((dressed) => [dressed.run, [...dressed.run]] as const)
+  // A domain carved gets new rings, not its old ones edited: which rings each claim held is put back too.
+  const held = doc.claims.map((claim) => [claim, claim.rings] as const)
   const anchors = doc.anchors.length
   const sources = doc.anchorSource.length
   return () => {
+    for (const [claim, list] of held) claim.rings = list
     for (const [live, copy] of [...rings, ...runs]) live.splice(0, live.length, ...copy)
     doc.anchors.length = anchors
     doc.anchorSource.length = sources
@@ -208,32 +421,6 @@ function candidateSegments(rings: readonly number[][]): [number, number][] {
     for (const [from, to] of segmentsOf(ring)) found.set(keyOf(from, to), [from, to])
   }
   return [...found.values()]
-}
-
-/**
- * Whether two lists hold the same segments, whichever way each is walked.
- * @param a - one list
- * @param b - the other
- * @returns `true` when the outline took nothing from the domain
- */
-function sameSegments(a: readonly [number, number][], b: readonly [number, number][]): boolean {
-  if (a.length !== b.length) return false
-  const keys = new Set(a.map(([from, to]) => keyOf(from, to)))
-  return b.every(([from, to]) => keys.has(keyOf(from, to)))
-}
-
-/**
- * Where an anchor sits, as a key — two anchors at the same position are one vertex to the walk.
- *
- * **Measured on 1100 (2026-10-15)**: the Franks' ring runs up a river near Ghent and back down it over
- * other anchors at the very same positions — a spike of no width, which bounds nothing and drops out, leaving
- * its two bases each ending one segment. Keyed by index they never close; keyed by position they are one.
- * @param point - the anchor's position
- * @param index - its index, the key of an anchor with no position
- * @returns the key
- */
-function positionKey(point: [number, number] | undefined, index: number): string {
-  return point === undefined ? `#${String(index)}` : `${String(point[0])},${String(point[1])}`
 }
 
 /**
@@ -371,97 +558,6 @@ function crossingOf(
   const alongSecond = (qx * ry - qy * rx) / denominator
   if (!inside(alongFirst) || !inside(alongSecond)) return null
   return { point: [a[0] + alongFirst * rx, a[1] + alongFirst * ry], alongFirst, alongSecond }
-}
-
-/**
- * Whether a segment has the remaining domain on exactly one side.
- * @param a - one end
- * @param b - the other
- * @param remains - whether a point is still the suzerain's own
- * @returns `true` when the segment bounds what remains
- */
-function bounds(
-  a: [number, number] | undefined,
-  b: [number, number] | undefined,
-  remains: (point: [number, number]) => boolean
-): boolean {
-  if (a === undefined || b === undefined) return false
-  const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-  const nx = -(b[1] - a[1]) * SIDE_STEP
-  const ny = (b[0] - a[0]) * SIDE_STEP
-  if (nx === 0 && ny === 0) return false
-  return remains([mid[0] + nx, mid[1] + ny]) !== remains([mid[0] - nx, mid[1] - ny])
-}
-
-/**
- * Walk segments into closed loops. Every vertex must end an even number of them, which a boundary always
- * does; when one does not, the segments do not close and `null` says so.
- *
- * Vertices are keyed by **position** (`vertexOf`), the loops written in **anchors**: where the walk passes
- * from one anchor to another at the same place, both are written, a hop of no length — so each segment keeps
- * the anchors a neighbour shares with it.
- * @param segments - the segments, as pairs of anchors
- * @param vertexOf - the vertex an anchor sits on
- * @returns the loops, each a ring of anchors, or `null` when the segments do not close
- */
-function loopsOf(
-  segments: readonly [number, number][],
-  vertexOf: (anchor: number) => string
-): number[][] | null {
-  const at = new Map<string, number[]>()
-  segments.forEach(([from, to], position) => {
-    for (const end of [vertexOf(from), vertexOf(to)]) {
-      const list = at.get(end)
-      if (list) list.push(position)
-      else at.set(end, [position])
-    }
-  })
-  for (const list of at.values()) if (list.length % 2 !== 0) return null
-  const used = new Set<number>()
-  const loops: number[][] = []
-  for (const [first, segment] of segments.entries()) {
-    if (used.has(first)) continue
-    used.add(first)
-    const loop = walkLoop(segment, segments, at, used, vertexOf)
-    if (loop === null) return null
-    loops.push(loop)
-  }
-  return loops
-}
-
-/**
- * Walk one loop from a segment until it comes back to the vertex it started on.
- * @param start - the first segment
- * @param segments - every segment
- * @param at - the segments at each vertex, by position in `segments`
- * @param used - the segments already walked, added to
- * @param vertexOf - the vertex an anchor sits on
- * @returns the loop's anchors, or `null` when it ran out of segments before closing
- */
-function walkLoop(
-  start: readonly [number, number],
-  segments: readonly [number, number][],
-  at: ReadonlyMap<string, readonly number[]>,
-  used: Set<number>,
-  vertexOf: (anchor: number) => string
-): number[] | null {
-  const [first, second] = start
-  const home = vertexOf(first)
-  const loop = [first]
-  let anchor = second
-  while (vertexOf(anchor) !== home) {
-    loop.push(anchor)
-    const exit = (at.get(vertexOf(anchor)) ?? []).find((position) => !used.has(position))
-    const segment = exit === undefined ? undefined : segments[exit]
-    if (exit === undefined || segment === undefined) return null
-    used.add(exit)
-    const [from, to] =
-      vertexOf(segment[0]) === vertexOf(anchor) ? segment : [segment[1], segment[0]]
-    if (from !== anchor) loop.push(from)
-    anchor = to
-  }
-  if (anchor !== first) loop.push(anchor)
-  return loop
 }
 
 /**

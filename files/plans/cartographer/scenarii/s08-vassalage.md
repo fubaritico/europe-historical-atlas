@@ -253,15 +253,30 @@ Scenario: every outline closed for a vassal carves, and nothing already drawn is
   Then France's own domain is carved under the new outline
   And Normandy's first outline keeps its overlap, for the author to correct by hand
 
-Scenario: a new vassal's outline over a co-vassal overlaps it, carves nothing of it
+Scenario: a new vassal's outline over a co-vassal carves it too
   Given "Duchy of Aquitaine" and "County of Poitou" are both vassals of France
   When I close an outline for Poitou that overlaps Aquitaine
-  Then Aquitaine is not touched — the two overlap, and the author corrects the outline
-  And only France's own domain is carved
+  Then the ground under Poitou is no longer Aquitaine's, as it is no longer France's own domain
+  And Aquitaine's new limit is Poitou's, by the same anchors
+
+Scenario: a new vassal's outline over a polity outside its suzerain's extent overlaps it
+  Given "Holy Roman Empire" owes nothing to France
+  When I close an outline for Aquitaine that overlaps the Empire
+  Then the Empire is not touched — the two overlap, hatched
+
+Scenario: a vassal's side running along its suzerain's limit carves
+  Given France's limit runs from one anchor to the next
+  When I close an outline for Aquitaine whose side lies on that limit, between its anchors, sharing none
+  Then France's own domain is carved under the outline — never refused
 ```
 
-> **Settled by the dev, 2026-10-15**: the carving takes from the **suzerain's own domain only**, never from a
-> co-vassal (*« il ne le creuse pas, il se chevauche »*); and **every** outline closed for a vassal carves,
+> **Changed by the dev, 2026-11-12** (Hum over Serbia, both Duklja's, then Bosnia in Serbia): the carving takes
+> from the suzerain **and from every other vassal of it** the outline covers — *"it must carve the suzerain, or a
+> vassal if the ground was held by a vassal"*; and it is a difference of areas, never a walk of segments that
+> refuses (*"think of Illustrator"*) — CORE-426. A carving still fails whole when the clipping cannot read a shape.
+>
+> **Settled by the dev, 2026-10-15** (its first half replaced above): the carving takes from the **suzerain's own
+> domain only**, never from a co-vassal (*« il ne le creuse pas, il se chevauche »*); and **every** outline closed for a vassal carves,
 > not only its first (*« ça permettra de gérer les enclaves et les exclaves entre vassaux et suzerains »*).
 > What is already drawn is never recomputed, so the overlaps being corrected by hand stay as they are.
 >
