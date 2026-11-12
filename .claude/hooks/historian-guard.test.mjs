@@ -109,36 +109,47 @@ describe('historian-guard', () => {
   })
 
   describe('as Claude Code runs it', () => {
+    const SESSION = 'this-session'
     const treeWith = (role) => {
       const tree = mkdtempSync(join(tmpdir(), 'guard-'))
-      if (role) writeRole(tree, role)
+      if (role) writeRole(tree, SESSION, role)
       return tree
     }
-    it('in a tree noted historian, prints a PreToolUse deny for a write under packages/', () => {
+    const edit = (tree, path, extra = {}) => ({ session_id: SESSION, tool_name: 'Edit', tool_input: { file_path: join(tree, path) }, ...extra })
+    it('a session noted historian gets a PreToolUse deny for a write under packages/', () => {
       const tree = treeWith('historian')
-      const out = JSON.parse(run({ tool_name: 'Edit', tool_input: { file_path: join(tree, 'packages/cms/a.ts') } }, tree))
+      const out = JSON.parse(run(edit(tree, 'packages/cms/a.ts'), tree))
       assert.equal(out.hookSpecificOutput.hookEventName, 'PreToolUse')
       assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
     })
-    it('in a tree noted coder, says nothing for a write under packages/', () => {
+    it('a session noted coder writes under packages/ though another session of the tree is the historian', () => {
       const tree = treeWith('coder')
-      assert.equal(run({ tool_name: 'Edit', tool_input: { file_path: join(tree, 'packages/cms/a.ts') } }, tree), '')
+      writeRole(tree, 'historian-console', 'historian')
+      assert.equal(run(edit(tree, 'packages/cms/a.ts'), tree), '')
     })
-    it('in a tree with no note, a session started as the historian is guarded', () => {
+    it('a session with no note, started as the historian, is guarded', () => {
       const tree = treeWith(null)
-      const out = JSON.parse(run({ agent_type: 'historian', tool_input: { file_path: join(tree, 'packages/a.ts') } }, tree))
+      const out = JSON.parse(run(edit(tree, 'packages/a.ts', { agent_type: 'historian' }), tree))
       assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
     })
-    it('in a tree noted historian, says nothing for a write elsewhere', () => {
+    it('a session noted historian says nothing for a write elsewhere', () => {
       const tree = treeWith('historian')
-      assert.equal(run({ tool_name: 'Write', tool_input: { file_path: join(tree, 'files/plans/a.md') } }, tree), '')
+      assert.equal(run(edit(tree, 'files/plans/a.md'), tree), '')
     })
-    it('in a tree noted historian, denies when stdin is not JSON', () => {
+    it('in a tree where a session is the historian, denies when stdin is not JSON', () => {
       const out = JSON.parse(run('not json', treeWith('historian')))
       assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
       assert.match(out.hookSpecificOutput.permissionDecisionReason, /could not read its input/)
     })
-    it('in a tree noted coder, says nothing when stdin is not JSON', () => {
+    it('in a tree where a session is the historian, denies when stdin is JSON but not an object', () => {
+      const tree = treeWith('historian')
+      for (const body of ['null', '42']) {
+        const out = JSON.parse(run(body, tree))
+        assert.equal(out.hookSpecificOutput.permissionDecision, 'deny')
+        assert.match(out.hookSpecificOutput.permissionDecisionReason, /not an object/)
+      }
+    })
+    it('in a tree with coders only, says nothing when stdin is not JSON', () => {
       assert.equal(run('not json', treeWith('coder')), '')
     })
   })

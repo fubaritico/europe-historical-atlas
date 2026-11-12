@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * The historian's guard — a PreToolUse hook declared in `.claude/settings.json`, which acts only when the session's
- * role is the historian: the tree's role note (`role-state.mjs`, set by a sentence or by `claude --agent historian`),
+ * role is the historian: the session's role note (`role-state.mjs`, set by a sentence or by `claude --agent historian`),
  * else the agent the session was started as. The historian researches, enters the CMS and draws in the Cartographer;
  * it never writes the code. Every Edit, Write or NotebookEdit aimed under `packages/` — of the main tree or of any
  * worktree — is denied, with the reason Claude reads and passes on.
@@ -15,7 +15,8 @@
  * found above it.
  *
  * Fails closed: unreadable input or a missing project root denies the write and says why — a guard that lets
- * everything through when it cannot read its input guards nothing.
+ * everything through when it cannot read its input guards nothing. Unreadable input names no session, so it is
+ * denied whenever any session of the tree holds the historian's role.
  *
  * Run its tests: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
  */
@@ -23,7 +24,7 @@ import { readFileSync } from 'node:fs'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { DEFAULT_ROLE, readRole } from './role-state.mjs'
+import { DEFAULT_ROLE, anySessionHolds, readRole } from './role-state.mjs'
 
 /** The folder the historian never writes in, relative to a tree's root. */
 export const CODE_ROOT = 'packages'
@@ -58,8 +59,8 @@ export const isCodePath = (target, projectDir) => {
 }
 
 /**
- * The session's role for the guard: the tree's note, else the agent it was started as, else the coder.
- * @param {string | null} noted - The tree's role note.
+ * The session's role for the guard: its note, else the agent it was started as, else the coder.
+ * @param {string | null} noted - The session's role note.
  * @param {unknown} input - The parsed hook input (`agent_type`).
  * @returns {string} The role.
  */
@@ -101,16 +102,24 @@ const deny = (reason) => {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const projectDir = process.env.CLAUDE_PROJECT_DIR
+  /**
+   * Input that names no session: denied whenever a session of the tree is the historian.
+   * @param {string} why - What made it unreadable.
+   * @returns {never}
+   */
+  const unreadable = (why) => {
+    if (projectDir && !anySessionHolds(projectDir, 'historian')) process.exit(0)
+    deny(`The historian guard could not read its input (${why}): write refused.`)
+    process.exit(0)
+  }
   let input
   try {
     input = JSON.parse(readFileSync(0, 'utf8'))
   } catch (error) {
-    const dir = process.env.CLAUDE_PROJECT_DIR
-    if (dir && sessionRole(readRole(dir), null) !== 'historian') process.exit(0)
-    deny(`The historian guard could not read its input (${error instanceof Error ? error.message : String(error)}): write refused.`)
-    process.exit(0)
+    unreadable(error instanceof Error ? error.message : String(error))
   }
-  const projectDir = process.env.CLAUDE_PROJECT_DIR
-  const reason = denialFor(input, projectDir, sessionRole(projectDir ? readRole(projectDir) : null, input))
+  if (typeof input !== 'object' || input === null) unreadable('not an object')
+  const reason = denialFor(input, projectDir, sessionRole(projectDir ? readRole(projectDir, input.session_id) : null, input))
   if (reason) deny(reason)
 }

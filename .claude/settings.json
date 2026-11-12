@@ -4,6 +4,7 @@
     "type": "command",
     "command": "node \"$(git rev-parse --show-toplevel)/.claude/statusline.mjs\""
   },
+  "idleCompaction": false,
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -32,7 +33,7 @@
     ],
     "SessionStart": [
       {
-        "matcher": "startup|clear|compact",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
@@ -46,6 +47,17 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/rules-for-prompt.mjs\" --reset"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-role.mjs\""
           }
         ]
       }

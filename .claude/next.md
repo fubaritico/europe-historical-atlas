@@ -18,11 +18,10 @@ session neuve** : le premier lancement de demain est le test (la ligne d'état, 
 **Sa question ouverte, REPO-419** : un **rôle de manager** — la session sans rôle du 11/11 a fait ce travail toute la
 journée ; peut-être le rôle par défaut. Mon avis lui est donné ; à trancher avec lui.
 
-**12/11 — le rôle noté par session (non commité, en attente de son essai)** : deux consoles dans l'arbre de `main` se
-volaient le rôle (une note par arbre). Corrigé : une note par session, passée d'une session à l'autre au `/clear`.
-**À lui rappeler en fin de session, ou avant une compaction** : quitter la console de l'historien, la relancer en
-historien, vérifier les deux lignes d'état (historien / codeur), puis `/clear` chez l'historien (doit rester historien) ;
-ensuite je commite.
+**12/11 — le rôle noté par session** : deux consoles dans l'arbre de `main` se volaient le rôle (une note par arbre).
+Corrigé : une note par session (`.claude/state/roles/<id>`), passée d'une session à l'autre au `/clear`. **Vérifié par
+lui** : historien et codeur côte à côte, chacun le sien. **Reste à voir, sans couper l'historien** : à son prochain
+`/clear`, sa ligne doit rester « historien » — sinon, rouvrir ce point.
 
 **À faire en ouvrant** :
 - **commiter** les deux plans réécrits avec des noms (`files/plans/automation.md`, `files/plans/automation-online.md`) et le

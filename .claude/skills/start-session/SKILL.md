@@ -28,7 +28,7 @@ Gather all necessary written context from previous session.
      before).
 2. **Take the role** — the argument names it (`/start-session historian`, sent by the agent file
    `.claude/agents/<role>.md` as the session's first prompt), or the dev's sentence does (« commence une session en
-   tant qu'historien »; the hook `session-role.mjs` notes it in the tree for the guard and the status line, and hands
+   tant qu'historien »; the hook `session-role.mjs` notes it for this session alone, for the guard and the status line, and hands
    the page over); none named means `coder`, the project's default (the dev, 2026-11-11). **Read `.claude/roles/<role>.md` whole** and hold to it: what the role does, what it does
    not, its tree. Say the role in the first line of the briefing.
    Then work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md).

@@ -2,7 +2,7 @@
 
 > Taken by a sentence — « commence une session en tant qu'historien », « prends le rôle de l'historien » — or by
 > `claude --agent historian` (`.claude/agents/historian.md`, whose first prompt is `/start-session historian`). The
-> hook `session-role.mjs` notes the role in the tree and hands this page over; the guard and the status line read the
+> hook `session-role.mjs` notes the role for this session alone and hands this page over; the guard and the status line read the
 > note. The dev's calls, 2026-11-11: one role per session, a role file each, taken by a sentence as well as by the
 > command. Split of the work: the dev, 2026-11-10 (memory `roles-atlas-vs-historian`).
 
