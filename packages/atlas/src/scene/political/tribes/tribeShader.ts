@@ -13,7 +13,7 @@ import {
   featherShiftKm,
 } from '@europe-historical-atlas/core/editor/tribeFeather'
 
-import { BLEND_GLSL } from '../tintOnRelief'
+import { BLEND_GLSL, LAND_GLSL } from '../tintOnRelief'
 
 import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFeather'
 
@@ -163,8 +163,11 @@ export const TRIBE_FRAGMENT_SHADER = /* glsl */ `
   varying float vClaimed;
   varying float vLand;
   ${BLEND_GLSL}
+  ${LAND_GLSL}
   ${BAND_WAVE_GLSL}
   void main() {
+    // Over water nothing is drawn: the colour stops on the land mask's coast (CORE-421).
+    if (overWater(vUv)) discard;
     vec3 base = toSrgb(texture2D(map, vUv).rgb);
     vec3 tinted = base + (blend(base, vTint) - base) * strength;
     ${TRIBE_OPACITY_GLSL}

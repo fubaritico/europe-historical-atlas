@@ -4,6 +4,7 @@
 
 import { cutYearFills, vassalBandCut } from '@europe-historical-atlas/core/pipeline/vassalBands'
 
+import { landTexturesOf } from '../../landMask'
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshVertexGrid, meshWorldDepth } from '../../relief/reliefMesh'
@@ -205,6 +206,7 @@ export function rebuildFills(context: LayerContext): void {
     worldWidth: WORLD_WIDTH,
     worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH),
     map: texture,
+    land: landTexturesOf(context),
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,
   }

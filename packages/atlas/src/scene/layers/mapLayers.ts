@@ -482,6 +482,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       relief: null,
       edge: null,
       texture: null,
+      land: null,
       coastline: null,
       rhumb: null,
       rivers: null,

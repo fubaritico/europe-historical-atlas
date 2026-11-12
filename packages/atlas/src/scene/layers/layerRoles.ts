@@ -24,6 +24,7 @@ export const LAYER_ROLES = {
   relief: 'relief',
   edge: 'draped',
   texture: 'texture',
+  land: 'texture',
   coastline: 'draped',
   rhumb: 'flat',
   rivers: 'draped',

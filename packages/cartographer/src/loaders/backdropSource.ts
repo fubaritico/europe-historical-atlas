@@ -1,4 +1,5 @@
 import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
+import { isLandAt } from '@europe-historical-atlas/core/data/landClip'
 
 import type { BackdropFrame } from '../viewport/projection'
 import type { HeightmapMeta, HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
@@ -52,6 +53,11 @@ export interface Backdrop {
   frame: BackdropFrame
   /** The baked pixels, in a form the 2D context can blit. */
   image: CanvasImageSource
+  /**
+   * The same pixels over the water only, transparent over the land (CORE-421): laid over the fills, the borders and
+   * the hatches, it gives the sea back, so a colour stops on the mask's coast whatever the outline drawn.
+   */
+  sea: CanvasImageSource
   /**
    * The land mask the bake read.
    *
@@ -139,7 +145,32 @@ export async function loadBackdrop(deps: BackdropDeps): Promise<Backdrop> {
   })
 
   const baked = await deps.compute.bakeTerrain(deps.options, deps.onProgress)
-  return { frame: frameFromHeightmap(dem.meta), image: await deps.toImage(baked), mask }
+  const image = await deps.toImage(baked)
+  return {
+    frame: frameFromHeightmap(dem.meta),
+    image,
+    sea: await deps.toImage(seaOnly(baked, mask)),
+    mask,
+  }
+}
+
+/**
+ * The baked pixels with the land made transparent — a copy, the bake's own bytes untouched.
+ * @param baked - the baked terrain
+ * @param mask - the land mask, over the same ground
+ * @returns the pixels over the water only
+ */
+export function seaOnly(baked: TerrainBakeResult, mask: LandMask): TerrainBakeResult {
+  const { width, height } = baked
+  const rgba = new Uint8Array(baked.rgba)
+  for (let y = 0; y < height; y++) {
+    // A single row or column lies at 0: the grid's first and last centres coincide.
+    const v = height > 1 ? y / (height - 1) : 0
+    for (let x = 0; x < width; x++) {
+      if (isLandAt(mask, width > 1 ? x / (width - 1) : 0, v)) rgba[(y * width + x) * 4 + 3] = 0
+    }
+  }
+  return { ...baked, rgba }
 }
 
 /**

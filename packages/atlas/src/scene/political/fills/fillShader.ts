@@ -17,7 +17,7 @@ import {
 import { bandWave } from '@europe-historical-atlas/core/editor/tribeFeather'
 import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
-import { BLEND_GLSL } from '../tintOnRelief'
+import { BLEND_GLSL, LAND_GLSL } from '../tintOnRelief'
 import { BAND_WAVE_GLSL } from '../tribes/tribeShader'
 
 /**
@@ -159,8 +159,11 @@ export const FILL_FRAGMENT_SHADER = /* glsl */ `
   varying float vBandWidth;
   varying float vBandReveal;
   ${BLEND_GLSL}
+  ${LAND_GLSL}
   ${BAND_WAVE_GLSL}
   void main() {
+    // Over water nothing is drawn: the colour stops on the land mask's coast (CORE-421).
+    if (overWater(vUv)) discard;
     vec3 base = toSrgb(texture2D(map, vUv).rgb);
     ${BAND_OPACITY_GLSL}
     // The band lays the colour at its share over the terrain the fragment reads — the blend an alpha would make, with

@@ -115,7 +115,7 @@ describe('traceCoastline', () => {
     })
 
     it('defaults to the atlas’s own tracing width, so the two agree on the coast', () => {
-      expect(COASTLINE_TRACE_WIDTH).toBe(2560)
+      expect(COASTLINE_TRACE_WIDTH).toBe(5120)
     })
   })
 

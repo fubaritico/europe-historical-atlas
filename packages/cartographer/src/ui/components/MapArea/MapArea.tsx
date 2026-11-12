@@ -113,6 +113,7 @@ export function MapArea({
         store={store}
         frame={assets.backdrop.frame}
         backdropImage={assets.backdrop.image}
+        seaImage={assets.backdrop.sea}
         vectorLayers={assets.vectors}
         onHover={handleHover}
         onAction={handleAction}

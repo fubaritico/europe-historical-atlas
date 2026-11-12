@@ -135,6 +135,7 @@ function attach(maxSnapReachKm = Infinity): {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
+    seaImage: backdropStandIn(),
     vectorLayers: {
       coast: [],
       rivers: [],
@@ -495,6 +496,7 @@ describe('startCanvasController', () => {
           store,
           frame: TEST_BACKDROP_FRAME,
           backdropImage: backdropStandIn(),
+          seaImage: backdropStandIn(),
           vectorLayers: {
             coast: [],
             rivers: [],
@@ -1387,6 +1389,7 @@ describe('the tools on the canvas', () => {
         store,
         frame: TEST_BACKDROP_FRAME,
         backdropImage: backdropStandIn(),
+        seaImage: backdropStandIn(),
         vectorLayers: {
           coast: [],
           rivers: [],
@@ -1466,6 +1469,7 @@ describe('the tools — what the review found', () => {
         store,
         frame: TEST_BACKDROP_FRAME,
         backdropImage: backdropStandIn(),
+        seaImage: backdropStandIn(),
         vectorLayers: {
           coast: [],
           rivers: [],
@@ -1806,6 +1810,7 @@ function attachWithShore(
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
+    seaImage: backdropStandIn(),
     vectorLayers: {
       coast: [shore, ...islands],
       rivers,
@@ -2187,6 +2192,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       store,
       frame: TEST_BACKDROP_FRAME,
       backdropImage: backdropStandIn(),
+      seaImage: backdropStandIn(),
       vectorLayers: {
         coast: [],
         rivers: [],
@@ -3102,6 +3108,7 @@ function attachWithTribe() {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
+    seaImage: backdropStandIn(),
     vectorLayers: {
       coast: [],
       rivers: [],
@@ -3217,6 +3224,7 @@ function attachWritingNames() {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
+    seaImage: backdropStandIn(),
     vectorLayers: {
       coast: [],
       rivers: [],

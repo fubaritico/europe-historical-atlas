@@ -4,7 +4,7 @@ import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createLandMask } from '@europe-historical-atlas/core/data/landMask'
 
-import { bakeToBitmap, frameFromHeightmap, loadBackdrop } from './backdropSource'
+import { bakeToBitmap, frameFromHeightmap, loadBackdrop, seaOnly } from './backdropSource'
 
 import type { BackdropDeps } from './backdropSource'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -363,5 +363,42 @@ describe('the test fixture stays out of production', () => {
 
     expect(production).toContain('../main.tsx')
     expect(production).toContain('./backdropSource.ts')
+  })
+})
+
+describe('seaOnly', () => {
+  const meta = {
+    width: 3,
+    height: 1,
+    scale: 1,
+    bbox: { west: 0, south: 0, east: 1, north: 1 },
+    source: 'test',
+  }
+  const baked = {
+    width: 3,
+    height: 1,
+    rgba: Uint8Array.from([10, 10, 10, 255, 20, 20, 20, 255, 30, 30, 30, 255]),
+  }
+
+  it('makes the land transparent and keeps the water, so a colour laid under it shows on land only', () => {
+    const mask = createLandMask(meta, (col) => col === 1)
+    const sea = seaOnly(baked, mask)
+    expect(Array.from(sea.rgba)).toEqual([10, 10, 10, 255, 20, 20, 20, 0, 30, 30, 30, 255])
+  })
+
+  it('leaves the bake’s own bytes untouched — the backdrop drawn under everything still shows the land', () => {
+    seaOnly(
+      baked,
+      createLandMask(meta, () => true)
+    )
+    expect(baked.rgba[3]).toBe(255)
+  })
+
+  it('keeps every pixel over a mask with no land', () => {
+    const sea = seaOnly(
+      baked,
+      createLandMask(meta, () => false)
+    )
+    expect(Array.from(sea.rgba)).toEqual(Array.from(baked.rgba))
   })
 })

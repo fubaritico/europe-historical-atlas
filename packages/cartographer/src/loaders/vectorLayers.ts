@@ -77,17 +77,13 @@ export interface VectorLayers {
 }
 
 /**
- * The grid the shoreline is traced at, in pixels across.
- *
- * **2 560, which is the atlas's own choice and is taken rather than re-decided** — so the two
- * applications agree on the shape of the coast, and an author reporting a frontier against it is
- * reporting against the map that will be published. The atlas's reason holds here too: the shipped mask
- * is 5 120 wide, and marching its 23 million cells costs 2 063 ms against 539 for half that, for
- * fidelity invisible at the zooms this is drawn at.
- *
- * Measured in `files/spikes/coastline-volume`: 95 212 segments, chained into 2 029 contours.
+ * The grid the shoreline is traced at, in pixels across: **the land mask's own, 5 120** (CORE-421, the dev,
+ * 2026-11-12). A coarser grid welds islets a strait apart and splits narrow ones — Cres and its neighbours at
+ * 2 560 — and the fills, cut by the mask, stop on the mask's coast: the line must be that coast. The atlas traces
+ * the same grid, so an author reports against the coast that is published. The cost, 2 063 ms against 539 at half,
+ * is paid once at the opening.
  */
-export const COASTLINE_TRACE_WIDTH = 2560
+export const COASTLINE_TRACE_WIDTH = 5120
 
 /**
  * Normalized grid coordinates into backdrop pixels.

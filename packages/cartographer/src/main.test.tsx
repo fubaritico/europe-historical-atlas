@@ -121,7 +121,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
 
       // Both live in the atlas's `public/`, which the Cartographer's `publicDir` now *is* — so these
       // are the bytes the published map renders rather than a second copy of them.
-      expect(asked).toContain('/heightmaps/europe-dem-z5.json')
+      expect(asked).toContain('/heightmaps/europe-dem-z6-1920.json')
       expect(asked).toContain('/masks/europe-land.json')
     })
 

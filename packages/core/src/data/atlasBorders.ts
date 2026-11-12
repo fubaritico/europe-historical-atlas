@@ -1,8 +1,14 @@
-import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
+import {
+  horizontalToLongitude,
+  latitudeToVertical,
+  longitudeToHorizontal,
+  verticalToLatitude,
+} from '../geo/mercator'
 
 import { handFor } from './borderHands'
 import { claimEnclosure, deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { homageLevels } from './homageLevels'
+import { landPieces } from './landClip'
 import { asSeenAcrossTribes, isTribeEdge, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
 
@@ -124,6 +130,38 @@ function leftHanded(
 }
 
 /**
+ * A point carried from one frame to another, through its longitude and latitude.
+ * @param p - the point, in the first frame's uv
+ * @param from - the frame it is in
+ * @param to - the frame it goes to
+ * @returns the point in the second frame's uv
+ */
+function across(p: UvPoint, from: GeoBounds, to: GeoBounds): UvPoint {
+  return {
+    u: longitudeToHorizontal(horizontalToLongitude(p.u, from), to),
+    v: latitudeToVertical(verticalToLatitude(p.v, from), to),
+  }
+}
+
+/**
+ * A line kept over land only (CORE-421): an outline may run over the sea, the fill stops on the coast, and so does
+ * the stroke. Cut in the mask's own frame, handed back in the map's — the two agree in the atlas; nothing here
+ * assumes it.
+ * @param points - the line, in the map's uv
+ * @param bbox - the map's frame
+ * @param mask - the land mask, or `null` when it failed — the line is then kept whole
+ * @returns its pieces over land, in the map's uv — none for a line of fewer than two points
+ */
+function landOnly(points: UvPoint[], bbox: GeoBounds, mask: LandMask | null): UvPoint[][] {
+  if (mask === null) return points.length >= 2 ? [points] : []
+  const frame = mask.meta.bbox
+  return landPieces(
+    points.map((p) => across(p, bbox, frame)),
+    mask
+  ).map((piece) => piece.map((p) => across(p, frame, bbox)))
+}
+
+/**
  * Derive an authored year's borders for the atlas.
  *
  * **Without a land mask, no frontier against unclaimed ground** — every far side nobody claims is read as
@@ -162,6 +200,8 @@ export function exactBordersOf(
         v: latitudeToVertical(lat, bbox),
       }))
   const holds = claimEnclosure(doc)
+  // A border stops on the coast as the fill does (CORE-421). Without a mask, kept whole — the degraded mode above.
+  const overLand = (points: UvPoint[]): UvPoint[][] => landOnly(points, bbox, mask)
   let undrawnHands = 0
   for (const border of derived) {
     if (isTribeEdge(border, tribes)) continue
@@ -169,17 +209,18 @@ export function exactBordersOf(
     const seen = asSeenAcrossTribes(border, tribes)
     const hand = handFor(seen, warn)
     if (hand.pattern === 'none') continue
-    const line = toGrid(border.run)
-    if (line.length < 2) continue
     if (!hand.cased) {
       if (seen.hand !== null) undrawnHands += 1
       // The polity a frontier bounds: its one side, or across a tribe the side that is not one.
       const owner = seen.between.find((id) => !tribes.has(id))
-      borders.frontier.push(toGrid(leftHanded(border.run, owner, doc, holds)))
+      borders.frontier.push(...overLand(toGrid(leftHanded(border.run, owner, doc, holds))))
       continue
     }
+    // A line of fewer than two points, or wholly at sea, draws nothing.
+    const lines = overLand(toGrid(border.run))
+    if (lines.length === 0) continue
     const key = borders.between.length
-    borders.between.push({ pair: [key, key], lines: [line] })
+    borders.between.push({ pair: [key, key], lines })
     patterns.set(pairKey([key, key]), ATLAS_PATTERN[hand.pattern])
     levels.set(pairKey([key, key]), splitLevelOf(border, homage))
   }

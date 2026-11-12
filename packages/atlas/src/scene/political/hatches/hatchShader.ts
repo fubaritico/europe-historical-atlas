@@ -9,7 +9,7 @@
  */
 
 import { BAND_OPACITY_GLSL, BAND_VERTEX_GLSL } from '../fills/fillShader'
-import { BLEND_GLSL } from '../tintOnRelief'
+import { BLEND_GLSL, LAND_GLSL } from '../tintOnRelief'
 import { BAND_WAVE_GLSL } from '../tribes/tribeShader'
 
 /**
@@ -88,8 +88,11 @@ export const HATCH_FRAGMENT_SHADER = /* glsl */ `
   varying float vBandWidth;
   varying float vBandReveal;
   ${BLEND_GLSL}
+  ${LAND_GLSL}
   ${BAND_WAVE_GLSL}
   void main() {
+    // Over water nothing is drawn: the colour stops on the land mask's coast (CORE-421).
+    if (overWater(vUv)) discard;
     vec4 two = texture2D(stripes2, vec2(vStripe / 2.0, 0.5));
     vec4 three = texture2D(stripes3, vec2(vStripe / 3.0, 0.5));
     vec4 four = texture2D(stripes4, vec2(vStripe / 4.0, 0.5));

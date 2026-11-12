@@ -7,7 +7,6 @@ import {
   Matrix4,
   Quaternion,
   Scene,
-  ShaderLib,
   Sprite,
   Vector3,
   WebGLRenderTarget,
@@ -50,7 +49,7 @@ import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBor
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { Material, Mesh, MeshLambertMaterial, Object3D } from 'three'
-import type { BufferAttribute, BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
+import type { BufferAttribute, BufferGeometry } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 // The vellum's bake stands in as a blank sheet of the right size: these tests check how the layers are laid,
@@ -849,9 +848,9 @@ describe('createMapLayers', () => {
       const { scene, dev, layers } = build()
       dev.coast.depthBias = 0.013
       layers.rebuildCoastline()
-      const material = (scene.children[0] as LineSegments<BufferGeometry, LineBasicMaterial>)
-        .material
-      const shader = compileHook(material, ShaderLib.basic.vertexShader)
+      // A fat line since CORE-421: drawn in the frontier's width over the tints.
+      const material = (scene.children[0] as unknown as { material: LineMaterial }).material
+      const shader = compileHook(material, new LineMaterial().vertexShader)
       expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.013 })
     })
 

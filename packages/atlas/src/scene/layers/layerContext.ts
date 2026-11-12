@@ -18,6 +18,7 @@ import type { NameLayer } from '../political/names/nameLayer'
 import type { TribeCutKey } from '../political/tribes/tribeCutKey'
 import type { TribeLayer } from '../political/tribes/tribeLayer'
 import type { DrapeProjection } from '../relief/drapeProjection'
+import type { LandTextures } from '../relief/landTextures'
 import type { MapEdge } from '../relief/mapEdge'
 import type { ReliefMesh } from '../relief/reliefMesh'
 import type { FrameLabels } from '../sheet/frameLabels'
@@ -38,6 +39,8 @@ export interface LayerHandles {
   edge: MapEdge | null
   /** The baked look hanging on it, managed apart from the mesh: a retune is a texture swap, not a rebuild. */
   texture: DataTexture | null
+  /** The land mask on the GPU, which the tints read to stop on the coast (CORE-421) — made once, at first need. */
+  land: LandTextures | null
   /** The drawn shoreline. */
   coastline: LineLayer | null
   /** The portolan rhumb web. */

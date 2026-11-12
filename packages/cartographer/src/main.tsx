@@ -219,7 +219,8 @@ const loadTheBackdrop = (onProgress: OpeningProgress) =>
     {
       loadBackdrop: (onBake) =>
         loadBackdrop({
-          heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z5'),
+          // The atlas's relief, so the two backdrops are one bake (CORE-421; the parity table promised it since 18/10).
+          heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z6-1920'),
           landMask: createFetchLandMaskSource('/masks/europe-land'),
           compute,
           toImage: bakeToBitmap,

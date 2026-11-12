@@ -55,6 +55,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
   return {
     anchorsInBackdrop: projectToBackdrop(document.anchors, FRAME),
     backdropImage: null,
+    seaImage: null,
     vectorLayers: null,
     frame: FRAME,
     viewport: NATIVE,

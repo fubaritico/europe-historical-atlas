@@ -7,6 +7,7 @@ import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/co
 import { maskOrFallback } from '../landMask'
 import { disposeHandle } from '../layers/disposeHandle'
 import { createLineLayer } from '../lines/lineLayer'
+import { BORDER_RENDER_ORDER } from '../political/borders/mapBorderLayer'
 
 import type { LayerContext } from '../layers/layerContext'
 
@@ -20,20 +21,17 @@ export function rebuildCoastline(context: LayerContext): void {
   // Nothing to trace before the elevation has loaded; otherwise the old line goes first.
   if (!sources.heightmap) return
   disposeHandle(scene, handles.coastline)
-  // Traced at twice the DEM rather than at the mask's full four times: the extra fidelity is invisible
-  // at the zooms the coastline is drawn at, and marching 23 million cells is not.
-  const segments = createMaskCoastlineSource(
-    maskOrFallback(context),
-    sources.heightmap.meta.width * 2
-  ).load()
-  // Drawn on the shore projection, styled from the dev panel's coast settings, and added to the scene.
+  // Traced on the mask's own grid, where the tints stop (CORE-421), and drawn in the frontier's ink over them — the
+  // line the polities' frontiers drew when their outlines followed the coast; now their outlines run at sea, cut by
+  // the mask. The trace costs ~2.5 s on this thread: to move to the build, as the bands were.
+  const segments = createMaskCoastlineSource(maskOrFallback(context)).load()
   handles.coastline = createLineLayer(segments, {
     project: projection.shore,
     depthBias: dev.coast.depthBias,
-    color: dev.coast.color,
-    opacity: dev.coast.opacity,
-    jitter: dev.coast.jitter,
-    strokes: dev.coast.strokes,
+    color: dev.political.frontierColor,
+    opacity: dev.political.frontierOpacity,
+    width: dev.political.frontierWidth,
+    renderOrder: BORDER_RENDER_ORDER,
   })
   scene.add(handles.coastline.object)
 }

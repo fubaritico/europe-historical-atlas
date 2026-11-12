@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { exactBordersOf, pairKey } from '../data/atlasBorders'
 import { createLandMask } from '../data/landMask'
 import { createYearDocument, saveYearDocument } from '../data/yearDocument'
-import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
+import { latitudeToVertical, longitudeToHorizontal, verticalToLatitude } from '../geo/mercator'
+import { pointInRing } from '../geo/pointInRing'
 
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 
@@ -11,7 +12,7 @@ import type { LandMask } from '../data/landMask'
 import type { YearDocument } from '../data/yearDocument'
 import type { AuthoredYear, YearPolity } from '../data/yearFormat'
 
-const bbox = { west: -50, south: -20, east: 150, north: 80 }
+const bbox = { west: -5, south: -5, east: 35, north: 15 }
 const SHORE = 'Shore (CC0)'
 const sources = [
   { id: 0, name: 'reported by eye', licence: 'fact' },
@@ -39,6 +40,40 @@ function anchors(doc: YearDocument, points: [number, number][], source = 0): num
 /** A mask over {@link bbox} answering the same everywhere. */
 function uniformMask(land: boolean, source = SHORE): LandMask {
   return createLandMask({ width: 64, height: 64, scale: 1, bbox, source }, () => land)
+}
+
+/**
+ * The polities on land and the sea all round (CORE-421): the land is what the year's outlines enclose, with a margin
+ * thinner than the far-side offset, so a border is never cut by the coast and no unclaimed ground lies beyond it.
+ * Cells of 0.025°, under the derivation's 0.05° look across a line.
+ */
+function anchorOf(doc: YearDocument, id: number): [number, number] {
+  const anchor = doc.anchors[id]
+  if (!anchor) throw new Error(`no anchor ${String(id)}`)
+  return anchor
+}
+
+function seaAround(doc: YearDocument): LandMask {
+  const rings = doc.claims.flatMap((claim) =>
+    claim.rings.map((ring) => ring.map((id) => anchorOf(doc, id)))
+  )
+  const width = (bbox.east - bbox.west) / 0.025 + 1
+  const height = 1200
+  const inside = (point: [number, number]): boolean =>
+    rings.some((ring) => pointInRing(point, ring))
+  const MARGIN = 0.015
+  return createLandMask({ width, height, scale: 1, bbox, source: SHORE }, (col, row) => {
+    const lon = bbox.west + (col / (width - 1)) * (bbox.east - bbox.west)
+    const lat = verticalToLatitude(row / (height - 1), bbox)
+    const offsets: [number, number][] = [
+      [0, 0],
+      [MARGIN, 0],
+      [-MARGIN, 0],
+      [0, MARGIN],
+      [0, -MARGIN],
+    ]
+    return offsets.some(([dx, dy]) => inside([lon + dx, lat + dy]))
+  })
 }
 
 function authored(doc: YearDocument): AuthoredYear {
@@ -92,7 +127,11 @@ afterEach(() => {
 describe('exactBordersOf', () => {
   describe('happy path', () => {
     it('draws the limit two sovereigns share through its anchors, solid', () => {
-      const { borders, patterns } = exactBordersOf(authored(sideBySide()), bbox, uniformMask(false))
+      const { borders, patterns } = exactBordersOf(
+        authored(sideBySide()),
+        bbox,
+        seaAround(sideBySide())
+      )
 
       expect(borders.between).toEqual([{ pair: [0, 0], lines: [[uv([10, 10]), uv([10, 0])]] }])
       expect(borders.frontier).toEqual([])
@@ -102,7 +141,11 @@ describe('exactBordersOf', () => {
 
   describe('variants', () => {
     it('draws a vassal’s limit with its lord dashed — the dotted hand, until the atlas has a dot', () => {
-      const { patterns } = exactBordersOf(authored(sideBySide('france')), bbox, uniformMask(false))
+      const { patterns } = exactBordersOf(
+        authored(sideBySide('france')),
+        bbox,
+        seaAround(sideBySide('france'))
+      )
 
       expect(patterns.get('0:0')).toBe('dashed')
     })
@@ -113,7 +156,7 @@ describe('exactBordersOf', () => {
       const hre = doc.polities.find((each) => each.id === 'hre')
       if (hre) hre.rank = 'tribe'
 
-      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(borders.between).toEqual([])
       // The kingdom on the west, on the frontier's left, north up: the run heads north.
@@ -126,7 +169,7 @@ describe('exactBordersOf', () => {
       const france = doc.polities.find((each) => each.id === 'france')
       if (france) france.rank = 'tribe'
 
-      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       // The kingdom on the east now: the run heads south.
       expect(borders.frontier).toEqual([[uv([10, 10]), uv([10, 0])]])
@@ -136,7 +179,7 @@ describe('exactBordersOf', () => {
       const doc = sideBySide()
       for (const polity of doc.polities) polity.rank = 'tribe'
 
-      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(borders.between).toEqual([])
     })
@@ -154,7 +197,7 @@ describe('exactBordersOf', () => {
       const doc = sideBySide()
       doc.runs.push({ run: [1, 2], hand: 'double', source: null, note: null })
 
-      const { patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { patterns } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(patterns.get('0:0')).toBe('double')
     })
@@ -169,7 +212,7 @@ describe('exactBordersOf', () => {
         note: null,
       })
 
-      const { patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { patterns } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(patterns.get('0:0')).toBe('dashed')
     })
@@ -197,7 +240,7 @@ describe('exactBordersOf', () => {
       addPolity(doc, polity('hungary'))
       closeRing(doc, 'hungary', [4, 6, 7, 5])
 
-      const { borders, patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders, patterns } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(borders.between.map((group) => group.pair)).toEqual([
         [0, 0],
@@ -207,13 +250,17 @@ describe('exactBordersOf', () => {
     })
 
     it('files a border between two sovereigns at split level 0', () => {
-      const { levels } = exactBordersOf(authored(sideBySide()), bbox, uniformMask(false))
+      const { levels } = exactBordersOf(authored(sideBySide()), bbox, seaAround(sideBySide()))
 
       expect(levels.get('0:0')).toBe(0)
     })
 
     it('files a vassal’s limit with its lord at split level 1', () => {
-      const { levels } = exactBordersOf(authored(sideBySide('france')), bbox, uniformMask(false))
+      const { levels } = exactBordersOf(
+        authored(sideBySide('france')),
+        bbox,
+        seaAround(sideBySide('france'))
+      )
 
       expect(levels.get('0:0')).toBe(1)
     })
@@ -227,7 +274,7 @@ describe('exactBordersOf', () => {
       if (france) france.suzerain = 'aquitaine'
       if (hre) hre.suzerain = 'poland'
 
-      const { levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { levels } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(levels.get('0:0')).toBe(0)
     })
@@ -245,7 +292,7 @@ describe('exactBordersOf', () => {
       addPolity(doc, polity('hungary', 'france'))
       closeRing(doc, 'hungary', [4, 6, 7, 5])
 
-      const { borders, levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders, levels } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(borders.between).toEqual([])
       expect(levels.size).toBe(0)
@@ -257,7 +304,7 @@ describe('exactBordersOf', () => {
       const { levels } = exactBordersOf(
         authored(sideBySide()),
         bbox,
-        uniformMask(false),
+        seaAround(sideBySide()),
         () => undefined,
         { chainOf: () => [], ancestorAt: (id) => id, splitLevel, deepest: 3 }
       )
@@ -303,7 +350,7 @@ describe('exactBordersOf', () => {
         if (each.id === 'france') each.suzerain = 'lord'
       })
 
-      const { patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { patterns } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(patterns.get('0:0')).toBe('dashed')
     })
@@ -336,7 +383,7 @@ describe('exactBordersOf', () => {
       const doc = sideBySide()
       doc.runs.push({ run: [1, 2], hand: 'zigzag', source: null, note: null })
 
-      const { patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { patterns } = exactBordersOf(authored(doc), bbox, seaAround(doc))
 
       expect(patterns.get('0:0')).toBe('solid')
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('"zigzag"'))
@@ -354,10 +401,27 @@ describe('exactBordersOf', () => {
       })
     })
 
+    it('stops a border on the coast, its stretch at sea not drawn (CORE-421)', () => {
+      // Land up to latitude 5 only: the shared limit runs from latitude 10, at sea, down to 0, on land.
+      const width = 1601
+      const height = 1200
+      const half = createLandMask(
+        { width, height, scale: 1, bbox, source: SHORE },
+        (_col, row) => verticalToLatitude(row / (height - 1), bbox) < 5
+      )
+
+      const { borders } = exactBordersOf(authored(sideBySide()), bbox, half)
+      const line = borders.between[0]?.lines[0] ?? []
+
+      expect(borders.between).toHaveLength(1)
+      expect(line.at(-1)).toEqual(uv([10, 0]))
+      expect(verticalToLatitude(line[0]?.v ?? 0, bbox)).toBeCloseTo(5, 1)
+    })
+
     it('projects against the frame it is given, not the mask’s', () => {
       const other = { west: -10, south: -10, east: 40, north: 40 }
 
-      const { borders } = exactBordersOf(authored(sideBySide()), other, uniformMask(false))
+      const { borders } = exactBordersOf(authored(sideBySide()), other, seaAround(sideBySide()))
 
       expect(borders.between[0]?.lines[0]?.[0]).toEqual({
         u: longitudeToHorizontal(10, other),

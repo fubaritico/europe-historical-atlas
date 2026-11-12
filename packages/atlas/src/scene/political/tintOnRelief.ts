@@ -1,8 +1,11 @@
 /**
- * What every layer that tints the relief shares — the fills and the tribes: the surface it is laid on and the look it
+ * What every layer that tints the relief shares — the fills, the tribes and the hatches: the surface it is laid on and the look it
  * is blended with, the bake's blend in GLSL, the pull forward in depth, and the writing of a uniform.
  */
 
+import { COAST_COVERAGE } from '@europe-historical-atlas/core/data/landClip'
+
+import type { LandTextures } from '../relief/landTextures'
 import type { FillSurface } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { BlendMode } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import type { ShaderMaterial, Texture } from 'three'
@@ -21,6 +24,41 @@ export interface TintLook {
   mode: BlendMode
   /** How much of the blended colour is kept, `[0, 1]` — the bake's `politicalStrength`. */
   strength: number
+  /** The land mask, in two halves: a tint is drawn over land only, so it stops on the coast (CORE-421). */
+  land: LandTextures
+}
+
+/**
+ * The land test in GLSL, for every layer that tints the relief: `landAt(vUv)` reads the mask's half the fragment lies
+ * in, one over land, nought over water; `overWater` thresholds it at core's `COAST_COVERAGE`, the coast the borders and
+ * the Cartographer's sea are cut at — a fragment over water is discarded, so a colour stops on the coast.
+ */
+export const LAND_GLSL = /* glsl */ `
+  uniform sampler2D landWest;
+  uniform sampler2D landEast;
+  uniform float landSplit;
+
+  float landAt(vec2 uv) {
+    if (uv.x < landSplit) return texture2D(landWest, vec2(uv.x / landSplit, uv.y)).r;
+    return texture2D(landEast, vec2((uv.x - landSplit) / (1.0 - landSplit), uv.y)).r;
+  }
+
+  bool overWater(vec2 uv) {
+    return landAt(uv) < ${COAST_COVERAGE.toFixed(2)};
+  }
+`
+
+/**
+ * The uniforms {@link LAND_GLSL} reads.
+ * @param land - the mask's two halves
+ * @returns the uniforms, by name
+ */
+export function landUniforms(land: LandTextures): Record<string, { value: unknown }> {
+  return {
+    landWest: { value: land.west },
+    landEast: { value: land.east },
+    landSplit: { value: land.split },
+  }
 }
 
 /** The blend modes, numbered as the shader switches on them — `blend()` below reads these numbers. */

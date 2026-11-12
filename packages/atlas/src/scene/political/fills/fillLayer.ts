@@ -39,7 +39,7 @@ import {
 
 import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 
-import { FILL_POLYGON_OFFSET, MODE_INDEX, setUniform } from '../tintOnRelief'
+import { FILL_POLYGON_OFFSET, MODE_INDEX, landUniforms, setUniform } from '../tintOnRelief'
 
 import { FILL_FRAGMENT_SHADER, fillVertexShader, tintAttribute } from './fillShader'
 
@@ -126,6 +126,7 @@ export function createFillLayer(options: FillLayerOptions): FillLayer {
       map: { value: options.map },
       strength: { value: options.strength },
       mode: { value: MODE_INDEX[options.mode] },
+      ...landUniforms(options.land),
       plane: { value: [options.worldWidth, options.worldDepth] },
       // The deepest level until the zoom says otherwise: every polity in its own colour, as before levels.
       detail: { value: tints.length - 1 },

@@ -17,6 +17,7 @@ import {
   meshVertexGrid,
   meshWorldDepth,
 } from '../../../relief/reliefMesh'
+import { allLand } from '../../../relief/testing/landFixture'
 
 import type { TintLook } from '../../tintOnRelief'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -120,6 +121,7 @@ export const options = (over: Partial<FillGeometry & TintLook> = {}): FillGeomet
     worldWidth: WORLD_WIDTH,
     worldDepth: DEPTH,
     map: texture(),
+    land: allLand(),
     mode: 'overlay',
     strength: 1,
     ...over,

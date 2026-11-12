@@ -16,7 +16,7 @@ import {
   Uint8BufferAttribute,
 } from 'three'
 
-import { FILL_POLYGON_OFFSET, MODE_INDEX, setUniform } from '../tintOnRelief'
+import { FILL_POLYGON_OFFSET, MODE_INDEX, landUniforms, setUniform } from '../tintOnRelief'
 import { TRIBE_RENDER_ORDER } from '../tribes/tribeLayer'
 
 import { HATCH_FRAGMENT_SHADER, HATCH_VERTEX_SHADER, hatchColourAttribute } from './hatchShader'
@@ -115,6 +115,7 @@ export function createHatchLayer(options: HatchLayerOptions): HatchLayer {
       map: { value: options.map },
       strength: { value: options.strength },
       mode: { value: MODE_INDEX[options.mode] },
+      ...landUniforms(options.land),
       plane: { value: [options.worldWidth, options.worldDepth] },
       stripeWorld: { value: options.stripeWorld },
       // The deepest level until the zoom says otherwise, as the fills open.

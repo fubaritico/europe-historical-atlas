@@ -74,6 +74,7 @@ function threePointsInFrance(): {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: document.createElement('canvas'),
+    seaImage: document.createElement('canvas'),
     vectorLayers: {
       coast: [],
       rivers: [],

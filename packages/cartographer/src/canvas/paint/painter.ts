@@ -4,6 +4,7 @@ import { boxesOverlap, detailThresholdSquared, visibleBox } from '../../viewport
 
 import { paintCities } from './cityPainter'
 import { paintHatches } from './hatchPainter'
+import { type SeaOnScreen, paintSea } from './seaPainter'
 
 import type { CityOnScreen } from './cityPainter'
 import type { HatchOnScreen } from './hatchPainter'
@@ -212,7 +213,7 @@ export interface CanvasScene {
    * canvas and no terrain. Drawing the vellum alone during it says "not loaded"; inventing a flat colour
    * that looks like land would say something false.
    */
-  backdrop: { image: CanvasImageSource; rect: Rect } | null
+  backdrop: (SeaOnScreen & { image: CanvasImageSource }) | null
   /** The closed outlines of the open document, each a run of projected anchors. */
   rings: readonly (readonly Point[])[]
   /**
@@ -769,10 +770,12 @@ export function paintCanvas(
   paintFills(ctx, scene, style)
   paintTribeFeathers(ctx, scene, style)
   paintOverlaps(ctx, size, scene, style)
-  paintVectors(ctx, size, scene, style)
-  // Over the fills and the water, under the edit outlines: the borders belong to the map, the blue
-  // strokes to the tool.
+  // Under the sea given back: a border, like a fill, stops on the coast (CORE-421). Under the edit outlines: the
+  // borders belong to the map, the blue strokes to the tool.
   paintBorders(ctx, scene, style)
+  if (layerAlpha(ctx, scene.layers.backdrop)) paintSea(ctx, scene.backdrop)
+  ctx.globalAlpha = 1
+  paintVectors(ctx, size, scene, style)
   paintCities(ctx, scene.cities, style, scene.citiesAsPoints)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

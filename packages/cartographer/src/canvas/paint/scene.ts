@@ -78,6 +78,8 @@ export interface SceneInputs {
   vassalBands: ReadonlyMap<YearDocument['claims'][number], { image: CanvasImageSource; box: Rect }>
   /** The baked terrain, or `null` while it is still being baked. */
   backdropImage: CanvasImageSource | null
+  /** The baked terrain over the water only (CORE-421), or `null` while it is still being baked. */
+  seaImage: CanvasImageSource | null
   /**
    * The coastline and the rivers, **already in backdrop pixels**, or `null` before they have loaded.
    *
@@ -375,6 +377,20 @@ export function projectedHatches(
 }
 
 /**
+ * The baked terrain and its sea, and where the backdrop lies on screen.
+ * @param inputs - the frame, the view and the images
+ * @returns the backdrop on screen, or `null` while it is still being baked
+ */
+function backdropOnScreen(inputs: SceneInputs): CanvasScene['backdrop'] {
+  if (inputs.backdropImage === null) return null
+  return {
+    image: inputs.backdropImage,
+    sea: inputs.seaImage,
+    rect: backdropRect(inputs.frame, inputs),
+  }
+}
+
+/**
  * Everything to paint, for one document and one view.
  *
  * The anchors are remapped **once** and the rings read that result, which is what keeps a shared anchor
@@ -387,10 +403,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
   const anchors = remapToScreen(inputs.anchorsInBackdrop, inputs.viewport)
   const tribes = tribeIds(document.polities)
   return {
-    backdrop:
-      inputs.backdropImage === null
-        ? null
-        : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
+    backdrop: backdropOnScreen(inputs),
     rings: projectedRings(document, anchors, 'closed'),
     openRings: projectedRings(document, anchors, 'open'),
     fills: projectedFills(document, anchors, inputs.colours, tribes, {

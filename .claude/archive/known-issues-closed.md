@@ -373,3 +373,7 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   cosmetic.**
   **Closed 2026-11-10 (ATLAS-396, reviews ARCH-004 and QUAL-001)**: the compute ahead carries the stamp it was started
   under, and `prepareAside` compares it with the map's before laying — changed, the compute is let go and computed again.
+- **[Clos le 12/11, CORE-421 : le Cartographe cuit son fond sur le relief de l'atlas, `main.tsx`] Depuis le 18/10, l'atlas lit le relief du niveau 6 (1 920 de large) et le Cartographe celui du niveau 5 (1 280)** —
+  les deux fonds de carte ne sont plus cuits du même relief, ce que la table de parité promet (`0ee299d`). **Le dev garde le
+  niveau 6** (19/10 : *« ça fonctionne »*). Remède : une ligne dans `packages/cartographer/src/main.tsx`
+  (`/heightmaps/europe-dem-z6-1920`), puis son test. **Sévérité : à savoir.**

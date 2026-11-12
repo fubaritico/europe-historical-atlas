@@ -39,6 +39,7 @@ function readyBackdrop(): EditorAssets {
     backdrop: {
       frame: TEST_BACKDROP_FRAME,
       image: document.createElement('canvas'),
+      sea: document.createElement('canvas'),
       // Read by the canvas for the borders' far side and the coast's source; the vector layers come
       // over already traced, so the shared one-cell mask is enough.
       mask: TEST_LAND_MASK,
@@ -430,6 +431,7 @@ describe('MapCanvas, re-rendered', () => {
           store={shared}
           frame={assets.backdrop.frame}
           backdropImage={assets.backdrop.image}
+          seaImage={assets.backdrop.sea}
           vectorLayers={assets.vectors}
           onHover={() => undefined}
           onAction={() => undefined}

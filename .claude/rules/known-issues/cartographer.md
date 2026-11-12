@@ -19,10 +19,6 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
   trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
   raccourci du même genre. **Sévérité : cosmétique.**
-- **Depuis le 18/10, l'atlas lit le relief du niveau 6 (1 920 de large) et le Cartographe celui du niveau 5 (1 280)** —
-  les deux fonds de carte ne sont plus cuits du même relief, ce que la table de parité promet (`0ee299d`). **Le dev garde le
-  niveau 6** (19/10 : *« ça fonctionne »*). Remède : une ligne dans `packages/cartographer/src/main.tsx`
-  (`/heightmaps/europe-dem-z6-1920`), puis son test. **Sévérité : à savoir.**
 - **Recreuser un vassal après coup est impossible depuis l'outil** — CARTO-189 (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`), à la fermeture d'un tracé ouvert repris (05/11, `outlineActions.keepOutline`) et
   au collage de points qui ferment un anneau (`core/editor/pastePoints`) — vérifié le 06/11 ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
@@ -215,3 +211,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   (`retraceView`) does not lay — it can promise a retrace the click then refuses as « too short » (France swallowing
   the whole Empire, `retrace.test.ts`). Masked until that day by the loop refusal. **Remedy**: the preview lays the
   same follow as the click. **Severity: cosmétique.**
+- **The coast is the land mask's own, and a colour stops on it** (2026-11-12, CORE-421, review ARCH-002): the Cartographer traces
+  the coast on the mask's full grid (5 120, `loaders/vectorLayers.ts`) and makes its sea image (`loaders/backdropSource.seaOnly`) in
+  the page, at the opening — about 2 s for the trace, and one coverage read per backdrop pixel for the sea, not measured. **Remedy**:
+  both in the compute worker, beside the bake, as the atlas's coast goes to the build. **Severity: à savoir.**

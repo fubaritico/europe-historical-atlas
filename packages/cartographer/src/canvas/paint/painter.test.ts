@@ -303,7 +303,9 @@ describe('painter', () => {
       paintCanvas(
         ctx,
         SIZE,
-        scene({ backdrop: { image, rect: { x: -40, y: -10, width: 1600, height: 1400 } } }),
+        scene({
+          backdrop: { image, sea: null, rect: { x: -40, y: -10, width: 1600, height: 1400 } },
+        }),
         STYLE
       )
       const order = ops(calls)
@@ -311,6 +313,64 @@ describe('painter', () => {
 
       expect(drawn?.args).toEqual([image, -40, -10, 1600, 1400])
       expect(order.indexOf('fillRect')).toBeLessThan(order.indexOf('drawImage'))
+    })
+
+    it('gives the sea back over the fills and the borders, so a colour stops on the coast', () => {
+      const { ctx, calls } = recordingContext()
+      const image = {} as CanvasImageSource
+      const sea = {} as CanvasImageSource
+      const rect = { x: -40, y: -10, width: 1600, height: 1400 }
+
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({
+          backdrop: { image, sea, rect },
+          fills: [
+            {
+              rings: [
+                [
+                  [0, 0],
+                  [100, 0],
+                  [0, 100],
+                ],
+              ],
+              colour: '#aa0000',
+            },
+          ],
+        }),
+        STYLE
+      )
+      const order = ops(calls)
+      const images = calls.filter((call) => call.op === 'drawImage')
+
+      expect(images.map((call) => call.args)).toEqual([
+        [image, -40, -10, 1600, 1400],
+        [sea, -40, -10, 1600, 1400],
+      ])
+      expect(order.indexOf('fill')).toBeLessThan(order.lastIndexOf('drawImage'))
+    })
+
+    it('gives no sea back while the relief layer is hidden', () => {
+      const { ctx, calls } = recordingContext()
+      const sea = {} as CanvasImageSource
+      const base = scene()
+
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({
+          backdrop: {
+            image: {} as CanvasImageSource,
+            sea,
+            rect: { x: 0, y: 0, width: 10, height: 10 },
+          },
+          layers: { ...base.layers, backdrop: { ...base.layers.backdrop, visible: false } },
+        }),
+        STYLE
+      )
+
+      expect(calls.filter((call) => call.op === 'drawImage')).toHaveLength(0)
     })
 
     it('draws no terrain while there is none, rather than a flat colour that reads as land', () => {

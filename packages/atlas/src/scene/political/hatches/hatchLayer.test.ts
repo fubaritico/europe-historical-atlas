@@ -2,6 +2,7 @@
 import { DataTexture } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { allLand } from '../../relief/testing/landFixture'
 import { FILL_POLYGON_OFFSET } from '../tintOnRelief'
 import { TRIBE_RENDER_ORDER } from '../tribes/tribeLayer'
 
@@ -36,6 +37,7 @@ function options(over: Partial<HatchLayerOptions> = {}): HatchLayerOptions {
     worldDepth: 8,
     stripeWorld: 0.5,
     map: new DataTexture(new Uint8Array(16), 2, 2),
+    land: allLand(),
     mode: 'overlay',
     strength: 1,
     ...over,

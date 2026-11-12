@@ -28,6 +28,8 @@ export interface CanvasControllerDeps {
   frame: BackdropFrame
   /** The baked terrain to blit under everything else. */
   backdropImage: CanvasImageSource
+  /** The same terrain over the water only, laid over the fills so a colour stops on the coast (CORE-421). */
+  seaImage: CanvasImageSource
   /**
    * The coastline and the rivers, in backdrop pixels.
    *

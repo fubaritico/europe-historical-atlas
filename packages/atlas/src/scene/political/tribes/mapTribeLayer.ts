@@ -11,7 +11,7 @@ import {
 } from '@europe-historical-atlas/core/editor/tribeFeather'
 import { tribePatches } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
-import { maskOrFallback } from '../../landMask'
+import { landTexturesOf, maskOrFallback } from '../../landMask'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
@@ -223,6 +223,7 @@ export function rebuildTribes(
     worldWidth: WORLD_WIDTH,
     worldDepth: meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH),
     map: texture,
+    land: landTexturesOf(context),
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,
     feather: dev.tribes,

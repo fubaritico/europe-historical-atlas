@@ -393,3 +393,20 @@ target.z)` would be coherent with the navigation that already exists.
   it knows as text. The land mask's `.bin` likely the same, not checked. **Remedy**: the bands' own (gzip at the build,
   `DecompressionStream` in the page), or a `Content-Type` the host compresses, set for `*.bin` in its headers — to measure
   first: an elevation grid gzips less well than the bands. **Severity: gênant** for the first visit on a slow connection.
+- **The coast and the land mask are made in the page at startup** (2026-11-12, CORE-421): the coastline is traced on the mask's
+  full grid (`scene/waters/mapCoastLayer.ts`, ~2.5 s on the main thread, measured in an automation tab — to measure in the dev's
+  browser) and the mask goes to the GPU as two textures at the first tint layer (`scene/relief/landTextures.ts`, read from the
+  packed bits). **Remedy**: the coast traced at the build, as the bands are (`bake/`), and laid by the page. **Severity: gênant**
+  for the first visit until then.
+- **The land textures are made once and never remade** (2026-11-12, reviews ARCH-001 · QUAL-001): `scene/landMask.landTexturesOf`
+  caches them on the handles; the coastline is retraced at each rebuild. Only the degraded mode can tell them apart — the mask
+  asset failed, the elevation threshold standing in, and the dev panel's sea level moved: the coast follows, the tints' cut does
+  not. **Remedy if it bites**: key the cache by the mask it was made from and repoint the live and shelved tint materials before
+  disposing the old pair. **Severity: cosmétique** (a dev slider in a degraded session).
+- **Two things of the land cut checked by eye only** (2026-11-12, reviews QUAL-002 · QUAL-003): no test lays a fragment over water
+  (the fixture is all land) nor checks `landAt`'s switch between the two halves; and the texture's texel centres sit half a mask
+  cell off the coast's trace grid, a possible half-cell gap between the colour's edge and the coast's ink. **Remedy**: a TypeScript
+  mirror of `landAt` tested against the mask's `isLand`; a look at maximum zoom near the split column. **Severity: à savoir.**
+- **The coastline imports its render order from the borders' builder** (2026-11-12, review ARCH-003): `waters/mapCoastLayer.ts`
+  reads `BORDER_RENDER_ORDER` from `political/borders/mapBorderLayer`. **Remedy**: the render orders in one small module beside
+  `layerRoles`, read by both families. **Severity: cosmétique.**

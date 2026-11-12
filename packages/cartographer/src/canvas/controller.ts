@@ -115,6 +115,7 @@ function repaint(it: LiveCanvas): void {
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
     backdropImage: it.deps.backdropImage,
+    seaImage: it.deps.seaImage,
     vectorLayers: it.deps.vectorLayers,
     frame: it.deps.frame,
     viewport: state.viewport,

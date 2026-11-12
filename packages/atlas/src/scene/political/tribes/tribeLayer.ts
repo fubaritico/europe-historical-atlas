@@ -34,7 +34,7 @@ import {
   Uint8BufferAttribute,
 } from 'three'
 
-import { FILL_POLYGON_OFFSET, MODE_INDEX, setUniform } from '../tintOnRelief'
+import { FILL_POLYGON_OFFSET, MODE_INDEX, landUniforms, setUniform } from '../tintOnRelief'
 
 import { tribeBuffers } from './tribeBuffers'
 import { TRIBE_FRAGMENT_SHADER, TRIBE_VERTEX_SHADER, featherUniforms } from './tribeShader'
@@ -130,6 +130,7 @@ export function createTribeLayer(options: TribeLayerOptions): TribeLayer {
       map: { value: options.map },
       strength: { value: options.strength },
       mode: { value: MODE_INDEX[options.mode] },
+      ...landUniforms(options.land),
       plane: { value: [options.worldWidth, options.worldDepth] },
       ...featherUniformSlots(options.feather),
     },

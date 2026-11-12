@@ -7,6 +7,7 @@ import { hatchStripeWorld } from '@europe-historical-atlas/core/data/hatchStripe
 import { BAND_REACH_KM } from '@europe-historical-atlas/core/data/vassalBand'
 import { hatchBuffers } from '@europe-historical-atlas/core/pipeline/hatchBuffers'
 
+import { landTexturesOf } from '../../landMask'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
@@ -45,6 +46,7 @@ export function rebuildHatches(context: LayerContext, grid: { segX: number; segY
     worldDepth,
     stripeWorld: hatchStripeWorld(bounds, WORLD_WIDTH),
     map: texture,
+    land: landTexturesOf(context),
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,
   })

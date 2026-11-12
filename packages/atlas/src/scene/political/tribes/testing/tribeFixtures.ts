@@ -4,6 +4,7 @@
 
 import { DataTexture } from 'three'
 
+import { allLand } from '../../../relief/testing/landFixture'
 import { createTribeLayer } from '../tribeLayer'
 
 import type { TribeLayerOptions } from '../tribeLayer'
@@ -47,6 +48,7 @@ export const options = (over: Partial<TribeLayerOptions> = {}): TribeLayerOption
   worldWidth: 4,
   worldDepth: 2,
   map: new DataTexture(new Uint8Array(16), 2, 2),
+  land: allLand(),
   mode: 'overlay',
   strength: 0.8,
   feather: { mode: 'inset', widthKm: 15 },
