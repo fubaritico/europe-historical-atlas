@@ -80,9 +80,9 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'caspian',
     name: { fr: 'Mer Caspienne', en: 'Caspian Sea' },
-    from: { lon: 50.4, lat: 44.2 },
-    bend: { lon: 50.2, lat: 41.8 },
-    to: { lon: 51.4, lat: 39.6 },
+    from: { lon: 49.4, lat: 44.8 },
+    bend: { lon: 51.6, lat: 42.2 },
+    to: { lon: 51.2, lat: 39 },
   },
   {
     id: 'red-sea',
