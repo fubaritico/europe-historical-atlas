@@ -18,6 +18,7 @@ import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
+import { REFUSAL_EVENT } from './devServer/refusalJournalRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { shortcutText } from './i18n/commandKeys'
 import { createLocaleStore } from './i18n/localeStore'
@@ -37,6 +38,7 @@ import { addressForMap, openingMapOf } from './persistence/openingMap'
 import { readPanelLayout, writePanelLayout } from './persistence/panelLayoutStorage'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
+import { journalRefusals } from './persistence/refusalJournal'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
@@ -126,6 +128,17 @@ import type { ReactToastContent } from '@fubaritico/react/Toast'
  * application would run, detached, and nothing would say so.
  */
 const container = document.getElementById('root')
+
+/**
+ * Every refusal of the Cartographer copied to the dev server's journal, `files/cartographer-refusals.log` (the dev,
+ * 2026-11-13: a gesture blocked, its reason only in a console nobody reads). In development only — the built editor
+ * has no server to send it to — and installed before the editor mounts, where every gesture's refusal is written. Put
+ * back if this module is ever replaced in place, so the console is never wrapped twice.
+ */
+if (import.meta.hot) {
+  const hot = import.meta.hot
+  hot.dispose(journalRefusals(console, hot.send.bind(hot, REFUSAL_EVENT)))
+}
 
 if (!container) {
   throw new Error('Cartographer: #root is missing from index.html — nothing to mount into.')

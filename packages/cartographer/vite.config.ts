@@ -1,9 +1,20 @@
-import { mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import {
+  appendFileSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
+import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+import { REFUSAL_EVENT } from './src/devServer/refusalJournalRoute.ts'
+import { isRefusalEntry, refusalLine } from './src/devServer/refusalLine.ts'
 import { createYearsFolderOnDisk } from './src/devServer/yearsOnDisk.ts'
 import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute.ts'
 
@@ -14,6 +25,14 @@ import type { Plugin, ViteDevServer } from 'vite'
 
 /** The folder the atlas reads its years from — inside the shared `public/`. */
 const YEARS_DIR = fileURLToPath(new URL('../atlas/public/years/', import.meta.url))
+
+/**
+ * The refusals' journal (the dev, 2026-11-13): one line a refusal of the page, in the repository's `files/`, which git
+ * ignores — read by Claude when a gesture is blocked, instead of asking for the browser's console.
+ */
+const REFUSAL_JOURNAL = fileURLToPath(
+  new URL('../../files/cartographer-refusals.log', import.meta.url)
+)
 
 /** `node:fs`'s synchronous calls, handed to the adapters, which hold the logic and its tests. */
 const disk = {
@@ -117,6 +136,37 @@ function saveYearsFromTheEditor(): Plugin {
 }
 
 /**
+ * Write every refusal the page sends into the journal — the dev server only. What is not a refusal is said on the
+ * server's console and not written: a journal holds only what the page meant to say.
+ * @returns the plugin
+ */
+function refusalJournalPlugin(): Plugin {
+  return {
+    name: 'cartographer-refusal-journal',
+    apply: 'serve',
+    configureServer(server) {
+      // `files/` is git-ignored, so a fresh clone or a worktree may not have it: made once, before any refusal.
+      mkdirSync(dirname(REFUSAL_JOURNAL), { recursive: true })
+      server.ws.on(REFUSAL_EVENT, (data: unknown) => {
+        if (!isRefusalEntry(data)) {
+          console.warn('[Cartographer] a refusal for the journal was not one:', data)
+          return
+        }
+        // A journal that cannot be written must not stop the dev's server: said on its console, the page untouched.
+        try {
+          appendFileSync(REFUSAL_JOURNAL, refusalLine(data, new Date()), 'utf8')
+        } catch (error) {
+          console.error(
+            `[Cartographer] the refusals' journal ${REFUSAL_JOURNAL} cannot be written:`,
+            error
+          )
+        }
+      })
+    },
+  }
+}
+
+/**
  * The Cartographer's Vite configuration.
  *
  * **`publicDir` points at the atlas's own `public/`, and that is a wiring decision rather than a
@@ -140,6 +190,6 @@ function saveYearsFromTheEditor(): Plugin {
  * is one favicon, and the drift this repository recorded as cosmetic cannot happen.
  */
 export default defineConfig({
-  plugins: [react(), saveYearsFromTheEditor()],
+  plugins: [react(), saveYearsFromTheEditor(), refusalJournalPlugin()],
   publicDir: '../atlas/public',
 })
