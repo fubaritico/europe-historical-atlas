@@ -1,4 +1,5 @@
 import { describeDrawingTarget } from '../../../state/drawingTarget'
+import { useListQuery } from '../../hooks/useListQuery'
 import { useTranslation } from '../../hooks/useTranslation'
 import { polityRows } from '../../utils/polityRows'
 import { Panel } from '../Panel'
@@ -46,6 +47,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
   const target = store((state) => state.target)
   // The document is mutated in place: the version is what changes when a polity is added or drawn.
   const version = store((state) => state.version)
+  const search = useListQuery(store, 'polities')
 
   // Store actions
   const chooseTarget = store((state) => state.chooseTarget)
@@ -90,6 +92,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
         onChoose={chooseTarget}
         onMenu={openMenu}
         onEdit={form.open}
+        search={search}
       />
       {arranging === null ? null : (
         <PolityArrangeMenu

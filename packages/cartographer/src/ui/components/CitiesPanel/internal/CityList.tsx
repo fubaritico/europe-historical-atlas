@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { useTranslation } from '../../../hooks/useTranslation'
 import { showRow } from '../../../utils/showRow'
@@ -23,7 +23,7 @@ type CityListWithFiltersProps = CityListProps & { year: number; filters: CityFil
  * The cities of the year, each with its eye, under two boxes (the dev, 2026-11-05): « Afficher toutes les villes » —
  * **all those listed**: under the filter at its head (CARTO-360), the cities whose name holds what is typed, and the box
  * says so (« Afficher les 2 villes trouvées ») — and « Afficher comme des points », in their holder's colour.
- * What is typed is the list's own — one writer, one reader, no slice. The holders and the states ticked in the advanced
+ * What is typed is the store's (CARTO-427), kept across a reload. The holders and the states ticked in the advanced
  * filters (CARTO-370, CARTO-369) are the store's, so they outlive the panel docked or floated; they narrow the list
  * together with the name.
  * **What it lists is the map's too** (CARTO-390): the ids found are handed to the store at each change of the list, and
@@ -40,10 +40,8 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
-  // State
-  const [query, setQuery] = useState('')
-
   // Derived
+  const { query, onQuery: setQuery } = filters
   const found = citiesListed(cities, query, filters, props.verdicts)
   const ids = found.map(({ id }) => id)
   const filtered = found.length < cities.length

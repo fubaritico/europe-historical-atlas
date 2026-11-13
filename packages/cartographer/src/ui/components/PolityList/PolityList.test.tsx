@@ -1,12 +1,27 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { PolityList } from './PolityList'
 
+import type { PolityListProps } from './PolityList'
 import type { PolityRow } from '../../utils/polityRows'
+
+/**
+ * The list with its filter's text held as the store holds it (CARTO-427), so typing in the filter filters.
+ * @param props - the list's props, the filter's text left out
+ * @returns the list
+ */
+function TypedPolityList(props: Omit<PolityListProps, 'search'>) {
+  // State
+  const search = useState('')
+
+  // Render
+  return <PolityList {...props} search={search} />
+}
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -54,7 +69,7 @@ function motion(reduce: boolean): void {
 /** The list over the hundred rows, aimed at one. */
 function list(targetId: string | null) {
   return (
-    <PolityList
+    <TypedPolityList
       year={1100}
       rows={ROWS}
       targetId={targetId}
@@ -131,7 +146,7 @@ function tree(targetId: string | null = null) {
   const onChoose = vi.fn()
   const onEdit = vi.fn()
   renderInEnglish(
-    <PolityList
+    <TypedPolityList
       year={1100}
       rows={TREE}
       targetId={targetId}
@@ -220,7 +235,7 @@ describe('PolityList — the filter (CARTO-360)', () => {
 
     it('shows no filter over a year with no polity', () => {
       renderInEnglish(
-        <PolityList
+        <TypedPolityList
           year={1100}
           rows={[]}
           targetId={null}

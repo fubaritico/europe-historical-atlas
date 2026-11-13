@@ -45,6 +45,8 @@ import { createYearSession } from './persistence/yearSession'
 import { summariseClipboard } from './state/clipboardSlice'
 import { createHeldClipboard } from './state/heldClipboard'
 import { keepCityFilters } from './state/keepCityFilters'
+import { keepListView } from './state/keepListView'
+import { keepView } from './state/keepView'
 import { openEmptyYear } from './state/openEmptyYear'
 import { PANEL_IDS } from './state/panelsSlice'
 import { createPolityColourSource } from './state/polityColourSource'
@@ -142,11 +144,15 @@ const MAP = openingMapOf(window.location.search, FIRST_MAP)
 /** The map's name as the chrome reads it — *Save as…* changes it without a reload. */
 const mapName = createMapNameStore(MAP)
 
+// The tab's storage, guarded as the page's is (CARTO-427, review): the view is written at every change, and a browser
+// refusing it keeps nothing, said once in the console.
+const tabStorage = guardedStorage(() => window.sessionStorage)
+
 /**
- * The view the previous map was left on, when *Open…* brought the page here (`s19`): the map opens on it rather than
- * on the whole backdrop. Taken once — a plain reload opens on the opening framing.
+ * The view last on screen in this tab — the previous map's, when *Open…* brought the page here (`s19`), or this one's
+ * before a reload (CARTO-427): the map opens on it rather than on the whole backdrop.
  */
-const CARRIED_VIEW = takeCarriedView(window.sessionStorage)
+const CARRIED_VIEW = takeCarriedView(tabStorage)
 
 const store = createCartographerStore({
   edition: {
@@ -178,6 +184,10 @@ store.subscribe(
 
 // CARTO-371: the cities' filters as the author left them, kept at each tick.
 keepCityFilters(store, pageStorage)
+
+// CARTO-427: what the lists show, and the view, as the author left them — kept at each change, put back at a reload.
+keepListView(store, pageStorage)
+keepView(store, tabStorage)
 
 /**
  * The compute the backdrop is baked through — a worker, so the ~1.8 s bake is nobody's frozen tab.
@@ -414,7 +424,7 @@ const handleOpenMap = (map: string): void => {
       version: () => store.getState().version,
       askSaveFirst: saveFirstQuestions.ask,
       carryView: () => {
-        carryView(window.sessionStorage, store.getState().viewport)
+        carryView(tabStorage, store.getState().viewport)
       },
       search: window.location.search,
       go: (address) => {

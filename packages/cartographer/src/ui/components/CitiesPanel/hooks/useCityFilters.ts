@@ -1,3 +1,4 @@
+import { useListQuery } from '../../../hooks/useListQuery'
 import { polityRows } from '../../../utils/polityRows'
 import { holderChoices } from '../utils/holderChoices'
 import { isOfferedState, stateChoices } from '../utils/stateChoices'
@@ -30,6 +31,7 @@ export function useCityFilters(
   const holders = store((state) => state.cityHolders)
   const tickedStates = store((state) => state.cityStates)
   const sort = store((state) => state.citySort)
+  const [query, onQuery] = useListQuery(store, 'cities')
   // The document is mutated in place: the version is what says a polity was added or recoloured.
   const version = store((state) => state.version)
 
@@ -60,5 +62,7 @@ export function useCityFilters(
     sort,
     onSort,
     onListed,
+    query,
+    onQuery,
   }
 }

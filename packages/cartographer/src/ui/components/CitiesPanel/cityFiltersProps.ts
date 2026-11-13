@@ -30,4 +30,8 @@ export interface CityFiltersProps {
   sort: CitySort
   /** An order was chosen in the sort menu. */
   onSort: (sort: CitySort) => void
+  /** What is typed in the list's filter — the store's, kept across a reload (CARTO-427). */
+  query: string
+  /** The filter's text changed. */
+  onQuery: (query: string) => void
 }

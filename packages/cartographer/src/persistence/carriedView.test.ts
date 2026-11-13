@@ -13,9 +13,6 @@ function memory(): ViewStorage & { held: Map<string, string> } {
     setItem: (key, value) => {
       held.set(key, value)
     },
-    removeItem: (key) => {
-      held.delete(key)
-    },
   }
 }
 
@@ -33,11 +30,12 @@ describe('the view carried to the next map', () => {
   })
 
   describe('variants', () => {
-    it('gives it back once, so a plain reload opens on the whole map', () => {
+    // CARTO-427: the view is kept, not taken once — a reload opens on it too.
+    it('gives it back at every opening, so a reload opens on the same view', () => {
       const storage = memory()
       carryView(storage, { scale: 12, originX: 0, originY: 0 })
       takeCarriedView(storage)
-      expect(takeCarriedView(storage)).toBeNull()
+      expect(takeCarriedView(storage)).toEqual({ scale: 12, originX: 0, originY: 0 })
     })
   })
 
@@ -48,7 +46,6 @@ describe('the view carried to the next map', () => {
       storage.setItem(CARRIED_VIEW_KEY, JSON.stringify({ scale: 0, originX: 1, originY: 2 }))
       expect(takeCarriedView(storage)).toBeNull()
       expect(warn).toHaveBeenCalledOnce()
-      expect(storage.held.has(CARRIED_VIEW_KEY)).toBe(false)
     })
   })
 

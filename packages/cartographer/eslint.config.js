@@ -192,6 +192,7 @@ export default tseslint.config(
             useLocale: 'context',
             useLocaleStore: 'context',
             usePolityDeletion: 'state',
+            useListQuery: 'store',
             usePolityDraft: 'state',
             usePolityForm: 'state',
             useRelayedResults: 'effect',

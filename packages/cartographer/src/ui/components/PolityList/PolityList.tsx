@@ -32,6 +32,8 @@ export interface PolityListProps {
   onMenu: (id: string, at: ViewportPoint) => void
   /** A row was double-clicked — its polity's dialogue, as a layer's options in Illustrator (`s07`). */
   onEdit: (id: string) => void
+  /** What is typed in the filter and its setter — the store's, kept across a reload (CARTO-427). */
+  search: readonly [string, (query: string) => void]
 }
 
 /**
@@ -45,7 +47,7 @@ export interface PolityListProps {
  *
  * **A filter at its head** (CARTO-360): the rows whose name holds what is typed, each under its suzerains, greyed
  * when they do not answer themselves (`filterRows`). The keys' cursor walks the rows shown. What is typed is the
- * list's own — one writer, one reader, no slice — so it empties when the panel is docked or floated (CARTO-342).
+ * store's (CARTO-427): it outlives the panel docked or floated, and a reload.
  * @param props - the rows, the target and the choice
  * @param props.year - the year being drawn, written in the subhead
  * @param props.rows - the rows to show, already sorted
@@ -53,15 +55,16 @@ export interface PolityListProps {
  * @param props.onChoose - aims at a polity, given its id — a click, or ‹enter› on the active row
  * @param props.onMenu - opens a row's menu, given its id and where to open it in viewport pixels
  * @param props.onEdit - opens a polity's dialogue, given its id — a double-click, or ‹enter› on the polity chosen
+ * @param props.search - what is typed in the filter, and its setter
  * @returns the filter, the subhead and the list — or a line saying the year is empty, or that nothing answers
  */
-export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
+export function PolityList({ year, rows, targetId, search, ...on }: PolityListProps) {
   // Context
   const t = useTranslation(POLITY_LIST_MESSAGES)
 
   // State
-  const { query, setQuery, filtered, keysTarget } = useRowFilter(rows, targetId)
-  const cursor = useListCursor(filtered.rows, keysTarget, onChoose, onMenu, onEdit)
+  const { query, setQuery, filtered, keysTarget } = useRowFilter(rows, targetId, search)
+  const cursor = useListCursor(filtered.rows, keysTarget, on.onChoose, on.onMenu, on.onEdit)
 
   // Effects
   useEffect(() => {
@@ -101,9 +104,9 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
               selected={row.id === targetId}
               active={row.id === cursor.activeId}
               dimmed={filtered.dimmed.has(row.id)}
-              onChoose={onChoose}
-              onMenu={onMenu}
-              onEdit={onEdit}
+              onChoose={on.onChoose}
+              onMenu={on.onMenu}
+              onEdit={on.onEdit}
             />
           ))}
         </ListboxList>

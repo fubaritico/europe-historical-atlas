@@ -63,10 +63,18 @@ export const DEFAULT_PANEL_LAYOUT: PanelLayout = {
   heights: {},
 }
 
+/** The lists whose filter text the store holds — `{Polities}`' and `{Cities}`'. */
+export type FilteredList = 'polities' | 'cities'
+
 /** The panels' state. */
 export interface PanelsState {
   /** Where the panels are. */
   panelLayout: PanelLayout
+  /**
+   * What is typed in each list's filter — held here rather than in the list (CARTO-427, the dev, 2026-11-13: *"when I
+   * reload the Cartographer, it remembers the zoom, the position, the filters"*), so the page's storage can keep it.
+   */
+  listQueries: Readonly<Record<FilteredList, string>>
 }
 
 /** What may be done to the panels. */
@@ -99,6 +107,12 @@ export interface PanelsActions {
    * @param layout - the layout
    */
   setPanelLayout: (layout: PanelLayout) => void
+  /**
+   * Set what is typed in a list's filter.
+   * @param list - the list
+   * @param query - the text
+   */
+  setListQuery: (list: FilteredList, query: string) => void
 }
 
 /** The slice: the layout, and the ways to change it. */
@@ -148,6 +162,10 @@ export const createPanelsSlice: StateCreator<
   PanelsSlice
 > = (set, get) => ({
   panelLayout: DEFAULT_PANEL_LAYOUT,
+  listQueries: { polities: '', cities: '' },
+  setListQuery: (list, query): void => {
+    set({ listQueries: { ...get().listQueries, [list]: query } })
+  },
   floatPanel: (id, rect): void => {
     set({ panelLayout: withPanelFloating(get().panelLayout, id, rect) })
   },

@@ -1040,11 +1040,13 @@ describe('CitiesPanel — the map filtered as the list (CARTO-390)', () => {
       expect(handed).not.toHaveBeenCalled()
     })
 
-    it('hands the map the same cities again once the panel is docked or floated', async () => {
+    // CARTO-427: what is typed is the store's, so the panel docked or floated keeps it, and the map its cities.
+    it('keeps what is typed once the panel is docked or floated, and hands the map the same cities', async () => {
       const { store, user, remount } = mount()
       await user.type(filter(), 'par')
       remount()
-      expect(idsHandedToTheMap(store)).toEqual(['metz', 'paris'])
+      expect(store.getState().listQueries.cities).toBe('par')
+      expect(idsHandedToTheMap(store)).toEqual(['paris'])
     })
 
     it('withdraws the list once the panel is gone: the map filters nothing', () => {

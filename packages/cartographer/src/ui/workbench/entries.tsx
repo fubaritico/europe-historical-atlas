@@ -186,6 +186,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           onMenu={() => undefined}
           onEdit={() => undefined}
           rows={PLATE_ROWS}
+          search={['', () => undefined]}
         />
       </div>
     ),
