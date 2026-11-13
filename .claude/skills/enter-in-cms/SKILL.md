@@ -25,8 +25,8 @@ connected (`/mcp`), and its tools are there. If not, **stop** and give the dev t
 
 1. **His CMS server runs** (`pnpm dev:cms`, port 3100) — his to start, never mine.
 2. **An API key** in the admin: menu **MCP › API Keys**, create; in the sidebar tick **find, create, update** for
-   `places`, `place-periods`, `sources`, and **find** for `importance-reasons`; save, copy the key. If his key lacks
-   the box for `importance-reasons`, he opens it and ticks it.
+   `places`, `place-periods`, `sources` and `importance-reasons`; save, copy the key. A key made before 2026-11-13
+   (CMS-431) has only **find** for `importance-reasons`: he opens it and ticks **create** and **update** too.
 3. **The key in his own terminal**, never in the conversation: it sits in `.env.local` (ignored by git); he loads it
    into the shell, then, from the `europe-map` folder:
    `claude mcp add --transport http cms http://localhost:3100/api/mcp --header "Authorization: Bearer $<his variable>"`.
@@ -47,7 +47,7 @@ peut figer le serveur »). The same table is in `packages/cms/README.md`, for a 
 | ✘ *connection timed out after 30000ms* | **the CMS server is stuck, not the key** — a wrong key is refused at once | probe without a key (below); if the admin hangs too, his server's terminal holds the error |
 | `index … already exists` in his terminal | a schema push failed halfway after a field change; every request waits behind it | he stops his server; on **a copy** of `cms.db`, Payload's `pushSchema` without `apply` must list nothing; then he restarts — never a push tried on his base |
 | `401` on `/api/mcp` with the key | the key is wrong, or the variable was empty when `claude mcp add` ran | he reloads it from `.env.local`, `claude mcp remove cms`, adds it again |
-| a refusal on `importance-reasons` | the key's **find** box for it is not ticked | admin › MCP › API Keys, tick it |
+| a refusal on `importance-reasons` | the key's **find**, **create** or **update** box for it is not ticked — a key made before 13/11 has find only | admin › MCP › API Keys, tick the three |
 
 **The probe, without a key** (it changes nothing): a `POST` of an MCP `initialize` to `http://localhost:3100/api/mcp`
 answers **401 in milliseconds** when the server is healthy; no answer in 20 s means the server is stuck. The same for
@@ -151,9 +151,11 @@ Two batches never write the same sheet at once — an update re-sends all its li
 - **A refusal names every issue** (the sheet is checked by `core/data/citySheet.ts` before it is saved): read them all,
   fix them all, then retry once. Never retry blind.
 - **An interrupted or refused call may have acted**: search for the record before creating it again.
-- **The importance reasons are read only** (`importance-reasons`: find, nothing else). A `reason` line or the
-  `reasons` field cites one by its id, found with `find` — never guessed. A reason that does not exist is not created:
-  say it to the dev, who adds it. One is misspelt in his data (« pelrinage »): use its id, never re-type the name.
+- **The importance reasons: find, create, change — never delete** (`importance-reasons`, opened 2026-11-13, CMS-431). A
+  `reason` line or the `reasons` field cites one by its id, found with `find` — never guessed. **Search before creating**:
+  a reason that exists is reused; one created names its faith when it has one (« évêché orthodoxe », « grande
+  mosquée ») — the sign on the map depends on it. One is misspelt in his data (« pelrinage »): use its id, never re-type
+  the name, never correct it yourself — it is his.
 - **A change the dev made by hand in the admin is his**: an `update` over it is said to him before it is made.
 - **He dictates by voice**: a garbled name is a dictation error — say what you understood before entering it.
 - **A city entered is not shown in the atlas** (CMS-391, 2026-11-08): « Afficher la ville dans l'atlas » (`showInAtlas`)
