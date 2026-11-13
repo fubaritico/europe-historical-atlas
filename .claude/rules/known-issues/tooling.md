@@ -25,6 +25,14 @@ paths:
 
 Open issues of the repository's tooling: install, lint, Turbo, CI, commits, ignores. Loaded by path; indexed in `.claude/known-issues.md`.
 
+- **Un test qui lance `git` hérite du `GIT_DIR` du commit en cours** (13/11, corrigé) : le crochet de commit lance les tests
+  des crochets de Claude, et `statusline.test.mjs` faisait un `git init` dans un dossier temporaire. Depuis un commit fait
+  dans un arbre secondaire, `GIT_DIR` désigne `.git/worktrees/<arbre>` : le `git init` réinitialisait ce dépôt au lieu du
+  dossier temporaire et écrivait `core.bare = true` dans la configuration commune — l'arbre de `main` n'était plus un
+  arbre de travail (« this operation must be run in a work tree »). Reproduit sur un dépôt jetable. **Remède appliqué** :
+  ce `git` part sans aucune variable `GIT_*`. **La règle** : tout `git` lancé par un test reçoit un environnement sans
+  `GIT_*`. **Si ça revient** : `git -C <racine> config core.bare false`. **Sévérité : bloquant quand ça arrive.**
+
 - **Le dépôt tourne sous Node 24 depuis le 21/10** (décision du dev : éviter les ennuis de compatibilité à venir).
   `.nvmrc` dit `24` — la CI et le déploiement Netlify le lisent par l'action `setup` — et `engines.node` exige `>=24`.
   En local : **24.22.1** par nvm (`nvm alias default 24`), les 22.14 et 22.23.3 restent installées. Gate entière et

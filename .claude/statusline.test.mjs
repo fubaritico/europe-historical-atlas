@@ -13,6 +13,13 @@ import { contextPart, statusLine } from './statusline.mjs'
 const here = dirname(fileURLToPath(import.meta.url))
 const script = join(here, 'statusline.mjs')
 
+/**
+ * The environment without git's own variables. Run by the commit hook, these tests inherit `GIT_DIR` (and its kin) from
+ * the commit in progress; a `git init <tmp>` under it re-initialises the real repository instead of the temporary one,
+ * and marks it bare — from a worktree's commit, 2026-11-13, the main tree stopped being a work tree.
+ */
+const withoutGit = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_')))
+
 describe('statusline', () => {
   it('a historian session in its tree reads its role, tree and branch', () => {
     const line = statusLine({ agent: { name: 'historian' }, workspace: { git_worktree: 'historian' } }, 'historian-1109')
@@ -58,7 +65,7 @@ describe('statusline', () => {
   })
   it('run as Claude Code runs it, two sessions of one tree each show their own role', () => {
     const tree = realpathSync(mkdtempSync(join(tmpdir(), 'statusline-')))
-    execFileSync('git', ['init', '-q', '-b', 'main', tree])
+    execFileSync('git', ['init', '-q', '-b', 'main', tree], { env: withoutGit })
     writeRole(tree, 'coder-console', 'coder')
     writeRole(tree, 'historian-console', 'historian')
     const lineOf = (session_id) =>
