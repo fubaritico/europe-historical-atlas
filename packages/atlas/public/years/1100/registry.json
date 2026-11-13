@@ -149,6 +149,17 @@
       "wikidata": "Q3708094"
     },
     {
+      "id": "inalids",
+      "name": "Inalids",
+      "rank": null,
+      "status": null,
+      "suzerain": null,
+      "existsFrom": 1098,
+      "existsTo": 1183,
+      "colour": null,
+      "wikidata": "Q2060041"
+    },
+    {
       "id": "armenian-kingdom-of-cilicia",
       "name": "Armenian Kingdom of Cilicia",
       "rank": "kingdom",
@@ -349,6 +360,17 @@
       "wikidata": "Q12544"
     },
     {
+      "id": "duche-de-fondi",
+      "name": "Duchy of Gaeta",
+      "rank": null,
+      "status": null,
+      "suzerain": null,
+      "existsFrom": 839,
+      "existsTo": 1140,
+      "colour": "#5b991c",
+      "wikidata": "Q2457072"
+    },
+    {
       "id": "najahid-dynasty",
       "name": "Najahid Dynasty",
       "rank": null,
@@ -449,13 +471,13 @@
     },
     {
       "id": "kingdom-of-duklja",
-      "name": "Kingdom of Duklja",
+      "name": "Duklja",
       "rank": "kingdom",
       "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#c09c59",
+      "suzerain": "byzantine-empire",
+      "existsFrom": 854,
+      "existsTo": 1252,
+      "colour": "#9a7a40",
       "wikidata": "Q1252942"
     },
     {
@@ -508,8 +530,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kingdom-of-duklja",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1084,
+      "existsTo": 1217,
       "colour": "#c09c59",
       "wikidata": "Q1311990"
     },
@@ -661,9 +683,9 @@
       "name": "Duchy of Naples",
       "rank": "duchy",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "byzantine-empire",
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1137,
       "colour": "#c059b7",
       "wikidata": "Q1051600"
     },
@@ -1302,10 +1324,10 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": "kingdom-of-hungary",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 925,
+      "existsTo": 1102,
       "colour": "#ab3030",
-      "wikidata": null
+      "wikidata": "Q858841"
     },
     {
       "id": "kingdom-of-bohemia",
@@ -1317,6 +1339,29 @@
       "existsTo": null,
       "colour": "#db9380",
       "wikidata": null
+    },
+    {
+      "id": "zachlumia",
+      "name": "Zachlumia",
+      "rank": "county",
+      "status": null,
+      "suzerain": "kingdom-of-duklja",
+      "existsFrom": null,
+      "existsTo": 1054,
+      "colour": "#c09c59",
+      "wikidata": "Q1311704"
+    },
+    {
+      "id": "bosnia-early-medieval",
+      "name": "Bosnia (early medieval)",
+      "shortName": "Bosnia",
+      "rank": null,
+      "status": null,
+      "suzerain": "kingdom-of-duklja",
+      "existsFrom": 838,
+      "existsTo": 1154,
+      "colour": "#5989c0",
+      "wikidata": "Q25340956"
     }
   ]
 }
