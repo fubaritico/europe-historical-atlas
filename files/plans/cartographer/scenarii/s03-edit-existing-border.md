@@ -391,6 +391,24 @@ Scenario: what is refused, said before the click
 > that strays and joins the two coast anchors. And the derivation of borders cost 5.7 s after every
 > gesture on 137 polities: fixed the same day (0.34 s).
 
+### Taking a territory — a polity with none yet (2026-11-13)
+
+> The dev, carving Upper Lotharingia out of the Empire's own ground with ⟨retrace⟩: every press refused, *"the press is
+> on no anchor of Upper Lotharingia"* — it had none (read in the refusals' journal). Built the same day
+> (`canvas/tools/retraceTake.ts`, `f4cf914`).
+
+```gherkin
+Given Upper Lotharingia, a vassal of the Holy Roman Empire, has no territory yet
+  And ⟨retrace⟩ is in hand, Upper Lotharingia aimed at
+When I click a point of the Empire's border with Frisia
+Then the bar says "Take the territory of Upper Lotharingia — start on this point"
+When I draw along the rivers, then click a point of the Empire's border with Champagne
+Then the stretch of that border between my two clicks closes the run — the side my run changes least, the other with ‹alt›
+  And the territory closes as the Pen closes it: carved out of the Empire, in one undo step
+When the start and the end lie on no one outline
+Then nothing is drawn, the click is taken back, and the bar says the two are not on one border
+```
+
 ## The shared border — settled
 
 ```gherkin
