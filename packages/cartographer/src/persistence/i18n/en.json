@@ -26,5 +26,7 @@
   "autosaveKeptAgain": "the automatic save is written again, as {name}",
   "autosaveNotKept": "the automatic save is not written — save with ‹ctrl+S› not to lose your work (details in the console)",
   "autosaveUnconfirmed": "the automatic save is still waiting for the server’s confirmation — save with ‹ctrl+S› not to lose your work (details in the console)",
-  "openAskFailed": "not opened — the question before opening could not be asked (details in the console)"
+  "openAskFailed": "not opened — the question before opening could not be asked (details in the console)",
+  "notSavedWikidata": "{year} not saved: the Wikidata id of {name} is “{value}”, which is no id — it is Q followed by digits, for example Q70972. Correct it or empty it in the polity’s form, then save.",
+  "notSavedPolityField": "{year} not saved: the field “{field}” of {name} is refused. Correct it in the polity’s form (details in the console), then save."
 }

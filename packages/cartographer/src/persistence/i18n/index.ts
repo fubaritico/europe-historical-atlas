@@ -14,7 +14,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * Its messages, and the values they take:
  * - `today`, `yesterday`, `onDate`, `unknownTime` — A time
  * - `contents`, `folderHoldsOther`, `readAfterDrawing`, `unreadable`, `opened`,
- *   `stillReading`, `saveRunning`, `notSaved`, `saved`, `saveUnconfirmed`, `notSavedChanged` — The year on
+ *   `stillReading`, `saveRunning`, `notSaved`, `notSavedWikidata`, `notSavedPolityField`, `saved`, `saveUnconfirmed`, `notSavedChanged` — The year on
  *   disk
  * - `mapPageChanged`, `saveAsSameName`, `saveAsBadName`, `saveAsOtherYear`, `saveAsTaken`, `saveAsFailed`,
  *   `copySaved`, `copyNotSaved`, `noSuchMap`, `openAskFailed` — A map opened, saved as, copied (`s19`)

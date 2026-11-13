@@ -2,6 +2,7 @@ import { copyName, isNewMapName, yearNamed } from '@europe-historical-atlas/core
 import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { awaitConfirmation } from './awaitConfirmation'
+import { notSavedSentence } from './saveDiagnosis'
 import { timeWords } from './timeWords'
 import { YearChangedOnDisk } from './yearArchive'
 
@@ -338,24 +339,23 @@ async function saveSilently(deps: YearSessionDeps, cell: SessionCell): Promise<v
  * @returns `true` when the map was written
  */
 async function writeYear(deps: YearSessionDeps, map: string, overwrite: boolean): Promise<boolean> {
+  // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is. Kept, so a
+  // refusal is read against what was sent, not what the author drew while the server answered (review QUAL-001).
+  const sent = deps.store.getState().document
   try {
-    // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is.
     // Never cut, since it may land; said when the server has not confirmed it in time (the dev, REPO-275).
-    const summary = await awaitConfirmation(
-      deps.archive.save(deps.store.getState().document, map, { overwrite }),
-      {
-        timers: deps.timers,
-        delayMs: ANSWER_TIMEOUT_MS,
-        late: () => {
-          console.error(`${LOG_TAG} ${map}: no confirmation of the save yet`)
-          deps.report({
-            tone: 'alarm',
-            topic: 'year',
-            text: deps.words().t('saveUnconfirmed', { year: map }),
-          })
-        },
-      }
-    )
+    const summary = await awaitConfirmation(deps.archive.save(sent, map, { overwrite }), {
+      timers: deps.timers,
+      delayMs: ANSWER_TIMEOUT_MS,
+      late: () => {
+        console.error(`${LOG_TAG} ${map}: no confirmation of the save yet`)
+        deps.report({
+          tone: 'alarm',
+          topic: 'year',
+          text: deps.words().t('saveUnconfirmed', { year: map }),
+        })
+      },
+    })
     deps.report({
       tone: 'success',
       topic: 'year',
@@ -368,7 +368,12 @@ async function writeYear(deps: YearSessionDeps, map: string, overwrite: boolean)
   } catch (error: unknown) {
     if (error instanceof YearChangedOnDisk && !overwrite) return askBeforeOverwriting(deps, error)
     console.error(`${LOG_TAG} ${map} was not saved`, error)
-    deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
+    // The server's refusal said in the author's words — the polity, the field, what to do (the dev, 2026-11-13).
+    deps.report({
+      tone: 'alarm',
+      topic: 'year',
+      text: notSavedSentence(map, error, sent, deps.words()),
+    })
     return false
   }
 }
