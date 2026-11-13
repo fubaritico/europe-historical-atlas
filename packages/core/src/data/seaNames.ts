@@ -50,9 +50,9 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'north-sea',
     name: { fr: 'Mer du Nord', en: 'North Sea' },
-    from: { lon: 1.2, lat: 52.8 },
-    bend: { lon: 6.4, lat: 56 },
-    to: { lon: 3.2, lat: 60.6 },
+    from: { lon: 1.8, lat: 53.4 },
+    bend: { lon: 6, lat: 56 },
+    to: { lon: 3.4, lat: 60 },
   },
   {
     id: 'baltic',
