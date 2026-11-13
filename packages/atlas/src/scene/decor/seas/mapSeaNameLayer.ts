@@ -14,7 +14,10 @@ import {
   longitudeToHorizontal,
 } from '@europe-historical-atlas/core/geo/mercator'
 
+import { landTexturesOf } from '../../landMask'
 import { disposeHandle } from '../../layers/disposeHandle'
+import { meshWorldDepth } from '../../relief/reliefMesh'
+import { WORLD_WIDTH } from '../../world'
 
 import { createSeaNameLayer } from './seaNameLayer'
 
@@ -38,8 +41,9 @@ export async function rebuildSeaNames(
   draw: DrawSeaLabel,
   lift: number
 ): Promise<void> {
-  const frame = context.sources.heightmap?.meta.bbox
-  if (frame === undefined) return
+  const meta = context.sources.heightmap?.meta
+  if (meta === undefined) return
+  const frame = meta.bbox
   const placed: PlacedSeaName[] = await Promise.all(
     SEA_NAMES.map(async (sea) => {
       const label = await draw(seaNameText(sea, context.locale))
@@ -57,7 +61,12 @@ export async function rebuildSeaNames(
   )
   const { scene, handles } = context
   disposeHandle(scene, handles.seaNames)
-  handles.seaNames = createSeaNameLayer(placed, SEA_NAME_OPACITY)
+  // The land the letters stop at, the fills' own: no name reaches the land, wherever its arc is laid.
+  handles.seaNames = createSeaNameLayer(placed, {
+    opacity: SEA_NAME_OPACITY,
+    land: landTexturesOf(context),
+    plane: [WORLD_WIDTH, meshWorldDepth(meta, WORLD_WIDTH)],
+  })
   scene.add(handles.seaNames.object)
 }
 

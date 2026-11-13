@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { Texture } from 'three'
+import { DataTexture, Texture } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createSeaNameLayer, ribbonGeometry } from './seaNameLayer'
+import { SEA_NAME_FRAGMENT_SHADER } from './seaNameShader'
 
-import type { PlacedSeaName } from './seaNameLayer'
-import type { Mesh, MeshBasicMaterial } from 'three'
+import type { PlacedSeaName, SeaNameLook } from './seaNameLayer'
+import type { Mesh, ShaderMaterial } from 'three'
 
 /** A name read west to east along a straight arc of length 4, four times as long as it is high. */
 const NAME: PlacedSeaName = {
@@ -18,19 +19,47 @@ const NAME: PlacedSeaName = {
   y: 0.01,
 }
 
+/** The land mask's two halves, stand-ins, and a dispose to watch. */
+const LAND = {
+  west: new DataTexture(new Uint8Array(1), 1, 1),
+  east: new DataTexture(new Uint8Array(1), 1, 1),
+  split: 0.5,
+  dispose: vi.fn(),
+}
+
+/** The names' look: see-through, on a 12 × 9 plane. */
+const LOOK: SeaNameLook = { opacity: 0.28, land: LAND, plane: [12, 9] }
+
+/**
+ * The first name's material.
+ * @param layer - the layer
+ * @returns its material
+ */
+function materialOf(layer: ReturnType<typeof createSeaNameLayer>): ShaderMaterial {
+  return (layer.object.children[0] as Mesh<ReturnType<typeof ribbonGeometry>, ShaderMaterial>)
+    .material
+}
+
 describe('createSeaNameLayer', () => {
   describe('happy path', () => {
     it('lays each name see-through, never hidden by the relief', () => {
-      const layer = createSeaNameLayer([NAME], 0.28, () => new Texture())
-      const mesh = layer.object.children[0] as Mesh<
-        ReturnType<typeof ribbonGeometry>,
-        MeshBasicMaterial
-      >
-      expect([mesh.material.opacity, mesh.material.depthTest, mesh.material.depthWrite]).toEqual([
+      const material = materialOf(createSeaNameLayer([NAME], LOOK, () => new Texture()))
+      expect([material.uniforms.opacity?.value, material.depthTest, material.depthWrite]).toEqual([
         0.28,
         false,
         false,
       ])
+    })
+
+    it('reads the map’s land mask and its plane, to draw over the sea only', () => {
+      const material = materialOf(createSeaNameLayer([NAME], LOOK, () => new Texture()))
+      expect([
+        material.uniforms.landWest?.value,
+        material.uniforms.landEast?.value,
+        material.uniforms.landSplit?.value,
+        material.uniforms.plane?.value,
+      ]).toEqual([LAND.west, LAND.east, 0.5, [12, 9]])
+      expect(SEA_NAME_FRAGMENT_SHADER).toContain('if (!overWater(vMapUv)) discard;')
     })
   })
 
@@ -63,8 +92,13 @@ describe('createSeaNameLayer', () => {
     it('frees every texture it was handed on teardown', () => {
       const texture = new Texture()
       const dispose = vi.spyOn(texture, 'dispose')
-      createSeaNameLayer([NAME, NAME], 0.28, () => texture).dispose()
+      createSeaNameLayer([NAME, NAME], LOOK, () => texture).dispose()
       expect(dispose).toHaveBeenCalledTimes(2)
+    })
+
+    it('leaves the land mask to the layers that share it', () => {
+      createSeaNameLayer([NAME], LOOK, () => new Texture()).dispose()
+      expect(LAND.dispose).not.toHaveBeenCalled()
     })
   })
 })

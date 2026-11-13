@@ -1,7 +1,8 @@
 /**
  * The seas' names on the map (ATLAS-440): each name an image stretched along its arc across its sea — a ribbon of
  * quads following the curve, the image's top on the arc's left — fixed, see-through, never placed by a computation
- * (`core/data/seaNames`). Unlit, writing no depth, drawn over whatever lies under it, as the compass rose.
+ * (`core/data/seaNames`). Unlit, writing no depth, drawn over whatever lies under it, as the compass rose — and over
+ * the sea only, a letter cut on the coast (`seaNameShader`).
  */
 
 import {
@@ -11,9 +12,14 @@ import {
   Float32BufferAttribute,
   Group,
   Mesh,
-  MeshBasicMaterial,
+  ShaderMaterial,
 } from 'three'
 
+import { landUniforms } from '../../political/tintOnRelief'
+
+import { SEA_NAME_FRAGMENT_SHADER, SEA_NAME_VERTEX_SHADER } from './seaNameShader'
+
+import type { LandTextures } from '../../relief/landTextures'
 import type { Texture } from 'three'
 
 /** A sea's name drawn: the image, and its proportions. */
@@ -32,6 +38,16 @@ export interface PlacedSeaName {
   readonly arc: readonly (readonly [number, number])[]
   /** The height the name lies at. */
   readonly y: number
+}
+
+/** How the names are drawn: their opacity, and the land they stop at. */
+export interface SeaNameLook {
+  /** How see-through they are. */
+  readonly opacity: number
+  /** The land mask on the GPU: no letter is drawn over land. Shared with the other layers, never freed here. */
+  readonly land: LandTextures
+  /** The map's plane in the world, `[width, depth]` — to read a point's place on the mask. */
+  readonly plane: readonly [number, number]
 }
 
 /** The seas' names on the scene, and their teardown. */
@@ -114,13 +130,13 @@ export function ribbonGeometry(
 /**
  * Lay the seas' names.
  * @param names - each name, drawn, and its arc
- * @param opacity - how see-through they are
+ * @param look - their opacity, and the land they stop at
  * @param toTexture - an image to a texture — the browser's canvas texture, a stand-in in a test
  * @returns the layer
  */
 export function createSeaNameLayer(
   names: readonly PlacedSeaName[],
-  opacity: number,
+  look: SeaNameLook,
   toTexture: (canvas: HTMLCanvasElement) => Texture = (canvas) => new CanvasTexture(canvas)
 ): SeaNameLayer {
   const object = new Group()
@@ -129,10 +145,16 @@ export function createSeaNameLayer(
     const texture = toTexture(name.label.canvas)
     // The name's height follows its length along the arc, so its letters keep their proportions.
     const geometry = ribbonGeometry(name.arc, lengthOf(name.arc) / name.label.aspect, name.y)
-    const material = new MeshBasicMaterial({
-      map: texture,
+    const material = new ShaderMaterial({
+      vertexShader: SEA_NAME_VERTEX_SHADER,
+      fragmentShader: SEA_NAME_FRAGMENT_SHADER,
+      uniforms: {
+        map: { value: texture },
+        opacity: { value: look.opacity },
+        plane: { value: look.plane },
+        ...landUniforms(look.land),
+      },
       transparent: true,
-      opacity,
       depthWrite: false,
       depthTest: false,
       side: DoubleSide,
