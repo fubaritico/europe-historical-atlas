@@ -6,6 +6,7 @@
 import {
   SEA_NAMES,
   SEA_NAME_OPACITY,
+  seaArcAt,
   seaNameText,
 } from '@europe-historical-atlas/core/data/seaNames'
 import {
@@ -14,13 +15,15 @@ import {
 } from '@europe-historical-atlas/core/geo/mercator'
 
 import { disposeHandle } from '../../layers/disposeHandle'
-import { WORLD_WIDTH } from '../../world'
 
 import { createSeaNameLayer } from './seaNameLayer'
 
 import type { DrawSeaLabel } from './seaLabel'
 import type { PlacedSeaName } from './seaNameLayer'
 import type { LayerContext } from '../../layers/layerContext'
+
+/** How many pieces an arc is cut into: enough for the ribbon to bend smoothly. */
+const ARC_SAMPLES = 32
 
 /**
  * Lay the seas' names, replacing any laid before. Before the relief's frame is known there is nowhere to place them:
@@ -37,20 +40,19 @@ export async function rebuildSeaNames(
 ): Promise<void> {
   const frame = context.sources.heightmap?.meta.bbox
   if (frame === undefined) return
-  const worldPerDegree = WORLD_WIDTH / (frame.east - frame.west)
   const placed: PlacedSeaName[] = await Promise.all(
     SEA_NAMES.map(async (sea) => {
       const label = await draw(seaNameText(sea))
-      const [x, , z] = context.projection.toWorld(
-        longitudeToHorizontal(sea.lon, frame),
-        latitudeToVertical(sea.lat, frame)
-      )
-      return {
-        label,
-        position: [x, lift, z] as const,
-        angle: (sea.angleDeg * Math.PI) / 180,
-        length: sea.lengthDeg * worldPerDegree,
-      }
+      // The arc sampled finely enough that the ribbon reads as a curve, each point projected as the map's.
+      const arc = Array.from({ length: ARC_SAMPLES + 1 }, (_, k) => {
+        const at = seaArcAt(sea, k / ARC_SAMPLES)
+        const [x, , z] = context.projection.toWorld(
+          longitudeToHorizontal(at.lon, frame),
+          latitudeToVertical(at.lat, frame)
+        )
+        return [x, z] as const
+      })
+      return { label, arc, y: lift }
     })
   )
   const { scene, handles } = context

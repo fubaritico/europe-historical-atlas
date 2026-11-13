@@ -1,10 +1,18 @@
 /**
- * The seas' names on the map (ATLAS-440): each name an image laid flat on its sea, along its axis, at its length —
- * fixed, see-through, never placed by a computation (`core/data/seaNames`). Built as the compass rose is: a flat
- * quad per name, unlit, writing no depth, drawn over whatever lies under it.
+ * The seas' names on the map (ATLAS-440): each name an image stretched along its arc across its sea — a ribbon of
+ * quads following the curve, the image's top on the arc's left — fixed, see-through, never placed by a computation
+ * (`core/data/seaNames`). Unlit, writing no depth, drawn over whatever lies under it, as the compass rose.
  */
 
-import { CanvasTexture, DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
+import {
+  BufferGeometry,
+  CanvasTexture,
+  DoubleSide,
+  Float32BufferAttribute,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+} from 'three'
 
 import type { Texture } from 'three'
 
@@ -16,16 +24,14 @@ export interface SeaLabel {
   readonly aspect: number
 }
 
-/** A sea's name ready to lay: its image, where its middle falls in the world, its direction and its length. */
+/** A sea's name ready to lay: its image, and its arc in the world. */
 export interface PlacedSeaName {
   /** The image. */
   readonly label: SeaLabel
-  /** The middle of the name, in world coordinates. */
-  readonly position: readonly [number, number, number]
-  /** Its direction, in radians counter-clockwise from east, seen from above. */
-  readonly angle: number
-  /** Its length, in world units. */
-  readonly length: number
+  /** The arc, sampled from its start to its end, as world `[x, z]` — at least two points. */
+  readonly arc: readonly (readonly [number, number])[]
+  /** The height the name lies at. */
+  readonly y: number
 }
 
 /** The seas' names on the scene, and their teardown. */
@@ -40,8 +46,74 @@ export interface SeaNameLayer {
 const SEA_NAME_RENDER_ORDER = 20
 
 /**
+ * The length of a polyline.
+ * @param points - its points
+ * @returns the sum of its segments
+ */
+function lengthOf(points: readonly (readonly [number, number])[]): number {
+  let total = 0
+  for (let i = 1; i < points.length; i++) {
+    const [ax, az] = points[i - 1] ?? [0, 0]
+    const [bx, bz] = points[i] ?? [0, 0]
+    total += Math.hypot(bx - ax, bz - az)
+  }
+  return total
+}
+
+/**
+ * A ribbon along an arc: two vertices at each point of it, half the name's height either side, the image's `u` running
+ * along the arc's length and its top (`v = 1`) on the arc's left — the north side for a name read west to east.
+ * @param arc - the arc's points, world `[x, z]`
+ * @param height - the ribbon's height, world units
+ * @param y - the height it lies at
+ * @returns the geometry
+ */
+export function ribbonGeometry(
+  arc: readonly (readonly [number, number])[],
+  height: number,
+  y: number
+): BufferGeometry {
+  const total = lengthOf(arc)
+  const positions: number[] = []
+  const uvs: number[] = []
+  let along = 0
+  arc.forEach(([x, z], i) => {
+    if (i > 0) {
+      const [px, pz] = arc[i - 1] ?? [x, z]
+      along += Math.hypot(x - px, z - pz)
+    }
+    // The direction here, from the neighbours either side; its left, seen from above, is (dz, −dx).
+    const [ax, az] = arc[Math.max(0, i - 1)] ?? [x, z]
+    const [bx, bz] = arc[Math.min(arc.length - 1, i + 1)] ?? [x, z]
+    const run = Math.hypot(bx - ax, bz - az) || 1
+    const lx = (bz - az) / run
+    const lz = -(bx - ax) / run
+    const u = total === 0 ? 0 : along / total
+    positions.push(
+      x + (lx * height) / 2,
+      y,
+      z + (lz * height) / 2,
+      x - (lx * height) / 2,
+      y,
+      z - (lz * height) / 2
+    )
+    uvs.push(u, 1, u, 0)
+  })
+  const indices: number[] = []
+  for (let i = 0; i + 1 < arc.length; i++) {
+    const top = 2 * i
+    indices.push(top, top + 1, top + 2, top + 1, top + 3, top + 2)
+  }
+  const geometry = new BufferGeometry()
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  return geometry
+}
+
+/**
  * Lay the seas' names.
- * @param names - each name, drawn and placed
+ * @param names - each name, drawn, and its arc
  * @param opacity - how see-through they are
  * @param toTexture - an image to a texture — the browser's canvas texture, a stand-in in a test
  * @returns the layer
@@ -55,10 +127,8 @@ export function createSeaNameLayer(
   const owned: { dispose: () => void }[] = []
   for (const name of names) {
     const texture = toTexture(name.label.canvas)
-    const geometry = new PlaneGeometry(name.length, name.length / name.label.aspect)
-    // Flat on the map, its top toward the north (−Z), then turned to its axis.
-    geometry.rotateX(-Math.PI / 2)
-    geometry.rotateY(name.angle)
+    // The name's height follows its length along the arc, so its letters keep their proportions.
+    const geometry = ribbonGeometry(name.arc, lengthOf(name.arc) / name.label.aspect, name.y)
     const material = new MeshBasicMaterial({
       map: texture,
       transparent: true,
@@ -68,7 +138,6 @@ export function createSeaNameLayer(
       side: DoubleSide,
     })
     const mesh = new Mesh(geometry, material)
-    mesh.position.set(name.position[0], name.position[1], name.position[2])
     mesh.renderOrder = SEA_NAME_RENDER_ORDER
     object.add(mesh)
     owned.push(geometry, material, texture)
