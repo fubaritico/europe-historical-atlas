@@ -8,44 +8,29 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après la session du 12/11 (la coupe par la terre, CORE-421 ; ses retours de dessin)
+## ▶ ON REPREND ICI — après la nuit du 12 au 13/11 (les outils de dessin débloqués, la 1100 des Balkans poussée)
 
-**Il revient avec ses retours de dessin** sur les cartes reconstruites — il corrige en zoom très serré. Les écouter d'abord.
+**Son programme du 13/11** : du beau — **les icônes 3D** (ATLAS-287 la couronne, ATLAS-288 les autres types), par
+`/make-event-icon`, candidates sur ses bancs, il choisit à l'œil. Puis l'interface de l'atlas, qu'il a hâte de commencer
+(ATLAS-329, ATLAS-134 ; React, décidé). **Il pense déléguer à un codeur 2** le nettoyage des cartes 1000, 1400, 1500, 1600
+(CARTO-403 à 406) : lui préparer un arbre propre — `coder-2` porte quatre `stash` de mes copies de la nuit, et
+`files/spikes/sea-zones/{carve,subtract}.ts` sont dans l'arbre `coder` ; une session par carte. **L'historien** fait les
+villes des Balkans (Roumanie, Hongrie…) et **les forteresses** (indice d'acquisition du territoire) : vérifier si le CMS
+a un type de lieu « forteresse » avant qu'il saisisse — sinon c'est un champ ajouté, sans migration bloquante (CMS-276).
 
-**CORE-421, en cours** : la couleur, les hachures et les frontières s'arrêtent sur la côte du masque, dans l'atlas et le
-Cartographe (un seul seuil, `core/data/landClip.COAST_COVERAGE`) ; une seule côte, tracée sur le masque entier dans les
-deux ; le Cartographe cuit sur le relief de l'atlas (`a1a7ea9`). **1100, 1200, 1300 reconstruites** par
-`files/spikes/sea-zones/rebuild.ts` (`6638a30`) — validées par lui ; cinq fois moins de points. **Reste** : le tracé de la
-côte et le masque à la publication (≈ 3 s de plus au démarrage du site d'ici là) ; l'image de la mer du Cartographe dans le
-calculateur ; les ouverts de la revue (`rules/known-issues/atlas.md`, `cartographer.md`).
+**Sa règle, la nuit du 12/11 : la liberté de manipulation** (mémoire `freedom-of-handling`) — un geste n'est jamais bloqué
+par une règle qu'il n'a pas demandée ; **l'outil choisi reste choisi**. Quand un geste échoue : le refaire dans mon
+Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me met**, jamais deviné.
 
-**Défauts du soir, en tickets** (À faire) : **CARTO-424** — un vassal collé n'est pas creusé dans son suzerain (la Bohême,
-creusée par `files/spikes/sea-zones/carve.ts`) ; **CARTO-425** — souder un point sur un autre refusé sans rien dire, entre
-la Croatie et la Hongrie de 1100 : **vérifier d'abord si mon script en est la cause** (points recréés par l'union ; la
-Hongrie retaillée par `subtract.ts` ne partage que 2 points avec la Croatie). Il était à bout (« ton outil de merde ») :
-réparer, pas expliquer.
+**L'état** : `main` = le dépôt distant = `3e5d00c`. Poussé cette nuit : la soudure qui replie l'épine (`b0baf3f`), le
+creusement par différence de surfaces (`dad8373`), la fermeture avec ⌥ (`33fe68b`), la retouche (`4e563cb`), la vue et
+les filtres gardés au rechargement (`c0bec21`, CARTO-427), la 1100 des Balkans (`81c7d8f`, cassait l'atlas) et son
+correctif (`3e5d00c`). **La CI de `3e5d00c` tournait à 02:10** — la lire jusqu'au bout. **Non commités** :
+`content/events.json` et `files/plans/sources/1100/first-lot.md` (l'historien). Mon serveur du port 5199 tourne encore.
 
-**Non commité dans l'arbre de `main`** : la 1100 avec la Croatie sortie de la Hongrie (`subtract.ts`, après `fc72157`) —
-la commiter avec ses prochaines retouches. **Non poussé** : `fc72157` (la 1100 avec la Bohême). Les scripts `carve.ts` et
-`subtract.ts` sont dans l'arbre `coder`, non commités ; `files/spikes/coast-push/` y est abandonné (approche remplacée).
-**L'arbre `coder`** porte encore les changements copiés dans `main` (non commités là) et `b5700ec` : à remettre sur `main`
-(avec son accord, c'est un `reset`).
-
-**À lui** : les cinq défauts du registre de 1100 (`files/plans/sources/1100/first-lot.md` : Norman England Q179876,
-Polotsk Q517333, Pologne duché Q108084610, Arles sous l'empereur, Rostov-Souzdal à chercher) ; la Croatie vassale de la
-Hongrie en 1100 alors que l'union date de 1102 (à l'historien) ; la source 762 à supprimer dans l'admin du CMS ; la Suède
-en Q34. **Le test du `/clear` de l'historien** (sa ligne doit rester « historien ») n'est pas encore fait.
-
-**L'automatisation, REPO-418** : les deux plans ci-dessus. **Décidé** (11/11) : l'agent passe par la même porte qu'un
-contributeur ; une affirmation sans concurrente, à deux sources indépendantes, passe « attestée, non arbitrée ». **Ouvert** :
-« une décision attend là où elle est enregistrée » (réexpliqué avec l'identifiant byzantin et la règle de date, pas encore
-accepté) ; un hook qui refuse les choses désignées par un numéro dans `files/plans/` et `.claude/` (proposé, pas décidé —
-il était trop tard). **La première automatisation proposée** : la synchronisation des arbres par un hook git.
-
-**L'état** : `main` = le dépôt distant = `b867422` ; `fc72157` devant, non poussé. Arbres : `coder` (à remettre sur
-`main`), `historian-1109`. **1000, 1400, 1500, 1600, 1700 ne se commitent pas** avant d'être nettoyées.
-
-**Sur le tableau** : En cours — CORE-421, ATLAS-408 ; À valider — CMS-414 ; À faire — CARTO-424, CARTO-425 (le reste : `/trello`).
+**Sur le tableau** : À valider — CORE-426 (le creusement, ⌥ ; essayé par moi, pas par lui), CARTO-425 (la soudure), CMS-414 ;
+À faire, nouveaux — CORE-428 (le diagnostic des cartes dans la CI), CORE-429 (simplifier les points des bandes de mer),
+ATLAS-430 (la côte et le masque à la publication) ; CARTO-424 (le vassal collé) et CARTO-189 (recreuser) restent.
 
 **Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
 souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README

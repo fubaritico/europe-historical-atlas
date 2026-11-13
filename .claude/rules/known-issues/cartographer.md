@@ -215,3 +215,12 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   the coast on the mask's full grid (5 120, `loaders/vectorLayers.ts`) and makes its sea image (`loaders/backdropSource.seaOnly`) in
   the page, at the opening — about 2 s for the trace, and one coverage read per backdrop pixel for the sea, not measured. **Remedy**:
   both in the compute worker, beside the bake, as the atlas's coast goes to the build. **Severity: à savoir.**
+- **Left open by the review of 2026-11-13** (my decision, all low): (1) **the view is written twice when a map changes**
+  — at every change by `state/keepView.ts`, and once more by `changeMap`'s `carryView`; redundant, harmless. (2) **Each
+  keystroke in a list's filter rewrites the whole kept state**, the cities shown included (`state/keepListView.ts`) —
+  not measured; debounce, flushed on `pagehide`, if a long selection ever makes typing lag. (3) **The retrace's report
+  reasons by polity, not by ring** (`core/editor/retrace.ts`, `detached`): a polity with two rings over one stretch, one
+  letting go, would be said to keep its points. **Severity: cosmétique.**
+- **The retrace's scenario still says the start moves to any anchor further along** (2026-11-13): since `4e563cb` a
+  second click on a non-neighbouring anchor ends the run on a straight segment, and on an open outline the two ends are
+  no neighbours. **Remedy**: `/scenarii-to-code` §7 on `s03`'s *Retracing a stretch*. **Severity: à savoir.**

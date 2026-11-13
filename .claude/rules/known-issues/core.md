@@ -63,3 +63,12 @@ Open issues of `packages/core`: the document model, the history, the derivations
   ~0.8 s). A change to the refusal rule or to the cut's order made in one hatches other ground in the other. **Remedy**:
   one sequence in core taking the shape and the pair steps as callbacks, the cache plugging its memoised ones in.
   **Severity: worth knowing.**
+- **A co-vassal whose outline is open is not carved, and nothing says so** (2026-11-13, review ARCH-003): the carving
+  reads closed areas only (`editor/carve.ts`, `closedClaimsOf`); only the suzerain's own open outline is held back and
+  said. Saying it would mean measuring the overlap at every close, for a rare case. **Trigger**: the dev meets it.
+  **Severity: cosmétique.**
+- **A hole that overflows its outline makes the atlas fail the whole year** (2026-11-13): `polygon-clipping`'s union of a
+  realm (`pipeline/vassalBands.ts`, `unionRings`) threw *"Unable to find segment … in SweepLine tree"* on a Hungarian
+  enclave whose corner lay 40 m outside Croatia — no polity drawn, a message nobody can read. Fixed in the data
+  (`3e5d00c`). **Remedy**: the maps' diagnostic in the CI, which names the polity, the ring and the point — CORE-428.
+  **Severity: gênant.**
