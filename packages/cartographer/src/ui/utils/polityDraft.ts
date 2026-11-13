@@ -1,5 +1,5 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
-import { TRIBE_RANK } from '@europe-historical-atlas/core/data/tribes'
+import { TRIBE_OUTLINED_RANK, TRIBE_RANK } from '@europe-historical-atlas/core/data/tribes'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
 import { pickedColour, toFileColour } from './polityColourValue'
@@ -84,6 +84,8 @@ export const RANKS: readonly string[] = [
   'county',
   // The rank that makes a polity a tribe, drawn with no fill — core's, never a copy (review ARCH-001).
   TRIBE_RANK,
+  // A tribe drawn by its rim, full at its limit and nothing at its heart (CARTO-439).
+  TRIBE_OUTLINED_RANK,
 ]
 
 /** The standings the form offers — `design/03`'s list, stored as OHM writes its `place` values. */

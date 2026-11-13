@@ -17,11 +17,17 @@ import {
 import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFeather'
 import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
-/** How a tribe's colour vanishes at its limit — core's own shape. */
-export type TribeDevParams = Required<TribeFeather>
+/**
+ * How a tribe's colour vanishes at its limit — core's own shape, the outlined tribe's rim left out: an outlined tribe
+ * is drawn by core's `TRIBE_OUTLINED_FEATHER`, as the Cartographer draws it, never by the panel (CARTO-439).
+ */
+export type TribeDevParams = Required<Omit<TribeFeather, 'innerKm'>>
 
-/** Core's default, copied so the live object can be tuned without touching it. */
-export const DEFAULT_TRIBE_PARAMS: TribeDevParams = { ...TRIBE_FEATHER }
+/** The band's rim, which the panel does not tune — taken out of core's default below. */
+const { innerKm: _rim, ...TUNED_FEATHER } = TRIBE_FEATHER
+
+/** Core's default, copied so the live object can be tuned without touching it — the rim left out. */
+export const DEFAULT_TRIBE_PARAMS: TribeDevParams = { ...TUNED_FEATHER }
 
 /**
  * Range, step and label of every {@link TribeDevParams} field. The width stops at the reach the distances

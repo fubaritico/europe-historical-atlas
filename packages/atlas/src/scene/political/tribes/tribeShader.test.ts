@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   BEYOND_OUTLINE_KM,
+  TRIBE_OUTLINED_FEATHER,
   featherOpacity,
   tribeOpacity,
   tribeOpacityAt,
@@ -69,6 +70,29 @@ describe('shaderOpacity', () => {
             shaderOpacity({ distance: signedKm, claimed: 5, land: 1, u, v }, uneven),
             `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
           ).toBe(tribeOpacityAt(signedKm, uneven, () => ({ claimedKm: 5, land: true }), { u, v }))
+    })
+
+    // CARTO-439: an outlined tribe's fragment answers as core's outlined rule, whatever the panel's feather.
+    it('answers as core over an outlined tribe, point by point across the frame', () => {
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.37, 0.61],
+        [0.72, 0.05],
+        [0.9, 0.88],
+      ] as const)
+        for (const signedKm of [-50, -40, -30, -20, -15, -10, -1, 0, 5])
+          expect(
+            shaderOpacity(
+              { distance: signedKm, claimed: 5, land: 1, u, v, outlined: 1 },
+              { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 }
+            ),
+            `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
+          ).toBe(
+            tribeOpacityAt(signedKm, TRIBE_OUTLINED_FEATHER, () => ({ claimedKm: 5, land: true }), {
+              u,
+              v,
+            })
+          )
     })
 
     it('reads the ramp as core’s smoothstep of (shift − d) / width', () => {

@@ -9,7 +9,8 @@ import type { YearPolity } from './yearFormat'
  * the one a fill would have had (*« la couleur de remplissage sera plutôt la couleur des traits en
  * pointillés »*).
  *
- * **Read off the rank, a free text of the registry**: `tribe`, exactly. The rank is the author's word for
+ * **Read off the rank, a free text of the registry**: `tribe`, exactly — or `tribe_outlined`, a tribe drawn the other way
+ * round, by its rim (CARTO-439, {@link TRIBE_OUTLINED_RANK}). The rank is the author's word for
  * what a polity is, so it is also what decides how it is drawn; nothing else in the registry says it.
  *
  * **Its fading colour is its limit, except against a state**: a derived border between two tribes, or between
@@ -24,12 +25,28 @@ import type { YearPolity } from './yearFormat'
 export const TRIBE_RANK = 'tribe'
 
 /**
- * Whether a polity is a tribe.
+ * The rank of a tribe drawn the other way round — **outlined** (the dev, 2026-11-13, CARTO-439: *« l'inverse de
+ * tribu »*): its colour full along its limit, half further in, nothing at its heart (`TRIBE_OUTLINED_FEATHER`). A tribe
+ * in every other respect: no fill, no border against another tribe.
+ */
+export const TRIBE_OUTLINED_RANK = 'tribe_outlined'
+
+/**
+ * Whether a polity is a tribe — outlined or not.
  * @param polity - the polity, its rank at least
- * @returns `true` when its rank is {@link TRIBE_RANK}
+ * @returns `true` when its rank is {@link TRIBE_RANK} or {@link TRIBE_OUTLINED_RANK}
  */
 export function isTribe(polity: Pick<YearPolity, 'rank'>): boolean {
-  return polity.rank === TRIBE_RANK
+  return polity.rank === TRIBE_RANK || polity.rank === TRIBE_OUTLINED_RANK
+}
+
+/**
+ * Whether a polity is an outlined tribe, drawn by its limit rather than its heart.
+ * @param polity - the polity, its rank at least
+ * @returns `true` when its rank is {@link TRIBE_OUTLINED_RANK}
+ */
+export function isOutlinedTribe(polity: Pick<YearPolity, 'rank'>): boolean {
+  return polity.rank === TRIBE_OUTLINED_RANK
 }
 
 /**

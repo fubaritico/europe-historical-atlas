@@ -12,7 +12,7 @@ import * as distanceModule from '@europe-historical-atlas/core/geo/signedDistanc
 import { lonLatToBackdrop } from '../../viewport/projection'
 import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
 
-import { createGridProjection, tribeFeatherRasters } from './tribeFeathers'
+import { createGridProjection, tribeFeatherPlans, tribeFeatherRasters } from './tribeFeathers'
 
 import type { FeatherGround, TribeFeatherRaster } from './tribeFeathers'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
@@ -103,6 +103,13 @@ const half = (feather: FeatherGround['feather']) =>
     north: 48,
   }).filter((alpha) => alpha > 0 && alpha < 255).length
 
+const outlined = (): YearDocument => {
+  const doc = withTribe()
+  const hre = doc.polities.find((polity) => polity.id === 'hre')
+  if (hre) hre.rank = 'tribe_outlined'
+  return doc
+}
+
 describe('tribeFeatherRasters', () => {
   describe('happy path', () => {
     it('makes one raster for the tribe, in its colour', () => {
@@ -133,6 +140,21 @@ describe('tribeFeatherRasters', () => {
 
     it('undulates where it is told to: another width of band, the same tribe', () => {
       expect(half({ ...EVEN, irregularity: 0.8, waveKm: 120 })).not.toBe(half(EVEN))
+    })
+  })
+
+  // CARTO-439: an outlined tribe is drawn by core's rim, whatever the ground's feather, and its change of rank repaints it.
+  describe('the outlined tribe', () => {
+    it('is the full colour just inside its outline and nothing at its heart', () => {
+      const [raster] = tribeFeatherRasters(outlined(), COLOURS, ground())
+      expect([alphaAt(raster, 2.05, 47), alphaAt(raster, 3, 47) ?? 0]).toEqual([255, 0])
+    })
+
+    it('signs its raster with its mode, so a change of rank makes the image again', () => {
+      const projection = createGridProjection(TEST_BACKDROP_FRAME)
+      const [plain] = tribeFeatherPlans(withTribe(), COLOURS, ground(), projection)
+      const [rim] = tribeFeatherPlans(outlined(), COLOURS, ground(), projection)
+      expect([plain?.signature.mode, rim?.signature.mode]).toEqual(['inset', 'outlined'])
     })
   })
 

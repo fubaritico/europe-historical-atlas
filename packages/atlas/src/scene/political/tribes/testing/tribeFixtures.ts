@@ -34,6 +34,7 @@ export const PATCH = {
   distances: Float32Array.from([-20, -10, 0, 5, 10, 30]),
   claimed: Float32Array.from([40, 40, 40, 40, -3, 40]),
   land: Float32Array.from([1, 1, 1, 1, 1, 0]),
+  outlined: false,
 }
 
 /**

@@ -15,11 +15,13 @@ import {
   TRIBE_FEATHER_REACH_KM as REACH,
   TRIBE_FEATHER,
   TRIBE_FEATHER_REACH_KM,
+  TRIBE_OUTLINED_FEATHER,
   bandWave,
   bandWidthKm,
   featherOpacity,
   featherReachKm,
   featherShiftKm,
+  rimWidthKm,
   tribeOpacity,
   tribeOpacityAt,
 } from './tribeFeather'
@@ -354,5 +356,47 @@ describe('the vassals’ band beside the tribes’', () => {
       TRIBE_FEATHER.irregularity,
       BAND_WAVE_KM,
     ])
+  })
+})
+
+// CARTO-439, the dev, 2026-11-13: the band inside out — full from the outline to 15 km, half to 30, nothing deeper.
+describe('featherOpacity, the outlined tribe', () => {
+  describe('happy path', () => {
+    it('is full within 15 km of the outline, half from 15 to 30 km, nothing deeper', () => {
+      expect(
+        [-1, -14.9, -15, -29.9, -30, -60].map((d) => featherOpacity(d, 30, 'outlined', 15))
+      ).toEqual([1, 1, BAND_SHARE, BAND_SHARE, 0, 0])
+    })
+  })
+
+  describe('variants', () => {
+    it('undulates both limits by one wave, the rim always half the width', () => {
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.72, 0.05],
+      ] as const)
+        expect(rimWidthKm(TRIBE_OUTLINED_FEATHER, u, v) * 2).toBeCloseTo(
+          bandWidthKm(TRIBE_OUTLINED_FEATHER, u, v),
+          9
+        )
+    })
+  })
+
+  describe('managed errors', () => {
+    it('draws nothing on the outline nor past it', () => {
+      expect([0, 5].map((d) => featherOpacity(d, 30, 'outlined', 15))).toEqual([0, 0])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('stays NaN for a NaN distance', () => {
+      expect(featherOpacity(Number.NaN, 30, 'outlined', 15)).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('is computed within the reach the distances are measured to', () => {
+      expect(featherReachKm(TRIBE_OUTLINED_FEATHER)).toBeLessThanOrEqual(TRIBE_FEATHER_REACH_KM)
+    })
   })
 })

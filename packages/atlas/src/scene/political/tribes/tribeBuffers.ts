@@ -26,6 +26,8 @@ export interface TribeBuffers {
   claimed: Float32Array
   /** `1` dry, `0` wet. */
   land: Float32Array
+  /** `1` for a vertex of an outlined tribe, drawn by its rim (CARTO-439), `0` otherwise. */
+  outlined: Float32Array
 }
 
 /**
@@ -83,6 +85,7 @@ function writePatch(
   out.distances.set(patch.distances, at)
   out.claimed.set(patch.claimed, at)
   out.land.set(patch.land, at)
+  out.outlined.fill(patch.outlined ? 1 : 0, at, at + count)
   return at + count
 }
 
@@ -101,6 +104,7 @@ export function tribeBuffers(options: TribeGeometry): TribeBuffers {
     distances: new Float32Array(vertices),
     claimed: new Float32Array(vertices),
     land: new Float32Array(vertices),
+    outlined: new Float32Array(vertices),
   }
   // Then write the patches one after the other.
   let at = 0

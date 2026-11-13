@@ -116,7 +116,7 @@ function featherUniformSlots(feather: TribeFeather): Record<string, { value: num
  */
 export function createTribeLayer(options: TribeLayerOptions): TribeLayer {
   // The geometry: positions, the tribe's colour, and what the shader fades and cuts by, per vertex.
-  const { positions, tints, distances, claimed, land } = tribeBuffers(options)
+  const { positions, tints, distances, claimed, land, outlined } = tribeBuffers(options)
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geometry.setAttribute('tint', new Uint8BufferAttribute(tints, 3, true))
@@ -124,6 +124,7 @@ export function createTribeLayer(options: TribeLayerOptions): TribeLayer {
   geometry.setAttribute('edgeDistance', new Float32BufferAttribute(distances, 1))
   geometry.setAttribute('claimedDistance', new Float32BufferAttribute(claimed, 1))
   geometry.setAttribute('land', new Float32BufferAttribute(land, 1))
+  geometry.setAttribute('outlined', new Float32BufferAttribute(outlined, 1))
   // The material blends as the fills do, with the limit's width, shift, band and undulation as uniforms.
   const material = new ShaderMaterial({
     uniforms: {

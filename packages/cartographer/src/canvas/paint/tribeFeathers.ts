@@ -1,6 +1,7 @@
-import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
+import { isOutlinedTribe, tribeIds } from '@europe-historical-atlas/core/data/tribes'
 import {
   CLAIM_CUT_REACH_KM,
+  TRIBE_OUTLINED_FEATHER,
   featherReachKm,
   featherShiftKm,
   tribeOpacityAt,
@@ -265,6 +266,8 @@ function featherRaster(
 export interface FeatherSignature {
   /** The tribe's colour. */
   colour: string
+  /** How its limit is drawn — the band, or the outlined tribe's rim (CARTO-439): a change of rank repaints it. */
+  mode: string
   /**
    * Its rings' points on the grid, each ring led by its length; then, **only when the fade reaches past the
    * outline** (outset), the rings of every other polity near its box, the same way — in inset nothing beyond
@@ -281,7 +284,9 @@ export interface FeatherSignature {
  * @returns `true` when nothing the raster reads differs
  */
 export function sameSignature(a: FeatherSignature, b: FeatherSignature): boolean {
-  if (a.colour !== b.colour || a.numbers.length !== b.numbers.length) return false
+  if (a.colour !== b.colour || a.mode !== b.mode || a.numbers.length !== b.numbers.length) {
+    return false
+  }
   for (let i = 0; i < a.numbers.length; i++)
     if (!Object.is(a.numbers[i], b.numbers[i])) return false
   return true
@@ -364,7 +369,9 @@ export function tribeFeatherPlans(
     const colour = colours.get(claim.polity)
     const tribe = tribesById.get(claim.polity)
     if (colour === undefined || tribe === undefined) continue
-    const grown = reachesBeyond ? featherBox(claim.rings, ground)?.grown : undefined
+    // An outlined tribe is drawn by its rim (CARTO-439); every other by the ground's own feather.
+    const own = isOutlinedTribe(tribe) ? { ...ground, feather: TRIBE_OUTLINED_FEATHER } : ground
+    const grown = reachesBeyond ? featherBox(claim.rings, own)?.grown : undefined
     // The same choice `unionDistanceField` makes over the same box, made here so the signature holds exactly
     // the rings the raster will read.
     const near =
@@ -379,8 +386,12 @@ export function tribeFeatherPlans(
     const polity = { id: tribe.id, name: tribe.name }
     out.push({
       polity: claim.polity,
-      signature: { colour, numbers: flattenRings([claim.rings, ...near]) },
-      raster: () => featherRaster(polity, claim.rings, near, colour, ground),
+      signature: {
+        colour,
+        mode: own.feather.mode,
+        numbers: flattenRings([claim.rings, ...near]),
+      },
+      raster: () => featherRaster(polity, claim.rings, near, colour, own),
     })
   }
   return out

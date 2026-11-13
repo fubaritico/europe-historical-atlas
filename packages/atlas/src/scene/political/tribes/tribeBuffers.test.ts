@@ -33,6 +33,15 @@ describe('tribeBuffers', () => {
     })
   })
 
+  describe('outlined tribes', () => {
+    // CARTO-439: the shader reads the mark per vertex — the outlined patch's vertices alone carry it.
+    it('marks every vertex of an outlined patch, and none of a plain one', () => {
+      const rim = { ...PATCH, outlined: true }
+      const { outlined } = tribeBuffers(options({ patches: [PATCH, rim] }))
+      expect([...outlined]).toEqual([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1])
+    })
+  })
+
   describe('managed errors', () => {
     it('refuses a patch with fewer distances than vertices', () => {
       const short = { ...PATCH, distances: Float32Array.from([1, 2]) }

@@ -38,6 +38,8 @@ export interface TribeOutline {
   readonly colour: string
   /** Its rings, outer and holes alike, in grid coordinates. */
   readonly rings: readonly (readonly UvPoint[])[]
+  /** Drawn by its rim rather than its heart — an outlined tribe (CARTO-439); absent for every other tribe. */
+  readonly outlined?: true
 }
 
 /** One tribe, ready to upload. */
@@ -52,6 +54,8 @@ export interface TribePatch {
   claimed: Float32Array
   /** Each vertex's land: `1` dry, `0` wet — one per vertex. */
   land: Float32Array
+  /** Whether the tribe is drawn by its rim — an outlined tribe (CARTO-439). */
+  outlined: boolean
 }
 
 /** Everyone's ground, for the cut: each region's polity and rings. */
@@ -94,7 +98,7 @@ export interface TribeGround {
  */
 export function tribePatches(tribes: readonly TribeOutline[], ground: TribeGround): TribePatch[] {
   const { claims, land, bounds, grid, reachKm, claimReachKm, spill } = ground
-  return tribes.flatMap(({ polity, colour, rings }) => {
+  return tribes.flatMap(({ polity, colour, rings, outlined }) => {
     // The tribe's box, grown by the reach; a tribe with no ring point has none.
     const box = paddedBox(rings, bounds, spill ? reachKm : 0)
     if (box === null) return []
@@ -132,6 +136,15 @@ export function tribePatches(tribes: readonly TribeOutline[], ground: TribeGroun
       claimed[vertex] = claimedAt(u, v)
       dry[vertex] = land.isLand(u, v) ? 1 : 0
     }
-    return [{ tint: hexToRgb(colour), triangles, distances, claimed, land: dry }]
+    return [
+      {
+        tint: hexToRgb(colour),
+        triangles,
+        distances,
+        claimed,
+        land: dry,
+        outlined: outlined === true,
+      },
+    ]
   })
 }

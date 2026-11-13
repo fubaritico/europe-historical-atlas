@@ -96,6 +96,17 @@ describe('settleAuthoredYear', () => {
       expect(settled.tribes[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
     })
 
+    // CARTO-439: the outlined tribe is marked for the atlas's shader; a plain tribe carries no mark.
+    it('marks an outlined tribe for the atlas, and leaves a plain tribe unmarked', () => {
+      const outlined = withTribe()
+      const aquitaine = outlined.registry.polities.find((polity) => polity.id === 'aquitaine')
+      if (aquitaine) aquitaine.rank = 'tribe_outlined'
+      expect([
+        settleAuthoredYear(requestFor(outlined), null).tribes[0]?.outlined,
+        'outlined' in (settleAuthoredYear(requestFor(withTribe()), null).tribes[0] ?? {}),
+      ]).toEqual([true, false])
+    })
+
     it('has no tribe in a year without one', () => {
       expect(settleAuthoredYear(requestFor(franceAndAquitaine()), null).tribes).toEqual([])
     })

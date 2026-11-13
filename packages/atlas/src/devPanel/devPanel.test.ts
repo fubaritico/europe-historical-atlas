@@ -399,7 +399,9 @@ describe('createDevPanel', () => {
     })
 
     it('starts the tribes’ fade from core’s default, the one the Cartographer draws', () => {
-      expect(build().dev.tribes).toEqual(TRIBE_FEATHER)
+      // The band's rim is not the panel's to tune (CARTO-439): every other field is core's.
+      const { innerKm: _rim, ...tuned } = TRIBE_FEATHER
+      expect(build().dev.tribes).toEqual(tuned)
     })
 
     it('repaints a colour live rather than rebuilding for it', () => {

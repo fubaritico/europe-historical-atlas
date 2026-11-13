@@ -136,7 +136,8 @@ export function vassalBandPlans(
     out.push({
       polity: claim.polity,
       claim,
-      signature: { colour, numbers: flattenRings([rings]) },
+      // A vassal's band has one look; its mode only keeps the signature the tribes' cache shares.
+      signature: { colour, mode: 'vassal-band', numbers: flattenRings([rings]) },
       raster: () => vassalBandRaster(named, rings, colour, frame),
     })
   }

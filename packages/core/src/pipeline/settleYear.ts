@@ -22,7 +22,7 @@ import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
 import { overlapHatches } from '../data/overlapHatches'
 import { authoredTintLevels, polityColours } from '../data/polityColours'
-import { tribeIds } from '../data/tribes'
+import { isOutlinedTribe, tribeIds } from '../data/tribes'
 import { bandDepthOf, bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
 import { yearOverlaps } from '../data/yearOverlaps'
@@ -71,6 +71,8 @@ export interface SettledTribe {
   colour: string
   /** Its rings, outer and holes alike, in grid coordinates. */
   rings: UvPoint[][]
+  /** Drawn by its rim rather than its heart — an outlined tribe (CARTO-439); absent for every other tribe. */
+  outlined?: true
 }
 
 /** An authored year settled: what the atlas's layers read for it. */
@@ -157,11 +159,23 @@ function colouredTribes(
   colours: ReadonlyMap<string, string>
 ): SettledTribe[] {
   const tribes = tribeIds(year.registry.polities)
+  const outlined = new Set(
+    year.registry.polities.filter(isOutlinedTribe).map((polity) => polity.id)
+  )
   // One area per region of a tribe, in the tribe's colour; any other region gives none.
   return regions.flatMap(({ polityId, rings }) => {
     if (polityId === undefined || !tribes.has(polityId)) return []
     const colour = colours.get(polityId)
-    if (colour !== undefined) return [{ polity: polityId, colour, rings }]
+    if (colour !== undefined) {
+      return [
+        {
+          polity: polityId,
+          colour,
+          rings,
+          ...(outlined.has(polityId) ? { outlined: true as const } : {}),
+        },
+      ]
+    }
     // polityColours colours every polity of the year, and the reader refused a claim naming none.
     console.error(`[atlas] tribe "${polityId}" has no colour; it is not drawn.`)
     return []

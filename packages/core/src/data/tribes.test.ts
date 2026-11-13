@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { asSeenAcrossTribes, isTribe, isTribeEdge, tribeIds } from './tribes'
+import { asSeenAcrossTribes, isOutlinedTribe, isTribe, isTribeEdge, tribeIds } from './tribes'
 
 const POLITIES = [
   { id: 'prussians', rank: 'tribe' },
@@ -13,6 +13,15 @@ describe('tribes', () => {
   describe('happy path', () => {
     it('reads a polity ranked tribe as a tribe', () => {
       expect(isTribe({ rank: 'tribe' })).toBe(true)
+    })
+
+    // CARTO-439: the outlined tribe is a tribe in every respect but its look.
+    it('reads an outlined tribe as a tribe, and as outlined — a plain tribe as not', () => {
+      expect([
+        isTribe({ rank: 'tribe_outlined' }),
+        isOutlinedTribe({ rank: 'tribe_outlined' }),
+        isOutlinedTribe({ rank: 'tribe' }),
+      ]).toEqual([true, true, false])
     })
 
     it('collects the ids of every tribe of the registry', () => {

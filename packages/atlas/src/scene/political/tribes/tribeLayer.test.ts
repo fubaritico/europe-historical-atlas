@@ -114,6 +114,13 @@ describe('createTribeLayer', () => {
     );
     float band = inside * mix(0.500, 1.0, step(bandWidth, -vDistance));
     float opacity = mix(fade, band, featherBand);
+    // An outlined tribe (CARTO-439), core's TRIBE_OUTLINED_FEATHER written in: full within the rim, half to the width,
+    // nothing deeper — both limits undulating by its own wave, as the Cartographer draws it.
+    float rimWave = 1.0 + 0.500 * bandWave(framed, 150.0);
+    float rimInner = clamp(15.0 * rimWave, 0.0, 60.0);
+    float rimOuter = clamp(30.0 * rimWave, 0.0, 60.0);
+    float rim = inside * mix(1.0, 0.500 * (1.0 - step(rimOuter, -vDistance)), step(rimInner, -vDistance));
+    opacity = mix(opacity, rim, vOutlined);
     float beyond = step(0.000001, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);

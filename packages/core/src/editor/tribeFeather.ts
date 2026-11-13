@@ -24,12 +24,14 @@
  */
 
 /**
- * How a tribe meets its limit: a fade inside or outside the outline — or, since 2026-11-02, **the band**: Illustrator's
+ * How a tribe meets its limit: a fade inside or outside the outline — or, since 2026-11-02, **the band** — or, for an
+ * outlined tribe, **the band inside out** (`outlined`, CARTO-439: full at the limit, half further in, nothing at the
+ * heart): Illustrator's
  * offset path drawn inwards (the dev: *"the shape drawn, and inside it an inner offset; the full colour, and the
  * offset band at half"*), two flat tones and no fade. Nothing spills past the outline in `inset` or `band`, so no
  * neighbour's ground is ever measured — what made the Kimek-Kipchak cost 5 s on the dev's 1100.
  */
-export type FeatherMode = 'band' | 'inset' | 'outset'
+export type FeatherMode = 'band' | 'inset' | 'outset' | 'outlined'
 
 /** The placements, in the order a dev-panel dropdown lists them — the band, the default, first. */
 export const FEATHER_MODES: readonly FeatherMode[] = ['band', 'inset', 'outset']
@@ -51,6 +53,11 @@ export interface TribeFeather {
   irregularity?: number
   /** The undulation's wavelength, in kilometres on the ground — roughly; a decoration. Absent: {@link BAND_WAVE_KM}. */
   waveKm?: number
+  /**
+   * The outlined tribe's rim of full colour, in kilometres inside its outline — `widthKm` is then where its half colour
+   * stops (CARTO-439). Undulates as the band does. **Absent: no rim**, what every other mode means.
+   */
+  innerKm?: number
 }
 
 /** The undulation's wavelength when a feather names none, km — and the default's. */
@@ -75,6 +82,20 @@ export const BAND_WAVE_KM = 150
 export const TRIBE_FEATHER: Readonly<Required<TribeFeather>> = {
   mode: 'band',
   widthKm: 30,
+  irregularity: 0.5,
+  waveKm: BAND_WAVE_KM,
+  // The band has no rim of full colour: that is the outlined tribe's (CARTO-439).
+  innerKm: 0,
+}
+
+/**
+ * **An outlined tribe** (CARTO-439, the dev, 2026-11-13): the colour full from its outline to 15 km inside, half from 15
+ * to 30 km, nothing deeper — the band turned inside out, its two limits undulating as the band's does.
+ */
+export const TRIBE_OUTLINED_FEATHER: Readonly<Required<TribeFeather>> = {
+  mode: 'outlined',
+  widthKm: 30,
+  innerKm: 15,
   irregularity: 0.5,
   waveKm: BAND_WAVE_KM,
 }
@@ -123,10 +144,33 @@ export function bandWave(u: number, v: number, waveKm: number): number {
  * @returns the width there, km
  */
 export function bandWidthKm(feather: TribeFeather, u: number, v: number): number {
+  return undulatedKm(feather.widthKm, feather, u, v)
+}
+
+/**
+ * The outlined tribe's rim at a point: {@link TribeFeather.innerKm}, undulating by the same wave as the width, so the
+ * two limits move together.
+ * @param feather - the rim, the irregularity and the wavelength
+ * @param u - across the frame, `0..1`
+ * @param v - down the frame, `0..1`
+ * @returns the rim there, km — `0` with no rim
+ */
+export function rimWidthKm(feather: TribeFeather, u: number, v: number): number {
+  return undulatedKm(feather.innerKm ?? 0, feather, u, v)
+}
+
+/**
+ * A width at a point: undulating by the feather's irregularity, never below nought nor past the reach.
+ * @param km - the mean width
+ * @param feather - the irregularity and the wavelength
+ * @param u - across the frame, `0..1`
+ * @param v - down the frame, `0..1`
+ * @returns the width there, km
+ */
+function undulatedKm(km: number, feather: TribeFeather, u: number, v: number): number {
   const irregularity = feather.irregularity ?? 0
-  if (irregularity === 0) return Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, feather.widthKm))
-  const width =
-    feather.widthKm * (1 + irregularity * bandWave(u, v, feather.waveKm ?? BAND_WAVE_KM))
+  if (irregularity === 0) return Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, km))
+  const width = km * (1 + irregularity * bandWave(u, v, feather.waveKm ?? BAND_WAVE_KM))
   return Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, width))
 }
 
@@ -138,8 +182,9 @@ export function bandWidthKm(feather: TribeFeather, u: number, v: number): number
  * @returns the depth, km
  */
 export function featherReachKm(feather: TribeFeather): number {
-  const widest =
-    feather.mode === 'band' ? feather.widthKm * (1 + (feather.irregularity ?? 0)) : feather.widthKm
+  const widest = isBanded(feather.mode)
+    ? feather.widthKm * (1 + (feather.irregularity ?? 0))
+    : feather.widthKm
   return Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, widest))
 }
 
@@ -154,6 +199,32 @@ export function featherShiftKm(mode: FeatherMode, widthKm: number): number {
 }
 
 /**
+ * A banded mode's flat tone at a distance — nothing on or past the outline. **The band**: half the colour within the
+ * width, the full colour deeper. **The outlined tribe**, the band inside out (CARTO-439): full within the rim, half to
+ * the width, nothing deeper.
+ * @param signedKm - the distance to the outline in km, negative inside
+ * @param widthKm - the width, km
+ * @param mode - the band or the outlined tribe
+ * @param innerKm - the outlined tribe's rim, km
+ * @returns the opacity: `0`, {@link BAND_SHARE} or `1`
+ */
+function flatTone(signedKm: number, widthKm: number, mode: FeatherMode, innerKm: number): number {
+  if (signedKm >= 0) return 0
+  const depth = -signedKm
+  if (mode === 'band') return depth < widthKm ? BAND_SHARE : 1
+  return depth < innerKm ? 1 : depth < widthKm ? BAND_SHARE : 0
+}
+
+/**
+ * Whether a mode is drawn in flat tones at undulating widths — the band, or the outlined tribe — rather than a fade.
+ * @param mode - the mode
+ * @returns `true` for the band and the outlined tribe
+ */
+export function isBanded(mode: FeatherMode): boolean {
+  return mode === 'band' || mode === 'outlined'
+}
+
+/**
  * The colour's opacity at a signed distance from a tribe's outline.
  *
  * **A width of zero or less is a hard edge**: full inside (and on the outline in outset), nothing outside.
@@ -162,12 +233,17 @@ export function featherShiftKm(mode: FeatherMode, widthKm: number): number {
  * @param signedKm - the distance to the outline in km, negative inside (`geo/signedDistance`)
  * @param widthKm - the fade's width in km
  * @param mode - inside or outside the outline
+ * @param innerKm - the outlined tribe's rim of full colour, km; the other modes ignore it
  * @returns the opacity, `0..1`
  */
-export function featherOpacity(signedKm: number, widthKm: number, mode: FeatherMode): number {
+export function featherOpacity(
+  signedKm: number,
+  widthKm: number,
+  mode: FeatherMode,
+  innerKm = 0
+): number {
   if (Number.isNaN(signedKm) || Number.isNaN(widthKm)) return Number.NaN
-  // The band: nothing on or past the outline, half the colour within the width, the full colour deeper.
-  if (mode === 'band') return signedKm >= 0 ? 0 : -signedKm < widthKm ? BAND_SHARE : 1
+  if (isBanded(mode)) return flatTone(signedKm, widthKm, mode, innerKm)
   if (widthKm <= 0) return (mode === 'outset' ? signedKm <= 0 : signedKm < 0) ? 1 : 0
   const t = Math.min(1, Math.max(0, (featherShiftKm(mode, widthKm) - signedKm) / widthKm))
   return t * t * (3 - 2 * t)
@@ -216,6 +292,24 @@ export function tribeOpacity(at: TribePoint, feather: TribeFeather): number {
 }
 
 /**
+ * A feather's widths at a point: undulating for a banded mode, the mean widths for a fade or a point not given.
+ * @param feather - the mode, the widths and the undulation
+ * @param at - where the point is in the frame, or `undefined`
+ * @param at.u - across the frame, `0..1`
+ * @param at.v - down the frame, `0..1`
+ * @returns the width and the outlined tribe's rim, km
+ */
+function widthsAt(
+  feather: TribeFeather,
+  at: { readonly u: number; readonly v: number } | undefined
+): { width: number; inner: number } {
+  if (!isBanded(feather.mode) || at === undefined) {
+    return { width: feather.widthKm, inner: feather.innerKm ?? 0 }
+  }
+  return { width: bandWidthKm(feather, at.u, at.v), inner: rimWidthKm(feather, at.u, at.v) }
+}
+
+/**
  * {@link tribeOpacity}, asking for the neighbours' distance and the land **only where they decide**: beyond
  * the outline, where the ramp is not already nothing — so in inset never, and in outset only within the
  * width past the outline (QUAL-003: a raster measures them once per pixel, and most pixels do not need them).
@@ -235,10 +329,8 @@ export function tribeOpacityAt(
   beyond: () => Pick<TribePoint, 'claimedKm' | 'land'>,
   at?: { readonly u: number; readonly v: number }
 ): number {
-  // The band's width undulates with the point; a fade, or a point not given, keeps the mean width.
-  const width =
-    feather.mode === 'band' && at !== undefined ? bandWidthKm(feather, at.u, at.v) : feather.widthKm
-  const ramp = featherOpacity(signedKm, width, feather.mode)
+  const { width, inner } = widthsAt(feather, at)
+  const ramp = featherOpacity(signedKm, width, feather.mode, inner)
   if (Number.isNaN(ramp) || !(signedKm >= BEYOND_OUTLINE_KM) || ramp === 0) return ramp
   const { claimedKm, land } = beyond()
   if (Number.isNaN(claimedKm)) return Number.NaN
