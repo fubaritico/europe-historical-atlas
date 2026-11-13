@@ -10,6 +10,8 @@
  * layer without any of them holding a stale copy.
  */
 
+import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
+
 import { rebuildRhumb } from '../decor/rhumbs/mapRhumbLayer'
 import { rebuildRose } from '../decor/rose/mapRoseLayer'
 import { laySeaNames } from '../decor/seas/mapSeaNameLayer'
@@ -503,6 +505,10 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
   // The viewport last told, and the years set aside, shared by the slices that read them.
   const viewport: ViewportSize = { size: null }
   const { disposeYears, ...years } = layerYears(context, viewport)
+  // The seas' names are laid after their face loads: only the newest call lays them, never after the teardown.
+  const seaNamesTurn = createLatestOnly()
+  let disposed = false
+  const lifecycle = layerLifecycle(context, viewport, disposeYears)
   // The handle, assembled from its slices over that same context.
   return {
     ...layerRebuilders(context),
@@ -510,7 +516,8 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       rebuildEvents(context)
     },
     rebuildSeaNames(): void {
-      laySeaNames(context)
+      const mine = seaNamesTurn.begin()
+      laySeaNames(context, () => !disposed && mine())
     },
     setReveal(share: number): void {
       context.reveal.value = share
@@ -521,6 +528,10 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     ...layerSetters(context),
     reliefHeights: () => readReliefHeights(context),
     ...years,
-    ...layerLifecycle(context, viewport, disposeYears),
+    ...lifecycle,
+    dispose(): void {
+      disposed = true
+      lifecycle.dispose()
+    },
   }
 }

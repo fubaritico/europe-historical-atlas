@@ -4,6 +4,7 @@
  */
 
 import { CITY_MARK_INK } from '../../cities/cityMarks'
+import { LABEL_FAMILY, lazyLabelFace } from '../../political/names/nameFace'
 
 import type { SeaLabel } from './seaNameLayer'
 
@@ -22,21 +23,13 @@ export type DrawSeaLabel = (text: string) => Promise<SeaLabel>
  * @returns the drawer; a face that cannot load rejects it, for the caller to say
  */
 export function canvasSeaLabelDrawer(faceUrl: string): DrawSeaLabel {
-  let ready: Promise<FontFace> | null = null
-  const loadFace = (): Promise<FontFace> => {
-    if (ready === null) {
-      const face = new FontFace('Fondamento', `url(${faceUrl})`)
-      document.fonts.add(face)
-      ready = face.load()
-    }
-    return ready
-  }
+  const loadFace = lazyLabelFace(faceUrl)
   return async (text) => {
     await loadFace()
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')
     if (context === null) throw new Error('[Atlas] a sea name has no 2D context')
-    const font = `${String(SEA_TYPE_SIZE)}px Fondamento`
+    const font = `${String(SEA_TYPE_SIZE)}px ${LABEL_FAMILY}`
     const spacing = `${String(SEA_TYPE_SIZE * SEA_LETTER_SPACING)}px`
     context.font = font
     context.letterSpacing = spacing

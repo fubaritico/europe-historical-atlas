@@ -1,6 +1,7 @@
 /**
- * How the seas' names are put on the map (ATLAS-440): each one drawn, placed from its longitude and latitude, laid flat
- * on its sea — once, at startup, and again only if the relief's frame changes.
+ * How the seas' names are put on the map (ATLAS-440): each one drawn in the reader's language, placed from its longitude
+ * and latitude, laid flat on its sea — once, at startup. Neither the relief's frame nor the language changes during a
+ * session today; the day one does, its change calls the rebuild again.
  */
 
 import {
@@ -34,12 +35,15 @@ const ARC_SAMPLES = 32
  * @param context - the layers and what they read
  * @param draw - a sea's name to an image
  * @param lift - the height above the sea the names lie at, as the compass rose's
- * @returns once laid
+ * @param isCurrent - whether this call may still lay its names once drawn: `false` when a newer call started or the
+ *   layers were torn down while the face loaded (reviews ARCH-001 · QUAL-002) — the newest call wins, nothing laid
+ * @returns once laid, or once given up
  */
 export async function rebuildSeaNames(
   context: LayerContext,
   draw: DrawSeaLabel,
-  lift: number
+  lift: number,
+  isCurrent: () => boolean
 ): Promise<void> {
   const meta = context.sources.heightmap?.meta
   if (meta === undefined) return
@@ -59,6 +63,8 @@ export async function rebuildSeaNames(
       return { label, arc, y: lift }
     })
   )
+  // Checked after the drawing, before anything is built or freed: a stale call leaves the names laid as they are.
+  if (!isCurrent()) return
   const { scene, handles } = context
   disposeHandle(scene, handles.seaNames)
   // The land the letters stop at, the fills' own: no name reaches the land, wherever its arc is laid.
@@ -74,9 +80,12 @@ export async function rebuildSeaNames(
  * Lay the seas' names and let the map go on without them if their face cannot load — a decor: said in the console,
  * the map shown whole otherwise (ATLAS-440).
  * @param context - the layers and what they read, the sea labels' drawer and the rose's lift among them
+ * @param isCurrent - whether this call may still lay its names once drawn — see {@link rebuildSeaNames}
  */
-export function laySeaNames(context: LayerContext): void {
-  rebuildSeaNames(context, context.seaLabels, context.dev.rose.lift).catch((error: unknown) => {
-    console.error('[Atlas] the seas’ names could not be drawn', error)
-  })
+export function laySeaNames(context: LayerContext, isCurrent: () => boolean): void {
+  rebuildSeaNames(context, context.seaLabels, context.dev.rose.lift, isCurrent).catch(
+    (error: unknown) => {
+      console.error('[Atlas] the seas’ names could not be drawn', error)
+    }
+  )
 }

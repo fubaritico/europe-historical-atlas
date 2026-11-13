@@ -35,9 +35,10 @@ export interface SeaName {
 }
 
 /**
- * The eight seas, the dev's list, each arc drawn by Claude to fill its sea, then fitted against the land mask so its
- * letters stay off the land (the dev: *« ça ne doit pas apparaître sur les terres »*) — under 2 % of each name's letters
- * on land, measured on 2026-11-13. Inside
+ * The eight seas, the dev's list, each arc drawn by Claude to fill its sea and fitted by eye and against the land mask
+ * (2026-11-13), then approved by the dev on sight. That no letter shows on land (the dev: *"it must not appear on the
+ * land"*) is not held by these numbers but by the atlas, which draws a name over the sea only (`seaNameShader`): a
+ * retuned arc can bite a coast and lose a letter's corner there, never print on land. Inside
  * the map's frame (`years/index.json`: 45°W–78.75°E, 11.2°N–76.8°N) — the Indian Ocean by its Arabian Sea, the one part
  * of it the frame holds.
  */

@@ -5,6 +5,8 @@
  * (Bertin: size reads as an order), never in capitals (`CITY_NAME_TYPE`).
  */
 
+import { LABEL_FAMILY, lazyLabelFace } from '../political/names/nameFace'
+
 import { CITY_MARKS, CITY_MARK_INK } from './cityMarks'
 
 import type { CityImportance } from '@europe-historical-atlas/core/data/cityImportance'
@@ -102,22 +104,14 @@ export function layoutLabel(markSize: number, textWidth: number, fontSize: numbe
  */
 export function canvasLabelDrawer(faceUrl: string): DrawCityLabel {
   // Loaded at the first name, once: a map with no city never asks for it.
-  let ready: Promise<FontFace> | null = null
-  const loadFace = (): Promise<FontFace> => {
-    if (ready === null) {
-      const face = new FontFace('Fondamento', `url(${faceUrl})`)
-      document.fonts.add(face)
-      ready = face.load()
-    }
-    return ready
-  }
+  const loadFace = lazyLabelFace(faceUrl)
   return async (name, importance) => {
     await loadFace()
     const type = CITY_NAME_TYPE[importance]
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')
     if (context === null) throw new Error('[Atlas] a city name has no 2D context')
-    const font = `${String(type.size)}px Fondamento`
+    const font = `${String(type.size)}px ${LABEL_FAMILY}`
     context.font = font
     const layout = layoutLabel(
       CITY_MARKS[importance].size,
