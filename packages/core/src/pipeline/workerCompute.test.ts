@@ -348,6 +348,34 @@ describe('createWorkerMapCompute', () => {
       expect(link.transfers.at(-1)).toHaveLength(4)
     })
 
+    // CARTO-439, found in the dev's atlas the same day: the page sent each tribe field by field, the outlined mark left
+    // behind — every outlined tribe was cut, and drawn, as a plain one.
+    it('carries an outlined tribe’s mark across the wire to its patch', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      await client.setSources(sources())
+      const square = [
+        { u: 0.25, v: 0.25 },
+        { u: 0.75, v: 0.25 },
+        { u: 0.75, v: 0.75 },
+        { u: 0.25, v: 0.75 },
+      ]
+      const request = {
+        claims: [{ polityId: 'pomerania', rings: [square] }],
+        bounds: { west: 0, south: 50, east: 10, north: 60 },
+        grid: { segX: 4, segY: 4 },
+        reachKm: 60,
+        claimReachKm: 20,
+        spill: false,
+        seaLevel: 0,
+      }
+      const [rim] = await client.cutTribes(
+        [{ polity: 'pomerania', colour: '#8bc059', rings: [square], outlined: true }],
+        request
+      )
+      expect(rim?.outlined).toBe(true)
+    })
+
     it('hands the baked pixels over instead of copying them', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
