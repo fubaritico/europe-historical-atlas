@@ -17,7 +17,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `drawingNoWater`, `branching`, `retracing`, `retracingFollowing`, `retracingNeighbour`,
  *   `retracingToEnd`, `retracingToStart`, `retracingStartHere`, `retracingOtherOutline`,
  *   `retracingCannotEnd`, `retracingMovesStart`, `retracingReplaces`, `takingToStart`, `takingStartHere`,
- *   `takingEndHere`, `takingToEnd` (a polity with no territory taking one) — The action under the pointer
+ *   `takingEndHere`, `takingToEnd`, `takingAlongBorder`, `takingClose` (a polity with no territory taking one) — The action under the pointer
  * - `tooFar`, `reachWould`, `notFramed`, `insertedFromWater`, `followedBorder`, `closedAlongWater`,
  *   `carved`, `removedAnchors`, `removedRings`, `pointsTakenFrom`, `keptPoints`, `notWelded`, `welded`,
  *   `retraceStartPrompt`, `takeStartPrompt`, `takeNoBorder`, `takeNoSource`, `retraceStartMoved`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain`, `overlapPair`, `overlapRefused`, `edgeSelected`, `erasedEdge` — What

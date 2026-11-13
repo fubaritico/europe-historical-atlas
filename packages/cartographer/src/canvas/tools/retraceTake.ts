@@ -1,10 +1,14 @@
 import { retraceArcs } from '@europe-historical-atlas/core/editor/retrace'
 
+import { nearestAmong } from '../../geometry/hitTest'
+
 import { TAG } from './consoleTag'
 import { closeOutline } from './toolGestures'
 import { everyHandle, sessionPointOf, targetHandles } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
+import type { SessionPoint } from './toolSession'
+import type { Point } from '../../viewport/viewport'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { RetraceArcs } from '@europe-historical-atlas/core/editor/retrace'
 
@@ -35,6 +39,59 @@ export function retraceHandles(document: YearDocument, polityId: string): number
   return takesTerritory(document, polityId)
     ? everyHandle(document)
     : targetHandles(document, polityId)
+}
+
+/**
+ * Whether a click on an outline's anchor ends the run — **only when the run comes back to a border after leaving it**
+ * (the dev, 2026-11-13: *« dès que je clique sur une ancre, la prochaine me propose de fermer »* — every anchor ended
+ * it, so no border could be followed). The point before the end on an outline that also holds the end means the run is
+ * following that border, as the Pen follows it: it goes on.
+ * @param document - the document
+ * @param previous - the run's point before the end, `undefined` for none
+ * @param end - the anchor clicked
+ * @returns `true` when the click ends the run
+ */
+export function returnsToBorder(
+  document: YearDocument,
+  previous: SessionPoint | undefined,
+  end: number
+): boolean {
+  const anchor = previous?.anchor ?? null
+  if (anchor === null) return true
+  return !document.claims.some((claim) =>
+    claim.rings.some((ring) => ring.includes(anchor) && ring.includes(end))
+  )
+}
+
+/**
+ * Whether a click on an anchor the retrace may end on ends the run: always for a target with its own outline, and for
+ * one taking its territory only when the run comes back to a border ({@link returnsToBorder}).
+ * @param document - the document
+ * @param polityId - the target
+ * @param previous - the run's point before the end
+ * @param end - the anchor clicked
+ * @returns `true` when the click ends the run
+ */
+export function endsTheRun(
+  document: YearDocument,
+  polityId: string,
+  previous: SessionPoint | undefined,
+  end: number
+): boolean {
+  return !takesTerritory(document, polityId) || returnsToBorder(document, previous, end)
+}
+
+/**
+ * Whether the pointer is on the run's first point with enough laid to close — it closes as the Pen closes.
+ * @param context - the session and the projection
+ * @param at - the pointer, in screen pixels
+ * @returns `true` when a click here closes the territory
+ */
+export function onTakeStart(context: GestureContext, at: Point): boolean {
+  const outline = context.session.outline
+  const start = outline[0]?.anchor ?? null
+  if (start === null || outline.length < 3) return false
+  return nearestAmong(context.anchorsOnScreen(), [start], at, context.radius) !== null
 }
 
 /**
@@ -108,19 +165,25 @@ export function closeWithBorder(context: GestureContext, side: readonly number[]
  * @param context - the session and the words
  * @param name - the target's name
  * @param under - the anchor under the pointer, or `null`
+ * @param pointer - the pointer, in screen pixels, or `null` off the canvas
  * @returns the sentence, and the one for the end still to click
  */
 export function takeSentences(
   context: GestureContext,
   name: string,
-  under: number | null
+  under: number | null,
+  pointer: Point | null
 ): { sentence: string | null; toEnd?: string } {
   const { t } = context.words
-  if (context.session.outline.length === 0) {
+  const outline = context.session.outline
+  if (outline.length === 0) {
     return { sentence: t(under === null ? 'takingToStart' : 'takingStartHere', { name }) }
   }
-  return {
-    sentence: under === null ? null : t('takingEndHere', { name }),
-    toEnd: t('takingToEnd', { name }),
-  }
+  const toEnd = t('takingToEnd', { name })
+  if (pointer !== null && onTakeStart(context, pointer))
+    return { sentence: t('takingClose', { name }), toEnd }
+  if (under === null) return { sentence: null, toEnd }
+  const { document } = context.store.getState()
+  const ends = returnsToBorder(document, outline.at(-1), under)
+  return { sentence: t(ends ? 'takingEndHere' : 'takingAlongBorder', { name }), toEnd }
 }

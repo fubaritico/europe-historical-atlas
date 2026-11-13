@@ -69,5 +69,7 @@
   "takingEndHere": "Take the territory of {name} — end here: the border between your two clicks closes it · ‹alt› the other side",
   "takeNoBorder": "{name} not drawn: the start and the end are not on one border",
   "takingToEnd": "Take the territory of {name} — click a point of a border to end",
-  "takeNoSource": "{name} not drawn: a point of the border has no recorded source — a defect, written in the journal"
+  "takeNoSource": "{name} not drawn: a point of the border has no recorded source — a defect, written in the journal",
+  "takingAlongBorder": "Take the territory of {name} — follows this border; leave it, then come back to a border to end",
+  "takingClose": "Take the territory of {name} — close on the first point"
 }

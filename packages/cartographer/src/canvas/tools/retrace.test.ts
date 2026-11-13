@@ -220,6 +220,44 @@ describe('retrace', () => {
       ).toEqual([])
     })
 
+    // The dev, 2026-11-13: « dès que je clique sur une ancre, la prochaine me propose de fermer » — a border's points
+    // clicked one after the other are followed; the run ends only when it comes back to a border after leaving it.
+    it('follows a border while its points are clicked, and ends only when the run comes back to a border', () => {
+      const { store, context } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      retraceClick(context, [300, 100])
+      retraceClick(context, [450, 200])
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([1, 6, 7])
+      retraceClick(context, [420, 170])
+      retraceClick(context, [350, 200])
+      const ring =
+        store.getState().document.claims.find((claim) => claim.polity === 'lor')?.rings[0] ?? []
+      expect(context.session.outline).toEqual([])
+      expect([ring.includes(1), ring.includes(6), ring.includes(2)]).toEqual([true, true, true])
+    })
+
+    it('closes a territory on its first point, as the Pen closes', () => {
+      const { store, context } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      retraceClick(context, [300, 100])
+      retraceClick(context, [400, 100])
+      retraceClick(context, [420, 170])
+      retraceClick(context, [300, 100])
+      const ring =
+        store.getState().document.claims.find((claim) => claim.polity === 'lor')?.rings[0] ?? []
+      expect([context.session.outline, ring.length]).toEqual([[], 3])
+    })
+
     it('refuses an end on a border the start is not on, the run kept as it was, and says it', () => {
       vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const { store, context, reports } = openRetrace()

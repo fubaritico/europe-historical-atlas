@@ -69,5 +69,7 @@
   "takingEndHere": "Prendre le territoire de {name} — finir ici : la frontière entre vos deux clics le ferme · ‹alt› l’autre côté",
   "takeNoBorder": "{name} non tracé : le départ et l’arrivée ne sont pas sur une même frontière",
   "takingToEnd": "Prendre le territoire de {name} — cliquez un point d’une frontière pour finir",
-  "takeNoSource": "{name} non tracé : un point de la frontière n’a pas d’origine notée — un défaut, écrit dans le journal"
+  "takeNoSource": "{name} non tracé : un point de la frontière n’a pas d’origine notée — un défaut, écrit dans le journal",
+  "takingAlongBorder": "Prendre le territoire de {name} — suit cette frontière ; quittez-la puis revenez sur une frontière pour finir",
+  "takingClose": "Prendre le territoire de {name} — fermer sur le premier point"
 }

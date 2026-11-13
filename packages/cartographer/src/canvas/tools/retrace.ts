@@ -12,11 +12,19 @@ import { TAG } from './consoleTag'
 import {
   borderBetween,
   closeWithBorder,
+  endsTheRun,
+  onTakeStart,
   retraceHandles,
   takeSentences,
   takesTerritory,
 } from './retraceTake'
-import { outlineOnScreen, placeClick, resolvedTarget, snapClick } from './toolGestures'
+import {
+  closeOutline,
+  outlineOnScreen,
+  placeClick,
+  resolvedTarget,
+  snapClick,
+} from './toolGestures'
 import { clearOutline, sessionPointOf } from './toolSession'
 import { waterVertexOf } from './waterVertex'
 
@@ -314,15 +322,23 @@ function refuseEnd(context: GestureContext, before: number, message: string): vo
  * while the run is still being drawn: the click landed on a free point, the water, or a neighbour's anchor.
  * @param context - the session and the store
  * @param polity - the target
+ * @param before - how many points the run held before the click: the last of them is where the run was, what the
+ *   click laid on its way to the end (a point on the water) not counted
  * @returns the start and end anchors, or `null`
  */
-function endsOfRun(context: GestureContext, polity: Polity): { from: number; to: number } | null {
+function endsOfRun(
+  context: GestureContext,
+  polity: Polity,
+  before: number
+): { from: number; to: number } | null {
   const outline = context.session.outline
   const from = outline[0]?.anchor ?? null
   const to = outline.at(-1)?.anchor ?? null
   if (outline.length < 2 || from === null || to === null) return null
   const { document } = context.store.getState()
-  return retraceHandles(document, polity.id).includes(to) ? { from, to } : null
+  if (!retraceHandles(document, polity.id).includes(to)) return null
+  // A target taking its territory follows a border while it clicks that border's points (`endsTheRun`).
+  return endsTheRun(document, polity.id, outline[before - 1], to) ? { from, to } : null
 }
 
 /**
@@ -358,7 +374,7 @@ function takeTerritory(
  * @param before - how many points the run held before the click
  */
 function endRetrace(context: GestureContext, polity: Polity, before: number): void {
-  const ends = endsOfRun(context, polity)
+  const ends = endsOfRun(context, polity, before)
   if (ends === null) return
   const { document } = context.store.getState()
   if (takesTerritory(document, polity.id)) {
@@ -448,6 +464,11 @@ export function retraceClick(context: GestureContext, at: Point): void {
     startRetrace(context, polity, at)
     return
   }
+  // A territory closes on its first point too, as the Pen closes an outline.
+  if (onTakeStart(context, at) && takesTerritory(context.store.getState().document, polity.id)) {
+    closeOutline(context)
+    return
+  }
   const end = retraceAnchorUnder(context, polity.id, at)
   const before = context.session.outline.length
   // Following the water, the end is reached along it (`H-46`: the stretch is replaced by *the water that
@@ -521,7 +542,7 @@ export function retraceView(
   const outline = context.session.outline
   const under = pointer === null ? null : retraceAnchorUnder(context, polity.id, pointer)
   if (takesTerritory(context.store.getState().document, polity.id)) {
-    return { replaced: null, ...takeSentences(context, polity.name, under) }
+    return { replaced: null, ...takeSentences(context, polity.name, under, pointer) }
   }
   if (outline.length === 0) {
     return {

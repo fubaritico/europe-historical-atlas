@@ -402,9 +402,13 @@ Given Upper Lotharingia, a vassal of the Holy Roman Empire, has no territory yet
   And ⟨retrace⟩ is in hand, Upper Lotharingia aimed at
 When I click a point of the Empire's border with Frisia
 Then the bar says "Take the territory of Upper Lotharingia — start on this point"
-When I draw along the rivers, then click a point of the Empire's border with Champagne
+When I click the next points of that border, then of the border with Flanders
+Then the run follows them, as the Pen follows a shared border — the bar says it follows this border, and nothing closes
+When I leave the border along the rivers, then click a point of the Empire's border with Champagne
 Then the stretch of that border between my two clicks closes the run — the side my run changes least, the other with ‹alt›
   And the territory closes as the Pen closes it: carved out of the Empire, in one undo step
+When instead I click the run's first point
+Then the territory closes on it, as the Pen closes
 When the start and the end lie on no one outline
 Then nothing is drawn, the click is taken back, and the bar says the two are not on one border
 ```
