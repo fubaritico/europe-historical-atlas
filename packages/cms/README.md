@@ -31,12 +31,12 @@ added.
 ## Connect Claude to it — the MCP server
 
 The CMS is an MCP server (`@payloadcms/plugin-mcp`) at `http://localhost:3100/api/mcp`, so a Claude Code session can
-read and enter places, cities at a date and sources — **never delete**. What a key may reach is set in
+read and enter places, cities at a date, sources and importance reasons — **never delete**. What a key may reach is set in
 `src/mcp/mcpAccess.ts`.
 
 1. **A key**: in the admin, **MCP › API Keys**, create one. In the sidebar, tick **find, create, update** for `places`,
-   `place-periods` and `sources`, and **find** for `importance-reasons`. Save, copy the key. The key acts as the account
-   that created it.
+   `place-periods`, `sources` and `importance-reasons`. Save, copy the key. The key acts as the account that created
+   it. A key made before 2026-11-13 has only **find** for `importance-reasons`: tick **create** and **update** too.
 2. **Keep it out of the repository**: put it in `.env.local` at the repository root (ignored by git), as `CMS_MCP_KEY=…`.
 3. **Register it once**, in a terminal, from the repository's folder:
 
@@ -52,14 +52,14 @@ read and enter places, cities at a date and sources — **never delete**. What a
 
 ## When something fails
 
-| what you see                                                                 | what it means                                                                    | what to do                                                                                                                        |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `cms` missing from `/mcp`                                                    | the session started before `claude mcp add`; a session never rereads it          | open a new session; `claude mcp list` shows the real state                                                                        |
-| `MCP server cms already exists`                                              | it was registered already                                                        | nothing; check with `claude mcp list`                                                                                             |
-| ✘ _connection timed out after 30000ms_                                       | **the server is stuck, not the key** — a wrong key is refused at once            | open `/admin`: if it hangs too, read the server's terminal                                                                        |
-| `SQLITE_ERROR: index … already exists` in the terminal, the admin showing it | a schema push failed halfway after a field change; every request waits behind it | stop the server; check on **a copy** of `cms.db` that the push has nothing left to do; restart. Never try a push on the real base |
-| `401` with the key                                                           | the key is wrong, or `CMS_MCP_KEY` was empty when `claude mcp add` ran           | `export` it again, `claude mcp remove cms`, add it again                                                                          |
-| an entry refused on the importance reasons                                   | the key's **find** box for `importance-reasons` is not ticked                    | admin › MCP › API Keys, tick it                                                                                                   |
+| what you see                                                                 | what it means                                                                           | what to do                                                                                                                        |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `cms` missing from `/mcp`                                                    | the session started before `claude mcp add`; a session never rereads it                 | open a new session; `claude mcp list` shows the real state                                                                        |
+| `MCP server cms already exists`                                              | it was registered already                                                               | nothing; check with `claude mcp list`                                                                                             |
+| ✘ _connection timed out after 30000ms_                                       | **the server is stuck, not the key** — a wrong key is refused at once                   | open `/admin`: if it hangs too, read the server's terminal                                                                        |
+| `SQLITE_ERROR: index … already exists` in the terminal, the admin showing it | a schema push failed halfway after a field change; every request waits behind it        | stop the server; check on **a copy** of `cms.db` that the push has nothing left to do; restart. Never try a push on the real base |
+| `401` with the key                                                           | the key is wrong, or `CMS_MCP_KEY` was empty when `claude mcp add` ran                  | `export` it again, `claude mcp remove cms`, add it again                                                                          |
+| an entry refused on the importance reasons                                   | the key's **find**, **create** or **update** box for `importance-reasons` is not ticked | admin › MCP › API Keys, tick the three                                                                                            |
 
 **A healthy server, checked without a key**: an MCP `initialize` posted to `/api/mcp` answers **401 within
 milliseconds**, and `/admin` answers 200 (a few seconds the first time, while Next compiles). No answer within 20

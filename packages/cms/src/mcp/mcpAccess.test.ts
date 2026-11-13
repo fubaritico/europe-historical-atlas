@@ -48,7 +48,7 @@ describe('mcpAccess', () => {
   })
 
   describe('boundaries', () => {
-    it.each(['places', 'placePeriods', 'sources'])(
+    it.each(['places', 'placePeriods', 'sources', 'importanceReasons'])(
       'gives a key the boxes find, create and update for %s, and no box to delete',
       async (group) => {
         const config = await applied()
@@ -56,12 +56,6 @@ describe('mcpAccess', () => {
         expect(operationBoxes(config, group)).toEqual(['find', 'create', 'update'])
       }
     )
-
-    it('gives a key only the box find for the importance reasons', async () => {
-      const config = await applied()
-
-      expect(operationBoxes(config, 'importanceReasons')).toEqual(['find'])
-    })
 
     it('describes a place’s position as the object the plugin’s tools take, not the stored tuple', () => {
       const description = MCP_COLLECTIONS[Places.slug]?.description

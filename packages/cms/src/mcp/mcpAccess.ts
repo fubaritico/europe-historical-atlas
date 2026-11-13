@@ -14,14 +14,8 @@ import type { Plugin } from 'payload'
 const ENTER_NEVER_DELETE = { find: true, create: true, update: true, delete: false } as const
 
 /**
- * What a model may do in a list it only chooses from: read it. The importance reasons are the dev's vocabulary; a
- * model reads their ids to cite one in a city's source line, and never adds one (the dev, 2026-11-03).
- */
-const READ_ONLY = { find: true, create: false, update: false, delete: false } as const
-
-/**
  * The collections a model reaches over MCP — the ones the historian enters its sources into: the places, a city at
- * a date with its holder (CMS-335), the sources; and, read only, the importance reasons a city's line cites.
+ * a date with its holder (CMS-335), the sources, and the importance reasons a city's line cites (CMS-431).
  * Everything else stays out until a need names it.
  *
  * Each entry still goes through Payload as the key's user: the collections' access rules and hooks — the sheet's
@@ -49,10 +43,13 @@ export const MCP_COLLECTIONS = {
     description: 'A source: a book, an atlas, an encyclopaedia page or a database, with its kind.',
   },
   [ImportanceReasons.slug]: {
-    enabled: READ_ONLY,
+    // Opened to creation on the dev's call, 2026-11-13 (CMS-431): the list knew only the Latin world, and the
+    // historian adds what a source attests — a fortress, a patriarchate, a great mosque. Read only until then.
+    enabled: ENTER_NEVER_DELETE,
     description:
-      'Why a city matters at a date (archbishopric, university…), read only: its id is what a city’s source line ' +
-      'with the subject « reason » cites.',
+      'Why a city matters at a date (archbishopric, university, fortress, patriarchate, great mosque…): its id is ' +
+      'what a city’s source line with the subject « reason » cites. Search before creating — a reason that exists ' +
+      'is reused, never created twice; a reason tied to a faith names it, the sign depends on it.',
   },
 } as const
 
