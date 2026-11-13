@@ -62,9 +62,9 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'mediterranean',
     name: { fr: 'Mer Méditerranée', en: 'Mediterranean Sea' },
-    from: { lon: -1.5, lat: 37.4 },
-    bend: { lon: 15, lat: 30.5 },
-    to: { lon: 31, lat: 34.6 },
+    from: { lon: 2, lat: 39.2 },
+    bend: { lon: 17, lat: 37.2 },
+    to: { lon: 31, lat: 33.2 },
   },
   {
     id: 'black-sea',
@@ -76,9 +76,9 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'caspian',
     name: { fr: 'Mer Caspienne', en: 'Caspian Sea' },
-    from: { lon: 50.6, lat: 46.2 },
-    bend: { lon: 49.4, lat: 42.2 },
-    to: { lon: 51.4, lat: 38.4 },
+    from: { lon: 51, lat: 45 },
+    bend: { lon: 49.6, lat: 42 },
+    to: { lon: 51.6, lat: 38.8 },
   },
   {
     id: 'red-sea',
