@@ -36,6 +36,15 @@ describe('carvedReport', () => {
     )
   })
 
+  // CORE-426: closed in front, the outline names whose ground it took.
+  it('names every polity a closing in front took ground from', () => {
+    const polities = [...POLITIES, testPolity('anjou', 'County of Anjou')]
+    const carving = { suzerain: 'fr', crossings: 0, rings: 1, taken: ['fr', 'anjou'] }
+    expect(carvedReport(polities, carving, EN)).toBe(
+      'took the ground of Kingdom of France, County of Anjou'
+    )
+  })
+
   it('shows the id of a suzerain the registry lacks rather than nothing', () => {
     expect(carvedReport([], { suzerain: 'fr', crossings: 0, rings: 1 }, EN)).toBe(
       "carved out of fr's own domain"

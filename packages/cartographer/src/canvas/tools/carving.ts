@@ -26,8 +26,15 @@ export function carvedReport(
 ): string {
   // The suzerain comes from a vassal's `suzerain` field, which the readers check against the registry:
   // the id is shown only if that check was bypassed, and showing it beats showing nothing.
-  const name = polities.find((polity) => polity.id === carving.suzerain)?.name ?? carving.suzerain
-  return t('carved', { name, crossings: carving.crossings })
+  const nameOf = (id: string): string => polities.find((polity) => polity.id === id)?.name ?? id
+  // Closed in front (‹alt›): whose ground the outline took, every one of them.
+  if (carving.taken !== undefined) {
+    return t('carvedFront', {
+      names: carving.taken.map(nameOf).join(', '),
+      crossings: carving.crossings,
+    })
+  }
+  return t('carved', { name: nameOf(carving.suzerain), crossings: carving.crossings })
 }
 
 /**

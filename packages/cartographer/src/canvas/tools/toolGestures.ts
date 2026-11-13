@@ -131,7 +131,8 @@ export function closeOutline(context: GestureContext, followWater = false): void
   const outline = [...context.session.outline, ...closing]
   const carved: string[] = []
   const onCarved = carvingAnswer(context, target.name, carved)
-  if (closeInHand(context, target.id, outline, step, onCarved)) {
+  // Held ‹alt› at the close, the outline passes in front: it takes the ground of its whole family (CORE-426).
+  if (closeInHand(context, target.id, outline, step, onCarved, context.flipSide === true)) {
     clearOutline(context.session)
     if (closing.length > 0) context.report(closingReport(closing.length, t))
     for (const message of carved) context.report(message)
@@ -159,12 +160,16 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context, true)
     return
   }
-  // An end of an open outline, nothing in hand: the Pen takes it up and goes on from there (open-outlines.md).
-  if (resumeClick(context, at)) return
-  // The target's own stretch before the layer: there the idle Pen edits the outline it already has.
-  // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
-  // nearer hit, and that one is reused by the layer click.
-  if (penInserts(context, at)) return
+  // Held ‹alt›, the Pen never edits what is drawn: it starts a new outline there, on the target's own limit too —
+  // the outline closed in front (the dev, 2026-11-12, Hungary's towns in Croatia: « it cannot start from the limit »).
+  if (context.flipSide !== true) {
+    // An end of an open outline, nothing in hand: the Pen takes it up and goes on from there (open-outlines.md).
+    if (resumeClick(context, at)) return
+    // The target's own stretch before the layer: there the idle Pen edits the outline it already has.
+    // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
+    // nearer hit, and that one is reused by the layer click.
+    if (penInserts(context, at)) return
+  }
   placeClick(context, at)
 }
 

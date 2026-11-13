@@ -26,6 +26,7 @@
   "followedBorder": "{count, plural, one {# ancre suivie} other {# ancres suivies}} le long d’une frontière partagée",
   "closedAlongWater": "fermé le long de l’eau, {count, plural, one {# sommet inséré} other {# sommets insérés}}",
   "carved": "découpé dans le domaine propre de son suzerain — {name}{crossings, plural, =0 {} one {, # ancre posée où les limites se croisent} other {, # ancres posées où les limites se croisent}}",
+  "carvedFront": "a pris la terre de {names}{crossings, plural, =0 {} one {, # ancre posée où les limites se croisent} other {, # ancres posées où les limites se croisent}}",
   "removedAnchors": "{count, plural, one {une ancre supprimée} other {# ancres supprimées}}{paths, plural, =0 {} one {} other {, tenues par # tracés — {names}}}",
   "removedRings": "{rings, plural, one {# anneau supprimé} other {# anneaux supprimés}} ({anchors, plural, one {# ancre} other {# ancres}})",
   "pointsTakenFrom": " · points pris à {names}",

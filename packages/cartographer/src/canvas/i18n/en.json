@@ -26,6 +26,7 @@
   "followedBorder": "followed {count, plural, one {# anchor} other {# anchors}} of a shared border",
   "closedAlongWater": "closed along the water, {count, plural, one {# vertex} other {# vertices}} inserted",
   "carved": "carved out of {name}'s own domain{crossings, plural, =0 {} one {, # anchor placed where the limits cross} other {, # anchors placed where the limits cross}}",
+  "carvedFront": "took the ground of {names}{crossings, plural, =0 {} one {, # anchor placed where the limits cross} other {, # anchors placed where the limits cross}}",
   "removedAnchors": "removed {count, plural, one {an anchor} other {# anchors}}{paths, plural, =0 {} one {} other { held by # paths — {names}}}",
   "removedRings": "removed {rings, plural, one {# ring} other {# rings}} ({anchors, plural, one {# anchor} other {# anchors}})",
   "pointsTakenFrom": " · points taken from {names}",

@@ -34,12 +34,20 @@ import type { MultiPolygon, Polygon } from 'polygon-clipping'
 
 /** What a carving did — for the status bar, and for a test to read. */
 export interface Carving {
-  /** The suzerain whose own domain was carved. */
+  /**
+   * The suzerain whose own domain was carved — on a carving in front, the top of the family whose ground was taken
+   * (review ARCH-004), the polity itself when it owes nobody; `taken` names the polities.
+   */
   suzerain: string
   /** How many anchors were placed where the new outline crossed the suzerain's limit. */
   crossings: number
   /** How many rings the suzerain's own domain holds afterwards. */
   rings: number
+  /**
+   * Set only by a closing in front (‹alt›, {@link carveInFront}): every polity whose ground the outline took, in the
+   * order of the family — the status bar names them.
+   */
+  taken?: string[]
 }
 
 /** Why a carving did not happen, when something should have. */
@@ -106,13 +114,15 @@ export function openSuzerainOf(doc: YearDocument, vassalId: string): string | nu
  * @param doc - the document
  * @param polityId - who the outline is drawn for
  * @param points - the outline's points, closure implied
+ * @param front - closed in front (‹alt›): it takes the ground of its whole family, {@link carveInFront}
  * @returns `closed: false` when the document refused the outline — and nothing was written; otherwise what
  *   the carving did, `null` when there was nothing to carve
  */
 export function addOutlineCarving(
   doc: YearDocument,
   polityId: string,
-  points: readonly OutlinePoint[]
+  points: readonly OutlinePoint[],
+  front = false
 ): { closed: false } | { closed: true; carving: Carving | CarvingFault | CarvingHeld | null } {
   if (!addOutline(doc, polityId, points, false)) return { closed: false }
   const ring = doc.claims.find((claim) => claim.polity === polityId)?.rings.at(-1)
@@ -124,7 +134,26 @@ export function addOutlineCarving(
       carving: { suzerain, reason: 'the closed outline is not in the document' },
     }
   }
-  return { closed: true, carving: carveOutOfSuzerain(doc, polityId, ring) }
+  return { closed: true, carving: carveClosedRing(doc, polityId, ring, front) }
+}
+
+/**
+ * Carve a ring just closed: in front with ‹alt› ({@link carveInFront}), out of the suzerain otherwise
+ * ({@link carveOutOfSuzerain}) — the one place the choice is made, for every closing (review ARCH-002). A paste closes
+ * no ring in front, and calls {@link carveOutOfSuzerain} itself.
+ * @param doc - the document, the ring already closed into it
+ * @param polityId - the polity whose ring was closed
+ * @param ring - the ring's anchors, edited in place by crossings
+ * @param front - whether ‹alt› was held at the close
+ * @returns what the carving did
+ */
+export function carveClosedRing(
+  doc: YearDocument,
+  polityId: string,
+  ring: number[],
+  front: boolean
+): Carving | CarvingFault | CarvingHeld | null {
+  return front ? carveInFront(doc, polityId, ring) : carveOutOfSuzerain(doc, polityId, ring)
 }
 
 /**
@@ -156,23 +185,93 @@ export function carveOutOfSuzerain(
 ): Carving | CarvingFault | CarvingHeld | null {
   const suzerain = doc.polities.find((polity) => polity.id === vassalId)?.suzerain ?? null
   if (suzerain === null) return null
-  const own = ownDomainOf(doc, suzerain)
-  if (own !== null && 'held' in own) return own
+  const domain = ownDomainOf(doc, suzerain)
+  if (domain !== null && 'held' in domain) return domain
 
+  const own = new Set(extentMembers(doc, vassalId))
+  const done = carveAll(
+    doc,
+    extentMembers(doc, suzerain).filter((id) => !own.has(id)),
+    ring
+  )
+  if (typeof done === 'string') return { suzerain, reason: done }
+  if (done === null) return null
+  return { suzerain, crossings: done.crossings, rings: domain === null ? 0 : domain.rings.length }
+}
+
+/**
+ * Take an outline out of the closed claims of some polities, as one transaction — the one both carvings share
+ * (review ARCH-001): a crossing that cannot be placed, or a shape the clipping cannot read, puts the whole document
+ * back as it was.
+ * @param doc - the document
+ * @param ids - the polities to carve, in order
+ * @param ring - the outline
+ * @returns the crossings placed and whose domains were carved; `null` when none was; the fault's reason, the document
+ *   put back
+ */
+function carveAll(
+  doc: YearDocument,
+  ids: readonly string[],
+  ring: number[]
+): { crossings: number; carved: string[] } | string | null {
   const putBack = snapshotOf(doc)
-  let done: { crossings: number; carved: number } | string
+  let done: { crossings: number; carved: string[] } | string
   try {
-    done = carveHosts(doc, hostsOf(doc, suzerain, vassalId), ring)
+    done = carveHosts(doc, closedClaimsOf(doc, ids), ring)
   } catch (error) {
     // polygon-clipping throws on a shape it cannot read: the gesture is refused whole, said as a fault.
     done = clippingFault(error)
   }
-  if (typeof done === 'string') {
-    putBack()
-    return { suzerain, reason: done }
+  if (typeof done === 'string') putBack()
+  else if (done.carved.length === 0) return null
+  return done
+}
+
+/**
+ * Carve a newly closed outline **in front** (the dev, 2026-11-12, Hungary's coastal towns in Croatia, its vassal):
+ * held ‹alt› at the close, the outline takes the ground under it from every polity of its family — the extent of its
+ * topmost suzerain, its own vassals included, itself left out. Pathfinder's Minus Front, asked for: without ‹alt› a
+ * suzerain's outline never takes from its vassals, or redrawing it would wipe them out. A polity outside the family is
+ * never touched; an open outline reads no area and is left as it is.
+ * @param doc - the document, the outline already closed into it
+ * @param polityId - the polity whose outline was closed
+ * @param ring - the outline's anchors, edited in place by crossings
+ * @returns what was carved, `taken` naming whose ground; `null` when the outline covered nobody of its family; a
+ *   fault when it could not be done — and then the document is exactly as it was
+ */
+export function carveInFront(
+  doc: YearDocument,
+  polityId: string,
+  ring: number[]
+): Carving | CarvingFault | null {
+  const root = topSuzerainOf(doc, polityId)
+  const done = carveAll(
+    doc,
+    extentMembers(doc, root).filter((id) => id !== polityId),
+    ring
+  )
+  if (typeof done === 'string') return { suzerain: root, reason: done }
+  if (done === null) return null
+  const rings = doc.claims.find((claim) => claim.polity === root)?.rings.length ?? 0
+  return { suzerain: root, crossings: done.crossings, rings, taken: done.carved }
+}
+
+/**
+ * The topmost suzerain above a polity — itself when it owes nobody. A loop of homage, which the form refuses, stops
+ * at the first polity met twice.
+ * @param doc - the document
+ * @param polityId - the polity
+ * @returns the id at the top of its chain
+ */
+function topSuzerainOf(doc: YearDocument, polityId: string): string {
+  const seen = new Set<string>([polityId])
+  let top = polityId
+  for (;;) {
+    const above = doc.polities.find((polity) => polity.id === top)?.suzerain ?? null
+    if (above === null || seen.has(above)) return top
+    seen.add(above)
+    top = above
   }
-  if (done.carved === 0) return null
-  return { suzerain, crossings: done.crossings, rings: own === null ? 0 : own.rings.length }
 }
 
 /**
@@ -189,47 +288,40 @@ function clippingFault(error: unknown): string {
  * @param doc - the document
  * @param hosts - the claims to carve
  * @param ring - the outline
- * @returns how many crossings were placed and domains carved, or why a crossing could not be placed — the caller
+ * @returns how many crossings were placed and whose domains were carved, or why a crossing could not be placed — the caller
  *   puts the document back
  */
 function carveHosts(
   doc: YearDocument,
   hosts: readonly YearClaim[],
   ring: number[]
-): { crossings: number; carved: number } | string {
+): { crossings: number; carved: string[] } | string {
   let crossings = 0
-  let carved = 0
+  const carved: string[] = []
   for (const host of hosts) {
     if (!overlapsArea(doc, host.rings, ring)) continue
     const placed = placeCrossings(doc, host.rings, ring)
     if (typeof placed === 'string') return placed
     crossings += placed
     host.rings = differenceOf(doc, host.rings, ring)
-    carved += 1
+    carved.push(host.polity)
   }
   return { crossings, carved }
 }
 
 /**
- * The claims a vassal's new outline takes ground from: its suzerain's own domain, then every other vassal of
- * that suzerain at any depth — never the vassal itself nor its own vassals (the dev, 2026-11-12: *"it must carve
- * the suzerain, or a vassal if the ground was held by a vassal"*). A co-vassal whose outline is open reads no area,
- * and is left as it is.
+ * The claims of some polities an outline may take ground from — a vassal's suzerain and its co-vassals (the dev,
+ * 2026-11-12: *"it must carve the suzerain, or a vassal if the ground was held by a vassal"*), or a whole family in
+ * front. One whose outline is open reads no area, and is left as it is.
  * @param doc - the document
- * @param suzerain - the suzerain's id
- * @param vassalId - the vassal whose outline was closed
- * @returns the closed claims to carve, the suzerain's first
+ * @param ids - the polities, in the order they are carved
+ * @returns their closed claims holding rings
  */
-function hostsOf(doc: YearDocument, suzerain: string, vassalId: string): YearClaim[] {
-  const own = new Set(extentMembers(doc, vassalId))
-  return extentMembers(doc, suzerain)
-    .filter((id) => !own.has(id))
-    .flatMap((id) => {
-      const claim = doc.claims.find((each) => each.polity === id)
-      return claim !== undefined && claim.rings.length > 0 && claim.open === undefined
-        ? [claim]
-        : []
-    })
+function closedClaimsOf(doc: YearDocument, ids: readonly string[]): YearClaim[] {
+  return ids.flatMap((id) => {
+    const claim = doc.claims.find((each) => each.polity === id)
+    return claim !== undefined && claim.rings.length > 0 && claim.open === undefined ? [claim] : []
+  })
 }
 
 /**

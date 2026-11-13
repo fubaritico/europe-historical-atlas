@@ -147,6 +147,7 @@ function sameRun(anchors: readonly (number | null)[], ring: readonly number[]): 
  * @param outline - the points, the closing ones laid
  * @param step - how the gesture is named
  * @param onCarved - told what the carving did
+ * @param front - closed with ‹alt›: the outline takes the ground of its whole family
  * @returns whether the document took it
  */
 export function closeInHand(
@@ -154,11 +155,12 @@ export function closeInHand(
   polityId: string,
   outline: readonly OutlinePoint[],
   step: HistoryStep,
-  onCarved: (carving: Carving | CarvingHeld) => void
+  onCarved: (carving: Carving | CarvingHeld) => void,
+  front = false
 ): boolean {
   const { resumed } = context.session
   const state = context.store.getState()
   return resumed?.polity === polityId
-    ? state.keepOutline(polityId, resumed, outline, false, step, onCarved)
-    : state.drawOutline(polityId, outline, step, onCarved)
+    ? state.keepOutline(polityId, resumed, outline, false, step, onCarved, front)
+    : state.drawOutline(polityId, outline, step, onCarved, front)
 }

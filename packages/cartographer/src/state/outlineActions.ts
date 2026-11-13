@@ -1,4 +1,4 @@
-import { addOutlineCarving, carveOutOfSuzerain } from '@europe-historical-atlas/core/editor/carve'
+import { addOutlineCarving, carveClosedRing } from '@europe-historical-atlas/core/editor/carve'
 import { addOutline, replaceOutline } from '@europe-historical-atlas/core/editor/documentEdits'
 
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
@@ -28,13 +28,15 @@ export interface OutlineActions {
    * the ground under it is no longer the suzerain's own, the new limit shares its anchors.
    * @param step - how `{History}` and `[↶ Undo]` will name the gesture
    * @param onCarved - told what a carving did, for the status bar; a carving that failed is logged here
+   * @param front - closed with ‹alt›: the outline takes the ground of its whole family (`carveInFront`)
    * @returns `false` when the polity is unknown or the points enclose nothing — and nothing happened
    */
   drawOutline: (
     polityId: string,
     points: readonly OutlinePoint[],
     step: HistoryStep,
-    onCarved?: (carving: Carving | CarvingHeld) => void
+    onCarved?: (carving: Carving | CarvingHeld) => void,
+    front?: boolean
   ) => boolean
   /**
    * Keep the Pen's outline as it stands, open or closed, as one undoable step (`open-outlines.md`, the dev,
@@ -46,6 +48,7 @@ export interface OutlineActions {
    * @param open - whether it stays open
    * @param step - how the gesture is named
    * @param onCarved - told what a closing carved, or that the carving was held back
+   * @param front - closed with ‹alt›: the outline takes the ground of its whole family (`carveInFront`)
    * @returns `false` when the document refused it — and nothing happened
    */
   keepOutline: (
@@ -54,7 +57,8 @@ export interface OutlineActions {
     points: readonly OutlinePoint[],
     open: boolean,
     step: HistoryStep,
-    onCarved?: (carving: Carving | CarvingHeld) => void
+    onCarved?: (carving: Carving | CarvingHeld) => void,
+    front?: boolean
   ) => boolean
 }
 
@@ -90,20 +94,24 @@ export function outlineActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
 ): OutlineActions {
   return {
-    keepOutline: (polityId, resumed, points, open, step, onCarved): boolean =>
+    keepOutline: (polityId, resumed, points, open, step, onCarved, front): boolean =>
       record((document) => {
         if (resumed === null) return addOutline(document, polityId, points, open)
         if (!replaceOutline(document, polityId, resumed.at, resumed.anchors, points, open))
           return false
         const ring = document.claims.find((claim) => claim.polity === polityId)?.rings[resumed.at]
         if (!open && ring !== undefined) {
-          answerCarving(polityId, carveOutOfSuzerain(document, polityId, ring), onCarved)
+          answerCarving(
+            polityId,
+            carveClosedRing(document, polityId, ring, front === true),
+            onCarved
+          )
         }
         return true
       }, step),
-    drawOutline: (polityId, points, step, onCarved): boolean =>
+    drawOutline: (polityId, points, step, onCarved, front): boolean =>
       record((document) => {
-        const drawn = addOutlineCarving(document, polityId, points)
+        const drawn = addOutlineCarving(document, polityId, points, front === true)
         if (drawn.closed) answerCarving(polityId, drawn.carving, onCarved)
         return drawn.closed
       }, step),

@@ -1041,6 +1041,19 @@ describe('editionSlice.drawOutline — carving the suzerain', () => {
     expect(onCarved).toHaveBeenCalledWith({ suzerain: 'fr-couronne', crossings: 0, rings: 2 })
   })
 
+  // CORE-426, the dev, 2026-11-12: held ‹alt›, a suzerain's outline takes the ground of its vassal under it.
+  it('lets a suzerain’s outline closed in front take its vassal’s ground, and names it', () => {
+    const { store } = withAnjou()
+    store.getState().drawOutline('anjou', inside, DRAW)
+    const onCarved = vi.fn()
+
+    expect(store.getState().drawOutline('fr-couronne', inside, DRAW, onCarved, true)).toBe(true)
+
+    const anjou = store.getState().document.claims.find((claim) => claim.polity === 'anjou')
+    expect(anjou?.rings).toEqual([])
+    expect(onCarved).toHaveBeenCalledWith(expect.objectContaining({ taken: ['anjou'] }))
+  })
+
   it('takes back the outline and the carving with one undo', () => {
     const { store } = withAnjou()
     store.getState().drawOutline('anjou', inside, DRAW)
@@ -1053,11 +1066,10 @@ describe('editionSlice.drawOutline — carving the suzerain', () => {
     ).toBeUndefined()
   })
 
-  it('keeps the outline, overlapping, and says so loudly when the carving cannot be done', () => {
+  // CORE-426: a side lying on France's limit between its anchors was refused (Bosnia in Serbia, 1100); it carves.
+  it('carves a vassal whose side lies on the suzerain’s limit between its anchors', () => {
     const { store } = withAnjou()
-    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     const onCarved = vi.fn()
-    // Its top side lies ON France's, between France's anchors: the carved domain cannot close.
     const onTheLimit = (
       [
         [0.5, 48],
@@ -1068,9 +1080,6 @@ describe('editionSlice.drawOutline — carving the suzerain', () => {
 
     expect(store.getState().drawOutline('anjou', onTheLimit, DRAW, onCarved)).toBe(true)
 
-    expect(franceRings(store)).toHaveLength(1)
-    expect(onCarved).not.toHaveBeenCalled()
-    expect(error).toHaveBeenCalledOnce()
-    error.mockRestore()
+    expect(onCarved).toHaveBeenCalledWith(expect.objectContaining({ suzerain: 'fr-couronne' }))
   })
 })

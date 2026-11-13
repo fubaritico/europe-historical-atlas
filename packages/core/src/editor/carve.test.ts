@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createYearDocument } from '../data/yearDocument'
 import { pointInRings } from '../geo/pointInRing'
 
-import { carveOutOfSuzerain } from './carve'
+import { carveInFront, carveOutOfSuzerain } from './carve'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 
 import type { Carving, CarvingFault, CarvingHeld } from './carve'
@@ -477,6 +477,171 @@ describe('carveOutOfSuzerain', () => {
       )
 
       expect(doc.claims.find((claim) => claim.polity === 'france')?.rings).toEqual([])
+    })
+  })
+})
+
+/** France and Aquitaine its vassal, drawn side by side: `0–10` and `10–20` on x, `0–10` on y. */
+function family(): YearDocument {
+  const doc = createYearDocument(1100, source)
+  anchors(doc, [
+    [0, 0],
+    [10, 0],
+    [10, 10],
+    [0, 10],
+    [20, 0],
+    [20, 10],
+  ])
+  addPolity(doc, polity('france'))
+  addPolity(doc, polity('aquitaine', 'france'))
+  closeRing(doc, 'france', [0, 1, 2, 3])
+  closeRing(doc, 'aquitaine', [1, 4, 5, 2])
+  return doc
+}
+
+/** Close an outline for France in front, as ‹alt› does at the close. */
+function closeInFront(doc: YearDocument, ring: number[]): Carving | CarvingFault | null {
+  closeRing(doc, 'france', ring)
+  const closed = doc.claims.find((each) => each.polity === 'france')?.rings.at(-1)
+  if (closed === undefined) throw new Error('fixture: the outline did not close')
+  return carveInFront(doc, 'france', closed)
+}
+
+describe('carveInFront', () => {
+  describe('happy path', () => {
+    // The dev, 2026-11-12: Hungary's coastal towns, in Croatia its vassal.
+    it('takes a vassal’s ground for its suzerain, and names whose', () => {
+      const doc = family()
+      const carving = closeInFront(
+        doc,
+        anchors(doc, [
+          [14, 2],
+          [18, 2],
+          [18, 6],
+          [14, 6],
+        ])
+      )
+
+      expect(carving).toMatchObject({ suzerain: 'france', taken: ['aquitaine'] })
+      expect(pointInRings([16, 4], domainOf(doc, 'aquitaine'))).toBe(false)
+      expect(pointInRings([12, 8], domainOf(doc, 'aquitaine'))).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('takes a co-vassal’s ground for a vassal, up its whole family', () => {
+      const doc = family()
+      addPolity(doc, polity('poitou', 'france'))
+      closeRing(
+        doc,
+        'poitou',
+        anchors(doc, [
+          [2, 2],
+          [8, 2],
+          [8, 8],
+          [2, 8],
+        ])
+      )
+      closeRing(doc, 'aquitaine', [])
+      const ring = anchors(doc, [
+        [4, 4],
+        [6, 4],
+        [6, 6],
+        [4, 6],
+      ])
+      closeRing(doc, 'aquitaine', ring)
+      const closed = doc.claims.find((each) => each.polity === 'aquitaine')?.rings.at(-1) ?? []
+      const carving = carveInFront(doc, 'aquitaine', closed)
+
+      expect(carving).toMatchObject({ taken: ['france', 'poitou'] })
+      expect(pointInRings([5, 5], domainOf(doc, 'poitou'))).toBe(false)
+    })
+  })
+
+  describe('managed errors', () => {
+    // Review QUAL-004: a family member whose outline is open reads no area — left as it is, not named.
+    it('leaves a family member whose outline is open as it is', () => {
+      const doc = family()
+      const aquitaine = doc.claims.find((claim) => claim.polity === 'aquitaine')
+      if (aquitaine === undefined) throw new Error('fixture: no Aquitaine')
+      aquitaine.open = [0]
+      const before = JSON.stringify(aquitaine.rings)
+      const carving = closeInFront(
+        doc,
+        anchors(doc, [
+          [14, 2],
+          [18, 2],
+          [18, 6],
+          [14, 6],
+        ])
+      )
+
+      expect(carving).toBeNull()
+      expect(JSON.stringify(aquitaine.rings)).toBe(before)
+    })
+
+    it('never takes from a polity outside the family', () => {
+      const doc = family()
+      addPolity(doc, polity('empire'))
+      const empire = anchors(doc, [
+        [30, 0],
+        [40, 0],
+        [40, 10],
+        [30, 10],
+      ])
+      closeRing(doc, 'empire', empire)
+      const carving = closeInFront(
+        doc,
+        anchors(doc, [
+          [32, 2],
+          [38, 2],
+          [38, 8],
+          [32, 8],
+        ])
+      )
+
+      expect(carving).toBeNull()
+      expect(doc.claims.find((claim) => claim.polity === 'empire')?.rings).toEqual([empire])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('puts the document back when the difference throws', () => {
+      const doc = family()
+      const outline = anchors(doc, [
+        [14, 2],
+        [18, 2],
+        [18, 6],
+        [14, 6],
+      ])
+      const before = JSON.stringify(doc.claims)
+      const spy = vi.spyOn(polygonClipping, 'difference').mockImplementation(() => {
+        throw new Error('unreadable shape')
+      })
+      const carving = closeInFront(doc, outline)
+      spy.mockRestore()
+      const france = doc.claims.find((claim) => claim.polity === 'france')
+      france?.rings.pop()
+
+      expect(carving).toHaveProperty('reason')
+      expect(JSON.stringify(doc.claims)).toBe(before)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('carves nothing for an outline over nobody of its family', () => {
+      const doc = family()
+      expect(
+        closeInFront(
+          doc,
+          anchors(doc, [
+            [50, 50],
+            [52, 50],
+            [52, 52],
+            [50, 52],
+          ])
+        )
+      ).toBeNull()
     })
   })
 })

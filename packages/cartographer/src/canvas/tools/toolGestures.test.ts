@@ -1102,6 +1102,16 @@ describe('the Pen inserting a point on the target’s outline', () => {
   })
 
   describe('variants', () => {
+    // CORE-426, the dev, 2026-11-12: held ‹alt›, the Pen starts a new outline on the target's own limit.
+    it('starts a new outline instead of inserting when ‹alt› is held', () => {
+      const context = idlePenOnTriangle()
+
+      penClick({ ...context, flipSide: true }, [200, 102])
+
+      expect(franceRings(context)).toEqual([[0, 1, 2]])
+      expect(context.session.outline).toHaveLength(1)
+    })
+
     it('neither selects nor holds the point it inserted — a drag after it moves nothing', () => {
       const context = idlePenOnTriangle()
 
