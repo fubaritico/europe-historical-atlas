@@ -359,12 +359,12 @@ describe('the vassals’ band beside the tribes’', () => {
   })
 })
 
-// CARTO-439, the dev, 2026-11-13: the band inside out — full from the outline to 15 km, half to 30, nothing deeper.
+// CARTO-439, the dev, 2026-11-13: the band inside out — full from the outline to 10 km, half to 20, nothing deeper.
 describe('featherOpacity, the outlined tribe', () => {
   describe('happy path', () => {
-    it('is full within 15 km of the outline, half from 15 to 30 km, nothing deeper', () => {
+    it('is full within 10 km of the outline, half from 10 to 20 km, nothing deeper', () => {
       expect(
-        [-1, -14.9, -15, -29.9, -30, -60].map((d) => featherOpacity(d, 30, 'outlined', 15))
+        [-1, -9.9, -10, -19.9, -20, -60].map((d) => featherOpacity(d, 20, 'outlined', 10))
       ).toEqual([1, 1, BAND_SHARE, BAND_SHARE, 0, 0])
     })
   })

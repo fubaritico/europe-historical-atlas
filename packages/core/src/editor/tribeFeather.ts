@@ -89,13 +89,14 @@ export const TRIBE_FEATHER: Readonly<Required<TribeFeather>> = {
 }
 
 /**
- * **An outlined tribe** (CARTO-439, the dev, 2026-11-13): the colour full from its outline to 15 km inside, half from 15
- * to 30 km, nothing deeper — the band turned inside out, its two limits undulating as the band's does.
+ * **An outlined tribe** (CARTO-439, the dev, 2026-11-13): the colour full from its outline to 10 km inside, half from 10
+ * to 20 km, nothing deeper — the band turned inside out, its two limits undulating as the band's does. 15 and 30 km the
+ * first evening; *« 10 km, 10 km »* on seeing it in the atlas.
  */
 export const TRIBE_OUTLINED_FEATHER: Readonly<Required<TribeFeather>> = {
   mode: 'outlined',
-  widthKm: 30,
-  innerKm: 15,
+  widthKm: 20,
+  innerKm: 10,
   irregularity: 0.5,
   waveKm: BAND_WAVE_KM,
 }
