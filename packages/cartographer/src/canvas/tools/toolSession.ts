@@ -294,6 +294,16 @@ export function targetHandles(document: YearDocument, target: string | null): nu
 }
 
 /**
+ * Every anchor any outline holds — where a retrace may start and end for a polity that has no territory yet
+ * (`retrace.ts`, the dev, 2026-11-13: Upper Lotharingia taken out of the Empire along its borders).
+ * @param document - the document to read
+ * @returns the anchor indices, ascending
+ */
+export function everyHandle(document: YearDocument): number[] {
+  return ascending(anchorsHeldBy(document, () => true))
+}
+
+/**
  * Every anchor held by the polities a test accepts — **the one walk over the claims**, which
  * {@link targetHandles}, {@link extentHandles} and {@link neighbourAnchors} share (review ARCH-101, 2026-10-15).
  * @param document - the document to read
@@ -487,6 +497,8 @@ export interface ActionInputs {
    * run is drawn with no end anchor under the pointer.
    */
   retracing: string | null
+  /** ⟨retrace⟩'s sentence for the end still to click, when its own is not the one (`RetraceView.toEnd`). */
+  retracingToEnd?: string | undefined
   /** The canvas's messages, in the page's language. */
   t: Translate<CanvasMessageKey>
 }
@@ -528,7 +540,7 @@ function retraceSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.joining !== null) return t('retracingNeighbour', name)
   // CARTO-257 — ⟨retrace⟩'s free points are clamped as the Pen's are, and said the same way.
   if (inputs.edge !== null) return t('retracing', { ...name, edge: inputs.edge })
-  return t('retracingToEnd', name)
+  return inputs.retracingToEnd ?? t('retracingToEnd', name)
 }
 
 /**

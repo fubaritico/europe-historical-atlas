@@ -193,6 +193,81 @@ describe('retrace', () => {
       expect(france(store)).not.toContain(3)
       expect(france(store)).toContain(2)
     })
+    // The dev, 2026-11-13: Upper Lotharingia, a vassal of the Empire with no territory yet, taken out of the Empire
+    // with the retrace — refused until then, its press on « no anchor » of a polity that had none.
+    it('takes a territory for a vassal that has none, closed by the border between the two clicks, carved in one step', () => {
+      const { store, context } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      retraceClick(context, [300, 100])
+      retraceClick(context, [380, 160])
+      retraceClick(context, [450, 200])
+      const ring =
+        store.getState().document.claims.find((claim) => claim.polity === 'lor')?.rings[0] ?? []
+      const laid = store.getState().document.anchors.length - 1
+      expect(context.session.outline).toEqual([])
+      // The run 1 → laid → 7, closed back along the Empire's border by its anchor 2, the side the run changes least;
+      // the Empire carved, its outline running along the new run now.
+      expect(from(ring, 1)).toEqual([1, laid, 7, 2])
+      expect(empire(store)).toContain(laid)
+      store.getState().undo()
+      expect(
+        store.getState().document.claims.find((claim) => claim.polity === 'lor')?.rings ?? []
+      ).toEqual([])
+    })
+
+    it('refuses an end on a border the start is not on, the run kept as it was, and says it', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { store, context, reports } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      retraceClick(context, [200, 300])
+      retraceClick(context, [400, 101])
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([4])
+      expect(reports.at(-1)).toBe(
+        'Lotharingia not drawn: the start and the end are not on one border'
+      )
+    })
+
+    it('starts a territory on any outline’s point, and says it takes one before the first click', () => {
+      const { store, context } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      expect(retraceView(context, { id: 'lor', name: 'Lotharingia' }, [301, 101]).sentence).toBe(
+        'Take the territory of Lotharingia — start on this point'
+      )
+      retraceClick(context, [301, 101])
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([1])
+    })
+
+    it('asks, while a territory is drawn, for a border’s point to end — not for the target’s anchors', () => {
+      const { store, context } = openRetrace()
+      const state = store.getState()
+      state.createPolity(
+        { ...testPolity('lor', 'Lotharingia'), suzerain: 'hre' },
+        { kind: 'create', label: 'lor' }
+      )
+      state.chooseTarget('lor')
+      retraceClick(context, [301, 101])
+      retraceClick(context, [380, 160])
+      expect(retraceView(context, { id: 'lor', name: 'Lotharingia' }, [250, 250])).toEqual({
+        replaced: null,
+        sentence: null,
+        toEnd: 'Take the territory of Lotharingia — click a point of a border to end',
+      })
+    })
   })
 
   describe('managed errors', () => {

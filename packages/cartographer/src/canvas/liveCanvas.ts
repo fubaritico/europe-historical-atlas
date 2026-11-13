@@ -681,6 +681,7 @@ export function refreshTools(it: LiveCanvas): void {
     tooFar,
     session: it.session,
     retracing: retrace.sentence,
+    retracingToEnd: 'toEnd' in retrace ? retrace.toEnd : undefined,
     t: it.deps.words().t,
   })
   if (sentence !== it.sentence) {

@@ -62,5 +62,12 @@
   "closeOverOpenSuzerain": "{name} is not closed: the outline of its suzerain, {suzerain}, is still open, and a vassal is carved only out of a closed outline. The outline of {name} is erased: close {suzerain} first, then draw {name} again.",
   "overlapPair": "{a} and {b}",
   "overlapRefused": "The hatching between {pairs} cannot be drawn: one of their outlines has a shape the computation cannot read, such as a point placed twice or a line crossing itself. That overlap is not hatched; the rest of the map is. Touch up the outline to see it.",
-  "pasteOverOpenSuzerain": "A piece is not pasted: it would close {name}, and the outline of its suzerain, {suzerain}, is still open. Close {suzerain} first, then paste again."
+  "pasteOverOpenSuzerain": "A piece is not pasted: it would close {name}, and the outline of its suzerain, {suzerain}, is still open. Close {suzerain} first, then paste again.",
+  "takeStartPrompt": "{name} has no territory yet: start on a point of a border already drawn",
+  "takingToStart": "Take the territory of {name} — click a point of a border to start",
+  "takingStartHere": "Take the territory of {name} — start on this point",
+  "takingEndHere": "Take the territory of {name} — end here: the border between your two clicks closes it · ‹alt› the other side",
+  "takeNoBorder": "{name} not drawn: the start and the end are not on one border",
+  "takingToEnd": "Take the territory of {name} — click a point of a border to end",
+  "takeNoSource": "{name} not drawn: a point of the border has no recorded source — a defect, written in the journal"
 }

@@ -62,5 +62,12 @@
   "closeOverOpenSuzerain": "{name} n’est pas fermé : le contour de son suzerain, {suzerain}, est encore ouvert, et un vassal ne se découpe que dans un contour fermé. Le tracé de {name} est effacé : fermez d’abord {suzerain}, puis redessinez {name}.",
   "overlapPair": "{a} et {b}",
   "overlapRefused": "Les hachures entre {pairs} ne peuvent pas être dessinées : un de leurs tracés a une forme que le calcul ne sait pas lire, comme un point posé deux fois ou une ligne qui se recoupe. Ce chevauchement n’est pas hachuré ; le reste de la carte l’est. Retouchez le tracé pour le voir.",
-  "pasteOverOpenSuzerain": "Une partie n’est pas collée : elle fermerait {name}, et le contour de son suzerain, {suzerain}, est encore ouvert. Fermez d’abord {suzerain}, puis collez de nouveau."
+  "pasteOverOpenSuzerain": "Une partie n’est pas collée : elle fermerait {name}, et le contour de son suzerain, {suzerain}, est encore ouvert. Fermez d’abord {suzerain}, puis collez de nouveau.",
+  "takeStartPrompt": "{name} n’a pas encore de territoire : commencez sur un point d’une frontière déjà tracée",
+  "takingToStart": "Prendre le territoire de {name} — cliquez un point d’une frontière pour commencer",
+  "takingStartHere": "Prendre le territoire de {name} — commencer sur ce point",
+  "takingEndHere": "Prendre le territoire de {name} — finir ici : la frontière entre vos deux clics le ferme · ‹alt› l’autre côté",
+  "takeNoBorder": "{name} non tracé : le départ et l’arrivée ne sont pas sur une même frontière",
+  "takingToEnd": "Prendre le territoire de {name} — cliquez un point d’une frontière pour finir",
+  "takeNoSource": "{name} non tracé : un point de la frontière n’a pas d’origine notée — un défaut, écrit dans le journal"
 }

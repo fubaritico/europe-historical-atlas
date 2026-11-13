@@ -9,8 +9,15 @@ import { nearestAmong } from '../../geometry/hitTest'
 import { MIN_RING_ANCHORS } from '../../geometry/ringClosure'
 
 import { TAG } from './consoleTag'
+import {
+  borderBetween,
+  closeWithBorder,
+  retraceHandles,
+  takeSentences,
+  takesTerritory,
+} from './retraceTake'
 import { outlineOnScreen, placeClick, resolvedTarget, snapClick } from './toolGestures'
-import { clearOutline, sessionPointOf, targetHandles } from './toolSession'
+import { clearOutline, sessionPointOf } from './toolSession'
 import { waterVertexOf } from './waterVertex'
 
 import type { CanvasMessageKey } from '../i18n'
@@ -30,6 +37,11 @@ import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
  * anchors, the new run drawn exactly as the Pen draws (the coast, a river, a neighbour's border, free
  * points, the Pencil), and a click on another of its anchors, on the same outline, replaces the stretch
  * between them — in one undo step, every ring over that stretch following.
+ *
+ * **A polity with no territory yet takes one with it** (the dev, 2026-11-13: *« creuser le duché dans l'espace non
+ * vassalisé du Saint-Empire »*, refused because it had no anchor to start on): the run starts and ends on any anchor of
+ * any outline, and the stretch of that outline between the two closes it — the side the run changes least, the other with ‹alt› —
+ * then it closes as the Pen closes, carved out of its suzerain.
  *
  * **Its own tool, not a mode of the Pen** (the dev: *"ce n'est plus un outil de traçage, mais un outil de
  * retraçage, de correction"*): the Pen's first click on its own anchor starts a new outline, and loading
@@ -60,7 +72,7 @@ export function retraceAnchorUnder(
   at: Point
 ): number | null {
   const held = new Set(context.session.outline.map((point) => point.anchor))
-  const handles = targetHandles(context.store.getState().document, polityId).filter(
+  const handles = retraceHandles(context.store.getState().document, polityId).filter(
     (index) => !held.has(index)
   )
   return nearestAmong(context.anchorsOnScreen(), handles, at, context.radius)
@@ -79,8 +91,13 @@ export function retraceAnchorUnder(
 function startRetrace(context: GestureContext, polity: Polity, at: Point): boolean {
   const anchor = retraceAnchorUnder(context, polity.id, at)
   if (anchor === null) {
-    console.warn(`${TAG} nothing retraced: the press is on no anchor of ${polity.name}.`)
-    context.report(context.words.t('retraceStartPrompt', { name: polity.name }))
+    const taking = takesTerritory(context.store.getState().document, polity.id)
+    console.warn(
+      `${TAG} nothing retraced: the press is on no anchor of ${taking ? 'any outline' : polity.name}.`
+    )
+    context.report(
+      context.words.t(taking ? 'takeStartPrompt' : 'retraceStartPrompt', { name: polity.name })
+    )
     return false
   }
   const point = sessionPointOf(context.store.getState().document, anchor)
@@ -305,7 +322,33 @@ function endsOfRun(context: GestureContext, polity: Polity): { from: number; to:
   const to = outline.at(-1)?.anchor ?? null
   if (outline.length < 2 || from === null || to === null) return null
   const { document } = context.store.getState()
-  return targetHandles(document, polity.id).includes(to) ? { from, to } : null
+  return retraceHandles(document, polity.id).includes(to) ? { from, to } : null
+}
+
+/**
+ * End a run for a target with no territory: the border between the two ends closes it — the side the run changes least, the other
+ * with ‹alt› — and it closes as the Pen closes, carved out of its suzerain (`closeOutline`).
+ * @param context - the session and the store
+ * @param polity - the target
+ * @param ends - the run's two ends
+ * @param ends.from - the anchor the run starts on
+ * @param ends.to - the anchor it ends on
+ * @param before - how many points the run held before the click
+ */
+function takeTerritory(
+  context: GestureContext,
+  polity: Polity,
+  ends: { from: number; to: number },
+  before: number
+): void {
+  const arcs = borderBetween(context.store.getState().document, polity.id, ends)
+  if (arcs === null) {
+    refuseEnd(context, before, context.words.t('takeNoBorder', { name: polity.name }))
+    return
+  }
+  if (!closeWithBorder(context, replacedSide(context, arcs, ends, outlineOnScreen(context)))) {
+    refuseEnd(context, before, context.words.t('takeNoSource', { name: polity.name }))
+  }
 }
 
 /**
@@ -318,6 +361,10 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
   const ends = endsOfRun(context, polity)
   if (ends === null) return
   const { document } = context.store.getState()
+  if (takesTerritory(document, polity.id)) {
+    takeTerritory(context, polity, ends, before)
+    return
+  }
   const arcs = retraceArcs(document, polity.id, ends.from, ends.to)
   if (arcs === null) {
     refuseEnd(
@@ -451,6 +498,11 @@ export interface RetraceView {
    * the pointer: then the bar says what the click would lay, as for the Pen (`actionSentence`).
    */
   sentence: string | null
+  /**
+   * The sentence for the end still to click when nothing else is said — absent for ⟨retrace⟩'s own (« click one of its
+   * anchors to end »); a target taking its territory has no anchor, and ends on a border's point.
+   */
+  toEnd?: string
 }
 
 /**
@@ -468,6 +520,9 @@ export function retraceView(
 ): RetraceView {
   const outline = context.session.outline
   const under = pointer === null ? null : retraceAnchorUnder(context, polity.id, pointer)
+  if (takesTerritory(context.store.getState().document, polity.id)) {
+    return { replaced: null, ...takeSentences(context, polity.name, under) }
+  }
   if (outline.length === 0) {
     return {
       replaced: null,

@@ -16,10 +16,11 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `selectToDraw`, `zoomInTo`, `closing`, `inserting`, `moving`, `selecting`, `following`, `drawing`,
  *   `drawingNoWater`, `branching`, `retracing`, `retracingFollowing`, `retracingNeighbour`,
  *   `retracingToEnd`, `retracingToStart`, `retracingStartHere`, `retracingOtherOutline`,
- *   `retracingCannotEnd`, `retracingMovesStart`, `retracingReplaces` — The action under the pointer
+ *   `retracingCannotEnd`, `retracingMovesStart`, `retracingReplaces`, `takingToStart`, `takingStartHere`,
+ *   `takingEndHere`, `takingToEnd` (a polity with no territory taking one) — The action under the pointer
  * - `tooFar`, `reachWould`, `notFramed`, `insertedFromWater`, `followedBorder`, `closedAlongWater`,
  *   `carved`, `removedAnchors`, `removedRings`, `pointsTakenFrom`, `keptPoints`, `notWelded`, `welded`,
- *   `retraceStartPrompt`, `retraceStartMoved`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain`, `overlapPair`, `overlapRefused`, `edgeSelected`, `erasedEdge` — What
+ *   `retraceStartPrompt`, `takeStartPrompt`, `takeNoBorder`, `takeNoSource`, `retraceStartMoved`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain`, `overlapPair`, `overlapRefused`, `edgeSelected`, `erasedEdge` — What
  *   a gesture did
  * - `refusedNoRing`, `refusedDressedRun`, `refusedTooShort`, `refusedDisagree`,
  *   `deliberateGap` — Why a retrace is refused
