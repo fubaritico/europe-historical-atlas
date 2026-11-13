@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--no-deprecation next dev --port 3100",
+    "dev": "NODE_OPTIONS=--no-deprecation next dev --port 3100 --hostname 127.0.0.1",
     "export": "NODE_OPTIONS=--no-deprecation payload run src/export/run.ts",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",

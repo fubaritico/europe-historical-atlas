@@ -11,6 +11,9 @@ pnpm install                 # from the repository root
 pnpm dev:cms                 # http://localhost:3100/admin
 ```
 
+The server listens on this machine only (`--hostname 127.0.0.1`): Next's default, every address, would open the admin
+and the MCP endpoint to the local network.
+
 `packages/cms/.env` (ignored by git) must hold `DATABASE_URL` (the SQLite file, `file:./cms.db`) and `PAYLOAD_SECRET`;
 the server refuses to start without either.
 
