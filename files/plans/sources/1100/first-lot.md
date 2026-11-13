@@ -18,7 +18,13 @@ Scandinavian ones, read by the agent on the PDF's page images, are entered in th
 
 The four with no holder named: **Derbent** and **Nakhchivan** (Encyclopaedia Iranica refused the scripts — its articles
 are to read in the browser), **Gray** (the count of Burgundy, but which one), **Ottaviano** (a leftover of the Italian
-research; nothing medieval found). 16 marked fragile. **Not yet in the CMS.**
+research; nothing medieval found). 16 marked fragile.
+
+**In the CMS since 2026-11-12** (`/enter-in-cms`, four agents, brief `ENTRY.md` of the research folder, the record of each
+lot in `entered/`): the 98 sheets updated — holder, QID and lines — none created; Ottaviano left untouched (no holder);
+sources 737–890. The holder that changes within 1100 is the report's most probable, both readings kept as lines. One
+duplicate source left for the dev to delete in the admin (762, Le Strange, its twin 755 is cited). Sent to the code
+instance for its read-only check.
 
 ## Holders that change within 1100 — the dev's open question, which day the map shows
 
