@@ -25,7 +25,7 @@ Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me m
 **L'état** : `main` = le dépôt distant = `3e5d00c`. Poussé cette nuit : la soudure qui replie l'épine (`b0baf3f`), le
 creusement par différence de surfaces (`dad8373`), la fermeture avec ⌥ (`33fe68b`), la retouche (`4e563cb`), la vue et
 les filtres gardés au rechargement (`c0bec21`, CARTO-427), la 1100 des Balkans (`81c7d8f`, cassait l'atlas) et son
-correctif (`3e5d00c`). **La CI de `3e5d00c` tournait à 02:10** — la lire jusqu'au bout. **Non commités** :
+correctif (`3e5d00c`). **La CI de `3e5d00c` est verte** (celle de `81c7d8f` était tombée : le site n'a jamais publié la carte cassée). **Non commités** :
 `content/events.json` et `files/plans/sources/1100/first-lot.md` (l'historien). Mon serveur du port 5199 tourne encore.
 
 **Sur le tableau** : À valider — CORE-426 (le creusement, ⌥ ; essayé par moi, pas par lui), CARTO-425 (la soudure), CMS-414 ;
