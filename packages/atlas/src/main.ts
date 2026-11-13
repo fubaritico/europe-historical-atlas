@@ -30,6 +30,7 @@ import { createMapPipeline } from './loading/mapPipeline'
 import { createSurfacePicker } from './picking/surfacePicker'
 import { createStandardBlur as standardBlur } from './scene/blur/standardBlur'
 import { canvasLabelDrawer } from './scene/cities/cityLabel'
+import { canvasSeaLabelDrawer } from './scene/decor/seas/seaLabel'
 import { createMapLayers } from './scene/layers/mapLayers'
 import { NAME_FACE_URL } from './scene/political/names/nameFace'
 import { createMapSources } from './sources/mapSources'
@@ -71,12 +72,14 @@ function createLayers(
   uploadUnseen: Parameters<typeof createMapLayers>[0]['uploadUnseen']
 ): ReturnType<typeof createMapLayers> {
   const cityLabels = canvasLabelDrawer(NAME_FACE_URL)
+  const seaLabels = canvasSeaLabelDrawer(NAME_FACE_URL)
   return createMapLayers({
     scene,
     dev,
     sources,
     blurMethod: standardBlur(),
     cityLabels,
+    seaLabels,
     uploadUnseen,
   })
 }

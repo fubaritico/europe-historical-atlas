@@ -173,6 +173,7 @@ function build(
       sources,
       blurMethod,
       cityLabels: NAME_STUB,
+      seaLabels: () => Promise.resolve({ canvas: document.createElement('canvas'), aspect: 4 }),
       uploadUnseen,
     }),
     uploadUnseen,
@@ -360,6 +361,7 @@ describe('createMapLayers', () => {
         reasons: [],
         testimonies: [],
         holder: null,
+        communities: [],
         showInAtlas: true,
       }
       sources.cities = [paris]

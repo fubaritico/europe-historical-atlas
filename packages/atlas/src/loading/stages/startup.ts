@@ -97,6 +97,7 @@ async function bringTheRelief(
   layers.rebuildRhumb()
   layers.rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
   layers.rebuildRose()
+  layers.rebuildSeaNames() // fixed, once: the seas' names (ATLAS-440)
   endScene()
   return true
 }

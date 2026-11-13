@@ -12,6 +12,7 @@
 
 import { rebuildRhumb } from '../decor/rhumbs/mapRhumbLayer'
 import { rebuildRose } from '../decor/rose/mapRoseLayer'
+import { laySeaNames } from '../decor/seas/mapSeaNameLayer'
 import { createDetailState } from '../detail/detailView'
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
@@ -27,11 +28,11 @@ import { rebuildRivers } from '../waters/mapRiverLayer'
 import { disposeHandle } from './disposeHandle'
 import { frameLineWork, frameRelief } from './frameLayers'
 import { createLayerProjection } from './layerProjection'
-import { layersWithRole } from './layerRoles'
+import { LAYER_ROLES, layersWithRole } from './layerRoles'
 import { rebuildSurface } from './rebuildSurface'
 import { createObjectIds, createYearShelf, yearStamp } from './yearShelf'
 
-import type { LayerContext, MapLayersDeps } from './layerContext'
+import type { LayerContext, LayerHandles, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
 import type { FillArraysKey, ReliefHeights } from '../political/fills/mapFillLayer'
 import type { MeasuredTribes } from '../political/tribes/mapTribeLayer'
@@ -114,6 +115,11 @@ export interface MapLayers {
    * @returns nothing
    */
   rebuildRose: () => void
+  /**
+   * Lay the seas' names (ATLAS-440), fixed, once the relief's frame is known — their face loaded first.
+   * @returns nothing; a face that cannot load is said in the console, the map shown without them
+   */
+  rebuildSeaNames: () => void
   /**
    * Rebuild the sheet and the graduated border that frames the map.
    * @returns nothing
@@ -469,6 +475,16 @@ function readReliefHeights(context: LayerContext): ReliefHeights | null {
 }
 
 /**
+ * Every handle empty, one per layer of the roles' table — so a layer added there is never left out here.
+ * @returns the handles, each `null`
+ */
+function emptyHandles(): LayerHandles {
+  return Object.fromEntries(
+    Object.keys(LAYER_ROLES).map((key) => [key, null])
+  ) as unknown as LayerHandles
+}
+
+/**
  * Build the map's overlays. Nothing is drawn until something is rebuilt.
  * @param deps - the scene to draw into, the live tunables and the loaded sources
  * @returns the layers
@@ -478,30 +494,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
   const context: LayerContext = {
     ...deps,
     projection: createLayerProjection(deps.dev, deps.sources),
-    handles: {
-      relief: null,
-      edge: null,
-      texture: null,
-      land: null,
-      coastline: null,
-      rhumb: null,
-      rivers: null,
-      borders: null,
-      fills: null,
-      fillCut: null,
-      fillArrays: null,
-      tribes: null,
-      hatches: null,
-      tribeCut: null,
-      names: null,
-      events: null,
-      compass: null,
-      sheet: null,
-      frame: null,
-      labels: null,
-      title: null,
-      sheetTexture: null,
-    },
+    handles: emptyHandles(),
     // Whole until a startup hides them to fade them in: a year changed later is drawn at once.
     reveal: { value: 1 },
     // The level of detail the zoom chooses, fading in time toward what it shows.
@@ -515,6 +508,9 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     ...layerRebuilders(context),
     rebuildEvents(): void {
       rebuildEvents(context)
+    },
+    rebuildSeaNames(): void {
+      laySeaNames(context)
     },
     setReveal(share: number): void {
       context.reveal.value = share

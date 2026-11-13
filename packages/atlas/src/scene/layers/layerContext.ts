@@ -8,6 +8,8 @@ import type { DevState } from '../../tunables/devState'
 import type { BlurMethod } from '../blur/blurMethod'
 import type { DrawCityLabel } from '../cities/cityLabel'
 import type { CompassRose } from '../decor/rose/compassRose'
+import type { DrawSeaLabel } from '../decor/seas/seaLabel'
+import type { SeaNameLayer } from '../decor/seas/seaNameLayer'
 import type { DetailState } from '../detail/detailView'
 import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'
@@ -89,6 +91,8 @@ export interface LayerHandles {
   events: EventMarkers | null
   /** The compass rose. */
   compass: CompassRose | null
+  /** The seas' names (ATLAS-440), or `null` before the relief's frame and the names' face are in. */
+  seaNames: SeaNameLayer | null
   /** The vellum the map is printed on. */
   sheet: PaperSheet | null
   /** The graduated border between the map and its margin. */
@@ -119,6 +123,8 @@ export interface MapLayersDeps {
    * the session, whatever the layers rebuild.
    */
   cityLabels: DrawCityLabel
+  /** How a sea's name is drawn (`decor/seas/seaLabel`, ATLAS-440): made once by the composition root, as the cities'. */
+  seaLabels: DrawSeaLabel
   /**
    * Send objects to the GPU unseen (`app/gpuUpload`, ATLAS-396): a map prepared in the background, so its first showing
    * uploads nothing. The renderer's, handed in by the composition root — the layers never hold the renderer.

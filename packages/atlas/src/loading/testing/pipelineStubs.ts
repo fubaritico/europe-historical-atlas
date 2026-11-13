@@ -60,6 +60,7 @@ export function fakeLayers(): MapLayers {
     'rebuildEvents',
     'setReveal',
     'rebuildRose',
+    'rebuildSeaNames',
     'rebuildFrame',
     'setWireframe',
     'setCoastColor',

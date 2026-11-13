@@ -93,6 +93,7 @@ function drawYear(loaded: RegionSet): {
     sources,
     blurMethod: createSeparateImagesBlur(),
     cityLabels: () => new Promise(() => undefined),
+    seaLabels: () => new Promise(() => undefined),
     uploadUnseen: () => undefined,
   })
   layers.rebuildRelief()

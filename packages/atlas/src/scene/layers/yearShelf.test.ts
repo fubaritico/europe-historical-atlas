@@ -34,6 +34,7 @@ function emptyHandles(): LayerHandles {
     names: null,
     events: null,
     compass: null,
+    seaNames: null,
     sheet: null,
     frame: null,
     labels: null,

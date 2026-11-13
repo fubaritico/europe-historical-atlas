@@ -38,6 +38,7 @@ export const LAYER_ROLES = {
   names: 'draped',
   events: 'draped',
   compass: 'flat',
+  seaNames: 'flat',
   sheet: 'flat',
   frame: 'flat',
   labels: 'flat',
