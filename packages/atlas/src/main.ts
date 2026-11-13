@@ -44,6 +44,7 @@ import type { MapBuffer } from './loading/mapBuffer'
 import type { MapSources } from './sources/mapSources'
 import type { YearSwitch } from './ui/yearSwitch'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
+import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
 /**
  * The page's canvas the map is drawn on.
@@ -63,13 +64,15 @@ function sceneCanvas(): HTMLCanvasElement {
  * @param dev - the live tunables
  * @param sources - what has been loaded so far
  * @param uploadUnseen - the viewport's way to send a map set aside to the GPU unseen (ATLAS-396)
+ * @param locale - the reader's language, the seas' names written in it
  * @returns the layers
  */
 function createLayers(
   scene: Parameters<typeof createMapLayers>[0]['scene'],
   dev: Parameters<typeof createMapLayers>[0]['dev'],
   sources: Parameters<typeof createMapLayers>[0]['sources'],
-  uploadUnseen: Parameters<typeof createMapLayers>[0]['uploadUnseen']
+  uploadUnseen: Parameters<typeof createMapLayers>[0]['uploadUnseen'],
+  locale: Locale
 ): ReturnType<typeof createMapLayers> {
   const cityLabels = canvasLabelDrawer(NAME_FACE_URL)
   const seaLabels = canvasSeaLabelDrawer(NAME_FACE_URL)
@@ -80,6 +83,7 @@ function createLayers(
     blurMethod: standardBlur(),
     cityLabels,
     seaLabels,
+    locale,
     uploadUnseen,
   })
 }
@@ -209,7 +213,7 @@ function bootstrap(): () => void {
   document.documentElement.lang = locale
   const translate = createTranslator(ATLAS_MESSAGES, locale)
   const ui = createMapUi({ host: document.body, isDisposed, translate })
-  const layers = createLayers(view.scene, dev, sources, view.uploadUnseen)
+  const layers = createLayers(view.scene, dev, sources, view.uploadUnseen, locale)
   const pipeline = pagePipeline({ dev, sources, layers, ui, translate, isDisposed })
   const interaction = createMapInteraction({
     element: canvas,

@@ -174,6 +174,7 @@ function build(
       blurMethod,
       cityLabels: NAME_STUB,
       seaLabels: () => Promise.resolve({ canvas: document.createElement('canvas'), aspect: 4 }),
+      locale: 'en',
       uploadUnseen,
     }),
     uploadUnseen,

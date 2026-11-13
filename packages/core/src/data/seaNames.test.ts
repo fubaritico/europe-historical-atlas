@@ -22,8 +22,12 @@ describe('seaNames', () => {
   })
 
   describe('variants', () => {
-    it('writes a name in capitals', () => {
-      expect(SEA_NAMES.map(seaNameText)[0]).toBe('ATLANTIC OCEAN')
+    it('writes a name in capitals, in English for an English reader', () => {
+      expect(SEA_NAMES.map((sea) => seaNameText(sea, 'en'))[0]).toBe('ATLANTIC OCEAN')
+    })
+
+    it('writes a name in capitals, accents kept, in French for a French reader', () => {
+      expect(SEA_NAMES.map((sea) => seaNameText(sea, 'fr'))[0]).toBe('OCÉAN ATLANTIQUE')
     })
   })
 

@@ -6,6 +6,8 @@
  * Each name follows an arc across its sea — Claude's proposal, for the dev to tune on sight.
  */
 
+import type { Locale } from '../i18n/locale'
+
 /** A point of the map, in degrees. */
 export interface LonLat {
   /** Degrees of longitude, east positive. */
@@ -23,7 +25,7 @@ export interface SeaName {
   /** Its key. */
   readonly id: string
   /** Its name in each language. */
-  readonly name: { readonly fr: string; readonly en: string }
+  readonly name: Readonly<Record<Locale, string>>
   /** Where the name begins. */
   readonly from: LonLat
   /** The point the arc bends toward — not on it: a quadratic curve's control point. */
@@ -118,11 +120,13 @@ export function seaArcAt(sea: SeaName, t: number): LonLat {
 export const SEA_NAME_OPACITY = 0.28
 
 /**
- * A sea's name as the map writes it: **in capitals** (the dev, 2026-11-13: *« à essayer »*, unlike the countries') — the
- * one line to change to try them otherwise.
+ * A sea's name as the map writes it: **in the reader's language** (the dev, 2026-11-13: *"multilingual"*) and **in
+ * capitals** (same day: *"to try"*, unlike the countries'). A longer name only shrinks on its arc — the ribbon's height
+ * is its length over the name's width — so the French ones, longer, stay off the land as the English were fitted.
  * @param sea - the sea
+ * @param locale - the reader's language
  * @returns its name, written
  */
-export function seaNameText(sea: SeaName): string {
-  return sea.name.en.toUpperCase()
+export function seaNameText(sea: SeaName, locale: Locale): string {
+  return sea.name[locale].toLocaleUpperCase(locale)
 }

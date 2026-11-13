@@ -42,7 +42,7 @@ export async function rebuildSeaNames(
   if (frame === undefined) return
   const placed: PlacedSeaName[] = await Promise.all(
     SEA_NAMES.map(async (sea) => {
-      const label = await draw(seaNameText(sea))
+      const label = await draw(seaNameText(sea, context.locale))
       // The arc sampled finely enough that the ribbon reads as a curve, each point projected as the map's.
       const arc = Array.from({ length: ARC_SAMPLES + 1 }, (_, k) => {
         const at = seaArcAt(sea, k / ARC_SAMPLES)

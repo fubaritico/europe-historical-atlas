@@ -28,6 +28,7 @@ import type { GraticuleFrame } from '../sheet/graticuleFrame'
 import type { MapTitle } from '../sheet/mapTitle'
 import type { PaperSheet } from '../sheet/paperSheet'
 import type { RiverLayer } from '../waters/riverLayer'
+import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
@@ -125,6 +126,8 @@ export interface MapLayersDeps {
   cityLabels: DrawCityLabel
   /** How a sea's name is drawn (`decor/seas/seaLabel`, ATLAS-440): made once by the composition root, as the cities'. */
   seaLabels: DrawSeaLabel
+  /** The reader's language, the seas' names written in it (ATLAS-440, the dev: *"multilingual"*). */
+  locale: Locale
   /**
    * Send objects to the GPU unseen (`app/gpuUpload`, ATLAS-396): a map prepared in the background, so its first showing
    * uploads nothing. The renderer's, handed in by the composition root — the layers never hold the renderer.
