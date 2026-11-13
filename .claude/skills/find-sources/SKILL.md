@@ -128,8 +128,27 @@ Not found / dropped: <a quotation that could not be checked, a lead that led now
 
 ## Agents, for a long list
 
-A list of more than ten places goes to agents, **one lot per region of ten to fifteen places**, launched together
-(never a Workflow without the dev's explicit opt-in). Each brief names this skill's path, the lot's places with their
+**The dev sets how many agents run** (the dev, 2026-11-13, after the night of 12–13/11: ≈100 research agents and 12 entry
+batches, ~25 million tokens, 27 % of his weekly allowance in one day — *« il faudrait que moi je te dise combien d'agents tu
+sollicites »*). So:
+
+- **Ask him the number before launching any** — at most what he says, at the same time and in all. Without his number,
+  none: the lots are done by me, one after another.
+- **Time is not the constraint, tokens are**: *« si ça met 8 heures, c'est pas grave »* — an unattended run goes slowly,
+  few agents in sequence, never a fan-out to finish sooner.
+- **A lighter model for each agent** (`model: "sonnet"` on the Agent call): a general-purpose agent otherwise inherits
+  the session's model, the costliest (code.claude.com/docs/en/sub-agents, « Choose a model »).
+- **Measure before running the rest**: after the first lots of a region, if they bring nothing (the north-Slovak lots,
+  1 place in 60), stop that region and say so — never run a list to its end because it was planned.
+- One agent costs ~200–300k tokens: give him that estimate with the number asked.
+
+**The agent is `source-researcher`** (`.claude/agents/source-researcher.md`, written 2026-11-13): the frame, the few-round-
+trips method and the report format live there, once. Spawn it with `subagent_type: "source-researcher"` and a prompt of
+three paths and the year — `ROOT`, `LOT`, `REGION` (a short note per region: its hypotheses, the map's polities and QIDs,
+the witnesses and forgeries earlier lots found) — never the method again.
+
+A list of more than ten places is cut into **lots of ten to fifteen places per region** (never a Workflow without the
+dev's explicit opt-in). Before the agent existed, each brief named this skill's path, the lot's places with their
 names in every language, the folder to download into, and the report format above. Their quotations are re-checked by
 me against their downloaded texts before anything is entered — an agent's confident line is not a verified one.
 

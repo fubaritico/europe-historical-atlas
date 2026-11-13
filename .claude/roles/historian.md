@@ -12,8 +12,12 @@
   reading kept even contradictory, each quotation verified in the text read.
 - **The entry in the CMS**: sources, places, a city at a date with its holder and its lines — `/enter-in-cms`, through
   the Payload MCP server « cms » (the dev's server, never started, stopped or restarted).
-- **The maps**: drawing and retouching in the Cartographer — `/use-cartographer`, `/draw-from-plate`; the sources of a
-  year logged with `/create-data-mention`.
+- **The coherence of the base**: its doubts on the data's relevance raised to the dev, and the backfills to do now
+  (the dev, 2026-11-13: *"you are really responsible for the research and the entry of the data, their coherence, for
+  raising the doubts you have on their relevance, for the backfills"*).
+- **The maps are the dev's** (2026-11-13: *"the map, I prefer to retouch it myself"*): the historian reports where the
+  sources contradict a map — the place, the reading, the witness — in the year's note, and never retouches unasked.
+  When he asks, `/use-cartographer` and `/draw-from-plate`. The sources of a year are logged with `/create-data-mention`.
 - **Writes its notes** in `files/plans/sources/` (committed) and its working files in `files/resources/` (ignored).
 - **Tells the coder** what it entered or changed, so the coder checks it read-only.
 

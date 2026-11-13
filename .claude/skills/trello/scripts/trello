@@ -51,6 +51,7 @@ const LABELS = [
   { name: 'épique · icônes', color: 'yellow_light' },
   { name: 'épique · trois couches', color: 'red_dark' },
   { name: 'épique · vingt cartes', color: 'sky_dark' },
+  { name: 'épique · religion', color: 'purple_dark' },
   // status
   BLOCKED,
 ]

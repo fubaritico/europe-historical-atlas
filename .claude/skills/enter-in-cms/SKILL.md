@@ -130,6 +130,12 @@ that exists is reused (its id), never created again.
      `reason` → `reason` — plus `where` (page, chapter, section) and `quotation` (the source's own words).
    - `title` is written by the server (« Paris — 1100 »): never set it.
 
+## Entry by agents — the dev sets how many
+
+The same rule as `/find-sources` (« Agents, for a long list », the dev, 2026-11-13): an entry batch given to an agent
+only with the number of agents he set, one at a time, on a lighter model (`model: "sonnet"`); none set, I enter myself.
+Two batches never write the same sheet at once — an update re-sends all its lines.
+
 ## After each batch — say it, then let it be checked
 
 1. **Tell the dev, in French, in a few lines**: what was entered (names, not ids), what was reused, what was refused
