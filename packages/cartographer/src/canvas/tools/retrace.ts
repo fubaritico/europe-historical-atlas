@@ -328,7 +328,7 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
     return
   }
   const points: OutlinePoint[] = context.session.outline.slice(1, -1)
-  if (movesStart(points)) {
+  if (movesStart(points, arcs)) {
     slideStart(context)
     return
   }
@@ -351,15 +351,20 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
 }
 
 /**
- * Whether a click on another of the target's anchors moves the start rather than ends the run: nothing has been
- * laid since the start. The dev, 2026-11-08: *"ça ne prend pas tout le tracé de la frontière"* — from the start,
- * a click anywhere further along the border takes the border up to there, unchanged, and the run goes on from
- * that anchor; the run ends on the target's anchor reached after a point of the author's own.
+ * Whether a click on another of the target's anchors moves the start rather than ends the run: nothing laid since
+ * the start, **and the two anchors are neighbours on the ring** — the straight line between them is already the
+ * border, so ending there would change nothing (the dev, 2026-11-08: *"dès que je clique sur un autre point, ça se
+ * désactive"*). Any other anchor clicked straight after the start **ends the run on a straight segment** (the dev,
+ * 2026-11-12, a bump of Venice cut off between two of its points: *"what I want is freedom of handling"* — this
+ * replaces the rule of 2026-11-08 that moved the start to any anchor further along).
  * @param points - the points laid between the ends
+ * @param arcs - the two stretches of the ring between the ends, and which one may be replaced on an open outline
  * @returns `true` when the click moves the start
  */
-export function movesStart(points: readonly OutlinePoint[]): boolean {
-  return points.length === 0
+export function movesStart(points: readonly OutlinePoint[], arcs: RetraceArcs): boolean {
+  // On an open outline only one arc may be replaced: its two ends are no neighbours across the gap (review QUAL-001).
+  const replaceable = arcs.only === null ? [arcs.forward, arcs.backward] : [arcs[arcs.only]]
+  return points.length === 0 && replaceable.some((arc) => arc.length === 0)
 }
 
 /**
@@ -501,7 +506,7 @@ function endView(
     }
   }
   const run: OutlinePoint[] = context.session.outline.slice(1)
-  if (movesStart(run)) {
+  if (movesStart(run, arcs)) {
     return {
       replaced: null,
       sentence: context.words.t('retracingMovesStart', { name: polity.name }),

@@ -96,7 +96,7 @@ export type RetraceRefusal =
   | { kind: 'bad-anchor' }
   /** A border dressed by hand runs over the stretch: replacing it would undo that stroke (`s13`). */
   | { kind: 'dressed-run' }
-  /** A ring would be left with fewer anchors than enclose an area. */
+  /** The polity's own ring would be left with fewer anchors than enclose an area — a neighbour's lets go instead. */
   | { kind: 'too-short'; polity: string | null }
 
 /** A ring that runs over the stretch, and which way. */
@@ -307,7 +307,7 @@ export function retraceStretch(
 
 /**
  * Check a retrace with its new run, without writing: the stretch ({@link checkRetrace}), then what the run
- * does to each ring taking it — too few anchors left. What the tool's preview reads
+ * does to each ring taking it — the polity's own left with too few anchors, a neighbour's letting go and said untouched. What the tool's preview reads
  * before the last click, so the bar never promises a replacement the click would refuse.
  * @param doc - the document to read
  * @param polityId - whose ring is retraced
@@ -370,31 +370,50 @@ function plannedRun(
     fresh.push([point.at[0], point.at[1]])
     return count + fresh.length - 1
   })
-  const rebuilt = rebuiltRings(check.followers, from, replaced.length, laid, (index) =>
+  const rebuilt = rebuiltRings(check.followers, from, replaced.length, laid, polityId, (index) =>
     index < count ? anchorAt(doc, index) : (fresh[index - count] ?? anchorAt(doc, index))
   )
-  return Array.isArray(rebuilt) ? { check, laid, rebuilt } : rebuilt
+  if ('kind' in rebuilt) return rebuilt
+  // A neighbour that let go keeps its points, said as untouched rather than as following.
+  const detached = new Set<string | null>(rebuilt.detached)
+  const kept: RetraceCheck = {
+    followers: check.followers,
+    neighbours: check.neighbours.filter((id) => !detached.has(id)),
+    untouched: [
+      ...check.untouched,
+      ...rebuilt.detached.filter((id) => !check.untouched.includes(id)),
+    ],
+  }
+  return { check: kept, laid, rebuilt: rebuilt.rings }
 }
 
 /**
  * Every ring taking the new run, rebuilt: the stretch replaced, then — on a closed ring — the stray loops the run
  * left cut out (`strayLoops.ts`), so a run along a neighbour's coast takes that land from it. Never refused for
- * a loop (the dev, 2026-11-08: *"faut rien interdire"*); refused only for a ring left too short to enclose an area.
+ * a loop (the dev, 2026-11-08: *"faut rien interdire"*); refused only for **the polity's own** ring left too short to
+ * enclose an area. **A neighbour's ring that following would leave too short lets go instead** (the dev, 2026-11-12,
+ * Venice retraced off a Hungarian exclave drawn on its very points — *"one of the simplest gestures there is"*): it
+ * keeps its points, and only the polity aimed at takes the run — the shared border detached, the question the rule of
+ * 2026-10-14 had left open.
  * @param followers - the rings that take the run
  * @param from - where the stretch starts
  * @param length - how many anchors the stretch holds between its ends
  * @param laid - the new run, from `from` towards `to`, as anchor indices
+ * @param polityId - the polity retraced, whose own ring is never let go
  * @param at - where each anchor lies, the new run's included
- * @returns each follower's new ring, in the followers' order, or the refusal
+ * @returns each follower's new ring, in the followers' order — a neighbour's that let go as it was — and the holders
+ *   that let go; or the refusal
  */
 function rebuiltRings(
   followers: readonly Follower[],
   from: number,
   length: number,
   laid: readonly number[],
+  polityId: string,
   at: (index: number) => readonly [number, number]
-): number[][] | RetraceRefusal {
+): { rings: number[][]; detached: (string | null)[] } | RetraceRefusal {
   const rings: number[][] = []
+  const detached: (string | null)[] = []
   for (const follower of followers) {
     const ring = follower.open
       ? splicedOpen(follower.ring, from, length, laid, follower.step)
@@ -403,11 +422,14 @@ function rebuiltRings(
           at,
           signedDoubleArea(follower.ring, at)
         )
-    if (ring.length < outlineFloor(follower.open))
-      return { kind: 'too-short', polity: follower.polity }
-    rings.push(ring)
+    if (ring.length >= outlineFloor(follower.open)) rings.push(ring)
+    else if (follower.polity === polityId) return { kind: 'too-short', polity: follower.polity }
+    else {
+      rings.push([...follower.ring])
+      if (!detached.includes(follower.polity)) detached.push(follower.polity)
+    }
   }
-  return rings
+  return { rings, detached }
 }
 
 /**

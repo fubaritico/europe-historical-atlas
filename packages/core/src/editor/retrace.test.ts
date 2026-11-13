@@ -183,6 +183,23 @@ describe('retrace', () => {
       })
     })
 
+    // CORE-426, the dev, 2026-11-12: Venice retraced off a Hungarian exclave drawn on its very points.
+    it('lets a neighbour’s ring that following would leave too short keep its points', () => {
+      const doc = sharedBorderDocument()
+      const empire = doc.claims.find((claim) => claim.polity === 'hre')
+      if (empire === undefined) throw new Error('fixture: no Empire')
+      const france = doc.claims.find((claim) => claim.polity === 'fr-couronne')
+      if (france === undefined) throw new Error('fixture: no France')
+      // France and the Empire share 1 → 4 → 2; the run straight from 1 to 2 would leave the Empire two anchors.
+      france.rings = [[0, 1, 4, 2, 3]]
+      empire.rings = [[1, 4, 2]]
+      const result = retraceStretch(doc, 'fr-couronne', 1, 2, [4], [])
+
+      expect(result).toMatchObject({ neighbours: [], untouched: ['hre'] })
+      expect(france.rings).toEqual([[1, 2, 3, 0]])
+      expect(empire.rings).toEqual([[1, 4, 2]])
+    })
+
     it('refuses two anchors no ring of the polity holds together', () => {
       const doc = sharedBorderDocument()
       expect(retraceStretch(doc, 'fr-couronne', 0, 4, [], [])).toEqual({ kind: 'no-ring' })

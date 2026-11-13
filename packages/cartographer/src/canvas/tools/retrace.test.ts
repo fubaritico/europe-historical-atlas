@@ -10,6 +10,7 @@ import { TEST_SHORE, testGestureContext, testPolity, testStore } from '../testGe
 
 import {
   doneMessage,
+  movesStart,
   refusalMessage,
   retraceAnchorUnder,
   retraceClick,
@@ -130,10 +131,9 @@ describe('retrace', () => {
       const { context } = testGestureContext(store)
       retraceClick(context, [300, 100])
       retraceClick(context, [300, 300])
-      // Nothing laid yet: the start moves to 3, the border between left as it is.
-      expect(context.session.outline.map((point) => point.anchor)).toEqual([3])
-      expect(from(france(store), 1)).toEqual([1, 2, 3, 4, 5, 0])
-      expect(from(empire(store), 1)).toContain(2)
+      // Nothing laid, 3 no neighbour of 1: the run ends on the straight line 1–3, the Empire's 2 left out of France.
+      expect(context.session.outline).toEqual([])
+      expect(france(store)).not.toContain(2)
     })
 
     it('replaces the other side with ‹alt› held', () => {
@@ -160,19 +160,16 @@ describe('retrace', () => {
       expect(reports.at(-1)).toBe('France: 0 anchors replaced by 1 · Empire follows')
     })
 
-    // The dev, 2026-11-08: "ça ne prend pas tout le tracé de la frontière" — from the start, a click further
-    // along the target's border takes it as it is and moves the start there; the run then ends on an anchor
-    // reached after a point of the author's.
-    it('moves the start along the target’s border, then ends after a point laid', () => {
+    // The dev, 2026-11-12, a bump of Venice cut off between two of its points: "what I want is freedom of
+    // handling" — an anchor that is no neighbour of the start, clicked straight after it, ends the run on a straight
+    // segment (it moved the start there since 2026-11-08).
+    it('ends on a straight segment at an anchor clicked straight after the start, not its neighbour', () => {
       const { store, context, reports } = openRetrace()
       retraceClick(context, [350, 200])
       retraceClick(context, [200, 300])
-      expect(context.session.outline.map((point) => point.anchor)).toEqual([4])
-      retraceClick(context, [100, 250])
-      retraceClick(context, [200, 100])
-      // 5 is replaced by the point laid, the document's anchor 8 (France 0–5, the Empire 6–7).
-      expect(from(france(store), 4)).toEqual([4, 8, 0, 1, 2, 3])
-      expect(reports.at(-1)).toBe('France: 1 anchor replaced by 1')
+      expect(context.session.outline).toEqual([])
+      expect(france(store)).not.toContain(3)
+      expect(reports.at(-1)).toBe('France: 1 anchor replaced by 0')
     })
 
     // Formentor, the walk of 2026-10-14: an end placed by eye on the shore is reached along the shore,
@@ -199,13 +196,15 @@ describe('retrace', () => {
   })
 
   describe('managed errors', () => {
-    it('refuses a first click off the target’s anchors, and says where to click', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-      const { context, reports } = openRetrace()
+    // The dev, 2026-11-13: the tool in hand stays the tool chosen — a first click off the target's anchors starts
+    // nothing, and says where to click.
+    it('starts nothing on a first click off the target’s anchors, keeps the tool, and says where to click', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { store, context, reports } = openRetrace()
       retraceClick(context, [250, 200])
+      expect(store.getState().tool).toBe('retrace')
       expect(context.session.outline).toEqual([])
       expect(reports).toEqual(['click an anchor of France to start the retrace'])
-      expect(warn).toHaveBeenCalledOnce()
     })
 
     it('refuses an end on another outline of the target, the run kept as it was', () => {
@@ -223,17 +222,16 @@ describe('retrace', () => {
       expect(reports.at(-1)).toBe('not retraced: the end is not on the same outline of France')
     })
 
-    // The Empire follows 1 → 2 and keeps its anchor 6: a run through 6 would have it visit 6 twice.
-    it('refuses what the document refuses, naming the polity, the run kept', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    // CORE-426, the dev, 2026-11-12: the Empire, which following would leave under 3 anchors, lets go instead —
+    // France alone takes the run, and the result says the Empire keeps its points.
+    it('lets a neighbour that following would collapse keep its points, and says so', () => {
       const { store, context, reports } = openRetrace()
+      const empireBefore = [...empire(store)]
       retraceClick(context, [300, 100])
       retraceClick(context, [400, 100])
       retraceClick(context, [350, 200])
-      expect(context.session.outline.map((point) => point.anchor)).toEqual([1, 6])
-      expect(from(france(store), 0)).toEqual([0, 1, 2, 3, 4, 5])
-      // The end clicked on the Empire's ring follows it through 7: France would take the whole Empire.
-      expect(reports.at(-1)).toBe('not retraced: Empire would be left with fewer than 3 anchors')
+      expect(empire(store)).toEqual(empireBefore)
+      expect(reports.at(-1)).toContain('Empire keeps its points')
     })
 
     // The dev, 2026-10-14: "c'est les Obotrites qui comptent" — the Empire meets France at 1, inside
@@ -379,5 +377,27 @@ describe('retraceView', () => {
     retraceClick(context, [200, 100])
     expect(retraceView(context, FRANCE, [250, 200])).toEqual({ replaced: null, sentence: null })
     expect(retraceView(context, FRANCE, null).replaced).toBeNull()
+  })
+})
+
+// Review QUAL-001: on an open outline the two ends are no neighbours — the closing line is no segment.
+describe('movesStart', () => {
+  it('moves the start between neighbours, on a closed ring', () => {
+    expect(movesStart([], { ring: [0, 1, 2, 3], forward: [], backward: [2, 3], only: null })).toBe(
+      true
+    )
+  })
+
+  it('ends the run between the two ends of an open outline, its whole interior replaced', () => {
+    expect(
+      movesStart([], { ring: [0, 1, 2, 3], forward: [1, 2], backward: [], only: 'forward' })
+    ).toBe(false)
+  })
+
+  it('ends the run once a point was laid, neighbours or not', () => {
+    const laid = { at: [0, 0] as [number, number], provenance: FREE_POINT_PROVENANCE }
+    expect(movesStart([laid], { ring: [0, 1, 2], forward: [], backward: [2], only: null })).toBe(
+      false
+    )
   })
 })
