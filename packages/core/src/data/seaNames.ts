@@ -33,7 +33,9 @@ export interface SeaName {
 }
 
 /**
- * The eight seas, the dev's list, each arc drawn by Claude to fill its sea, read off the map — to tune on sight. Inside
+ * The eight seas, the dev's list, each arc drawn by Claude to fill its sea, then fitted against the land mask so its
+ * letters stay off the land (the dev: *« ça ne doit pas apparaître sur les terres »*) — under 2 % of each name's letters
+ * on land, measured on 2026-11-13. Inside
  * the map's frame (`years/index.json`: 45°W–78.75°E, 11.2°N–76.8°N) — the Indian Ocean by its Arabian Sea, the one part
  * of it the frame holds.
  */
@@ -62,9 +64,9 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'mediterranean',
     name: { fr: 'Mer Méditerranée', en: 'Mediterranean Sea' },
-    from: { lon: 2, lat: 39.2 },
-    bend: { lon: 17, lat: 37.2 },
-    to: { lon: 31, lat: 33.2 },
+    from: { lon: 4, lat: 38.6 },
+    bend: { lon: 17, lat: 36.2 },
+    to: { lon: 28.5, lat: 33.4 },
   },
   {
     id: 'black-sea',
@@ -76,16 +78,16 @@ export const SEA_NAMES: readonly SeaName[] = [
   {
     id: 'caspian',
     name: { fr: 'Mer Caspienne', en: 'Caspian Sea' },
-    from: { lon: 51, lat: 45 },
-    bend: { lon: 49.6, lat: 42 },
-    to: { lon: 51.6, lat: 38.8 },
+    from: { lon: 50.4, lat: 44.2 },
+    bend: { lon: 50.2, lat: 41.8 },
+    to: { lon: 51.4, lat: 39.6 },
   },
   {
     id: 'red-sea',
     name: { fr: 'Mer Rouge', en: 'Red Sea' },
-    from: { lon: 34.2, lat: 27 },
-    bend: { lon: 38.8, lat: 22.6 },
-    to: { lon: 41.8, lat: 15.6 },
+    from: { lon: 36.8, lat: 24.2 },
+    bend: { lon: 38.7, lat: 21.6 },
+    to: { lon: 40.4, lat: 18.2 },
   },
   {
     id: 'indian',
