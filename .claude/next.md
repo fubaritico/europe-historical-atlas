@@ -8,29 +8,30 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après la nuit du 12 au 13/11 (les outils de dessin débloqués, la 1100 des Balkans poussée)
+## ▶ ON REPREND ICI — après le 13/11 (les noms des mers poussés ; l'historien travaille dans la nuit)
 
-**Son programme du 13/11** : du beau — **les icônes 3D** (ATLAS-287 la couronne, ATLAS-288 les autres types), par
-`/make-event-icon`, candidates sur ses bancs, il choisit à l'œil. Puis l'interface de l'atlas, qu'il a hâte de commencer
-(ATLAS-329, ATLAS-134 ; React, décidé). **Il pense déléguer à un codeur 2** le nettoyage des cartes 1000, 1400, 1500, 1600
-(CARTO-403 à 406) : lui préparer un arbre propre — `coder-2` porte quatre `stash` de mes copies de la nuit, et
-`files/spikes/sea-zones/{carve,subtract}.ts` sont dans l'arbre `coder` ; une session par carte. **L'historien** fait les
-villes des Balkans (Roumanie, Hongrie…) et **les forteresses** (indice d'acquisition du territoire) : vérifier si le CMS
-a un type de lieu « forteresse » avant qu'il saisisse — sinon c'est un champ ajouté, sans migration bloquante (CMS-276).
+**Ce soir et cette nuit, l'historien seul** : il lui fait glaner plusieurs sujets, en plusieurs sessions jusque tard. **Sa
+consigne : qu'il ne nous mange pas nos jetons** — peu d'agents, ceux qu'il fixe (la règle du nombre est dans les skills de
+l'historien). Ce que l'historien saisit, je le vérifie en lecture seule quand il me l'annonce ; une fiche dont aucune ligne
+ne cite le détenteur est à signaler (vu sur Smolensk, Rostov, Souzdal le 13/11, corrigé).
 
 **Sa règle, la nuit du 12/11 : la liberté de manipulation** (mémoire `freedom-of-handling`) — un geste n'est jamais bloqué
 par une règle qu'il n'a pas demandée ; **l'outil choisi reste choisi**. Quand un geste échoue : le refaire dans mon
 Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me met**, jamais deviné.
 
-**L'état** : `main` = le dépôt distant = `3e5d00c`. Poussé cette nuit : la soudure qui replie l'épine (`b0baf3f`), le
-creusement par différence de surfaces (`dad8373`), la fermeture avec ⌥ (`33fe68b`), la retouche (`4e563cb`), la vue et
-les filtres gardés au rechargement (`c0bec21`, CARTO-427), la 1100 des Balkans (`81c7d8f`, cassait l'atlas) et son
-correctif (`3e5d00c`). **La CI de `3e5d00c` est verte** (celle de `81c7d8f` était tombée : le site n'a jamais publié la carte cassée). **Non commités** :
-`content/events.json` et `files/plans/sources/1100/first-lot.md` (l'historien). Mon serveur du port 5199 tourne encore.
+**L'état** : `main` = le dépôt distant = `b655b0b` (les noms des mers, ATLAS-440, et le diagnostic d'un enregistrement
+refusé) ; la CI de `b655b0b` suivie au moment de clore. **Non commités, à l'historien** : `content/events.json`,
+`years/1100/{polities,registry}.json`, `files/plans/sources/1100/{france-empire,lusatia}.md`, `next-historian.md`. **Dans
+l'arbre `coder`, non commité** : CMS-433 (les communautés religieuses) — attend **sa bascule** : fusion, son CMS relancé
+(deux fois peut-être : le piège du mode push sur une collection neuve), l'export, puis je commite `events.json`.
 
-**Sur le tableau** : À valider — CORE-426 (le creusement, ⌥ ; essayé par moi, pas par lui), CARTO-425 (la soudure), CMS-414 ;
-À faire, nouveaux — CORE-428 (le diagnostic des cartes dans la CI), CORE-429 (simplifier les points des bandes de mer),
-ATLAS-430 (la côte et le masque à la publication) ; CARTO-424 (le vassal collé) et CARTO-189 (recreuser) restent.
+**Sur le tableau** : À valider — **CMS-431** (« forteresse » à voir dans le prochain export, puis Fait). En cours —
+**CMS-433**. Fait aujourd'hui — CARTO-439 (la tribu à contour), ATLAS-440 (les noms des mers). Créés — CMS-436 (l'historique
+des écritures MCP), CMS-437 (la limite de fréquence), ATLAS-434 (le signe d'une ville selon sa confession, à trancher avec
+lui). Haut de À faire — CARTO-336, puis les icônes ATLAS-287, ATLAS-288.
+
+**Proposé, sans son feu vert** : une épique d'audit des refus du Cartographe — ne garder que ceux qui protègent le fichier,
+dire les autres par une fenêtre. Son idée, *« en tout dernier »* : un agent dans le Cartographe à qui dicter un geste.
 
 **Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
 souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README
