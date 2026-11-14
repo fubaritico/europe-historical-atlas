@@ -262,6 +262,20 @@ describe('validateSheet', () => {
       })
     })
 
+    it('refuses a confession already in the list, under the second community only', () => {
+      const source = { id: 4, name: 'Horvat 1924' }
+      const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }
+      const named = { ...emptyTestimony(), source, subject: 'community' as const, confession: 9 }
+      const sheet = {
+        ...rome,
+        communities: [jews, { ...jews, weight: 'dominant' as const }],
+        testimonies: [named],
+      }
+      expect(validateSheet(sheet, say)).toEqual({
+        communities: [undefined, { confession: say('confessionTwice') }],
+      })
+    })
+
     it('takes a community a line names, and asks a community line for its confession', () => {
       const source = { id: 4, name: 'Horvat 1924' }
       const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }

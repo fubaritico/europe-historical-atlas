@@ -153,13 +153,27 @@ export const citySheetSchema: z.ZodMiniType<CitySheet> = z
       path: ['holderName'],
     }),
     z.superRefine((sheet, context) => {
+      // A confession entered twice would carry two weights that may contradict each other: the second is refused
+      // (the dev, 2026-11-14). Its ids are compared as text, as `namedByALine` does.
+      const seen = new Set<string>()
       sheet.communities.forEach((community, index) => {
+        const path = ['communities', index, 'confession']
+        const key = String(community.confession)
+        if (seen.has(key)) {
+          context.issues.push({
+            code: 'custom',
+            input: community.confession,
+            message: 'a confession is entered once per sheet',
+            path,
+          })
+        }
+        seen.add(key)
         if (namedByALine(sheet.testimonies, community.confession)) return
         context.issues.push({
           code: 'custom',
           input: community.confession,
           message: 'a community needs a line of the sources about it',
-          path: ['communities', index, 'confession'],
+          path,
         })
       })
     })

@@ -122,6 +122,7 @@
   "confessionNamed": "Confession: {value}",
   "confessionMissing": "Choose the confession.",
   "communityUnsourced": "Add, in « What the sources say », an « A community » line citing this confession.",
+  "confessionTwice": "This confession is already in the list: keep one community per confession.",
   "lineConfessionHelp": "The community the source speaks of, by its confession.",
   "weight": "Weight",
   "weightHelp": "Dominant: the larger part of the city. Present: a quarter, a minority.",

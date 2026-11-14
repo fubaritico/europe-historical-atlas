@@ -138,6 +138,18 @@ describe('checkCitySheet', () => {
       expect(refusedPaths(elsewhere)).toEqual(['communities.0.confession'])
     })
 
+    it('refuses a confession entered twice, the second under its confession — whatever the id’s type', () => {
+      const twice = {
+        ...jewsOfToledo,
+        communities: [
+          { confession: 9, weight: 'present', weightAttested: true },
+          { confession: '9', weight: 'dominant', weightAttested: false },
+        ],
+      }
+
+      expect(refusedPaths(twice)).toEqual(['communities.1.confession'])
+    })
+
     it('refuses a weight the map does not have, and a community with no mark on its weight', () => {
       const wrong = {
         ...jewsOfToledo,

@@ -189,12 +189,23 @@ function withCommunityIssue(
   const at = `communities.${String(index)}`
   if (key === 'weight') return withError(errors, `${at}.weight`, say('weightMissing'))
   if (key !== 'confession') return withUnexpected(errors, issue, say)
+  return withError(errors, `${at}.confession`, say(confessionRefusal(values, index)))
+}
+
+/**
+ * Why the schema refused a community's confession, told from what the form holds — the schema says the field, not
+ * which rule: none chosen, one an earlier community already has, or one no line names.
+ * @param values - the form's values
+ * @param index - the community's rank
+ * @returns the sentence's key
+ */
+function confessionRefusal(values: SheetValues, index: number): CitySheetMessageKey {
   const chosen = values.communities[index]?.confession ?? null
-  return withError(
-    errors,
-    `${at}.confession`,
-    say(chosen === null ? 'confessionMissing' : 'communityUnsourced')
-  )
+  if (chosen === null) return 'confessionMissing'
+  const earlier = values.communities.slice(0, index)
+  if (earlier.some((community) => String(community.confession) === String(chosen)))
+    return 'confessionTwice'
+  return 'communityUnsourced'
 }
 
 /**
