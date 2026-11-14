@@ -104,13 +104,13 @@ export const TRIBE_OUTLINED_FEATHER: Readonly<Required<TribeFeather>> = {
 }
 
 /**
- * **A tribe** (CARTO-447, the dev, 2026-11-15): from its outline inward, 7 km bare, 7 km at half its colour, then its
- * colour full — both limits undulating as the band's do. *« 5 km complètement transparent… ou peut-être même 7 »*: 7,
- * one constant to change.
+ * **A tribe** (CARTO-447, the dev, 2026-11-15): from its outline inward, 7 km bare, 14 km at half its colour, then its
+ * colour full — both limits undulating as the band's do. *« 5 km complètement transparent… ou peut-être même 7 »*: 7;
+ * the half band 7 km the first evening, then *« plus épaisse »* on seeing it: 14.
  */
 export const TRIBE_MARGIN_FEATHER: Readonly<Required<TribeFeather>> = {
   mode: 'margin',
-  widthKm: 14,
+  widthKm: 21,
   innerKm: 7,
   irregularity: 0.5,
   waveKm: BAND_WAVE_KM,

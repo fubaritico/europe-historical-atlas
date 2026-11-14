@@ -167,7 +167,7 @@ Scenario: the band tuned
 ```gherkin
 Scenario: a tribe's margin
   Given the Prussians, a tribe
-  Then from its outline inwards: 7 km bare, the relief showing, then 7 km of half its colour, then its full colour
+  Then from its outline inwards: 7 km bare, the relief showing, then 14 km of half its colour, then its full colour
   And both limits undulate along the outline, as a confederation's band does
   And the same tribe open in the Cartographer is drawn the same, at the same places
 
@@ -180,7 +180,8 @@ Scenario: three peoples in the rank list
 
 > **Built 2026-11-15 (CARTO-447), not walked yet.** The dev: a **confederation** is several tribes — the great groups of
 > Central Asia — and keeps the band every tribe had; a **tribe**, a small people — the Baltic ones — takes the margin,
-> *« 5 km complètement transparent… ou peut-être même 7 »*, then 7 km at half, then full, *« de manière irrégulière »*.
+> *« 5 km complètement transparent… ou peut-être même 7 »*, then 7 km at half, then full, *« de manière irrégulière »*;
+> on seeing it, the half band *« plus épaisse »*, 14 km (same evening).
 > One constant in core (`TRIBE_MARGIN_FEATHER`). No file renamed: he re-ranks his polities himself.
 
 ## The countries' names

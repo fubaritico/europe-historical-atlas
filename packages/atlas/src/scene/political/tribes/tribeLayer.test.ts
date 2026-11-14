@@ -137,7 +137,7 @@ describe('createTribeLayer', () => {
     // full deeper — both limits undulating by its own wave.
     float marginWave = 1.0 + 0.500 * bandWave(framed, 150.0);
     float marginInner = clamp(7.0 * marginWave, 0.0, 60.0);
-    float marginOuter = clamp(14.0 * marginWave, 0.0, 60.0);
+    float marginOuter = clamp(21.0 * marginWave, 0.0, 60.0);
     float margin = inside * step(marginInner, -vDistance) * mix(0.500, 1.0, step(marginOuter, -vDistance));
     // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin.
     opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)));
