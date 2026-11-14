@@ -213,8 +213,9 @@ export function claimsInPaintOrder(document: YearDocument): YearDocument['claims
  * polities that are filled, or the tribes, which are not (`core/editor/tribes`).
  *
  * A claim whose polity has no colour in the map is skipped: `polityColours` gives one to every polity of
- * the registry, so that is a claim naming a polity the registry lacks — which the file could not have been
- * opened with, and which painting in an invented colour would hide.
+ * the registry but an uncoloured one (CARTO-445), which is meant to show bare; any other miss is a claim naming a
+ * polity the registry lacks — which the file could not have been opened with, and which painting in an invented
+ * colour would hide.
  * @param document - the document to read
  * @param anchors - the projected anchor table, parallel to `document.anchors`
  * @param colours - each polity's colour, by id

@@ -42,8 +42,8 @@ type SettledSources = Pick<
 export interface ComputedYear {
   /** The lines traced from the raster of the fills. */
   borders: RegionBorders
-  /** Each region's tint, in the regions' order. */
-  tints: RgbColor[]
+  /** Each region's tint, in the regions' order — `null` for one left unpainted (CARTO-445). */
+  tints: (RgbColor | null)[]
 }
 
 /**

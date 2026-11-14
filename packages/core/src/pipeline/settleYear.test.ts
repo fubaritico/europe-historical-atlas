@@ -107,6 +107,29 @@ describe('settleAuthoredYear', () => {
       ]).toEqual([true, false])
     })
 
+    // CARTO-445: an uncoloured tribe is drawn with its borders only — no band, and no error said for its missing colour.
+    it('draws no band for an uncoloured tribe, and says nothing', () => {
+      const year = withTribe()
+      const aquitaine = year.registry.polities.find((polity) => polity.id === 'aquitaine')
+      if (aquitaine) aquitaine.colour = 'none'
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const settled = settleAuthoredYear(requestFor(year), null)
+      expect([settled.tribes, error.mock.calls]).toEqual([[], []])
+      error.mockRestore()
+    })
+
+    it('leaves an uncoloured sovereign unfilled at every level', () => {
+      const year = franceAndAquitaine()
+      const france = year.registry.polities.find((polity) => polity.id === 'fr-couronne')
+      if (france) france.colour = 'none'
+      const request = requestFor(year)
+      const at = request.regions.findIndex((region) => region.polityId === 'fr-couronne')
+      const settled = settleAuthoredYear(request, null)
+      expect(settled.tintLevels.map((level) => level[at])).toEqual(
+        settled.tintLevels.map(() => null)
+      )
+    })
+
     it('has no tribe in a year without one', () => {
       expect(settleAuthoredYear(requestFor(franceAndAquitaine()), null).tribes).toEqual([])
     })

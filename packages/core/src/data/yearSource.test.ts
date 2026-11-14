@@ -122,6 +122,12 @@ describe('the three readers', () => {
       expect(failureOf(() => parseYearPolities({}, 'p.json')).asset).toBe('yearPolities')
       expect(failureOf(() => parseYearBorders({}, 'b.json')).asset).toBe('yearBorders')
     })
+
+    // CARTO-445: a polity drawn with no fill — a third value beside a colour and the palette's `null`.
+    it('reads a polity whose colour is none', () => {
+      const uncoloured = { ...registry, polities: [{ ...registry.polities[0], colour: 'none' }] }
+      expect(parseYearRegistry(uncoloured, 'r.json').polities[0]?.colour).toBe('none')
+    })
   })
 
   describe('managed errors', () => {

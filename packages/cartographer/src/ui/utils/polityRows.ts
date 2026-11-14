@@ -17,7 +17,9 @@ export interface PolityRow {
   /**
    * The colour it is painted in — its own when pinned, its palette slot otherwise — or `null` when the
    * colour source has none for it, which the list shows as a struck swatch rather than a blank one
-   * (QUAL-001): the source colours every polity of the document, so `null` is a defect made visible.
+   * (QUAL-001): the source colours every polity of the document but an uncoloured one (CARTO-445) — for which the
+   * struck swatch stands until the design system gives « no colour » its own; for any other, `null` is a defect made
+   * visible.
    */
   colour: string | null
   /**

@@ -71,9 +71,10 @@ export interface PoliticalRequest {
   /**
    * The colour of each region, indexed as `regions` — given for an authored year, whose colours are the
    * Cartographer's (`core/editor/polityColours`). When present it replaces the automatic palette, the
-   * editorial name rules and `colorBySuzerain`: the author already chose.
+   * editorial name rules and `colorBySuzerain`: the author already chose — `null` for a polity drawn with no fill
+   * (CARTO-445).
    */
-  colours?: readonly RgbColor[]
+  colours?: readonly (RgbColor | null)[]
 }
 
 /**
@@ -85,8 +86,8 @@ export interface PoliticalRequest {
  * one query, and a query is a message.
  */
 export interface PoliticalResult {
-  /** The colour each region takes, indexed as `regions` was. */
-  tints: RgbColor[]
+  /** The colour each region takes, indexed as `regions` was — `null` for one left unpainted (CARTO-445). */
+  tints: (RgbColor | null)[]
   /** The border lines, derived from the cells above so the two cannot disagree. */
   borders: RegionBorders
 }

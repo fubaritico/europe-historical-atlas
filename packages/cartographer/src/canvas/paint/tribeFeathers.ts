@@ -335,7 +335,8 @@ export interface TribeFeatherPlan {
  * Every tribe's fade, in painting order — one plan per claim of a tribe, nothing measured yet.
  *
  * A claim whose polity has no colour is skipped, as `projectedFills` skips it: `polityColours` colours every
- * polity of the registry, so it names a polity the registry lacks, which `documentFaults` reports once.
+ * polity of the registry but an uncoloured one (CARTO-445), which has no fade; any other names a polity the registry
+ * lacks, which `documentFaults` reports once.
  * @param document - the document to read
  * @param colours - each polity's colour, by id
  * @param ground - the backdrop's frame, the fade and the land mask

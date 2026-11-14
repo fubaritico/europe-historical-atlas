@@ -18,6 +18,9 @@ import type { IndexedFill } from './indexFill'
 import type { FillBand, FillRegion } from './vassalBands'
 import type { RgbColor } from '../utils/color'
 
+/** The bytes of one vertex's tint at one level: red, green, blue, and whether it is painted. */
+export const TINT_BYTES = 4
+
 /** The relief the fills are laid on. */
 export interface FillSurface {
   /** The relief's subdivision — the one the triangles were cut against. */
@@ -91,7 +94,7 @@ export interface FillGeometry extends FillSurface {
 export interface FillArrays {
   /** Three floats per vertex, in world space. */
   positions: Float32Array
-  /** Three bytes per vertex for each level of homage, level 0 first. */
+  /** {@link TINT_BYTES} per vertex for each level of homage, level 0 first: the colour, and whether it is painted. */
   tints: Uint8Array[]
   /** Each vertex's polity band depth, `0` for a sovereign — one byte a vertex. */
   bandDepth: Uint8Array
@@ -113,28 +116,28 @@ export interface FillArrays {
  * its exact size; the second resolves each polity's tints and writes its vertices and its triangles. A vertex is never
  * shared between two polities: each has its own tints.
  * @param options - the fills, their tints by level, their band depths and the surface
- * @returns three floats per vertex, three bytes per vertex for each level, the band's depth and distance per vertex,
+ * @returns three floats per vertex, four bytes per vertex for each level — the tint, and whether it is painted (`255`) or
+ *   left bare (`0`, CARTO-445) — the band's depth and distance per vertex,
  *   and three indices per triangle
- * @throws when no level is given, or when a filled polity has no tint at a lower level — the levels are
- *   built from one registry, so either is a defect, and a guessed colour would paint a vassal in nobody's; and when a
- *   banded polity's fill was cut without its distances, or has no depth — the cut and the settling read one registry
+ * @throws when no level is given — a defect, never a year with no tint; and when a banded polity's fill was cut
+ *   without its distances, or has no depth — the cut and the settling read one registry
  */
 export function fillBuffers(options: FillGeometry): FillArrays {
-  // The deepest level decides which polities are filled at all.
+  // A polity painted at some level is filled; one painted at none — a tribe, an uncoloured polity alone — is not.
   const levels = options.tintLevels
-  const deepest = levels[levels.length - 1]
-  if (deepest === undefined) throw new Error('fill layer: no tint level given')
+  if (levels.length === 0) throw new Error('fill layer: no tint level given')
+  const filled = (polity: number): boolean => levels.some((level) => level[polity])
   // 1. Count the vertices and indices of the filled polities, so every buffer is allocated at its exact size.
   let vertices = 0
   let corners = 0
   options.fills.forEach((fill, i) => {
-    if (!deepest[i]) return
+    if (!filled(i)) return
     vertices += Math.floor(fill.vertices.length / 2)
     corners += fill.indices.length
   })
   // 2. One position buffer, one tint buffer per level, one index buffer.
   const positions = new Float32Array(vertices * 3)
-  const tints = levels.map(() => new Uint8Array(vertices * 3))
+  const tints = levels.map(() => new Uint8Array(vertices * TINT_BYTES))
   const bandDepth = new Uint8Array(vertices)
   const bandKm = new Float32Array(vertices)
   const realmKm = new Float32Array(vertices)
@@ -143,7 +146,7 @@ export function fillBuffers(options: FillGeometry): FillArrays {
   let at = 0
   let corner = 0
   options.fills.forEach((fill, i) => {
-    if (!deepest[i]) return
+    if (!filled(i)) return
     // Its triangles, shifted past the vertices of the polities written before it.
     for (const index of fill.indices) indices[corner++] = at + index
     writeBand(fill, polityBandDepth(options.bandDepths, i), { bandDepth, bandKm, realmKm }, at)
@@ -206,21 +209,14 @@ function writeBand(
 }
 
 /**
- * One filled polity's tint at every level.
+ * One filled polity's tint at every level — `null` where it is left bare: an uncoloured polity close up, or a vassal
+ * from afar while it wears an uncoloured suzerain's colour (CARTO-445).
  * @param levels - each level's tints, one per polity
  * @param polity - the polity's index in the fills
  * @returns its tint at each level, level 0 first
- * @throws when it has no tint at some level — the levels are built from one registry, so a defect
  */
-function polityTints(levels: FillGeometry['tintLevels'], polity: number): RgbColor[] {
-  return levels.map((level, k) => {
-    const tint = level[polity]
-    if (!tint)
-      throw new Error(
-        `fill layer: polity ${String(polity)} is filled but has no tint at level ${String(k)}`
-      )
-    return tint
-  })
+function polityTints(levels: FillGeometry['tintLevels'], polity: number): (RgbColor | null)[] {
+  return levels.map((level) => level[polity] ?? null)
 }
 
 /**
@@ -233,14 +229,14 @@ function polityTints(levels: FillGeometry['tintLevels'], polity: number): RgbCol
  * @param own - its tint at every level
  * @param buffers - the buffers, written in place
  * @param buffers.positions - three floats per vertex
- * @param buffers.tints - three bytes per vertex, one array per level
+ * @param buffers.tints - four bytes per vertex, one array per level
  * @param at - the first vertex to write
  * @param surface - the surface the vertices are laid on
  * @returns the vertex after the last one written
  */
 function writeFill(
   fill: Float32Array,
-  own: readonly RgbColor[],
+  own: readonly (RgbColor | null)[],
   buffers: { positions: Float32Array; tints: readonly Uint8Array[] },
   at: number,
   surface: FillSurface
@@ -268,18 +264,21 @@ function writeFill(
 }
 
 /**
- * One colour over a run of vertices, three bytes each.
+ * One tint over a run of vertices, four bytes each — the colour and `255`, or four zeros for a level left bare.
  * @param bytes - the tint buffer
- * @param tint - the colour
+ * @param tint - the colour, `null` for none
  * @param from - the first vertex
  * @param count - how many vertices
  */
-function paintRun(bytes: Uint8Array, tint: RgbColor, from: number, count: number): void {
+function paintRun(bytes: Uint8Array, tint: RgbColor | null, from: number, count: number): void {
+  // A bare level stays at the zeros the buffer was allocated with.
+  if (tint === null) return
   const { r, g, b } = tint
-  const end = 3 * (from + count)
-  for (let p = 3 * from; p < end; p += 3) {
+  const end = TINT_BYTES * (from + count)
+  for (let p = TINT_BYTES * from; p < end; p += TINT_BYTES) {
     bytes[p] = r
     bytes[p + 1] = g
     bytes[p + 2] = b
+    bytes[p + 3] = 255
   }
 }

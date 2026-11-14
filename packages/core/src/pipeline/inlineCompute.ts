@@ -82,12 +82,12 @@ export interface InlineComputeOptions {
 
 /**
  * The colours a request gave, checked against its regions.
- * @param colours - one colour per region
+ * @param colours - one colour per region, `null` for one left unpainted
  * @param count - how many regions there are
  * @returns the colours, as tints
  * @throws when the two counts differ — a colour would land on the wrong polity, which no caller does
  */
-function givenColours(colours: readonly RgbColor[], count: number): RgbColor[] {
+function givenColours(colours: readonly (RgbColor | null)[], count: number): (RgbColor | null)[] {
   if (colours.length !== count)
     throw new Error(
       `map compute: ${String(colours.length)} colours given for ${String(count)} regions`
@@ -141,8 +141,8 @@ export function borderTraceOptions(
 export interface PoliticalRaster {
   /** One polity index per cell. */
   raster: RegionRaster
-  /** The colour each polity was given, by index. */
-  tints: RgbColor[]
+  /** The colour each polity was given, by index — `null` for one left unpainted (CARTO-445). */
+  tints: (RgbColor | null)[]
   /** The border lines derived from that very grid. */
   borders: RegionBorders
 }

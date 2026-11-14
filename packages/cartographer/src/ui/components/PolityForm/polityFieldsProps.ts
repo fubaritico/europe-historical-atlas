@@ -4,7 +4,10 @@ import type { WikidataView } from '../../utils/wikidataView'
 import type { HsvaColor } from '@fubaritico/behaviors'
 
 /** The fields a form event can name: every text field and every list of the draft — the colour and the box their own. */
-export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour' | 'forceShortName'>
+export type PolityFormField = Exclude<
+  keyof PolityDraft,
+  'idEdited' | 'colour' | 'forceShortName' | 'uncoloured'
+>
 
 /** What the form's fields show and what they report — the form's own props extend these. */
 export interface PolityFieldsProps {

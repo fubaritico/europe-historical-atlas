@@ -1,5 +1,6 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
 import { TRIBE_OUTLINED_RANK, TRIBE_RANK } from '@europe-historical-atlas/core/data/tribes'
+import { NO_COLOUR, isUncoloured } from '@europe-historical-atlas/core/data/yearFormat'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
 import { pickedColour, toFileColour } from './polityColourValue'
@@ -45,6 +46,12 @@ export interface PolityDraft {
    * thumb back to red. The hex is made once, when the form is read.
    */
   colour: HsvaColor | null
+  /**
+   * Whether the polity opened with no colour at all (CARTO-445). The picker has no such state until the design
+   * system gives it one (`files/plans/cartographer/ds-request-no-colour.md`), so the form keeps it as it came: left
+   * on « automatic », the polity is written back uncoloured; a colour picked replaces it.
+   */
+  uncoloured: boolean
 }
 
 /** A blank form — what `[+ New polity]` opens. */
@@ -61,6 +68,7 @@ export const EMPTY_DRAFT: PolityDraft = {
   suzerain: null,
   wikidata: '',
   colour: null,
+  uncoloured: false,
 }
 
 /** One choice of a list: the value stored in the file, and what the list shows. */
@@ -192,10 +200,20 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
       suzerain: draft.suzerain,
       existsFrom,
       existsTo,
-      colour: toFileColour(draft.colour),
+      colour: fileColourOf(draft),
       wikidata: wikidata === '' ? null : wikidata,
     },
   }
+}
+
+/**
+ * The file's colour for the form: the one picked, `null` for « automatic » — or `none` for a polity that opened with no
+ * colour and was left on « automatic », the one state the picker cannot hold yet (CARTO-445).
+ * @param draft - the form
+ * @returns the file's `colour`
+ */
+function fileColourOf(draft: PolityDraft): string | null {
+  return draft.uncoloured && draft.colour === null ? NO_COLOUR : toFileColour(draft.colour)
 }
 
 /**
@@ -220,6 +238,7 @@ export function draftOf(polity: YearPolity): PolityDraft {
     suzerain: polity.suzerain,
     wikidata: polity.wikidata ?? '',
     colour: pickedColour(polity),
+    uncoloured: isUncoloured(polity.colour),
   }
 }
 

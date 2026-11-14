@@ -253,6 +253,19 @@ describe('draftOf', () => {
       ])
     })
 
+    // CARTO-445: the picker has no « no colour » yet — the form keeps the state the polity came with.
+    it('reads back an uncoloured polity left on « automatic », uncoloured', () => {
+      const original = { ...polity('fr'), colour: 'none' }
+      expect(readDraft(draftOf(original), NONE)).toEqual({ ok: true, polity: original })
+    })
+
+    it('writes the colour picked over an uncoloured polity', () => {
+      const original = { ...polity('fr'), colour: 'none' }
+      const picked = { ...draftOf(original), colour: { h: 0, s: 100, v: 100, a: 1 } }
+      const reading = readDraft(picked, NONE)
+      expect(reading.ok && reading.polity.colour).toBe('#ff0000')
+    })
+
     it('opens "automatic" for a polity with no colour of its own', () => {
       expect(draftOf({ ...polity('fr'), colour: null }).colour).toBeNull()
     })

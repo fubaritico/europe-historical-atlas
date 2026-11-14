@@ -19,7 +19,8 @@
  * the colour of its polity's ancestor at depth `min(k, depth)` — and the vertex stage mixes the two levels
  * around a `detail` uniform the zoom sets. Zooming writes one float; no buffer is rewritten and no triangle
  * recut. The tint is constant over a polity, so mixing per vertex is exact. The level count is compiled
- * into the shader; each level costs one attribute, against WebGL's floor of 16 per vertex.
+ * into the shader; each level costs one attribute, against WebGL's floor of 16 per vertex. A tint carries an alpha:
+ * painted, or bare at a level an uncoloured polity is worn (CARTO-445).
  *
  * **A vassal's band** (ATLAS-398): two more attributes — the polity's depth of homage when it wears the band, and each
  * vertex's distance to its outline, measured in the worker (`core/pipeline/vassalBands`); the width is core's constant,
@@ -37,7 +38,7 @@ import {
   Uint8BufferAttribute,
 } from 'three'
 
-import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
+import { TINT_BYTES, fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 
 import { FILL_POLYGON_OFFSET, MODE_INDEX, landUniforms, setUniform } from '../tintOnRelief'
 
@@ -118,7 +119,7 @@ export function createFillLayer(options: FillLayerOptions): FillLayer {
   // The realm's outline, for the band the realm wears from afar, its vassals in its colour.
   geometry.setAttribute('realmKm', new Float32BufferAttribute(realmKm, 1))
   tints.forEach((bytes, level) => {
-    geometry.setAttribute(tintAttribute(level), new Uint8BufferAttribute(bytes, 3, true))
+    geometry.setAttribute(tintAttribute(level), new Uint8BufferAttribute(bytes, TINT_BYTES, true))
   })
   // The material blends the tint over the baked terrain, with the bake's own mode and strength.
   const material = new ShaderMaterial({

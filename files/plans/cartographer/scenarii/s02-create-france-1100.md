@@ -43,6 +43,25 @@ Scenario: fill the identity by hand
 > stops working and two neighbours can come out identical.
 
 ```gherkin
+# CARTO-445 — the dev, 2026-11-14: a country whose history the atlas does not tell (India, sub-Saharan Africa).
+Scenario: a polity with no colour
+  Given the Chola empire is in {Polities}
+  When I choose « No colour » in its colour field
+  Then its fill disappears and the backdrop shows under it
+  And its borders and its name stay
+  And no hatch is laid where it overlaps a neighbour
+  When I save and reopen the map
+  Then it still has no colour
+  When I choose « Automatic » again
+  Then the palette gives it a colour no neighbour uses
+```
+
+> **Built in part 2026-11-14 (CARTO-445), not walked yet**: the file, the palette and the painters know « no colour »
+> (`none`); a polity opened with it keeps it through the form and the rail's swatch unless a colour is picked. **Not
+> built**: the « No colour » choice itself and its swatch, which wait on the design system
+> (`files/plans/cartographer/ds-request-no-colour.md`) — until then the first `When` and the last two have no gesture.
+
+```gherkin
 # Superseded 2026-11-06 (CARTO-186 archived): identities come from the Cliopatria import, never built.
 Scenario: pull the identity from OHM instead of typing it
   Given OHM holds "Kingdom of France" at 1100 with a Wikidata id and no geometry

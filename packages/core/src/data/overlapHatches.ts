@@ -42,22 +42,30 @@ export interface YearHatches {
  * A year's overlaps, projected on its frame and given their polities' colours.
  * @param overlaps - the year's overlaps — computed now (`yearOverlaps`) or at the build (`bakedOverlaps`)
  * @param bbox - the frame its anchors are projected against — the DEM's
- * @param colours - every polity's colour, by id (`polityColours`)
+ * @param painted - every coloured polity's colour, by id, and the polities drawn with no fill
+ * @param painted.colours - `polityColours` of the year
+ * @param painted.uncoloured - `uncolouredIds` of the year: an uncoloured polity lays no stripe, and a piece left with
+ *   fewer than two colours is not hatched — as the Cartographer does (CARTO-445)
  * @param bandDepthOf - a polity's depth of homage when it wears the vassals' band, `0` otherwise
  * @returns the pieces to hatch, and the refusals
- * @throws when a polity covering a piece has no colour — every polity is coloured by `polityColours`, so a defect
+ * @throws when a polity covering a piece has no colour and is not uncoloured — `polityColours` colours every other
+ *   polity, so a defect
  */
 export function overlapHatches(
   overlaps: YearOverlaps,
   bbox: GeoBounds,
-  colours: ReadonlyMap<string, string>,
+  painted: { colours: ReadonlyMap<string, string>; uncoloured: ReadonlySet<string> },
   bandDepthOf: (polity: string) => number
 ): YearHatches {
   const { pieces, refused } = overlaps
-  const hatches = pieces.map(({ polities, area }) => ({
+  const striped = pieces.flatMap(({ polities, area }) => {
+    const coloured = polities.filter((polity) => !painted.uncoloured.has(polity))
+    return coloured.length < 2 ? [] : [{ polities: coloured, area }]
+  })
+  const hatches = striped.map(({ polities, area }) => ({
     polities,
     colours: polities.map((polity) => {
-      const hex = colours.get(polity)
+      const hex = painted.colours.get(polity)
       if (hex === undefined)
         throw new Error(`[atlas] the overlap's polity "${polity}" has no colour`)
       return hexToRgb(hex)

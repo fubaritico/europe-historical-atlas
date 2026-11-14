@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { UNMEASURED_BAND_KM } from '@europe-historical-atlas/core/data/vassalBand'
-import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
+import { TINT_BYTES, fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import {
@@ -94,11 +94,11 @@ describe('fillBuffers', () => {
         })
       )
       const lordVertices = Math.floor((fills[0]?.vertices.length ?? 0) / 2)
-      const last = positions.length - 3
+      const last = (positions.length / 3 - 1) * TINT_BYTES
       expect(tints).toHaveLength(2)
-      expect(Array.from(tints[0]?.slice(last, last + 3) ?? [])).toEqual([10, 20, 30])
-      expect(Array.from(tints[1]?.slice(last, last + 3) ?? [])).toEqual([200, 100, 50])
-      expect(Array.from(tints[1]?.slice(0, 3) ?? [])).toEqual([10, 20, 30])
+      expect(Array.from(tints[0]?.slice(last, last + 4) ?? [])).toEqual([10, 20, 30, 255])
+      expect(Array.from(tints[1]?.slice(last, last + 4) ?? [])).toEqual([200, 100, 50, 255])
+      expect(Array.from(tints[1]?.slice(0, 4) ?? [])).toEqual([10, 20, 30, 255])
       expect(lordVertices).toBeGreaterThan(0)
     })
 
@@ -180,8 +180,42 @@ describe('fillBuffers', () => {
           ],
         })
       )
-      expect(tints[0]?.length).toBe(positions.length)
-      expect(tints[1]?.length).toBe(positions.length)
+      expect(tints[0]?.length).toBe((positions.length / 3) * TINT_BYTES)
+      expect(tints[1]?.length).toBe((positions.length / 3) * TINT_BYTES)
+    })
+
+    // CARTO-445: an uncoloured suzerain leaves its vassal bare from afar, its own colour close up.
+    it('fills a vassal bare at the levels it wears an uncoloured suzerain, painted at its own', () => {
+      const fills = twoPolities()
+      const { positions, tints } = fillBuffers(
+        options({
+          fills,
+          tintLevels: [
+            [null, null],
+            [null, VASSAL],
+          ],
+        })
+      )
+      const last = (positions.length / 3 - 1) * TINT_BYTES
+      expect(positions.length / 3).toBe(Math.floor((fills[1]?.vertices.length ?? 0) / 2))
+      expect(Array.from(tints[0]?.slice(last, last + 4) ?? [])).toEqual([0, 0, 0, 0])
+      expect(Array.from(tints[1]?.slice(last, last + 4) ?? [])).toEqual([200, 100, 50, 255])
+    })
+
+    // CARTO-445: an uncoloured vassal wears its suzerain's colour from afar, and is bare close up.
+    it('fills an uncoloured vassal in its lord’s colour from afar, bare at its own level', () => {
+      const { positions, tints } = fillBuffers(
+        options({
+          fills: twoPolities(),
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, null],
+          ],
+        })
+      )
+      const last = (positions.length / 3 - 1) * TINT_BYTES
+      expect(Array.from(tints[0]?.slice(last, last + 4) ?? [])).toEqual([10, 20, 30, 255])
+      expect(Array.from(tints[1]?.slice(last, last + 4) ?? [])).toEqual([0, 0, 0, 0])
     })
   })
 
@@ -212,20 +246,6 @@ describe('fillBuffers', () => {
           options({ fills: twoPolities(), tintLevels: [[LORD, VASSAL]], bandDepths: [0] })
         )
       ).toThrow(/polity 1 is filled but has no band depth/)
-    })
-
-    it('throws when a filled polity has no tint at a lower level', () => {
-      expect(() =>
-        fillBuffers(
-          options({
-            fills: twoPolities(),
-            tintLevels: [
-              [LORD, null],
-              [LORD, VASSAL],
-            ],
-          })
-        )
-      ).toThrow(/polity 1 is filled but has no tint at level 0/)
     })
   })
 

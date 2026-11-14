@@ -224,3 +224,9 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
 - **The retrace's scenario still says the start moves to any anchor further along** (2026-11-13): since `4e563cb` a
   second click on a non-neighbouring anchor ends the run on a straight segment, and on an open outline the two ends are
   no neighbours. **Remedy**: `/scenarii-to-code` §7 on `s03`'s *Retracing a stretch*. **Severity: à savoir.**
+- **A polity with no colour (`none`, CARTO-445) has no swatch and no control of its own yet** (2026-11-14): the format, the
+  palette, the painters and the atlas know it; the picker does not — it waits on the design system's third state
+  (`files/plans/cartographer/ds-request-no-colour.md`). Until then: the list shows the struck swatch, the rail's swatch
+  reads as « nothing aimed », and the form opens « automatic » and writes `none` back unless a colour is picked —
+  « automatic » cannot be reached from `none`, nor `none` from the interface. **Trigger**: the design system's release
+  with « no colour » — the draft's flag goes, the picker carries the state. **Severity: à savoir.**

@@ -37,7 +37,11 @@ describe('politicalRequest', () => {
 
     // France and the Empire share a limit, so they take the first two slots, one each.
     expect(
-      new Set(request.colours?.map((c) => `${String(c.r)},${String(c.g)},${String(c.b)}`))
+      new Set(
+        request.colours?.map((c) =>
+          c === null ? 'none' : `${String(c.r)},${String(c.g)},${String(c.b)}`
+        )
+      )
     ).toEqual(new Set(['1,2,3', '4,5,6']))
   })
 

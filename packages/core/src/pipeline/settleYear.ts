@@ -21,7 +21,7 @@
 import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
 import { overlapHatches } from '../data/overlapHatches'
-import { authoredTintLevels, polityColours } from '../data/polityColours'
+import { authoredTintLevels, polityColours, uncolouredIds } from '../data/polityColours'
 import { isOutlinedTribe, tribeIds } from '../data/tribes'
 import { bandDepthOf, bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
@@ -124,12 +124,16 @@ export function settleAuthoredYear(
   const exact = exactBordersOf(year, bbox, mask, warn, homage)
   const document = openYearDocument(year)
   const colours = polityColours(document, palette)
+  const uncoloured = uncolouredIds(year.registry.polities)
   const fromBuild = request.baked?.key === overlapsKey(year) ? request.baked.overlaps : null
   const banded = bandedVassalIds(year.registry.polities)
-  const overlaps = overlapHatches(fromBuild ?? yearOverlaps(document), bbox, colours, (polity) =>
-    bandDepthOf(polity, banded, homage)
+  const overlaps = overlapHatches(
+    fromBuild ?? yearOverlaps(document),
+    bbox,
+    { colours, uncoloured },
+    (polity) => bandDepthOf(polity, banded, homage)
   )
-  const { deepest, levels } = tintsByLevel(year, regions, colours, homage)
+  const { deepest, levels } = tintsByLevel(year, regions, { colours, uncoloured }, homage)
   return {
     tints: deepest,
     tintLevels: levels,
@@ -137,7 +141,7 @@ export function settleAuthoredYear(
     borders: exact.borders,
     patterns: exact.patterns,
     levels: exact.levels,
-    tribes: colouredTribes(year, regions, colours),
+    tribes: colouredTribes(year, regions, colours, uncoloured),
     bandDepths: regionBandDepths(regions, banded, homage),
     hatches: overlaps.hatches,
     hatchRefusals: overlaps.refused,
@@ -150,13 +154,15 @@ export function settleAuthoredYear(
  * outline the borders and the fills are drawn on.
  * @param year - the year's three files, whose registry says who is a tribe
  * @param regions - its regions, each carrying the id of its polity
- * @param colours - every polity's colour, by id
- * @returns one area per region of a tribe; empty for a year with no tribe
+ * @param colours - every coloured polity's colour, by id
+ * @param uncoloured - the polities drawn with no fill, whose band is not drawn either (CARTO-445)
+ * @returns one area per region of a coloured tribe; empty for a year with no tribe
  */
 function colouredTribes(
   year: AuthoredYear,
   regions: readonly SettleRegion[],
-  colours: ReadonlyMap<string, string>
+  colours: ReadonlyMap<string, string>,
+  uncoloured: ReadonlySet<string>
 ): SettledTribe[] {
   const tribes = tribeIds(year.registry.polities)
   const outlined = new Set(
@@ -164,7 +170,7 @@ function colouredTribes(
   )
   // One area per region of a tribe, in the tribe's colour; any other region gives none.
   return regions.flatMap(({ polityId, rings }) => {
-    if (polityId === undefined || !tribes.has(polityId)) return []
+    if (polityId === undefined || !tribes.has(polityId) || uncoloured.has(polityId)) return []
     const colour = colours.get(polityId)
     if (colour !== undefined) {
       return [
@@ -187,7 +193,9 @@ function colouredTribes(
  * from the homage (`authoredTintLevels`); the deepest is each region's own colour.
  * @param year - the year's three files
  * @param regions - its regions, each carrying the id of its polity
- * @param colours - every polity's colour, by id
+ * @param painted - every coloured polity's colour, by id, and the polities drawn with no fill (CARTO-445)
+ * @param painted.colours - `polityColours` of the year
+ * @param painted.uncoloured - `uncolouredIds` of the year
  * @param homage - the year's homage read as levels
  * @returns the deepest level's tints, and every level's, level 0 first — each one tint per region
  * @throws when the homage gives no level at all — a defect, never a year with no tint
@@ -195,17 +203,19 @@ function colouredTribes(
 function tintsByLevel(
   year: AuthoredYear,
   regions: readonly SettleRegion[],
-  colours: ReadonlyMap<string, string>,
+  painted: { colours: ReadonlyMap<string, string>; uncoloured: ReadonlySet<string> },
   homage: HomageLevels
 ): { deepest: (RgbColor | null)[]; levels: (RgbColor | null)[][] } {
   const tribes = tribeIds(year.registry.polities)
   // A tribe's region gets no tint, at any level.
-  const unlessTribe = (tint: RgbColor, index: number): RgbColor | null => {
+  const unlessTribe = (tint: RgbColor | null, index: number): RgbColor | null => {
     const polity = regions[index]?.polityId
     return polity !== undefined && tribes.has(polity) ? null : tint
   }
   // The last level is each region's own colour (`authoredTintLevels` says so): the deepest.
-  const levels = authoredTintLevels(colours, regions, homage).map((level) => level.map(unlessTribe))
+  const levels = authoredTintLevels(painted.colours, painted.uncoloured, regions, homage).map(
+    (level) => level.map(unlessTribe)
+  )
   const deepest = levels.at(-1)
   // The homage always gives a level 0: none at all is a defect, said — never a year settled with no tint (review
   // ARCH-014).

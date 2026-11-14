@@ -29,7 +29,7 @@ describe('fillVertexShader', () => {
     const source = fillVertexShader(3)
     expect(source).toContain('#define LEVELS 3')
     for (const level of [0, 1, 2])
-      expect(source).toContain(`attribute vec3 ${tintAttribute(level)};`)
+      expect(source).toContain(`attribute vec4 ${tintAttribute(level)};`)
     expect(source).not.toContain('tint3')
   })
 
@@ -137,6 +137,16 @@ describe('shaderBandOpacity', () => {
       expect(BAND_OPACITY_GLSL).toContain('step(-sovereignWidth, vRealmKm)')
       expect(BAND_OPACITY_GLSL).toContain('mix(realmBand, ownBand, vBandReveal)')
       expect(FILL_FRAGMENT_SHADER).toContain('* strength * bandOpacity')
+    })
+  })
+
+  // CARTO-445: a level's alpha is its painted share — four zeros for a bare one, so the mix is premultiplied by
+  // construction. Mutation: dropping the alpha paints a bare polity at full strength; dropping the division darkens a
+  // vassal's colour as it fades in.
+  describe('a bare level', () => {
+    it('lays the colour at its painted share, its hue taken back from the premultiplied mix', () => {
+      expect(FILL_FRAGMENT_SHADER).toContain('vec3 hue = vTint.rgb / max(vTint.a, 1e-3);')
+      expect(FILL_FRAGMENT_SHADER).toContain('* strength * bandOpacity * vTint.a;')
     })
   })
 

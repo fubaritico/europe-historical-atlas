@@ -42,21 +42,21 @@ export function fillVertexShader(levels: number): string {
   const last = names[names.length - 1] ?? tintAttribute(0)
   return /* glsl */ `
   #define LEVELS ${String(count)}
-  ${names.map((name) => `attribute vec3 ${name};`).join('\n  ')}
+  ${names.map((name) => `attribute vec4 ${name};`).join('\n  ')}
   attribute float bandDepth;
   attribute float bandKm;
   attribute float realmKm;
   uniform vec2 plane;
   uniform float detail;
   varying vec2 vUv;
-  varying vec3 vTint;
+  varying vec4 vTint;
   varying float vBandKm;
   varying float vBandShare;
   varying float vRealmKm;
   varying float vSovereign;
   varying float vBandWidth;
   varying float vBandReveal;
-  vec3 tintAt(float level) {
+  vec4 tintAt(float level) {
     ${names
       .slice(0, -1)
       .map((name, level) => `if (level < ${String(level)}.5) return ${name};`)
@@ -69,6 +69,7 @@ export function fillVertexShader(levels: number): string {
     float top = float(LEVELS - 1);
     float d = clamp(detail, 0.0, top);
     float below = floor(d);
+    // A bare level is four zeros (CARTO-445): its colour weighs nothing in the mix, and its alpha fades the fill out.
     vTint = mix(tintAt(below), tintAt(min(below + 1.0, top)), d - below);
     ${BAND_VERTEX_GLSL}
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -151,7 +152,7 @@ export const FILL_FRAGMENT_SHADER = /* glsl */ `
   uniform sampler2D map;
   uniform float strength;
   varying vec2 vUv;
-  varying vec3 vTint;
+  varying vec4 vTint;
   varying float vBandKm;
   varying float vBandShare;
   varying float vRealmKm;
@@ -168,7 +169,10 @@ export const FILL_FRAGMENT_SHADER = /* glsl */ `
     ${BAND_OPACITY_GLSL}
     // The band lays the colour at its share over the terrain the fragment reads — the blend an alpha would make, with
     // no transparency to sort.
-    vec3 tinted = base + (blend(base, vTint) - base) * strength * bandOpacity;
+    // CARTO-445, a separate step: a tint's alpha is its painted share (255 painted, four zeros bare), so the mix of two
+    // levels is premultiplied by construction — divided back, the hue; multiplied in, the fade toward bare ground.
+    vec3 hue = vTint.rgb / max(vTint.a, 1e-3);
+    vec3 tinted = base + (blend(base, hue) - base) * strength * bandOpacity * vTint.a;
     gl_FragColor = vec4(toLinear(tinted), 1.0);
     #include <colorspace_fragment>
   }

@@ -5,6 +5,8 @@ import * as overlapsModule from './overlaps'
 import { TWO_OVERLAPPING, squaresDocument } from './testing/overlapFixtures'
 import { yearOverlaps } from './yearOverlaps'
 
+import type { SquarePolity } from './testing/overlapFixtures'
+
 // ATLAS-399: the overlaps projected on the year's frame, in their polities' colours.
 
 /** A frame of 4° by 4°, so the shared band — longitude 1 to 2, latitude 40 to 42 — falls inside. */
@@ -14,7 +16,10 @@ const BBOX = { west: 0, south: 40, east: 4, north: 44 }
 const NO_BAND = (): number => 0
 
 /** Each fixture polity's colour, by id. */
-const COLOURS = new Map(TWO_OVERLAPPING.map(({ id, colour }) => [id, colour]))
+const COLOURS = {
+  colours: new Map(TWO_OVERLAPPING.map(({ id, colour }) => [id, colour])),
+  uncoloured: new Set<string>(),
+}
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -121,10 +126,51 @@ describe('overlapHatches', () => {
     })
   })
 
+  // CARTO-445: an uncoloured polity lays no stripe; a piece left with one colour is not hatched, as in the Cartographer.
+  describe('uncoloured polities', () => {
+    const THREE: SquarePolity[] = [
+      ...TWO_OVERLAPPING,
+      { id: 'test3', square: [0.5, 40, 2], colour: '#20ff40' },
+    ]
+
+    it('hatches no piece an uncoloured polity shares with one coloured polity alone', () => {
+      const { hatches } = overlapHatches(
+        yearOverlaps(squaresDocument(TWO_OVERLAPPING)),
+        BBOX,
+        { colours: new Map([['test2', '#2040ff']]), uncoloured: new Set(['test1']) },
+        NO_BAND
+      )
+      expect(hatches).toEqual([])
+    })
+
+    it('stripes a piece in its coloured polities only', () => {
+      const document = squaresDocument(THREE)
+      const { hatches } = overlapHatches(
+        yearOverlaps(document),
+        BBOX,
+        {
+          colours: new Map([
+            ['test2', '#2040ff'],
+            ['test3', '#20ff40'],
+          ]),
+          uncoloured: new Set(['test1']),
+        },
+        NO_BAND
+      )
+      expect(hatches.length).toBeGreaterThan(0)
+      for (const hatch of hatches) expect(hatch.polities).not.toContain('test1')
+    })
+  })
+
   describe('unmanaged errors', () => {
     it('throws when a polity of a piece has no colour — every polity is coloured, so a defect', () => {
       expect(() =>
-        overlapHatches(yearOverlaps(squaresDocument(TWO_OVERLAPPING)), BBOX, new Map(), NO_BAND)
+        overlapHatches(
+          yearOverlaps(squaresDocument(TWO_OVERLAPPING)),
+          BBOX,
+          { colours: new Map(), uncoloured: new Set() },
+          NO_BAND
+        )
       ).toThrow(/"test1" has no colour/)
     })
   })

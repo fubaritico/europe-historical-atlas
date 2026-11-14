@@ -6,8 +6,10 @@ import {
   authoredTintLevels,
   polityColours,
   polityNeighbours,
+  uncolouredIds,
 } from '../data/polityColours'
 import { createYearDocument, openYearDocument, saveYearDocument } from '../data/yearDocument'
+import { NO_COLOUR } from '../data/yearFormat'
 import { hexToRgb } from '../utils/color'
 
 import { addAnchor, addPolity, closeRing } from './documentEdits'
@@ -47,6 +49,26 @@ describe('polityColours', () => {
       const doc = createYearDocument(1100)
       addPolity(doc, { ...base('alone') })
       expect(polityColours(doc, PALETTE).get('alone')).toBe('#aa0000')
+    })
+
+    // CARTO-445: an uncoloured polity is painted in nothing, and its neighbour takes the slot it would have taken.
+    it('gives an uncoloured polity no colour, and no palette slot', () => {
+      const doc = sharedBorderDocument()
+      const france = doc.polities[0]
+      if (france) france.colour = NO_COLOUR
+      const colours = polityColours(doc, PALETTE)
+      expect(colours.has('fr-couronne')).toBe(false)
+      expect(colours.get('hre')).toBe('#aa0000')
+    })
+
+    it('names the uncoloured polities of a registry', () => {
+      expect(
+        uncolouredIds([
+          { id: 'chola', colour: NO_COLOUR },
+          { id: 'france', colour: '#123456' },
+          { id: 'hre', colour: null },
+        ])
+      ).toEqual(new Set(['chola']))
     })
   })
 
@@ -181,7 +203,22 @@ const levelsOf = (
   year: AuthoredYear,
   regions: readonly Pick<Region, 'polityId'>[],
   homage: HomageLevels = homageLevels(year.registry.polities)
-) => authoredTintLevels(polityColours(openYearDocument(year), PALETTE), regions, homage)
+) =>
+  authoredTintLevels(
+    polityColours(openYearDocument(year), PALETTE),
+    uncolouredIds(year.registry.polities),
+    regions,
+    homage
+  )
+
+/** France uncoloured, Burgundy under it in its own colour, Hungary uncoloured under nobody. */
+function uncolouredYear() {
+  const doc = createYearDocument(1100)
+  addPolity(doc, { ...base('france'), colour: NO_COLOUR })
+  addPolity(doc, { ...base('burgundy'), suzerain: 'france', colour: '#000002' })
+  addPolity(doc, { ...base('hungary'), colour: NO_COLOUR })
+  return { year: 1100, ...saveYearDocument(doc) }
+}
 
 describe('authoredTintLevels', () => {
   const regions = [
@@ -218,6 +255,27 @@ describe('authoredTintLevels', () => {
   })
 
   describe('variants', () => {
+    // CARTO-445: from afar a vassal wears its suzerain's colour — none, for an uncoloured suzerain.
+    it('leaves an uncoloured polity unpainted at every level, and its vassal while it wears it', () => {
+      const levels = levelsOf(uncolouredYear(), [
+        { polityId: 'france' },
+        { polityId: 'burgundy' },
+        { polityId: 'hungary' },
+      ])
+      expect(levels).toEqual([
+        [null, null, null],
+        [null, rgb(2), null],
+      ])
+    })
+
+    it('paints an uncoloured vassal in its suzerain’s colour from afar, and nothing close up', () => {
+      const doc = createYearDocument(1100)
+      addPolity(doc, { ...base('france'), colour: '#000001' })
+      addPolity(doc, { ...base('burgundy'), suzerain: 'france', colour: NO_COLOUR })
+      const levels = levelsOf({ year: 1100, ...saveYearDocument(doc) }, [{ polityId: 'burgundy' }])
+      expect(levels).toEqual([[rgb(1)], [null]])
+    })
+
     it('has one level for a year with no vassal', () => {
       expect(levelsOf(authored(), [{ polityId: 'hre' }])).toHaveLength(1)
     })
@@ -243,6 +301,7 @@ describe('authoredTintLevels', () => {
       ])
       const levels = authoredTintLevels(
         colours,
+        new Set(),
         [{ polityId: 'nevers' }],
         homageLevels(homageYear().registry.polities)
       )

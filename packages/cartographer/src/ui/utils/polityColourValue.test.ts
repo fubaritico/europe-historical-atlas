@@ -52,6 +52,25 @@ describe('polity colour values', () => {
 
   // L4: N/A — pure conversions; the behaviors package's own functions are tested upstream.
 
+  // CARTO-445: a polity with no colour is a state of the file, not a defect — the picker cannot show it yet.
+  describe('an uncoloured polity', () => {
+    const CHOLA: YearPolity = { ...FRANCE, id: 'chola', colour: 'none' }
+
+    it('opens as automatic, and says nothing', () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      expect([pickedColour(CHOLA), error.mock.calls]).toEqual([null, []])
+    })
+
+    it('asks nothing of the document when « automatic » is pressed on it', () => {
+      expect(recolouring(CHOLA, null, 'colour chola')).toBeNull()
+    })
+
+    it('takes the colour picked over it', () => {
+      const picked = pickedColour(FRANCE)
+      expect(recolouring(CHOLA, picked, 'colour chola')?.polity.colour).toBe('#c0392b')
+    })
+  })
+
   describe('edge cases', () => {
     it('asks nothing of the document when the gesture ends on the colour it began with', () => {
       expect(recolouring(FRANCE, pickedColour(FRANCE), 'colour')).toBeNull()

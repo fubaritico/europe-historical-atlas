@@ -38,10 +38,28 @@ import { z } from 'zod/mini'
 import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from './ringFloors'
 import { WIKIDATA_ID } from './wikidataId'
 
-/** A pinned colour, as a six-digit hex string. */
+/**
+ * The colour of a polity drawn with its borders and its name but no fill (CARTO-445, the dev, 2026-11-14): its history
+ * is not told — too far, no direct dealings with Europe. No palette slot, no tint, no hatch, in both applications.
+ */
+export const NO_COLOUR = 'none'
+
+/** A pinned colour, as a six-digit hex string, or {@link NO_COLOUR}. */
 const hexColour = z.nullable(
-  z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour'))
+  z.union([
+    z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour')),
+    z.literal(NO_COLOUR),
+  ])
 )
+
+/**
+ * Whether a polity's colour is {@link NO_COLOUR}.
+ * @param colour - the polity's `colour`
+ * @returns `true` when it is drawn with no fill
+ */
+export function isUncoloured(colour: string | null): boolean {
+  return colour === NO_COLOUR
+}
 
 /** A Wikidata entity id. Checked in shape only — we never resolve it. */
 const wikidataId = z.nullable(
@@ -108,7 +126,10 @@ export interface YearPolity {
   existsFrom: number | null
   /** When it ended. `null` = it outlives this year as far as we know. */
   existsTo: number | null
-  /** A pinned colour as a hex string; `null` leaves it to the palette by adjacency. */
+  /**
+   * A pinned colour as a hex string; `null` leaves it to the palette by adjacency; {@link NO_COLOUR} gives it no fill
+   * at all (CARTO-445).
+   */
   colour: string | null
   /**
    * Wikidata `Q…`, for **checking** that two entries mean the same polity — never for identity.

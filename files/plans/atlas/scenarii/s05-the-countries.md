@@ -75,6 +75,36 @@ Scenario: a vassal that is a tribe
 > 1.5 / 1.5 / 2.5 — taken off the settings panel. **A sub-vassal's suzerain** is banded along the sub-vassal's edge
 > from the second level, before the sub-vassal shows apart: no year has a sub-vassal today (1100, 1200 measured 09/11).
 
+## A country with no colour
+
+```gherkin
+Scenario: a country whose history is not told
+  Given the Chola empire's colour is « no colour » in the year's file
+  Then it has no tint over the relief, at any zoom
+  And its borders and its name are drawn as any country's
+  And it takes no palette colour: its neighbours keep theirs
+
+Scenario: a vassal of a country with no colour
+  Given a vassal in its own colour, under a suzerain with no colour
+  Then from afar, where a vassal wears its suzerain's colour, it has none
+  And close up it shows its own, faded in by the zoom
+
+Scenario: a country with no colour under a coloured suzerain
+  Given a vassal with no colour, under a suzerain in its colour
+  Then from afar it wears its suzerain's colour, and close up the relief shows bare
+
+Scenario: an overlap with a country with no colour
+  Given a country with no colour overlaps one in its colour
+  Then the ground they share is not hatched
+  And where two coloured countries overlap it too, the stripes are theirs only
+```
+
+> **Built 2026-11-14 (CARTO-445), not walked yet** — `core` and the atlas; the Cartographer's colour field waits on the
+> design system's « no colour » (`files/plans/cartographer/ds-request-no-colour.md`). The dev: *"keeping its borders
+> without a colour says that we do not tell the history of these countries — too far, no direct dealings"*; *"it keeps
+> its name; it just has no colour, that's all"*; and a hatch is made of colours, so none. A tint carries its painted
+> share per level (`core/pipeline/fillBuffers`, `TINT_BYTES`), mixed by the zoom in `fills/fillShader`.
+
 ## The borders
 
 ```gherkin

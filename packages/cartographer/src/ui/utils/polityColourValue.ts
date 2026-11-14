@@ -1,5 +1,7 @@
 import { hexToRgba, hsvaToHex, rgbaToHsva } from '@fubaritico/behaviors'
 
+import { isUncoloured } from '@europe-historical-atlas/core/data/yearFormat'
+
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
 import type { HsvaColor } from '@fubaritico/behaviors'
@@ -11,7 +13,8 @@ import type { HsvaColor } from '@fubaritico/behaviors'
  */
 
 /**
- * A polity's colour as the picker holds it, or `null` for "automatic".
+ * A polity's colour as the picker holds it, or `null` for "automatic" — and for a polity with no colour at all
+ * (CARTO-445), which the picker cannot show yet: the form and the swatch keep that state themselves.
  *
  * **A colour that does not read as hex is said, and opens as automatic.** It cannot come from the
  * readers (the schema takes `#rrggbb` only) nor from the picker; reaching it is a defect. Validating the
@@ -20,7 +23,7 @@ import type { HsvaColor } from '@fubaritico/behaviors'
  * @returns the HSVA, or `null`
  */
 export function pickedColour(polity: YearPolity): HsvaColor | null {
-  if (polity.colour === null) return null
+  if (polity.colour === null || isUncoloured(polity.colour)) return null
   const rgba = hexToRgba(polity.colour)
   if (rgba === null) {
     console.error(
@@ -60,6 +63,8 @@ export interface Recolouring {
  * or "automatic" pressed on a polity that already has none, would otherwise put a row in `{History}` that
  * ‹ctrl+Z› takes back to no visible effect.
  * @param polity - the polity aimed at
+ * **"Automatic" on a polity with no colour changes nothing** (CARTO-445): the picker cannot tell the two apart
+ * yet, so the uncoloured polity keeps its state until a colour is picked.
  * @param picked - where the gesture ended, or `null` for "automatic"
  * @param label - how the history names the step, in the page's language
  * @returns the recolouring, or `null` when the colour does not change
@@ -69,6 +74,7 @@ export function recolouring(
   picked: HsvaColor | null,
   label: string
 ): Recolouring | null {
+  if (picked === null && isUncoloured(polity.colour)) return null
   const colour = toFileColour(picked)
   if (colour === polity.colour) return null
   return {
