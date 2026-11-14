@@ -22,7 +22,7 @@ import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
 import { overlapHatches } from '../data/overlapHatches'
 import { authoredTintLevels, polityColours, uncolouredIds } from '../data/polityColours'
-import { isOutlinedTribe, tribeIds } from '../data/tribes'
+import { tribeIds, tribeStyleOf } from '../data/tribes'
 import { bandDepthOf, bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
 import { yearOverlaps } from '../data/yearOverlaps'
@@ -37,6 +37,7 @@ import type { LandMask } from '../data/landMask'
 import type { OverlapHatch } from '../data/overlapHatches'
 import type { RegionBorders } from '../data/regionBorders'
 import type { Region } from '../data/regionSource'
+import type { MarkedTribeStyle } from '../data/tribes'
 import type { AuthoredYear } from '../data/yearFormat'
 import type { OverlapRefusal } from '../data/yearOverlaps'
 import type { GeoBounds } from '../geo/mercator'
@@ -71,8 +72,11 @@ export interface SettledTribe {
   colour: string
   /** Its rings, outer and holes alike, in grid coordinates. */
   rings: UvPoint[][]
-  /** Drawn by its rim rather than its heart — an outlined tribe (CARTO-439); absent for every other tribe. */
-  outlined?: true
+  /**
+   * How its limit is drawn when it is not a confederation's band: an outlined tribe's rim (CARTO-439) or a tribe's margin
+   * (CARTO-447); absent for a confederation.
+   */
+  style?: MarkedTribeStyle
 }
 
 /** An authored year settled: what the atlas's layers read for it. */
@@ -165,20 +169,19 @@ function colouredTribes(
   uncoloured: ReadonlySet<string>
 ): SettledTribe[] {
   const tribes = tribeIds(year.registry.polities)
-  const outlined = new Set(
-    year.registry.polities.filter(isOutlinedTribe).map((polity) => polity.id)
-  )
+  const styles = new Map(year.registry.polities.map((polity) => [polity.id, tribeStyleOf(polity)]))
   // One area per region of a tribe, in the tribe's colour; any other region gives none.
   return regions.flatMap(({ polityId, rings }) => {
     if (polityId === undefined || !tribes.has(polityId) || uncoloured.has(polityId)) return []
     const colour = colours.get(polityId)
     if (colour !== undefined) {
+      const style = styles.get(polityId)
       return [
         {
           polity: polityId,
           colour,
           rings,
-          ...(outlined.has(polityId) ? { outlined: true as const } : {}),
+          ...(style === undefined || style === null || style === 'band' ? {} : { style }),
         },
       ]
     }

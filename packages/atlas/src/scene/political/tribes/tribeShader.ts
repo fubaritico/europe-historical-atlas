@@ -9,6 +9,7 @@ import {
   BAND_WAVE_KM,
   BEYOND_OUTLINE_KM,
   TRIBE_FEATHER_REACH_KM,
+  TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   bandWave,
   featherShiftKm,
@@ -30,14 +31,14 @@ export const TRIBE_VERTEX_SHADER = /* glsl */ `
   attribute float edgeDistance;
   attribute float claimedDistance;
   attribute float land;
-  attribute float outlined;
+  attribute float tribeStyle;
   uniform vec2 plane;
   varying vec2 vUv;
   varying vec3 vTint;
   varying float vDistance;
   varying float vClaimed;
   varying float vLand;
-  varying float vOutlined;
+  varying float vStyle;
   void main() {
     // The relief's uv: u west→east, v = 1 at the north edge (z = -depth/2), the texture flipped to match.
     vUv = vec2(position.x / plane.x + 0.5, 0.5 - position.z / plane.y);
@@ -45,7 +46,7 @@ export const TRIBE_VERTEX_SHADER = /* glsl */ `
     vDistance = edgeDistance;
     vClaimed = claimedDistance;
     vLand = land;
-    vOutlined = outlined;
+    vStyle = tribeStyle;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `
@@ -91,8 +92,9 @@ export const BAND_WAVE_GLSL = /* glsl */ `
  * The fragment's opacity — `tribeOpacity` in GLSL: `smoothstep(0, 1, clamp((shift − d) / width, 0, 1))` for a fade, or
  * for the band `BAND_SHARE` inside the outline and `1` deeper than the width (`featherBand` choosing), then
  * nothing where `d ≥ BEYOND_OUTLINE_KM` (core's threshold, written in from the constant) and the ground is
- * claimed (`c < 0`) or wet. An outlined tribe's vertex (`vOutlined`, CARTO-439) takes core's outlined rule instead,
- * its widths and wave written in from `TRIBE_OUTLINED_FEATHER`. **Mirrored on the CPU by {@link shaderOpacity}**, line for line, which is what a
+ * claimed (`c < 0`) or wet. The band is a confederation's; an outlined tribe's vertex (`vStyle` 1, CARTO-439) takes
+ * core's outlined rule instead, a tribe's (`vStyle` 2, CARTO-447) the margin's — their widths and wave written in from
+ * `TRIBE_OUTLINED_FEATHER` and `TRIBE_MARGIN_FEATHER`. **Mirrored on the CPU by {@link shaderOpacity}**, line for line, which is what a
  * test compares with core; its own test pins this text, so an edit here fails until the mirror follows.
  */
 export const TRIBE_OPACITY_GLSL = /* glsl */ `
@@ -112,7 +114,15 @@ export const TRIBE_OPACITY_GLSL = /* glsl */ `
     float rimInner = clamp(${TRIBE_OUTLINED_FEATHER.innerKm.toFixed(1)} * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
     float rimOuter = clamp(${TRIBE_OUTLINED_FEATHER.widthKm.toFixed(1)} * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
     float rim = inside * mix(1.0, ${BAND_SHARE.toFixed(3)} * (1.0 - step(rimOuter, -vDistance)), step(rimInner, -vDistance));
-    opacity = mix(opacity, rim, vOutlined);
+    // A tribe's margin (CARTO-447), core's TRIBE_MARGIN_FEATHER written in: nothing within the rim, half to the width,
+    // full deeper — both limits undulating by its own wave.
+    float marginWave = 1.0 + ${TRIBE_MARGIN_FEATHER.irregularity.toFixed(3)} * bandWave(framed, ${TRIBE_MARGIN_FEATHER.waveKm.toFixed(1)});
+    float marginInner = clamp(${TRIBE_MARGIN_FEATHER.innerKm.toFixed(1)} * marginWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
+    float marginOuter = clamp(${TRIBE_MARGIN_FEATHER.widthKm.toFixed(1)} * marginWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
+    float margin = inside * step(marginInner, -vDistance) * mix(${BAND_SHARE.toFixed(3)}, 1.0, step(marginOuter, -vDistance));
+    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin.
+    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)));
+    opacity = mix(opacity, margin, step(1.5, vStyle));
     float beyond = step(${String(BEYOND_OUTLINE_KM)}, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);
@@ -129,6 +139,26 @@ function glslStep(edge: number, x: number): number {
 }
 
 /**
+ * A flat style's two limits at a fragment, as the GLSL writes them in: the rim and the width, each times the same wave,
+ * held within the reach — the outlined tribe's (CARTO-439) or the margin's (CARTO-447).
+ * @param feather - the style's feather, core's
+ * @param at - the fragment's frame position
+ * @param at.u - across the frame
+ * @param at.v - down the frame, north to south
+ * @returns the inner limit (the rim) and the outer (the width), km
+ */
+function flatLimits(
+  feather: Readonly<Required<TribeFeather>>,
+  at: { u?: number; v?: number }
+): { inner: number; outer: number } {
+  const wave = 1 + feather.irregularity * bandWave(at.u ?? 0, at.v ?? 0, feather.waveKm)
+  return {
+    inner: Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, feather.innerKm * wave)),
+    outer: Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, feather.widthKm * wave)),
+  }
+}
+
+/**
  * The fragment's opacity as {@link TRIBE_OPACITY_GLSL} computes it, on the CPU — its mirror, expression for
  * expression, so the shader's cut can be compared with core's `tribeOpacity` without a GPU (QUAL-004).
  * @param at - what one fragment reads: its distance, its neighbours' distance and its land, `1` dry
@@ -137,7 +167,8 @@ function glslStep(edge: number, x: number): number {
  * @param at.land - `1` dry, `0` wet, as the interpolated attribute
  * @param at.u - the fragment's frame `u`, for the band's undulation
  * @param at.v - the fragment's frame `v`, north to south
- * @param at.outlined - `1` for an outlined tribe's vertex (CARTO-439), `0` or absent otherwise
+ * @param at.style - the vertex's style number: `1` an outlined tribe (CARTO-439), `2` a tribe (CARTO-447), `0` or absent
+ *   a confederation
  * @param feather - inset or outset, and the width, turned into uniforms as the material does
  * @returns the opacity
  */
@@ -148,7 +179,7 @@ export function shaderOpacity(
     land: number
     u?: number
     v?: number
-    outlined?: number
+    style?: number
   },
   feather: TribeFeather
 ): number {
@@ -162,24 +193,20 @@ export function shaderOpacity(
   const bandWidth = Math.min(TRIBE_FEATHER_REACH_KM, Math.max(0, width * (1 + undulation)))
   const banded = inside * (BAND_SHARE + (1 - BAND_SHARE) * glslStep(bandWidth, -at.distance))
   const tribal = fade + (banded - fade) * band
-  // The outlined tribe: full within the rim, half to the width, nothing deeper — its own widths and wave, core's.
-  const rimWave =
-    1 +
-    TRIBE_OUTLINED_FEATHER.irregularity *
-      bandWave(at.u ?? 0, at.v ?? 0, TRIBE_OUTLINED_FEATHER.waveKm)
-  const rimInner = Math.min(
-    TRIBE_FEATHER_REACH_KM,
-    Math.max(0, TRIBE_OUTLINED_FEATHER.innerKm * rimWave)
-  )
-  const rimOuter = Math.min(
-    TRIBE_FEATHER_REACH_KM,
-    Math.max(0, TRIBE_OUTLINED_FEATHER.widthKm * rimWave)
-  )
-  const rim =
+  // The outlined tribe and the tribe's margin: two flat tones between undulating limits — their own widths and wave.
+  const depth = -at.distance
+  const rim = flatLimits(TRIBE_OUTLINED_FEATHER, at)
+  const outlined =
+    inside * (1 + (BAND_SHARE * (1 - glslStep(rim.outer, depth)) - 1) * glslStep(rim.inner, depth))
+  const edge = flatLimits(TRIBE_MARGIN_FEATHER, at)
+  const margin =
     inside *
-    (1 +
-      (BAND_SHARE * (1 - glslStep(rimOuter, -at.distance)) - 1) * glslStep(rimInner, -at.distance))
-  const ramp = tribal + (rim - tribal) * (at.outlined ?? 0)
+    glslStep(edge.inner, depth) *
+    (BAND_SHARE + (1 - BAND_SHARE) * glslStep(edge.outer, depth))
+  const style = at.style ?? 0
+  const outlinedShare = glslStep(0.5, style) * (1 - glslStep(1.5, style))
+  const withRim = tribal + (outlined - tribal) * outlinedShare
+  const ramp = withRim + (margin - withRim) * glslStep(1.5, style)
   // The cut: nothing beyond the outline, unless the ground there is both unclaimed and dry.
   const beyond = glslStep(BEYOND_OUTLINE_KM, at.distance)
   const free = glslStep(0, at.claimed) * glslStep(0.5, at.land)
@@ -200,7 +227,7 @@ export const TRIBE_FRAGMENT_SHADER = /* glsl */ `
   varying float vDistance;
   varying float vClaimed;
   varying float vLand;
-  varying float vOutlined;
+  varying float vStyle;
   ${BLEND_GLSL}
   ${LAND_GLSL}
   ${BAND_WAVE_GLSL}

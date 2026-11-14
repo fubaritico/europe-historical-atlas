@@ -107,11 +107,12 @@ describe('tribePatches', () => {
   })
 
   describe('variants', () => {
-    // CARTO-439: the mark travels from the outline to the patch, across the worker.
-    it('carries an outlined tribe’s mark to its patch, and none for a plain tribe', () => {
-      const [rim] = tribePatches([{ ...TRIBE, outlined: true }], ground())
-      const [plain] = tribePatches([TRIBE], ground())
-      expect([rim?.outlined, plain?.outlined]).toEqual([true, false])
+    // CARTO-439, CARTO-447: the style travels from the outline to the patch, across the worker.
+    it('carries a tribe’s style to its patch, a confederation’s band when none is given', () => {
+      const [rim] = tribePatches([{ ...TRIBE, style: 'outlined' }], ground())
+      const [margin] = tribePatches([{ ...TRIBE, style: 'margin' }], ground())
+      const [band] = tribePatches([TRIBE], ground())
+      expect([rim?.style, margin?.style, band?.style]).toEqual(['outlined', 'margin', 'band'])
     })
 
     it('extends the patch past the outline by the reach, so an outset fade has room', () => {

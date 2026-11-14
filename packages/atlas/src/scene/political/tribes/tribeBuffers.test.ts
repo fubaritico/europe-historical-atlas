@@ -33,12 +33,13 @@ describe('tribeBuffers', () => {
     })
   })
 
-  describe('outlined tribes', () => {
-    // CARTO-439: the shader reads the mark per vertex — the outlined patch's vertices alone carry it.
-    it('marks every vertex of an outlined patch, and none of a plain one', () => {
-      const rim = { ...PATCH, outlined: true }
-      const { outlined } = tribeBuffers(options({ patches: [PATCH, rim] }))
-      expect([...outlined]).toEqual([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1])
+  describe('the three styles', () => {
+    // CARTO-439, CARTO-447: the shader reads the style per vertex — each patch's vertices carry their own.
+    it('numbers every vertex of a patch by its style: the band 0, the rim 1, the margin 2', () => {
+      const rim = { ...PATCH, style: 'outlined' as const }
+      const margin = { ...PATCH, style: 'margin' as const }
+      const { style } = tribeBuffers(options({ patches: [PATCH, rim, margin] }))
+      expect([...style]).toEqual([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     })
   })
 

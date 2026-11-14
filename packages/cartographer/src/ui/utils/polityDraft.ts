@@ -1,5 +1,9 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
-import { TRIBE_OUTLINED_RANK, TRIBE_RANK } from '@europe-historical-atlas/core/data/tribes'
+import {
+  CONFEDERATION_RANK,
+  TRIBE_OUTLINED_RANK,
+  TRIBE_RANK,
+} from '@europe-historical-atlas/core/data/tribes'
 import { NO_COLOUR, isUncoloured } from '@europe-historical-atlas/core/data/yearFormat'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
@@ -90,7 +94,9 @@ export const RANKS: readonly string[] = [
   'principality',
   'duchy',
   'county',
-  // The rank that makes a polity a tribe, drawn with no fill — core's, never a copy (review ARCH-001).
+  // The three peoples, drawn with no fill — core's ranks, never a copy (review ARCH-001): a confederation of tribes, its
+  // band the look every tribe had before; a tribe, its bare margin (CARTO-447).
+  CONFEDERATION_RANK,
   TRIBE_RANK,
   // A tribe drawn by its rim, full at its limit and nothing at its heart (CARTO-439).
   TRIBE_OUTLINED_RANK,

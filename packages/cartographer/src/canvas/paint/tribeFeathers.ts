@@ -1,6 +1,7 @@
-import { isOutlinedTribe, tribeIds } from '@europe-historical-atlas/core/data/tribes'
+import { tribeIds, tribeStyleOf } from '@europe-historical-atlas/core/data/tribes'
 import {
   CLAIM_CUT_REACH_KM,
+  TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   featherReachKm,
   featherShiftKm,
@@ -24,6 +25,7 @@ import type { Rect } from '../../geometry/marquee'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFeather'
 import type {
   GridBox,
@@ -266,7 +268,10 @@ function featherRaster(
 export interface FeatherSignature {
   /** The tribe's colour. */
   colour: string
-  /** How its limit is drawn — the band, or the outlined tribe's rim (CARTO-439): a change of rank repaints it. */
+  /**
+   * How its limit is drawn — a confederation's band, an outlined tribe's rim (CARTO-439) or a tribe's margin (CARTO-447):
+   * a change of rank repaints it.
+   */
   mode: string
   /**
    * Its rings' points on the grid, each ring led by its length; then, **only when the fade reaches past the
@@ -332,6 +337,20 @@ export interface TribeFeatherPlan {
 }
 
 /**
+ * The ground a people is drawn on, its look its rank's: an outlined tribe by its rim (CARTO-439), a tribe by its margin
+ * (CARTO-447), a confederation by the ground's own feather, the band.
+ * @param tribe - the people, its rank at least
+ * @param ground - the backdrop's frame, the fade and the land mask
+ * @returns the ground, its feather the people's
+ */
+function groundOf(tribe: Pick<YearPolity, 'rank'>, ground: FeatherGround): FeatherGround {
+  const style = tribeStyleOf(tribe)
+  if (style === 'outlined') return { ...ground, feather: TRIBE_OUTLINED_FEATHER }
+  if (style === 'margin') return { ...ground, feather: TRIBE_MARGIN_FEATHER }
+  return ground
+}
+
+/**
  * Every tribe's fade, in painting order — one plan per claim of a tribe, nothing measured yet.
  *
  * A claim whose polity has no colour is skipped, as `projectedFills` skips it: `polityColours` colours every
@@ -370,8 +389,7 @@ export function tribeFeatherPlans(
     const colour = colours.get(claim.polity)
     const tribe = tribesById.get(claim.polity)
     if (colour === undefined || tribe === undefined) continue
-    // An outlined tribe is drawn by its rim (CARTO-439); every other by the ground's own feather.
-    const own = isOutlinedTribe(tribe) ? { ...ground, feather: TRIBE_OUTLINED_FEATHER } : ground
+    const own = groundOf(tribe, ground)
     const grown = reachesBeyond ? featherBox(claim.rings, own)?.grown : undefined
     // The same choice `unionDistanceField` makes over the same box, made here so the signature holds exactly
     // the rings the raster will read.

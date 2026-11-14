@@ -8,7 +8,12 @@ import { MODE_INDEX } from '../tintOnRelief'
 
 import { options, uniform } from './testing/tribeFixtures'
 import { TRIBE_RENDER_ORDER, createTribeLayer } from './tribeLayer'
-import { BAND_WAVE_GLSL, TRIBE_FRAGMENT_SHADER, TRIBE_OPACITY_GLSL } from './tribeShader'
+import {
+  BAND_WAVE_GLSL,
+  TRIBE_FRAGMENT_SHADER,
+  TRIBE_OPACITY_GLSL,
+  TRIBE_VERTEX_SHADER,
+} from './tribeShader'
 
 const reference = (u: number, v: number, wave: number): number => {
   const k = (2 * Math.PI) / wave
@@ -20,6 +25,14 @@ const reference = (u: number, v: number, wave: number): number => {
     3
   )
 }
+
+/**
+ * The varyings a shader stage declares, by name.
+ * @param source - the stage's GLSL
+ * @returns the names, sorted
+ */
+const varyings = (source: string): string[] =>
+  [...source.matchAll(/varying\s+\w+\s+(\w+);/g)].map(([, name]) => name ?? '').sort()
 
 describe('createTribeLayer', () => {
   describe('happy path', () => {
@@ -120,12 +133,26 @@ describe('createTribeLayer', () => {
     float rimInner = clamp(10.0 * rimWave, 0.0, 60.0);
     float rimOuter = clamp(20.0 * rimWave, 0.0, 60.0);
     float rim = inside * mix(1.0, 0.500 * (1.0 - step(rimOuter, -vDistance)), step(rimInner, -vDistance));
-    opacity = mix(opacity, rim, vOutlined);
+    // A tribe's margin (CARTO-447), core's TRIBE_MARGIN_FEATHER written in: nothing within the rim, half to the width,
+    // full deeper — both limits undulating by its own wave.
+    float marginWave = 1.0 + 0.500 * bandWave(framed, 150.0);
+    float marginInner = clamp(7.0 * marginWave, 0.0, 60.0);
+    float marginOuter = clamp(14.0 * marginWave, 0.0, 60.0);
+    float margin = inside * step(marginInner, -vDistance) * mix(0.500, 1.0, step(marginOuter, -vDistance));
+    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin.
+    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)));
+    opacity = mix(opacity, margin, step(1.5, vStyle));
     float beyond = step(0.000001, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);
 `)
       expect(TRIBE_FRAGMENT_SHADER).toContain(TRIBE_OPACITY_GLSL)
+    })
+
+    // CARTO-447: the style's varying was renamed in the vertex stage and left under its old name in the fragment stage —
+    // a shader that no test compiles and the browser refuses. Mutation: the fragment stage reading `vOutlined`.
+    it('reads in the fragment stage only the varyings the vertex stage writes', () => {
+      expect(varyings(TRIBE_FRAGMENT_SHADER)).toEqual(varyings(TRIBE_VERTEX_SHADER))
     })
   })
 

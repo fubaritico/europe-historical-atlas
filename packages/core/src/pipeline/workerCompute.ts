@@ -146,12 +146,12 @@ function cutsOver(send: SendCommand): Pick<MapCompute, 'layFills' | 'cutTribes' 
     ): Promise<TribePatch[]> {
       // The ground's outlines and ids alone cross over, like the fills'.
       const claims = request.claims.map(({ polityId, rings }) => ({ polityId, rings }))
-      // The outlined tribe's mark crosses too (CARTO-439): left behind, every tribe was cut as a plain one.
-      const outlines = tribes.map(({ polity, colour, rings, outlined }) => ({
+      // The tribe's style crosses too (CARTO-439, CARTO-447): left behind, every tribe was cut as a confederation.
+      const outlines = tribes.map(({ polity, colour, rings, style }) => ({
         polity,
         colour,
         rings,
-        ...(outlined === true ? { outlined } : {}),
+        ...(style === undefined ? {} : { style }),
       }))
       const event = await send((id) => ({
         kind: 'cutTribes',

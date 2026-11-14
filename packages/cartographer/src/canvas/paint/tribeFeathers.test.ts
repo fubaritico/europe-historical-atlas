@@ -17,11 +17,14 @@ import { createGridProjection, tribeFeatherPlans, tribeFeatherRasters } from './
 import type { FeatherGround, TribeFeatherRaster } from './tribeFeathers'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
-/** The Empire (2°E–4°E, 46°N–48°N) made a tribe, beside the kingdom of France (0°–2°E). */
+/**
+ * The Empire (2°E–4°E, 46°N–48°N) made a confederation of tribes — drawn by the ground's own feather — beside the
+ * kingdom of France (0°–2°E).
+ */
 const withTribe = (): YearDocument => {
   const doc = sharedBorderDocument()
   const hre = doc.polities.find((polity) => polity.id === 'hre')
-  if (hre) hre.rank = 'tribe'
+  if (hre) hre.rank = 'confederation'
   return doc
 }
 
@@ -103,12 +106,19 @@ const half = (feather: FeatherGround['feather']) =>
     north: 48,
   }).filter((alpha) => alpha > 0 && alpha < 255).length
 
-const outlined = (): YearDocument => {
+/**
+ * The Empire as a people of another rank.
+ * @param rank - `tribe_outlined` or `tribe`
+ * @returns the document
+ */
+const ranked = (rank: string): YearDocument => {
   const doc = withTribe()
   const hre = doc.polities.find((polity) => polity.id === 'hre')
-  if (hre) hre.rank = 'tribe_outlined'
+  if (hre) hre.rank = rank
   return doc
 }
+
+const outlined = (): YearDocument => ranked('tribe_outlined')
 
 describe('tribeFeatherRasters', () => {
   describe('happy path', () => {
@@ -155,6 +165,20 @@ describe('tribeFeatherRasters', () => {
       const [plain] = tribeFeatherPlans(withTribe(), COLOURS, ground(), projection)
       const [rim] = tribeFeatherPlans(outlined(), COLOURS, ground(), projection)
       expect([plain?.signature.mode, rim?.signature.mode]).toEqual(['inset', 'outlined'])
+    })
+  })
+
+  // CARTO-447: a tribe is drawn by core's margin, whatever the ground's feather — bare along its limit, full at its heart.
+  describe('the tribe', () => {
+    it('is bare just inside its outline and the full colour at its heart', () => {
+      const [raster] = tribeFeatherRasters(ranked('tribe'), COLOURS, ground())
+      expect([alphaAt(raster, 2.02, 47) ?? 0, alphaAt(raster, 3, 47)]).toEqual([0, 255])
+    })
+
+    it('signs its raster with the margin, so a change of rank makes the image again', () => {
+      const projection = createGridProjection(TEST_BACKDROP_FRAME)
+      const [margin] = tribeFeatherPlans(ranked('tribe'), COLOURS, ground(), projection)
+      expect(margin?.signature.mode).toBe('margin')
     })
   })
 

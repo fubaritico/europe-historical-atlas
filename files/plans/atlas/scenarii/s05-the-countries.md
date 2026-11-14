@@ -142,8 +142,8 @@ Scenario: a border's hand
 > settings panel (‹H›) beside the band, to compare.
 
 ```gherkin
-Scenario: a tribe's band
-  Given the Kimek-Kipchak, a tribe
+Scenario: a confederation's band
+  Given the Kimek-Kipchak, a confederation of tribes (until CARTO-447, every tribe)
   Then from its outline inwards, a band of half its colour, then its full colour deeper
   And the band is 30 km wide on average, undulating between about 15 and 45 km along the outline
   And the undulation is the same at each opening
@@ -163,6 +163,25 @@ Scenario: the band tuned
 > **Built 2026-11-02 (ATLAS-333's measure, ATLAS-344).** The band costs 0.34 s for the Kimek-Kipchak where the fade cost
 > 5.1 s: a colour that stays inside measures nobody else's ground. **Not walked in the Cartographer yet**: whether its
 > band widens at the same places as the atlas's (the shader turns the relief's `v`, north at 1, to the frame's).
+
+```gherkin
+Scenario: a tribe's margin
+  Given the Prussians, a tribe
+  Then from its outline inwards: 7 km bare, the relief showing, then 7 km of half its colour, then its full colour
+  And both limits undulate along the outline, as a confederation's band does
+  And the same tribe open in the Cartographer is drawn the same, at the same places
+
+Scenario: three peoples in the rank list
+  Given a polity's window in the Cartographer
+  Then its rank list offers « confédération de tribus », « tribu » and « tribu à contour »
+  When I give a polity one of them
+  Then it is drawn in that people's look, in the Cartographer and in the atlas
+```
+
+> **Built 2026-11-15 (CARTO-447), not walked yet.** The dev: a **confederation** is several tribes — the great groups of
+> Central Asia — and keeps the band every tribe had; a **tribe**, a small people — the Baltic ones — takes the margin,
+> *« 5 km complètement transparent… ou peut-être même 7 »*, then 7 km at half, then full, *« de manière irrégulière »*.
+> One constant in core (`TRIBE_MARGIN_FEATHER`). No file renamed: he re-ranks his polities himself.
 
 ## The countries' names
 

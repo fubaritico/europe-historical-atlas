@@ -15,6 +15,7 @@ import {
   TRIBE_FEATHER_REACH_KM as REACH,
   TRIBE_FEATHER,
   TRIBE_FEATHER_REACH_KM,
+  TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   bandWave,
   bandWidthKm,
@@ -360,6 +361,43 @@ describe('the vassals’ band beside the tribes’', () => {
 })
 
 // CARTO-439, the dev, 2026-11-13: the band inside out — full from the outline to 10 km, half to 20, nothing deeper.
+// CARTO-447: a tribe's margin — the dev's 7 km bare, then 7 km at half, then full.
+describe('featherOpacity, the tribe’s margin', () => {
+  describe('happy path', () => {
+    it('is bare within 7 km of the outline, half from 7 to 14 km, full deeper', () => {
+      const { widthKm, innerKm } = TRIBE_MARGIN_FEATHER
+      expect(
+        [-1, -6.9, -7, -13.9, -14, -60].map((d) => featherOpacity(d, widthKm, 'margin', innerKm))
+      ).toEqual([0, 0, BAND_SHARE, BAND_SHARE, 1, 1])
+    })
+  })
+
+  describe('variants', () => {
+    it('undulates both limits by one wave, the bare rim always half the width', () => {
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.72, 0.05],
+      ] as const)
+        expect(rimWidthKm(TRIBE_MARGIN_FEATHER, u, v) * 2).toBeCloseTo(
+          bandWidthKm(TRIBE_MARGIN_FEATHER, u, v),
+          9
+        )
+    })
+  })
+
+  describe('managed errors', () => {
+    it('draws nothing on the outline nor past it', () => {
+      expect([0, 5].map((d) => featherOpacity(d, 14, 'margin', 7))).toEqual([0, 0])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('keeps a NaN distance a NaN', () => {
+      expect(featherOpacity(Number.NaN, 14, 'margin', 7)).toBeNaN()
+    })
+  })
+})
+
 describe('featherOpacity, the outlined tribe', () => {
   describe('happy path', () => {
     it('is full within 10 km of the outline, half from 10 to 20 km, nothing deeper', () => {

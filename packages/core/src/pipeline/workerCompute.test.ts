@@ -370,10 +370,10 @@ describe('createWorkerMapCompute', () => {
         seaLevel: 0,
       }
       const [rim] = await client.cutTribes(
-        [{ polity: 'pomerania', colour: '#8bc059', rings: [square], outlined: true }],
+        [{ polity: 'pomerania', colour: '#8bc059', rings: [square], style: 'margin' }],
         request
       )
-      expect(rim?.outlined).toBe(true)
+      expect(rim?.style).toBe('margin')
     })
 
     it('hands the baked pixels over instead of copying them', async () => {

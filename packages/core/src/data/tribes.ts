@@ -9,8 +9,8 @@ import type { YearPolity } from './yearFormat'
  * the one a fill would have had (*« la couleur de remplissage sera plutôt la couleur des traits en
  * pointillés »*).
  *
- * **Read off the rank, a free text of the registry**: `tribe`, exactly — or `tribe_outlined`, a tribe drawn the other way
- * round, by its rim (CARTO-439, {@link TRIBE_OUTLINED_RANK}). The rank is the author's word for
+ * **Read off the rank, a free text of the registry**: `confederation`, `tribe` or `tribe_outlined`, exactly — three ways
+ * of drawing a people's limit ({@link tribeStyleOf}, CARTO-439 and CARTO-447). The rank is the author's word for
  * what a polity is, so it is also what decides how it is drawn; nothing else in the registry says it.
  *
  * **Its fading colour is its limit, except against a state**: a derived border between two tribes, or between
@@ -21,8 +21,19 @@ import type { YearPolity } from './yearFormat'
  * tribe touches it, but *« on ne peut pas considérer une tribu comme un état »*). {@link asSeenAcrossTribes}.
  */
 
-/** The rank that makes a polity a tribe. */
+/**
+ * The rank of a **tribe** — a small people, the Baltic ones (the dev, 2026-11-15, CARTO-447): drawn with a bare margin
+ * along its limit, half its colour further in, full at its heart (`TRIBE_MARGIN_FEATHER`). Until that day it was the
+ * band every tribe wore, which is the confederation's now.
+ */
 export const TRIBE_RANK = 'tribe'
+
+/**
+ * The rank of a **confederation of tribes** — several tribes, the great groups of Central Asia (the dev, 2026-11-15,
+ * CARTO-447): half its colour along its limit, an undulating band, full deeper (`TRIBE_FEATHER`) — the look every tribe
+ * had before.
+ */
+export const CONFEDERATION_RANK = 'confederation'
 
 /**
  * The rank of a tribe drawn the other way round — **outlined** (the dev, 2026-11-13, CARTO-439: *« l'inverse de
@@ -32,21 +43,39 @@ export const TRIBE_RANK = 'tribe'
 export const TRIBE_OUTLINED_RANK = 'tribe_outlined'
 
 /**
- * Whether a polity is a tribe — outlined or not.
- * @param polity - the polity, its rank at least
- * @returns `true` when its rank is {@link TRIBE_RANK} or {@link TRIBE_OUTLINED_RANK}
+ * How a people's limit is drawn, by its rank: `band` for a confederation, `outlined` for an outlined tribe, `margin` for
+ * a tribe (CARTO-447).
  */
-export function isTribe(polity: Pick<YearPolity, 'rank'>): boolean {
-  return polity.rank === TRIBE_RANK || polity.rank === TRIBE_OUTLINED_RANK
+export type TribeStyle = 'band' | 'outlined' | 'margin'
+
+/** A style a people is marked with across the worker — every one but the confederation's band, which is the default. */
+export type MarkedTribeStyle = Exclude<TribeStyle, 'band'>
+
+/** Each people's rank and the style it is drawn in — the one table both applications read. */
+const STYLE_OF_RANK: Readonly<Record<string, TribeStyle>> = {
+  [CONFEDERATION_RANK]: 'band',
+  [TRIBE_OUTLINED_RANK]: 'outlined',
+  [TRIBE_RANK]: 'margin',
 }
 
 /**
- * Whether a polity is an outlined tribe, drawn by its limit rather than its heart.
+ * Whether a polity is a people drawn with no fill — a confederation, a tribe or an outlined tribe.
  * @param polity - the polity, its rank at least
- * @returns `true` when its rank is {@link TRIBE_OUTLINED_RANK}
+ * @returns `true` when its rank is one of the three
  */
-export function isOutlinedTribe(polity: Pick<YearPolity, 'rank'>): boolean {
-  return polity.rank === TRIBE_OUTLINED_RANK
+export function isTribe(polity: Pick<YearPolity, 'rank'>): boolean {
+  return tribeStyleOf(polity) !== null
+}
+
+/**
+ * How a people's limit is drawn.
+ * @param polity - the polity, its rank at least
+ * @returns its style, or `null` for a polity that is no people
+ */
+export function tribeStyleOf(polity: Pick<YearPolity, 'rank'>): TribeStyle | null {
+  // A rank is free text: read the table's own keys only, never a name it inherits (`constructor`).
+  const { rank } = polity
+  return rank !== null && Object.hasOwn(STYLE_OF_RANK, rank) ? (STYLE_OF_RANK[rank] ?? null) : null
 }
 
 /**

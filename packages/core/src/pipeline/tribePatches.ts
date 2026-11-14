@@ -27,6 +27,7 @@ import { fillTriangles } from './fillTriangles'
 import type { FillGrid } from './fillTriangles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { LandMask } from '../data/landMask'
+import type { MarkedTribeStyle, TribeStyle } from '../data/tribes'
 import type { GeoBounds } from '../geo/mercator'
 import type { RgbColor } from '../utils/color'
 
@@ -38,8 +39,8 @@ export interface TribeOutline {
   readonly colour: string
   /** Its rings, outer and holes alike, in grid coordinates. */
   readonly rings: readonly (readonly UvPoint[])[]
-  /** Drawn by its rim rather than its heart — an outlined tribe (CARTO-439); absent for every other tribe. */
-  readonly outlined?: true
+  /** An outlined tribe's rim (CARTO-439) or a tribe's margin (CARTO-447); absent for a confederation's band. */
+  readonly style?: MarkedTribeStyle
 }
 
 /** One tribe, ready to upload. */
@@ -54,8 +55,8 @@ export interface TribePatch {
   claimed: Float32Array
   /** Each vertex's land: `1` dry, `0` wet — one per vertex. */
   land: Float32Array
-  /** Whether the tribe is drawn by its rim — an outlined tribe (CARTO-439). */
-  outlined: boolean
+  /** How its limit is drawn: a confederation's band, an outlined tribe's rim or a tribe's margin (CARTO-447). */
+  style: TribeStyle
 }
 
 /** Everyone's ground, for the cut: each region's polity and rings. */
@@ -98,7 +99,7 @@ export interface TribeGround {
  */
 export function tribePatches(tribes: readonly TribeOutline[], ground: TribeGround): TribePatch[] {
   const { claims, land, bounds, grid, reachKm, claimReachKm, spill } = ground
-  return tribes.flatMap(({ polity, colour, rings, outlined }) => {
+  return tribes.flatMap(({ polity, colour, rings, style }) => {
     // The tribe's box, grown by the reach; a tribe with no ring point has none.
     const box = paddedBox(rings, bounds, spill ? reachKm : 0)
     if (box === null) return []
@@ -143,7 +144,8 @@ export function tribePatches(tribes: readonly TribeOutline[], ground: TribeGroun
         distances,
         claimed,
         land: dry,
-        outlined: outlined === true,
+        // Absent, the confederation's band — the look every tribe had before CARTO-447.
+        style: style ?? 'band',
       },
     ]
   })

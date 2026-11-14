@@ -6,7 +6,18 @@
 import { planeHeightIn } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import type { TintSurface } from '../tintOnRelief'
+import type { TribeStyle } from '@europe-historical-atlas/core/data/tribes'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
+
+/**
+ * Each style's number in the `tribeStyle` attribute, which the shader reads by thresholds at `0.5` and `1.5`: a
+ * confederation's band, an outlined tribe's rim (CARTO-439), a tribe's margin (CARTO-447).
+ */
+export const TRIBE_STYLE_CODES: Readonly<Record<TribeStyle, number>> = {
+  band: 0,
+  outlined: 1,
+  margin: 2,
+}
 
 /** What the tribes' geometry is built from: the patches, and the surface they are laid on. */
 export interface TribeGeometry extends TintSurface {
@@ -26,8 +37,8 @@ export interface TribeBuffers {
   claimed: Float32Array
   /** `1` dry, `0` wet. */
   land: Float32Array
-  /** `1` for a vertex of an outlined tribe, drawn by its rim (CARTO-439), `0` otherwise. */
-  outlined: Float32Array
+  /** Each vertex's tribe style, as {@link TRIBE_STYLE_CODES} numbers it. */
+  style: Float32Array
 }
 
 /**
@@ -85,7 +96,7 @@ function writePatch(
   out.distances.set(patch.distances, at)
   out.claimed.set(patch.claimed, at)
   out.land.set(patch.land, at)
-  out.outlined.fill(patch.outlined ? 1 : 0, at, at + count)
+  out.style.fill(TRIBE_STYLE_CODES[patch.style], at, at + count)
   return at + count
 }
 
@@ -104,7 +115,7 @@ export function tribeBuffers(options: TribeGeometry): TribeBuffers {
     distances: new Float32Array(vertices),
     claimed: new Float32Array(vertices),
     land: new Float32Array(vertices),
-    outlined: new Float32Array(vertices),
+    style: new Float32Array(vertices),
   }
   // Then write the patches one after the other.
   let at = 0

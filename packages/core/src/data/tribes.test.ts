@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { asSeenAcrossTribes, isOutlinedTribe, isTribe, isTribeEdge, tribeIds } from './tribes'
+import { asSeenAcrossTribes, isTribe, isTribeEdge, tribeIds, tribeStyleOf } from './tribes'
 
 const POLITIES = [
   { id: 'prussians', rank: 'tribe' },
@@ -15,13 +15,22 @@ describe('tribes', () => {
       expect(isTribe({ rank: 'tribe' })).toBe(true)
     })
 
-    // CARTO-439: the outlined tribe is a tribe in every respect but its look.
-    it('reads an outlined tribe as a tribe, and as outlined — a plain tribe as not', () => {
+    // CARTO-439 and CARTO-447: three peoples, tribes in every respect but their look.
+    it('reads a confederation, a tribe and an outlined tribe as tribes, each in its style', () => {
+      const ranks = ['confederation', 'tribe', 'tribe_outlined']
       expect([
-        isTribe({ rank: 'tribe_outlined' }),
-        isOutlinedTribe({ rank: 'tribe_outlined' }),
-        isOutlinedTribe({ rank: 'tribe' }),
-      ]).toEqual([true, true, false])
+        ranks.map((rank) => isTribe({ rank })),
+        ranks.map((rank) => tribeStyleOf({ rank })),
+      ]).toEqual([
+        [true, true, true],
+        ['band', 'margin', 'outlined'],
+      ])
+    })
+
+    it('gives a polity that is no people no style, its rank a name objects inherit included', () => {
+      expect(
+        ['kingdom', null, 'constructor', 'toString'].map((rank) => tribeStyleOf({ rank }))
+      ).toEqual([null, null, null, null])
     })
 
     it('collects the ids of every tribe of the registry', () => {

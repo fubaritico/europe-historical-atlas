@@ -41,6 +41,19 @@ function withTribe(): AuthoredYear {
   return year
 }
 
+/**
+ * The style the settling marks Aquitaine with, made a people of a rank.
+ * @param rank - the people's rank
+ * @returns its style, `unmarked` for a confederation's band, `no tribe` when none is settled
+ */
+function styleAs(rank: string): string {
+  const year = withTribe()
+  const aquitaine = year.registry.polities.find((polity) => polity.id === 'aquitaine')
+  if (aquitaine) aquitaine.rank = rank
+  const [tribe] = settleAuthoredYear(requestFor(year), null).tribes
+  return tribe === undefined ? 'no tribe' : (tribe.style ?? 'unmarked')
+}
+
 // ATLAS-333: the settling moved from the atlas's loading/yearBorders to core, so the worker can run it. The atlas's
 // suite (yearBorders.test.ts) still walks its cases through settleYearBorders; this one holds what the worker returns.
 describe('settleAuthoredYear', () => {
@@ -96,15 +109,13 @@ describe('settleAuthoredYear', () => {
       expect(settled.tribes[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
     })
 
-    // CARTO-439: the outlined tribe is marked for the atlas's shader; a plain tribe carries no mark.
-    it('marks an outlined tribe for the atlas, and leaves a plain tribe unmarked', () => {
-      const outlined = withTribe()
-      const aquitaine = outlined.registry.polities.find((polity) => polity.id === 'aquitaine')
-      if (aquitaine) aquitaine.rank = 'tribe_outlined'
-      expect([
-        settleAuthoredYear(requestFor(outlined), null).tribes[0]?.outlined,
-        'outlined' in (settleAuthoredYear(requestFor(withTribe()), null).tribes[0] ?? {}),
-      ]).toEqual([true, false])
+    // CARTO-439, CARTO-447: each people's style is marked for the atlas's shader; a confederation carries no mark.
+    it('marks an outlined tribe and a tribe for the atlas, and leaves a confederation unmarked', () => {
+      expect(['tribe_outlined', 'tribe', 'confederation'].map(styleAs)).toEqual([
+        'outlined',
+        'margin',
+        'unmarked',
+      ])
     })
 
     // CARTO-445: an uncoloured tribe is drawn with its borders only — no band, and no error said for its missing colour.

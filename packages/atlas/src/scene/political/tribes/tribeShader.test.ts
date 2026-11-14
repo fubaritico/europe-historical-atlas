@@ -3,12 +3,14 @@ import { describe, expect, it } from 'vitest'
 
 import {
   BEYOND_OUTLINE_KM,
+  TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   featherOpacity,
   tribeOpacity,
   tribeOpacityAt,
 } from '@europe-historical-atlas/core/editor/tribeFeather'
 
+import { TRIBE_STYLE_CODES } from './tribeBuffers'
 import { shaderOpacity } from './tribeShader'
 
 describe('shaderOpacity', () => {
@@ -83,12 +85,35 @@ describe('shaderOpacity', () => {
         for (const signedKm of [-50, -40, -30, -20, -15, -10, -1, 0, 5])
           expect(
             shaderOpacity(
-              { distance: signedKm, claimed: 5, land: 1, u, v, outlined: 1 },
+              { distance: signedKm, claimed: 5, land: 1, u, v, style: TRIBE_STYLE_CODES.outlined },
               { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 }
             ),
             `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
           ).toBe(
             tribeOpacityAt(signedKm, TRIBE_OUTLINED_FEATHER, () => ({ claimedKm: 5, land: true }), {
+              u,
+              v,
+            })
+          )
+    })
+
+    // CARTO-447: a tribe's fragment answers as core's margin — bare along the limit, half further in, full at the heart.
+    it('answers as core over a tribe’s margin, point by point across the frame', () => {
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.37, 0.61],
+        [0.72, 0.05],
+        [0.9, 0.88],
+      ] as const)
+        for (const signedKm of [-40, -21, -14, -10, -7, -5, -1, 0, 5])
+          expect(
+            shaderOpacity(
+              { distance: signedKm, claimed: 5, land: 1, u, v, style: TRIBE_STYLE_CODES.margin },
+              { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 }
+            ),
+            `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
+          ).toBe(
+            tribeOpacityAt(signedKm, TRIBE_MARGIN_FEATHER, () => ({ claimedKm: 5, land: true }), {
               u,
               v,
             })

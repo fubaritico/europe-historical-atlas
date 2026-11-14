@@ -29,9 +29,11 @@
  * heart): Illustrator's
  * offset path drawn inwards (the dev: *"the shape drawn, and inside it an inner offset; the full colour, and the
  * offset band at half"*), two flat tones and no fade. Nothing spills past the outline in `inset` or `band`, so no
- * neighbour's ground is ever measured — what made the Kimek-Kipchak cost 5 s on the dev's 1100.
+ * neighbour's ground is ever measured — what made the Kimek-Kipchak cost 5 s on the dev's 1100. Since 2026-11-15 the band
+ * is a confederation's, and a tribe's is **the margin** (`margin`, CARTO-447): bare along the limit, half further in,
+ * full at the heart.
  */
-export type FeatherMode = 'band' | 'inset' | 'outset' | 'outlined'
+export type FeatherMode = 'band' | 'inset' | 'outset' | 'outlined' | 'margin'
 
 /** The placements, in the order a dev-panel dropdown lists them — the band, the default, first. */
 export const FEATHER_MODES: readonly FeatherMode[] = ['band', 'inset', 'outset']
@@ -54,8 +56,8 @@ export interface TribeFeather {
   /** The undulation's wavelength, in kilometres on the ground — roughly; a decoration. Absent: {@link BAND_WAVE_KM}. */
   waveKm?: number
   /**
-   * The outlined tribe's rim of full colour, in kilometres inside its outline — `widthKm` is then where its half colour
-   * stops (CARTO-439). Undulates as the band does. **Absent: no rim**, what every other mode means.
+   * The rim, in kilometres inside the outline — full colour for an outlined tribe (CARTO-439), bare for a tribe's margin
+   * (CARTO-447); `widthKm` is then where the half colour stops. Undulates as the band does. **Absent: no rim**, what every other mode means.
    */
   innerKm?: number
 }
@@ -97,6 +99,19 @@ export const TRIBE_OUTLINED_FEATHER: Readonly<Required<TribeFeather>> = {
   mode: 'outlined',
   widthKm: 20,
   innerKm: 10,
+  irregularity: 0.5,
+  waveKm: BAND_WAVE_KM,
+}
+
+/**
+ * **A tribe** (CARTO-447, the dev, 2026-11-15): from its outline inward, 7 km bare, 7 km at half its colour, then its
+ * colour full — both limits undulating as the band's do. *« 5 km complètement transparent… ou peut-être même 7 »*: 7,
+ * one constant to change.
+ */
+export const TRIBE_MARGIN_FEATHER: Readonly<Required<TribeFeather>> = {
+  mode: 'margin',
+  widthKm: 14,
+  innerKm: 7,
   irregularity: 0.5,
   waveKm: BAND_WAVE_KM,
 }
@@ -149,7 +164,7 @@ export function bandWidthKm(feather: TribeFeather, u: number, v: number): number
 }
 
 /**
- * The outlined tribe's rim at a point: {@link TribeFeather.innerKm}, undulating by the same wave as the width, so the
+ * The rim at a point — the outlined tribe's or the margin's: {@link TribeFeather.innerKm}, undulating by the same wave as the width, so the
  * two limits move together.
  * @param feather - the rim, the irregularity and the wavelength
  * @param u - across the frame, `0..1`
@@ -202,27 +217,29 @@ export function featherShiftKm(mode: FeatherMode, widthKm: number): number {
 /**
  * A banded mode's flat tone at a distance — nothing on or past the outline. **The band**: half the colour within the
  * width, the full colour deeper. **The outlined tribe**, the band inside out (CARTO-439): full within the rim, half to
- * the width, nothing deeper.
+ * the width, nothing deeper. **The tribe's margin** (CARTO-447): nothing within the rim, half to the width, full deeper.
  * @param signedKm - the distance to the outline in km, negative inside
  * @param widthKm - the width, km
- * @param mode - the band or the outlined tribe
- * @param innerKm - the outlined tribe's rim, km
+ * @param mode - the band, the outlined tribe or the margin
+ * @param innerKm - the rim of the outlined tribe and of the margin, km
  * @returns the opacity: `0`, {@link BAND_SHARE} or `1`
  */
 function flatTone(signedKm: number, widthKm: number, mode: FeatherMode, innerKm: number): number {
   if (signedKm >= 0) return 0
   const depth = -signedKm
   if (mode === 'band') return depth < widthKm ? BAND_SHARE : 1
+  if (mode === 'margin') return depth < innerKm ? 0 : depth < widthKm ? BAND_SHARE : 1
   return depth < innerKm ? 1 : depth < widthKm ? BAND_SHARE : 0
 }
 
 /**
- * Whether a mode is drawn in flat tones at undulating widths — the band, or the outlined tribe — rather than a fade.
+ * Whether a mode is drawn in flat tones at undulating widths — the band, the outlined tribe or the margin — rather than a
+ * fade.
  * @param mode - the mode
- * @returns `true` for the band and the outlined tribe
+ * @returns `true` for the band, the outlined tribe and the margin
  */
 export function isBanded(mode: FeatherMode): boolean {
-  return mode === 'band' || mode === 'outlined'
+  return mode === 'band' || mode === 'outlined' || mode === 'margin'
 }
 
 /**
@@ -234,7 +251,7 @@ export function isBanded(mode: FeatherMode): boolean {
  * @param signedKm - the distance to the outline in km, negative inside (`geo/signedDistance`)
  * @param widthKm - the fade's width in km
  * @param mode - inside or outside the outline
- * @param innerKm - the outlined tribe's rim of full colour, km; the other modes ignore it
+ * @param innerKm - the rim of the outlined tribe (full) and of the margin (bare), km; the other modes ignore it
  * @returns the opacity, `0..1`
  */
 export function featherOpacity(
@@ -298,7 +315,7 @@ export function tribeOpacity(at: TribePoint, feather: TribeFeather): number {
  * @param at - where the point is in the frame, or `undefined`
  * @param at.u - across the frame, `0..1`
  * @param at.v - down the frame, `0..1`
- * @returns the width and the outlined tribe's rim, km
+ * @returns the width and the rim, km
  */
 function widthsAt(
   feather: TribeFeather,
@@ -315,13 +332,12 @@ function widthsAt(
  * the outline, where the ramp is not already nothing — so in inset never, and in outset only within the
  * width past the outline (QUAL-003: a raster measures them once per pixel, and most pixels do not need them).
  * @param signedKm - the distance to the tribe's own outline, km, negative inside
- * @param feather - inset or outset, and the width
+ * @param feather - the people's look — a confederation's band, an outlined tribe's rim, a tribe's margin — or a fade,
+ *   inset or outset, and the width
  * @param beyond - the neighbours' distance and the land at the point, asked for at most once
  * @param at - where the point is in the frame, for the band's undulating width; without it, the mean width
  * @param at.u - across the frame, `0..1`
  * @param at.v - down the frame, `0..1`
- * @param at.u
- * @param at.v
  * @returns the opacity, as {@link tribeOpacity}'s
  */
 export function tribeOpacityAt(
