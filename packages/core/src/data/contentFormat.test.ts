@@ -82,6 +82,7 @@ function rome(overrides: Record<string, unknown> = {}): unknown {
       },
     ],
     holder: { name: 'Papal States', wikidata: 'Q170174' },
+    communities: [],
     showInAtlas: true,
     ...overrides,
   }
@@ -271,8 +272,39 @@ describe('contentFileSchema', () => {
       expect(acceptsCity(rome({ showInAtlas: false }))).toBe(true)
     })
 
+    // CMS-433: a city carries its religious communities; a file of version 7, without them, is refused.
+    it('accepts a community named by a line about it, its weight supposed', () => {
+      const catholics = { fr: 'catholique', en: null }
+      const toledo = rome({
+        testimonies: [
+          {
+            source: { id: '4', title: 'Buringh 2021', author: 'Eltjo Buringh', url: null },
+            where: null,
+            quotation: 'the Christians of the city',
+            subject: 'community',
+            confession: catholics,
+          },
+        ],
+        communities: [{ confession: catholics, weight: 'dominant', weightAttested: false }],
+      })
+
+      expect(acceptsCity(toledo)).toBe(true)
+    })
+
+    it('refuses a city that carries no communities, and a weight the atlas does not know', () => {
+      const { communities: _none, ...without } = rome() as Record<string, unknown>
+      const majority = [
+        { confession: { fr: 'juive', en: null }, weight: 'majority', weightAttested: true },
+      ]
+
+      expect([acceptsCity(without), acceptsCity(rome({ communities: majority }))]).toEqual([
+        false,
+        false,
+      ])
+    })
+
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 4, 5, 6, 8])
+      for (const version of [1, 2, 3, 4, 5, 6, 7, 9])
         expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 

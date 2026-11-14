@@ -16,6 +16,9 @@ export function citySheetCandidate(data: Record<string, unknown>): Record<string
   const rows = Array.isArray(data.testimonies)
     ? (data.testimonies as Record<string, unknown>[])
     : []
+  const communities = Array.isArray(data.communities)
+    ? (data.communities as Record<string, unknown>[])
+    : []
   return {
     place: relationId(data.place),
     date,
@@ -25,8 +28,14 @@ export function citySheetCandidate(data: Record<string, unknown>): Record<string
       ...row,
       source: relationId(row.source),
       reason: relationId(row.reason),
+      confession: relationId(row.confession),
       // The id is optional, so an emptied one is none; the name is not, and stays as typed for its own rule.
       holderQid: filled(row.holderQid),
+    })),
+    // A sheet saved before CMS-433 has no communities at all: it holds none, which is what `[]` says.
+    communities: communities.map((community) => ({
+      ...community,
+      confession: relationId(community.confession),
     })),
     holderName: filled(data.holderName),
     holderQid: filled(data.holderQid),

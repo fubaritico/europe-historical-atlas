@@ -12,7 +12,9 @@ const bare = {
   reasons: [3, 4],
   testimonies: [
     { id: 'r1', source: 4, subject: 'reason', reason: 3, population: null, where: null },
+    { id: 'r2', source: 4, subject: 'community', confession: 9, where: null },
   ],
+  communities: [{ id: 'c1', confession: 9, weight: 'present', weightAttested: false }],
 }
 
 /** The same sheet, its relations populated, as the export reads it. */
@@ -22,7 +24,9 @@ const populated = {
   reasons: [{ id: 3 }, { id: 4 }],
   testimonies: [
     { ...bare.testimonies[0], source: { id: 4, title: 'Buringh 2021' }, reason: { id: 3 } },
+    { ...bare.testimonies[1], source: { id: 4, title: 'Buringh 2021' }, confession: { id: 9 } },
   ],
+  communities: [{ ...bare.communities[0], confession: { id: 9, name: { fr: 'juive' } } }],
 }
 
 describe('citySheetCandidate', () => {
@@ -33,7 +37,11 @@ describe('citySheetCandidate', () => {
         date: { kind: 'instant', at: { year: 1100, circa: true } },
         importance: 'capital',
         reasons: [3, 4],
-        testimonies: [{ source: 4, subject: 'reason', reason: 3 }],
+        testimonies: [
+          { source: 4, subject: 'reason', reason: 3 },
+          { source: 4, subject: 'community', confession: 9 },
+        ],
+        communities: [{ confession: 9, weight: 'present', weightAttested: false }],
       })
     })
   })
@@ -59,6 +67,11 @@ describe('citySheetCandidate', () => {
         reasons: [],
         testimonies: [],
       })
+    })
+
+    it('reads a sheet saved before the communities existed as one with none', () => {
+      const { communities: _none, ...older } = bare
+      expect(citySheetCandidate(older)).toMatchObject({ communities: [] })
     })
   })
 })

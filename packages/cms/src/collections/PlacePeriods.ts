@@ -1,5 +1,6 @@
 import { APIError } from 'payload'
 
+import { COMMUNITY_WEIGHTS } from '@europe-historical-atlas/core/data/cityCommunity'
 import {
   CITY_IMPORTANCES,
   TESTIMONY_SUBJECTS,
@@ -18,6 +19,7 @@ import { writeSheetTitle } from './writeSheetTitle'
 
 import type { EventDateFields } from '../fields/historicalDate'
 import type { SavedSheet } from '../fields/sheetOverlap'
+import type { CommunityWeight } from '@europe-historical-atlas/core/data/cityCommunity'
 import type {
   CityImportance,
   TestimonySubject,
@@ -37,6 +39,13 @@ const SUBJECT_LABELS: Readonly<Record<TestimonySubject, string>> = {
   importance: 'Importance',
   reason: 'Raison',
   holder: 'Tenue par',
+  community: 'Une communauté',
+}
+
+/** What the form calls each weight of a community. */
+const WEIGHT_LABELS: Readonly<Record<CommunityWeight, string>> = {
+  dominant: 'Dominante',
+  present: 'Présente',
 }
 
 /** The HTTP status of a refused save: the request is wrong, not the server. */
@@ -213,6 +222,49 @@ export const PlacePeriods: CollectionConfig = {
           'Celui du pays, pas de la ville — par exemple : Q4948 pour Venise. Facultatif : un pays qui n’en a pas se saisit par son nom seul. Vérifiez-le sur Wikidata : les cartes importées en portent de faux.',
       },
     },
+    // CMS-433: an added array with its own table, so the push mode adds it without a question (CMS-276), and every
+    // sheet already saved reads with no community.
+    {
+      name: 'communities',
+      type: 'array',
+      label: 'Communautés religieuses',
+      labels: { singular: 'Communauté', plural: 'Communautés' },
+      admin: {
+        description:
+          'Facultatif. Les communautés que les sources attestent dans la ville à cette date — par exemple, à Tolède en 1100 : catholique dominante, musulmane présente, juive présente. Chacune doit avoir sa ligne « Une communauté » dans « Ce que disent les sources ».',
+      },
+      fields: [
+        {
+          name: 'confession',
+          type: 'relationship',
+          relationTo: 'confessions',
+          label: 'Confession',
+          required: true,
+          admin: { description: 'La liste se complète dans « Confessions ».' },
+        },
+        {
+          name: 'weight',
+          type: 'select',
+          label: 'Poids',
+          required: true,
+          options: COMMUNITY_WEIGHTS.map((value) => ({ value, label: WEIGHT_LABELS[value] })),
+          admin: {
+            description:
+              'Dominante : la plus grande part de la ville. Présente : un quartier, une minorité.',
+          },
+        },
+        {
+          name: 'weightAttested',
+          type: 'checkbox',
+          label: 'Poids attesté par une source',
+          defaultValue: false,
+          admin: {
+            description:
+              'Cochée quand une source dit ce poids. Décochée, le poids est une déduction : la présence est attestée, le poids supposé, et la carte le montre incertain.',
+          },
+        },
+      ],
+    },
     {
       name: 'testimonies',
       type: 'array',
@@ -239,7 +291,7 @@ export const PlacePeriods: CollectionConfig = {
           options: TESTIMONY_SUBJECTS.map((value) => ({ value, label: SUBJECT_LABELS[value] })),
           admin: {
             description:
-              'De quoi parle la source : la population, l’importance, une raison, ou le pays qui tient la ville.',
+              'De quoi parle la source : la population, l’importance, une raison, le pays qui tient la ville, ou une communauté religieuse qui y vit.',
           },
         },
         // One value a line, the one its subject names — required, so a « population » line cannot be saved without its
@@ -287,6 +339,17 @@ export const PlacePeriods: CollectionConfig = {
           admin: {
             condition: (_data, sibling) => sibling.subject === 'holder',
             description: 'Facultatif — par exemple : Q4948.',
+          },
+        },
+        {
+          name: 'confession',
+          type: 'relationship',
+          relationTo: 'confessions',
+          label: 'Confession',
+          required: true,
+          admin: {
+            condition: (_data, sibling) => sibling.subject === 'community',
+            description: 'La communauté dont parle la source, par sa confession.',
           },
         },
         {

@@ -23,6 +23,9 @@ const BURINGH = { id: 4, title: 'Buringh 2021', author: 'Eltjo Buringh', url: nu
 /** A reason, with every locale. */
 const BISHOPRIC = { id: 3, name: { fr: 'Évêché', en: null } }
 
+/** A confession, with every locale (CMS-433). */
+const JEWISH = { id: 9, name: { fr: 'juive', en: 'Jewish' } }
+
 /**
  * Rome in 1100, as the export reads it: every relation resolved, every locale.
  * @param overrides - what a test changes
@@ -83,6 +86,7 @@ describe('toContentCity', () => {
           },
         ],
         holder: null,
+        communities: [],
         showInAtlas: true,
       })
     })
@@ -174,6 +178,43 @@ describe('toContentCity', () => {
       const city = toContentCity(rome({ reasons: null, testimonies: null }))
       expect([city.reasons, city.testimonies]).toEqual([[], []])
     })
+
+    // CMS-433: a community and its line, the confession named in both; its weight and its mark as entered.
+    it('writes a community and the line naming it, the confession named, its weight supposed', () => {
+      const city = toContentCity(
+        rome({
+          testimonies: [
+            {
+              id: 'r2',
+              source: BURINGH,
+              subject: 'community',
+              confession: JEWISH,
+              where: null,
+              quotation: 'the Jewish quarter',
+            },
+          ],
+          communities: [{ id: 'c1', confession: JEWISH, weight: 'present', weightAttested: false }],
+        })
+      )
+
+      expect([city.communities, city.testimonies[0]]).toEqual([
+        [{ confession: { fr: 'juive', en: 'Jewish' }, weight: 'present', weightAttested: false }],
+        {
+          source: { id: '4', title: 'Buringh 2021', author: 'Eltjo Buringh', url: null },
+          where: null,
+          quotation: 'the Jewish quarter',
+          subject: 'community',
+          confession: { fr: 'juive', en: 'Jewish' },
+        },
+      ])
+      expect(
+        contentFileSchema.safeParse({
+          version: CONTENT_FORMAT_VERSION,
+          events: [],
+          cities: [city],
+        }).success
+      ).toBe(true)
+    })
   })
 
   describe('managed errors', () => {
@@ -196,6 +237,14 @@ describe('toContentCity', () => {
         'city sheet 1: its date does not read'
       )
     })
+
+    it('stops on a community no line names, naming the sheet and where', () => {
+      expect(() =>
+        toContentCity(
+          rome({ communities: [{ confession: JEWISH, weight: 'dominant', weightAttested: true }] })
+        )
+      ).toThrow('communities.0.confession')
+    })
   })
 
   describe('unmanaged errors', () => {
@@ -207,6 +256,17 @@ describe('toContentCity', () => {
 
     it('stops on a reason the query did not resolve', () => {
       expect(() => toContentCity(rome({ reasons: [3] }))).toThrow('not resolved (3)')
+    })
+
+    it('stops on a confession the query did not resolve', () => {
+      expect(() =>
+        toContentCity(
+          rome({
+            testimonies: [{ source: BURINGH, subject: 'community', confession: 9 }],
+            communities: [{ confession: 9, weight: 'present', weightAttested: true }],
+          })
+        )
+      ).toThrow('not resolved (9)')
     })
   })
 

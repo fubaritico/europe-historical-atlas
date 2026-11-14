@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   EMPTY_MOMENT,
+  emptyCommunity,
   emptyTestimony,
   momentValues,
   readNumber,
@@ -30,6 +31,7 @@ describe('sheetValues', () => {
         importance: 'capital',
         reasons: [],
         testimonies: [],
+        communities: [],
         holderName: '',
         holderQid: '',
         showInAtlas: false,
@@ -56,6 +58,7 @@ describe('sheetValues', () => {
         importance: 'capital',
         reasons: [],
         testimonies: [],
+        communities: [],
         holderName: null,
         holderQid: null,
         showInAtlas: false,
@@ -94,6 +97,7 @@ describe('sheetValues', () => {
         population: 35000,
         importance: null,
         reason: null,
+        confession: null,
         holderName: null,
         holderQid: null,
         where: 'p. 12',
@@ -114,6 +118,7 @@ describe('sheetValues', () => {
           population: '35000',
           importance: '',
           reason: null,
+          confession: null,
           holderName: '',
           holderQid: '',
           where: 'p. 12',
@@ -131,6 +136,7 @@ describe('sheetValues', () => {
         population: null,
         importance: null,
         reason: null,
+        confession: null,
         holderName: 'Republic of Venice',
         holderQid: 'Q4948',
         where: 'p. 33',
@@ -183,14 +189,46 @@ describe('sheetValues', () => {
         subject: 'reason' as const,
         population: '12',
         reason: 2,
+        confession: null,
         where: ' ',
       }
       expect(testimonyBody(line)).toMatchObject({
         population: null,
         importance: null,
         reason: 2,
+        confession: null,
         where: null,
       })
+    })
+
+    // CMS-433: a saved community and its line read into the form and sent back as they were.
+    it('reads a community and the line naming it — row ids, confession, weight, mark — and sends them back', () => {
+      const saved = {
+        testimonies: [{ id: 'r2', source: 4, subject: 'community', confession: 9 }],
+        communities: [
+          { id: 'c1', confession: { id: 9 }, weight: 'dominant', weightAttested: true },
+        ],
+      }
+      const values = sheetValues(saved, null, new Map([['4', 'Horvat 1924']]))
+      const body = sheetBody(values)
+      expect([values.communities[0], body.communities, body.testimonies[0]?.confession]).toEqual([
+        { key: 'c1', rowId: 'c1', confession: 9, weight: 'dominant', weightAttested: true },
+        [{ id: 'c1', confession: 9, weight: 'dominant', weightAttested: true }],
+        9,
+      ])
+    })
+
+    it('starts a new community with no confession, no weight, its weight supposed', () => {
+      expect(emptyCommunity()).toMatchObject({
+        confession: null,
+        weight: '',
+        weightAttested: false,
+      })
+    })
+
+    it('keeps a confession only on a line about a community', () => {
+      const line = { ...emptyTestimony(), subject: 'reason' as const, reason: 2, confession: 9 }
+      expect(testimonyBody(line).confession).toBeNull()
     })
   })
 
@@ -202,6 +240,7 @@ describe('sheetValues', () => {
         importance: '',
         reasons: [],
         testimonies: [],
+        communities: [],
         holderName: '',
         holderQid: '',
         showInAtlas: false,

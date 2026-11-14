@@ -5,14 +5,14 @@ import { relationId } from '../../fields/relationId'
 import { CitySheetForm } from './CitySheetForm'
 import { sheetValues } from './utils/sheetValues'
 
-import type { SheetDocument } from './utils/sheetValues'
+import type { RecordChoice, SheetDocument } from './utils/sheetValues'
 import type { DocumentViewServerProps, PayloadRequest } from 'payload'
 
 /**
  * The server half of the « Ville à une date » screen, in place of Payload's form
  * (`admin.components.views.edit.default`): Payload keeps the document's header and its tabs around it. It reads the
- * sheet's place name, in the content language, the reasons' list and the titles of the sources its lines cite, and
- * hands the client form its values, its id, the reasons and its routes. Every read runs as the contributor
+ * sheet's place name, in the content language, the reasons' and the confessions' lists and the titles of the sources
+ * its lines cite, and hands the client form its values, its id, the two lists and its routes. Every read runs as the contributor
  * (`overrideAccess: false`): the form shows nothing he could not read through the API.
  * @param props - Payload's document view props
  * @param props.doc - the sheet, `null` for a new one
@@ -41,17 +41,10 @@ export async function CitySheetView({ doc, initPageResult }: DocumentViewServerP
           user: req.user,
           req,
         })
-  const reasons = await req.payload.find({
-    collection: 'importance-reasons',
-    depth: 0,
-    pagination: false,
-    sort: 'name',
-    locale: contentLocale,
-    fallbackLocale: 'fr',
-    overrideAccess: false,
-    user: req.user,
-    req,
-  })
+  const lists = {
+    reasons: await choiceList(req, 'importance-reasons', contentLocale),
+    confessions: await choiceList(req, 'confessions', contentLocale),
+  }
   const sourceNames = await citedSourceNames(req, sheet)
   const id = relationId(sheet.id)
   const { api, admin } = req.payload.config.routes
@@ -60,7 +53,7 @@ export async function CitySheetView({ doc, initPageResult }: DocumentViewServerP
     <CitySheetForm
       key={id === null ? 'new' : String(id)}
       initialValues={sheetValues(sheet, place?.name ?? null, sourceNames)}
-      reasons={reasons.docs.map((reason) => ({ id: reason.id, name: reason.name }))}
+      lists={lists}
       {...(id === null ? {} : { id })}
       locale={pickLocale([req.i18n.language])}
       contentLocale={contentLocale}
@@ -68,6 +61,32 @@ export async function CitySheetView({ doc, initPageResult }: DocumentViewServerP
       admin={admin}
     />
   )
+}
+
+/**
+ * A list of the CMS a sheet chooses from — the importance reasons, the confessions — by name, in the content language.
+ * @param req - the request, whose Payload reads it as the contributor
+ * @param collection - the list
+ * @param locale - the content language
+ * @returns every entry, its id and its name
+ */
+async function choiceList(
+  req: PayloadRequest,
+  collection: 'importance-reasons' | 'confessions',
+  locale: 'fr' | 'en'
+): Promise<RecordChoice[]> {
+  const { docs } = await req.payload.find({
+    collection,
+    depth: 0,
+    pagination: false,
+    sort: 'name',
+    locale,
+    fallbackLocale: 'fr',
+    overrideAccess: false,
+    user: req.user,
+    req,
+  })
+  return docs.map((entry) => ({ id: entry.id, name: entry.name }))
 }
 
 /**

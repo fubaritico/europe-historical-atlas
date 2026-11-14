@@ -5,7 +5,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { describeDateRefusalFr } from '../../../fields/historicalDate'
 import { CITY_SHEET_MESSAGES } from '../i18n'
 
-import { EMPTY_MOMENT, emptyTestimony } from './sheetValues'
+import { EMPTY_MOMENT, emptyCommunity, emptyTestimony } from './sheetValues'
 import { validateSheet } from './validateSheet'
 
 import type { MomentValues, SheetValues } from './sheetValues'
@@ -23,6 +23,7 @@ const rome: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  communities: [],
   showInAtlas: false,
 }
 
@@ -110,6 +111,7 @@ describe('validateSheet', () => {
         testimonies: [],
         holderName: '',
         holderQid: '',
+        communities: [],
         showInAtlas: false,
       }
       expect(validateSheet(empty, say)).toEqual({
@@ -244,6 +246,31 @@ describe('validateSheet', () => {
       expect(validateSheet({ ...rome, testimonies: [line] }, say)).toEqual({
         testimonies: [{ holderName: say('lineHolderMissing'), holderQid: say('qidInvalid') }],
       })
+    })
+
+    // CMS-433: the three refusals of a community, each under its field — none chosen, none weighed, none sourced.
+    it('asks a new community for its confession and its weight', () => {
+      expect(validateSheet({ ...rome, communities: [emptyCommunity()] }, say)).toEqual({
+        communities: [{ confession: say('confessionMissing'), weight: say('weightMissing') }],
+      })
+    })
+
+    it('asks for a line naming a community’s confession, under the confession', () => {
+      const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }
+      expect(validateSheet({ ...rome, communities: [jews] }, say)).toEqual({
+        communities: [{ confession: say('communityUnsourced') }],
+      })
+    })
+
+    it('takes a community a line names, and asks a community line for its confession', () => {
+      const source = { id: 4, name: 'Horvat 1924' }
+      const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }
+      const named = { ...emptyTestimony(), source, subject: 'community' as const, confession: 9 }
+      const unnamed = { ...emptyTestimony(), source, subject: 'community' as const }
+      expect([
+        validateSheet({ ...rome, communities: [jews], testimonies: [named] }, say),
+        validateSheet({ ...rome, testimonies: [unnamed] }, say),
+      ]).toEqual([{}, { testimonies: [{ confession: say('confessionMissing') }] }])
     })
   })
 

@@ -23,6 +23,12 @@ const REASONS = [
   { id: 2, name: 'Religion' },
 ]
 
+/** The CMS's confessions, as the server reads them (CMS-433). */
+const CONFESSIONS = [
+  { id: 8, name: 'Catholique' },
+  { id: 9, name: 'Juive' },
+]
+
 /** Rome in 1100, a capital — the sheet the dev's base holds. */
 const rome: SheetValues = {
   place: { id: 5, name: 'Rome' },
@@ -32,6 +38,7 @@ const rome: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  communities: [],
   showInAtlas: false,
 }
 
@@ -44,6 +51,7 @@ const empty: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  communities: [],
   showInAtlas: false,
 }
 
@@ -52,9 +60,15 @@ const empty: SheetValues = {
  * @param values - its values
  * @param id - its id, absent for a new one
  * @param reasons - the CMS's reasons, its two by default
+ * @param confessions - the CMS's confessions, its two by default
  * @returns the rendered form
  */
-function renderForm(values: SheetValues, id?: number, reasons: typeof REASONS = REASONS) {
+function renderForm(
+  values: SheetValues,
+  id?: number,
+  reasons: typeof REASONS = REASONS,
+  confessions: typeof CONFESSIONS = CONFESSIONS
+) {
   return render(
     <CitySheetForm
       initialValues={values}
@@ -63,7 +77,7 @@ function renderForm(values: SheetValues, id?: number, reasons: typeof REASONS = 
       contentLocale="fr"
       api="/api"
       admin="/admin"
-      reasons={reasons}
+      lists={{ reasons, confessions }}
     />
   )
 }
@@ -371,6 +385,7 @@ describe('CitySheetForm', () => {
           population: 35000,
           importance: null,
           reason: null,
+          confession: null,
           holderName: null,
           holderQid: null,
           where: 'p. 12',
@@ -414,12 +429,69 @@ describe('CitySheetForm', () => {
           population: null,
           importance: null,
           reason: null,
+          confession: null,
           holderName: 'Papal States',
           holderQid: null,
           where: null,
           quotation: 'the Patrimony of Peter',
         },
       ])
+    })
+
+    // CMS-433: a community is saved only with a line of the sources naming its confession; its weight supposed until
+    // ticked attested.
+    it('adds a community, refuses it until a line names it, then saves both', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Ajouter une communauté' }))
+      const community = screen.getByRole('group', { name: 'Communauté 1' })
+      await user.click(
+        within(community).getByRole('button', { name: 'Confession : Choisir une confession' })
+      )
+      await user.click(await screen.findByRole('option', { name: 'Juive' }))
+      await user.click(within(community).getByRole('button', { name: 'Poids : Choisir un poids' }))
+      await user.click(await screen.findByRole('option', { name: 'Dominante' }))
+      await user.click(within(community).getByLabelText('Poids attesté par une source'))
+      expect(
+        await within(community).findByText(/une ligne « Une communauté » qui cite cette confession/)
+      ).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Enregistrer' })).toHaveProperty('disabled', true)
+      await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
+      const line = screen.getByRole('group', { name: 'Source 1' })
+      await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
+      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
+      await user.click(await screen.findByRole('option', { name: 'Une communauté' }))
+      await user.click(
+        within(line).getByRole('button', { name: 'Confession : Choisir une confession' })
+      )
+      await user.click(await screen.findByRole('option', { name: 'Juive' }))
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      const body = savedBody(fetcher)
+      expect(body.communities).toEqual([
+        { confession: 9, weight: 'dominant', weightAttested: true },
+      ])
+      expect(body.testimonies).toMatchObject([{ source: 4, subject: 'community', confession: 9 }])
+    })
+
+    it('removes a community, and the keyboard lands on its add button', async () => {
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Ajouter une communauté' }))
+      await user.click(screen.getByRole('button', { name: 'Retirer la communauté 1' }))
+      expect(screen.queryByRole('group', { name: 'Communauté 1' })).toBeNull()
+      expect(document.activeElement).toBe(
+        screen.getByRole('button', { name: 'Ajouter une communauté' })
+      )
+    })
+
+    it('says where the confessions are entered when the list is still empty', () => {
+      renderForm(rome, 1, REASONS, [])
+      expect(screen.getByText(/Aucune confession saisie encore/)).toBeTruthy()
     })
 
     it('removes a line, and the keyboard lands on the add button', async () => {

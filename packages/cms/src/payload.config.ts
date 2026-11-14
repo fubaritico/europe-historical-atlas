@@ -10,6 +10,7 @@ import { TAB_MARK_SIDE } from '@europe-historical-atlas/core/utils/brandMark'
 
 import { ATLAS_NAME } from './atlasName'
 import { Actors } from './collections/Actors'
+import { Confessions } from './collections/Confessions'
 import { Events } from './collections/Events'
 import { EventTypes } from './collections/EventTypes'
 import { ImportanceReasons } from './collections/ImportanceReasons'
@@ -77,6 +78,7 @@ export default buildConfig({
     Places,
     PlacePeriods,
     ImportanceReasons,
+    Confessions,
     Actors,
     Sources,
     Users,

@@ -134,3 +134,12 @@ only once touched, the button greyed then enabled) needs a DOM: the CMS tests ru
   contributor. Harmless while the CMS is local and his alone; the day it is online, the last save wins on the same
   sheet — the overlap rule still refuses a second sheet for the same year. Remedy then: call Payload's lock from our
   form.
+
+## The religious communities (CMS-433, 2026-11-13)
+
+A list on the sheet, after the holder: each community a confession (from « Confessions », grown without code), a weight
+— dominant or present — and **whether a source says that weight**, unticked by default. **The presence is proved, the
+weight may be supposed** (the dev: allowed, and marked): `core`'s schema refuses a community no line names (a line with
+the subject « Une communauté » citing the same confession), and lets a supposed weight through, exported as such for the
+atlas to show uncertain — how is to be decided with him (ATLAS-434). The form tells the two refusals of a confession
+apart by what it holds: none chosen, or one no line names.

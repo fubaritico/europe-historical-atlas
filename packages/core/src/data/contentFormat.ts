@@ -21,10 +21,12 @@ import { z } from 'zod/mini'
 
 import { historicalDateSchema, historicalMomentSchema } from '../time/historicalDate'
 
+import { COMMUNITY_WEIGHTS } from './cityCommunity'
 import { CITY_IMPORTANCES } from './cityImportance'
 import { SIEGE_ENGINES } from './siegeEngines'
 import { WIKIDATA_ID } from './wikidataId'
 
+import type { CommunityWeight } from './cityCommunity'
 import type { CityImportance } from './cityImportance'
 import type { SiegeEngine } from './siegeEngines'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
@@ -203,6 +205,8 @@ export type ContentTestimonyValue =
   | { subject: 'reason'; reason: LocalizedText }
   /** Which polity held it at that date (CMS-335). */
   | { subject: 'holder'; holder: ContentHolder }
+  /** A religious community there at that date, by its confession, named (CMS-433). */
+  | { subject: 'community'; confession: LocalizedText }
 
 /** One line of what the sources say of a city: the source written in, what it says, where, and in its own words. */
 export type ContentTestimony = ContentTestimonyValue & {
@@ -258,7 +262,34 @@ const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('s
     subject: z.literal('holder'),
     holder: holderSchema,
   }),
+  z.strictObject({
+    source: sourceSchema,
+    where: z.nullable(z.string()),
+    quotation: z.nullable(z.string()),
+    subject: z.literal('community'),
+    confession: localizedText,
+  }),
 ])
+
+/**
+ * A religious community attested in a city at a date (CMS-433): its confession named, its weight, and whether a source
+ * says that weight — the atlas is to show a supposed one as uncertain (the dev, 2026-11-13).
+ */
+export interface ContentCommunity {
+  /** Its confession, named. */
+  confession: LocalizedText
+  /** The larger part of the city, or a quarter, a minority. */
+  weight: CommunityWeight
+  /** Whether a source says that weight; `false` when it is the contributor's reading. */
+  weightAttested: boolean
+}
+
+/** {@link ContentCommunity}. */
+const communitySchema: z.ZodMiniType<ContentCommunity> = z.strictObject({
+  confession: localizedText,
+  weight: z.enum(COMMUNITY_WEIGHTS),
+  weightAttested: z.boolean(),
+})
 
 /**
  * A city at a date — « Rome en 1100 » — as the atlas will draw it (ATLAS-295): the point and the name together, by
@@ -279,6 +310,8 @@ export interface ContentCity {
   testimonies: ContentTestimony[]
   /** The polity that held it at that date, or `null` before it is entered (CMS-335). */
   holder: ContentHolder | null
+  /** The religious communities attested there (CMS-433); none before they are entered. */
+  communities: ContentCommunity[]
   /**
    * Whether the atlas shows it (CMS-391, the dev, 2026-11-08: the historian's research brought too many cities to show
    * them all) — ticked on its sheet, unticked by default. Every city still reaches the Cartographer, for the borders.
@@ -295,6 +328,7 @@ const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   reasons: z.array(localizedText),
   testimonies: z.array(testimonySchema),
   holder: z.nullable(holderSchema),
+  communities: z.array(communitySchema),
   showInAtlas: z.boolean(),
 })
 
@@ -313,9 +347,10 @@ export interface ContentFile {
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
  * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
  * and a source line its quotation (2026-11-02, CMS-335), 7 since a city says whether the atlas shows it (2026-11-08,
- * CMS-391) — an export of 6 is refused, and a new export mends it.
+ * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433) — an export of 7 is refused, and a
+ * new export mends it.
  */
-export const CONTENT_FORMAT_VERSION = 7
+export const CONTENT_FORMAT_VERSION = 8
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

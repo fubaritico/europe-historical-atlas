@@ -27,8 +27,9 @@ function operationBoxes(config: Config, group: string): string[] {
 
 describe('mcpAccess', () => {
   describe('happy path', () => {
-    it('reaches the importance reasons, the places, the cities at a date and the sources, and nothing else', () => {
+    it('reaches the confessions, the importance reasons, the places, the cities at a date and the sources, and nothing else', () => {
       expect(Object.keys(MCP_COLLECTIONS).sort()).toEqual([
+        'confessions',
         'importance-reasons',
         'place-periods',
         'places',
@@ -48,7 +49,7 @@ describe('mcpAccess', () => {
   })
 
   describe('boundaries', () => {
-    it.each(['places', 'placePeriods', 'sources', 'importanceReasons'])(
+    it.each(['places', 'placePeriods', 'sources', 'importanceReasons', 'confessions'])(
       'gives a key the boxes find, create and update for %s, and no box to delete',
       async (group) => {
         const config = await applied()

@@ -16,7 +16,7 @@ import { CITY_SHEET_MESSAGES } from './i18n'
 import { SheetFields } from './internal/SheetFields'
 import { validateSheet } from './utils/validateSheet'
 
-import type { RecordChoice, SheetValues } from './utils/sheetValues'
+import type { SheetLists, SheetValues } from './utils/sheetValues'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
 /** What the form is handed by its server half. */
@@ -33,8 +33,8 @@ export interface CitySheetFormProps {
   readonly api: string
   /** The admin's root: `/admin`. */
   readonly admin: string
-  /** Every reason of the CMS's list, in the admin's language — read when the page opens. */
-  readonly reasons: readonly RecordChoice[]
+  /** Every reason and every confession of the CMS, in the admin's language — read when the page opens. */
+  readonly lists: SheetLists
 }
 
 /**
@@ -51,7 +51,7 @@ export interface CitySheetFormProps {
  * @param props.contentLocale - the content language
  * @param props.api - the API's root
  * @param props.admin - the admin's root
- * @param props.reasons - every reason of the CMS's list
+ * @param props.lists - every reason and every confession of the CMS
  * @returns the form
  */
 export function CitySheetForm({
@@ -61,7 +61,7 @@ export function CitySheetForm({
   contentLocale,
   api,
   admin,
-  reasons,
+  lists,
 }: CitySheetFormProps) {
   const say = createTranslator(CITY_SHEET_MESSAGES, locale)
   const handleSubmit = useSheetSubmit(id === undefined ? { api, admin } : { id, api, admin }, say)
@@ -86,7 +86,7 @@ export function CitySheetForm({
               {status}
             </p>
           )}
-          <SheetFields searches={searches} overlap={overlap} reasons={reasons} say={say} />
+          <SheetFields searches={searches} overlap={overlap} lists={lists} say={say} />
           <div className="city-sheet__actions">
             <Button type="submit" disabled={!isValid || !dirty || isSubmitting}>
               {isSubmitting ? say('saving') : id === undefined ? say('create') : say('save')}

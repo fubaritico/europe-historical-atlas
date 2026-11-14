@@ -23,7 +23,9 @@ function viewProps(doc: Record<string, unknown> | null, locale: { code: string }
       docs:
         collection === 'sources'
           ? [{ id: 4, title: 'Buringh 2021' }]
-          : [{ id: 1, name: 'Pouvoir' }],
+          : collection === 'confessions'
+            ? [{ id: 9, name: 'Juive' }]
+            : [{ id: 1, name: 'Pouvoir' }],
     })
   )
   const props = {
@@ -70,11 +72,14 @@ describe('CitySheetView', () => {
       expect(form.key).toBe('1')
     })
 
-    it('hands the form the reasons’ list and names the sources its lines cite', async () => {
+    it('hands the form the reasons’ and the confessions’ lists, and names the sources its lines cite', async () => {
       const line = { id: 'r1', source: 4, subject: 'population', population: 35000 }
       const { props } = viewProps({ id: 1, place: 5, testimonies: [line] }, { code: 'fr' })
       const form = await formOf(props)
-      expect(form.props.reasons).toEqual([{ id: 1, name: 'Pouvoir' }])
+      expect(form.props.lists).toEqual({
+        reasons: [{ id: 1, name: 'Pouvoir' }],
+        confessions: [{ id: 9, name: 'Juive' }],
+      })
       expect(form.props.initialValues.testimonies[0]?.source).toEqual({
         id: 4,
         name: 'Buringh 2021',

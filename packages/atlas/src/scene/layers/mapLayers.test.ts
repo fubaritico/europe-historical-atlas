@@ -362,6 +362,7 @@ describe('createMapLayers', () => {
         reasons: [],
         testimonies: [],
         holder: null,
+        communities: [],
         showInAtlas: true,
       }
       sources.cities = [paris]

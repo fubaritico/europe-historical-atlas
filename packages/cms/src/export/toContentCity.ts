@@ -5,6 +5,7 @@ import { citySheetCandidate } from '../fields/citySheetCandidate'
 import { localized, present, resolved, toPlace, toSource } from './docRecords'
 
 import type { DocId, DocLocalized, DocPlace, DocSource } from './docRecords'
+import type { CommunityWeight } from '@europe-historical-atlas/core/data/cityCommunity'
 import type {
   CityImportance,
   TestimonySubject,
@@ -12,6 +13,7 @@ import type {
 import type { CitySheet } from '@europe-historical-atlas/core/data/citySheet'
 import type {
   ContentCity,
+  ContentCommunity,
   ContentHolder,
   ContentTestimony,
 } from '@europe-historical-atlas/core/data/contentFormat'
@@ -22,6 +24,26 @@ export interface DocReason {
   id: DocId
   /** Its name, every locale. */
   name: DocLocalized
+}
+
+/** A confession of a city's community (CMS-433). */
+export interface DocConfession {
+  /** Its id. */
+  id: DocId
+  /** Its name, every locale. */
+  name: DocLocalized
+}
+
+/** A religious community of a city at a date, its confession resolved (CMS-433). */
+export interface DocCommunity {
+  /** Payload's row id. */
+  id?: string | null
+  /** Its confession. */
+  confession: DocConfession | DocId | null | undefined
+  /** The larger part of the city, or a quarter. */
+  weight: CommunityWeight | null | undefined
+  /** Whether a source says that weight. */
+  weightAttested?: boolean | null
 }
 
 /** One line of what the sources say, its relations resolved. */
@@ -38,6 +60,8 @@ export interface DocTestimony {
   importance?: CityImportance | null
   /** The reason, for a line about one. */
   reason?: DocReason | DocId | null
+  /** The confession, for a line about a community. */
+  confession?: DocConfession | DocId | null
   /** Where in the source. */
   where?: string | null
   /** The polity's name, for a line about the holder. */
@@ -62,6 +86,8 @@ export interface DocCitySheet {
   reasons?: (DocReason | DocId)[] | null
   /** What the sources say. */
   testimonies?: DocTestimony[] | null
+  /** Its religious communities (CMS-433). */
+  communities?: DocCommunity[] | null
   /** The polity that held it, by its name. */
   holderName?: string | null
   /** That polity's Wikidata id. */
@@ -102,6 +128,38 @@ function reasonName(value: DocReason | DocId | null | undefined, where: string) 
 }
 
 /**
+ * A confession, named.
+ * @param value - the relation
+ * @param where - what it is, for the error
+ * @returns its name in both languages
+ */
+function confessionName(value: DocConfession | DocId | null | undefined, where: string) {
+  // Unreachable while the schema refuses a community or its line without a confession first: a defect, said.
+  if (value === null || value === undefined) throw new Error(`[CMS] ${where}: no confession`)
+  const confession = resolved<DocConfession>(value, where)
+  return localized(confession.name, `confession ${String(confession.id)}`)
+}
+
+/**
+ * One community, written in: its confession named, its weight and its mark as the schema read them.
+ * @param row - the record's community
+ * @param community - the community as the schema read it
+ * @param where - what it is, for the error
+ * @returns it, as the atlas reads it
+ */
+function toCommunity(
+  row: DocCommunity,
+  community: CitySheet['communities'][number],
+  where: string
+): ContentCommunity {
+  return {
+    confession: confessionName(row.confession, `${where}, confession`),
+    weight: community.weight,
+    weightAttested: community.weightAttested,
+  }
+}
+
+/**
  * One line, written in: the value its subject names, as the schema read it.
  * @param row - the record's line
  * @param line - the line as the schema read it
@@ -129,6 +187,12 @@ function toTestimony(
       return { ...base, subject: 'reason', reason: reasonName(row.reason, `${where}, reason`) }
     case 'holder':
       return { ...base, subject: 'holder', holder: toHolder(line.holderName, line.holderQid) }
+    case 'community':
+      return {
+        ...base,
+        subject: 'community',
+        confession: confessionName(row.confession, `${where}, confession`),
+      }
   }
 }
 
@@ -162,6 +226,7 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
     )
   }
   const rows = sheet.testimonies ?? []
+  const communityRows = sheet.communities ?? []
   return {
     id: String(sheet.id),
     place: toPlace(resolved<DocPlace>(sheet.place, `${where}, place`)),
@@ -177,6 +242,12 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
       read.holderName === null || read.holderName === undefined
         ? null
         : toHolder(read.holderName, read.holderQid),
+    communities: read.communities.map((community, index) => {
+      const row = communityRows[index]
+      const at = `${where}, community ${String(index + 1)}`
+      if (row === undefined) throw new Error(`[CMS] ${at} vanished`)
+      return toCommunity(row, community, at)
+    }),
     showInAtlas: sheet.showInAtlas,
   }
 }

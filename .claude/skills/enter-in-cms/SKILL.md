@@ -25,7 +25,7 @@ connected (`/mcp`), and its tools are there. If not, **stop** and give the dev t
 
 1. **His CMS server runs** (`pnpm dev:cms`, port 3100) — his to start, never mine.
 2. **An API key** in the admin: menu **MCP › API Keys**, create; in the sidebar tick **find, create, update** for
-   `places`, `place-periods`, `sources` and `importance-reasons`; save, copy the key. A key made before 2026-11-13
+   `places`, `place-periods`, `sources`, `importance-reasons` and `confessions`; save, copy the key. A key made before 2026-11-13
    (CMS-431) has only **find** for `importance-reasons`: he opens it and ticks **create** and **update** too.
 3. **The key in his own terminal**, never in the conversation: it sits in `.env.local` (ignored by git); he loads it
    into the shell, then, from the `europe-map` folder:
@@ -127,7 +127,14 @@ that exists is reused (its id), never created again.
    - `holderName` + `holderQid` — the polity holding it at that date. **Never the id without the name.**
    - `testimonies`, one line per thing a source says: `source` (its id), `subject` and the one value it names —
      `holder` → `holderName` (+ `holderQid`) · `population` → `population` · `importance` → `importance` ·
-     `reason` → `reason` — plus `where` (page, chapter, section) and `quotation` (the source's own words).
+     `reason` → `reason` · `community` → `confession` — plus `where` (page, chapter, section) and `quotation` (the
+     source's own words).
+   - `communities` (CMS-433), one per religious community a source attests: `confession` (its id, from
+     `confessions`), `weight` — `dominant` (the larger part of the city) or `present` (a quarter, a minority) — and
+     `weightAttested`, **`true` only when a source's words say that weight**; the presence alone attested, it stays
+     `false` and the map shows the weight as supposed. **Each community needs a line** with the subject `community`
+     citing the same confession, or the sheet is refused. The holder's confession is never entered: it follows from the
+     holder.
    - `title` is written by the server (« Paris — 1100 »): never set it.
 
 ## Entry by agents — the dev sets how many
@@ -156,6 +163,8 @@ Two batches never write the same sheet at once — an update re-sends all its li
   a reason that exists is reused; one created names its faith when it has one (« évêché orthodoxe », « grande
   mosquée ») — the sign on the map depends on it. One is misspelt in his data (« pelrinage »): use its id, never re-type
   the name, never correct it yourself — it is his.
+- **The confessions: find, create, change — never delete** (`confessions`, CMS-433): a community and its line cite one by
+  its id, found with `find`; one that exists is reused, never created twice.
 - **A change the dev made by hand in the admin is his**: an `update` over it is said to him before it is made.
 - **He dictates by voice**: a garbled name is a dictation error — say what you understood before entering it.
 - **A city entered is not shown in the atlas** (CMS-391, 2026-11-08): « Afficher la ville dans l'atlas » (`showInAtlas`)

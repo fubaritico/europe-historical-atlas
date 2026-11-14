@@ -1,6 +1,7 @@
 import { relationId, relationIds } from '../../../fields/relationId'
 
 import type { EventDateFields, MomentFields } from '../../../fields/dateReading'
+import type { CommunityWeight } from '@europe-historical-atlas/core/data/cityCommunity'
 import type {
   CityImportance,
   TestimonySubject,
@@ -31,6 +32,14 @@ export interface RecordChoice {
   name: string
 }
 
+/** The CMS's lists a sheet chooses from, read when the page opens, in the admin's language. */
+export interface SheetLists {
+  /** Every importance reason. */
+  reasons: readonly RecordChoice[]
+  /** Every confession a community may have (CMS-433). */
+  confessions: readonly RecordChoice[]
+}
+
 /** One line of the sources as the form holds it. */
 export interface TestimonyValues {
   /** The line's key in the form, stable while it is edited: Payload's row id, or one made for a new line. */
@@ -47,6 +56,8 @@ export interface TestimonyValues {
   importance: CityImportance | ''
   /** The reason it gives, by its id — read when the subject is a reason; `null` before one is chosen. */
   reason: number | string | null
+  /** The community's confession, by its id — read when the subject is a community; `null` before one is chosen. */
+  confession: number | string | null
   /** The polity it names, as typed — read when the subject is the holder. */
   holderName: string
   /** That polity's Wikidata id, as typed — read when the subject is the holder. */
@@ -55,6 +66,20 @@ export interface TestimonyValues {
   where: string
   /** The source's own words, as typed. */
   quotation: string
+}
+
+/** One religious community as the form holds it (CMS-433). */
+export interface CommunityValues {
+  /** Its key in the form, stable while it is edited: Payload's row id, or one made for a new community. */
+  key: string
+  /** Payload's row id, kept so a saved community is updated rather than replaced; absent for a new one. */
+  rowId?: string
+  /** Its confession, by its id, or `null` before one is chosen. */
+  confession: number | string | null
+  /** Its weight, or `''` before one is chosen. */
+  weight: CommunityWeight | ''
+  /** Whether a source says that weight — unticked for a new community: supposed until said otherwise. */
+  weightAttested: boolean
 }
 
 /** The form's values. */
@@ -69,6 +94,8 @@ export interface SheetValues {
   reasons: (number | string)[]
   /** The lines of the sources. */
   testimonies: TestimonyValues[]
+  /** The religious communities attested there (CMS-433). */
+  communities: CommunityValues[]
   /** The polity that held it, by its name, as typed — « tenue par ». */
   holderName: string
   /** That polity's Wikidata id, as typed. */
@@ -91,6 +118,8 @@ export interface TestimonyBody {
   importance: CityImportance | null
   /** The reason, for a line about one. */
   reason: number | string | null
+  /** The confession, for a line about a community. */
+  confession: number | string | null
   /** The polity, for a line about the holder. */
   holderName: string | null
   /** Its Wikidata id, for a line about the holder. */
@@ -99,6 +128,18 @@ export interface TestimonyBody {
   where: string | null
   /** The source's own words. */
   quotation: string | null
+}
+
+/** One community as the collection stores it. */
+export interface CommunityBody {
+  /** Payload's row id, for a saved community. */
+  id?: string
+  /** The confession's id. */
+  confession: number | string | null
+  /** The weight, `null` when none is chosen. */
+  weight: CommunityWeight | null
+  /** Whether a source says that weight. */
+  weightAttested: boolean
 }
 
 /** What the form sends to Payload's API. */
@@ -113,6 +154,8 @@ export interface SheetBody {
   reasons: (number | string)[]
   /** The lines; each keeps only the value its subject names, the others `null` as the collection holds them. */
   testimonies: TestimonyBody[]
+  /** The religious communities. */
+  communities: CommunityBody[]
   /** The holder's name, `null` when none is typed. */
   holderName: string | null
   /** The holder's Wikidata id, `null` when none is typed. */
@@ -172,10 +215,35 @@ export function emptyTestimony(): TestimonyValues {
     population: '',
     importance: '',
     reason: null,
+    confession: null,
     holderName: '',
     holderQid: '',
     where: '',
     quotation: '',
+  }
+}
+
+/**
+ * A new community, empty, with its own key: its weight supposed until the contributor ticks it attested.
+ * @returns the community
+ */
+export function emptyCommunity(): CommunityValues {
+  return { key: crypto.randomUUID(), confession: null, weight: '', weightAttested: false }
+}
+
+/**
+ * One saved community as the form holds it.
+ * @param row - the community as Payload stores it
+ * @returns the community
+ */
+function communityValues(row: Record<string, unknown>): CommunityValues {
+  const rowId = typeof row.id === 'string' ? row.id : undefined
+  return {
+    key: rowId ?? crypto.randomUUID(),
+    ...(rowId === undefined ? {} : { rowId }),
+    confession: relationId(row.confession),
+    weight: (row.weight as CommunityWeight | null | undefined) ?? '',
+    weightAttested: row.weightAttested === true,
   }
 }
 
@@ -200,6 +268,7 @@ function testimonyValues(
     population: asText(row.population as number | null | undefined),
     importance: (row.importance as CityImportance | null | undefined) ?? '',
     reason: relationId(row.reason),
+    confession: relationId(row.confession),
     holderName: textOf(row.holderName),
     holderQid: textOf(row.holderQid),
     where: textOf(row.where),
@@ -232,12 +301,16 @@ export function sheetValues(
   const date = (doc.date ?? {}) as EventDateFields
   const importance = doc.importance as CityImportance | null | undefined
   const rows = Array.isArray(doc.testimonies) ? (doc.testimonies as Record<string, unknown>[]) : []
+  const communities = Array.isArray(doc.communities)
+    ? (doc.communities as Record<string, unknown>[])
+    : []
   return {
     place: id === null || placeName === null ? null : { id, name: placeName },
     date: { start: momentValues(date.start), end: momentValues(date.end) },
     importance: importance ?? '',
     reasons: relationIds(doc.reasons),
     testimonies: rows.map((row) => testimonyValues(row, sourceNames)),
+    communities: communities.map(communityValues),
     holderName: textOf(doc.holderName),
     holderQid: textOf(doc.holderQid),
     // Ticked only when the base says so: a new sheet starts unticked, the collection's default (CMS-391).
@@ -283,6 +356,7 @@ export function sheetBody(values: SheetValues): SheetBody {
     importance: values.importance === '' ? null : values.importance,
     reasons: values.reasons,
     testimonies: values.testimonies.map(testimonyBody),
+    communities: values.communities.map(communityBody),
     holderName: trimmed(values.holderName),
     holderQid: trimmed(values.holderQid),
     showInAtlas: values.showInAtlas,
@@ -322,9 +396,24 @@ export function testimonyBody(line: TestimonyValues): TestimonyBody {
     population: line.subject === 'population' ? readNumber(line.population) : null,
     importance: line.subject === 'importance' && line.importance !== '' ? line.importance : null,
     reason: line.subject === 'reason' ? line.reason : null,
+    confession: line.subject === 'community' ? line.confession : null,
     ...lineHolder(line),
     where: typed(line.where),
     quotation: typed(line.quotation),
+  }
+}
+
+/**
+ * One community as the collection stores it.
+ * @param community - the form's community
+ * @returns the community to send
+ */
+export function communityBody(community: CommunityValues): CommunityBody {
+  return {
+    ...(community.rowId === undefined ? {} : { id: community.rowId }),
+    confession: community.confession,
+    weight: community.weight === '' ? null : community.weight,
+    weightAttested: community.weightAttested,
   }
 }
 

@@ -1,5 +1,6 @@
 import { placeTexts } from '../utils/recordFieldTexts'
 
+import { CommunitiesField } from './CommunitiesField'
 import { HolderFields } from './HolderFields'
 import { ImportanceField } from './ImportanceField'
 import { MomentFields } from './MomentFields'
@@ -12,28 +13,28 @@ import { TestimoniesField } from './TestimoniesField'
 import type { OverlapWiring } from '../hooks/useOverlapCheck'
 import type { RecordSearches } from '../hooks/useRecordSearches'
 import type { Say } from '../utils/say'
-import type { RecordChoice } from '../utils/sheetValues'
+import type { SheetLists } from '../utils/sheetValues'
 
 /**
  * Every field of the sheet, in the order it is entered — **first whether the atlas shows it** (the dev, 2026-11-08:
  * *"it should be at the very top, here it is drowned in the form"*), then the place, the date, the importance, the
- * reasons, the polity that held it, the lines of the sources.
- * @param props - the searches, the overlap's wiring, the reasons and the translator
+ * reasons, the polity that held it, its religious communities (CMS-433), the lines of the sources.
+ * @param props - the searches, the overlap's wiring, the CMS's lists and the translator
  * @param props.searches - the searches of the places and the sources
  * @param props.overlap - the overlap rule's wiring, fed the chosen place's sheets
- * @param props.reasons - every reason of the CMS's list
+ * @param props.lists - every reason and every confession of the CMS
  * @param props.say - the translator
  * @returns the fields
  */
 export function SheetFields({
   searches,
   overlap,
-  reasons,
+  lists,
   say,
 }: {
   searches: RecordSearches
   overlap: OverlapWiring
-  reasons: readonly RecordChoice[]
+  lists: SheetLists
   say: Say
 }) {
   return (
@@ -48,9 +49,10 @@ export function SheetFields({
         <MomentFields end="end" title={say('end')} help={say('endHelp')} say={say} />
       </fieldset>
       <ImportanceField say={say} />
-      <ReasonsField reasons={reasons} say={say} />
+      <ReasonsField reasons={lists.reasons} say={say} />
       <HolderFields say={say} />
-      <TestimoniesField reasons={reasons} searchSources={searches.sources} say={say} />
+      <CommunitiesField confessions={lists.confessions} say={say} />
+      <TestimoniesField lists={lists} searchSources={searches.sources} say={say} />
     </>
   )
 }

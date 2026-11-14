@@ -20,10 +20,17 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   échoué sur `CREATE INDEX payload_preferences_rels_order_idx` — *already exists* ; l'initialisation de Payload est restée
   en échec, chaque requête attendait derrière (admin, API, `/api/mcp` : 20 à 90 s). Une première relance du dev a
   redonné l'erreur. **Mesuré ensuite sur une copie identique de la base** (`pushSchema` sans `apply`) : plus aucune
-  instruction en attente ; relancé à 13:21, le serveur répond (admin 200, MCP 401 sans clé en 7 ms). **Mon hypothèse, non
-  prouvée** : deux pushes concurrents (Next initialise Payload par route), le second recréant l'index du premier. Base
-  intacte. **Remède** : après un changement de schéma, relancer jusqu'à ce que le push n'ait plus rien à faire — vérifié
-  sur une copie, jamais sur sa base ; le lui dire avant qu'il clique. Durable : les migrations, CMS-276. **Sévérité : gênant.**
+  instruction en attente ; relancé à 13:21, le serveur répond (admin 200, MCP 401 sans clé en 7 ms). **Reproduit le 13/11
+  à coup sûr, dans un seul processus** (CMS-433, une collection ajoutée, sur une copie de sa base) : le premier démarrage
+  pousse, le **deuxième** échoue sur `CREATE INDEX payload_locked_documents_rels_order_idx` — *already exists* —, le
+  troisième et les suivants passent ; mêmes comptes dans dix tables, `integrity_check` ok. L'hypothèse de deux pushes
+  concurrents est donc **fausse** : c'est le push de Drizzle qui recrée une table (une colonne de relation ajoutée) et
+  bute sur son propre index. **Le 14/11, sur une copie de sa base d'aujourd'hui** (CMS-433 entier : une collection et une
+  relation ajoutée aux lignes) : **quatre démarrages** — le 2ᵉ bute sur `place_periods_testimonies_order_idx`, le 3ᵉ sur
+  `payload_locked_documents_rels_order_idx`, le 4ᵉ passe ; une table refaite par démarrage, mêmes comptes, `integrity_check`
+  ok. **Remède** : après un changement de schéma qui ajoute une collection ou une relation, le lui dire avant : relancer
+  tant que l'admin répond 500 ou que le terminal montre *already exists* — le nombre mesuré d'abord sur une copie, jamais
+  sur sa base. Durable : les migrations, CMS-276. **Sévérité : gênant.**
 - **Le serveur du CMS est le sien** (25/10) : je ne le lance, ne le coupe ni ne le relance jamais. Mes relances pendant
   qu'il remplissait un lieu ont donné un « Failed to fetch » qu'il a pris pour un défaut du bouton. Je vérifie par des
   tests et des scripts sur une base à moi (CMS-279). **Sévérité : à savoir.**

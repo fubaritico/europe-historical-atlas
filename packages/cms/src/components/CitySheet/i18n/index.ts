@@ -11,7 +11,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   reason.
  * - `reasonResults` — `count`, how many reasons match.
  * - `removeLine`, `line` — `rank`, the line's rank from 1.
- * - `subjectNamed`, `reasonNamed`, `lineImportanceNamed` — `value`, what is chosen, or the invitation to choose.
+ * - `removeCommunity`, `community` — `rank`, the community's rank from 1.
+ * - `subjectNamed`, `reasonNamed`, `lineImportanceNamed`, `confessionNamed`, `weightNamed` — `value`, what is chosen, or
+ *   the invitation to choose.
  * - `importanceNamed` — `value`, the importance chosen, or the invitation to choose one.
  * - `unexpected` — `detail`, the schema's own wording of an issue the form has no sentence for.
  */

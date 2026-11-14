@@ -10,9 +10,11 @@ import { z } from 'zod/mini'
 
 import { historicalDateSchema } from '../time/historicalDate'
 
+import { COMMUNITY_WEIGHTS } from './cityCommunity'
 import { CITY_IMPORTANCES } from './cityImportance'
 import { WIKIDATA_ID } from './wikidataId'
 
+import type { CommunityWeight } from './cityCommunity'
 import type { CityImportance, TestimonySubject } from './cityImportance'
 import type { HistoricalDate } from '../time/historicalDate'
 
@@ -33,6 +35,8 @@ export type TestimonyValue =
       holderName: string
       holderQid?: string | null | undefined
     }
+  /** A religious community there at that date (CMS-433), by its confession. */
+  | { subject: Extract<TestimonySubject, 'community'>; confession: RecordId }
 
 /** One line of the sources: which source, what it says, where it says it, and its own words. */
 export type CityTestimony = TestimonyValue & {
@@ -42,6 +46,19 @@ export type CityTestimony = TestimonyValue & {
   where?: string | null | undefined
   /** The source's own words, quoted — when given; what lets a reader check the line without the book. */
   quotation?: string | null | undefined
+}
+
+/** A religious community attested in the city at that date (CMS-433). */
+export interface CityCommunity {
+  /** Its confession, from the CMS's list — catholic, orthodox, Sunni Muslim, Jewish… */
+  confession: RecordId
+  /** The larger part of the city, or a quarter, a minority. */
+  weight: CommunityWeight
+  /**
+   * Whether a source says that weight — `false` when it is the contributor's reading, the presence alone being
+   * attested: the map shows a supposed weight as uncertain (the dev, 2026-11-13).
+   */
+  weightAttested: boolean
 }
 
 /** A city at a date, read. */
@@ -56,6 +73,8 @@ export interface CitySheet {
   reasons: RecordId[]
   /** What the sources say of it, one line a thing said. */
   testimonies: CityTestimony[]
+  /** The religious communities attested there, each named by a line of the sources (CMS-433); none before entered. */
+  communities: CityCommunity[]
   /**
    * The polity that held it at that date — « tenue par » (CMS-335) — by its name, as the dev arbitrated it from the
    * lines; none before it is entered. What the Cartographer's cities layer checks a border against (CARTO-193).
@@ -98,12 +117,21 @@ const testimonySchema: z.ZodMiniType<CityTestimony> = z.discriminatedUnion('subj
     holderName: polityName,
     holderQid: optionalQid,
   }),
+  z.object({ ...lineBase, subject: z.literal('community'), confession: recordId }),
 ])
+
+/** {@link CityCommunity}. */
+const communitySchema: z.ZodMiniType<CityCommunity> = z.object({
+  confession: recordId,
+  weight: z.enum(COMMUNITY_WEIGHTS),
+  weightAttested: z.boolean(),
+})
 
 /**
  * {@link CitySheet} with every rule: a place, a date as {@link historicalDateSchema} reads it, one of the three
- * importances, the reasons, the lines — each with its source and the value its subject names — and the holder, whose
- * Wikidata id is never entered without its name. A document's other
+ * importances, the reasons, the lines — each with its source and the value its subject names — the holder, whose
+ * Wikidata id is never entered without its name, and the communities, each named by a line of the sources about it
+ * (CMS-433: the presence is proved, never typed alone). A document's other
  * fields (its id, its timestamps, a line's row id) are ignored, not refused: the CMS hands whole documents to it.
  */
 export const citySheetSchema: z.ZodMiniType<CitySheet> = z
@@ -113,6 +141,7 @@ export const citySheetSchema: z.ZodMiniType<CitySheet> = z
     importance: z.enum(CITY_IMPORTANCES),
     reasons: z.array(recordId),
     testimonies: z.array(testimonySchema),
+    communities: z.array(communitySchema),
     holderName: z.optional(z.nullable(polityName)),
     holderQid: optionalQid,
   })
@@ -122,8 +151,31 @@ export const citySheetSchema: z.ZodMiniType<CitySheet> = z
     z.refine((sheet) => !hasText(sheet.holderQid) || typeof sheet.holderName === 'string', {
       message: 'a holder’s Wikidata id needs its name',
       path: ['holderName'],
+    }),
+    z.superRefine((sheet, context) => {
+      sheet.communities.forEach((community, index) => {
+        if (namedByALine(sheet.testimonies, community.confession)) return
+        context.issues.push({
+          code: 'custom',
+          input: community.confession,
+          message: 'a community needs a line of the sources about it',
+          path: ['communities', index, 'confession'],
+        })
+      })
     })
   )
+
+/**
+ * Whether a line of the sources speaks of a community of this confession.
+ * @param lines - the sheet's lines
+ * @param confession - the community's confession
+ * @returns `true` when one does — the ids compared as text, a number in SQLite, a string in another base
+ */
+function namedByALine(lines: readonly CityTestimony[], confession: RecordId): boolean {
+  return lines.some(
+    (line) => line.subject === 'community' && String(line.confession) === String(confession)
+  )
+}
 
 /**
  * Whether a field holds a text.
@@ -174,6 +226,7 @@ const FIELDS: ReadonlySet<PropertyKey> = new Set<CitySheetField>([
   'importance',
   'reasons',
   'testimonies',
+  'communities',
   'holderName',
   'holderQid',
 ])

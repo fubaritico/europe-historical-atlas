@@ -1,5 +1,6 @@
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
+import { Confessions } from '../collections/Confessions'
 import { ImportanceReasons } from '../collections/ImportanceReasons'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
@@ -15,7 +16,8 @@ const ENTER_NEVER_DELETE = { find: true, create: true, update: true, delete: fal
 
 /**
  * The collections a model reaches over MCP — the ones the historian enters its sources into: the places, a city at
- * a date with its holder (CMS-335), the sources, and the importance reasons a city's line cites (CMS-431).
+ * a date with its holder (CMS-335), the sources, the importance reasons a city's line cites (CMS-431), and the
+ * confessions of its communities (CMS-433).
  * Everything else stays out until a need names it.
  *
  * Each entry still goes through Payload as the key's user: the collections' access rules and hooks — the sheet's
@@ -35,7 +37,9 @@ export const MCP_COLLECTIONS = {
     enabled: ENTER_NEVER_DELETE,
     description:
       'A city at a date (« Ville à une date »): its importance, the polity holding it (holderName, holderQid) ' +
-      'and its source lines, each with a subject, a source and a quotation; `showInAtlas` (false by default) ' +
+      'and its source lines, each with a subject, a source and a quotation; its `communities`, each a confession, a ' +
+      '`weight` (dominant or present) and `weightAttested` — true only when a source says that weight — and each named ' +
+      'by a line with the subject « community » citing the same confession; `showInAtlas` (false by default) ' +
       'decides whether the published atlas shows it — every city still reaches the Cartographer.',
   },
   [Sources.slug]: {
@@ -50,6 +54,12 @@ export const MCP_COLLECTIONS = {
       'Why a city matters at a date (archbishopric, university, fortress, patriarchate, great mosque…): its id is ' +
       'what a city’s source line with the subject « reason » cites. Search before creating — a reason that exists ' +
       'is reused, never created twice; a reason tied to a faith names it, the sign depends on it.',
+  },
+  [Confessions.slug]: {
+    enabled: ENTER_NEVER_DELETE,
+    description:
+      'A confession a city’s community belongs to (catholic, orthodox, Sunni Muslim, Jewish…): its id is what a ' +
+      'community and its « community » line cite. Search before creating — one that exists is reused, never created twice.',
   },
 } as const
 

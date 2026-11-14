@@ -302,6 +302,7 @@ const VALUE_FIELDS: Readonly<Record<TestimonySubject, readonly string[]>> = {
   importance: ['importance'],
   reason: ['reason'],
   holder: ['holderName', 'holderQid'],
+  community: ['confession'],
 }
 
 /** A named field, the kind that carries a value. */

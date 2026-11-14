@@ -11,7 +11,7 @@ import { TextField } from './TextField'
 
 import type { CitySheetMessageKey } from '../i18n'
 import type { Say } from '../utils/say'
-import type { RecordChoice } from '../utils/sheetValues'
+import type { RecordChoice, SheetLists } from '../utils/sheetValues'
 import type { TestimonySubject } from '@europe-historical-atlas/core/data/cityImportance'
 
 /** Each subject's label in the screen's texts. */
@@ -20,6 +20,7 @@ const SUBJECT_KEYS: Readonly<Record<TestimonySubject, CitySheetMessageKey>> = {
   importance: 'lineImportance',
   reason: 'reason',
   holder: 'holderSubject',
+  community: 'communitySubject',
 }
 
 /**
@@ -27,7 +28,7 @@ const SUBJECT_KEYS: Readonly<Record<TestimonySubject, CitySheetMessageKey>> = {
  * its own words — and a button to remove the line.
  * @param props - the line's rank, the lists, the search and the removal
  * @param props.index - its rank in the lines, from 0
- * @param props.reasons - the reasons a line may give
+ * @param props.lists - the reasons a line may give, the confessions it may name
  * @param props.searchSources - the sources matching what was typed, from the base
  * @param props.onRemove - removes the line
  * @param props.say - the translator
@@ -35,13 +36,13 @@ const SUBJECT_KEYS: Readonly<Record<TestimonySubject, CitySheetMessageKey>> = {
  */
 export function TestimonyLine({
   index,
-  reasons,
+  lists,
   searchSources,
   onRemove,
   say,
 }: {
   index: number
-  reasons: readonly RecordChoice[]
+  lists: SheetLists
   searchSources: (query: string) => Promise<RecordChoice[]>
   onRemove: () => void
   say: Say
@@ -61,7 +62,7 @@ export function TestimonyLine({
         prompt={say('subjectChoose')}
         named={(value) => say('subjectNamed', { value })}
       />
-      <TestimonyValueField index={index} reasons={reasons} say={say} />
+      <TestimonyValueField index={index} lists={lists} say={say} />
       <TextField name={`${path}.where`} label={say('where')} help={say('whereHelp')} />
       <TextField name={`${path}.quotation`} label={say('quotation')} help={say('quotationHelp')} />
       <div className="city-sheet__line-actions">

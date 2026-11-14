@@ -11,9 +11,16 @@ export type CityImportance = (typeof CITY_IMPORTANCES)[number]
 
 /**
  * What a source line of a city-at-a-date speaks about, so the tool can tell two figures of one population apart and
- * say whether they agree (decision 5b) — and, since CMS-335, which polity held the city at that date (`holder`).
+ * say whether they agree (decision 5b) — since CMS-335, which polity held the city at that date (`holder`), and since
+ * CMS-433, a religious community attested there (`community`).
  */
-export const TESTIMONY_SUBJECTS = ['population', 'importance', 'reason', 'holder'] as const
+export const TESTIMONY_SUBJECTS = [
+  'population',
+  'importance',
+  'reason',
+  'holder',
+  'community',
+] as const
 
 /** One of {@link TESTIMONY_SUBJECTS}. */
 export type TestimonySubject = (typeof TESTIMONY_SUBJECTS)[number]

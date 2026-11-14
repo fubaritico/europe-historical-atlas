@@ -3,28 +3,30 @@ import { useFormikContext } from 'formik'
 import { importanceChoices } from '../utils/importanceChoices'
 
 import { ChoiceField } from './ChoiceField'
+import { ConfessionField } from './ConfessionField'
 import { HolderLineFields } from './HolderLineFields'
 import { NumberField } from './NumberField'
+import { ReasonLineField } from './ReasonLineField'
 
 import type { Say } from '../utils/say'
-import type { RecordChoice, SheetValues } from '../utils/sheetValues'
+import type { SheetLists, SheetValues } from '../utils/sheetValues'
 
 /**
  * The one value a line's subject names: the inhabitants for the population, an importance, a reason, the polity that
- * held the city with its Wikidata id — nothing until the subject is chosen.
- * @param props - the line's rank, the reasons and the translator
+ * held the city with its Wikidata id, a community's confession — nothing until the subject is chosen.
+ * @param props - the line's rank, the CMS's lists and the translator
  * @param props.index - the line's rank, from 0
- * @param props.reasons - the reasons a line may give
+ * @param props.lists - the reasons a line may give, the confessions it may name
  * @param props.say - the translator
  * @returns the field, or nothing
  */
 export function TestimonyValueField({
   index,
-  reasons,
+  lists,
   say,
 }: {
   index: number
-  reasons: readonly RecordChoice[]
+  lists: SheetLists
   say: Say
 }) {
   const { values } = useFormikContext<SheetValues>()
@@ -50,18 +52,18 @@ export function TestimonyValueField({
         />
       )
     case 'reason':
-      return (
-        <ChoiceField
-          name={`${path}.reason`}
-          label={say('reason')}
-          help={say('reasonsHelp')}
-          choices={reasons.map((reason) => ({ value: reason.id, label: reason.name }))}
-          prompt={say('reasonChoose')}
-          named={(value) => say('reasonNamed', { value })}
-        />
-      )
+      return <ReasonLineField name={`${path}.reason`} reasons={lists.reasons} say={say} />
     case 'holder':
       return <HolderLineFields path={path} say={say} />
+    case 'community':
+      return (
+        <ConfessionField
+          name={`${path}.confession`}
+          help={say('lineConfessionHelp')}
+          confessions={lists.confessions}
+          say={say}
+        />
+      )
     default:
       return null
   }

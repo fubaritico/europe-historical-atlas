@@ -74,6 +74,7 @@ export interface Config {
     places: Place;
     'place-periods': PlacePeriod;
     'importance-reasons': ImportanceReason;
+    confessions: Confession;
     actors: Actor;
     sources: Source;
     users: User;
@@ -91,6 +92,7 @@ export interface Config {
     places: PlacesSelect<false> | PlacesSelect<true>;
     'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>;
     'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>;
+    confessions: ConfessionsSelect<false> | ConfessionsSelect<true>;
     actors: ActorsSelect<false> | ActorsSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -416,6 +418,26 @@ export interface PlacePeriod {
    */
   holderQid?: string | null;
   /**
+   * Facultatif. Les communautés que les sources attestent dans la ville à cette date — par exemple, à Tolède en 1100 : catholique dominante, musulmane présente, juive présente. Chacune doit avoir sa ligne « Une communauté » dans « Ce que disent les sources ».
+   */
+  communities?:
+    | {
+        /**
+         * La liste se complète dans « Confessions ».
+         */
+        confession: number | Confession;
+        /**
+         * Dominante : la plus grande part de la ville. Présente : un quartier, une minorité.
+         */
+        weight: 'dominant' | 'present';
+        /**
+         * Cochée quand une source dit ce poids. Décochée, le poids est une déduction : la présence est attestée, le poids supposé, et la carte le montre incertain.
+         */
+        weightAttested?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Facultatif. Une ligne par chose qu’une source dit de la ville à cette date — par exemple : Buringh 2021, population, 25 000. La source se choisit dans « Sources », qui doit donc la contenir.
    */
   testimonies?:
@@ -425,9 +447,9 @@ export interface PlacePeriod {
          */
         source: number | Source;
         /**
-         * De quoi parle la source : la population, l’importance, une raison, ou le pays qui tient la ville.
+         * De quoi parle la source : la population, l’importance, une raison, le pays qui tient la ville, ou une communauté religieuse qui y vit.
          */
-        subject: 'population' | 'importance' | 'reason' | 'holder';
+        subject: 'population' | 'importance' | 'reason' | 'holder' | 'community';
         population?: number | null;
         importance?: ('capital' | 'large-city' | 'city') | null;
         reason?: (number | null) | ImportanceReason;
@@ -439,6 +461,10 @@ export interface PlacePeriod {
          * Facultatif — par exemple : Q4948.
          */
         holderQid?: string | null;
+        /**
+         * La communauté dont parle la source, par sa confession.
+         */
+        confession?: (number | null) | Confession;
         /**
          * Où la source le dit : une page, une ligne, une colonne. Facultatif.
          */
@@ -460,6 +486,18 @@ export interface PlacePeriod {
  * via the `definition` "importance-reasons".
  */
 export interface ImportanceReason {
+  id: number;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Les confessions qu’on peut donner à une communauté sur une fiche « Ville à une date » : catholique, orthodoxe, musulmane sunnite, juive… Ajoutez-en autant qu’il faut.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confessions".
+ */
+export interface Confession {
   id: number;
   name: string;
   updatedAt: string;
@@ -567,6 +605,20 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  confessions?: {
+    /**
+     * Allow clients to find confessions.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create confessions.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update confessions.
+     */
+    update?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -622,6 +674,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'importance-reasons';
         value: number | ImportanceReason;
+      } | null)
+    | ({
+        relationTo: 'confessions';
+        value: number | Confession;
       } | null)
     | ({
         relationTo: 'actors';
@@ -856,6 +912,14 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
   reasons?: T;
   holderName?: T;
   holderQid?: T;
+  communities?:
+    | T
+    | {
+        confession?: T;
+        weight?: T;
+        weightAttested?: T;
+        id?: T;
+      };
   testimonies?:
     | T
     | {
@@ -866,6 +930,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
         reason?: T;
         holderName?: T;
         holderQid?: T;
+        confession?: T;
         where?: T;
         quotation?: T;
         id?: T;
@@ -878,6 +943,15 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
  * via the `definition` "importance-reasons_select".
  */
 export interface ImportanceReasonsSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confessions_select".
+ */
+export interface ConfessionsSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -962,6 +1036,13 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
       };
   importanceReasons?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  confessions?:
     | T
     | {
         find?: T;

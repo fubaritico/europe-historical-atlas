@@ -22,6 +22,17 @@ const rome = {
   importance: 'capital',
   reasons: [1],
   testimonies: [{ source: 4, subject: 'population', population: 35000, where: 'p. 12' }],
+  communities: [],
+}
+
+/** Toledo's Jews in 1100: a quarter, attested by a line of the sources about them. */
+const jewsOfToledo = {
+  ...rome,
+  testimonies: [
+    ...rome.testimonies,
+    { source: 7, subject: 'community', confession: 9, quotation: 'the Jewish quarter' },
+  ],
+  communities: [{ confession: 9, weight: 'present', weightAttested: true }],
 }
 
 describe('checkCitySheet', () => {
@@ -87,11 +98,64 @@ describe('checkCitySheet', () => {
       const sheet = { ...rome, testimonies: [line], holderName: 'Norse Greenland', holderQid: null }
       expect(refusedPaths(sheet)).toBe('accepted')
     })
+
+    it('reads a community with the line of the sources that names it', () => {
+      expect(checkCitySheet(jewsOfToledo)).toEqual(jewsOfToledo)
+    })
+
+    it('reads a supposed weight: the presence attested, « dominant » the contributor’s reading', () => {
+      const supposed = {
+        ...jewsOfToledo,
+        communities: [{ confession: 9, weight: 'dominant', weightAttested: false }],
+      }
+
+      expect(refusedPaths(supposed)).toBe('accepted')
+    })
+
+    it('matches a community with its line whatever the id’s type — a number in SQLite, a string elsewhere', () => {
+      const mixed = {
+        ...jewsOfToledo,
+        communities: [{ confession: '9', weight: 'present', weightAttested: true }],
+      }
+
+      expect(refusedPaths(mixed)).toBe('accepted')
+    })
   })
 
   describe('managed errors', () => {
+    it('refuses a community no line of the sources names, under its confession', () => {
+      const unsourced = { ...jewsOfToledo, testimonies: rome.testimonies }
+
+      expect(refusedPaths(unsourced)).toEqual(['communities.0.confession'])
+    })
+
+    it('refuses a community whose only line names another confession', () => {
+      const elsewhere = {
+        ...jewsOfToledo,
+        communities: [{ confession: 10, weight: 'present', weightAttested: true }],
+      }
+
+      expect(refusedPaths(elsewhere)).toEqual(['communities.0.confession'])
+    })
+
+    it('refuses a weight the map does not have, and a community with no mark on its weight', () => {
+      const wrong = {
+        ...jewsOfToledo,
+        communities: [{ confession: 9, weight: 'majority' }],
+      }
+
+      expect(refusedPaths(wrong)).toEqual(['communities.0.weight', 'communities.0.weightAttested'])
+    })
+
     it('names every missing field at once, so a form shows each under its own', () => {
-      expect(refusedPaths({})).toEqual(['place', 'date', 'importance', 'reasons', 'testimonies'])
+      expect(refusedPaths({})).toEqual([
+        'place',
+        'date',
+        'importance',
+        'reasons',
+        'testimonies',
+        'communities',
+      ])
     })
 
     it('refuses an importance the map does not have', () => {

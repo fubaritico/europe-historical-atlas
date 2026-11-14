@@ -23,6 +23,7 @@ const SARKEL: ContentCity = {
   reasons: [],
   testimonies: [],
   holder: null,
+  communities: [],
   showInAtlas: false,
 }
 

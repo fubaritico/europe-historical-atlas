@@ -6,7 +6,7 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 import { toHistoricalDate } from '../../../fields/dateReading'
 import { OVERLAP_PATH, overlappingSheet } from '../../../fields/sheetOverlap'
 
-import { momentFields, readNumber, sheetBody, testimonyBody } from './sheetValues'
+import { momentFields, readNumber, sheetBody } from './sheetValues'
 
 import type { CitySheetMessageKey } from '../i18n'
 import type { Say } from './say'
@@ -116,6 +116,7 @@ function withError(errors: Errors, path: string, sentence: string): Errors {
  * The schema's issues, each under its field, in the form's words.
  * @param errors - the errors so far
  * @param issues - what the schema found
+ * @param values - the form's values, to tell a community with no confession from one no line names
  * @param dateRefused - whether the date already has its error, which the schema's would only repeat
  * @param say - the translator
  * @returns the errors with the issues'
@@ -123,6 +124,7 @@ function withError(errors: Errors, path: string, sentence: string): Errors {
 function withIssues(
   errors: Errors,
   issues: CitySheetIssue[],
+  values: SheetValues,
   dateRefused: boolean,
   say: Say
 ): Errors {
@@ -132,6 +134,7 @@ function withIssues(
     else if (issue.field === 'importance')
       all = withError(all, 'importance', say('importanceMissing'))
     else if (issue.field === 'testimonies') all = withLineIssue(all, issue, say)
+    else if (issue.field === 'communities') all = withCommunityIssue(all, issue, values, say)
     else if (issue.field === 'holderName')
       all = withError(all, 'holderName', say('holderNameMissing'))
     else if (issue.field === 'holderQid') all = withError(all, 'holderQid', say('qidInvalid'))
@@ -147,6 +150,7 @@ const LINE_SENTENCES: Readonly<Record<string, CitySheetMessageKey>> = {
   population: 'populationInvalid',
   importance: 'lineImportanceMissing',
   reason: 'reasonMissing',
+  confession: 'confessionMissing',
   holderName: 'lineHolderMissing',
   holderQid: 'qidInvalid',
 }
@@ -163,6 +167,34 @@ function withLineIssue(errors: Errors, issue: CitySheetIssue, say: Say): Errors 
   const sentence = typeof key === 'string' ? LINE_SENTENCES[key] : undefined
   if (typeof index !== 'number' || sentence === undefined) return withUnexpected(errors, issue, say)
   return withError(errors, `testimonies.${String(index)}.${key as string}`, say(sentence))
+}
+
+/**
+ * A community's issue, under its field: `communities.0.weight`. Two refusals share the confession's place, and the
+ * form tells them apart by what it holds: none chosen, or one no line of the sources names (CMS-433).
+ * @param errors - the errors so far
+ * @param issue - the schema's issue, its path from `communities` down
+ * @param values - the form's values
+ * @param say - the translator
+ * @returns the errors with it
+ */
+function withCommunityIssue(
+  errors: Errors,
+  issue: CitySheetIssue,
+  values: SheetValues,
+  say: Say
+): Errors {
+  const [, index, key] = issue.path
+  if (typeof index !== 'number') return withUnexpected(errors, issue, say)
+  const at = `communities.${String(index)}`
+  if (key === 'weight') return withError(errors, `${at}.weight`, say('weightMissing'))
+  if (key !== 'confession') return withUnexpected(errors, issue, say)
+  const chosen = values.communities[index]?.confession ?? null
+  return withError(
+    errors,
+    `${at}.confession`,
+    say(chosen === null ? 'confessionMissing' : 'communityUnsourced')
+  )
 }
 
 /**
@@ -235,9 +267,10 @@ export function validateSheet(values: SheetValues, say: Say, overlap?: OverlapCh
     date: dateRefused ? undefined : date,
     importance: values.importance === '' ? undefined : values.importance,
     reasons: values.reasons,
-    testimonies: values.testimonies.map(testimonyBody),
+    testimonies: body.testimonies,
+    communities: body.communities,
     holderName: body.holderName,
     holderQid: body.holderQid,
   })
-  return isSheetRefused(answer) ? withIssues(errors, answer, dateRefused, say) : errors
+  return isSheetRefused(answer) ? withIssues(errors, answer, values, dateRefused, say) : errors
 }
