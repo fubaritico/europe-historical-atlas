@@ -554,7 +554,7 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": 967,
       "existsTo": 1314,
-      "colour": "#297ef5",
+      "colour": "#0768f0",
       "wikidata": "Q546266"
     },
     {
@@ -708,7 +708,7 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": 500,
       "existsTo": 1660,
-      "colour": "#5096f7",
+      "colour": "#0768f0",
       "wikidata": "Q19336869"
     },
     {
@@ -730,7 +730,7 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#0860db",
+      "colour": "#0768f0",
       "wikidata": "Q26385"
     },
     {
@@ -851,7 +851,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#3480ea",
+      "colour": "#27bd8d",
       "wikidata": "Q732738"
     },
     {
@@ -895,7 +895,7 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": 930,
       "existsTo": 1360,
-      "colour": "#0a60d8",
+      "colour": "#0768f0",
       "wikidata": "Q2991084"
     },
     {
@@ -972,19 +972,30 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": 801,
       "existsTo": 1789,
-      "colour": "#065dd7",
+      "colour": "#0768f0",
       "wikidata": "Q2070440"
     },
     {
       "id": "kingdom-of-poland",
-      "name": "Kingdom of Poland",
+      "name": "Duchy of Poland",
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": 1025,
-      "existsTo": 1385,
+      "existsFrom": 1079,
+      "existsTo": 1138,
       "colour": "#c05963",
-      "wikidata": "Q577867"
+      "wikidata": "Q108084610"
+    },
+    {
+      "id": "pomerania",
+      "name": "Pomeranians",
+      "rank": "tribe_outlined",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#8bc059",
+      "wikidata": "Q1937043"
     },
     {
       "id": "paramara-dynasty",
@@ -1021,14 +1032,14 @@
     },
     {
       "id": "kingdom-of-arles",
-      "name": "Kingdom of Arles",
-      "rank": "kingdom",
+      "name": "Duchy of Burgundy",
+      "rank": "duchy",
       "status": "country",
       "suzerain": "kingdom-of-france",
-      "existsFrom": 933,
-      "existsTo": 1378,
+      "existsFrom": 880,
+      "existsTo": 1477,
       "colour": "#0768f0",
-      "wikidata": "Q3271735"
+      "wikidata": "Q4712"
     },
     {
       "id": "county-of-pallars-jussa",
@@ -1137,7 +1148,7 @@
       "suzerain": "kingdom-of-france",
       "existsFrom": 866,
       "existsTo": 1797,
-      "colour": "#639ded",
+      "colour": "#0768f0",
       "wikidata": "Q157070"
     },
     {
@@ -1331,14 +1342,14 @@
     },
     {
       "id": "kingdom-of-bohemia",
-      "name": "Kingdom of Bohemia",
+      "name": "Duchy of Bohemia",
       "rank": "kingdom",
       "status": null,
       "suzerain": "holy-roman-empire",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 870,
+      "existsTo": 1198,
       "colour": "#db9380",
-      "wikidata": null
+      "wikidata": "Q2162698"
     },
     {
       "id": "zachlumia",
@@ -1362,6 +1373,226 @@
       "existsTo": 1154,
       "colour": "#5989c0",
       "wikidata": "Q25340956"
+    },
+    {
+      "id": "duchy-of-saxony",
+      "name": "Duchy of Saxony",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 804,
+      "existsTo": 1296,
+      "colour": "#c06c59",
+      "wikidata": "Q164092"
+    },
+    {
+      "id": "northern-march",
+      "name": "Northern March",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 965,
+      "existsTo": 1157,
+      "colour": null,
+      "wikidata": "Q701627"
+    },
+    {
+      "id": "duchy-of-thuringia",
+      "name": "Thuringia",
+      "rank": null,
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 908,
+      "existsTo": 1131,
+      "colour": "#c06c59",
+      "wikidata": null
+    },
+    {
+      "id": "saxon-eastern-march",
+      "name": "Saxon Eastern March",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 965,
+      "existsTo": 1128,
+      "colour": "#c06c59",
+      "wikidata": "Q703390"
+    },
+    {
+      "id": "friesland",
+      "name": "Friesland",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#c06c59",
+      "wikidata": null
+    },
+    {
+      "id": "upper-lotharingia",
+      "name": "Upper Lotharingia",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 959,
+      "existsTo": 1766,
+      "colour": "#c06c59",
+      "wikidata": "Q155019"
+    },
+    {
+      "id": "lower-lotharingia",
+      "name": "Lower Lotharingia",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 959,
+      "existsTo": 1190,
+      "colour": "#c06c59",
+      "wikidata": "Q660393"
+    },
+    {
+      "id": "margraviate-of-meissen",
+      "name": "Margraviate of Meissen",
+      "rank": "county",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 965,
+      "existsTo": 1423,
+      "colour": "#c06c59",
+      "wikidata": "Q170180"
+    },
+    {
+      "id": "duchy-of-franconia",
+      "name": "Duchy of Franconia",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 906,
+      "existsTo": 1168,
+      "colour": "#c06c59",
+      "wikidata": "Q703265"
+    },
+    {
+      "id": "duchy-of-bavaria",
+      "name": "Duchy of Bavaria",
+      "rank": "duchy",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 907,
+      "existsTo": 1805,
+      "colour": "#c06c59",
+      "wikidata": "Q47261"
+    },
+    {
+      "id": "duchy-of-carinthia",
+      "name": "Duchy of Carinthia",
+      "rank": null,
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 976,
+      "existsTo": 1335,
+      "colour": "#c06c59",
+      "wikidata": "Q702224"
+    },
+    {
+      "id": "march-of-verona",
+      "name": "March of Verona",
+      "rank": null,
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 952,
+      "existsTo": 1167,
+      "colour": "#c06c59",
+      "wikidata": "Q701920"
+    },
+    {
+      "id": "elsass",
+      "name": "Elsass",
+      "rank": "county",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#c06c59",
+      "wikidata": null
+    },
+    {
+      "id": "duchy-of-swabia",
+      "name": "Duchy of Swabia",
+      "rank": null,
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 917,
+      "existsTo": 1313,
+      "colour": "#c06c59",
+      "wikidata": "Q693980"
+    },
+    {
+      "id": "kingdom-of-arles-2",
+      "name": "Kingdom of Arles",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 933,
+      "existsTo": 1378,
+      "colour": "#a659c0",
+      "wikidata": "Q3271735"
+    },
+    {
+      "id": "kingdom-of-italy",
+      "name": "Kingdom of Italy",
+      "rank": null,
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 961,
+      "existsTo": 1806,
+      "colour": "#009d6e",
+      "wikidata": "Q838931"
+    },
+    {
+      "id": "duchy-of-normandy",
+      "name": "Duchy of Normandy",
+      "rank": "duchy",
+      "status": "country",
+      "suzerain": "norman-england",
+      "existsFrom": 911,
+      "existsTo": 1259,
+      "colour": null,
+      "wikidata": "Q842091"
+    },
+    {
+      "id": "duchy-of-spoleto",
+      "name": "Duchy of Spoleto",
+      "rank": null,
+      "status": null,
+      "suzerain": "kingdom-of-italy",
+      "existsFrom": 570,
+      "existsTo": 1203,
+      "colour": "#009d6e",
+      "wikidata": "Q2829270"
+    },
+    {
+      "id": "march-of-tuscany",
+      "name": "March of Tuscany",
+      "rank": null,
+      "status": null,
+      "suzerain": "kingdom-of-italy",
+      "existsFrom": 846,
+      "existsTo": 1197,
+      "colour": "#009d6e",
+      "wikidata": "Q1867844"
+    },
+    {
+      "id": "romagna",
+      "name": "Romagna",
+      "rank": null,
+      "status": null,
+      "suzerain": "kingdom-of-italy",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009d6e",
+      "wikidata": "Q244482"
     }
   ]
 }
