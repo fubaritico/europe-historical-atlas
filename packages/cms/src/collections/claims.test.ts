@@ -206,6 +206,30 @@ describe('titles and links', () => {
   })
 
   describe('edge cases', () => {
+    it('lets a title be saved again, and a divergent reading in — another suzerain, other years', async () => {
+      await payload.update({ collection: 'titles', id: count, data: {} })
+      const first = await payload.findByID({ collection: 'titles', id: count, depth: 0 })
+      const other = await payload.create({
+        collection: 'titles',
+        data: {
+          person: first.person,
+          territory: first.territory,
+          date: years(1084, 1104),
+          lines: [{ source }],
+        },
+      })
+      const divergent = await link({
+        vassal: count,
+        answersTo: 'suzerain',
+        suzerain: king,
+        date: years(1100, 1100),
+        lines: [{ source }],
+      })
+      // Gone again, so the refusals after it count only the base of `beforeAll`
+      await payload.delete({ collection: 'vassal-links', id: divergent.id })
+      await payload.delete({ collection: 'titles', id: other.id })
+    })
+
     it('lets any number of records go without a Wikidata id, empty or absent', async () => {
       await payload.create({ collection: 'people', data: { name: 'Gerbert', kind: 'person' } })
       await payload.create({ collection: 'people', data: { name: 'Gerberge', kind: 'person' } })
@@ -315,6 +339,103 @@ describe('titles and links', () => {
           data: { name: 'Apulie', kind: 'duchy', wikidata: 'Q3715874' },
         })
       ).rejects.toThrow('wikidata')
+    })
+
+    // The dev, 2026-11-15: three titles entered twice — a claim is itself by its relations and its years.
+    it('refuses a second title of the same person, territory and years, naming the first', async () => {
+      const first = await payload.findByID({ collection: 'titles', id: count, depth: 0 })
+      await expect(
+        payload.create({
+          collection: 'titles',
+          data: {
+            person: first.person,
+            territory: first.territory,
+            date: years(1084, 1103),
+            lines: [{ source }],
+          },
+        })
+      ).rejects.toThrow(new RegExp(`^Ce titre existe déjà : « .+ » \\(n° ${String(count)}\\)`))
+    })
+
+    it('counts two titles with no end as the same years, which an index would not', async () => {
+      const holder = await payload.create({
+        collection: 'people',
+        data: { name: 'Hoël II', kind: 'person' },
+      })
+      const land = await payload.create({
+        collection: 'territories',
+        data: { name: 'comté de Cornouaille (bis)', kind: 'county' },
+      })
+      const data = {
+        person: holder.id,
+        territory: land.id,
+        date: { start: { year: 1100 } },
+        lines: [{ source }],
+      }
+      await payload.create({ collection: 'titles', data })
+      await expect(payload.create({ collection: 'titles', data })).rejects.toThrow(
+        'Ce titre existe déjà'
+      )
+    })
+
+    it('refuses a second link of the same vassal to the same suzerain over the same years', async () => {
+      await expect(
+        link({
+          vassal: count,
+          answersTo: 'suzerain',
+          suzerain: duke,
+          date: years(1084, 1103),
+          lines: [{ source }],
+        })
+      ).rejects.toThrow('Ce maillon existe déjà')
+      await expect(
+        link({ vassal: king, answersTo: 'no-one', date: years(1060, 1108), lines: [{ source }] })
+      ).rejects.toThrow('Ce maillon existe déjà')
+    })
+
+    it('refuses a correction that makes a title the twin of another, and lets a link be saved again', async () => {
+      const holder = await payload.create({
+        collection: 'people',
+        data: { name: 'Budic', kind: 'person' },
+      })
+      const land = await payload.create({
+        collection: 'territories',
+        data: { name: 'comté de Vannes', kind: 'county' },
+      })
+      const one = { person: holder.id, territory: land.id, lines: [{ source }] }
+      const kept = await payload.create({
+        collection: 'titles',
+        data: { ...one, date: { start: { year: 1100 } } },
+      })
+      const moved = await payload.create({
+        collection: 'titles',
+        data: { ...one, date: { start: { year: 1101 } } },
+      })
+      await expect(
+        payload.update({
+          collection: 'titles',
+          id: moved.id,
+          data: { date: { start: { year: 1100 } } },
+        })
+      ).rejects.toThrow(`(n° ${String(kept.id)})`)
+      const { docs } = await payload.find({ collection: 'vassal-links', limit: 1, depth: 0 })
+      const anyLink = docs[0]
+      if (anyLink === undefined) throw new Error('the fixture holds no link')
+      await expect(
+        payload.update({ collection: 'vassal-links', id: anyLink.id, data: {} })
+      ).resolves.toMatchObject({ id: anyLink.id })
+    })
+
+    it('refuses a second « no one » link sent with a stray suzerain, compared as stored', async () => {
+      await expect(
+        link({
+          vassal: king,
+          answersTo: 'no-one',
+          suzerain: duke,
+          date: years(1060, 1108),
+          lines: [{ source }],
+        })
+      ).rejects.toThrow('Ce maillon existe déjà')
     })
 
     it('refuses to delete a person or a territory a title names, naming the title', async () => {

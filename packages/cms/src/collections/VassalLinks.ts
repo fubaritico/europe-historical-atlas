@@ -2,6 +2,7 @@ import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
 
+import { refuseDuplicateClaim } from './refuseDuplicateClaim'
 import { writeLinkLabel } from './writeClaimTitles'
 
 import type { CollectionConfig, Validate } from 'payload'
@@ -51,7 +52,17 @@ export const VassalLinks: CollectionConfig = {
   slug: 'vassal-links',
   labels: { singular: 'Maillon', plural: 'Maillons' },
   admin: { useAsTitle: 'label', defaultColumns: ['label'] },
-  hooks: { beforeChange: [writeLinkLabel] },
+  hooks: {
+    // The label's hook first: it empties the suzerain of a « no one » link, so the twin is looked for as stored
+    beforeChange: [
+      writeLinkLabel,
+      refuseDuplicateClaim({
+        collection: 'vassal-links',
+        relations: ['vassal', 'suzerain'],
+        subject: 'Ce maillon',
+      }),
+    ],
+  },
   fields: [
     {
       name: 'label',

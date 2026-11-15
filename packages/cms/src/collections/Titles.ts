@@ -2,6 +2,7 @@ import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
 
 import { refreshLinksOfTitle, refuseDeletingCited } from './claimDependants'
+import { refuseDuplicateClaim } from './refuseDuplicateClaim'
 import { writeTitleLabel } from './writeClaimTitles'
 
 import type { CollectionConfig } from 'payload'
@@ -17,7 +18,14 @@ export const Titles: CollectionConfig = {
   labels: { singular: 'Titre', plural: 'Titres' },
   admin: { useAsTitle: 'label', defaultColumns: ['label', 'person', 'territory'] },
   hooks: {
-    beforeChange: [writeTitleLabel],
+    beforeChange: [
+      writeTitleLabel,
+      refuseDuplicateClaim({
+        collection: 'titles',
+        relations: ['person', 'territory'],
+        subject: 'Ce titre',
+      }),
+    ],
     afterChange: [refreshLinksOfTitle],
     beforeDelete: [
       refuseDeletingCited({
