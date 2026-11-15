@@ -1,0 +1,247 @@
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { chainPaths, vassalChain } from '@europe-historical-atlas/core/data/vassalChain'
+
+import { vassalLinkOf } from '../fields/vassalLinkOf'
+
+import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { Payload } from 'payload'
+
+/**
+ * The registers of CMS-422 step 2 in a real base — Payload on a temporary SQLite file, never the dev's: Nantes in
+ * 1100 entered as the plan tells it (three people, three territories, three titles, three links, the king's link
+ * « to no one »), entered once before every test; each name written by the server; the chain of the count of
+ * Nantes computed by `core` from what the base holds.
+ */
+
+const folder = mkdtempSync(path.join(tmpdir(), 'cms-claims-'))
+const databaseUrl = `file:${path.join(folder, 'cms.db')}`
+let payload: Payload
+let source: number
+let count: number
+let duke: number
+let king: number
+let nantes: number
+
+/**
+ * A date group from one year to another, both included.
+ * @param from - the first year
+ * @param to - the last
+ * @returns the group
+ */
+function years(from: number, to: number) {
+  return { start: { year: from }, end: { year: to } }
+}
+
+/**
+ * Enter a link — through a loose shape, so a refused one can be tried as the MCP would send it.
+ * @param data - the link's fields
+ * @returns the link saved
+ */
+function link(data: Record<string, unknown>) {
+  return payload.create({ collection: 'vassal-links', data: data as never })
+}
+
+/**
+ * Enter a person, a territory and their title.
+ * @param person - the holder's name
+ * @param territory - the territory's name and kind
+ * @param from - the title's first year
+ * @param to - its last
+ * @returns the ids of the title and the territory
+ */
+async function title(
+  person: string,
+  territory: { name: string; kind: 'county' | 'duchy' | 'kingdom' },
+  from: number,
+  to: number
+): Promise<{ title: number; territory: number }> {
+  const holder = await payload.create({
+    collection: 'people',
+    data: { name: person, kind: 'person' },
+  })
+  const land = await payload.create({ collection: 'territories', data: territory })
+  const created = await payload.create({
+    collection: 'titles',
+    data: { person: holder.id, territory: land.id, date: years(from, to), lines: [{ source }] },
+  })
+  return { title: created.id, territory: land.id }
+}
+
+/**
+ * The links the base holds, read as `core`'s chain reads them.
+ * @returns the links
+ */
+async function storedLinks(): Promise<VassalLink[]> {
+  const { docs } = await payload.find({ collection: 'vassal-links', depth: 0, pagination: false })
+  return docs.map(vassalLinkOf).filter((read): read is VassalLink => read !== null)
+}
+
+beforeAll(async () => {
+  process.env.DATABASE_URL = databaseUrl
+  process.env.PAYLOAD_SECRET = 'test-secret-of-the-claims-suite'
+  const { getPayload, readMigrationFiles } = await import('payload')
+  const { default: config } = await import('../payload.config')
+  const { migrateBase } = await import('../migrate/migrateBase')
+  payload = await getPayload({ config })
+  await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+  const created = await payload.create({
+    collection: 'sources',
+    data: { title: 'Chédeville et Tonnerre 1987', kind: 'scholarly' },
+  })
+  source = created.id
+  const countOf = await title('Mathias II', { name: 'comté de Nantes', kind: 'county' }, 1084, 1103)
+  count = countOf.title
+  nantes = countOf.territory
+  duke = (await title('Alain IV', { name: 'duché de Bretagne', kind: 'duchy' }, 1084, 1112)).title
+  king = (await title('Philippe Ier', { name: 'royaume de France', kind: 'kingdom' }, 1060, 1108))
+    .title
+  const lines = [{ source }]
+  await link({
+    vassal: count,
+    answersTo: 'suzerain',
+    suzerain: duke,
+    date: years(1084, 1103),
+    lines,
+  })
+  await link({
+    vassal: duke,
+    answersTo: 'suzerain',
+    suzerain: king,
+    date: years(1084, 1112),
+    lines,
+  })
+  await link({ vassal: king, answersTo: 'no-one', date: years(1060, 1108), lines })
+}, 60_000)
+
+afterAll(async () => {
+  await payload.destroy()
+  rmSync(folder, { recursive: true, force: true })
+})
+
+describe('titles and links', () => {
+  describe('happy path', () => {
+    it('writes a title’s name from its holder, its territory and its years', async () => {
+      expect((await payload.findByID({ collection: 'titles', id: count })).label).toBe(
+        'Mathias II — comté de Nantes, 1084–1103'
+      )
+    })
+
+    it('gives the chain of Nantes in 1100 from what the base holds: count → duke → king, sovereign', async () => {
+      expect(chainPaths(vassalChain(String(count), 1100, await storedLinks()))).toEqual([
+        { titles: [String(count), String(duke), String(king)], end: 'sovereign' },
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('names the king’s link « → personne », and holds no suzerain on it', async () => {
+      const { docs } = await payload.find({
+        collection: 'vassal-links',
+        where: { vassal: { equals: king } },
+        depth: 0,
+      })
+      expect(docs.map((saved) => [saved.label, saved.suzerain ?? null])).toEqual([
+        ['Philippe Ier — royaume de France, 1060–1108 → personne', null],
+      ])
+    })
+
+    it('renames the titles and their links when a territory is renamed', async () => {
+      await payload.update({
+        collection: 'territories',
+        id: nantes,
+        data: { name: 'comté nantais' },
+      })
+      expect((await payload.findByID({ collection: 'titles', id: count })).label).toBe(
+        'Mathias II — comté nantais, 1084–1103'
+      )
+      const { docs } = await payload.find({
+        collection: 'vassal-links',
+        where: { vassal: { equals: count } },
+        depth: 0,
+      })
+      expect(docs[0]?.label).toBe(
+        'Mathias II — comté nantais, 1084–1103 → Alain IV — duché de Bretagne, 1084–1112'
+      )
+    }, 60_000)
+
+    it('renames the titles and the links where they are the suzerain when a person is renamed', async () => {
+      const ofDuke = await payload.findByID({ collection: 'titles', id: duke, depth: 0 })
+      await payload.update({
+        collection: 'people',
+        id: ofDuke.person as number,
+        data: { name: 'Alain Fergent' },
+      })
+      expect((await payload.findByID({ collection: 'titles', id: duke })).label).toBe(
+        'Alain Fergent — duché de Bretagne, 1084–1112'
+      )
+      const { docs } = await payload.find({
+        collection: 'vassal-links',
+        where: { suzerain: { equals: duke } },
+        depth: 0,
+      })
+      expect(docs[0]?.label?.endsWith('→ Alain Fergent — duché de Bretagne, 1084–1112')).toBe(true)
+    }, 60_000)
+
+    it('empties the suzerain of a « no one » link even when one was sent with it', async () => {
+      const aquitaine = (
+        await title('Guillaume IX', { name: 'duché d’Aquitaine', kind: 'duchy' }, 1086, 1126)
+      ).title
+      const saved = await link({
+        vassal: aquitaine,
+        answersTo: 'no-one',
+        suzerain: king,
+        date: years(1100, 1100),
+        lines: [{ source }],
+      })
+      expect([saved.suzerain ?? null, saved.label]).toEqual([
+        null,
+        'Guillaume IX — duché d’Aquitaine, 1086–1126 → personne',
+      ])
+    }, 60_000)
+  })
+
+  describe('managed errors', () => {
+    it('refuses a link with no source line', async () => {
+      await expect(
+        link({ vassal: count, suzerain: duke, date: years(1100, 1100), lines: [] })
+      ).rejects.toThrow('Ce que disent les sources')
+    })
+
+    it('refuses a title that answers to itself', async () => {
+      await expect(
+        link({ vassal: count, suzerain: count, date: years(1100, 1100), lines: [{ source }] })
+      ).rejects.toThrow('Suzerain')
+    })
+
+    it('refuses a link answering to a title with no title chosen — never read as a sovereign', async () => {
+      await expect(
+        link({ vassal: count, answersTo: 'suzerain', date: years(1100, 1100), lines: [{ source }] })
+      ).rejects.toThrow('Suzerain')
+    })
+
+    it('refuses to delete a title a link names, naming the links', async () => {
+      await expect(payload.delete({ collection: 'titles', id: duke })).rejects.toThrow(
+        'Ce titre est cité par 2 maillon(s)'
+      )
+      expect((await payload.findByID({ collection: 'titles', id: duke })).id).toBe(duke)
+    })
+
+    it('refuses to delete a person or a territory a title names, naming the title', async () => {
+      const ofCount = await payload.findByID({ collection: 'titles', id: count, depth: 0 })
+      await expect(
+        payload.delete({ collection: 'people', id: ofCount.person as number })
+      ).rejects.toThrow('Cette personne est citée par 1 titre(s)')
+      await expect(payload.delete({ collection: 'territories', id: nantes })).rejects.toThrow(
+        'Ce territoire est cité par 1 titre(s)'
+      )
+    })
+  })
+
+  // L4: N/A — a failing database is Payload's, inside its transaction; the hooks add no I/O of their own past it.
+  // L5: a link whose suzerain is gone is `vassalLinkOf`'s edge (vassalLinkOf.test.ts) — the delete above refuses it.
+})

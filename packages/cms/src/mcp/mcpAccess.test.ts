@@ -35,6 +35,9 @@ describe('mcpAccess', () => {
         'place-periods',
         'places',
         'sources',
+        'territories',
+        'titles',
+        'vassal-links',
       ])
     })
 

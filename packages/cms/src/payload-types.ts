@@ -76,6 +76,9 @@ export interface Config {
     'importance-reasons': ImportanceReason;
     confessions: Confession;
     people: Person;
+    territories: Territory;
+    titles: Title;
+    'vassal-links': VassalLink;
     sources: Source;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
@@ -94,6 +97,9 @@ export interface Config {
     'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>;
     confessions: ConfessionsSelect<false> | ConfessionsSelect<true>;
     people: PeopleSelect<false> | PeopleSelect<true>;
+    territories: TerritoriesSelect<false> | TerritoriesSelect<true>;
+    titles: TitlesSelect<false> | TitlesSelect<true>;
+    'vassal-links': VassalLinksSelect<false> | VassalLinksSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
@@ -573,6 +579,209 @@ export interface Confession {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "territories".
+ */
+export interface Territory {
+  id: number;
+  name: string;
+  /**
+   * Une terre tenue — d’un empire à une seigneurie — ou une charge exercée.
+   */
+  kind:
+    | 'empire'
+    | 'kingdom'
+    | 'principality'
+    | 'duchy'
+    | 'march'
+    | 'county'
+    | 'viscounty'
+    | 'lordship'
+    | 'bishopric'
+    | 'abbey'
+    | 'city'
+    | 'tribe'
+    | 'office';
+  /**
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   */
+  wikidata?: string | null;
+  /**
+   * Sa création, ou sa première mention.
+   */
+  existsFrom?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * Vide : on ne sait pas, ou il existe encore.
+   */
+  existsTo?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "titles".
+ */
+export interface Title {
+  id: number;
+  /**
+   * Écrit seul à l’enregistrement : la personne, le territoire, la date.
+   */
+  label?: string | null;
+  /**
+   * Celle qui tient le territoire, choisie dans « Personnes ».
+   */
+  person: number | Person;
+  /**
+   * Ce qu’elle tient ou exerce, choisi dans « Territoires ».
+   */
+  territory: number | Territory;
+  /**
+   * Une année suffit ; remplir la fin en fait une durée : de son avènement à sa mort ou à sa perte.
+   */
+  date: {
+    start: {
+      year: number;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+    end?: {
+      year?: number | null;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+  };
+  /**
+   * Au moins une : la source qui dit que cette personne tenait ce territoire à cette date.
+   */
+  lines: {
+    /**
+     * Choisie parmi celles déjà saisies dans « Sources ».
+     */
+    source: number | Source;
+    /**
+     * Une page, une ligne, une colonne. Facultatif.
+     */
+    where?: string | null;
+    /**
+     * Les mots de la source, recopiés tels quels.
+     */
+    quotation?: string | null;
+    /**
+     * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+     */
+    asWritten?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vassal-links".
+ */
+export interface VassalLink {
+  id: number;
+  /**
+   * Écrit seul à l’enregistrement : le vassal → son suzerain.
+   */
+  label?: string | null;
+  /**
+   * Le titre qui relève d’un autre, choisi dans « Titres ».
+   */
+  vassal: number | Title;
+  /**
+   * « Personne » seulement quand une source dit qu’il ne relève de personne à cette date.
+   */
+  answersTo: 'suzerain' | 'no-one';
+  /**
+   * Le titre dont il relève, choisi dans « Titres ».
+   */
+  suzerain?: (number | null) | Title;
+  /**
+   * Quand ce lien vaut. Une année suffit ; remplir la fin en fait une durée.
+   */
+  date: {
+    start: {
+      year: number;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+    end?: {
+      year?: number | null;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+  };
+  /**
+   * Au moins une : la source qui dit ce lien à cette date.
+   */
+  lines: {
+    /**
+     * Choisie parmi celles déjà saisies dans « Sources ».
+     */
+    source: number | Source;
+    /**
+     * Une page, une ligne, une colonne. Facultatif.
+     */
+    where?: string | null;
+    /**
+     * Les mots de la source, recopiés tels quels.
+     */
+    quotation?: string | null;
+    /**
+     * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+     */
+    asWritten?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -701,6 +910,48 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  territories?: {
+    /**
+     * Allow clients to find territories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create territories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update territories.
+     */
+    update?: boolean | null;
+  };
+  titles?: {
+    /**
+     * Allow clients to find titles.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create titles.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update titles.
+     */
+    update?: boolean | null;
+  };
+  vassalLinks?: {
+    /**
+     * Allow clients to find vassal-links.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create vassal-links.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update vassal-links.
+     */
+    update?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -764,6 +1015,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'people';
         value: number | Person;
+      } | null)
+    | ({
+        relationTo: 'territories';
+        value: number | Territory;
+      } | null)
+    | ({
+        relationTo: 'titles';
+        value: number | Title;
+      } | null)
+    | ({
+        relationTo: 'vassal-links';
+        value: number | VassalLink;
       } | null)
     | ({
         relationTo: 'sources';
@@ -1094,6 +1357,126 @@ export interface PeopleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "territories_select".
+ */
+export interface TerritoriesSelect<T extends boolean = true> {
+  name?: T;
+  kind?: T;
+  wikidata?: T;
+  existsFrom?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  existsTo?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "titles_select".
+ */
+export interface TitlesSelect<T extends boolean = true> {
+  label?: T;
+  person?: T;
+  territory?: T;
+  date?:
+    | T
+    | {
+        start?:
+          | T
+          | {
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+        end?:
+          | T
+          | {
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+      };
+  lines?:
+    | T
+    | {
+        source?: T;
+        where?: T;
+        quotation?: T;
+        asWritten?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vassal-links_select".
+ */
+export interface VassalLinksSelect<T extends boolean = true> {
+  label?: T;
+  vassal?: T;
+  answersTo?: T;
+  suzerain?: T;
+  date?:
+    | T
+    | {
+        start?:
+          | T
+          | {
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+        end?:
+          | T
+          | {
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+      };
+  lines?:
+    | T
+    | {
+        source?: T;
+        where?: T;
+        quotation?: T;
+        asWritten?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sources_select".
  */
 export interface SourcesSelect<T extends boolean = true> {
@@ -1175,6 +1558,27 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
       };
   people?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  territories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  titles?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  vassalLinks?:
     | T
     | {
         find?: T;

@@ -6,6 +6,9 @@ import { People } from '../collections/People'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
+import { TERRITORY_KINDS, Territories } from '../collections/Territories'
+import { Titles } from '../collections/Titles'
+import { VassalLinks } from '../collections/VassalLinks'
 
 import type { Plugin } from 'payload'
 
@@ -15,11 +18,14 @@ import type { Plugin } from 'payload'
  */
 const ENTER_NEVER_DELETE = { find: true, create: true, update: true, delete: false } as const
 
+/** The kinds of land a territory can be, for its description — read from the collection, the office said apart. */
+const LAND_KINDS = TERRITORY_KINDS.filter((kind) => kind !== 'office').join(', ')
+
 /**
  * The collections a model reaches over MCP — the ones the historian enters its sources into: the places, a city at
  * a date with its holder (CMS-335), the sources, the importance reasons a city's line cites (CMS-431), the
- * confessions of its communities (CMS-433), and the register of people every holder and suzerain is entered in
- * before any link of vassalage (CMS-422).
+ * confessions of its communities (CMS-433); and the chain of vassalage (CMS-422) — the register of people, the
+ * territories they hold, their titles, and the links between titles.
  * Everything else stays out until a need names it.
  *
  * Each entry still goes through Payload as the key's user: the collections' access rules and hooks — the sheet's
@@ -70,6 +76,29 @@ export const MCP_COLLECTIONS = {
       '`wikidata`; for a person `born` and `died`, each { year, month, day, circa, margin, calendar }, and `house` ' +
       '(the id of a record of kind house); for a house `founded`, `ended` and `founder`. No rank, role or ' +
       'confession here. Search by `wikidata` before creating — a person is entered once.',
+  },
+  [Territories.slug]: {
+    enabled: ENTER_NEVER_DELETE,
+    description:
+      `The register of territories: what is held — a land (\`kind\` ${LAND_KINDS}) or an office (\`office\`) — ` +
+      'with `name`, `wikidata`, `existsFrom`, `existsTo`. Never a point on the map, never its suzerain. Search by ' +
+      '`wikidata` before creating.',
+  },
+  [Titles.slug]: {
+    enabled: ENTER_NEVER_DELETE,
+    description:
+      'A title: a `person` (an id from people) holding a `territory` (an id from territories) over a `date` ' +
+      '({ start, end }, each { year, month, day, circa, margin, calendar }; end empty for a single year), with its ' +
+      '`lines` — at least one, each { source, where, quotation, asWritten }. `label` is written by the server. Search ' +
+      'by person and territory before creating.',
+  },
+  [VassalLinks.slug]: {
+    enabled: ENTER_NEVER_DELETE,
+    description:
+      'A link of vassalage: the title `vassal` answers, over a `date`, to the title `suzerain` (`answersTo` ' +
+      '"suzerain") — or to no one (`answersTo` "no-one", only when a source states it: a sovereign; `suzerain` then ' +
+      'stays empty). With its `lines`. Entered once per pair and period, reused by every place under it; a divergent ' +
+      'reading is a second link. `label` is written by the server.',
   },
 } as const
 

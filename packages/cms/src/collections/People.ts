@@ -1,6 +1,8 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
 import { wikidataField } from '../fields/wikidata'
 
+import { refreshTitlesOf, refuseDeletingCited } from './claimDependants'
+
 import type { CollectionConfig, Condition, GroupField } from 'payload'
 
 /** What a record of the register is: a person, or a house — a dynasty, a lineage (the Almoravids, the Stuarts). */
@@ -43,6 +45,18 @@ export const People: CollectionConfig = {
   slug: 'people',
   labels: { singular: 'Personne', plural: 'Personnes' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'kind', 'wikidata'] },
+  hooks: {
+    afterChange: [refreshTitlesOf('person')],
+    beforeDelete: [
+      refuseDeletingCited({
+        collection: 'titles',
+        fields: ['person'],
+        subject: 'Cette personne',
+        cited: 'citée',
+        what: 'titre(s)',
+      }),
+    ],
+  },
   fields: [
     { name: 'name', type: 'text', label: 'Nom', required: true, localized: true },
     {

@@ -18,7 +18,10 @@ import { PlacePeriods } from './collections/PlacePeriods'
 import { Places } from './collections/Places'
 import { SiegeEngines } from './collections/SiegeEngines'
 import { Sources } from './collections/Sources'
+import { Territories } from './collections/Territories'
+import { Titles } from './collections/Titles'
 import { Users } from './collections/Users'
+import { VassalLinks } from './collections/VassalLinks'
 import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
 import { mcpAccess } from './mcp/mcpAccess'
 import { MIGRATION_DIR } from './migrate/paths'
@@ -81,6 +84,9 @@ export default buildConfig({
     ImportanceReasons,
     Confessions,
     People,
+    Territories,
+    Titles,
+    VassalLinks,
     Sources,
     Users,
   ],
