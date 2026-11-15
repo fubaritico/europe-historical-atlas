@@ -8,8 +8,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1065,
+      "existsTo": 1833,
       "colour": "#d4982f",
       "wikidata": "Q179293"
     },
@@ -19,8 +19,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1098,
+      "existsTo": 1150,
       "colour": "#c0b659",
       "wikidata": "Q232806"
     },
@@ -30,8 +30,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 401,
+      "existsTo": 1216,
       "colour": "#7bc059",
       "wikidata": "Q816814"
     },
@@ -41,8 +41,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1018,
+      "existsTo": 1110,
       "colour": "#5987c0",
       "wikidata": "Q33061"
     },
@@ -64,8 +64,8 @@
       "rank": "sultanate",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1077,
+      "existsTo": 1307,
       "colour": "#595cc0",
       "wikidata": "Q975405"
     },
@@ -75,19 +75,19 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 900,
+      "existsTo": 1286,
       "colour": "#9e8447",
       "wikidata": "Q1991742"
     },
     {
       "id": "danishmendids",
       "name": "Danishmendids",
-      "rank": null,
+      "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1071,
+      "existsTo": 1178,
       "colour": "#c05987",
       "wikidata": "Q846670"
     },
@@ -97,19 +97,19 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1010,
+      "existsTo": 1099,
       "colour": "#b959c0",
       "wikidata": "Q605930"
     },
     {
       "id": "almoravid-dynasty",
       "name": "Almoravid Dynasty",
-      "rank": null,
+      "rank": "empire",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1040,
+      "existsTo": 1147,
       "colour": "#1e9802",
       "wikidata": "Q75613"
     },
@@ -131,8 +131,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1012,
+      "existsTo": 1104,
       "colour": "#95c059",
       "wikidata": "Q2060937"
     },
@@ -151,7 +151,7 @@
     {
       "id": "inalids",
       "name": "Inalids",
-      "rank": null,
+      "rank": "county",
       "status": null,
       "suzerain": null,
       "existsFrom": 1098,
@@ -165,8 +165,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1080,
+      "existsTo": 1375,
       "colour": "#c09359",
       "wikidata": "Q335088"
     },
@@ -176,8 +176,8 @@
       "rank": "republic",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1005,
+      "existsTo": 1797,
       "colour": "#c059b0",
       "wikidata": "Q174306"
     },
@@ -187,8 +187,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1000,
+      "existsTo": 1946,
       "colour": "#7c4424",
       "wikidata": "Q171150"
     },
@@ -252,11 +252,11 @@
     {
       "id": "western-chalukya-empire",
       "name": "Western Chalukya Empire",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 973,
+      "existsTo": 1189,
       "colour": "#abc059",
       "wikidata": "Q14624218"
     },
@@ -329,11 +329,12 @@
     {
       "id": "chola-empire",
       "name": "Chola Empire",
-      "rank": null,
+      "shortName": "Chola",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 848,
+      "existsTo": 1279,
       "colour": "#59c07d",
       "wikidata": "Q6806806"
     },
@@ -373,11 +374,11 @@
     {
       "id": "najahid-dynasty",
       "name": "Najahid Dynasty",
-      "rank": null,
+      "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1022,
+      "existsTo": 1158,
       "colour": "#5a59c0",
       "wikidata": "Q1411866"
     },
@@ -387,8 +388,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1097,
+      "existsTo": 1521,
       "colour": "#04a233",
       "wikidata": "Q269109"
     },
@@ -398,8 +399,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1098,
+      "existsTo": 1268,
       "colour": "#b7c059",
       "wikidata": "Q235030"
     },
@@ -409,15 +410,15 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 500,
+      "existsTo": 1471,
       "colour": "#67a308",
       "wikidata": "Q1483430"
     },
     {
       "id": "kimek-kipchak-confederation",
-      "name": "Kimek-Kipchak confederation",
-      "rank": "tribe",
+      "name": "Kimek Khanate",
+      "rank": "confederation",
       "status": null,
       "suzerain": null,
       "existsFrom": 743,
@@ -431,21 +432,21 @@
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1048,
+      "existsTo": 1141,
       "colour": "#5982c0",
       "wikidata": "Q680530"
     },
     {
       "id": "halych-volhynia-occupation",
-      "name": "Halych-Volhynia occupation",
-      "rank": "tribe",
+      "name": "Cumania",
+      "rank": "confederation",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1000,
+      "existsTo": 1241,
       "colour": "#c07259",
-      "wikidata": "Q239502"
+      "wikidata": "Q1122052"
     },
     {
       "id": "principality-of-chernigov",
@@ -453,8 +454,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 988,
+      "existsTo": 1402,
       "colour": "#67a308",
       "wikidata": "Q1322662"
     },
@@ -464,8 +465,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1125,
+      "existsTo": 1389,
       "colour": "#67a308",
       "wikidata": "Q83546"
     },
@@ -482,7 +483,8 @@
     },
     {
       "id": "norman-italy",
-      "name": "Norman Italy",
+      "name": "Norman conquest of southern Italy",
+      "shortName": "Norman Italy",
       "rank": null,
       "status": "country",
       "suzerain": null,
@@ -516,11 +518,11 @@
     {
       "id": "eastern-kara-khanids",
       "name": "Eastern Kara-Khanids",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 840,
+      "existsTo": 1212,
       "colour": "#59c0af",
       "wikidata": "Q494354"
     },
@@ -537,12 +539,12 @@
     },
     {
       "id": "ghaznavid-empire",
-      "name": "Ghaznavid Empire",
-      "rank": null,
+      "name": "Ghaznavids",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 962,
+      "existsTo": 1186,
       "colour": "#599dc0",
       "wikidata": "Q12844800"
     },
@@ -563,8 +565,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1010,
+      "existsTo": 1508,
       "colour": "#64a005",
       "wikidata": "Q1483495"
     },
@@ -603,23 +605,23 @@
     },
     {
       "id": "novgorod-republic",
-      "name": "Novgorod Republic",
+      "name": "Principality of Novgorod",
       "rank": null,
       "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#a8c059",
-      "wikidata": "Q151536"
+      "suzerain": "kievan-rus",
+      "existsFrom": 882,
+      "existsTo": 1136,
+      "colour": "#67a308",
+      "wikidata": "Q130499974"
     },
     {
       "id": "ghana-empire",
       "name": "Ghana Empire",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 100,
+      "existsTo": 1200,
       "colour": "#c05a59",
       "wikidata": "Q206789"
     },
@@ -651,21 +653,10 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1031,
+      "existsTo": 1124,
       "colour": "#67a308",
       "wikidata": "Q4350658"
-    },
-    {
-      "id": "ziyadid-dynasty",
-      "name": "Ziyadid dynasty",
-      "rank": null,
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#59c090",
-      "wikidata": "Q207017"
     },
     {
       "id": "zurayid-dynasty",
@@ -761,8 +752,8 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 900,
+      "existsTo": 1239,
       "colour": "#67a308",
       "wikidata": "Q1261908"
     },
@@ -791,11 +782,11 @@
     {
       "id": "empire-of-kanem",
       "name": "Empire of Kanem",
-      "rank": "empire",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1100,
+      "existsTo": 1900,
       "colour": "#c0597d",
       "wikidata": "Q1139762"
     },
@@ -879,11 +870,11 @@
     {
       "id": "lohara-dynasty",
       "name": "Lohara Dynasty",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1003,
+      "existsTo": 1320,
       "colour": "#598bc0",
       "wikidata": "Q1315339"
     },
@@ -912,7 +903,7 @@
     {
       "id": "kashmir",
       "name": "Kashmir",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -926,19 +917,19 @@
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 987,
+      "existsTo": 1452,
       "colour": "#67a308",
       "wikidata": "Q680472"
     },
     {
       "id": "takrur",
       "name": "Takrur",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1285,
       "colour": "#c09159",
       "wikidata": "Q2272880"
     },
@@ -956,7 +947,7 @@
     {
       "id": "chauhan-dynasty",
       "name": "Chauhan Dynasty",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -989,7 +980,7 @@
     {
       "id": "pomerania",
       "name": "Pomeranians",
-      "rank": "tribe_outlined",
+      "rank": "tribe",
       "status": null,
       "suzerain": null,
       "existsFrom": null,
@@ -999,12 +990,12 @@
     },
     {
       "id": "paramara-dynasty",
-      "name": "Paramara Dynasty",
-      "rank": null,
+      "name": "Paramara dynasty",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1305,
       "colour": "#a6c059",
       "wikidata": "Q7135130"
     },
@@ -1014,15 +1005,15 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
+      "existsFrom": 900,
       "existsTo": null,
       "colour": "#5368de",
       "wikidata": "Q34"
     },
     {
       "id": "sind-habbari-dynasty",
-      "name": "Sind-Habbari Dynasty",
-      "rank": null,
+      "name": "Habbari dynasty",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -1080,8 +1071,8 @@
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 812,
+      "existsTo": 1402,
       "colour": "#59c08c",
       "wikidata": "Q1541699"
     },
@@ -1091,8 +1082,8 @@
       "rank": "republic",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 697,
+      "existsTo": 1797,
       "colour": "#54a0f1",
       "wikidata": "Q4948"
     },
@@ -1131,7 +1122,7 @@
     },
     {
       "id": "jaemtland",
-      "name": "Jaemtland",
+      "name": "Jämtland",
       "rank": null,
       "status": "country",
       "suzerain": "kingdom-of-sweden",
@@ -1164,23 +1155,23 @@
     },
     {
       "id": "chaulukya-dynasty",
-      "name": "Chaulukya Dynasty",
-      "rank": null,
+      "name": "Chaulukya dynasty",
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 940,
+      "existsTo": 1244,
       "colour": "#8ec059",
       "wikidata": "Q18211496"
     },
     {
       "id": "zagwe-dynasty",
       "name": "Zagwe dynasty",
-      "rank": null,
+      "rank": "distant",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 900,
+      "existsTo": 1270,
       "colour": "#a1c059",
       "wikidata": "Q140446"
     },
@@ -1190,8 +1181,8 @@
       "rank": null,
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 930,
+      "existsTo": 1262,
       "colour": "#59c082",
       "wikidata": "Q62389"
     },
@@ -1201,8 +1192,8 @@
       "rank": null,
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 500,
+      "existsTo": 1518,
       "colour": "#b2c059",
       "wikidata": "Q829356"
     },
@@ -1212,8 +1203,8 @@
       "rank": null,
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 600,
+      "existsTo": 1504,
       "colour": "#59c074",
       "wikidata": "Q449639"
     },
@@ -1235,10 +1226,10 @@
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
+      "existsFrom": -5000,
       "existsTo": null,
       "colour": "#5d1939",
-      "wikidata": null
+      "wikidata": "Q690126"
     },
     {
       "id": "viscounty-of-fenouilledes",
@@ -1261,7 +1252,7 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#0d8e63",
-      "wikidata": null
+      "wikidata": "Q49540"
     },
     {
       "id": "lithuanians",
@@ -1272,40 +1263,40 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#65391e",
-      "wikidata": null
+      "wikidata": "Q4263549"
     },
     {
       "id": "prussians",
-      "name": "Prussians",
+      "name": "Old Prussians",
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#41580b",
-      "wikidata": null
+      "wikidata": "Q109073"
     },
     {
       "id": "sudovians",
-      "name": "Sudovians",
+      "name": "Suvalkians",
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#5a741d",
-      "wikidata": null
+      "wikidata": "Q97223161"
     },
     {
       "id": "zhmuds",
-      "name": "Zhmuds",
+      "name": "Samogitians",
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#305156",
-      "wikidata": null
+      "wikidata": "Q393779"
     },
     {
       "id": "semigallians",
@@ -1316,7 +1307,7 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#36134b",
-      "wikidata": null
+      "wikidata": "Q287800"
     },
     {
       "id": "curonians",
@@ -1327,7 +1318,7 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#4a8c24",
-      "wikidata": null
+      "wikidata": "Q756922"
     },
     {
       "id": "kingdom-of-croatia",
@@ -1393,7 +1384,7 @@
       "suzerain": "holy-roman-empire",
       "existsFrom": 965,
       "existsTo": 1157,
-      "colour": null,
+      "colour": "#c06c59",
       "wikidata": "Q701627"
     },
     {
@@ -1487,7 +1478,7 @@
     {
       "id": "duchy-of-carinthia",
       "name": "Duchy of Carinthia",
-      "rank": null,
+      "rank": "duchy",
       "status": null,
       "suzerain": "holy-roman-empire",
       "existsFrom": 976,
@@ -1498,7 +1489,7 @@
     {
       "id": "march-of-verona",
       "name": "March of Verona",
-      "rank": null,
+      "rank": "county",
       "status": null,
       "suzerain": "holy-roman-empire",
       "existsFrom": 952,
