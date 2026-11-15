@@ -165,3 +165,17 @@
 .city-sheet__chain-end--loop {
   color: var(--theme-error-600);
 }
+
+/* CMS-422 step 2c: « Créer un titre », Payload's own drawer under the holder's Typeahead. */
+.city-sheet__new-title-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--theme-elevation-800);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

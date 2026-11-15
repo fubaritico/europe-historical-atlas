@@ -101,6 +101,8 @@
   "holderTitleNone": "Aucun titre de ce nom dans « Titres ».",
   "holderTitleSearchFailed": "La recherche des titres n’a pas abouti. Réessayez dans un instant.",
   "holderTitleRemove": "Retirer {name}",
+  "newTitle": "Créer un titre",
+  "newTitleUnnamed": "Le titre a été créé sans son nom : ouvrez-le dans « Titres » et enregistrez-le de nouveau, puis choisissez-le ici.",
   "chain": "Chaîne de vassalité en {year}",
   "chainNoYear": "Saisissez l’année de la fiche : la chaîne se lit à cette année.",
   "chainLoading": "Lecture de la chaîne…",

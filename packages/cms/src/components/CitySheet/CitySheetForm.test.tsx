@@ -13,9 +13,28 @@ import type { SheetValues } from './utils/sheetValues'
 
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }))
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+// Payload's drawer, its form stood in for: the toggler its label, the drawer keeping its `onSave` for a test to call
+const drawer = vi.hoisted(() => {
+  type OnSave = (args: { doc: { id: number; label?: string } }) => void
+  const state: { onSave?: OnSave | undefined; initialData?: unknown } = {}
+  const closeDrawer = vi.fn()
+  return {
+    state,
+    closeDrawer,
+    use: () => [
+      (props: { onSave?: OnSave; initialData?: unknown }) => {
+        state.onSave = props.onSave
+        state.initialData = props.initialData
+        return null
+      },
+      ({ children }: { children?: unknown }) => children as never,
+      { closeDrawer },
+    ],
+  }
+})
 
 vi.mock('next/navigation', () => ({ useRouter: () => router }))
-vi.mock('@payloadcms/ui', () => ({ toast }))
+vi.mock('@payloadcms/ui', () => ({ toast, useDocumentDrawer: drawer.use }))
 
 /** The CMS's reasons, as the server reads them. */
 const REASONS = [
@@ -218,6 +237,26 @@ describe('CitySheetForm', () => {
   })
 
   describe('variants', () => {
+    // CMS-422 step 2c: a title created in Payload's own drawer becomes the sheet's holder.
+    it('offers « Créer un titre » while no title is held, and holds the one saved in the drawer', async () => {
+      serverAnswers(200, { docs: [] })
+      renderForm(rome, 1)
+      expect(screen.getByText('Créer un titre')).toBeTruthy()
+      drawer.state.onSave?.({ doc: { id: 12, label: 'Mathias II — comté de Nantes, 1084–1103' } })
+      expect(await screen.findByText('Mathias II — comté de Nantes, 1084–1103')).toBeTruthy()
+      expect(screen.queryByText('Créer un titre')).toBeNull()
+      expect(drawer.closeDrawer).toHaveBeenCalled()
+    })
+
+    it('opens the drawer with the sheet’s year filled in, and with no year while it is not one', () => {
+      serverAnswers(200, { docs: [] })
+      const { unmount } = renderForm(rome, 1)
+      expect(drawer.state.initialData).toEqual({ date: { start: { year: 1100 } } })
+      unmount()
+      renderForm(empty)
+      expect(drawer.state.initialData).toBeUndefined()
+    })
+
     // CMS-422 step 2c: the holder as a title, its chain computed from the links and read under it.
     it('shows the chain of the holder’s title at the sheet’s year, up to a sovereign', async () => {
       const span = { start: { year: 1084 }, end: { year: 1103 } }
@@ -590,6 +629,22 @@ describe('CitySheetForm', () => {
   })
 
   describe('unmanaged errors', () => {
+    it('holds no title saved without its name, and says so', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      serverAnswers(200, { docs: [] })
+      renderForm(rome, 1)
+      drawer.state.onSave?.({ doc: { id: 12, label: '' } })
+      drawer.state.onSave?.({ doc: { id: 12 } })
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Le titre a été créé sans son nom : ouvrez-le dans « Titres » et enregistrez-le de nouveau, puis choisissez-le ici.'
+        )
+      })
+      expect(error).toHaveBeenCalledTimes(2)
+      expect(error).toHaveBeenCalledWith('[CMS] the title 12 was saved without its name')
+      expect(screen.getByText('Créer un titre')).toBeTruthy()
+    })
+
     it('says a silent server in its own words, and keeps what was typed', async () => {
       vi.stubGlobal(
         'fetch',

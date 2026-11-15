@@ -1,6 +1,7 @@
 import { holderTitleTexts } from '../utils/recordFieldTexts'
 
 import { HolderChain } from './HolderChain'
+import { NewTitleDrawer } from './NewTitleDrawer'
 import { RecordField } from './RecordField'
 import { TextField } from './TextField'
 
@@ -10,7 +11,7 @@ import type { RecordChoice } from '../utils/sheetValues'
 
 /**
  * « Tenue par »: the holder of the city at the sheet's date — **a title**, chosen among « Titres » by typing, its chain
- * of vassalage read under it (CMS-422 step 2c) — then the polity's name and Wikidata id as typed (CMS-335), what the
+ * of vassalage read under it, or created in Payload's own drawer when absent (CMS-422 step 2c) — then the polity's name and Wikidata id as typed (CMS-335), what the
  * Cartographer's cities layer compares with the polity drawn under the city until 1100 is taken over into the titles
  * (step 3). All optional; an id needs its name.
  * @param props - the titles' search, the chain's reader and the translator
@@ -32,6 +33,7 @@ export function HolderFields({
     <fieldset className="city-sheet__group">
       <legend className="city-sheet__legend">{say('holder')}</legend>
       <RecordField name="holderTitle" texts={holderTitleTexts(say)} search={searchTitles} />
+      <NewTitleDrawer say={say} />
       <HolderChain read={readChain} say={say} />
       <TextField name="holderName" label={say('lineHolder')} help={say('holderHelp')} />
       <TextField name="holderQid" label={say('holderQid')} help={say('holderQidHelp')} />

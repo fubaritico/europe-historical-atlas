@@ -101,6 +101,8 @@
   "holderTitleNone": "No title of that name in « Titles ».",
   "holderTitleSearchFailed": "The search for titles did not go through. Try again in a moment.",
   "holderTitleRemove": "Remove {name}",
+  "newTitle": "Create a title",
+  "newTitleUnnamed": "The title was created without its name: open it in « Titles » and save it again, then pick it here.",
   "chain": "Chain of vassalage in {year}",
   "chainNoYear": "Enter the sheet’s year: the chain is read at that year.",
   "chainLoading": "Reading the chain…",
