@@ -44,8 +44,10 @@ export const MCP_COLLECTIONS = {
   [PlacePeriods.slug]: {
     enabled: ENTER_NEVER_DELETE,
     description:
-      'A city at a date (« Ville à une date »): its importance, the polity holding it (holderName, holderQid) ' +
-      'and its source lines, each with a subject, a source and a quotation; its `communities`, each a confession, a ' +
+      'A city at a date (« Ville à une date »): its importance; its holder `holderTitle`, an id from titles — the ' +
+      'person, for the territory held, the city answers to at that date; its chain of vassalage is computed from the ' +
+      'links of that title, never entered here — and, until 1100 is taken over, the polity holding it as text ' +
+      '(holderName, holderQid); its source lines, each with a subject, a source and a quotation; its `communities`, each a confession, a ' +
       '`weight` (dominant or present) and `weightAttested` — true only when a source says that weight — and each named ' +
       'by a line with the subject « community » citing the same confession; `showInAtlas` (false by default) ' +
       'decides whether the published atlas shows it — every city still reaches the Cartographer.',
