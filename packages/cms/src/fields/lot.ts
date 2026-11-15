@@ -24,6 +24,7 @@ export function lotGroup(options: {
     admin: { description: options.description, width: '50%' },
     fields: [
       { name: 'name', type: 'text', label: 'Nom' },
+      // Not `wikidataField`, and never unique: a lot's id is today's country or region, which many places share
       {
         name: 'wikidata',
         type: 'text',

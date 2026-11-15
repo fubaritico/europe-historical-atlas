@@ -205,6 +205,22 @@ describe('titles and links', () => {
     }, 60_000)
   })
 
+  describe('edge cases', () => {
+    it('lets any number of records go without a Wikidata id, empty or absent', async () => {
+      await payload.create({ collection: 'people', data: { name: 'Gerbert', kind: 'person' } })
+      await payload.create({ collection: 'people', data: { name: 'Gerberge', kind: 'person' } })
+      await payload.create({
+        collection: 'people',
+        data: { name: 'Gerold', kind: 'person', wikidata: '' },
+      })
+      const saved = await payload.create({
+        collection: 'people',
+        data: { name: 'Gerlinde', kind: 'person', wikidata: '' },
+      })
+      expect(saved.wikidata ?? null).toBeNull()
+    })
+  })
+
   describe('managed errors', () => {
     it('refuses a link with no source line', async () => {
       await expect(
@@ -253,6 +269,53 @@ describe('titles and links', () => {
         'Ce titre est cité par 1 fiche(s) de ville : « Quimper — 1080 »'
       )
     }, 60_000)
+
+    // The dev, 2026-11-15: « il faut plus jamais qu'il y ait de doublons » — Humbert II was entered twice by a correction.
+    it('refuses a second person with a Wikidata id another holds, at a creation and at a correction', async () => {
+      await payload.create({
+        collection: 'people',
+        data: { name: 'Humbert II de Savoie', kind: 'person', wikidata: 'Q553289' },
+      })
+      await expect(
+        payload.create({
+          collection: 'people',
+          data: { name: 'Humbert II', kind: 'person', wikidata: 'Q553289' },
+        })
+      ).rejects.toThrow('wikidata')
+      const other = await payload.create({
+        collection: 'people',
+        data: { name: 'Humbert de Maurienne', kind: 'person' },
+      })
+      await expect(
+        payload.update({ collection: 'people', id: other.id, data: { wikidata: 'Q553289' } })
+      ).rejects.toThrow('wikidata')
+    })
+
+    it('refuses a second place with a Wikidata id another holds', async () => {
+      await payload.create({
+        collection: 'places',
+        data: { name: 'Erfurt', location: [11.03, 50.98], wikidata: 'Q1729' },
+      })
+      await expect(
+        payload.create({
+          collection: 'places',
+          data: { name: 'Erfurt (bis)', location: [11.03, 50.98], wikidata: 'Q1729' },
+        })
+      ).rejects.toThrow('wikidata')
+    })
+
+    it('refuses a second territory with a Wikidata id another holds', async () => {
+      await payload.create({
+        collection: 'territories',
+        data: { name: 'duché d’Apulie et de Calabre', kind: 'duchy', wikidata: 'Q3715874' },
+      })
+      await expect(
+        payload.create({
+          collection: 'territories',
+          data: { name: 'Apulie', kind: 'duchy', wikidata: 'Q3715874' },
+        })
+      ).rejects.toThrow('wikidata')
+    })
 
     it('refuses to delete a person or a territory a title names, naming the title', async () => {
       const ofCount = await payload.findByID({ collection: 'titles', id: count, depth: 0 })

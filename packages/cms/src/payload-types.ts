@@ -200,7 +200,7 @@ export interface Event {
   description?: string | null;
   sources?: (number | Source)[] | null;
   /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
   wikidata?: string | null;
   updatedAt: string;
@@ -231,7 +231,7 @@ export interface Place {
    */
   location: [number, number];
   /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
   wikidata?: string | null;
   /**
@@ -288,7 +288,7 @@ export interface Person {
   name: string;
   kind: 'person' | 'house';
   /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
   wikidata?: string | null;
   /**
@@ -418,7 +418,7 @@ export interface SiegeEngine {
    */
   sources: (number | Source)[];
   /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
   wikidata?: string | null;
   updatedAt: string;
@@ -664,7 +664,7 @@ export interface Territory {
     | 'tribe'
     | 'office';
   /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
   wikidata?: string | null;
   /**

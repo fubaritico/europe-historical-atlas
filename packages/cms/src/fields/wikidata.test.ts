@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { validateWikidataId } from './wikidata'
+import { emptyAsNoId, validateWikidataId } from './wikidata'
 
 describe('validateWikidataId', () => {
   describe('happy path', () => {
@@ -37,4 +37,24 @@ describe('validateWikidataId', () => {
       expect(validateWikidataId('Q')).not.toBe(true)
     })
   })
+})
+
+describe('emptyAsNoId', () => {
+  describe('happy path', () => {
+    it('reads an empty id as no id, so the unique index never compares it', () => {
+      expect(emptyAsNoId({ value: '' })).toBeNull()
+    })
+  })
+
+  describe('variants', () => {
+    it('lets an id, a null and a missing value through as they are', () => {
+      expect([
+        emptyAsNoId({ value: 'Q1218' }),
+        emptyAsNoId({ value: null }),
+        emptyAsNoId({}),
+      ]).toEqual(['Q1218', null, undefined])
+    })
+  })
+
+  // L3–L5: N/A — one comparison, no failure of its own; a blank of spaces is the shape check's to refuse.
 })
