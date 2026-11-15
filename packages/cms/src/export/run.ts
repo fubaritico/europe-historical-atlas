@@ -2,10 +2,11 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { getPayload } from 'payload'
+import { getPayload, readMigrationFiles } from 'payload'
 
 import { contentFileSchema } from '@europe-historical-atlas/core/data/contentFormat'
 
+import { assertMigrated } from '../migrate/migrateBase'
 import config from '../payload.config'
 
 import { toContent, toSiegeEnginePeriods } from './toContent'
@@ -27,6 +28,8 @@ const OUT = path.resolve(
  * Anything wrong stops the export and names the event — nothing half-written reaches the atlas.
  */
 const payload = await getPayload({ config })
+// A base behind the collections would fail mid-way on a missing column: refused first, the way out said (CMS-276)
+await assertMigrated(payload, await readMigrationFiles({ payload }))
 // The engins first: each siege is given the newest in use at its date.
 const engines = await payload.find({
   collection: 'siege-engines',

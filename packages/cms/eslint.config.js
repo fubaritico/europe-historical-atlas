@@ -19,6 +19,8 @@ export default tseslint.config(
       'next-env.d.ts',
       'src/app/(payload)/**',
       'src/payload-types.ts',
+      // The schema's migrations: written by `payload migrate:create`, their snapshot beside them (CMS-276)
+      'src/migrations/**',
       'next.config.ts',
     ],
   },

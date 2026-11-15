@@ -14,5 +14,7 @@ packages/atlas/public/years
 # them, so a reload leaves no diff (CMS-290)
 packages/cms/src/payload-types.ts
 packages/cms/src/app/(payload)/admin/importMap.js
+# The schema's migrations and their snapshots, written by `payload migrate:create` (CMS-276)
+packages/cms/src/migrations
 # The names' fixture is written by files/spikes/name-fixture/build-fixture.ts, its runs on one line
 **/pipeline/testing/*.json

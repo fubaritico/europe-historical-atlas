@@ -13,5 +13,8 @@
       "@payload-config": ["./src/payload.config.ts"]
     }
   },
-  "include": ["next-env.d.ts", "src", ".next/types/**/*.ts"]
+  "include": ["next-env.d.ts", "src", ".next/types/**/*.ts"],
+  // Written by `payload migrate:create` in Payload's own style (CMS-276); what proves them is their test, which runs
+  // every one from an empty base and compares the result with the collections.
+  "exclude": ["src/migrations"]
 }

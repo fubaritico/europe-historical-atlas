@@ -27,9 +27,24 @@ the server refuses to start without either.
 **`pnpm seed:cms` writes into whatever base `DATABASE_URL` names** — never run it against a base that holds real
 content.
 
-**A field removed or renamed** makes Payload ask a question in the server's terminal, and every request waits behind it
-(it pushes the schema at the first request, in development). Until migrations replace that push, a field is only ever
-added.
+## The schema changes by migrations
+
+The base's schema never changes by itself: **`pnpm dev:cms` runs `migrate` before the server starts** (`push: false`,
+CMS-276). Before applying anything, `migrate` copies the base to `packages/cms/.backups/` (ignored by git, as every
+`.db`), named by the moment and the last migration it held. A base built by the old schema push is adopted the first
+time — once it is checked to be exactly the collections' schema; a base that differs is refused, nothing written, and
+the server does not start.
+
+| command, in `packages/cms`   | what it does                                                                                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `pnpm migrate`               | copies the base, then applies what is pending — run by `dev` and `seed`                                   |
+| `pnpm migrate:create <name>` | after a field change: writes `src/migrations/<moment>_<name>.ts` and its `.json` snapshot, both committed |
+| `pnpm migrate:status`        | which migrations the base holds                                                                           |
+
+**A rename asks a question**: `migrate:create` cannot tell a renamed table or column from one removed and one added, and
+asks in its terminal — such a migration is written by hand, then proved by `src/migrate/migrateBase.test.ts`, which
+applies every migration to an empty base and fails on any difference with the collections. **Going back** is the copy:
+stop the server, put the copy in place of `cms.db`, start it again.
 
 ## Connect Claude to it — the MCP server
 
@@ -55,14 +70,14 @@ read and enter places, cities at a date, sources, importance reasons and confess
 
 ## When something fails
 
-| what you see                                                                 | what it means                                                                      | what to do                                                                                                                        |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `cms` missing from `/mcp`                                                    | the session started before `claude mcp add`; a session never rereads it            | open a new session; `claude mcp list` shows the real state                                                                        |
-| `MCP server cms already exists`                                              | it was registered already                                                          | nothing; check with `claude mcp list`                                                                                             |
-| ✘ _connection timed out after 30000ms_                                       | **the server is stuck, not the key** — a wrong key is refused at once              | open `/admin`: if it hangs too, read the server's terminal                                                                        |
-| `SQLITE_ERROR: index … already exists` in the terminal, the admin showing it | a schema push failed halfway after a field change; every request waits behind it   | stop the server; check on **a copy** of `cms.db` that the push has nothing left to do; restart. Never try a push on the real base |
-| `401` with the key                                                           | the key is wrong, or `CMS_MCP_KEY` was empty when `claude mcp add` ran             | `export` it again, `claude mcp remove cms`, add it again                                                                          |
-| an entry refused on the importance reasons or the confessions                | the key's **find**, **create** or **update** box for that collection is not ticked | admin › MCP › API Keys, tick the three                                                                                            |
+| what you see                                                                                     | what it means                                                                      | what to do                                                   |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `cms` missing from `/mcp`                                                                        | the session started before `claude mcp add`; a session never rereads it            | open a new session; `claude mcp list` shows the real state   |
+| `MCP server cms already exists`                                                                  | it was registered already                                                          | nothing; check with `claude mcp list`                        |
+| ✘ _connection timed out after 30000ms_                                                           | **the server is stuck, not the key** — a wrong key is refused at once              | open `/admin`: if it hangs too, read the server's terminal   |
+| `[CMS] the base was built by the schema push and differs from the collections` at `pnpm dev:cms` | the base's schema is not the one the code describes; nothing was written           | tell the coder: the differences are listed under the message |
+| `401` with the key                                                                               | the key is wrong, or `CMS_MCP_KEY` was empty when `claude mcp add` ran             | `export` it again, `claude mcp remove cms`, add it again     |
+| an entry refused on the importance reasons or the confessions                                    | the key's **find**, **create** or **update** box for that collection is not ticked | admin › MCP › API Keys, tick the three                       |
 
 **A healthy server, checked without a key**: an MCP `initialize` posted to `/api/mcp` answers **401 within
 milliseconds**, and `/admin` answers 200 (a few seconds the first time, while Next compiles). No answer within 20

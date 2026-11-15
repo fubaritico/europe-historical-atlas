@@ -345,6 +345,7 @@ export default tseslint.config(
       // well as in the CMS's own config, because lint-staged runs ESLint from the root.
       'packages/cms/src/app/(payload)/**',
       'packages/cms/src/payload-types.ts',
+      'packages/cms/src/migrations/**',
       '**/next-env.d.ts',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',

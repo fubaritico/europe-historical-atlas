@@ -21,6 +21,7 @@ import { Sources } from './collections/Sources'
 import { Users } from './collections/Users'
 import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
 import { mcpAccess } from './mcp/mcpAccess'
+import { MIGRATION_DIR } from './migrate/paths'
 
 /** This file's folder: the import map and the generated types are written beside it. */
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -95,5 +96,10 @@ export default buildConfig({
   plugins: [mcpAccess()],
   secret: required('PAYLOAD_SECRET'),
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
-  db: sqliteAdapter({ client: { url: required('DATABASE_URL') } }),
+  // Migrations, never the push (CMS-276): the push asks its questions in the dev's terminal and freezes his server.
+  db: sqliteAdapter({
+    client: { url: required('DATABASE_URL') },
+    push: false,
+    migrationDir: MIGRATION_DIR,
+  }),
 })

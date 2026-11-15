@@ -1,6 +1,7 @@
-import { getPayload } from 'payload'
+import { getPayload, readMigrationFiles } from 'payload'
 
 import { retitleSheets } from '../collections/retitleSheets'
+import { assertMigrated } from '../migrate/migrateBase'
 import config from '../payload.config'
 
 /**
@@ -9,6 +10,7 @@ import config from '../payload.config'
  * rules as the form, and a sheet they refuse stops the run, named.
  */
 const payload = await getPayload({ config })
+await assertMigrated(payload, await readMigrationFiles({ payload }))
 const count = await retitleSheets(payload, {})
 console.warn(`[CMS] place-periods: ${String(count)} given their title`)
 process.exit(0)

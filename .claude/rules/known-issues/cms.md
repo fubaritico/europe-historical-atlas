@@ -12,9 +12,13 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   sait pas si c'est un renommage et **demande** (`drizzle/src/utilities/pushDevSchema.ts` l. 47) ; un avertissement de
   perte de données répondu « non » **arrête le serveur** (`process.exit(0)`). Payload ne se connecte qu'à la première
   requête : la question tombe au milieu d'un clic, chaque requête attend derrière (2 min mesurées, puis plus rien). Sa
-  base a été supprimée le 25/10, avec son accord (elle ne tenait que son compte). **Remède** : les migrations
-  (`push: false`), CMS-276. **Jusque-là** : aucun changement de champ qui retire ou renomme une colonne, et le dire au
-  dev avant qu'il relance. **Sévérité : bloquant dès qu'il y a du contenu.**
+  base a été supprimée le 25/10, avec son accord (elle ne tenait que son compte). **Remède en place, le 15/11** : les
+  migrations (`push: false`, `src/migrate/`, `packages/cms/README.md` « The schema changes by migrations ») — `pnpm
+  dev:cms` copie la base puis applique les migrations avant que Next démarre ; sa base, bâtie par le push, est adoptée à
+  la première relance une fois prouvée identique aux collections (mesuré sur une copie : 0 écart, 2 s). **L'entrée part
+  aux archives quand il aura relancé son serveur avec.** **Reste un piège, celui de `migrate:create`** : un renommage de
+  table ou de colonne y pose la même question — une telle migration s'écrit à la main, prouvée par
+  `migrateBase.test.ts`. **Sévérité : à savoir.**
 - **Un ajout de champ pur peut figer le serveur, sans question dans le terminal** (03/11, `49a623d`) : une collection
   ajoutée au plugin MCP a ajouté une colonne à la table des clés. Le push l'a créée (`importance_reasons_find`), puis a
   échoué sur `CREATE INDEX payload_preferences_rels_order_idx` — *already exists* ; l'initialisation de Payload est restée
