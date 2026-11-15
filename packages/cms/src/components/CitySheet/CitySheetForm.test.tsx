@@ -6,6 +6,8 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { RelationshipInputStandIn } from '../../testing/relationshipInputStandIn'
+
 import { CitySheetForm } from './CitySheetForm'
 import { EMPTY_MOMENT } from './utils/sheetValues'
 
@@ -13,28 +15,8 @@ import type { SheetValues } from './utils/sheetValues'
 
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }))
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
-// Payload's drawer, its form stood in for: the toggler its label, the drawer keeping its `onSave` for a test to call
-const drawer = vi.hoisted(() => {
-  type OnSave = (args: { doc: { id: number; label?: string } }) => void
-  const state: { onSave?: OnSave | undefined; initialData?: unknown } = {}
-  const closeDrawer = vi.fn()
-  return {
-    state,
-    closeDrawer,
-    use: () => [
-      (props: { onSave?: OnSave; initialData?: unknown }) => {
-        state.onSave = props.onSave
-        state.initialData = props.initialData
-        return null
-      },
-      ({ children }: { children?: unknown }) => children as never,
-      { closeDrawer },
-    ],
-  }
-})
-
 vi.mock('next/navigation', () => ({ useRouter: () => router }))
-vi.mock('@payloadcms/ui', () => ({ toast, useDocumentDrawer: drawer.use }))
+vi.mock('@payloadcms/ui', () => ({ toast, RelationshipInput: RelationshipInputStandIn }))
 
 /** The CMS's reasons, as the server reads them. */
 const REASONS = [
@@ -237,24 +219,18 @@ describe('CitySheetForm', () => {
   })
 
   describe('variants', () => {
-    // CMS-422 step 2c: a title created in Payload's own drawer becomes the sheet's holder.
-    it('offers « Créer un titre » while no title is held, and holds the one saved in the drawer', async () => {
-      serverAnswers(200, { docs: [] })
+    // CMS-422: the holder chosen in Payload's own field, saved by its id.
+    it('saves the title chosen in « Personnage et titre » by its id', async () => {
+      const fetcher = serverWithSources()
       renderForm(rome, 1)
-      expect(screen.getByText('Créer un titre')).toBeTruthy()
-      drawer.state.onSave?.({ doc: { id: 12, label: 'Mathias II — comté de Nantes, 1084–1103' } })
-      expect(await screen.findByText('Mathias II — comté de Nantes, 1084–1103')).toBeTruthy()
-      expect(screen.queryByText('Créer un titre')).toBeNull()
-      expect(drawer.closeDrawer).toHaveBeenCalled()
-    })
-
-    it('opens the drawer with the sheet’s year filled in, and with no year while it is not one', () => {
-      serverAnswers(200, { docs: [] })
-      const { unmount } = renderForm(rome, 1)
-      expect(drawer.state.initialData).toEqual({ date: { start: { year: 1100 } } })
-      unmount()
-      renderForm(empty)
-      expect(drawer.state.initialData).toBeUndefined()
+      const user = userEvent.setup()
+      const holder = screen.getByRole('group', { name: 'Tenue par' })
+      await user.type(within(holder).getByLabelText('Personnage et titre'), '12')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).holderTitle).toBe(12)
     })
 
     // CMS-422 step 2c: the holder as a title, its chain computed from the links and read under it.
@@ -280,7 +256,7 @@ describe('CitySheetForm', () => {
         return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
       })
       vi.stubGlobal('fetch', fetcher)
-      renderForm({ ...rome, holderTitle: { id: 10, name: 'Mathias II — comté de Nantes' } }, 1)
+      renderForm({ ...rome, holderTitle: 10 }, 1)
       expect(await screen.findByText('Chaîne de vassalité en 1100')).toBeTruthy()
       expect(
         screen.getByText('Mathias II — comté de Nantes → Alain IV — duché de Bretagne', {
@@ -472,17 +448,17 @@ describe('CitySheetForm', () => {
     // The free text is pasted, not typed key by key: this test is about what is saved, and seventy keystrokes, each one
     // re-rendering the form, took it past its 5 s on the CI's loaded runner (REPO-260, 2026-11-06 run 114510149255) —
     // whose cleanup then left its line in the next tests' page. The source's search is still typed: that is its gesture.
-    it('adds a quoted line naming the holder, enters the holder, and saves both', async () => {
+    // CMS-422: the polity typed by name is off the screen, and kept in the base for the export.
+    it('adds a quoted line naming the holder, and saves it with the polity typed before kept', async () => {
       const fetcher = serverWithSources()
-      renderForm(rome, 1)
+      renderForm({ ...rome, holderName: 'Papal States', holderQid: 'Q170174' }, 1)
       const user = userEvent.setup()
       const paste = async (field: HTMLElement, text: string) => {
         await user.click(field)
         await user.paste(text)
       }
       const holder = screen.getByRole('group', { name: 'Tenue par' })
-      await paste(within(holder).getByLabelText('Pays'), 'Papal States')
-      await paste(within(holder).getByLabelText('Identifiant Wikidata du pays'), 'Q170174')
+      expect(within(holder).queryByLabelText('Pays')).toBeNull()
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
       const line = screen.getByRole('group', { name: 'Source 1' })
       await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
@@ -629,22 +605,6 @@ describe('CitySheetForm', () => {
   })
 
   describe('unmanaged errors', () => {
-    it('holds no title saved without its name, and says so', async () => {
-      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-      serverAnswers(200, { docs: [] })
-      renderForm(rome, 1)
-      drawer.state.onSave?.({ doc: { id: 12, label: '' } })
-      drawer.state.onSave?.({ doc: { id: 12 } })
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(
-          'Le titre a été créé sans son nom : ouvrez-le dans « Titres » et enregistrez-le de nouveau, puis choisissez-le ici.'
-        )
-      })
-      expect(error).toHaveBeenCalledTimes(2)
-      expect(error).toHaveBeenCalledWith('[CMS] the title 12 was saved without its name')
-      expect(screen.getByText('Créer un titre')).toBeTruthy()
-    })
-
     it('says a silent server in its own words, and keeps what was typed', async () => {
       vi.stubGlobal(
         'fetch',

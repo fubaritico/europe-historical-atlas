@@ -1,42 +1,57 @@
-import { holderTitleTexts } from '../utils/recordFieldTexts'
+import { useFormikContext } from 'formik'
 
 import { HolderChain } from './HolderChain'
-import { NewTitleDrawer } from './NewTitleDrawer'
-import { RecordField } from './RecordField'
-import { TextField } from './TextField'
+import { RelationField } from './RelationField'
 
 import type { ChainReading } from '../utils/readVassalChain'
+import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
 import type { Say } from '../utils/say'
-import type { RecordChoice } from '../utils/sheetValues'
+import type { SheetValues } from '../utils/sheetValues'
 
 /**
- * « Tenue par »: the holder of the city at the sheet's date — **a title**, chosen among « Titres » by typing, its chain
- * of vassalage read under it, or created in Payload's own drawer when absent (CMS-422 step 2c) — then the polity's name and Wikidata id as typed (CMS-335), what the
- * Cartographer's cities layer compares with the polity drawn under the city until 1100 is taken over into the titles
- * (step 3). All optional; an id needs its name.
- * @param props - the titles' search, the chain's reader and the translator
- * @param props.searchTitles - the titles matching what was typed, from the base
+ * « Tenue par » (CMS-422, the dev's mock-up of 2026-11-15 and his words of 2026-11-16): **one** field, the holder of
+ * the city at the sheet's date — a title, shown by its name « Mathias II, comte de Nantes », chosen with Payload's own
+ * relationship field, or created by its « + » in a drawer whose person and territory have their own « + ». Under it,
+ * the chain of vassalage, one line « Vassal de » per link, built by « ⊕ ».
+ *
+ * The polity typed by name and its Wikidata id (CMS-335) are off the screen and kept in the base: the export reads
+ * them for a city with no title yet, until 1100 is taken over into the titles (step 3).
+ * @param props - the chain's reader, the link's writer and the translator
  * @param props.readChain - the chain of a title at a year, from the base
+ * @param props.saveLink - saves a link of vassalage
  * @param props.say - the translator
  * @returns the fields
  */
 export function HolderFields({
-  searchTitles,
   readChain,
+  saveLink,
   say,
 }: {
-  searchTitles: (query: string) => Promise<RecordChoice[]>
   readChain: (title: number | string, year: number) => Promise<ChainReading[]>
+  saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
   say: Say
 }) {
+  const { values, setFieldValue, setFieldTouched } = useFormikContext<SheetValues>()
+
+  // Handlers
+  const handleChange = (id: number | string | null) => {
+    void setFieldValue('holderTitle', id)
+    void setFieldTouched('holderTitle', true, false)
+  }
+
+  // Render
   return (
     <fieldset className="city-sheet__group">
       <legend className="city-sheet__legend">{say('holder')}</legend>
-      <RecordField name="holderTitle" texts={holderTitleTexts(say)} search={searchTitles} />
-      <NewTitleDrawer say={say} />
-      <HolderChain read={readChain} say={say} />
-      <TextField name="holderName" label={say('lineHolder')} help={say('holderHelp')} />
-      <TextField name="holderQid" label={say('holderQid')} help={say('holderQidHelp')} />
+      <RelationField
+        path="holderTitle"
+        collection="titles"
+        label={say('holderTitle')}
+        description={say('holderTitleHelp')}
+        value={values.holderTitle}
+        onChange={handleChange}
+      />
+      <HolderChain read={readChain} saveLink={saveLink} say={say} />
     </fieldset>
   )
 }

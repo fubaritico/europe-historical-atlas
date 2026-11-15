@@ -139,7 +139,7 @@
   gap: calc(var(--base) * 0.4) calc(var(--base) * 1.2);
 }
 
-/* CMS-422 step 2c: the chain of vassalage under the holder, computed, never entered here. */
+/* CMS-422: the chain of vassalage under the holder, read at the sheet's year. */
 .city-sheet__chain {
   display: flex;
   flex-direction: column;
@@ -166,21 +166,49 @@
   color: var(--theme-error-600);
 }
 
-/* CMS-422 step 2c: the buttons that open one of Payload's drawers from the sheet — « Créer un titre », « Ajouter son suzerain ». */
-.city-sheet__link-button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--theme-elevation-800);
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
+/* CMS-422, the dev's mock-up: one line « Vassal de » per link entered, then « Vassal de ⊕ » where the chain stops. */
+.city-sheet__chain-reading-block {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.4);
 }
 
-.city-sheet__link-button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+.city-sheet__chain-links {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.city-sheet__chain-link,
+.city-sheet__chain-add {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) * 0.6);
+}
+
+.city-sheet__chain-suzerain {
+  font-weight: 600;
+}
+
+.city-sheet__chain-new {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.3);
+}
+
+/* The suzerain, the ✕ closing the line at its right, and its source under it — side by side, a chosen title's name
+   was cut */
+.city-sheet__chain-new-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: calc(var(--base) * 0.6);
+  align-items: start;
+}
+
+.city-sheet__chain-new-fields > :nth-child(2) {
+  grid-row: 2;
+  grid-column: 1;
 }

@@ -46,14 +46,13 @@ export async function CitySheetView({ doc, initPageResult }: DocumentViewServerP
     confessions: await choiceList(req, 'confessions', contentLocale),
   }
   const sourceNames = await citedSourceNames(req, sheet)
-  const holderTitle = await holderTitleName(req, sheet)
   const id = relationId(sheet.id)
   const { api, admin } = req.payload.config.routes
   return (
     // Keyed by the sheet: Formik reads its initial values once, so another sheet in the same view gets a new form
     <CitySheetForm
       key={id === null ? 'new' : String(id)}
-      initialValues={sheetValues(sheet, place?.name ?? null, sourceNames, holderTitle)}
+      initialValues={sheetValues(sheet, place?.name ?? null, sourceNames)}
       lists={lists}
       {...(id === null ? {} : { id })}
       locale={pickLocale([req.i18n.language])}
@@ -117,30 +116,4 @@ async function citedSourceNames(
     req,
   })
   return new Map(docs.map((source) => [String(source.id), source.title]))
-}
-
-/**
- * The name of the title a sheet names as its holder (CMS-422 step 2c) — written by the server at each save of the
- * title, so always there. A title without one is refused here, loudly: shown empty, the field would be saved empty and
- * the sheet would lose its holder with no one seeing it.
- * @param req - the request, whose Payload reads it as the contributor
- * @param sheet - the sheet
- * @returns the title's name, or `null` when the sheet names no title
- * @throws {Error} when the title has no name
- */
-async function holderTitleName(req: PayloadRequest, sheet: SheetDocument): Promise<string | null> {
-  const id = relationId(sheet.holderTitle)
-  if (id === null) return null
-  const title = await req.payload.findByID({
-    collection: 'titles',
-    id,
-    depth: 0,
-    overrideAccess: false,
-    user: req.user,
-    req,
-  })
-  if (typeof title.label !== 'string' || title.label === '') {
-    throw new Error(`[CMS] the title ${String(id)} a city sheet names as its holder has no name`)
-  }
-  return title.label
 }

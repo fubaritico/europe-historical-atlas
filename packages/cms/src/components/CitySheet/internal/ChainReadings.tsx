@@ -1,7 +1,8 @@
-import { AddLinkDrawer } from './AddLinkDrawer'
 import { ChainReadingLine } from './ChainReadingLine'
+import { NewLinkLine } from './NewLinkLine'
 
 import type { ChainReading } from '../utils/readVassalChain'
+import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
 import type { Say } from '../utils/say'
 import type { RecordChoice } from '../utils/sheetValues'
 
@@ -18,11 +19,14 @@ function topOf(reading: ChainReading): RecordChoice {
 }
 
 /**
- * The chain once read (CMS-422 step 2c): its year, how many readings when the sources diverge, and each reading — the
- * ones that stop for want of a link followed by « Ajouter son suzerain ».
- * @param props - the readings, their year, what to do once a link is added, the translator
+ * The chain once read (the dev's mock-up, CMS-422): for each reading, one line « Vassal de » per link entered —
+ * entered once, it shows on every city under that title — then « Vassal de ⊕ » where it stops for want of a link,
+ * then the reading in one line, how it ends included. A heading names the year; a sentence says how many readings
+ * when the sources diverge.
+ * @param props - the readings, their year, the link's writer, what to do once a link is added, the translator
  * @param props.readings - the readings
  * @param props.year - the year they were read at
+ * @param props.saveLink - saves a link of vassalage
  * @param props.onAdded - called once a link is saved from the sheet
  * @param props.say - the translator
  * @returns the readings
@@ -30,11 +34,13 @@ function topOf(reading: ChainReading): RecordChoice {
 export function ChainReadings({
   readings,
   year,
+  saveLink,
   onAdded,
   say,
 }: {
   readings: ChainReading[]
   year: number
+  saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
   onAdded: () => void
   say: Say
 }) {
@@ -45,19 +51,33 @@ export function ChainReadings({
       {readings.length > 1 && (
         <p className="city-sheet__help">{say('chainReadings', { count: readings.length })}</p>
       )}
-      <ul className="city-sheet__chain-readings">
-        {readings.map((reading) => (
-          <ChainReadingLine
-            key={`${reading.titles.map((title) => title.id).join('>')}|${reading.end}`}
-            reading={reading}
-            say={say}
-          >
-            {reading.end === 'unknown' && (
-              <AddLinkDrawer vassal={topOf(reading)} year={year} onAdded={onAdded} say={say} />
-            )}
-          </ChainReadingLine>
-        ))}
-      </ul>
+      {readings.map((reading) => (
+        <div
+          key={`${reading.titles.map((title) => title.id).join('>')}|${reading.end}`}
+          className="city-sheet__chain-reading-block"
+        >
+          <ul className="city-sheet__chain-links">
+            {reading.titles.slice(1).map((suzerain) => (
+              <li key={String(suzerain.id)} className="city-sheet__chain-link">
+                <span className="city-sheet__label">{say('vassalOf')}</span>
+                <span className="city-sheet__chain-suzerain">{suzerain.name}</span>
+              </li>
+            ))}
+          </ul>
+          {reading.end === 'unknown' && (
+            <NewLinkLine
+              vassal={topOf(reading)}
+              year={year}
+              saveLink={saveLink}
+              onAdded={onAdded}
+              say={say}
+            />
+          )}
+          <ul className="city-sheet__chain-readings">
+            <ChainReadingLine reading={reading} say={say} />
+          </ul>
+        </div>
+      ))}
     </>
   )
 }

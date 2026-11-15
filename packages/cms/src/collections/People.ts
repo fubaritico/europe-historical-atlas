@@ -35,7 +35,8 @@ function onlyFor(group: GroupField, kind: PersonKind): GroupField {
 
 /**
  * The register of people (« Personnes », CMS-422 step 1, the dev, 2026-11-15) — **who someone is, nothing more**: a
- * name, a Wikidata id, when they lived, and the house they belong to. Any person, lords or not (Pascal, Joan of Arc,
+ * name, a Wikidata id, when they lived, the house they belong to, and their father and mother (the dev, 2026-11-16 —
+ * brothers and sisters are read from them, never entered). Any person, lords or not (Pascal, Joan of Arc,
  * Luther), so it grows into genealogies; a house is a record of the same register, with its founder.
  *
  * What changes over a life is never a field here (`files/plans/contribution/vassal-chain.md`, rule 3): a rank goes to
@@ -123,6 +124,35 @@ export const People: CollectionConfig = {
         description:
           'La maison à laquelle elle appartient (Wikidata, P53), choisie parmi les maisons du registre.',
       },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'father',
+          type: 'relationship',
+          relationTo: 'people',
+          label: 'Père',
+          filterOptions: { kind: { equals: 'person' } },
+          admin: {
+            condition: forKind('person'),
+            description:
+              'Choisi parmi les personnes du registre (Wikidata, P22) ; absent, « + » le crée.',
+          },
+        },
+        {
+          name: 'mother',
+          type: 'relationship',
+          relationTo: 'people',
+          label: 'Mère',
+          filterOptions: { kind: { equals: 'person' } },
+          admin: {
+            condition: forKind('person'),
+            description:
+              'Choisie parmi les personnes du registre (Wikidata, P25) ; absente, « + » la crée.',
+          },
+        },
+      ],
     },
     {
       name: 'founder',

@@ -352,6 +352,14 @@ export interface Person {
    */
   house?: (number | null) | Person;
   /**
+   * Choisi parmi les personnes du registre (Wikidata, P22) ; absent, « + » le crée.
+   */
+  father?: (number | null) | Person;
+  /**
+   * Choisie parmi les personnes du registre (Wikidata, P25) ; absente, « + » la crée.
+   */
+  mother?: (number | null) | Person;
+  /**
    * La personne qui l’a fondée, choisie dans le registre.
    */
   founder?: (number | null) | Person;
@@ -1356,6 +1364,8 @@ export interface PeopleSelect<T extends boolean = true> {
         calendar?: T;
       };
   house?: T;
+  father?: T;
+  mother?: T;
   founder?: T;
   updatedAt?: T;
   createdAt?: T;

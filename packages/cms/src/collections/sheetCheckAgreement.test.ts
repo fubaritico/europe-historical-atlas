@@ -61,7 +61,7 @@ function serverRefuses(doc: Record<string, unknown>): boolean {
  * @returns `true` when it does
  */
 function formRefuses(doc: Record<string, unknown>): boolean {
-  return Object.keys(validateSheet(sheetValues(doc, 'Rome', NAMES, null), say)).length > 0
+  return Object.keys(validateSheet(sheetValues(doc, 'Rome', NAMES), say)).length > 0
 }
 
 /** Sheets each side must judge alike, by what is wrong with them. */

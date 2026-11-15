@@ -55,20 +55,3 @@ export function sourceTexts(say: Say): RecordFieldTexts {
     remove: (name) => say('sourceRemove', { name }),
   }
 }
-
-/**
- * The holder's title field's texts (CMS-422 step 2c).
- * @param say - the translator
- * @returns its sentences
- */
-export function holderTitleTexts(say: Say): RecordFieldTexts {
-  return {
-    label: say('holderTitle'),
-    placeholder: say('holderTitlePlaceholder'),
-    help: say('holderTitleHelp'),
-    list: say('holderTitleList'),
-    none: say('holderTitleNone'),
-    searchFailed: say('holderTitleSearchFailed'),
-    remove: (name) => say('holderTitleRemove', { name }),
-  }
-}

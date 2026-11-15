@@ -51,15 +51,6 @@ describe('useRecordSearches', () => {
       expect(url.pathname).toBe('/api/sources')
       expect(url.searchParams.get('where[title][like]')).toBe('Bur')
     })
-
-    it('searches the titles by their name', async () => {
-      const fetcher = stubFetch()
-      const { result } = renderHook(() => useRecordSearches('/api', 'fr'))
-      await result.current.titles('Mat')
-      const url = calledUrl(fetcher)
-      expect(url.pathname).toBe('/api/titles')
-      expect(url.searchParams.get('where[label][like]')).toBe('Mat')
-    })
   })
 
   describe('managed errors', () => {

@@ -70,8 +70,8 @@ describe('People', () => {
   })
 
   describe('variants', () => {
-    it('shows birth, death and the house for a person, not a house’s foundation, end or founder', () => {
-      for (const name of ['born', 'died', 'house'])
+    it('shows birth, death, the house and the parents for a person, not a house’s foundation, end or founder', () => {
+      for (const name of ['born', 'died', 'house', 'father', 'mother'])
         expect(shownFor(fields.get(name), 'person')).toBe(true)
       for (const name of ['founded', 'ended', 'founder'])
         expect(shownFor(fields.get(name), 'person')).toBe(false)
@@ -80,19 +80,20 @@ describe('People', () => {
     it('shows the foundation, the end and the founder for a house, not a person’s birth, death or house', () => {
       for (const name of ['founded', 'ended', 'founder'])
         expect(shownFor(fields.get(name), 'house')).toBe(true)
-      for (const name of ['born', 'died', 'house'])
+      for (const name of ['born', 'died', 'house', 'father', 'mother'])
         expect(shownFor(fields.get(name), 'house')).toBe(false)
     })
 
-    it('offers a house among the houses only, a founder among the persons only', () => {
+    it('offers a house among the houses only, a founder and the parents among the persons only', () => {
       expect(fields.get('house')).toMatchObject({
         relationTo: 'people',
         filterOptions: { kind: { equals: 'house' } },
       })
-      expect(fields.get('founder')).toMatchObject({
-        relationTo: 'people',
-        filterOptions: { kind: { equals: 'person' } },
-      })
+      for (const name of ['founder', 'father', 'mother'])
+        expect(fields.get(name)).toMatchObject({
+          relationTo: 'people',
+          filterOptions: { kind: { equals: 'person' } },
+        })
     })
   })
 

@@ -4,6 +4,7 @@ import * as migration_20261115_160620_holder_as_written from './20261115_160620_
 import * as migration_20261115_171652_titles_and_links from './20261115_171652_titles_and_links';
 import * as migration_20261115_182214_holder_title from './20261115_182214_holder_title';
 import * as migration_20261115_215340_unique_wikidata from './20261115_215340_unique_wikidata';
+import * as migration_20261115_233056_parents from './20261115_233056_parents';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261115_215340_unique_wikidata.up,
     down: migration_20261115_215340_unique_wikidata.down,
-    name: '20261115_215340_unique_wikidata'
+    name: '20261115_215340_unique_wikidata',
+  },
+  {
+    up: migration_20261115_233056_parents.up,
+    down: migration_20261115_233056_parents.down,
+    name: '20261115_233056_parents'
   },
 ];

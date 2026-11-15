@@ -9,6 +9,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * Its messages that take values:
  * - `placeRemove`, `sourceRemove`, `reasonRemove`, `reasonAdded`, `reasonRemoved` — `name`, the place, source or
  *   reason.
+ * - `addSuzerainOf`, `linkLineOf`, `linkSuzerainHelp` — `name`, the title the chain of vassalage stops at.
+ * - `chain` — `year`, as text. `chainReadings` — `count`, how many readings.
  * - `reasonResults` — `count`, how many reasons match.
  * - `removeLine`, `line` — `rank`, the line's rank from 1.
  * - `removeCommunity`, `community` — `rank`, the community's rank from 1.
