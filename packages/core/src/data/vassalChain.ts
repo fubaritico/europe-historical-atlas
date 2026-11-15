@@ -34,6 +34,9 @@ export type ChainEnd =
   /** The links lead back to a title already in this branch: the entries contradict one another. */
   | 'loop'
 
+/** Every {@link ChainEnd}, for a reader to check one — the content file's (`contentFormat`). */
+export const CHAIN_ENDS = ['sovereign', 'unknown', 'loop'] as const satisfies readonly ChainEnd[]
+
 /** One title of the chain, and what lies above it. */
 export interface ChainNode {
   /** The title. */
@@ -111,4 +114,29 @@ export function chainPaths(chain: ChainNode): { titles: string[]; end: ChainEnd 
   )
   // A title read as sovereign by one source and as a vassal by another: its « no one » reading is a path of its own
   return chain.end === 'sovereign' ? [{ titles: [chain.title], end: 'sovereign' }, ...paths] : paths
+}
+
+/** One path of a chain: its titles from the sheet's up, and how it ends. */
+export interface ChainPath {
+  /** The titles, the sheet's first. */
+  readonly titles: readonly string[]
+  /** How it ends. */
+  readonly end: ChainEnd
+}
+
+/**
+ * The paths that differ — two links entered alike (the same vassal to the same suzerain, the same year) give the same
+ * path twice, which would read as a divergence of the sources where there is none. Their agreement is the lines' to
+ * count, by concordance, never this list's. What every screen and the export list (CARTO-435).
+ * @param paths - the chain's paths, as {@link chainPaths} gives them
+ * @returns each path once, in the order first met
+ */
+export function distinctPaths<P extends ChainPath>(paths: readonly P[]): P[] {
+  const seen = new Set<string>()
+  return paths.filter((path) => {
+    const key = `${path.titles.join('>')}|${path.end}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 }

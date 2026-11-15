@@ -9,6 +9,7 @@ import { localized, optionalLocalized, present, resolved, toPlace, toSource } fr
 import { toContentCity } from './toContentCity'
 
 import type { DocEventType, DocId, DocLocalized, DocPlace, DocSource } from './docRecords'
+import type { ChainRegister } from './toContentChain'
 import type { DocCitySheet } from './toContentCity'
 import type { EventDateFields } from '../fields/historicalDate'
 import type {
@@ -81,6 +82,8 @@ export interface ExportContext {
    * @returns nothing
    */
   warn: (message: string) => void
+  /** The titles and the links every city's chain of vassalage is computed from (CARTO-435). */
+  register: ChainRegister
 }
 
 /**
@@ -165,7 +168,7 @@ export function toContent(records: ContentRecords, context: ExportContext): Cont
   return {
     version: CONTENT_FORMAT_VERSION,
     events: records.events.map((event) => toContentEvent(event, context)),
-    cities: records.cities.map(toContentCity),
+    cities: records.cities.map((sheet) => toContentCity(sheet, context.register)),
   }
 }
 

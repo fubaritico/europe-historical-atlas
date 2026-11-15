@@ -11,6 +11,7 @@ import type { CityMark } from '../../../../state/citiesSlice'
 export const STATE_ORDER = [
   'misplaced',
   'toDeclare',
+  'incomplete',
   'cannotCompare',
   'agrees',
 ] as const satisfies readonly CityVerdictKind[]

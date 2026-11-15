@@ -5,6 +5,7 @@ import { projectedTerritories } from './paint/scene'
 import type { CityAlert } from './paint/cityPainter'
 import type { PolityRings } from '../geometry/fillHit'
 import type { CityHolder, CityMark } from '../state/citiesSlice'
+import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
@@ -34,8 +35,13 @@ export type CityVerdictKind =
   | 'toDeclare'
   /** The map has the sources' holder under the city. */
   | 'agrees'
-  /** The map has another polity, or none, under the city. */
+  /** The map has another polity, or none, under the city — by its chain, one that is not in it (CARTO-435). */
   | 'misplaced'
+  /**
+   * The polity under the city is not in its chain, but the chain stops for want of a link — *beyond, we do not know*:
+   * it may be higher (CARTO-435), so not shown wrong where a link is missing.
+   */
+  | 'incomplete'
 
 /** Both answers and their comparison. */
 export interface CityVerdict {
@@ -45,6 +51,8 @@ export interface CityVerdict {
   readonly bySources: CityHolder | null
   /** Whether they agree, and if not, why. */
   readonly kind: CityVerdictKind
+  /** The city's chain of vassalage it was judged by, or `null` when its sheet names no title (CARTO-435). */
+  readonly chain: readonly ContentChainReading[] | null
 }
 
 /**
@@ -70,6 +78,29 @@ function polityOnMap(
 }
 
 /**
+ * The verdict of a city that has its chain of vassalage (CARTO-435, the dev's rule of 2026-11-15: *"if the duchy it lies
+ * in is not in its chain, it is wrong"*): the polity under it is one of the chain's titles' territories, in any reading
+ * — the sources diverging, each reading is a place it may rightly be. A polity with no Wikidata id cannot be looked for
+ * (CARTO-450 will compare those by the territory's own id). Not found: wrong where every reading reaches its end, and
+ * only *incomplete* where one stops for want of a link — the polity may lie above.
+ * @param chain - the city's chain, every reading
+ * @param onMap - the polity under it, or `null` over ground nobody claims
+ * @returns the verdict
+ */
+export function byChain(
+  chain: readonly ContentChainReading[],
+  onMap: PolityOnMap | null
+): CityVerdictKind {
+  if (onMap === null) return 'misplaced'
+  if (onMap.wikidata === null) return 'cannotCompare'
+  const inChain = chain.some((reading) =>
+    reading.titles.some((title) => title.wikidata === onMap.wikidata)
+  )
+  if (inChain) return 'agrees'
+  return chain.some((reading) => reading.end === 'unknown') ? 'incomplete' : 'misplaced'
+}
+
+/**
  * Compare, for each city, who holds it on the map with who holds it by the sources — the territories projected once
  * for them all.
  * @param document - the year open
@@ -90,8 +121,9 @@ export function cityVerdicts(
       const bySources = city.holder
       const verdict = (kind: CityVerdictKind): [string, CityVerdict] => [
         city.id,
-        { onMap, bySources, kind },
+        { onMap, bySources, kind, chain: city.chain },
       ]
+      if (city.chain !== null) return verdict(byChain(city.chain, onMap))
       if (bySources === null) return verdict('notEntered')
       if (bySources.wikidata === null) return verdict('cannotCompare')
       if (!declared.has(bySources.wikidata)) return verdict('toDeclare')
@@ -101,12 +133,15 @@ export function cityVerdicts(
 }
 
 /**
- * The alert a verdict raises, or none — a city where all is well, or one with nothing to compare by, keeps its look.
+ * The alert a verdict raises, or none — only a city where all is well keeps its plain look. One that cannot be
+ * compared, or whose chain stops short of the polity under it, is **uncertain**, never plain (the dev, 2026-11-15, on
+ * the white points: *"we don't understand"* — « right » and « we don't know » looked alike).
  * @param kind - the verdict
  * @returns the alert, or `null`
  */
 export function cityAlert(kind: CityVerdictKind): CityAlert | null {
   if (kind === 'notEntered') return 'missing'
   if (kind === 'misplaced' || kind === 'toDeclare') return 'toCorrect'
+  if (kind === 'cannotCompare' || kind === 'incomplete') return 'uncertain'
   return null
 }

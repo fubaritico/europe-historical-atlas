@@ -26,6 +26,7 @@ const LYON: CityMark = {
   lat: 45.76,
   date: { kind: 'instant', at: moment(1100) },
   holder: null,
+  chain: null,
   holderSources: [],
 }
 const ZADAR: CityMark = {
@@ -35,6 +36,7 @@ const ZADAR: CityMark = {
   lat: 44.12,
   date: { kind: 'interval', from: moment(1099), to: moment(1105) },
   holder: null,
+  chain: null,
   holderSources: [],
 }
 /**
@@ -55,6 +57,7 @@ const PARIS_1200: CityMark = {
   lat: 48.86,
   date: { kind: 'instant', at: moment(1200) },
   holder: null,
+  chain: null,
   holderSources: [],
 }
 

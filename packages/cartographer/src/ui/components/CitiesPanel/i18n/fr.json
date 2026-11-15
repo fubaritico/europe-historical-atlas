@@ -52,5 +52,13 @@
   "sortExport": "Ordre de l’export",
   "sortName": "Par nom",
   "sortVerification": "Par vérification",
-  "sortHolder": "Par détenteur"
+  "sortHolder": "Par détenteur",
+  "incomplete": "{polity} n’est pas dans sa chaîne de vassalité, qui s’arrête faute de maillon : on ne sait pas encore.",
+  "misplacedChain": "Pas au bon endroit : {polity} n’est pas dans sa chaîne de vassalité.",
+  "cannotCompareMap": "{polity} n’a pas d’identifiant Wikidata sur la carte : impossible de le chercher dans la chaîne.",
+  "chain": "Chaîne : {titles} — {end}",
+  "chainSovereign": "souverain",
+  "chainUnknown": "au-delà, on ne sait pas",
+  "chainLoop": "les maillons se contredisent",
+  "stateIncomplete": "Chaîne incomplète ({count})"
 }

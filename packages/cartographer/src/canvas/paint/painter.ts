@@ -6,7 +6,7 @@ import { paintCities } from './cityPainter'
 import { paintHatches } from './hatchPainter'
 import { type SeaOnScreen, paintSea } from './seaPainter'
 
-import type { CityOnScreen } from './cityPainter'
+import type { CityOnScreen, CityStyle } from './cityPainter'
 import type { HatchOnScreen } from './hatchPainter'
 import type { Rect } from '../../geometry/marquee'
 import type { LayerSetting, LayerSettings } from '../../state/layersSlice'
@@ -121,7 +121,7 @@ export interface Painter2D {
  * holds here. Passing them in rather than importing them keeps the painter indifferent to the theme, and
  * is what lets a test assert a colour without knowing which one the design chose this week.
  */
-export interface PaintStyle {
+export interface PaintStyle extends CityStyle {
   /** The canvas behind everything. `#d9ccad` in the design — the vellum the backdrop sits on. */
   background: string
   /** The edit stroke: thin, crisp, blue, no casing (decided 2026-09-22). */
@@ -165,18 +165,6 @@ export interface PaintStyle {
   riverWidthMajor: number
   /** The finest tributary's width (rank 9) in screen pixels; the ranks between are interpolated. */
   riverWidthMinor: number
-  /** A city's dot and its name's ink (CARTO-193). */
-  cityInk: string
-  /** The light ring round a city's dot and the halo round its name, so both read over any fill. */
-  cityHalo: string
-  /** The ring of a city with no holder entered, on its point (CARTO-389). */
-  cityMissing: string
-  /** The ring of a city to correct on the map, on its point (CARTO-389). */
-  cityToCorrect: string
-  /** A city's dot's radius, in screen pixels. */
-  cityRadius: number
-  /** A city's name's size, in screen pixels. */
-  cityFontSize: number
   /** One stripe of an overlap's hatching, measured along the screen's horizontal, in screen pixels (CARTO-364). */
   hatchWidth: number
 }

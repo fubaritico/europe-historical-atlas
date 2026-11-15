@@ -25,6 +25,7 @@ function city(name: string, holder: CityHolder | null): CityMark {
       at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
     },
     holder,
+    chain: null,
     holderSources: [],
   }
 }
@@ -49,7 +50,7 @@ const VERDICTS: ReadonlyMap<string, CityVerdict> = new Map(
       ['Paris', 'notEntered'],
       ['Man', 'cannotCompare'],
     ] as const
-  ).map(([id, kind]) => [id, { onMap: null, bySources: null, kind }])
+  ).map(([id, kind]) => [id, { onMap: null, bySources: null, kind, chain: null }])
 )
 
 /**

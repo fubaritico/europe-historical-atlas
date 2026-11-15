@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { cityAlert, cityVerdicts } from './cityVerdict'
+import { byChain, cityAlert, cityVerdicts } from './cityVerdict'
 
 import type { CityMark } from '../state/citiesSlice'
+import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 
 const in1100 = {
   kind: 'instant',
@@ -48,6 +49,7 @@ const CITY: CityMark = {
   lat: 47,
   date: in1100,
   holder: null,
+  chain: null,
   holderSources: [],
 }
 
@@ -68,6 +70,18 @@ describe('cityVerdicts', () => {
         { ...CITY, holder: { name: 'Duchy', wikidata: 'Q1' } },
       ])
       expect(verdict.get('c')?.kind).toBe('agrees')
+    })
+
+    // CARTO-435: a city with its chain is judged by it — before its holder, entered or not.
+    it('judges a city by its chain when it has one, and hands the chain on with the verdict', () => {
+      const chain = [{ titles: [{ name: 'Duc', wikidata: 'Q1' }], end: 'unknown' as const }]
+      const agrees = cityVerdicts(withDuchy(), [{ ...CITY, chain }]).get('c')
+      expect([agrees?.kind, agrees?.chain]).toEqual(['agrees', chain])
+      const elsewhere = [{ titles: [{ name: 'Comte', wikidata: 'Q9' }], end: 'sovereign' as const }]
+      const wrong = cityVerdicts(withDuchy(), [
+        { ...CITY, holder: { name: 'Duchy', wikidata: 'Q1' }, chain: elsewhere },
+      ]).get('c')
+      expect(wrong?.kind).toBe('misplaced')
     })
   })
 
@@ -103,8 +117,64 @@ describe('cityAlert', () => {
   // L3–L4: N/A — a total mapping of a closed union.
 
   describe('edge cases', () => {
-    it('raises nothing when there is nothing to compare by, as the list marks nothing', () => {
-      expect(cityAlert('cannotCompare')).toBeNull()
+    // CARTO-435, the dev of 2026-11-15 on the white points: « we don't know » must never look like « right ».
+    it('marks uncertain a city with nothing to compare by, or whose chain stops short — never plain', () => {
+      expect([cityAlert('cannotCompare'), cityAlert('incomplete'), cityAlert('agrees')]).toEqual([
+        'uncertain',
+        'uncertain',
+        null,
+      ])
+    })
+  })
+})
+
+// CARTO-435, the dev's rule of 2026-11-15: if the polity drawn under the city is not in its chain, it is wrong.
+describe('byChain', () => {
+  const MAINZ = { name: 'Ruthard — archevêché de Mayence', wikidata: 'Q1' }
+  const EMPIRE = { name: 'Henri IV — Saint-Empire', wikidata: 'Q12548' }
+  const ERFURT: ContentChainReading[] = [{ titles: [MAINZ, EMPIRE], end: 'sovereign' }]
+
+  describe('happy path', () => {
+    it('agrees with Erfurt in Mainz, which its chain goes through', () => {
+      expect(byChain(ERFURT, { name: 'Mainz', wikidata: 'Q1' })).toBe('agrees')
+    })
+  })
+
+  describe('variants', () => {
+    it('agrees where any reading goes through the polity — the sources diverging', () => {
+      const two: ContentChainReading[] = [
+        ...ERFURT,
+        { titles: [{ name: 'Thuringia', wikidata: 'Q2' }], end: 'sovereign' },
+      ]
+      expect(byChain(two, { name: 'Thuringia', wikidata: 'Q2' })).toBe('agrees')
+    })
+
+    it('says incomplete, not wrong, where the chain stops for want of a link', () => {
+      const short: ContentChainReading[] = [{ titles: [MAINZ], end: 'unknown' }]
+      expect(byChain(short, { name: 'Thuringia', wikidata: 'Q2' })).toBe('incomplete')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('finds Erfurt wrong in Thuringia, though Thuringia answers to the Empire too', () => {
+      expect(byChain(ERFURT, { name: 'Thuringia', wikidata: 'Q2' })).toBe('misplaced')
+    })
+
+    it('finds a city wrong over ground nobody claims', () => {
+      expect(byChain(ERFURT, null)).toBe('misplaced')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('cannot look for a polity with no Wikidata id — never agrees by default', () => {
+      expect(byChain(ERFURT, { name: 'Thuringia', wikidata: null })).toBe('cannotCompare')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('finds wrong a chain whose links contradict one another, the polity not in it', () => {
+      const loop: ContentChainReading[] = [{ titles: [MAINZ, EMPIRE, MAINZ], end: 'loop' }]
+      expect(byChain(loop, { name: 'Thuringia', wikidata: 'Q2' })).toBe('misplaced')
     })
   })
 })

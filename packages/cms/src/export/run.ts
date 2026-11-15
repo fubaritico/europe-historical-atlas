@@ -10,6 +10,7 @@ import { assertMigrated } from '../migrate/migrateBase'
 import config from '../payload.config'
 
 import { toContent, toSiegeEnginePeriods } from './toContent'
+import { chainRegister } from './toContentChain'
 
 import type { DocEvent } from './toContent'
 import type { DocCitySheet } from './toContentCity'
@@ -23,7 +24,8 @@ const OUT = path.resolve(
 /**
  * Export every event and every city at a date for the atlas (CMS-223, ATLAS-295): read them through Payload's Local
  * API with every locale and every relation resolved, and every siege engin's period; turn them into the content
- * format — each city sheet first checked by the schema the form and the server check it by — check the result
+ * format — each city sheet first checked by the schema the form and the server check it by, and given its chain of
+ * vassalage computed from the titles and the links — check the result
  * against `core`'s content schema, write it.
  * Anything wrong stops the export and names the event — nothing half-written reaches the atlas.
  */
@@ -51,6 +53,10 @@ const cities = await payload.find({
   pagination: false,
   sort: 'date.start.year',
 })
+// The chains' register, read once: every title with its territory, every link (CARTO-435)
+const titles = await payload.find({ collection: 'titles', depth: 1, pagination: false })
+const links = await payload.find({ collection: 'vassal-links', depth: 0, pagination: false })
+const register = chainRegister(titles.docs, links.docs)
 const content = contentFileSchema.parse(
   toContent(
     { events: docs as unknown as DocEvent[], cities: cities.docs as unknown as DocCitySheet[] },
@@ -59,6 +65,7 @@ const content = contentFileSchema.parse(
       warn: (message) => {
         console.warn(message)
       },
+      register,
     }
   )
 )

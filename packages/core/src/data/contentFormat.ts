@@ -24,11 +24,13 @@ import { historicalDateSchema, historicalMomentSchema } from '../time/historical
 import { COMMUNITY_WEIGHTS } from './cityCommunity'
 import { CITY_IMPORTANCES } from './cityImportance'
 import { SIEGE_ENGINES } from './siegeEngines'
+import { CHAIN_ENDS } from './vassalChain'
 import { WIKIDATA_ID } from './wikidataId'
 
 import type { CommunityWeight } from './cityCommunity'
 import type { CityImportance } from './cityImportance'
 import type { SiegeEngine } from './siegeEngines'
+import type { ChainEnd } from './vassalChain'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
 
 /** A text in the two languages of the project. */
@@ -271,6 +273,38 @@ const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('s
   }),
 ])
 
+/** One title of a city's chain of vassalage, as the map compares it: its name, and its territory's Wikidata id. */
+export interface ContentChainTitle {
+  /** The title's name, as the contribution writes it: « Mathias II — comté de Nantes, 1084–1103 ». */
+  name: string
+  /** The Wikidata id of the territory it holds — what a map's polity is compared by — or `null` when it has none. */
+  wikidata: string | null
+}
+
+/** {@link ContentChainTitle}. */
+const chainTitleSchema: z.ZodMiniType<ContentChainTitle> = z.strictObject({
+  name: z.string().check(z.minLength(1)),
+  wikidata: wikidataId,
+})
+
+/**
+ * One reading of a city's chain of vassalage at its sheet's year (CMS-422, CARTO-435): the titles from its holder's
+ * up, and why it stops — computed by `data/vassalChain` at the export, never typed. Two readings or more when the
+ * sources diverge.
+ */
+export interface ContentChainReading {
+  /** The titles, the holder's first. */
+  titles: ContentChainTitle[]
+  /** Why it stops: a sovereign, « beyond, we do not know », or links that contradict one another. */
+  end: ChainEnd
+}
+
+/** {@link ContentChainReading}. */
+const chainReadingSchema: z.ZodMiniType<ContentChainReading> = z.strictObject({
+  titles: z.array(chainTitleSchema).check(z.minLength(1)),
+  end: z.enum(CHAIN_ENDS),
+})
+
 /**
  * A religious community attested in a city at a date (CMS-433): its confession named, its weight, and whether a source
  * says that weight — the atlas is to show a supposed one as uncertain (the dev, 2026-11-13).
@@ -310,6 +344,11 @@ export interface ContentCity {
   testimonies: ContentTestimony[]
   /** The polity that held it at that date, or `null` before it is entered (CMS-335). */
   holder: ContentHolder | null
+  /**
+   * Its chain of vassalage at the sheet's year (CARTO-435), from the title its sheet names as holder — every reading
+   * kept — or `null` while its sheet names no title.
+   */
+  chain: ContentChainReading[] | null
   /** The religious communities attested there (CMS-433); none before they are entered. */
   communities: ContentCommunity[]
   /**
@@ -328,6 +367,7 @@ const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   reasons: z.array(localizedText),
   testimonies: z.array(testimonySchema),
   holder: z.nullable(holderSchema),
+  chain: z.nullable(z.array(chainReadingSchema).check(z.minLength(1))),
   communities: z.array(communitySchema),
   showInAtlas: z.boolean(),
 })
@@ -347,10 +387,10 @@ export interface ContentFile {
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
  * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
  * and a source line its quotation (2026-11-02, CMS-335), 7 since a city says whether the atlas shows it (2026-11-08,
- * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433) — an export of 7 is refused, and a
- * new export mends it.
+ * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433), 9 since a city carries its chain
+ * of vassalage (2026-11-15, CARTO-435) — an export of 8 is refused, and a new export mends it.
  */
-export const CONTENT_FORMAT_VERSION = 8
+export const CONTENT_FORMAT_VERSION = 9
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

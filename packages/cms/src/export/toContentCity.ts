@@ -1,10 +1,13 @@
 import { checkCitySheet, isSheetRefused } from '@europe-historical-atlas/core/data/citySheet'
+import { yearSpanOf } from '@europe-historical-atlas/core/time/dateOverlap'
 
 import { citySheetCandidate } from '../fields/citySheetCandidate'
 
 import { localized, present, resolved, toPlace, toSource } from './docRecords'
+import { contentChain } from './toContentChain'
 
 import type { DocId, DocLocalized, DocPlace, DocSource } from './docRecords'
+import type { ChainRegister } from './toContentChain'
 import type { CommunityWeight } from '@europe-historical-atlas/core/data/cityCommunity'
 import type {
   CityImportance,
@@ -92,6 +95,8 @@ export interface DocCitySheet {
   holderName?: string | null
   /** That polity's Wikidata id. */
   holderQid?: string | null
+  /** The title it answers to, bare or resolved (CMS-422) — where its chain of vassalage starts. */
+  holderTitle?: { id: DocId } | DocId | null
   /** Whether the atlas shows it (CMS-391). */
   showInAtlas?: boolean | null
 }
@@ -207,12 +212,14 @@ function toHolder(name: string, qid: string | null | undefined): ContentHolder {
 }
 
 /**
- * One city at a date, everything it points to written in, after the schema's check.
+ * One city at a date, everything it points to written in, after the schema's check — and its chain of vassalage at
+ * its first year, computed from the register (CARTO-435).
  * @param sheet - the record, relations resolved
+ * @param register - the titles and the links every chain is computed from
  * @returns it, as the atlas reads it
  * @throws {Error} when the schema refuses it, or a relation is not resolved — the export stops, naming it
  */
-export function toContentCity(sheet: DocCitySheet): ContentCity {
+export function toContentCity(sheet: DocCitySheet, register: ChainRegister): ContentCity {
   const where = `city sheet ${String(sheet.id)}`
   const read = checked(sheet, where)
   // The three guards below are unreachable while the schema refuses such a sheet first (`checked`): each is the
@@ -242,6 +249,7 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
       read.holderName === null || read.holderName === undefined
         ? null
         : toHolder(read.holderName, read.holderQid),
+    chain: contentChain(register, sheet.holderTitle, yearSpanOf(read.date).from, where),
     communities: read.communities.map((community, index) => {
       const row = communityRows[index]
       const at = `${where}, community ${String(index + 1)}`

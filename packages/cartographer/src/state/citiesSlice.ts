@@ -1,5 +1,6 @@
 import { dateCoversYear } from '@europe-historical-atlas/core/time/dateOverlap'
 
+import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HistoricalDate } from '@europe-historical-atlas/core/time/historicalDate'
 import type { StateCreator } from 'zustand'
 
@@ -26,6 +27,11 @@ export interface CityMark {
   readonly holder: CityHolder | null
   /** The sources that say who held it, each with where in it. */
   readonly holderSources: readonly HolderSource[]
+  /**
+   * Its chain of vassalage at its sheet's year (CARTO-435), every reading kept — computed at the export from the title
+   * its sheet names — or `null` while its sheet names no title.
+   */
+  readonly chain: readonly ContentChainReading[] | null
 }
 
 /** The polity holding a city by the sources: its name, and its Wikidata id — what a map's polity is compared by. */

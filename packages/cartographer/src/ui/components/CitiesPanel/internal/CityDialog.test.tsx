@@ -20,9 +20,10 @@ const METZ: CityMark = {
     at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
   },
   holder: EMPIRE,
+  chain: null,
   holderSources: [{ title: 'Duby, Atlas historique', where: 'p. 46', holder: EMPIRE }],
 }
-const AGREES: CityVerdict = { onMap: EMPIRE, bySources: EMPIRE, kind: 'agrees' }
+const AGREES: CityVerdict = { onMap: EMPIRE, bySources: EMPIRE, kind: 'agrees', chain: null }
 
 /**
  * The box, Metz open or none.

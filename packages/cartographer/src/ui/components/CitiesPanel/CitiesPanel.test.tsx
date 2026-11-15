@@ -35,6 +35,7 @@ const PARIS: CityMark = {
   lat: 47,
   date: in1100,
   holder: null,
+  chain: null,
   holderSources: [],
 }
 const METZ: CityMark = {
@@ -44,6 +45,7 @@ const METZ: CityMark = {
   lat: 47,
   date: in1100,
   holder: EMPIRE,
+  chain: null,
   holderSources: [{ title: 'Duby, Atlas historique', where: 'p. 46', holder: EMPIRE }],
 }
 const LATER: CityMark = {

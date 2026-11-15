@@ -31,6 +31,7 @@ function city(id: string, holder: CityHolder | null): CityMark {
       at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
     },
     holder,
+    chain: null,
     holderSources: [],
   }
 }

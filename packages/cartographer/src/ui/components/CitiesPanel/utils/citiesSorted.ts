@@ -9,8 +9,9 @@ const VERIFICATION_RANK: Readonly<Record<CityVerdictKind, number>> = {
   misplaced: 0,
   toDeclare: 1,
   notEntered: 2,
-  cannotCompare: 3,
-  agrees: 4,
+  incomplete: 3,
+  cannotCompare: 4,
+  agrees: 5,
 }
 
 /** Names compared as a reader would: accents and case ignored (« Évreux » beside « Evreux »). */

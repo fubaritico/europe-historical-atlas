@@ -24,6 +24,7 @@ const SARKEL: ContentCity = {
   testimonies: [],
   holder: null,
   communities: [],
+  chain: null,
   showInAtlas: false,
 }
 
@@ -59,6 +60,7 @@ describe('cityLoad', () => {
         lat: 47.7,
         date: SARKEL.date,
         holder: null,
+        chain: null,
         holderSources: [],
       })
     })

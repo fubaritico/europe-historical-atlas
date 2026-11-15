@@ -24,12 +24,13 @@ function year(kinds: readonly CityVerdictKind[]): {
       at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
     },
     holder: null,
+    chain: null,
     holderSources: [],
   }))
   const verdicts = new Map(
     kinds.map((kind, index): [string, CityVerdict] => [
       String(index),
-      { onMap: null, bySources: null, kind },
+      { onMap: null, bySources: null, kind, chain: null },
     ])
   )
   return { cities, verdicts }
@@ -43,6 +44,7 @@ describe('stateChoices', () => {
       expect(stateChoices(cities, verdicts)).toEqual([
         { kind: 'misplaced', count: 2 },
         { kind: 'toDeclare', count: 0 },
+        { kind: 'incomplete', count: 0 },
         { kind: 'cannotCompare', count: 0 },
         { kind: 'agrees', count: 1 },
       ])

@@ -82,6 +82,7 @@ function rome(overrides: Record<string, unknown> = {}): unknown {
       },
     ],
     holder: { name: 'Papal States', wikidata: 'Q170174' },
+    chain: null,
     communities: [],
     showInAtlas: true,
     ...overrides,
@@ -272,6 +273,29 @@ describe('contentFileSchema', () => {
       expect(acceptsCity(rome({ showInAtlas: false }))).toBe(true)
     })
 
+    // CARTO-435: the chain computed at the export, every reading kept.
+    it('accepts a city with its chain, two readings, one stopping for want of a link', () => {
+      const chain = [
+        {
+          titles: [
+            { name: 'Mathias II — comté de Nantes', wikidata: 'Q1' },
+            { name: 'Alain IV — duché de Bretagne', wikidata: 'Q2' },
+          ],
+          end: 'sovereign',
+        },
+        { titles: [{ name: 'Mathias II — comté de Nantes', wikidata: null }], end: 'unknown' },
+      ]
+      expect(acceptsCity(rome({ chain }))).toBe(true)
+    })
+
+    it('refuses a chain with no reading, or a reading with no title, or an end it does not know', () => {
+      expect(acceptsCity(rome({ chain: [] }))).toBe(false)
+      expect(acceptsCity(rome({ chain: [{ titles: [], end: 'unknown' }] }))).toBe(false)
+      expect(
+        acceptsCity(rome({ chain: [{ titles: [{ name: 'X', wikidata: null }], end: 'maybe' }] }))
+      ).toBe(false)
+    })
+
     // CMS-433: a city carries its religious communities; a file of version 7, without them, is refused.
     it('accepts a community named by a line about it, its weight supposed', () => {
       const catholics = { fr: 'catholique', en: null }
@@ -304,7 +328,7 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 4, 5, 6, 7, 9])
+      for (const version of [1, 2, 3, 4, 5, 6, 7, 8, 10])
         expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 

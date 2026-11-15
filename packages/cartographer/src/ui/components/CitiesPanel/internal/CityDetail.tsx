@@ -1,13 +1,15 @@
 import { formatLonLat } from '../../../../viewport/coordinateLabel'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
+import { CHAIN_END_TEXT, verdictText } from '../utils/verdictText'
 
 import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { HolderSource } from '../../../../state/citiesSlice'
 import type { LonLat } from '../../../../viewport/coordinateLabel'
 
 /**
- * Where a city is, and who holds it: by the sources, with the lines saying so, and on the map — and whether they agree.
+ * Where a city is, and who holds it: by the sources, with the lines saying so, its chain of vassalage (CARTO-435), and
+ * on the map — and whether they agree.
  * The body of its information box ({@link CityDialog}). **Its coordinates are written as the status bar writes the
  * pointer's** (CARTO-368): degrees and minutes, a hemisphere letter, never a minus sign.
  * @param props - the city's name, its position, its verdict and its sources
@@ -32,8 +34,9 @@ export function CityDetail({
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
   // Derived
-  const { onMap, bySources, kind } = verdict
+  const { onMap, bySources, kind, chain } = verdict
   const holder = bySources?.name ?? ''
+  const said = verdictText(verdict)
 
   // Render
   return (
@@ -50,8 +53,19 @@ export function CityDetail({
       <p className="city-detail__line">
         {onMap === null ? t('unclaimed') : t('onMap', { polity: onMap.name })}
       </p>
-      {kind !== 'notEntered' && (
-        <p className="city-detail__verdict">{t(kind, { polity: holder })}</p>
+      {chain?.map((reading) => (
+        <p
+          key={`${reading.titles.map((title) => title.name).join('>')}|${reading.end}`}
+          className="city-detail__line city-detail__line--chain"
+        >
+          {t('chain', {
+            titles: reading.titles.map((title) => title.name).join(' → '),
+            end: t(CHAIN_END_TEXT[reading.end]),
+          })}
+        </p>
+      ))}
+      {said !== null && (
+        <p className="city-detail__verdict">{t(said.key, { polity: said.polity })}</p>
       )}
     </section>
   )

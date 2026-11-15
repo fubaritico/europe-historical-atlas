@@ -23,6 +23,8 @@ export interface LoadedCity {
   readonly date: ContentCity['date']
   /** The polity holding it by the sources, or `null` while nobody has entered it. */
   readonly holder: ContentCity['holder']
+  /** Its chain of vassalage at its sheet's year, or `null` while its sheet names no title (CARTO-435). */
+  readonly chain: ContentCity['chain']
   /** The sources that say who held it. */
   readonly holderSources: readonly {
     readonly title: string
@@ -61,6 +63,7 @@ export function toLoadedCity(city: ContentCity): LoadedCity {
     lat: city.place.lat,
     date: city.date,
     holder: city.holder,
+    chain: city.chain,
     holderSources: city.testimonies.flatMap((testimony) =>
       testimony.subject === 'holder'
         ? [{ title: testimony.source.title, where: testimony.where, holder: testimony.holder }]

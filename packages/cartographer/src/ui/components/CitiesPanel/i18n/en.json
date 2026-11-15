@@ -52,5 +52,13 @@
   "sortExport": "The export’s order",
   "sortName": "By name",
   "sortVerification": "By verification",
-  "sortHolder": "By holder"
+  "sortHolder": "By holder",
+  "incomplete": "{polity} is not in its chain of vassalage, which stops for want of a link: we do not know yet.",
+  "misplacedChain": "Not at the right place: {polity} is not in its chain of vassalage.",
+  "cannotCompareMap": "{polity} has no Wikidata id on the map: it cannot be looked for in the chain.",
+  "chain": "Chain: {titles} — {end}",
+  "chainSovereign": "sovereign",
+  "chainUnknown": "beyond, we do not know",
+  "chainLoop": "the links contradict one another",
+  "stateIncomplete": "Chain incomplete ({count})"
 }

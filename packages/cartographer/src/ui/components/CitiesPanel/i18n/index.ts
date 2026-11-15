@@ -21,6 +21,11 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `notEntered` — Nobody has entered the holder yet.
  * - `agrees`, `misplaced`, `toDeclare`, `cannotCompare` — The verdict of the comparison by Wikidata id; `polity` is the
  *   sources' holder.
+ * - `misplacedChain`, `incomplete`, `cannotCompareMap` — The verdict by the city's chain of vassalage (CARTO-435);
+ *   `polity` is the polity the map has under it.
+ * - `chain` — One reading of the chain; `titles` its titles from the holder's up, `end` how it ends —
+ *   `chainSovereign`, `chainUnknown`, `chainLoop`.
+ * - `stateIncomplete` — The state box of the cities whose chain stops short; `count` how many.
  * - `source`, `sourceWhere` — A source saying who held it; `title` is its title, `where` where in it.
  * - `closeDetail` — The button that closes a city's detail.
  * - `filter` — The filter field's accessible name (CARTO-360).

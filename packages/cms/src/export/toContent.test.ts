@@ -6,6 +6,7 @@ import {
 } from '@europe-historical-atlas/core/data/contentFormat'
 
 import { toContent, toContentEvent, toSiegeEnginePeriods } from './toContent'
+import { chainRegister } from './toContentChain'
 
 import type { DocEvent, DocSiegeEngine, ExportContext } from './toContent'
 import type { DocCitySheet } from './toContentCity'
@@ -26,6 +27,9 @@ const JERUSALEM = {
 const GODFREY = { id: 3, name: { fr: 'Godefroy de Bouillon', en: null }, kind: 'person' as const }
 const GESTA = { id: 4, title: 'Gesta Francorum', author: null, url: '' }
 
+/** No title, no link: every city's chain reads `null`. */
+const NO_CHAIN = chainRegister([], [])
+
 /** The traction trebuchet from 808, still in use: the one engin of a siege of 1099. */
 const TRACTION: DocSiegeEngine = {
   id: 5,
@@ -34,7 +38,11 @@ const TRACTION: DocSiegeEngine = {
 }
 
 /** An export that knows the traction trebuchet and has nothing to say. */
-const QUIET: ExportContext = { periods: toSiegeEnginePeriods([TRACTION]), warn: () => undefined }
+const QUIET: ExportContext = {
+  periods: toSiegeEnginePeriods([TRACTION]),
+  warn: () => undefined,
+  register: NO_CHAIN,
+}
 
 /**
  * One event exported with {@link QUIET}.
@@ -236,14 +244,18 @@ describe('toContent', () => {
         engine: 'counterweight-trebuchet',
         inUse: { start: { year: 1217 }, end: { year: 1450 } },
       }
-      const context = { periods: toSiegeEnginePeriods([TRACTION, counterweight]), warn: vi.fn() }
+      const context = {
+        periods: toSiegeEnginePeriods([TRACTION, counterweight]),
+        warn: vi.fn(),
+        register: NO_CHAIN,
+      }
       const siege = capture({ date: { start: { year: 1250 } } })
       expect(toContentEvent(siege, context).engine).toBe('counterweight-trebuchet')
       expect(context.warn).not.toHaveBeenCalled()
     })
 
     it('gives a battle no engin, and says nothing, even with no period at all', () => {
-      const context = { periods: [], warn: vi.fn() }
+      const context = { periods: [], warn: vi.fn(), register: NO_CHAIN }
       const battle = capture({
         type: { id: 7, name: { fr: 'Bataille', en: null }, icon: 'swords', colour: '#e3170a' },
       })
@@ -252,7 +264,7 @@ describe('toContent', () => {
     })
 
     it('says so, naming the siege and its date, when no period covers it — the map shows the tower alone', () => {
-      const context = { periods: [], warn: vi.fn() }
+      const context = { periods: [], warn: vi.fn(), register: NO_CHAIN }
       expect(toContentEvent(capture(), context).engine).toBeNull()
       expect(context.warn).toHaveBeenCalledOnce()
       expect(context.warn).toHaveBeenCalledWith(

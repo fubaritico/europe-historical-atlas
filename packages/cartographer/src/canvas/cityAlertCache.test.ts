@@ -22,6 +22,7 @@ const METZ: CityMark = {
   lat: 47,
   date: in1100,
   holder: EMPIRE,
+  chain: null,
   holderSources: [],
 }
 const PARIS: CityMark = { ...METZ, id: 'paris', name: 'Paris', lon: 1, holder: null }

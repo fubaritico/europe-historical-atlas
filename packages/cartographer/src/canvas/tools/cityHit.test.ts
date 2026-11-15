@@ -38,6 +38,7 @@ function cityAt(store: CartographerStoreHook, id: string, at: Point): CityMark {
     lat: lonLat[1],
     date: in1100,
     holder: null,
+    chain: null,
     holderSources: [],
   }
 }

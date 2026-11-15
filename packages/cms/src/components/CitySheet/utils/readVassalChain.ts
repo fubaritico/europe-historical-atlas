@@ -1,4 +1,8 @@
-import { chainPaths, vassalChain } from '@europe-historical-atlas/core/data/vassalChain'
+import {
+  chainPaths,
+  distinctPaths,
+  vassalChain,
+} from '@europe-historical-atlas/core/data/vassalChain'
 
 import { vassalLinkOf } from '../../../fields/vassalLinkOf'
 
@@ -108,27 +112,10 @@ export async function readVassalChain(
   const paths = chainPaths(vassalChain(String(title), year, links))
   const ids = [...new Set(paths.flatMap((path) => path.titles))]
   const names = await fetchTitleNames(fetcher, api, ids)
-  return distinct(paths).map((path) => ({
+  return distinctPaths(paths).map((path) => ({
     titles: path.titles.map((id) => titleOf(names, id)),
     end: path.end,
   }))
-}
-
-/**
- * The readings that differ — two links entered alike (the same vassal to the same suzerain, the same year) give the
- * same path twice, which would count as a divergence of the sources where there is none. Their agreement is the
- * lines' to count, by concordance, never this list's.
- * @param paths - the chain's paths, as `chainPaths` gives them
- * @returns each path once, in the order first met
- */
-function distinct(paths: readonly { titles: string[]; end: ChainEnd }[]) {
-  const seen = new Set<string>()
-  return paths.filter((path) => {
-    const key = `${path.titles.join('>')}|${path.end}`
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
 }
 
 /**

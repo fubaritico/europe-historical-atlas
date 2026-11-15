@@ -11,6 +11,7 @@ import type { StateChoice } from '../utils/stateChoices'
 const STATE_LABEL: Readonly<Record<StateChoice['kind'], CitiesPanelMessageKey>> = {
   misplaced: 'stateMisplaced',
   toDeclare: 'stateToDeclare',
+  incomplete: 'stateIncomplete',
   cannotCompare: 'stateCannotCompare',
   agrees: 'stateAgrees',
 }

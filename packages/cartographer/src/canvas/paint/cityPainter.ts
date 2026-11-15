@@ -35,7 +35,7 @@ export interface CityCanvas {
  * holder; **`toCorrect`**, yellow — the map puts it elsewhere, or lacks its holder. The same two levels as the list's
  * names (CARTO-386); `canvas/cityVerdict`'s `cityAlert` reads them from a verdict.
  */
-export type CityAlert = 'missing' | 'toCorrect'
+export type CityAlert = 'missing' | 'toCorrect' | 'uncertain'
 
 /** The cities' colours and sizes, in device pixels. */
 export interface CityStyle {
@@ -47,6 +47,8 @@ export interface CityStyle {
   cityMissing: string
   /** The ring of a city to correct on the map — the theme's `--caution` (CARTO-389). */
   cityToCorrect: string
+  /** The ring of a city that cannot be compared, or whose chain stops short (CARTO-435). */
+  cityUncertain: string
   /** The dot's radius. */
   cityRadius: number
   /** The name's size. */
@@ -121,11 +123,19 @@ function disc(ctx: CityCanvas, at: readonly [number, number], radius: number, in
   ctx.fill()
 }
 
+/** Each alert's ring, read from the style. */
+const STATUS_INK: Readonly<Record<CityAlert, (style: CityStyle) => string>> = {
+  missing: (style) => style.cityMissing,
+  toCorrect: (style) => style.cityToCorrect,
+  uncertain: (style) => style.cityUncertain,
+}
+
 /**
  * The rings round a point (CARTO-389). **All well**: a dark ring outside a light one, so a point reads on light ground
  * and on dark alike — the look of 2026-11-05, unchanged. **With an alert** (the dev, 2026-11-08, after trying a status
  * ring between two light ones, *"not very readable"*: *"the colour, a white stroke, a thick status stroke, a black
- * stroke"*): the light ring, the status ring — red for no holder, yellow to correct, three strokes wide — and the dark
+ * stroke"*): the light ring, the status ring — red for no holder, yellow to correct, slate for uncertain (CARTO-435),
+ * three strokes wide — and the dark
  * ring outside, the same edge as a city where all is well.
  * @param ctx - the context
  * @param city - the city on screen
@@ -139,7 +149,7 @@ function paintRings(ctx: CityCanvas, city: CityOnScreen, style: CityStyle): void
     disc(ctx, city.at, radius + ring, style.cityHalo)
     return
   }
-  const status = city.alert === 'missing' ? style.cityMissing : style.cityToCorrect
+  const status = STATUS_INK[city.alert](style)
   disc(ctx, city.at, radius + 5 * ring, style.cityInk)
   disc(ctx, city.at, radius + 4 * ring, status)
   disc(ctx, city.at, radius + ring, style.cityHalo)

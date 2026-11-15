@@ -23,6 +23,7 @@ function city(name: string): CityMark {
       at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
     },
     holder: EMPIRE,
+    chain: null,
     holderSources: [],
   }
 }

@@ -97,9 +97,16 @@ describe('editor-chrome.css — the {Cities} alerts', () => {
   })
 
   describe('edge cases', () => {
-    it('leaves unmarked a holder without a Wikidata id, and a city at the right place', () => {
-      expect(() => declarationsFor(row('cannotCompare'))).toThrow()
+    it('leaves unmarked only a city at the right place', () => {
       expect(() => declarationsFor(row('agrees'))).toThrow()
+    })
+
+    // CARTO-435, the dev of 2026-11-15: « we don't know » never looks like « right ».
+    it('writes « we do not know » in slate: a city that cannot be compared, or whose chain stops short', () => {
+      for (const kind of ['cannotCompare', 'incomplete']) {
+        expect(declarationsFor(row(kind))).toContain('color: var(--uncertain);')
+        expect(declarationsFor(detail(kind))).toContain('color: var(--uncertain);')
+      }
     })
   })
 

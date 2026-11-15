@@ -3262,6 +3262,7 @@ describe('the cities shown', () => {
       at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
     },
     holder: null,
+    chain: null,
     holderSources: [],
   } as const
 
