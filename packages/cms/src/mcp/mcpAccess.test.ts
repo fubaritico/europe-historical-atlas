@@ -27,10 +27,11 @@ function operationBoxes(config: Config, group: string): string[] {
 
 describe('mcpAccess', () => {
   describe('happy path', () => {
-    it('reaches the confessions, the importance reasons, the places, the cities at a date and the sources, and nothing else', () => {
+    it('reaches the confessions, the importance reasons, the register of people, the places, the cities at a date and the sources, and nothing else', () => {
       expect(Object.keys(MCP_COLLECTIONS).sort()).toEqual([
         'confessions',
         'importance-reasons',
+        'people',
         'place-periods',
         'places',
         'sources',

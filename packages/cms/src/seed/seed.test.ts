@@ -139,7 +139,7 @@ describe('seed', () => {
 
       expect(report.events).toEqual({ found: 0, created: EVENTS.length, updated: 0 })
       expect(report.places.created).toBe(DISTINCT_PLACES)
-      expect(report.actors).toEqual({ found: 0, created: ACTORS.length, updated: 0 })
+      expect(report.people).toEqual({ found: 0, created: ACTORS.length, updated: 0 })
       expect(report.sources).toEqual({
         found: 0,
         created: SOURCES.length + ENGINE_SOURCES.length + CITY_SOURCES.length,
@@ -164,7 +164,7 @@ describe('seed', () => {
       expect(event?.data).toMatchObject({
         type: base.records('event-types')[0]?.id,
         place: base.records('places')[0]?.id,
-        actors: [base.records('actors')[0]?.id],
+        actors: [base.records('people')[0]?.id],
         sources: [base.records('sources')[0]?.id],
       })
     })
@@ -195,15 +195,15 @@ describe('seed', () => {
   describe('variants', () => {
     it('reuses a record already in the base and leaves it unchanged', async () => {
       const base = memoryStore()
-      const theirs = await base.store.create('actors', {
+      const theirs = await base.store.create('people', {
         wikidata: 'Q1',
         name: 'Tancrède (le sien)',
       })
 
       const report = await seed(base.store, atParis, SMALL)
 
-      expect(report.actors).toEqual({ found: 1, created: 0, updated: 0 })
-      expect(base.records('actors')).toEqual([
+      expect(report.people).toEqual({ found: 1, created: 0, updated: 0 })
+      expect(base.records('people')).toEqual([
         { id: theirs, data: { wikidata: 'Q1', name: 'Tancrède (le sien)' } },
       ])
       expect(base.records('events')[0]?.data.actors).toEqual([theirs])

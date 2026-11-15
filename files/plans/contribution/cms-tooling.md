@@ -68,7 +68,7 @@ through tests and scripts on a database of my own.
   collection plus a manifest (date, last migration applied, count per collection); written to
   `packages/cms/content/` and **committed** — the dev's call, 2026-10-25: the content's history in git and a copy off
   the machine.
-- `pnpm cms:load`: into an **empty** base, in dependency order (sources, places, actors, types, events), ids kept
+- `pnpm cms:load`: into an **empty** base, in dependency order (sources, places, people, types, events), ids kept
   (`allowIDOnCreate`), through Payload's validation, in **one transaction — all or nothing**; a record that no longer
   fits the schema is refused by name. Refuses a base that is not empty.
 - **Guarded by a round trip**: dump → empty base → load → dump again, the two identical.

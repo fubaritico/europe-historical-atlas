@@ -388,6 +388,7 @@ describe('CitySheetForm', () => {
           confession: null,
           holderName: null,
           holderQid: null,
+          holderAsWritten: null,
           where: 'p. 12',
           quotation: null,
         },
@@ -415,6 +416,7 @@ describe('CitySheetForm', () => {
       await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Le pays qui la tient' }))
       await paste(within(line).getByLabelText('Pays'), 'Papal States')
+      await paste(within(line).getByLabelText('Nom dans la source'), 'Patrimonium Petri')
       await paste(within(line).getByLabelText('Citation'), 'the Patrimony of Peter')
       await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
       await waitFor(() => {
@@ -432,6 +434,7 @@ describe('CitySheetForm', () => {
           confession: null,
           holderName: 'Papal States',
           holderQid: null,
+          holderAsWritten: 'Patrimonium Petri',
           where: null,
           quotation: 'the Patrimony of Peter',
         },

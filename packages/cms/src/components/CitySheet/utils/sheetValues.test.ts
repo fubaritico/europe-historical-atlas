@@ -100,6 +100,7 @@ describe('sheetValues', () => {
         confession: null,
         holderName: null,
         holderQid: null,
+        holderAsWritten: null,
         where: 'p. 12',
         quotation: null,
       }
@@ -121,6 +122,7 @@ describe('sheetValues', () => {
           confession: null,
           holderName: '',
           holderQid: '',
+          holderAsWritten: '',
           where: 'p. 12',
           quotation: '',
         },
@@ -139,6 +141,7 @@ describe('sheetValues', () => {
         confession: null,
         holderName: 'Republic of Venice',
         holderQid: 'Q4948',
+        holderAsWritten: 'Venetici',
         where: 'p. 33',
         quotation: 'in the name of the emperor',
       }
@@ -159,8 +162,17 @@ describe('sheetValues', () => {
     it('sends a holder left blank as none, and a line’s holder only when it speaks of one', () => {
       const values = { ...sheetValues({}, null, new Map()), holderName: '  ', holderQid: '' }
       expect(sheetBody(values)).toMatchObject({ holderName: null, holderQid: null })
-      const line = { ...emptyTestimony(), subject: 'population' as const, holderName: 'Venice' }
-      expect(testimonyBody(line)).toMatchObject({ holderName: null, holderQid: null })
+      const line = {
+        ...emptyTestimony(),
+        subject: 'population' as const,
+        holderName: 'Venice',
+        holderAsWritten: 'Venetici',
+      }
+      expect(testimonyBody(line)).toMatchObject({
+        holderName: null,
+        holderQid: null,
+        holderAsWritten: null,
+      })
     })
 
     it('cuts the blanks around a typed holder and its id, never around a quotation', () => {
@@ -175,10 +187,12 @@ describe('sheetValues', () => {
         ...emptyTestimony(),
         subject: 'holder' as const,
         holderQid: ' Q4948',
+        holderAsWritten: ' Venetici ',
         quotation: ' « in the name » ',
       }
       expect(testimonyBody(line)).toMatchObject({
         holderQid: 'Q4948',
+        holderAsWritten: 'Venetici',
         quotation: ' « in the name » ',
       })
     })

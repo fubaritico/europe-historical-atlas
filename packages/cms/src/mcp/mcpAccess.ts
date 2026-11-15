@@ -2,6 +2,7 @@ import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 import { Confessions } from '../collections/Confessions'
 import { ImportanceReasons } from '../collections/ImportanceReasons'
+import { People } from '../collections/People'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
@@ -16,8 +17,9 @@ const ENTER_NEVER_DELETE = { find: true, create: true, update: true, delete: fal
 
 /**
  * The collections a model reaches over MCP — the ones the historian enters its sources into: the places, a city at
- * a date with its holder (CMS-335), the sources, the importance reasons a city's line cites (CMS-431), and the
- * confessions of its communities (CMS-433).
+ * a date with its holder (CMS-335), the sources, the importance reasons a city's line cites (CMS-431), the
+ * confessions of its communities (CMS-433), and the register of people every holder and suzerain is entered in
+ * before any link of vassalage (CMS-422).
  * Everything else stays out until a need names it.
  *
  * Each entry still goes through Payload as the key's user: the collections' access rules and hooks — the sheet's
@@ -60,6 +62,14 @@ export const MCP_COLLECTIONS = {
     description:
       'A confession a city’s community belongs to (catholic, orthodox, Sunni Muslim, Jewish…): its id is what a ' +
       'community and its « community » line cite. Search before creating — one that exists is reused, never created twice.',
+  },
+  [People.slug]: {
+    enabled: ENTER_NEVER_DELETE,
+    description:
+      'The register of people: who someone is, nothing more — `name`, `kind` (`person` or `house`, a dynasty), ' +
+      '`wikidata`; for a person `born` and `died`, each { year, month, day, circa, margin, calendar }, and `house` ' +
+      '(the id of a record of kind house); for a house `founded`, `ended` and `founder`. No rank, role or ' +
+      'confession here. Search by `wikidata` before creating — a person is entered once.',
   },
 } as const
 

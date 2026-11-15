@@ -105,6 +105,8 @@
   "lineHolderHelp": "Le pays qui tient la ville selon cette source, par son nom.",
   "lineHolderMissing": "Donnez le pays que nomme la source.",
   "lineHolderQidHelp": "Facultatif — par exemple : Q4948.",
+  "lineHolderAsWritten": "Nom dans la source",
+  "lineHolderAsWrittenHelp": "Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».",
   "quotation": "Citation",
   "quotationHelp": "Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre.",
   "showInAtlas": "Afficher la ville dans l’atlas",

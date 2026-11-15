@@ -62,6 +62,8 @@ export interface TestimonyValues {
   holderName: string
   /** That polity's Wikidata id, as typed — read when the subject is the holder. */
   holderQid: string
+  /** The holder's name as the source writes it, as typed — read when the subject is the holder (CMS-422). */
+  holderAsWritten: string
   /** Where in the source, as typed. */
   where: string
   /** The source's own words, as typed. */
@@ -124,6 +126,8 @@ export interface TestimonyBody {
   holderName: string | null
   /** Its Wikidata id, for a line about the holder. */
   holderQid: string | null
+  /** The holder's name as the source writes it, for a line about the holder. */
+  holderAsWritten: string | null
   /** Where in the source. */
   where: string | null
   /** The source's own words. */
@@ -218,6 +222,7 @@ export function emptyTestimony(): TestimonyValues {
     confession: null,
     holderName: '',
     holderQid: '',
+    holderAsWritten: '',
     where: '',
     quotation: '',
   }
@@ -271,6 +276,7 @@ function testimonyValues(
     confession: relationId(row.confession),
     holderName: textOf(row.holderName),
     holderQid: textOf(row.holderQid),
+    holderAsWritten: textOf(row.holderAsWritten),
     where: textOf(row.where),
     quotation: textOf(row.quotation),
   }
@@ -422,7 +428,13 @@ export function communityBody(community: CommunityValues): CommunityBody {
  * @param line - the form's line
  * @returns the two fields
  */
-function lineHolder(line: TestimonyValues): Pick<TestimonyBody, 'holderName' | 'holderQid'> {
-  if (line.subject !== 'holder') return { holderName: null, holderQid: null }
-  return { holderName: trimmed(line.holderName), holderQid: trimmed(line.holderQid) }
+function lineHolder(
+  line: TestimonyValues
+): Pick<TestimonyBody, 'holderName' | 'holderQid' | 'holderAsWritten'> {
+  if (line.subject !== 'holder') return { holderName: null, holderQid: null, holderAsWritten: null }
+  return {
+    holderName: trimmed(line.holderName),
+    holderQid: trimmed(line.holderQid),
+    holderAsWritten: trimmed(line.holderAsWritten),
+  }
 }

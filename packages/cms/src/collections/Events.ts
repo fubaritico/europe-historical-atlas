@@ -25,7 +25,7 @@ export const Events: CollectionConfig = {
     {
       name: 'actors',
       type: 'relationship',
-      relationTo: 'actors',
+      relationTo: 'people',
       hasMany: true,
       label: 'Acteurs',
     },

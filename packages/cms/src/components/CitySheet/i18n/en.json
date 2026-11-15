@@ -105,6 +105,8 @@
   "lineHolderHelp": "The polity holding the city according to this source, by its name.",
   "lineHolderMissing": "Give the polity the source names.",
   "lineHolderQidHelp": "Optional — for instance: Q4948.",
+  "lineHolderAsWritten": "Name in the source",
+  "lineHolderAsWrittenHelp": "Optional — the name as the source writes it, copied as it stands: « Mathieu, comte nantais ».",
   "quotation": "Quotation",
   "quotationHelp": "The source’s own words, copied as they are. Optional, but it is what lets the line be checked without the book.",
   "showInAtlas": "Show the city in the atlas",

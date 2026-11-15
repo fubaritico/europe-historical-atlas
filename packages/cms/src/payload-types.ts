@@ -75,7 +75,7 @@ export interface Config {
     'place-periods': PlacePeriod;
     'importance-reasons': ImportanceReason;
     confessions: Confession;
-    actors: Actor;
+    people: Person;
     sources: Source;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
@@ -93,7 +93,7 @@ export interface Config {
     'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>;
     'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>;
     confessions: ConfessionsSelect<false> | ConfessionsSelect<true>;
-    actors: ActorsSelect<false> | ActorsSelect<true>;
+    people: PeopleSelect<false> | PeopleSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
@@ -190,7 +190,7 @@ export interface Event {
     };
   };
   place?: (number | null) | Place;
-  actors?: (number | Actor)[] | null;
+  actors?: (number | Person)[] | null;
   description?: string | null;
   sources?: (number | Source)[] | null;
   /**
@@ -275,9 +275,9 @@ export interface Place {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "actors".
+ * via the `definition` "people".
  */
-export interface Actor {
+export interface Person {
   id: number;
   name: string;
   kind: 'person' | 'house';
@@ -285,6 +285,70 @@ export interface Actor {
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
    */
   wikidata?: string | null;
+  /**
+   * Le jour, l’année, ou « vers ».
+   */
+  born?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * Vide : on ne sait pas, ou la personne vit encore.
+   */
+  died?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * Sa première mention, à défaut.
+   */
+  founded?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * Vide : on ne sait pas, ou la maison existe encore.
+   */
+  ended?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * La maison à laquelle elle appartient (Wikidata, P53), choisie parmi les maisons du registre.
+   */
+  house?: (number | null) | Person;
+  /**
+   * La personne qui l’a fondée, choisie dans le registre.
+   */
+  founder?: (number | null) | Person;
   updatedAt: string;
   createdAt: string;
 }
@@ -462,6 +526,10 @@ export interface PlacePeriod {
          */
         holderQid?: string | null;
         /**
+         * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+         */
+        holderAsWritten?: string | null;
+        /**
          * La communauté dont parle la source, par sa confession.
          */
         confession?: (number | null) | Confession;
@@ -619,6 +687,20 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  people?: {
+    /**
+     * Allow clients to find people.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create people.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update people.
+     */
+    update?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -680,8 +762,8 @@ export interface PayloadLockedDocument {
         value: number | Confession;
       } | null)
     | ({
-        relationTo: 'actors';
-        value: number | Actor;
+        relationTo: 'people';
+        value: number | Person;
       } | null)
     | ({
         relationTo: 'sources';
@@ -930,6 +1012,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
         reason?: T;
         holderName?: T;
         holderQid?: T;
+        holderAsWritten?: T;
         confession?: T;
         where?: T;
         quotation?: T;
@@ -958,12 +1041,54 @@ export interface ConfessionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "actors_select".
+ * via the `definition` "people_select".
  */
-export interface ActorsSelect<T extends boolean = true> {
+export interface PeopleSelect<T extends boolean = true> {
   name?: T;
   kind?: T;
   wikidata?: T;
+  born?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  died?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  founded?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  ended?:
+    | T
+    | {
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  house?: T;
+  founder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1043,6 +1168,13 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
       };
   confessions?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  people?:
     | T
     | {
         find?: T;

@@ -341,6 +341,19 @@ export const PlacePeriods: CollectionConfig = {
             description: 'Facultatif — par exemple : Q4948.',
           },
         },
+        // The identity is a claim (`files/plans/contribution/vassal-chain.md`, the state of the art): the name as the
+        // source writes it stays beside the one the line is read as, so two records later found to be one person
+        // can be merged by a signed arbitration, the reading kept (CMS-422).
+        {
+          name: 'holderAsWritten',
+          type: 'text',
+          label: 'Nom dans la source',
+          admin: {
+            condition: (_data, sibling) => sibling.subject === 'holder',
+            description:
+              'Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».',
+          },
+        },
         {
           name: 'confession',
           type: 'relationship',

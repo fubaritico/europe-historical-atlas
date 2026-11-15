@@ -12,7 +12,7 @@ export type SeedCollection =
   | 'event-types'
   | 'sources'
   | 'siege-engines'
-  | 'actors'
+  | 'people'
   | 'places'
   | 'events'
   | 'importance-reasons'
@@ -427,7 +427,7 @@ function emptyReport(): SeedReport {
     'event-types': { found: 0, created: 0, updated: 0 },
     sources: { found: 0, created: 0, updated: 0 },
     'siege-engines': { found: 0, created: 0, updated: 0 },
-    actors: { found: 0, created: 0, updated: 0 },
+    people: { found: 0, created: 0, updated: 0 },
     places: { found: 0, created: 0, updated: 0 },
     events: { found: 0, created: 0, updated: 0 },
     'importance-reasons': { found: 0, created: 0, updated: 0 },
@@ -466,7 +466,7 @@ async function settleLinks(
       data.sources.map((s) => ({ key: s.title, data: () => ({ ...s }) }))
     ),
     actors: await batch(
-      'actors',
+      'people',
       'wikidata',
       data.actors.map((a) => ({ key: a.wikidata, data: () => ({ ...a }) }))
     ),

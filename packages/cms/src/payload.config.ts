@@ -9,11 +9,11 @@ import { buildConfig } from 'payload'
 import { TAB_MARK_SIDE } from '@europe-historical-atlas/core/utils/brandMark'
 
 import { ATLAS_NAME } from './atlasName'
-import { Actors } from './collections/Actors'
 import { Confessions } from './collections/Confessions'
 import { Events } from './collections/Events'
 import { EventTypes } from './collections/EventTypes'
 import { ImportanceReasons } from './collections/ImportanceReasons'
+import { People } from './collections/People'
 import { PlacePeriods } from './collections/PlacePeriods'
 import { Places } from './collections/Places'
 import { SiegeEngines } from './collections/SiegeEngines'
@@ -80,7 +80,7 @@ export default buildConfig({
     PlacePeriods,
     ImportanceReasons,
     Confessions,
-    Actors,
+    People,
     Sources,
     Users,
   ],

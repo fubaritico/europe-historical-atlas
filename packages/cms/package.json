@@ -1,13 +1,13 @@
 {
   "name": "@europe-historical-atlas/cms",
   "version": "1.0.0",
-  "description": "The CMS — the shared contribution system: places, events, actors and sources, entered in Payload and exported for the atlas.",
+  "description": "The CMS — the shared contribution system: places, events, people and sources, entered in Payload and exported for the atlas.",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "pnpm migrate && NODE_OPTIONS=--no-deprecation next dev --port 3100 --hostname 127.0.0.1",
     "migrate": "NODE_OPTIONS=--no-deprecation payload run src/migrate/run.ts",
-    "migrate:create": "NODE_OPTIONS=--no-deprecation payload migrate:create && NODE_OPTIONS=--no-deprecation payload run src/migrate/fixImports.ts",
+    "migrate:create": "NODE_OPTIONS=--no-deprecation payload run src/migrate/create.ts",
     "migrate:status": "NODE_OPTIONS=--no-deprecation payload migrate:status",
     "export": "NODE_OPTIONS=--no-deprecation payload run src/export/run.ts",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",

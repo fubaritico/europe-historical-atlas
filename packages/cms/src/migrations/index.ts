@@ -1,9 +1,21 @@
 import * as migration_20261115_152716_initial from './20261115_152716_initial';
+import * as migration_20261115_160000_people from './20261115_160000_people';
+import * as migration_20261115_160620_holder_as_written from './20261115_160620_holder_as_written';
 
 export const migrations = [
   {
     up: migration_20261115_152716_initial.up,
     down: migration_20261115_152716_initial.down,
-    name: '20261115_152716_initial'
+    name: '20261115_152716_initial',
+  },
+  {
+    up: migration_20261115_160000_people.up,
+    down: migration_20261115_160000_people.down,
+    name: '20261115_160000_people',
+  },
+  {
+    up: migration_20261115_160620_holder_as_written.up,
+    down: migration_20261115_160620_holder_as_written.down,
+    name: '20261115_160620_holder_as_written',
   },
 ];
