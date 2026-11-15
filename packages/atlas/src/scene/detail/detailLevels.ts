@@ -57,6 +57,13 @@ const ALL_CITIES: readonly CityImportance[] = ['capital', 'large-city', 'city']
 export const NAME_OPACITY = 0.75
 
 /**
+ * A distant country's name's opacity (CARTO-447, the dev, 2026-11-15): written as a country's — black, not inverted — but
+ * *« un peu transparent… opacity 50 %, pas de trait blanc autour »*, from the furthest zoom on. Its level's share is taken
+ * of it as of {@link NAME_OPACITY}.
+ */
+export const DISTANT_NAME_OPACITY = 0.5
+
+/**
  * A level's countries' names written as **their opacity on screen**, `0..1` (the dev, 2026-11-09: a share of a share
  * was one indirection too many): the share the level hands the names is that opacity over the names' own
  * (`NAME_OPACITY`), which their white edge follows as well.

@@ -59,6 +59,8 @@ function options(): NameLayerOptions {
     haloCells: 1,
     blurMethod: createSeparateImagesBlur(),
     inverted: new Set(),
+    faint: new Set(),
+    faintOpacity: 0.3,
   }
 }
 
@@ -270,6 +272,37 @@ describe('createNameLayer', () => {
       ]
       layer.dispose()
       expect(spies.map((spy) => spy.mock.calls.length)).toEqual([1, 1, 1])
+    })
+  })
+
+  // CARTO-447: a distant country's name is a country's — the multiplied ink — faint, with no white edge.
+  describe('faint names', () => {
+    it('writes a faint polity’s name in the ordinary ink, multiplied, with no edge of its own', () => {
+      const layer = createNameLayer({ ...options(), faint: new Set(['king']) })
+      const [ordinaryEdge, ordinaryInk, faint, ...rest] = meshes(layer)
+      expect([meshes(layer).length, rest.length]).toEqual([5, 2])
+      expect(faint?.material.blending).toBe(MultiplyBlending)
+      expect((faint?.material.uniforms.ink?.value as Color).getHexString()).toBe(
+        new Color('#3b2614').getHexString()
+      )
+      expect([ordinaryEdge?.geometry, ordinaryInk?.geometry].includes(faint?.geometry)).toBe(false)
+    })
+
+    it('shows the faint names with their level, at their own opacity, the level’s share taken of it', () => {
+      const layer = createNameLayer({ ...options(), faint: new Set(['king']) })
+      const faint = meshes(layer)[2]
+      layer.setDetail(0)
+      layer.setWatermark(0.5)
+      expect([faint?.visible, faint?.material.uniforms.opacity?.value]).toEqual([true, 0.15])
+    })
+
+    it('frees the faint names’ geometry and material on disposal', () => {
+      const layer = createNameLayer({ ...options(), faint: new Set(['king']) })
+      const faint = meshes(layer)[2]
+      if (faint === undefined) throw new Error('no faint name')
+      const spies = [vi.spyOn(faint.geometry, 'dispose'), vi.spyOn(faint.material, 'dispose')]
+      layer.dispose()
+      expect(spies.map((spy) => spy.mock.calls.length)).toEqual([1, 1])
     })
   })
 

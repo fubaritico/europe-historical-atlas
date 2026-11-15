@@ -19,7 +19,7 @@
  * band alone until the trial is kept.
  */
 
-import { isTribe } from './tribes'
+import { isUnfilled } from './tribes'
 
 import type { HomageLevels } from './homageLevels'
 import type { YearPolity } from './yearFormat'
@@ -114,7 +114,7 @@ export function bandDepthOf(
  * @returns `true` for a vassal that is not a tribe
  */
 export function isBandedVassal(polity: Pick<YearPolity, 'suzerain' | 'rank'>): boolean {
-  return polity.suzerain !== null && !isTribe(polity)
+  return polity.suzerain !== null && !isUnfilled(polity)
 }
 
 /**

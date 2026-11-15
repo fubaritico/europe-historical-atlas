@@ -127,21 +127,23 @@ describe('createTribeLayer', () => {
     );
     float band = inside * mix(0.500, 1.0, step(bandWidth, -vDistance));
     float opacity = mix(fade, band, featherBand);
-    // An outlined tribe (CARTO-439), core's TRIBE_OUTLINED_FEATHER written in: full within the rim, half to the width,
-    // nothing deeper — both limits undulating by its own wave, as the Cartographer draws it.
-    float rimWave = 1.0 + 0.500 * bandWave(framed, 150.0);
-    float rimInner = clamp(10.0 * rimWave, 0.0, 60.0);
-    float rimOuter = clamp(20.0 * rimWave, 0.0, 60.0);
+    // An outlined tribe (CARTO-439) and a distant country (CARTO-447), core's TRIBE_OUTLINED_FEATHER and
+    // TRIBE_DISTANT_FEATHER written in, mixed by the style: full within the rim, half to the width, nothing deeper — both
+    // limits undulating by their one wave, as the Cartographer draws them.
+    float distant = step(2.5, vStyle);
+    float rimWave = 1.0 + mix(0.500, 0.000, distant) * bandWave(framed, 150.0);
+    float rimInner = clamp(mix(10.0, 15.0, distant) * rimWave, 0.0, 60.0);
+    float rimOuter = clamp(mix(20.0, 30.0, distant) * rimWave, 0.0, 60.0);
     float rim = inside * mix(1.0, 0.500 * (1.0 - step(rimOuter, -vDistance)), step(rimInner, -vDistance));
     // A tribe's margin (CARTO-447), core's TRIBE_MARGIN_FEATHER written in: nothing within the rim, half to the width,
     // full deeper — both limits undulating by its own wave.
     float marginWave = 1.0 + 0.500 * bandWave(framed, 150.0);
-    float marginInner = clamp(7.0 * marginWave, 0.0, 60.0);
-    float marginOuter = clamp(21.0 * marginWave, 0.0, 60.0);
+    float marginInner = clamp(3.0 * marginWave, 0.0, 60.0);
+    float marginOuter = clamp(17.0 * marginWave, 0.0, 60.0);
     float margin = inside * step(marginInner, -vDistance) * mix(0.500, 1.0, step(marginOuter, -vDistance));
-    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin.
-    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)));
-    opacity = mix(opacity, margin, step(1.5, vStyle));
+    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin, 3 the distant country's rim.
+    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)) + distant);
+    opacity = mix(opacity, margin, step(1.5, vStyle) * (1.0 - distant));
     float beyond = step(0.000001, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);

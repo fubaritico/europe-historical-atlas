@@ -3,9 +3,9 @@
  * relief is built, and again whenever the relief is — every letter's vertex sits at the ground's height.
  */
 
-import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
+import { distantIds, tribeIds } from '@europe-historical-atlas/core/data/tribes'
 
-import { NAME_OPACITY } from '../../detail/detailLevels'
+import { DISTANT_NAME_OPACITY, NAME_OPACITY } from '../../detail/detailLevels'
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 
@@ -52,6 +52,7 @@ export function rebuildNames(context: LayerContext): void {
   tellTheCities(context, null)
   const relief = handles.relief
   if (yearNames === null || nameSheet === null || relief === null) return
+  const polities = sources.regionSet?.authored?.year.registry.polities ?? []
   handles.names = createNameLayer({
     names: yearNames,
     sheet: nameSheet,
@@ -61,9 +62,10 @@ export function rebuildNames(context: LayerContext): void {
     haloOpacity: NAME_HALO_OPACITY,
     haloCells: NAME_HALO_CELLS,
     blurMethod,
-    inverted: dev.names.tribesInverted
-      ? tribeIds(sources.regionSet?.authored?.year.registry.polities ?? [])
-      : new Set(),
+    inverted: dev.names.tribesInverted ? tribeIds(polities) : new Set(),
+    // A distant country's name is a country's, faint and with no white edge (CARTO-447).
+    faint: distantIds(polities),
+    faintOpacity: DISTANT_NAME_OPACITY,
   })
   handles.names.object.scale.setY(relief.scale.y)
   scene.add(handles.names.object)

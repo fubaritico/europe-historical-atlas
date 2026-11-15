@@ -167,13 +167,20 @@ Scenario: the band tuned
 ```gherkin
 Scenario: a tribe's margin
   Given the Prussians, a tribe
-  Then from its outline inwards: 7 km bare, the relief showing, then 14 km of half its colour, then its full colour
+  Then from its outline inwards: 3 km bare, the relief showing, then 14 km of half its colour, then its full colour
   And both limits undulate along the outline, as a confederation's band does
   And the same tribe open in the Cartographer is drawn the same, at the same places
 
+Scenario: a distant country
+  Given the Chola empire ranked « pays lointain »
+  Then its colour is full from its outline to 15 km inside, half from 15 to 30 km, nothing at its heart
+  And both limits undulate, as an outlined tribe's do
+  And its borders are drawn as any country's, against another distant country too
+  And its name is written as a country's, in the ink, at 50 % and with no white edge, from the furthest zoom on
+
 Scenario: three peoples in the rank list
   Given a polity's window in the Cartographer
-  Then its rank list offers « confédération de tribus », « tribu » and « tribu à contour »
+  Then its rank list offers « confédération de tribus », « tribu », « tribu à contour » and « pays lointain »
   When I give a polity one of them
   Then it is drawn in that people's look, in the Cartographer and in the atlas
 ```
@@ -181,8 +188,11 @@ Scenario: three peoples in the rank list
 > **Built 2026-11-15 (CARTO-447), not walked yet.** The dev: a **confederation** is several tribes — the great groups of
 > Central Asia — and keeps the band every tribe had; a **tribe**, a small people — the Baltic ones — takes the margin,
 > *« 5 km complètement transparent… ou peut-être même 7 »*, then 7 km at half, then full, *« de manière irrégulière »*;
-> on seeing it, the half band *« plus épaisse »*, 14 km (same evening).
-> One constant in core (`TRIBE_MARGIN_FEATHER`). No file renamed: he re-ranks his polities himself.
+> on seeing it, the half band *« plus épaisse »*, 14 km, and the bare one *« disons à 3, ou 2,5 km »*, 3 (same evening).
+> One constant in core (`TRIBE_MARGIN_FEATHER`). No file renamed: he re-ranks his polities himself. **The distant
+> country**, the same evening: *« la même chose que la tribu outline, mais avec des bandes un petit peu plus larges »*,
+> its borders kept — *« c'est des pays et pas des tribus »* — and its name a country's, *« noir, opacity 50 %, pas de trait
+> blanc autour »* (`TRIBE_DISTANT_FEATHER`, `DISTANT_NAME_OPACITY`).
 
 ## The countries' names
 

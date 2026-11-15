@@ -386,7 +386,7 @@ const ranked = (...ranks: (string | null)[]) => ranks.map((rank) => ({ rank }))
 
 describe('rankChoices', () => {
   describe('happy path', () => {
-    it('offers the usual ranks, the confederation, the tribe and the outlined tribe among them', () => {
+    it('offers the usual ranks, the three peoples and the distant country among them', () => {
       expect(rankChoices([])).toEqual([
         'empire',
         'kingdom',
@@ -396,6 +396,7 @@ describe('rankChoices', () => {
         'confederation',
         'tribe',
         'tribe_outlined',
+        'distant',
       ])
     })
   })

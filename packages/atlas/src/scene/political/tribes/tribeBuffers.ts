@@ -10,13 +10,14 @@ import type { TribeStyle } from '@europe-historical-atlas/core/data/tribes'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 /**
- * Each style's number in the `tribeStyle` attribute, which the shader reads by thresholds at `0.5` and `1.5`: a
- * confederation's band, an outlined tribe's rim (CARTO-439), a tribe's margin (CARTO-447).
+ * Each style's number in the `tribeStyle` attribute, which the shader reads by thresholds at `0.5`, `1.5` and `2.5`: a
+ * confederation's band, an outlined tribe's rim (CARTO-439), a tribe's margin and a distant country's rim (CARTO-447).
  */
 export const TRIBE_STYLE_CODES: Readonly<Record<TribeStyle, number>> = {
   band: 0,
   outlined: 1,
   margin: 2,
+  distant: 3,
 }
 
 /** What the tribes' geometry is built from: the patches, and the surface they are laid on. */

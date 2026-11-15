@@ -1,6 +1,7 @@
-import { tribeIds, tribeStyleOf } from '@europe-historical-atlas/core/data/tribes'
+import { tribeStyleOf, unfilledIds } from '@europe-historical-atlas/core/data/tribes'
 import {
   CLAIM_CUT_REACH_KM,
+  TRIBE_DISTANT_FEATHER,
   TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   featherReachKm,
@@ -337,8 +338,21 @@ export interface TribeFeatherPlan {
 }
 
 /**
+ * What a people's raster is signed with for its look: its style when its rank gives it one of its own — an outlined
+ * tribe, a tribe, a distant country, two of which share a feather mode — else the ground's feather mode, a
+ * confederation's band or the fade the ground is set to.
+ * @param tribe - the people, its rank at least
+ * @param own - the ground it is drawn on
+ * @returns the look's name
+ */
+function signedLook(tribe: Pick<YearPolity, 'rank'>, own: FeatherGround): string {
+  const style = tribeStyleOf(tribe)
+  return style === null || style === 'band' ? own.feather.mode : style
+}
+
+/**
  * The ground a people is drawn on, its look its rank's: an outlined tribe by its rim (CARTO-439), a tribe by its margin
- * (CARTO-447), a confederation by the ground's own feather, the band.
+ * and a distant country by its wider rim (CARTO-447), a confederation by the ground's own feather, the band.
  * @param tribe - the people, its rank at least
  * @param ground - the backdrop's frame, the fade and the land mask
  * @returns the ground, its feather the people's
@@ -347,6 +361,7 @@ function groundOf(tribe: Pick<YearPolity, 'rank'>, ground: FeatherGround): Feath
   const style = tribeStyleOf(tribe)
   if (style === 'outlined') return { ...ground, feather: TRIBE_OUTLINED_FEATHER }
   if (style === 'margin') return { ...ground, feather: TRIBE_MARGIN_FEATHER }
+  if (style === 'distant') return { ...ground, feather: TRIBE_DISTANT_FEATHER }
   return ground
 }
 
@@ -369,7 +384,7 @@ export function tribeFeatherPlans(
   ground: FeatherGround,
   projection: GridProjection
 ): TribeFeatherPlan[] {
-  const tribes = tribeIds(document.polities)
+  const tribes = unfilledIds(document.polities)
   const tribesById = new Map(
     document.polities.filter((polity) => tribes.has(polity.id)).map((polity) => [polity.id, polity])
   )
@@ -407,7 +422,7 @@ export function tribeFeatherPlans(
       polity: claim.polity,
       signature: {
         colour,
-        mode: own.feather.mode,
+        mode: signedLook(tribe, own),
         numbers: flattenRings([claim.rings, ...near]),
       },
       raster: () => featherRaster(polity, claim.rings, near, colour, own),

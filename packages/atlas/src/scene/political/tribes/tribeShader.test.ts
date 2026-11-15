@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   BEYOND_OUTLINE_KM,
+  TRIBE_DISTANT_FEATHER,
   TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
   featherOpacity,
@@ -91,6 +92,29 @@ describe('shaderOpacity', () => {
             `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
           ).toBe(
             tribeOpacityAt(signedKm, TRIBE_OUTLINED_FEATHER, () => ({ claimedKm: 5, land: true }), {
+              u,
+              v,
+            })
+          )
+    })
+
+    // CARTO-447: a distant country's fragment answers as core's wider rim.
+    it('answers as core over a distant country, point by point across the frame', () => {
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.37, 0.61],
+        [0.72, 0.05],
+        [0.9, 0.88],
+      ] as const)
+        for (const signedKm of [-60, -45, -30, -22, -15, -10, -1, 0, 5])
+          expect(
+            shaderOpacity(
+              { distance: signedKm, claimed: 5, land: 1, u, v, style: TRIBE_STYLE_CODES.distant },
+              { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 }
+            ),
+            `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
+          ).toBe(
+            tribeOpacityAt(signedKm, TRIBE_DISTANT_FEATHER, () => ({ claimedKm: 5, land: true }), {
               u,
               v,
             })

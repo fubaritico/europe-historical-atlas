@@ -5,6 +5,7 @@ import {
   asSeenAcrossTribes,
   isTribeEdge,
   tribeIds,
+  unfilledIds,
 } from '@europe-historical-atlas/core/data/tribes'
 
 import { lonLatToBackdrop, remapToScreen } from '../../viewport/projection'
@@ -253,24 +254,25 @@ function boxOnScreen(box: Rect, viewport: Viewport): Rect {
 
 /**
  * Each claim's rings as one fill in its polity's colour — **a tribe's excepted**: a tribe is not yet
- * sovereign, and a fill is the mark of sovereignty (the dev, 2026-10-15).
+ * sovereign, and a fill is the mark of sovereignty (the dev, 2026-10-15); nor a distant country's (CARTO-447).
  * @param document - the document to read
  * @param anchors - the projected anchor table, parallel to `document.anchors`
  * @param colours - each polity's colour, by id
- * @param tribes - the ids of the year's tribes (`tribeIds`), built once per scene
+ * @param unfilled - the ids of the polities drawn with no fill — the peoples and the distant countries (`unfilledIds`),
+ *   built once per scene; never `tribeIds`, which leaves the distant countries out
  * @param bands - each vassal claim's band (ATLAS-398) and the view it is laid through
  * @param bands.images - each band, in backdrop pixels, by the claim it fills; a claim with none is filled whole
  * @param bands.viewport - the current view, for the bands' boxes
- * @returns one fill per claim of a polity that is not a tribe, a vassal's with its band
+ * @returns one fill per claim of a polity that is filled, a vassal's with its band
  */
 export function projectedFills(
   document: YearDocument,
   anchors: readonly Point[],
   colours: ReadonlyMap<string, string>,
-  tribes: ReadonlySet<string>,
+  unfilled: ReadonlySet<string>,
   bands: { images: SceneInputs['vassalBands']; viewport: Viewport }
 ): CanvasScene['fills'][number][] {
-  return colouredClaims(document, anchors, colours, tribes, false).map(
+  return colouredClaims(document, anchors, colours, unfilled, false).map(
     ({ claim, rings, colour }) => {
       const band = bands.images.get(claim)
       return band === undefined
@@ -402,12 +404,15 @@ function backdropOnScreen(inputs: SceneInputs): CanvasScene['backdrop'] {
  */
 export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasScene {
   const anchors = remapToScreen(inputs.anchorsInBackdrop, inputs.viewport)
+  // Two sets (CARTO-447): what is not filled — the peoples and the distant countries — and the peoples alone, whose
+  // borders between them are not drawn; a distant country keeps its borders.
+  const unfilled = unfilledIds(document.polities)
   const tribes = tribeIds(document.polities)
   return {
     backdrop: backdropOnScreen(inputs),
     rings: projectedRings(document, anchors, 'closed'),
     openRings: projectedRings(document, anchors, 'open'),
-    fills: projectedFills(document, anchors, inputs.colours, tribes, {
+    fills: projectedFills(document, anchors, inputs.colours, unfilled, {
       images: inputs.vassalBands,
       viewport: inputs.viewport,
     }),

@@ -15,7 +15,7 @@
 
 import polygonClipping from 'polygon-clipping'
 
-import { tribeIds } from '../data/tribes'
+import { unfilledIds } from '../data/tribes'
 import { BAND_REACH_KM } from '../data/vassalBand'
 import { signedDistanceField } from '../geo/signedDistance'
 
@@ -76,7 +76,7 @@ function bandedFillRegions(
 ): FillRegion[] {
   // Every polity filled is measured since the sovereigns wear a band too (the dev's trial, 2026-11-09): the vassals and
   // the sovereigns, never a tribe, which is not filled.
-  const tribes = tribeIds(polities)
+  const tribes = unfilledIds(polities)
   const realmOf = realms(polities)
   return regions.map(({ rings, polityId }) => {
     const realm = polityId === undefined ? undefined : realmOf.get(polityId)

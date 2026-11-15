@@ -77,6 +77,13 @@ export interface NameLayerOptions {
    * experiment of the dev's, 2026-10-29 (*« pour les tribus, leur nom, tu vas inverser le noir et le blanc »*).
    */
   readonly inverted: ReadonlySet<string>
+  /**
+   * The polities whose names are written faint — the ink alone, no white edge, at {@link NameLayerOptions.faintOpacity}:
+   * the distant countries (CARTO-447).
+   */
+  readonly faint: ReadonlySet<string>
+  /** The faint names' ink opacity where a level is fully in, `0..1`. */
+  readonly faintOpacity: number
 }
 
 /** When the white edge shows — the panel's, read every frame. */
@@ -171,6 +178,12 @@ interface LevelMeshes {
     readonly edge: Mesh<BufferGeometry, ShaderMaterial>
     readonly ink: Mesh<BufferGeometry, ShaderMaterial>
   } | null
+  /** The level's faint names — the ink alone, at its own opacity; `null` when it has none. */
+  readonly faint: {
+    readonly geometry: BufferGeometry
+    readonly ink: Mesh<BufferGeometry, ShaderMaterial>
+    readonly inkOpacity: { value: number }
+  } | null
 }
 
 /**
@@ -200,7 +213,9 @@ function levelMeshes(
       draped: options.draped,
       haloCells: options.haloCells,
     })
-  const geometry = geometryOf(names.filter(({ polity }) => !options.inverted.has(polity)))
+  const geometry = geometryOf(
+    names.filter(({ polity }) => !options.inverted.has(polity) && !options.faint.has(polity))
+  )
   const edgeOpacity = { value: 0 }
   const inkOpacity = { value: 0 }
   const look = { textures, opacities: { edge: edgeOpacity, ink: inkOpacity }, screen: screens.own }
@@ -209,9 +224,10 @@ function levelMeshes(
     ink: options.ink,
     blending: MultiplyBlending,
   })
+  const faint = faintMeshes(names, options, geometryOf, textures.letters)
   const invertedNames = names.filter(({ polity }) => options.inverted.has(polity))
   if (invertedNames.length === 0)
-    return { geometry, edge, edgeOpacity, ink, inkOpacity, inverted: null }
+    return { geometry, edge, edgeOpacity, ink, inkOpacity, inverted: null, faint }
   // The ink white in the ordinary blend — multiplied, white would change nothing — on an edge of the ink's colour.
   const flipped = geometryOf(invertedNames)
   const [flippedEdge, flippedInk] = edgeAndInk(
@@ -230,7 +246,33 @@ function levelMeshes(
     ink,
     inkOpacity,
     inverted: { geometry: flipped, edge: flippedEdge, ink: flippedInk },
+    faint,
   }
+}
+
+/**
+ * A level's faint names — a distant country's (CARTO-447): the ink alone, multiplied as an ordinary name's, no white
+ * edge, at an opacity of its own; hidden until a detail is set.
+ * @param placed - the level's names, the faint ones among them
+ * @param options - the faint polities and the ink
+ * @param geometryOf - the tiles of a set of names, as the level makes its own
+ * @param letters - the letters' texture
+ * @returns the meshes, or `null` for a level with none
+ */
+function faintMeshes(
+  placed: NameLayerOptions['names']['levels'][number]['placed'],
+  options: Pick<NameLayerOptions, 'faint' | 'ink'>,
+  geometryOf: (names: NameLayerOptions['names']['levels'][number]['placed']) => BufferGeometry,
+  letters: CanvasTexture
+): LevelMeshes['faint'] {
+  const names = placed.filter(({ polity }) => options.faint.has(polity))
+  if (names.length === 0) return null
+  const geometry = geometryOf(names)
+  const inkOpacity = { value: 0 }
+  const mesh = new Mesh(geometry, inkMaterial(letters, options.ink, inkOpacity, MultiplyBlending))
+  mesh.renderOrder = NAME_RENDER_ORDER + 1
+  mesh.visible = false
+  return { geometry, ink: mesh, inkOpacity }
 }
 
 /** What a level's edges and inks are drawn with, whatever their colours. */
@@ -283,13 +325,14 @@ function edgeAndInk(
 }
 
 /**
- * A level's meshes, edges before inks: its own names', then its inverted names'.
+ * A level's meshes, edges before inks: its own names', then its inverted names', then its faint names' ink.
  * @param level - the level
  * @returns the meshes
  */
 function meshesOf(level: LevelMeshes): Mesh<BufferGeometry, ShaderMaterial>[] {
   const own = [level.edge, level.ink]
-  return level.inverted === null ? own : [...own, level.inverted.edge, level.inverted.ink]
+  const inverted = level.inverted === null ? [] : [level.inverted.edge, level.inverted.ink]
+  return [...own, ...inverted, ...(level.faint === null ? [] : [level.faint.ink])]
 }
 
 /**
@@ -332,7 +375,7 @@ function inkBlur(
  */
 function levelOpacities(
   levels: readonly LevelMeshes[],
-  options: Pick<NameLayerOptions, 'opacity' | 'haloOpacity'>
+  options: Pick<NameLayerOptions, 'opacity' | 'haloOpacity' | 'faintOpacity'>
 ): {
   setDetail: (detail: number) => void
   setWatermark: (share: number) => void
@@ -342,10 +385,11 @@ function levelOpacities(
   let watermark = 1
   let reveal = 1
   const show = (): void => {
-    levels.forEach(({ edgeOpacity, inkOpacity }, level) => {
+    levels.forEach(({ edgeOpacity, inkOpacity, faint }, level) => {
       const weight = (weights[level] ?? 0) * watermark * reveal
       edgeOpacity.value = options.haloOpacity * weight
       inkOpacity.value = options.opacity * weight
+      if (faint !== null) faint.inkOpacity.value = options.faintOpacity * weight
     })
   }
   return {
@@ -415,6 +459,7 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
       for (const level of levels) {
         level.geometry.dispose()
         level.inverted?.geometry.dispose()
+        level.faint?.geometry.dispose()
         for (const mesh of meshesOf(level)) mesh.material.dispose()
       }
       object.remove(blur.blur.object)

@@ -1,6 +1,7 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
 import {
   CONFEDERATION_RANK,
+  DISTANT_RANK,
   TRIBE_OUTLINED_RANK,
   TRIBE_RANK,
 } from '@europe-historical-atlas/core/data/tribes'
@@ -100,6 +101,8 @@ export const RANKS: readonly string[] = [
   TRIBE_RANK,
   // A tribe drawn by its rim, full at its limit and nothing at its heart (CARTO-439).
   TRIBE_OUTLINED_RANK,
+  // A country whose history is not told, drawn as an outlined tribe, its bands wider (CARTO-447).
+  DISTANT_RANK,
 ]
 
 /** The standings the form offers — `design/03`'s list, stored as OHM writes its `place` values. */

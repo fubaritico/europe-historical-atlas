@@ -22,7 +22,7 @@ import { exactBordersOf } from '../data/atlasBorders'
 import { homageLevels } from '../data/homageLevels'
 import { overlapHatches } from '../data/overlapHatches'
 import { authoredTintLevels, polityColours, uncolouredIds } from '../data/polityColours'
-import { tribeIds, tribeStyleOf } from '../data/tribes'
+import { tribeStyleOf, unfilledIds } from '../data/tribes'
 import { bandDepthOf, bandedVassalIds, regionBandDepths } from '../data/vassalBand'
 import { openYearDocument } from '../data/yearDocument'
 import { yearOverlaps } from '../data/yearOverlaps'
@@ -168,7 +168,7 @@ function colouredTribes(
   colours: ReadonlyMap<string, string>,
   uncoloured: ReadonlySet<string>
 ): SettledTribe[] {
-  const tribes = tribeIds(year.registry.polities)
+  const tribes = unfilledIds(year.registry.polities)
   const styles = new Map(year.registry.polities.map((polity) => [polity.id, tribeStyleOf(polity)]))
   // One area per region of a tribe, in the tribe's colour; any other region gives none.
   return regions.flatMap(({ polityId, rings }) => {
@@ -209,7 +209,7 @@ function tintsByLevel(
   painted: { colours: ReadonlyMap<string, string>; uncoloured: ReadonlySet<string> },
   homage: HomageLevels
 ): { deepest: (RgbColor | null)[]; levels: (RgbColor | null)[][] } {
-  const tribes = tribeIds(year.registry.polities)
+  const tribes = unfilledIds(year.registry.polities)
   // A tribe's region gets no tint, at any level.
   const unlessTribe = (tint: RgbColor | null, index: number): RgbColor | null => {
     const polity = regions[index]?.polityId

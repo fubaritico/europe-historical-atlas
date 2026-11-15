@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { asSeenAcrossTribes, isTribe, isTribeEdge, tribeIds, tribeStyleOf } from './tribes'
+import {
+  asSeenAcrossTribes,
+  distantIds,
+  isTribe,
+  isTribeEdge,
+  isUnfilled,
+  tribeIds,
+  tribeStyleOf,
+} from './tribes'
 
 const POLITIES = [
   { id: 'prussians', rank: 'tribe' },
@@ -16,14 +24,19 @@ describe('tribes', () => {
     })
 
     // CARTO-439 and CARTO-447: three peoples, tribes in every respect but their look.
-    it('reads a confederation, a tribe and an outlined tribe as tribes, each in its style', () => {
-      const ranks = ['confederation', 'tribe', 'tribe_outlined']
+    // CARTO-447: a distant country is drawn with no fill, as the peoples are, but it is no people — it keeps its borders.
+    it('reads the three peoples and a distant country as unfilled, each in its style, the distant country no people', () => {
+      const ranks = ['confederation', 'tribe', 'tribe_outlined', 'distant']
+      expect(ranks.map((rank) => isUnfilled({ rank }))).toEqual([true, true, true, true])
+      expect([...distantIds(ranks.map((rank, index) => ({ id: String(index), rank })))]).toEqual([
+        '3',
+      ])
       expect([
         ranks.map((rank) => isTribe({ rank })),
         ranks.map((rank) => tribeStyleOf({ rank })),
       ]).toEqual([
-        [true, true, true],
-        ['band', 'margin', 'outlined'],
+        [true, true, true, false],
+        ['band', 'margin', 'outlined', 'distant'],
       ])
     })
 

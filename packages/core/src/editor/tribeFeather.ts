@@ -104,14 +104,28 @@ export const TRIBE_OUTLINED_FEATHER: Readonly<Required<TribeFeather>> = {
 }
 
 /**
- * **A tribe** (CARTO-447, the dev, 2026-11-15): from its outline inward, 7 km bare, 14 km at half its colour, then its
- * colour full — both limits undulating as the band's do. *« 5 km complètement transparent… ou peut-être même 7 »*: 7;
- * the half band 7 km the first evening, then *« plus épaisse »* on seeing it: 14.
+ * **A distant country** (CARTO-447, the dev, 2026-11-15): the outlined tribe's look, its bands *« un petit peu plus
+ * larges »* — full from its outline to 15 km inside, half from 15 to 30 km, nothing deeper — and **even**: *« les deux
+ * couleurs de bord… pas irrégulières »*. Its wavelength stays the outlined tribe's: the atlas's shader lays the two by one
+ * rim, their widths and irregularities mixed by the style.
+ */
+export const TRIBE_DISTANT_FEATHER: Readonly<Required<TribeFeather>> = {
+  mode: 'outlined',
+  widthKm: 30,
+  innerKm: 15,
+  irregularity: 0,
+  waveKm: BAND_WAVE_KM,
+}
+
+/**
+ * **A tribe** (CARTO-447, the dev, 2026-11-15): from its outline inward, 3 km bare, 14 km at half its colour, then its
+ * colour full — both limits undulating as the band's do. 7 km bare and 7 at half the first evening; on seeing them, the
+ * half band *« plus épaisse »*, 14, and the bare one *« disons à 3, ou 2,5 km »*: 3.
  */
 export const TRIBE_MARGIN_FEATHER: Readonly<Required<TribeFeather>> = {
   mode: 'margin',
-  widthKm: 21,
-  innerKm: 7,
+  widthKm: 17,
+  innerKm: 3,
   irregularity: 0.5,
   waveKm: BAND_WAVE_KM,
 }

@@ -8,6 +8,7 @@ import {
   BAND_SHARE,
   BAND_WAVE_KM,
   BEYOND_OUTLINE_KM,
+  TRIBE_DISTANT_FEATHER,
   TRIBE_FEATHER_REACH_KM,
   TRIBE_MARGIN_FEATHER,
   TRIBE_OUTLINED_FEATHER,
@@ -108,11 +109,13 @@ export const TRIBE_OPACITY_GLSL = /* glsl */ `
     );
     float band = inside * mix(${BAND_SHARE.toFixed(3)}, 1.0, step(bandWidth, -vDistance));
     float opacity = mix(fade, band, featherBand);
-    // An outlined tribe (CARTO-439), core's TRIBE_OUTLINED_FEATHER written in: full within the rim, half to the width,
-    // nothing deeper — both limits undulating by its own wave, as the Cartographer draws it.
-    float rimWave = 1.0 + ${TRIBE_OUTLINED_FEATHER.irregularity.toFixed(3)} * bandWave(framed, ${TRIBE_OUTLINED_FEATHER.waveKm.toFixed(1)});
-    float rimInner = clamp(${TRIBE_OUTLINED_FEATHER.innerKm.toFixed(1)} * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
-    float rimOuter = clamp(${TRIBE_OUTLINED_FEATHER.widthKm.toFixed(1)} * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
+    // An outlined tribe (CARTO-439) and a distant country (CARTO-447), core's TRIBE_OUTLINED_FEATHER and
+    // TRIBE_DISTANT_FEATHER written in, mixed by the style: full within the rim, half to the width, nothing deeper — both
+    // limits undulating by their one wave, as the Cartographer draws them.
+    float distant = step(2.5, vStyle);
+    float rimWave = 1.0 + mix(${TRIBE_OUTLINED_FEATHER.irregularity.toFixed(3)}, ${TRIBE_DISTANT_FEATHER.irregularity.toFixed(3)}, distant) * bandWave(framed, ${TRIBE_OUTLINED_FEATHER.waveKm.toFixed(1)});
+    float rimInner = clamp(mix(${TRIBE_OUTLINED_FEATHER.innerKm.toFixed(1)}, ${TRIBE_DISTANT_FEATHER.innerKm.toFixed(1)}, distant) * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
+    float rimOuter = clamp(mix(${TRIBE_OUTLINED_FEATHER.widthKm.toFixed(1)}, ${TRIBE_DISTANT_FEATHER.widthKm.toFixed(1)}, distant) * rimWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
     float rim = inside * mix(1.0, ${BAND_SHARE.toFixed(3)} * (1.0 - step(rimOuter, -vDistance)), step(rimInner, -vDistance));
     // A tribe's margin (CARTO-447), core's TRIBE_MARGIN_FEATHER written in: nothing within the rim, half to the width,
     // full deeper — both limits undulating by its own wave.
@@ -120,9 +123,9 @@ export const TRIBE_OPACITY_GLSL = /* glsl */ `
     float marginInner = clamp(${TRIBE_MARGIN_FEATHER.innerKm.toFixed(1)} * marginWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
     float marginOuter = clamp(${TRIBE_MARGIN_FEATHER.widthKm.toFixed(1)} * marginWave, 0.0, ${TRIBE_FEATHER_REACH_KM.toFixed(1)});
     float margin = inside * step(marginInner, -vDistance) * mix(${BAND_SHARE.toFixed(3)}, 1.0, step(marginOuter, -vDistance));
-    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin.
-    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)));
-    opacity = mix(opacity, margin, step(1.5, vStyle));
+    // The style's number (TRIBE_STYLE_CODES): 0 the band, 1 the outlined rim, 2 the margin, 3 the distant country's rim.
+    opacity = mix(opacity, rim, step(0.5, vStyle) * (1.0 - step(1.5, vStyle)) + distant);
+    opacity = mix(opacity, margin, step(1.5, vStyle) * (1.0 - distant));
     float beyond = step(${String(BEYOND_OUTLINE_KM)}, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);
@@ -167,8 +170,8 @@ function flatLimits(
  * @param at.land - `1` dry, `0` wet, as the interpolated attribute
  * @param at.u - the fragment's frame `u`, for the band's undulation
  * @param at.v - the fragment's frame `v`, north to south
- * @param at.style - the vertex's style number: `1` an outlined tribe (CARTO-439), `2` a tribe (CARTO-447), `0` or absent
- *   a confederation
+ * @param at.style - the vertex's style number: `1` an outlined tribe (CARTO-439), `2` a tribe, `3` a distant country
+ *   (CARTO-447), `0` or absent a confederation
  * @param feather - inset or outset, and the width, turned into uniforms as the material does
  * @returns the opacity
  */
@@ -195,7 +198,9 @@ export function shaderOpacity(
   const tribal = fade + (banded - fade) * band
   // The outlined tribe and the tribe's margin: two flat tones between undulating limits — their own widths and wave.
   const depth = -at.distance
-  const rim = flatLimits(TRIBE_OUTLINED_FEATHER, at)
+  const style = at.style ?? 0
+  const distant = glslStep(2.5, style)
+  const rim = flatLimits(distant === 1 ? TRIBE_DISTANT_FEATHER : TRIBE_OUTLINED_FEATHER, at)
   const outlined =
     inside * (1 + (BAND_SHARE * (1 - glslStep(rim.outer, depth)) - 1) * glslStep(rim.inner, depth))
   const edge = flatLimits(TRIBE_MARGIN_FEATHER, at)
@@ -203,10 +208,9 @@ export function shaderOpacity(
     inside *
     glslStep(edge.inner, depth) *
     (BAND_SHARE + (1 - BAND_SHARE) * glslStep(edge.outer, depth))
-  const style = at.style ?? 0
-  const outlinedShare = glslStep(0.5, style) * (1 - glslStep(1.5, style))
+  const outlinedShare = glslStep(0.5, style) * (1 - glslStep(1.5, style)) + distant
   const withRim = tribal + (outlined - tribal) * outlinedShare
-  const ramp = withRim + (margin - withRim) * glslStep(1.5, style)
+  const ramp = withRim + (margin - withRim) * glslStep(1.5, style) * (1 - distant)
   // The cut: nothing beyond the outline, unless the ground there is both unclaimed and dry.
   const beyond = glslStep(BEYOND_OUTLINE_KM, at.distance)
   const free = glslStep(0, at.claimed) * glslStep(0.5, at.land)

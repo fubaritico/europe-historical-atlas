@@ -170,15 +170,35 @@ describe('tribeFeatherRasters', () => {
 
   // CARTO-447: a tribe is drawn by core's margin, whatever the ground's feather — bare along its limit, full at its heart.
   describe('the tribe', () => {
-    it('is bare just inside its outline and the full colour at its heart', () => {
+    // The test backdrop's pixel is ~7 km, wider than the 3 km bare rim: core's test pins the widths; this one that the
+    // edge is lighter than the heart, which a confederation's band is not past its half.
+    it('is lighter than half its colour at its edge and the full colour at its heart', () => {
       const [raster] = tribeFeatherRasters(ranked('tribe'), COLOURS, ground())
-      expect([alphaAt(raster, 2.02, 47) ?? 0, alphaAt(raster, 3, 47)]).toEqual([0, 255])
+      const edge = alphaAt(raster, 2.02, 47) ?? 0
+      expect([edge <= Math.round(featherModule.BAND_SHARE * 255), alphaAt(raster, 3, 47)]).toEqual([
+        true,
+        255,
+      ])
     })
 
     it('signs its raster with the margin, so a change of rank makes the image again', () => {
       const projection = createGridProjection(TEST_BACKDROP_FRAME)
       const [margin] = tribeFeatherPlans(ranked('tribe'), COLOURS, ground(), projection)
       expect(margin?.signature.mode).toBe('margin')
+    })
+
+    // CARTO-447: a distant country wears an outlined tribe's feather mode, wider — so its raster is signed by its style,
+    // or a change of rank between the two would keep the other's image. Mutation: signing with the feather's mode.
+    it('signs a distant country apart from an outlined tribe, and draws it nothing at its heart', () => {
+      const projection = createGridProjection(TEST_BACKDROP_FRAME)
+      const [rim] = tribeFeatherPlans(outlined(), COLOURS, ground(), projection)
+      const [distant] = tribeFeatherPlans(ranked('distant'), COLOURS, ground(), projection)
+      const [raster] = tribeFeatherRasters(ranked('distant'), COLOURS, ground())
+      expect([rim?.signature.mode, distant?.signature.mode, alphaAt(raster, 3, 47) ?? 0]).toEqual([
+        'outlined',
+        'distant',
+        0,
+      ])
     })
   })
 

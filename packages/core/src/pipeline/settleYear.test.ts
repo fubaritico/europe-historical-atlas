@@ -111,10 +111,11 @@ describe('settleAuthoredYear', () => {
 
     // CARTO-439, CARTO-447: each people's style is marked for the atlas's shader; a confederation carries no mark.
     it('marks an outlined tribe and a tribe for the atlas, and leaves a confederation unmarked', () => {
-      expect(['tribe_outlined', 'tribe', 'confederation'].map(styleAs)).toEqual([
+      expect(['tribe_outlined', 'tribe', 'confederation', 'distant'].map(styleAs)).toEqual([
         'outlined',
         'margin',
         'unmarked',
+        'distant',
       ])
     })
 

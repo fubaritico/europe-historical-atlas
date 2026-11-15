@@ -410,3 +410,8 @@ target.z)` would be coherent with the navigation that already exists.
 - **The coastline imports its render order from the borders' builder** (2026-11-12, review ARCH-003): `waters/mapCoastLayer.ts`
   reads `BORDER_RENDER_ORDER` from `political/borders/mapBorderLayer`. **Remedy**: the render orders in one small module beside
   `layerRoles`, read by both families. **Severity: cosmétique.**
+- **A distant country's name is not blurred close up** (2026-11-15, CARTO-447, review ARCH-001): its ink is a third mesh
+  group of the name layer (`scene/political/names/nameLayer`, `faintMeshes`), multiplied at its own opacity, outside the
+  ink blur's members — the ordinary names soften close up, the distant ones stay crisp, as the tribes' white ink does.
+  Close up on India or Africa is rare. **Remedy if it shows**: the faint inks among the blur's members, their opacity kept
+  through the blur's image. **Severity: cosmétique.**

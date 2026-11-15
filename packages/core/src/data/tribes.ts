@@ -43,10 +43,17 @@ export const CONFEDERATION_RANK = 'confederation'
 export const TRIBE_OUTLINED_RANK = 'tribe_outlined'
 
 /**
- * How a people's limit is drawn, by its rank: `band` for a confederation, `outlined` for an outlined tribe, `margin` for
- * a tribe (CARTO-447).
+ * The rank of a **distant country** — a state whose history the atlas does not tell, too far, with no direct dealings
+ * with Europe: India, sub-Saharan Africa (the dev, 2026-11-15, CARTO-447). Drawn as an outlined tribe, its bands a little
+ * wider (`TRIBE_DISTANT_FEATHER`); like a people, no fill and no border against another drawn so.
  */
-export type TribeStyle = 'band' | 'outlined' | 'margin'
+export const DISTANT_RANK = 'distant'
+
+/**
+ * How a people's limit is drawn, by its rank: `band` for a confederation, `outlined` for an outlined tribe, `margin` for
+ * a tribe, `distant` for a distant country (CARTO-447).
+ */
+export type TribeStyle = 'band' | 'outlined' | 'margin' | 'distant'
 
 /** A style a people is marked with across the worker — every one but the confederation's band, which is the default. */
 export type MarkedTribeStyle = Exclude<TribeStyle, 'band'>
@@ -56,15 +63,49 @@ const STYLE_OF_RANK: Readonly<Record<string, TribeStyle>> = {
   [CONFEDERATION_RANK]: 'band',
   [TRIBE_OUTLINED_RANK]: 'outlined',
   [TRIBE_RANK]: 'margin',
+  [DISTANT_RANK]: 'distant',
 }
 
 /**
- * Whether a polity is a people drawn with no fill — a confederation, a tribe or an outlined tribe.
+ * Whether a polity is a **people** — a confederation, a tribe or an outlined tribe: no fill, **no border against another
+ * people**, its name inverted. A distant country is not one: it keeps its borders (the dev, 2026-11-15, CARTO-447).
  * @param polity - the polity, its rank at least
  * @returns `true` when its rank is one of the three
  */
 export function isTribe(polity: Pick<YearPolity, 'rank'>): boolean {
+  const style = tribeStyleOf(polity)
+  // The three peoples by name, never « every style but the distant country's »: a style added later is no people
+  // until it is said to be one (review ARCH-002).
+  return style === 'band' || style === 'outlined' || style === 'margin'
+}
+
+/**
+ * Whether a polity is **drawn with no fill**, by a band at its limit — a people, or a distant country (CARTO-447).
+ * @param polity - the polity, its rank at least
+ * @returns `true` when its rank gives it a style
+ */
+export function isUnfilled(polity: Pick<YearPolity, 'rank'>): boolean {
   return tribeStyleOf(polity) !== null
+}
+
+/**
+ * The ids of every distant country of a registry (CARTO-447) — whose names the atlas writes faint.
+ * @param polities - the registry's polities
+ * @returns their ids
+ */
+export function distantIds(polities: readonly Pick<YearPolity, 'id' | 'rank'>[]): Set<string> {
+  return new Set(
+    polities.filter((polity) => tribeStyleOf(polity) === 'distant').map((polity) => polity.id)
+  )
+}
+
+/**
+ * The ids of every polity of a registry drawn with no fill — the peoples and the distant countries.
+ * @param polities - the registry's polities
+ * @returns their ids
+ */
+export function unfilledIds(polities: readonly Pick<YearPolity, 'id' | 'rank'>[]): Set<string> {
+  return new Set(polities.filter(isUnfilled).map((polity) => polity.id))
 }
 
 /**
