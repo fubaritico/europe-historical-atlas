@@ -12,5 +12,7 @@ Summary of what `review-quality` checks (see the agent for full detail):
 - **QUAL-007** god function past the lint budgets; **QUAL-008** dead code; **QUAL-010** stale JSDoc.
 - **QUAL-012** empty catch / lost error context; **QUAL-014** non-null assertion abuse.
 - **QUAL-020** a new branch or option with no test; **QUAL-021** a touched module with no tests.
+- **QUAL-022** a write sent twice, or a late answer landing over a newer one — one call in flight, stale answers
+  dropped (the dev, 2026-11-16: no double calls, no duplicates).
 
 Finding schema: `schema.json`.

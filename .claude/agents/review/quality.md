@@ -113,6 +113,19 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 - **Anchor**: `data/regionRaster.ts` — the heart of the political layer — carried no tests whatever for
   several sessions. Nobody flagged it; it was noticed only when someone went to add one.
 
+### QUAL-022: A write sent twice, or an answer that lands after a newer one
+
+- **Check**: a write fired from a field change or a click (a POST, a save, a store update after an `await`) must have
+  **one call in flight at a time** — the gesture held while it runs — and an answer that comes back after the line,
+  the form or the request was replaced must **not land on the screen**. A write the server has kept is still followed
+  through (the data is in the base whatever the screen shows).
+- **Why**: the dev, 2026-11-16 — *"no double calls, ever… there must be no duplicates"*. Duplicates are refused in the
+  base (`refuseDuplicateClaim`), but a second call with one field changed is not a duplicate: it is a second, wrong
+  record, shared by every place that reads it.
+- **Anchors**: the line « Vassal de » of the city sheet (CMS-422, review of 2026-11-16, three agents on it) — a suzerain
+  changed while the first link was being saved sent a second one; the memory *newest call wins* (guard every side
+  effect after every `await`) records the earlier case.
+
 ---
 
 # Review protocol (shared by every dimension)
