@@ -4,19 +4,21 @@ import { searchRecords } from '../utils/searchRecords'
 
 import type { RecordChoice } from '../utils/sheetValues'
 
-/** The two searches of the form, each stable for the life of the form. */
+/** The searches of the form, each stable for the life of the form. */
 export interface RecordSearches {
   /** The places matching what was typed, by name. */
   places: (query: string) => Promise<RecordChoice[]>
   /** The sources matching what was typed, by title. */
   sources: (query: string) => Promise<RecordChoice[]>
+  /** The titles matching what was typed, by name — the holder's (CMS-422 step 2c). */
+  titles: (query: string) => Promise<RecordChoice[]>
 }
 
 /**
- * The form's searches of the base: the places and the sources, in the content language.
+ * The form's searches of the base: the places, the sources and the titles, in the content language.
  * @param api - the API's root
  * @param locale - the content language
- * @returns the two searches
+ * @returns the searches
  */
 export function useRecordSearches(api: string, locale: string): RecordSearches {
   const places = useCallback(
@@ -29,5 +31,10 @@ export function useRecordSearches(api: string, locale: string): RecordSearches {
       searchRecords(fetch, { api, collection: 'sources', field: 'title', locale }, query),
     [api, locale]
   )
-  return { places, sources }
+  const titles = useCallback(
+    (query: string) =>
+      searchRecords(fetch, { api, collection: 'titles', field: 'label', locale }, query),
+    [api, locale]
+  )
+  return { places, sources, titles }
 }

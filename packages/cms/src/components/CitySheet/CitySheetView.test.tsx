@@ -14,10 +14,19 @@ vi.mock('./CitySheetForm', () => ({ CitySheetForm: () => null }))
  * The view's props, as much as it reads: the sheet, the request's Payload and languages.
  * @param doc - the sheet
  * @param locale - the content locale, `undefined` for none
+ * @param titleLabel - the name the holder's title carries, `null` for a title without one
  * @returns the props, and the place lookup to read its calls
  */
-function viewProps(doc: Record<string, unknown> | null, locale: { code: string } | undefined) {
-  const findByID = vi.fn(() => Promise.resolve({ id: 5, name: 'Rome' }))
+function viewProps(
+  doc: Record<string, unknown> | null,
+  locale: { code: string } | undefined,
+  titleLabel: string | null = 'Mathias II — comté de Nantes, 1084–1103'
+) {
+  const findByID = vi.fn(({ collection }: { collection: string }) =>
+    Promise.resolve(
+      collection === 'titles' ? { id: 7, label: titleLabel } : { id: 5, name: 'Rome' }
+    )
+  )
   const find = vi.fn(({ collection }: { collection: string }) =>
     Promise.resolve({
       docs:
@@ -106,6 +115,19 @@ describe('CitySheetView', () => {
       await formOf(props)
       expect(findByID).toHaveBeenCalledWith(expect.objectContaining({ id: 5 }))
     })
+
+    // CMS-422 step 2c
+    it('hands the form the holder’s title, named, read as the contributor', async () => {
+      const { props, findByID } = viewProps({ id: 1, place: 5, holderTitle: 7 }, { code: 'fr' })
+      const form = await formOf(props)
+      expect(form.props.initialValues.holderTitle).toEqual({
+        id: 7,
+        name: 'Mathias II — comté de Nantes, 1084–1103',
+      })
+      expect(findByID).toHaveBeenCalledWith(
+        expect.objectContaining({ collection: 'titles', id: 7, overrideAccess: false })
+      )
+    })
   })
 
   describe('managed errors', () => {
@@ -120,6 +142,11 @@ describe('CitySheetView', () => {
     it('throws when Payload hands no content locale — a config without localization', async () => {
       const { props } = viewProps({}, undefined)
       await expect(formOf(props)).rejects.toThrow('no content locale')
+    })
+
+    it('throws when the holder’s title has no name — shown empty, a save would drop it', async () => {
+      const { props } = viewProps({ id: 1, place: 5, holderTitle: 7 }, { code: 'fr' }, null)
+      await expect(formOf(props)).rejects.toThrow('has no name')
     })
   })
 

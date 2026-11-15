@@ -27,6 +27,13 @@ export const Titles: CollectionConfig = {
         cited: 'cité',
         what: 'maillon(s)',
       }),
+      refuseDeletingCited({
+        collection: 'place-periods',
+        fields: ['holderTitle'],
+        subject: 'Ce titre',
+        cited: 'cité',
+        what: 'fiche(s) de ville',
+      }),
     ],
   },
   fields: [

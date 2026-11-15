@@ -36,6 +36,7 @@ const rome: SheetValues = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  holderTitle: null,
   holderName: '',
   holderQid: '',
   communities: [],
@@ -49,6 +50,7 @@ const empty: SheetValues = {
   importance: '',
   reasons: [],
   testimonies: [],
+  holderTitle: null,
   holderName: '',
   holderQid: '',
   communities: [],
@@ -216,6 +218,39 @@ describe('CitySheetForm', () => {
   })
 
   describe('variants', () => {
+    // CMS-422 step 2c: the holder as a title, its chain computed from the links and read under it.
+    it('shows the chain of the holder’s title at the sheet’s year, up to a sovereign', async () => {
+      const span = { start: { year: 1084 }, end: { year: 1103 } }
+      const fetcher = vi.fn<typeof fetch>((input) => {
+        const url = input as string
+        const json = url.startsWith('/api/vassal-links?')
+          ? {
+              docs: [
+                { id: 1, vassal: 10, answersTo: 'suzerain', suzerain: 20, date: span },
+                { id: 2, vassal: 20, answersTo: 'no-one', suzerain: null, date: span },
+              ],
+            }
+          : url.startsWith('/api/titles?')
+            ? {
+                docs: [
+                  { id: 10, label: 'Mathias II — comté de Nantes' },
+                  { id: 20, label: 'Alain IV — duché de Bretagne' },
+                ],
+              }
+            : { docs: [] }
+        return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
+      })
+      vi.stubGlobal('fetch', fetcher)
+      renderForm({ ...rome, holderTitle: { id: 10, name: 'Mathias II — comté de Nantes' } }, 1)
+      expect(await screen.findByText('Chaîne de vassalité en 1100')).toBeTruthy()
+      expect(
+        screen.getByText('Mathias II — comté de Nantes → Alain IV — duché de Bretagne', {
+          exact: false,
+        })
+      ).toBeTruthy()
+      expect(screen.getByText('— souverain', { exact: false })).toBeTruthy()
+    })
+
     it('opens a new sheet with its « Ajouter » greyed, and no error before anything is touched', async () => {
       renderForm(empty)
       await waitFor(() => {

@@ -2,6 +2,7 @@ import * as migration_20261115_152716_initial from './20261115_152716_initial';
 import * as migration_20261115_160000_people from './20261115_160000_people';
 import * as migration_20261115_160620_holder_as_written from './20261115_160620_holder_as_written';
 import * as migration_20261115_171652_titles_and_links from './20261115_171652_titles_and_links';
+import * as migration_20261115_182214_holder_title from './20261115_182214_holder_title';
 
 export const migrations = [
   {
@@ -22,6 +23,11 @@ export const migrations = [
   {
     up: migration_20261115_171652_titles_and_links.up,
     down: migration_20261115_171652_titles_and_links.down,
-    name: '20261115_171652_titles_and_links'
+    name: '20261115_171652_titles_and_links',
+  },
+  {
+    up: migration_20261115_182214_holder_title.up,
+    down: migration_20261115_182214_holder_title.down,
+    name: '20261115_182214_holder_title'
   },
 ];

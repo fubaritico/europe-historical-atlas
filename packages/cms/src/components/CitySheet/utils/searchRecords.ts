@@ -1,3 +1,5 @@
+import { readDocs } from './readDocs'
+
 import type { RecordChoice } from './sheetValues'
 
 /** How many records the list offers at most. */
@@ -41,16 +43,8 @@ export async function searchRecords(
   const response = await fetcher(`${target.api}/${target.collection}?${params.toString()}`, {
     credentials: 'include',
   })
-  if (!response.ok) {
-    throw new Error(
-      `[CMS] the search in ${target.collection} was refused (${String(response.status)})`
-    )
-  }
-  const answer = (await response.json()) as { docs?: unknown }
-  if (!Array.isArray(answer.docs)) {
-    throw new Error(`[CMS] the search in ${target.collection} answered no list`)
-  }
-  return answer.docs.map((doc: unknown) => {
+  const docs = await readDocs(response, `the search in ${target.collection}`, 'was refused')
+  return docs.map((doc) => {
     const record = (doc ?? {}) as Record<string, unknown>
     const id = record.id
     const name = record[target.field]

@@ -98,6 +98,8 @@ export interface SheetValues {
   testimonies: TestimonyValues[]
   /** The religious communities attested there (CMS-433). */
   communities: CommunityValues[]
+  /** The holder as a title — a person for a territory — or `null` before one is chosen (CMS-422 step 2c). */
+  holderTitle: RecordChoice | null
   /** The polity that held it, by its name, as typed — « tenue par ». */
   holderName: string
   /** That polity's Wikidata id, as typed. */
@@ -160,6 +162,8 @@ export interface SheetBody {
   testimonies: TestimonyBody[]
   /** The religious communities. */
   communities: CommunityBody[]
+  /** The holder's title's id, `null` when none is chosen. */
+  holderTitle: number | string | null
   /** The holder's name, `null` when none is typed. */
   holderName: string | null
   /** The holder's Wikidata id, `null` when none is typed. */
@@ -296,14 +300,17 @@ function textOf(value: unknown): string {
  * @param doc - the sheet as Payload hands it; `{}` for a new one
  * @param placeName - the name of its place, read by the server; `null` for a new sheet
  * @param sourceNames - the titles of the sources its lines cite, by id, read by the server
+ * @param holderTitleName - the name of its holder's title, read by the server; `null` when it names none
  * @returns the values
  */
 export function sheetValues(
   doc: SheetDocument,
   placeName: string | null,
-  sourceNames: ReadonlyMap<string, string>
+  sourceNames: ReadonlyMap<string, string>,
+  holderTitleName: string | null
 ): SheetValues {
   const id = relationId(doc.place)
+  const holderTitle = relationId(doc.holderTitle)
   const date = (doc.date ?? {}) as EventDateFields
   const importance = doc.importance as CityImportance | null | undefined
   const rows = Array.isArray(doc.testimonies) ? (doc.testimonies as Record<string, unknown>[]) : []
@@ -317,6 +324,10 @@ export function sheetValues(
     reasons: relationIds(doc.reasons),
     testimonies: rows.map((row) => testimonyValues(row, sourceNames)),
     communities: communities.map(communityValues),
+    holderTitle:
+      holderTitle === null || holderTitleName === null
+        ? null
+        : { id: holderTitle, name: holderTitleName },
     holderName: textOf(doc.holderName),
     holderQid: textOf(doc.holderQid),
     // Ticked only when the base says so: a new sheet starts unticked, the collection's default (CMS-391).
@@ -363,6 +374,7 @@ export function sheetBody(values: SheetValues): SheetBody {
     reasons: values.reasons,
     testimonies: values.testimonies.map(testimonyBody),
     communities: values.communities.map(communityBody),
+    holderTitle: values.holderTitle?.id ?? null,
     holderName: trimmed(values.holderName),
     holderQid: trimmed(values.holderQid),
     showInAtlas: values.showInAtlas,

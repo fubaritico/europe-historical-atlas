@@ -58,8 +58,8 @@ export const refreshLinksOfTitle: CollectionAfterChangeHook = async ({ doc, oper
 
 /** Where a record is cited, for the refusal of its deletion: the collection that cites it, by which fields. */
 interface Citers {
-  /** The collection whose records cite it. */
-  readonly collection: 'titles' | 'vassal-links'
+  /** The collection whose records cite it — a claim, or a city's sheet naming its holder (CMS-422 step 2c). */
+  readonly collection: 'titles' | 'vassal-links' | 'place-periods'
   /** The fields that point at it. */
   readonly fields: readonly string[]
   /** The sentence's subject: « Ce titre », « Cette personne », « Ce territoire ». */
@@ -71,11 +71,11 @@ interface Citers {
 }
 
 /**
- * Refuse to delete a record a claim still cites (the dev's « vas-y », 2026-11-15): the base would empty the claim's
+ * Refuse to delete a record a claim or a city sheet still cites (the dev's « vas-y », 2026-11-15): the base would empty the claim's
  * field under it (`ON DELETE set null`), and a sourced claim would change its meaning — a link turned sovereign, a
  * title holding nothing — with no one deciding. The citing records are named, to be changed or deleted first, by hand.
  * @param citers - where the record is cited, and how the refusal says it
- * @returns the hook — it throws when a claim cites the record; Payload says it in the admin, the console keeps it
+ * @returns the hook — it throws when a claim or a sheet cites the record; Payload says it in the admin, the console keeps it
  */
 export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook {
   return async ({ id, req }) => {
@@ -87,7 +87,7 @@ export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook 
       req,
     })
     if (docs.length === 0) return
-    const names = docs.map((cited) => `« ${cited.label ?? String(cited.id)} »`).join(', ')
+    const names = docs.map((cited) => `« ${nameOf(cited)} »`).join(', ')
     console.warn(
       `[CMS] deleting ${String(id)} refused: ${String(docs.length)} record(s) of ${citers.collection} cite it`
     )
@@ -98,4 +98,21 @@ export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook 
       true
     )
   }
+}
+
+/**
+ * The name a citing record is said by in a refusal: a claim's label, a sheet's title — written by the server, so
+ * missing only on a record saved before it wrote them; its id then.
+ * @param cited - the citing record
+ * @param cited.id - its id
+ * @param cited.label - a claim's name
+ * @param cited.title - a sheet's name
+ * @returns its name
+ */
+function nameOf(cited: {
+  id: number | string
+  label?: string | null
+  title?: string | null
+}): string {
+  return cited.label ?? cited.title ?? String(cited.id)
 }

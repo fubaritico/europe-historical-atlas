@@ -2,6 +2,8 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 
 import { toHistoricalDate } from '../../../fields/dateReading'
 
+import { readDocs } from './readDocs'
+
 import type { EventDateFields } from '../../../fields/dateReading'
 import type { SavedSheet } from '../../../fields/sheetOverlap'
 
@@ -30,12 +32,8 @@ export async function fetchPlaceSheets(
   const response = await fetcher(`${api}/place-periods?${params.toString()}`, {
     credentials: 'include',
   })
-  if (!response.ok) {
-    throw new Error(`[CMS] the place's sheets could not be read (${String(response.status)})`)
-  }
-  const answer = (await response.json()) as { docs?: unknown }
-  if (!Array.isArray(answer.docs)) throw new Error("[CMS] the place's sheets answered no list")
-  return answer.docs.map((doc: unknown) => {
+  const docs = await readDocs(response, "the place's sheets", 'could not be read')
+  return docs.map((doc) => {
     const { id, date } = (doc ?? {}) as { id?: unknown; date?: unknown }
     if (
       (typeof id !== 'number' && typeof id !== 'string') ||

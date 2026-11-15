@@ -231,6 +231,29 @@ describe('titles and links', () => {
       expect((await payload.findByID({ collection: 'titles', id: duke })).id).toBe(duke)
     })
 
+    it('refuses to delete a title a city sheet names as its holder, naming the sheet', async () => {
+      const lone = (
+        await title('Hoël', { name: 'comté de Cornouaille', kind: 'county' }, 1066, 1084)
+      ).title
+      const place = await payload.create({
+        collection: 'places',
+        data: { name: 'Quimper', location: [-4.1, 48.0] },
+      })
+      await payload.create({
+        collection: 'place-periods',
+        data: {
+          place: place.id,
+          date: { start: { year: 1080 } },
+          importance: 'city',
+          holderTitle: lone,
+          testimonies: [{ source, subject: 'importance', importance: 'city' }],
+        },
+      })
+      await expect(payload.delete({ collection: 'titles', id: lone })).rejects.toThrow(
+        'Ce titre est cité par 1 fiche(s) de ville : « Quimper — 1080 »'
+      )
+    }, 60_000)
+
     it('refuses to delete a person or a territory a title names, naming the title', async () => {
       const ofCount = await payload.findByID({ collection: 'titles', id: count, depth: 0 })
       await expect(

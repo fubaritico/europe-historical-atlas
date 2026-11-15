@@ -480,6 +480,10 @@ export interface PlacePeriod {
    */
   reasons?: (number | ImportanceReason)[] | null;
   /**
+   * Le titre de celui à qui la ville obéit à cette date — par exemple : Mathias II, comte de Nantes. Choisi dans « Titres » ; sa chaîne de vassalité se lit dessous.
+   */
+  holderTitle?: (number | null) | Title;
+  /**
    * Le pays qui tient la ville à cette date, par son nom — par exemple : République de Venise. Facultatif. C’est ce que le Cartographe compare au pays dessiné sous la ville.
    */
   holderName?: string | null;
@@ -566,77 +570,6 @@ export interface ImportanceReason {
   createdAt: string;
 }
 /**
- * Les confessions qu’on peut donner à une communauté sur une fiche « Ville à une date » : catholique, orthodoxe, musulmane sunnite, juive… Ajoutez-en autant qu’il faut.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "confessions".
- */
-export interface Confession {
-  id: number;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "territories".
- */
-export interface Territory {
-  id: number;
-  name: string;
-  /**
-   * Une terre tenue — d’un empire à une seigneurie — ou une charge exercée.
-   */
-  kind:
-    | 'empire'
-    | 'kingdom'
-    | 'principality'
-    | 'duchy'
-    | 'march'
-    | 'county'
-    | 'viscounty'
-    | 'lordship'
-    | 'bishopric'
-    | 'abbey'
-    | 'city'
-    | 'tribe'
-    | 'office';
-  /**
-   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
-   */
-  wikidata?: string | null;
-  /**
-   * Sa création, ou sa première mention.
-   */
-  existsFrom?: {
-    year?: number | null;
-    month?: number | null;
-    day?: number | null;
-    circa?: boolean | null;
-    /**
-     * Avec « vers » seulement. Vide : ±10 ans.
-     */
-    margin?: number | null;
-    calendar?: ('julian' | 'gregorian') | null;
-  };
-  /**
-   * Vide : on ne sait pas, ou il existe encore.
-   */
-  existsTo?: {
-    year?: number | null;
-    month?: number | null;
-    day?: number | null;
-    circa?: boolean | null;
-    /**
-     * Avec « vers » seulement. Vide : ±10 ans.
-     */
-    margin?: number | null;
-    calendar?: ('julian' | 'gregorian') | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "titles".
  */
@@ -703,6 +636,77 @@ export interface Title {
     asWritten?: string | null;
     id?: string | null;
   }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "territories".
+ */
+export interface Territory {
+  id: number;
+  name: string;
+  /**
+   * Une terre tenue — d’un empire à une seigneurie — ou une charge exercée.
+   */
+  kind:
+    | 'empire'
+    | 'kingdom'
+    | 'principality'
+    | 'duchy'
+    | 'march'
+    | 'county'
+    | 'viscounty'
+    | 'lordship'
+    | 'bishopric'
+    | 'abbey'
+    | 'city'
+    | 'tribe'
+    | 'office';
+  /**
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   */
+  wikidata?: string | null;
+  /**
+   * Sa création, ou sa première mention.
+   */
+  existsFrom?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  /**
+   * Vide : on ne sait pas, ou il existe encore.
+   */
+  existsTo?: {
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
+    /**
+     * Avec « vers » seulement. Vide : ±10 ans.
+     */
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Les confessions qu’on peut donner à une communauté sur une fiche « Ville à une date » : catholique, orthodoxe, musulmane sunnite, juive… Ajoutez-en autant qu’il faut.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confessions".
+ */
+export interface Confession {
+  id: number;
+  name: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1255,6 +1259,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
   importance?: T;
   showInAtlas?: T;
   reasons?: T;
+  holderTitle?: T;
   holderName?: T;
   holderQid?: T;
   communities?:

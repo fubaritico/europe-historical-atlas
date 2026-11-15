@@ -138,3 +138,30 @@
   flex-wrap: wrap;
   gap: calc(var(--base) * 0.4) calc(var(--base) * 1.2);
 }
+
+/* CMS-422 step 2c: the chain of vassalage under the holder, computed, never entered here. */
+.city-sheet__chain {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.3);
+  padding: calc(var(--base) * 0.6) calc(var(--base) * 0.8);
+  border-left: 2px solid var(--theme-elevation-150);
+}
+
+.city-sheet__chain-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.city-sheet__chain-readings {
+  margin: 0;
+  padding-left: calc(var(--base) * 1.2);
+}
+
+.city-sheet__chain-end {
+  color: var(--theme-elevation-600);
+}
+
+.city-sheet__chain-end--loop {
+  color: var(--theme-error-600);
+}

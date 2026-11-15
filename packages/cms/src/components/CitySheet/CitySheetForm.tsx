@@ -6,6 +6,7 @@ import './citySheet.css'
 
 import { Button } from '@fubaritico/react/Button'
 import { Form, Formik } from 'formik'
+import { useCallback } from 'react'
 
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
@@ -14,6 +15,7 @@ import { useRecordSearches } from './hooks/useRecordSearches'
 import { useSheetSubmit } from './hooks/useSheetSubmit'
 import { CITY_SHEET_MESSAGES } from './i18n'
 import { SheetFields } from './internal/SheetFields'
+import { readVassalChain } from './utils/readVassalChain'
 import { validateSheet } from './utils/validateSheet'
 
 import type { SheetLists, SheetValues } from './utils/sheetValues'
@@ -67,6 +69,10 @@ export function CitySheetForm({
   const handleSubmit = useSheetSubmit(id === undefined ? { api, admin } : { id, api, admin }, say)
 
   const searches = useRecordSearches(api, contentLocale)
+  const readChain = useCallback(
+    (title: number | string, year: number) => readVassalChain(fetch, api, title, year),
+    [api]
+  )
   const overlap = useOverlapCheck(api, locale, id)
   const validate = (values: SheetValues) =>
     validateSheet(values, say, overlap.current(values.place?.id ?? null))
@@ -86,7 +92,13 @@ export function CitySheetForm({
               {status}
             </p>
           )}
-          <SheetFields searches={searches} overlap={overlap} lists={lists} say={say} />
+          <SheetFields
+            searches={searches}
+            readChain={readChain}
+            overlap={overlap}
+            lists={lists}
+            say={say}
+          />
           <div className="city-sheet__actions">
             <Button type="submit" disabled={!isValid || !dirty || isSubmitting}>
               {isSubmitting ? say('saving') : id === undefined ? say('create') : say('save')}
