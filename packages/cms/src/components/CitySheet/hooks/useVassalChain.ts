@@ -29,12 +29,14 @@ export type VassalChainState =
  * @param title - the holder's title, `null` when none is chosen
  * @param year - the sheet's year, `null` when it is not a whole year yet
  * @param read - the chain of a title at a year, from the base
+ * @param generation - raised to read the chain again, once a link is added from the sheet
  * @returns where the chain stands
  */
 export function useVassalChain(
   title: number | string | null,
   year: number | null,
-  read: (title: number | string, year: number) => Promise<ChainReading[]>
+  read: (title: number | string, year: number) => Promise<ChainReading[]>,
+  generation = 0
 ): VassalChainState {
   const [state, setState] = useState<VassalChainState>({ kind: 'none' })
 
@@ -66,7 +68,7 @@ export function useVassalChain(
       current = false
       clearTimeout(timer)
     }
-  }, [title, year, read])
+  }, [title, year, read, generation])
 
   return state
 }

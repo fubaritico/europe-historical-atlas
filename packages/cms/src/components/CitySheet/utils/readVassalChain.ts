@@ -10,7 +10,7 @@ import type { ChainEnd, VassalLink } from '@europe-historical-atlas/core/data/va
 
 /** One reading of the chain: the titles from the holder's up, named, and why it stops. */
 export interface ChainReading {
-  /** The titles, the holder's first. */
+  /** The titles, the holder's first, each with its id as the base gives it. */
   titles: RecordChoice[]
   /** Why it stops where it does: a sovereign, « we do not know », or links that contradict one another. */
   end: ChainEnd
@@ -50,12 +50,13 @@ export async function fetchVassalLinks(fetcher: typeof fetch, api: string): Prom
 }
 
 /**
- * The names of titles, by id — written by the server at each save of a title, so a title without one, or one asked
- * for and not answered, is a defect said loudly rather than a chain shown with a hole.
+ * The titles of a chain, by id as `core` names them — each with its id as the base gives it, for a drawer to name it
+ * again, and its name, written by the server at each save of a title: a title without one, or one asked for and not
+ * answered, is a defect said loudly rather than a chain shown with a hole.
  * @param fetcher - the `fetch` to use
  * @param api - the API's root
  * @param ids - the titles
- * @returns their names, by id as text
+ * @returns each title, its id and its name, by id as text
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server refuses, or a title is missing or has no name
  */
@@ -63,7 +64,7 @@ export async function fetchTitleNames(
   fetcher: typeof fetch,
   api: string,
   ids: readonly string[]
-): Promise<Map<string, string>> {
+): Promise<Map<string, RecordChoice>> {
   const params = new URLSearchParams({
     'where[id][in]': ids.join(','),
     depth: '0',
@@ -72,11 +73,11 @@ export async function fetchTitleNames(
   })
   const response = await fetcher(`${api}/titles?${params.toString()}`, { credentials: 'include' })
   const docs = await readDocs(response, 'the titles of the chain', 'could not be read')
-  const names = new Map<string, string>()
+  const names = new Map<string, RecordChoice>()
   for (const doc of docs) {
     const { id, label } = (doc ?? {}) as { id?: unknown; label?: unknown }
     if ((typeof id === 'number' || typeof id === 'string') && typeof label === 'string') {
-      names.set(String(id), label)
+      names.set(String(id), { id, name: label })
     }
   }
   const missing = ids.filter((id) => !names.has(id))
@@ -108,7 +109,7 @@ export async function readVassalChain(
   const ids = [...new Set(paths.flatMap((path) => path.titles))]
   const names = await fetchTitleNames(fetcher, api, ids)
   return distinct(paths).map((path) => ({
-    titles: path.titles.map((id) => ({ id, name: nameOf(names, id) })),
+    titles: path.titles.map((id) => titleOf(names, id)),
     end: path.end,
   }))
 }
@@ -131,14 +132,14 @@ function distinct(paths: readonly { titles: string[]; end: ChainEnd }[]) {
 }
 
 /**
- * A title's name from those read — `fetchTitleNames` refuses an answer missing one, so none is missing here.
- * @param names - the names read, by id
+ * A title from those read — `fetchTitleNames` refuses an answer missing one, so none is missing here.
+ * @param titles - the titles read, by id as text
  * @param id - the title
- * @returns its name
+ * @returns its id as the base gives it, and its name
  * @throws {Error} when it is missing, which `fetchTitleNames` was to refuse
  */
-function nameOf(names: ReadonlyMap<string, string>, id: string): string {
-  const name = names.get(id)
-  if (name === undefined) throw new Error(`[CMS] the title ${id} of the chain was read unnamed`)
-  return name
+function titleOf(titles: ReadonlyMap<string, RecordChoice>, id: string): RecordChoice {
+  const title = titles.get(id)
+  if (title === undefined) throw new Error(`[CMS] the title ${id} of the chain was read unnamed`)
+  return title
 }

@@ -166,8 +166,8 @@
   color: var(--theme-error-600);
 }
 
-/* CMS-422 step 2c: « Créer un titre », Payload's own drawer under the holder's Typeahead. */
-.city-sheet__new-title-button {
+/* CMS-422 step 2c: the buttons that open one of Payload's drawers from the sheet — « Créer un titre », « Ajouter son suzerain ». */
+.city-sheet__link-button {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -178,4 +178,9 @@
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.city-sheet__link-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }

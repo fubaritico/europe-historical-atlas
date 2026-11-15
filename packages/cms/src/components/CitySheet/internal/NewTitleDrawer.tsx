@@ -48,7 +48,7 @@ export function NewTitleDrawer({ say }: { say: Say }) {
   return (
     <div className="city-sheet__new-title">
       {/* Its visible words as its name: Payload's own (« Ajouter Titre ») would hide them from voice control */}
-      <Toggler className="city-sheet__new-title-button" aria-label={say('newTitle')}>
+      <Toggler className="city-sheet__link-button" aria-label={say('newTitle')}>
         {say('newTitle')}
       </Toggler>
       <Drawer

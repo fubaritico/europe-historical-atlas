@@ -50,9 +50,9 @@ describe('readVassalChain', () => {
       expect(await readVassalChain(stubFetch(), '/api', 10, 1100)).toEqual([
         {
           titles: [
-            { id: '10', name: NAMES['10'] },
-            { id: '20', name: NAMES['20'] },
-            { id: '30', name: NAMES['30'] },
+            { id: 10, name: NAMES['10'] },
+            { id: 20, name: NAMES['20'] },
+            { id: 30, name: NAMES['30'] },
           ],
           end: 'sovereign',
         },
@@ -75,7 +75,7 @@ describe('readVassalChain', () => {
   describe('variants', () => {
     it('stops where no link is known in the year: beyond, we do not know', async () => {
       const chain = await readVassalChain(stubFetch(), '/api', 10, 1110)
-      expect(chain).toEqual([{ titles: [{ id: '10', name: NAMES['10'] }], end: 'unknown' }])
+      expect(chain).toEqual([{ titles: [{ id: 10, name: NAMES['10'] }], end: 'unknown' }])
     })
 
     it('keeps both readings when the sources diverge', async () => {
@@ -85,8 +85,8 @@ describe('readVassalChain', () => {
       ]
       const chain = await readVassalChain(stubFetch(diverging), '/api', 10, 1100)
       expect(chain.map((reading) => reading.titles.map((title) => title.id))).toEqual([
-        ['10', '20', '30'],
-        ['10', '20', '40'],
+        [10, 20, 30],
+        [10, 20, 40],
       ])
     })
   })

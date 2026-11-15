@@ -111,6 +111,8 @@
   "chainSovereign": "sovereign",
   "chainUnknown": "beyond, we do not know",
   "chainLoop": "the links contradict one another: this title comes back in its own chain",
+  "addSuzerain": "Add its suzerain",
+  "addSuzerainOf": "Add its suzerain: whom {name} answers to",
   "holder": "Held by",
   "holderHelp": "The polity holding the city at this date, by its name — for instance: Republic of Venice. Optional. It is what the Cartographer compares with the polity drawn under the city.",
   "holderQid": "Wikidata id of the polity",

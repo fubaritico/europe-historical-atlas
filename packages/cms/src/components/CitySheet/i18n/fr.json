@@ -111,6 +111,8 @@
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
   "chainLoop": "les maillons se contredisent : ce titre revient dans sa propre chaîne",
+  "addSuzerain": "Ajouter son suzerain",
+  "addSuzerainOf": "Ajouter son suzerain : de qui relève {name}",
   "holder": "Tenue par",
   "holderHelp": "Le pays qui tient la ville à cette date, par son nom — par exemple : République de Venise. Facultatif. C’est ce que le Cartographe compare au pays dessiné sous la ville.",
   "holderQid": "Identifiant Wikidata du pays",

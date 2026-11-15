@@ -13,11 +13,32 @@ import { HolderChain } from './HolderChain'
 import type { ChainReading } from '../utils/readVassalChain'
 import type { SheetValues } from '../utils/sheetValues'
 
+// Payload's drawer, its form stood in for: the toggler its label, the drawer keeping what it is opened with
+const drawer = vi.hoisted(() => {
+  const state: { onSave?: (() => void) | undefined; initialData?: unknown } = {}
+  const closeDrawer = vi.fn()
+  return {
+    state,
+    closeDrawer,
+    use: () => [
+      (props: { onSave?: () => void; initialData?: unknown }) => {
+        state.onSave = props.onSave
+        state.initialData = props.initialData
+        return null
+      },
+      ({ children }: { children?: unknown }) => children as never,
+      { closeDrawer },
+    ],
+  }
+})
+
+vi.mock('@payloadcms/ui', () => ({ useDocumentDrawer: drawer.use }))
+
 const say = createTranslator(CITY_SHEET_MESSAGES, 'fr')
 
-const COUNT = { id: '10', name: 'Mathias II — comté de Nantes' }
-const DUKE = { id: '20', name: 'Alain IV — duché de Bretagne' }
-const EMPEROR = { id: '40', name: 'Henri IV — Saint-Empire' }
+const COUNT = { id: 10, name: 'Mathias II — comté de Nantes' }
+const DUKE = { id: 20, name: 'Alain IV — duché de Bretagne' }
+const EMPEROR = { id: 40, name: 'Henri IV — Saint-Empire' }
 
 /**
  * A sheet's values: a holder's title, the year as typed.
@@ -79,8 +100,28 @@ describe('HolderChain', () => {
     it('says where the chain stops for want of a link: beyond, we do not know — never sovereign', async () => {
       renderChain(values('1110'), () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]))
       expect((await screen.findByRole('listitem')).textContent).toBe(
-        'Mathias II — comté de Nantes — au-delà, on ne sait pas'
+        'Mathias II — comté de Nantes — au-delà, on ne sait pas' + 'Ajouter son suzerain'
       )
+    })
+
+    it('opens the drawer of a new link from the title the chain stops at, and reads the chain again once saved', async () => {
+      const read = vi
+        .fn()
+        .mockResolvedValueOnce([{ titles: [COUNT], end: 'unknown' }])
+        .mockResolvedValueOnce([{ titles: [COUNT, DUKE], end: 'sovereign' }])
+      renderChain(values('1100'), read)
+      expect((await screen.findByRole('listitem')).textContent).toContain('Ajouter son suzerain')
+      expect(drawer.state.initialData).toEqual({
+        vassal: 10,
+        answersTo: 'suzerain',
+        date: { start: { year: 1100 } },
+      })
+      drawer.state.onSave?.()
+      expect(await screen.findByText('— souverain', { exact: false })).toBeTruthy()
+      expect(read).toHaveBeenCalledTimes(2)
+      expect(drawer.closeDrawer).toHaveBeenCalled()
+      expect(document.activeElement?.getAttribute('aria-live')).toBe('polite')
+      expect(screen.getByRole('listitem').textContent).not.toContain('Ajouter son suzerain')
     })
 
     it('lists every reading when the sources diverge, and says how many', async () => {
