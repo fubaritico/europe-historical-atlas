@@ -10,6 +10,7 @@ import {
   formatCityAlerts,
   openMapFolder,
   parseCityAlertArgs,
+  pipedContent,
 } from '../src/cli/cityAlerts'
 import { toLoadedCity } from '../src/loaders/cityLoad'
 
@@ -29,7 +30,7 @@ try {
   // closed pipe, its trace on top of the reason (measured).
   const piped = await readStdin()
   const args = parseCityAlertArgs(process.argv.slice(2))
-  const content = parseContentFile(JSON.parse(piped), 'stdin')
+  const content = parseContentFile(pipedContent(piped), 'stdin')
   const folder = path.join(YEARS, args.map)
   const document = await openMapFolder(folder, (file) => readFile(path.join(folder, file), 'utf8'))
   const report = cityAlertReport(document, content.cities.map(toLoadedCity), args.box)

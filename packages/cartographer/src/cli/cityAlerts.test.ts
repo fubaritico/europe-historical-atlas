@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { cityAlertReport, formatCityAlerts, openMapFolder, parseCityAlertArgs } from './cityAlerts'
+import {
+  cityAlertReport,
+  formatCityAlerts,
+  openMapFolder,
+  parseCityAlertArgs,
+  pipedContent,
+} from './cityAlerts'
 
 import type { CityMark } from '../state/citiesSlice'
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
@@ -440,4 +446,27 @@ describe('openMapFolder', () => {
       await expect(openMapFolder('years/1100', readerOf(files))).rejects.toThrow(/registry\.json/)
     })
   })
+})
+
+describe('pipedContent', () => {
+  describe('happy path', () => {
+    it('reads the JSON piped in', () => {
+      expect(pipedContent('{"events":[]}')).toEqual({ events: [] })
+    })
+  })
+
+  describe('managed errors', () => {
+    // Review QUAL-003, 2026-11-16: a failed print reached the command as « Unexpected end of JSON input »
+    it.each(['', '  \n'])('says the CMS sent nothing for an empty pipe (%j)', (piped) => {
+      expect(() => pipedContent(piped)).toThrow('le CMS n’a rien envoyé')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('lets a pipe that is not JSON fail as JSON', () => {
+      expect(() => pipedContent('not json')).toThrow(SyntaxError)
+    })
+  })
+
+  // L2, L5: N/A — one input, read whole
 })

@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload'
 
-import { cmsConfig } from '../payload.config'
+import { cmsConfig } from '../cmsConfig'
 
 import { readContent } from './readContent'
 

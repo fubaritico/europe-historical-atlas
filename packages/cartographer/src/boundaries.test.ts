@@ -182,11 +182,15 @@ describe('architecture boundaries', () => {
       // there, persistence/ would read the year through the page's HTTP port.
       const patterns = forbiddenPatterns(resolved.get('cli') ?? {})
 
-      for (const layer of ['ui', 'persistence', 'devServer', 'main']) {
-        expect(
-          patterns.some((pattern) => pattern.includes(layer)),
-          `cli must not reach ${layer}`
-        ).toBe(true)
+      // The exact globs, never a substring: « ui » or « main » would match an unrelated pattern (review ARCH-004)
+      for (const glob of [
+        '**/ui/**',
+        '**/persistence/**',
+        '**/devServer/**',
+        '**/main',
+        '**/main.{ts,tsx}',
+      ]) {
+        expect(patterns, `cli must not reach ${glob}`).toContain(glob)
       }
       expect(patterns).not.toContain('**/canvas/**')
       expect(forbiddenPackages(resolved.get('cli') ?? {})).toContain('three')

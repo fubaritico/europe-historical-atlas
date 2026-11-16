@@ -93,14 +93,22 @@ function said(kind: AlertKind, reason: string): string {
   return `${COLOUR[alert]} — ${reason}`
 }
 
-/** The kinds on alert, in the report's order: the yellow ones, then the red. */
-const ALERT_ORDER: readonly AlertKind[] = [
-  'misplaced',
-  'incomplete',
-  'toDeclare',
-  'cannotCompare',
-  'notEntered',
-]
+/**
+ * Each kind on alert, its rank in the report: the yellow ones, then the red. A record, so a kind the canvas adds fails
+ * the type-check here rather than sorting first and dropping out of the counts (review ARCH-001).
+ */
+const ALERT_RANK: Readonly<Record<AlertKind, number>> = {
+  misplaced: 0,
+  incomplete: 1,
+  toDeclare: 2,
+  cannotCompare: 3,
+  notEntered: 4,
+}
+
+/** The kinds on alert, in the report's order — read from {@link ALERT_RANK}. */
+const ALERT_ORDER: readonly AlertKind[] = (Object.keys(ALERT_RANK) as AlertKind[]).sort(
+  (a, b) => ALERT_RANK[a] - ALERT_RANK[b]
+)
 
 /**
  * Whether a verdict puts its city on alert — by the canvas's own rule, `cityAlert`.
@@ -120,6 +128,21 @@ const ENDS: Readonly<Record<ChainEnd, string>> = {
 
 /** The command's own usage, said with each refusal. */
 export const USAGE = 'usage : pnpm cities:alerts --map 1100 [--box=ouest,sud,est,nord]'
+
+/**
+ * The content piped in, read as JSON (review QUAL-003): an empty pipe means the CMS's print sent nothing — it failed,
+ * its reason above on the standard error — and is said so, rather than as JSON's « unexpected end of input ».
+ * @param piped - everything read on the standard input
+ * @returns the JSON read
+ * @throws {Error} when nothing was piped, or what was is not JSON
+ */
+export function pipedContent(piped: string): unknown {
+  if (piped.trim() === '')
+    throw new Error(
+      'le CMS n’a rien envoyé : sa commande export:print a échoué, sa raison est plus haut'
+    )
+  return JSON.parse(piped)
+}
 
 /**
  * Read the command's arguments: `--map <name>` (or `--map=<name>`), required, and `--box=west,south,east,north`, in
@@ -198,8 +221,7 @@ export function cityAlertReport(
     })
     .sort(
       (a, b) =>
-        ALERT_ORDER.indexOf(a.kind) - ALERT_ORDER.indexOf(b.kind) ||
-        a.city.name.localeCompare(b.city.name, 'fr')
+        ALERT_RANK[a.kind] - ALERT_RANK[b.kind] || a.city.name.localeCompare(b.city.name, 'fr')
     )
   return { judged: kept.length, alerted }
 }
