@@ -1,16 +1,16 @@
 import { citiesOfYear, shownCityPoints } from '../state/citiesSlice'
 
-import { cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
+import { cityAlert, cityVerdicts, mapPolities, paintedHolder } from './cityVerdict'
 
 import type { CityAlert } from './paint/cityPainter'
 import type { CitiesState, CityMark, ShownCity } from '../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
-/** What a city's point shows: its alert ring, and the Wikidata id of the polity whose colour fills it. */
+/** What a city's point shows: its alert ring, and the polity whose colour fills it. */
 export interface CityPaint {
   /** Its alert, or `null` at the right place. */
   readonly alert: CityAlert | null
-  /** The polity whose colour fills the dot, by its Wikidata id — `null` for a hollow dot. */
+  /** The registry id of the polity whose colour fills the dot — `null` for a hollow dot (CARTO-450). */
   readonly holder: string | null
 }
 
@@ -58,11 +58,9 @@ export function createCityAlertCache(): CityAlertCache {
         return last.alerts
       }
       const alerts = new Map<string, CityPaint>()
-      const declared = new Set(
-        document.polities.flatMap(({ wikidata }) => (wikidata === null ? [] : [wikidata]))
-      )
+      const map = mapPolities(document)
       for (const [id, verdict] of cityVerdicts(document, citiesOfYear(cities, document.year))) {
-        alerts.set(id, { alert: cityAlert(verdict.kind), holder: paintedHolder(verdict, declared) })
+        alerts.set(id, { alert: cityAlert(verdict.kind), holder: paintedHolder(verdict, map) })
       }
       last = { document, version, cities, alerts }
       return alerts
@@ -101,9 +99,9 @@ export function citiesToPaint(
     state.listedCities
   ).map((city) => {
     const paint = alerts.get(city.id)
-    // Not judged — the cities shown as names, or none shown: the dot keeps the sources' holder, as before
+    // Not judged — the cities shown as names, or none shown: no point is painted, so no colour to give it
     return paint === undefined
-      ? { ...city, alert: null }
+      ? { ...city, holder: null, alert: null }
       : { ...city, holder: paint.holder, alert: paint.alert }
   })
 }

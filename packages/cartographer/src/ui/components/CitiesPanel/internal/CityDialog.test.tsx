@@ -25,7 +25,7 @@ const METZ: CityMark = {
   holderSources: [{ title: 'Duby, Atlas historique', where: 'p. 46', holder: EMPIRE }],
 }
 const AGREES: CityVerdict = {
-  onMap: EMPIRE,
+  onMap: { id: 'hre', ...EMPIRE },
   bySources: EMPIRE,
   kind: 'agrees',
   chain: null,

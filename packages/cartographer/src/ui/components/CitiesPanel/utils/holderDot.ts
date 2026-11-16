@@ -38,7 +38,7 @@ export function holderDot(
   const { wikidata } = holder
   const polity = polityCarrying(document, wikidata)
   if (polity === undefined) return { colour: null, key: 'dotOffMap', values: { name: holder.name } }
-  const colour = holderColour(document, colours, wikidata)
+  const colour = holderColour(colours, polity.id)
   if (polity.suzerain === null) return { colour, key: 'dotHolder', values: { name: polity.name } }
   const suzerainId = polity.suzerain
   const suzerain = document.polities.find((each) => each.id === suzerainId)

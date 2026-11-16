@@ -9,6 +9,7 @@ import { sovereignLinkOf } from '../fields/sovereignLinkOf'
 import { vassalLinkOf } from '../fields/vassalLinkOf'
 
 import { resolved } from './docRecords'
+import { territoryNumberOf } from './toContentTerritory'
 
 import type { DocId } from './docRecords'
 import type { EventDateFields } from '../fields/historicalDate'
@@ -19,7 +20,7 @@ import type {
 } from '@europe-historical-atlas/core/data/contentFormat'
 import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
 
-/** A territory as the export reads it, through its title: only its Wikidata id matters to the chain. */
+/** A territory as the export reads it, through its title: its number and its Wikidata id, what the map matches it by. */
 export interface DocTerritory {
   /** Its id. */
   id: DocId
@@ -71,7 +72,11 @@ export function chainRegister(
       throw new Error(`[CMS] ${where}: no territory`)
     }
     const territory = resolved<DocTerritory>(title.territory, `${where}, territory`)
-    named.set(String(title.id), { name: title.label, wikidata: territory.wikidata ?? null })
+    named.set(String(title.id), {
+      name: title.label,
+      wikidata: territory.wikidata ?? null,
+      territory: territoryNumberOf(territory.id, `${where}, territory`),
+    })
   }
   return {
     titles: named,

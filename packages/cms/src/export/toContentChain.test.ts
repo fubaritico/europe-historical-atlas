@@ -28,13 +28,13 @@ const LINKS = [
 
 describe('contentChain', () => {
   describe('happy path', () => {
-    it('writes the chain of Nantes in 1100, each title with its territory’s Wikidata id', () => {
+    it('writes the chain of Nantes in 1100, each title with its territory’s Wikidata id and number', () => {
       expect(contentChain(chainRegister(TITLES, LINKS), 10, 1100, 'city sheet 1')).toEqual([
         {
           titles: [
-            { name: 'Mathias II — comté de Nantes', wikidata: 'Q1' },
-            { name: 'Alain IV — duché de Bretagne', wikidata: 'Q2' },
-            { name: 'Philippe Ier — royaume de France', wikidata: null },
+            { name: 'Mathias II — comté de Nantes', wikidata: 'Q1', territory: 1 },
+            { name: 'Alain IV — duché de Bretagne', wikidata: 'Q2', territory: 2 },
+            { name: 'Philippe Ier — royaume de France', wikidata: null, territory: 3 },
           ],
           end: 'unknown',
         },
@@ -96,7 +96,10 @@ describe('contentChain', () => {
     it('stops at the holder’s own title in a year no link covers: beyond, we do not know', () => {
       const chain = contentChain(chainRegister(TITLES, LINKS), 10, 1110, 'city sheet 1')
       expect(chain).toEqual([
-        { titles: [{ name: 'Mathias II — comté de Nantes', wikidata: 'Q1' }], end: 'unknown' },
+        {
+          titles: [{ name: 'Mathias II — comté de Nantes', wikidata: 'Q1', territory: 1 }],
+          end: 'unknown',
+        },
       ])
     })
   })

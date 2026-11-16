@@ -1,4 +1,7 @@
-import type { ContentCity } from '@europe-historical-atlas/core/data/contentFormat'
+import type {
+  ContentCity,
+  ContentTerritory,
+} from '@europe-historical-atlas/core/data/contentFormat'
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 
 /**
@@ -44,6 +47,11 @@ export interface CitySink {
    */
   setCities: (cities: readonly LoadedCity[]) => void
   /**
+   * The CMS's territories, read (CARTO-450).
+   * @param territories - every territory of the export
+   */
+  setTerritories: (territories: readonly ContentTerritory[]) => void
+  /**
    * The export could not be read.
    * @param reason - what went wrong
    */
@@ -83,6 +91,10 @@ export async function loadCities(source: ContentSource, sink: CitySink): Promise
   try {
     const content = await source.load()
     sink.setCities(content.cities.map(toLoadedCity))
+    // An export written before CARTO-450 has no territories: none to offer, and the form says to export again
+    if (content.territories === undefined)
+      console.warn('[Cartographer] the export has no territories: run the CMS export again')
+    sink.setTerritories(content.territories ?? [])
   } catch (error: unknown) {
     console.error('[Cartographer] the cities could not be read', error)
     sink.setCitiesFailed(error instanceof Error ? error.message : String(error))

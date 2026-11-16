@@ -4,13 +4,22 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { POLITY_FORM_MESSAGES } from '../i18n'
 
 /**
- * The suzerain held now — its name, or *none* — and the cross that removes it.
- * @param props - the name held and what removing does
- * @param props.held - the suzerain's name, or `null` when there is none
- * @param props.onRemove - remove the suzerain
+ * The choice held now — the suzerain, or the CMS territory (CARTO-450) — its name, or *none*, and the cross that removes it.
+ * @param props - the name held, the cross's name and what removing does
+ * @param props.held - the name held, or `null` when there is none
+ * @param props.removeKey - the message naming the cross, given the name held
+ * @param props.onRemove - remove the choice
  * @returns the line
  */
-export function HeldSuzerain({ held, onRemove }: { held: string | null; onRemove: () => void }) {
+export function HeldSuzerain({
+  held,
+  removeKey,
+  onRemove,
+}: {
+  held: string | null
+  removeKey: 'removeSuzerain' | 'removeTerritory'
+  onRemove: () => void
+}) {
   // Context
   const t = useTranslation(POLITY_FORM_MESSAGES)
 
@@ -23,7 +32,7 @@ export function HeldSuzerain({ held, onRemove }: { held: string | null; onRemove
         <IconButton
           type="button"
           icon="XMark"
-          aria-label={t('removeSuzerain', { name: held })}
+          aria-label={t(removeKey, { name: held })}
           onClick={onRemove}
         />
       )}

@@ -11,6 +11,7 @@ import { ColourField } from './ColourField'
 import { ShortNameFields } from './ShortNameFields'
 import { StandingFields } from './StandingFields'
 import { SuzerainField } from './SuzerainField'
+import { TerritoryField } from './TerritoryField'
 
 import type { PolityFieldsProps, PolityFormField } from '../polityFieldsProps'
 
@@ -65,6 +66,11 @@ export function PolityFields(props: PolityFieldsProps) {
       <ColourField value={draft.colour} onChange={onColour} />
       <Input label={t('wikidata')} placeholder="Q…" {...textField('wikidata', props)} />
       <WikidataPanel view={props.wikidata} onUse={props.onUseWikidata} />
+      <TerritoryField
+        options={props.territories}
+        value={draft.territory}
+        onSelect={choose('territory')}
+      />
     </>
   )
 }

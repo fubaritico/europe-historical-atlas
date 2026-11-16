@@ -14,7 +14,7 @@ const CHAIN = [{ titles: [{ name: 'Ruthard — Mayence', wikidata: 'Q1' }], end:
  */
 function verdict(fields: Partial<CityVerdict>): CityVerdict {
   return {
-    onMap: MAINZ,
+    onMap: { id: 'mainz', ...MAINZ },
     bySources: MAINZ,
     kind: 'agrees',
     chain: null,

@@ -69,7 +69,7 @@ const SAID: Readonly<Record<AlertKind, string>> = {
   misplaced: 'le pays dessiné sous elle n’est pas dans sa chaîne',
   incomplete: 'sa chaîne s’arrête faute de maillon, le pays dessiné sous elle n’y est pas',
   toDeclare: 'le titre vérifié n’est pas dessiné sur la carte',
-  cannotCompare: 'rien à comparer : un identifiant Wikidata manque',
+  cannotCompare: 'rien à comparer : ni identifiant Wikidata ni territoire du CMS',
   notEntered: 'aucun détenteur saisi dans le CMS',
 }
 
@@ -117,6 +117,20 @@ const ALERT_ORDER: readonly AlertKind[] = (Object.keys(ALERT_RANK) as AlertKind[
  */
 function isAlert(kind: CityVerdictKind): kind is AlertKind {
   return cityAlert(kind) !== null
+}
+
+/**
+ * What a polity of the map is recognised by, said: its Wikidata id, else its CMS territory (CARTO-450).
+ * @param ids - its ids
+ * @param ids.wikidata - its Wikidata id
+ * @param ids.territory - its CMS territory number
+ * @returns the text
+ */
+function idText(ids: { wikidata: string | null; territory?: number }): string {
+  if (ids.wikidata !== null) return ids.wikidata
+  return ids.territory === undefined
+    ? 'sans identifiant'
+    : `territoire ${String(ids.territory)} du CMS`
 }
 
 /** How a reading ends, in French. */
@@ -246,8 +260,9 @@ export function formatCityAlerts({ judged, alerted }: CityAlertReport, map: stri
 }
 
 /**
- * Why one city is on alert, from its own verdict: `cannotCompare` has two causes — the country drawn under it has no
- * Wikidata id, or, the sheet naming no title, the holder entered as text has none (`cityVerdicts`) — and the
+ * Why one city is on alert, from its own verdict: `cannotCompare` has two causes — the country drawn under it has
+ * neither a Wikidata id nor a CMS territory (CARTO-450), or, the sheet naming no title, the holder entered as text has
+ * no Wikidata id (`cityVerdicts`) — and the
  * historian fixes the one in the map, the other in the base (review QUAL-001).
  * @param verdict - the city's verdict, on alert
  * @param kind - its kind
@@ -259,7 +274,7 @@ function reasonOf(verdict: CityVerdict, kind: AlertKind): string {
     kind,
     verdict.chain === null
       ? 'le détenteur saisi en texte n’a pas d’identifiant Wikidata'
-      : 'le pays dessiné sous elle n’a pas d’identifiant Wikidata'
+      : 'le pays dessiné sous elle n’a ni identifiant Wikidata ni territoire du CMS'
   )
 }
 
@@ -275,7 +290,7 @@ function formatCity({ city, verdict, kind }: AlertedCity): string {
   const under =
     verdict.onMap === null
       ? 'aucun pays (terre que personne ne revendique)'
-      : `${verdict.onMap.name} (${verdict.onMap.wikidata ?? 'sans identifiant'})`
+      : `${verdict.onMap.name} (${idText(verdict.onMap)})`
   const lines = [
     `${city.name} — fiche ${city.id} — ${kind} : ${reasonOf(verdict, kind)}`,
     `  position : ${String(city.lon)}, ${String(city.lat)}`,

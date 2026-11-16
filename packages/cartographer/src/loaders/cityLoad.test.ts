@@ -34,11 +34,17 @@ afterEach(() => {
 
 /** A sink that keeps what it is handed. */
 function sink() {
-  const got: { cities: unknown[] | null; failed: string | null } = { cities: null, failed: null }
+  const got: { cities: unknown[] | null; failed: string | null; territories?: unknown[] } = {
+    cities: null,
+    failed: null,
+  }
   return {
     got,
     setCities: (cities: readonly unknown[]) => {
       got.cities = [...cities]
+    },
+    setTerritories: (territories: readonly unknown[]) => {
+      got.territories = [...territories]
     },
     setCitiesFailed: (reason: string) => {
       got.failed = reason
@@ -50,9 +56,19 @@ describe('cityLoad', () => {
   describe('happy path', () => {
     it('hands the store Sarkel with its French name, its position and its date', async () => {
       const into = sink()
-      const file: ContentFile = { version: 1, events: [], cities: [SARKEL] }
+      const thuringia = { id: 42, name: 'Thuringe', wikidata: null }
+      const file: ContentFile = {
+        version: 1,
+        events: [],
+        cities: [SARKEL],
+        territories: [thuringia],
+      }
       await loadCities({ load: () => Promise.resolve(file) }, into)
-      expect(into.got).toEqual({ cities: [toLoadedCity(SARKEL)], failed: null })
+      expect(into.got).toEqual({
+        cities: [toLoadedCity(SARKEL)],
+        failed: null,
+        territories: [thuringia],
+      })
       expect(toLoadedCity(SARKEL)).toEqual({
         id: '113',
         name: 'Sarkel',
@@ -67,6 +83,16 @@ describe('cityLoad', () => {
   })
 
   describe('variants', () => {
+    // CARTO-450: an export written before the territories offers none, and says to export again
+    it('hands no territory from an export that has none, and says to export again', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const into = sink()
+      const file: ContentFile = { version: 1, events: [], cities: [SARKEL] }
+      await loadCities({ load: () => Promise.resolve(file) }, into)
+      expect(into.got.territories).toEqual([])
+      expect(warn).toHaveBeenCalledOnce()
+    })
+
     it('keeps the holder and only the lines saying who held it, two sources disagreeing kept both', () => {
       const source = { id: '1', title: 'Duby', author: null, url: null }
       const venice = { name: 'Venise', wikidata: 'Q4948' }

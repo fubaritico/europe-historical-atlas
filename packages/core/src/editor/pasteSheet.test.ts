@@ -100,6 +100,25 @@ describe('pasteSheet', () => {
   })
 
   // Review QUAL-001, 2026-11-05: a sheet without a short name takes it away; a free name is taken.
+  // CARTO-450: the CMS territory is what a polity with no Wikidata id is found by — a sheet carries it, or drops it
+  describe('the CMS territory', () => {
+    it('takes the copied sheet’s territory, and drops it when the copy has none', () => {
+      const doc = sharedBorderDocument()
+      const tied = franceElsewhere({ territory: 42 })
+      expect(sheetDifferences(doc, tied, 'fr-couronne')).toContainEqual({
+        field: 'territory',
+        current: null,
+        copied: 42,
+        offered: true,
+      })
+      pasteSheet(doc, tied, 'fr-couronne', ['territory'])
+      expect(doc.polities.find((polity) => polity.id === 'fr-couronne')?.territory).toBe(42)
+      pasteSheet(doc, franceElsewhere(), 'fr-couronne', ['territory'])
+      const france = doc.polities.find((polity) => polity.id === 'fr-couronne')
+      expect(france !== undefined && 'territory' in france).toBe(false)
+    })
+  })
+
   describe('what a sheet takes away', () => {
     it('drops the short name and its pin when the copied sheet has neither', () => {
       const doc = sharedBorderDocument()

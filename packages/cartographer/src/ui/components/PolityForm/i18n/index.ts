@@ -17,6 +17,10 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `suzerainPlaceholder`, `suzerainList`, `noSuzerainMatch` — The suzerain search: its placeholder, its
  *   list's name, and what it says when nothing matches.
  * - `removeSuzerain` — The cross beside the suzerain held; `name` is its name.
+ * - `territory`, `territoryHelp`, `territoryPlaceholder`, `territoryList`, `noTerritoryMatch`, `noTerritories` — The
+ *   CMS territory a polity is tied to (CARTO-450): its label, its help, its search and what it says when there is none.
+ * - `removeTerritory` — The cross beside the territory held; `name` is its label.
+ * - `territoryLabel` — A territory in the list; `name` its name, `id` its number in the CMS.
  * - `nameMissing`, `idMissing`, `idTaken`, `notAYear` — Why a field is refused — `polityDraft`'s
  *   `DraftError`.
  */

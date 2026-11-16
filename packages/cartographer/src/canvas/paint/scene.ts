@@ -96,6 +96,7 @@ export interface SceneInputs {
   cities: readonly {
     readonly name: string
     readonly lonLat: Point
+    /** The registry id of the polity whose colour fills its point, or `null` for a hollow one. */
     readonly holder: string | null
     /** What its point says: a holder to enter, the map to correct, or `null` when all is well (CARTO-389). */
     readonly alert: CityAlert | null
@@ -110,22 +111,18 @@ export interface SceneInputs {
 }
 
 /**
- * The colour of the polity holding a city by the sources — the map's polity carrying its Wikidata id, as `{Cities}`'
- * verdict matches them (`cityVerdict`) — painted on the city's point, so a point of one colour on another's ground
- * shows at once (the dev, 2026-11-05).
- * @param document - the map
+ * The colour of the polity holding a city — the one `cityVerdict.paintedHolder` names, by Wikidata id or CMS territory
+ * number (CARTO-450) — painted on the city's point, so a point of one colour on another's ground shows at once (the
+ * dev, 2026-11-05).
  * @param colours - each polity's colour, by id
- * @param holder - the holder's Wikidata id by the sources, or `null` when none is entered
- * @returns the colour, or `null` when no holder is entered or no polity of the map carries it
+ * @param holder - the registry id of the polity to paint, or `null` when the map has none
+ * @returns the colour, or `null` when none is to paint
  */
 export function holderColour(
-  document: YearDocument,
   colours: ReadonlyMap<string, string>,
   holder: string | null
 ): string | null {
-  if (holder === null) return null
-  const polity = polityCarrying(document, holder)
-  return polity === undefined ? null : (colours.get(polity.id) ?? null)
+  return holder === null ? null : (colours.get(holder) ?? null)
 }
 
 /**
@@ -434,7 +431,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       name,
       at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),
       // Read only as points: a named city's dot keeps its ink.
-      colour: inputs.citiesAsPoints ? holderColour(document, inputs.colours, holder) : null,
+      colour: inputs.citiesAsPoints ? holderColour(inputs.colours, holder) : null,
       alert: inputs.citiesAsPoints ? alert : null,
     })),
     citiesAsPoints: inputs.citiesAsPoints,

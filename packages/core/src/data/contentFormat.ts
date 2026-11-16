@@ -273,16 +273,43 @@ const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('s
   }),
 ])
 
-/** One title of a city's chain of vassalage, as the map compares it: its name, and its territory's Wikidata id. */
+/**
+ * One title of a city's chain of vassalage, as the map compares it: its name, its territory's Wikidata id, and its
+ * territory's number in the CMS — the map's polity compared by the id first, by the number where the id is missing
+ * (CARTO-450, `data/territoryMatch`).
+ */
 export interface ContentChainTitle {
   /** The title's name, as the contribution writes it: « Mathias II — comté de Nantes, 1084–1103 ». */
   name: string
   /** The Wikidata id of the territory it holds — what a map's polity is compared by — or `null` when it has none. */
   wikidata: string | null
+  /** The number of the territory it holds in the CMS; absent from an export written before CARTO-450. */
+  territory?: number
 }
+
+/** A territory number of the CMS: a whole number from one. */
+const territoryNumber = z.int().check(z.gte(1))
 
 /** {@link ContentChainTitle}. */
 const chainTitleSchema: z.ZodMiniType<ContentChainTitle> = z.strictObject({
+  name: z.string().check(z.minLength(1)),
+  wikidata: wikidataId,
+  territory: z.exactOptional(territoryNumber),
+})
+
+/** A territory of the CMS, as the Cartographer offers it to a polity of the map (CARTO-450). */
+export interface ContentTerritory {
+  /** Its number in the CMS. */
+  id: number
+  /** Its name, in French — the contribution's language. */
+  name: string
+  /** Its Wikidata id, or `null` when it has none. */
+  wikidata: string | null
+}
+
+/** {@link ContentTerritory}. */
+const territorySchema: z.ZodMiniType<ContentTerritory> = z.strictObject({
+  id: territoryNumber,
   name: z.string().check(z.minLength(1)),
   wikidata: wikidataId,
 })
@@ -380,6 +407,11 @@ export interface ContentFile {
   events: ContentEvent[]
   /** Every city at a date, in the order the export wrote them. */
   cities: ContentCity[]
+  /**
+   * Every territory of the CMS, for a polity of the map to be tied to one (CARTO-450); absent from an export written
+   * before it. Added without a version: a reader of 9 that knows it reads both, and the atlas never looks at it.
+   */
+  territories?: ContentTerritory[]
 }
 
 /**
@@ -397,4 +429,5 @@ export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({
   version: z.literal(CONTENT_FORMAT_VERSION),
   events: z.array(eventSchema),
   cities: z.array(citySchema),
+  territories: z.exactOptional(z.array(territorySchema)),
 })

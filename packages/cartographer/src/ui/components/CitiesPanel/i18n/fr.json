@@ -58,7 +58,7 @@
   "sortHolder": "Par détenteur",
   "incomplete": "{polity} n’est pas dans sa chaîne de vassalité, qui s’arrête faute de maillon : on ne sait pas encore.",
   "misplacedChain": "Pas au bon endroit : {polity} n’est pas dans sa chaîne de vassalité.",
-  "cannotCompareMap": "{polity} n’a pas d’identifiant Wikidata sur la carte : impossible de le chercher dans la chaîne.",
+  "cannotCompareMap": "{polity} n’a ni identifiant Wikidata ni territoire du CMS sur la carte : impossible de le chercher dans la chaîne.",
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
   "chainLoop": "les maillons se contredisent",

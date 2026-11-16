@@ -138,6 +138,11 @@ export interface YearPolity {
    * into four. It identifies a polity *during a period*, which is not a polity.
    */
   wikidata: string | null
+  /**
+   * The number of its territory in the CMS (CARTO-450) — what a city's chain finds it by where it has no Wikidata id:
+   * the Thuringia of 1100 has no fair item. Absent when none is chosen.
+   */
+  territory?: number
 }
 
 /** {@link YearPolity}. */
@@ -153,6 +158,7 @@ export const yearPolitySchema: z.ZodMiniType<YearPolity> = z.strictObject({
   existsTo: z.nullable(year),
   colour: hexColour,
   wikidata: wikidataId,
+  territory: z.exactOptional(z.int().check(z.gte(1))),
 })
 
 /** `<year>/registry.json` — who exists that year. */

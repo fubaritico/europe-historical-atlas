@@ -47,6 +47,9 @@ export interface PolityDialogProps {
  * @returns the dialogue
  */
 export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: PolityDialogProps) {
+  // Store
+  const territories = store((state) => state.territories)
+
   // Context
   const form = useTranslation(POLITY_FORM_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
@@ -61,6 +64,10 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   const { document } = store.getState()
   const others = document.polities.filter((polity) => polity.id !== editing?.id)
   const wikidataView = wikidataViewOf(reading, draft, document.year, others)
+  const territoryOptions = territories.map((territory) => ({
+    value: String(territory.id),
+    label: form('territoryLabel', { name: territory.name, id: String(territory.id) }),
+  }))
 
   // Handlers
   // Wikidata only ever writes on the author's click, through the same path as typing.
@@ -76,6 +83,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         draft={draft}
         errors={errors}
         suzerains={suzerains}
+        territories={territoryOptions}
         ranks={ranks}
         idLocked={editing !== null}
         onField={onField}

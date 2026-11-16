@@ -72,7 +72,7 @@ export function SuzerainField({
       <span className="ui-field__label" aria-hidden="true">
         {t('suzerain')}
       </span>
-      <HeldSuzerain held={held} onRemove={handleRemove} />
+      <HeldSuzerain held={held} removeKey="removeSuzerain" onRemove={handleRemove} />
       <Typeahead minChars={1} onSearch={setQuery} onSelect={handleSelect}>
         <Typeahead.Input aria-label={t('suzerain')} placeholder={t('suzerainPlaceholder')} />
         <Typeahead.Menu aria-label={t('suzerainList')}>

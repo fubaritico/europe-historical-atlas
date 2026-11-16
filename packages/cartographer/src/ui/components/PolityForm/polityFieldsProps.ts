@@ -17,6 +17,8 @@ export interface PolityFieldsProps {
   errors: Partial<Record<DraftField, DraftError>>
   /** The polities of the year it may owe homage to, as value (id) and label (name). */
   suzerains: readonly DraftOption[]
+  /** The CMS's territories it may be tied to, as value (number) and label (CARTO-450). */
+  territories: readonly DraftOption[]
   /** The ranks it may take, as stored — the usual ones and every one the year already uses (`rankChoices`). */
   ranks: readonly string[]
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */

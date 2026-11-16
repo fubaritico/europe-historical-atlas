@@ -595,21 +595,15 @@ describe('polityCarrying', () => {
   })
 })
 
-// The dev, 2026-11-05: a city's point takes the colour of the polity holding it by the sources, matched by Wikidata.
+// The dev, 2026-11-05: a city's point takes the colour of the polity holding it — the verdict names it (CARTO-450).
 describe('holderColour', () => {
-  it('gives the colour of the map’s polity carrying the holder’s Wikidata id', () => {
-    const document = sharedBorderDocument()
-    const hre = document.polities.find((polity) => polity.id === 'hre')
-    if (hre !== undefined) hre.wikidata = 'Q12548'
-
-    expect(holderColour(document, new Map([['hre', '#3355aa']]), 'Q12548')).toBe('#3355aa')
+  it('gives the colour of the polity the verdict names', () => {
+    expect(holderColour(new Map([['hre', '#3355aa']]), 'hre')).toBe('#3355aa')
   })
 
-  it('gives no colour for a holder not entered, or one no polity of the map carries', () => {
-    const document = sharedBorderDocument()
-
-    expect(holderColour(document, new Map([['hre', '#3355aa']]), null)).toBeNull()
-    expect(holderColour(document, new Map([['hre', '#3355aa']]), 'Q999')).toBeNull()
+  it('gives no colour for no polity, or one with no colour', () => {
+    expect(holderColour(new Map([['hre', '#3355aa']]), null)).toBeNull()
+    expect(holderColour(new Map([['hre', '#3355aa']]), 'fr')).toBeNull()
   })
 
   it('colours a city held by a polity of the map only when the cities are drawn as points', () => {
@@ -618,7 +612,7 @@ describe('holderColour', () => {
     if (hre !== undefined) hre.wikidata = 'Q12548'
     const held = inputs(document, {
       colours: new Map([['hre', '#3355aa']]),
-      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'Q12548', alert: null }],
+      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'hre', alert: null }],
     })
 
     expect(buildScene(document, { ...held, citiesAsPoints: true }).cities[0]?.colour).toBe(

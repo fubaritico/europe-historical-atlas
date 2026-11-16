@@ -1,3 +1,5 @@
+import { isIdentified, sameTerritory } from '@europe-historical-atlas/core/data/territoryMatch'
+
 import { polityAt } from '../geometry/fillHit'
 
 import { projectedTerritories } from './paint/scene'
@@ -6,32 +8,37 @@ import type { CityAlert } from './paint/cityPainter'
 import type { PolityRings } from '../geometry/fillHit'
 import type { CityHolder, CityMark } from '../state/citiesSlice'
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
+import type { TerritoryIds } from '@europe-historical-atlas/core/data/territoryMatch'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * Who holds a city, by the map and by the sources, and whether they agree (CARTO-193, the dev, 2026-11-02: *"if it is
  * not at the right place, say it is not at the right place; if the country does not exist on the map yet, say it"*).
  *
- * **Compared by Wikidata id**, the one key both sides carry: a map's polity has its `wikidata`, the sources' holder
- * its own (CMS-335). A wrong id in the map's registry therefore reads as a misplaced city — which is how such an id is
- * found (`files/plans/sources/1100/wikidata.md`).
+ * **Compared by Wikidata id first, by the CMS's territory number where one side has none** (CARTO-450, the dev's rule of
+ * 2026-11-16, `data/territoryMatch`): a map's polity has its `wikidata` and may carry its `territory`, a title of the
+ * chain both. A wrong id in the map's registry therefore reads as a misplaced city — which is how such an id is found
+ * (`files/plans/sources/1100/wikidata.md`).
  */
 
-/** The polity the map has under a city. */
-export interface PolityOnMap {
+/** The polity the map has under a city: its registry id, its name, and what it is recognised by. */
+export interface PolityOnMap extends TerritoryIds {
+  /** Its id in the registry. */
+  readonly id: string
   /** Its name, the registry's. */
   readonly name: string
-  /** Its Wikidata id, or `null`. */
-  readonly wikidata: string | null
 }
 
 /** What the comparison says. */
 export type CityVerdictKind =
   /** Nobody has entered the holder yet. */
   | 'notEntered'
-  /** The sources' holder has no Wikidata id: nothing to compare by. */
+  /**
+   * Nothing to compare by: the polity under the city has neither a Wikidata id nor a CMS territory, or — a sheet with no
+   * title — the holder entered as text has no Wikidata id.
+   */
   | 'cannotCompare'
-  /** No polity of the map carries the sources' holder's id: it has to be declared. */
+  /** The map draws no polity for the title checked, or for the sources' holder: it has to be declared. */
   | 'toDeclare'
   /** The map has the sources' holder under the city. */
   | 'agrees'
@@ -66,22 +73,51 @@ export interface CityVerdict {
   readonly expectedOnMap: string | null
 }
 
-/** What the map says of its polities, for the level check: which ids it draws, each one's rank and name. */
+/** A polity the map draws, as the verdict needs it: its registry id, its name, its rank. */
+export interface DrawnPolity {
+  /** Its id in the registry. */
+  readonly id: string
+  /** Its name, the registry's. */
+  readonly name: string
+  /** Its rank, or `null`. */
+  readonly rank: string | null
+}
+
+/** What the map says of its polities: the one that is a given territory, if it draws it. */
 export interface MapPolities {
-  /** The Wikidata ids its polities carry. */
-  readonly declared: ReadonlySet<string>
   /**
-   * The rank of the polity carrying an id.
-   * @param wikidata - the id
-   * @returns its rank, or `null`
+   * The map's polity that is this territory — by Wikidata id first, by the CMS's number else.
+   * @param ids - the territory's ids, a title's or the sources' holder's
+   * @returns the polity, or `null` when the map draws none
    */
-  readonly rankOf: (wikidata: string) => string | null
-  /**
-   * The name of the polity carrying an id.
-   * @param wikidata - the id
-   * @returns its name, or `null`
-   */
-  readonly nameOf: (wikidata: string) => string | null
+  readonly find: (ids: TerritoryIds) => DrawnPolity | null
+}
+
+/**
+ * What a polity of the registry is recognised by — its Wikidata id, and its CMS territory number when it carries one.
+ * @param polity - the polity
+ * @param polity.wikidata - its Wikidata id
+ * @param polity.territory - its CMS territory number
+ * @returns its ids
+ */
+function idsOf(polity: { wikidata: string | null; territory?: number }): TerritoryIds {
+  return polity.territory === undefined
+    ? { wikidata: polity.wikidata }
+    : { wikidata: polity.wikidata, territory: polity.territory }
+}
+
+/**
+ * The map's polities, as the verdict looks for them (CARTO-450).
+ * @param document - the year open
+ * @returns the lookup
+ */
+export function mapPolities(document: YearDocument): MapPolities {
+  return {
+    find: (ids) => {
+      const polity = document.polities.find((each) => sameTerritory(idsOf(each), ids))
+      return polity === undefined ? null : { id: polity.id, name: polity.name, rank: polity.rank }
+    },
+  }
 }
 
 /** How far below the sovereign the check goes: an empire's kingdoms and duchies are two levels down, a kingdom's one. */
@@ -105,17 +141,16 @@ export function bySovereignLevel(
   const level = checkedLevel(reading, map)
   const target = reading.titles[level]
   const expected = target?.name ?? ''
-  const drawn = target?.wikidata ?? null
-  const expectedOnMap = drawn === null ? null : map.nameOf(drawn)
+  const drawn = target === undefined ? null : map.find(target)
+  const expectedOnMap = drawn?.name ?? null
   if (liesWithin(reading, level, onMap)) return { kind: 'agrees', expected, expectedOnMap }
-  if (drawn === null || !map.declared.has(drawn))
-    return { kind: 'toDeclare', expected, expectedOnMap }
+  if (drawn === null) return { kind: 'toDeclare', expected, expectedOnMap }
   return { kind: 'misplaced', expected, expectedOnMap }
 }
 
 /**
- * Whether the polity under a city is the title checked, or one below it in the chain — by its Wikidata id, a polity
- * without one never.
+ * Whether the polity under a city is the title checked, or one below it in the chain — by Wikidata id, else by the
+ * CMS's territory number; a polity with neither never.
  * @param reading - the reading
  * @param level - the rank of the title checked
  * @param onMap - the polity under the city, or `null`
@@ -126,8 +161,10 @@ function liesWithin(
   level: number,
   onMap: PolityOnMap | null
 ): boolean {
-  const id = onMap?.wikidata ?? null
-  return id !== null && reading.titles.slice(0, level + 1).some((title) => title.wikidata === id)
+  return (
+    onMap !== null &&
+    reading.titles.slice(0, level + 1).some((title) => sameTerritory(title, onMap))
+  )
 }
 
 /**
@@ -143,8 +180,8 @@ function liesWithin(
 function checkedLevel(reading: ContentChainReading, map: MapPolities): number {
   const top = reading.titles.length - 1
   if (top <= 0) return 0
-  const sovereign = reading.titles[top]?.wikidata ?? null
-  const rank = sovereign === null ? null : map.rankOf(sovereign)
+  const sovereign = reading.titles[top]
+  const rank = sovereign === undefined ? null : (map.find(sovereign)?.rank ?? null)
   const wanted = (rank === null ? undefined : LEVELS_BELOW[rank]) ?? 1
   return Math.max(1, top - wanted)
 }
@@ -168,14 +205,15 @@ function polityOnMap(
   const polity = document.polities.find((candidate) => candidate.id === id)
   // A claim naming a polity the registry lacks is never in the territories (`projectedTerritories`): the id stands in
   // only where that guard were broken, visibly an id rather than a plausible name — as `featureUnder` does.
-  return { name: polity?.name ?? id, wikidata: polity?.wikidata ?? null }
+  if (polity === undefined) return { id, name: id, wikidata: null }
+  return { id, name: polity.name, ...idsOf(polity) }
 }
 
 /**
  * The verdict of a city that has its chain of vassalage (CARTO-435, the dev's rule of 2026-11-15: *"if the duchy it lies
  * in is not in its chain, it is wrong"*): the polity under it is one of the chain's titles' territories, in any reading
- * — the sources diverging, each reading is a place it may rightly be. A polity with no Wikidata id cannot be looked for
- * (CARTO-450 will compare those by the territory's own id). Not found: wrong where every reading reaches its end, and
+ * — the sources diverging, each reading is a place it may rightly be — by Wikidata id, else by the CMS's territory
+ * number (CARTO-450); a polity with neither cannot be looked for. Not found: wrong where every reading reaches its end, and
  * only *incomplete* where one stops for want of a link — the polity may lie above.
  * @param chain - the city's chain, every reading
  * @param onMap - the polity under it, or `null` over ground nobody claims
@@ -186,9 +224,9 @@ export function byChain(
   onMap: PolityOnMap | null
 ): CityVerdictKind {
   if (onMap === null) return 'misplaced'
-  if (onMap.wikidata === null) return 'cannotCompare'
+  if (!isIdentified(onMap)) return 'cannotCompare'
   const inChain = chain.some((reading) =>
-    reading.titles.some((title) => title.wikidata === onMap.wikidata)
+    reading.titles.some((title) => sameTerritory(title, onMap))
   )
   if (inChain) return 'agrees'
   return chain.some((reading) => reading.end === 'unknown') ? 'incomplete' : 'misplaced'
@@ -206,16 +244,7 @@ export function cityVerdicts(
   cities: readonly CityMark[]
 ): ReadonlyMap<string, CityVerdict> {
   const territories = projectedTerritories(document, document.anchors)
-  const declared = new Set(
-    document.polities.flatMap(({ wikidata }) => (wikidata === null ? [] : [wikidata]))
-  )
-  const map: MapPolities = {
-    declared,
-    rankOf: (wikidata) =>
-      document.polities.find((polity) => polity.wikidata === wikidata)?.rank ?? null,
-    nameOf: (wikidata) =>
-      document.polities.find((polity) => polity.wikidata === wikidata)?.name ?? null,
-  }
+  const map = mapPolities(document)
   return new Map(
     cities.map((city) => {
       const onMap = polityOnMap(document, territories, [city.lon, city.lat])
@@ -235,30 +264,43 @@ export function cityVerdicts(
       }
       if (city.chain !== null) return verdict(byChain(city.chain, onMap))
       if (bySources === null) return verdict('notEntered')
+      // A sheet with no title: its holder entered as text carries a Wikidata id and no CMS territory, so it is compared
+      // by its id alone — deliberately (review QUAL-001, CARTO-450)
       if (bySources.wikidata === null) return verdict('cannotCompare')
-      if (!declared.has(bySources.wikidata)) return verdict('toDeclare')
-      return verdict(onMap?.wikidata === bySources.wikidata ? 'agrees' : 'misplaced')
+      if (map.find(bySources) === null) return verdict('toDeclare')
+      return verdict(onMap !== null && sameTerritory(onMap, bySources) ? 'agrees' : 'misplaced')
     })
   )
 }
 
 /**
- * The polity whose colour fills a city's dot, by its Wikidata id (the dev, 2026-11-16: *"well placed, it has the
- * colour of the country it is in"*). At the right place, the polity under it. Elsewhere, the one that holds it — by
- * its chain, the first title from the holder up that the map has drawn; without a chain, the sources' holder — so a
- * dot of one colour on another's ground shows at once (2026-11-05). `null` — a hollow dot — when the map has none.
+ * The polity whose colour fills a city's dot (the dev, 2026-11-16: *"well placed, it has the colour of the country it
+ * is in"*). At the right place, the polity under it. Elsewhere, the one that holds it — by its chain, the first title
+ * from the holder up that the map has drawn; without a chain, the sources' holder — so a dot of one colour on
+ * another's ground shows at once (2026-11-05). `null` — a hollow dot — when the map has none.
  * @param verdict - the city's verdict
- * @param declared - the Wikidata ids the map's polities carry
- * @returns the Wikidata id to paint, or `null`
+ * @param map - the map's polities
+ * @returns the registry id of the polity to paint, or `null`
  */
-export function paintedHolder(verdict: CityVerdict, declared: ReadonlySet<string>): string | null {
-  if (verdict.kind === 'agrees') return verdict.onMap?.wikidata ?? null
-  if (verdict.chain === null) return verdict.bySources?.wikidata ?? null
-  for (const reading of verdict.chain) {
-    const drawn = reading.titles.find(
-      (title) => title.wikidata !== null && declared.has(title.wikidata)
-    )
-    if (drawn !== undefined) return drawn.wikidata
+export function paintedHolder(verdict: CityVerdict, map: MapPolities): string | null {
+  if (verdict.kind === 'agrees') return verdict.onMap?.id ?? null
+  if (verdict.chain === null)
+    return verdict.bySources === null ? null : (map.find(verdict.bySources)?.id ?? null)
+  return firstDrawn(verdict.chain, map)
+}
+
+/**
+ * The first title of a chain, from the holder up, that the map has drawn — every reading in turn.
+ * @param chain - the city's chain
+ * @param map - the map's polities
+ * @returns the registry id of its polity, or `null` when the map draws none
+ */
+function firstDrawn(chain: readonly ContentChainReading[], map: MapPolities): string | null {
+  for (const reading of chain) {
+    for (const title of reading.titles) {
+      const drawn = map.find(title)
+      if (drawn !== null) return drawn.id
+    }
   }
   return null
 }

@@ -29,6 +29,8 @@ export const SHEET_FIELDS = [
   'existsTo',
   'colour',
   'wikidata',
+  // The other half of what a city's chain finds it by (CARTO-450): a Thuringia pasted keeps its CMS territory
+  'territory',
 ] as const
 
 /** One field of {@link SHEET_FIELDS}. */
@@ -64,6 +66,8 @@ function valueOf(polity: YearPolity, field: SheetField, suzerainName: string | n
       return polity.shortName ?? null
     case 'forceShortName':
       return polity.forceShortName === true
+    case 'territory':
+      return polity.territory ?? null
     default:
       return polity[field]
   }
@@ -133,15 +137,32 @@ function takeField(doc: YearDocument, next: YearPolity, copied: Sheet, field: Sh
     if (found === undefined)
       throw new Error(`[Cartographer] the suzerain "${String(name)}" is not in the map.`)
     next.suzerain = found === null ? null : found.id
-  } else if (field === 'shortName') {
-    if (source.shortName === undefined) delete next.shortName
-    else next.shortName = source.shortName
-  } else if (field === 'forceShortName') {
-    if (source.forceShortName === undefined) delete next.forceShortName
-    else next.forceShortName = true
+  } else if (field === 'shortName' || field === 'forceShortName' || field === 'territory') {
+    takeOptional(next, source, field)
   } else {
     Object.assign(next, { [field]: source[field] })
   }
+}
+
+/**
+ * Take an optional field of a copied sheet — absent on the copy, absent on the polity: the format's optional fields
+ * are exact, so a field is deleted rather than set to `undefined` (CARTO-307, CARTO-450).
+ * @param next - the sheet being built, edited in place
+ * @param source - the copied polity
+ * @param field - the optional field
+ */
+function takeOptional(
+  next: YearPolity,
+  source: YearPolity,
+  field: 'shortName' | 'forceShortName' | 'territory'
+): void {
+  if (source[field] !== undefined) {
+    Object.assign(next, { [field]: source[field] })
+    return
+  }
+  if (field === 'shortName') delete next.shortName
+  else if (field === 'forceShortName') delete next.forceShortName
+  else delete next.territory
 }
 
 /** Why a sheet was not pasted — nothing was written. */

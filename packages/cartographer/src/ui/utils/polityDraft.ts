@@ -43,6 +43,8 @@ export interface PolityDraft {
   suzerain: string | null
   /** As typed: empty, or a Wikidata id. */
   wikidata: string
+  /** The number of the CMS territory it is tied to, as the list holds it (CARTO-450), or `null` for none. */
+  territory: string | null
   /**
    * As picked, or `null` for "automatic" — *"the palette decides"* (`s02`).
    *
@@ -72,6 +74,7 @@ export const EMPTY_DRAFT: PolityDraft = {
   existsTo: '',
   suzerain: null,
   wikidata: '',
+  territory: null,
   colour: null,
   uncoloured: false,
 }
@@ -197,7 +200,6 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
     return { ok: false, errors }
   }
 
-  const wikidata = draft.wikidata.trim()
   return {
     ok: true,
     polity: {
@@ -210,9 +212,19 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
       existsFrom,
       existsTo,
       colour: fileColourOf(draft),
-      wikidata: wikidata === '' ? null : wikidata,
+      ...identityOf(draft),
     },
   }
+}
+
+/**
+ * What the polity is recognised by, read from the form: its Wikidata id, and the CMS territory it is tied to (CARTO-450).
+ * @param draft - the form
+ * @returns its `wikidata`, and its `territory` when one is chosen
+ */
+function identityOf(draft: PolityDraft): Pick<YearPolity, 'wikidata' | 'territory'> {
+  const wikidata = draft.wikidata.trim() === '' ? null : draft.wikidata.trim()
+  return draft.territory === null ? { wikidata } : { wikidata, territory: Number(draft.territory) }
 }
 
 /**
@@ -246,6 +258,7 @@ export function draftOf(polity: YearPolity): PolityDraft {
     existsTo: polity.existsTo === null ? '' : String(polity.existsTo),
     suzerain: polity.suzerain,
     wikidata: polity.wikidata ?? '',
+    territory: polity.territory === undefined ? null : String(polity.territory),
     colour: pickedColour(polity),
     uncoloured: isUncoloured(polity.colour),
   }

@@ -1,6 +1,9 @@
 import { dateCoversYear } from '@europe-historical-atlas/core/time/dateOverlap'
 
-import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
+import type {
+  ContentChainReading,
+  ContentTerritory,
+} from '@europe-historical-atlas/core/data/contentFormat'
 import type { HistoricalDate } from '@europe-historical-atlas/core/time/historicalDate'
 import type { StateCreator } from 'zustand'
 
@@ -62,6 +65,8 @@ export type CitiesLoad =
 export interface CitiesState {
   /** Every city of the export, whatever its date. */
   cities: readonly CityMark[]
+  /** Every territory of the CMS, for a polity of the map to be tied to one (CARTO-450); empty until read. */
+  territories: readonly ContentTerritory[]
   /** Where the load stands. */
   citiesLoad: CitiesLoad
   /** The ids of the cities shown on the canvas. */
@@ -106,6 +111,11 @@ export interface CitiesActions {
    * @param cities - every city, whatever its date
    */
   setCities: (cities: readonly CityMark[]) => void
+  /**
+   * Install the CMS's territories read from the export (CARTO-450).
+   * @param territories - every territory
+   */
+  setTerritories: (territories: readonly ContentTerritory[]) => void
   /**
    * Say the cities could not be read; the panel shows it, the canvas draws none.
    * @param reason - what went wrong, for the panel and the console
@@ -310,6 +320,22 @@ function filterActions(
 }
 
 /**
+ * The CMS's territories, empty until the export is read, and their setter (CARTO-450).
+ * @param set - the store's setter
+ * @returns the state and its action
+ */
+function territoryActions(
+  set: (partial: Pick<CitiesSlice, 'territories'>) => void
+): Pick<CitiesSlice, 'territories' | 'setTerritories'> {
+  return {
+    territories: [],
+    setTerritories: (territories): void => {
+      set({ territories })
+    },
+  }
+}
+
+/**
  * Open a cities slice: none read yet, none shown.
  * @param set - the store's setter
  * @param get - the store's getter
@@ -322,6 +348,7 @@ export const createCitiesSlice: StateCreator<
   CitiesSlice
 > = (set, get) => ({
   cities: [],
+  ...territoryActions(set),
   citiesLoad: { state: 'loading' },
   shownCities: new Set(),
   citiesAsPoints: false,

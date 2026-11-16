@@ -317,6 +317,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         draft={EMPTY_DRAFT}
         errors={{}}
         suzerains={SUZERAINS}
+        territories={[]}
         ranks={RANKS}
         {...INERT}
       />
@@ -345,6 +346,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         }}
         errors={{ id: 'idTaken', existsFrom: 'notAYear' }}
         suzerains={SUZERAINS}
+        territories={[]}
         ranks={RANKS}
         {...INERT}
       />
@@ -366,6 +368,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         }}
         errors={{}}
         suzerains={SUZERAINS}
+        territories={[]}
         ranks={RANKS}
         {...INERT}
       />

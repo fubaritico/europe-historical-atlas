@@ -6,6 +6,7 @@ import { assertMigrated } from '../migrate/migrateBase'
 
 import { toContent, toSiegeEnginePeriods } from './toContent'
 import { chainRegister } from './toContentChain'
+import { toContentTerritories } from './toContentTerritory'
 
 import type { DocEvent } from './toContent'
 import type { DocCitySheet } from './toContentCity'
@@ -56,10 +57,19 @@ export async function readContent(
   const titles = await payload.find({ collection: 'titles', depth: 1, pagination: false })
   const links = await payload.find({ collection: 'vassal-links', depth: 0, pagination: false })
   const register = chainRegister(titles.docs, links.docs)
-  return contentFileSchema.parse(
-    toContent(
+  // Every territory, for a polity of the map to be tied to one where it has no Wikidata id (CARTO-450)
+  const territories = await payload.find({
+    collection: 'territories',
+    locale: 'fr',
+    depth: 0,
+    pagination: false,
+    sort: 'name',
+  })
+  return contentFileSchema.parse({
+    ...toContent(
       { events: docs as unknown as DocEvent[], cities: cities.docs as unknown as DocCitySheet[] },
       { periods, warn, register }
-    )
-  )
+    ),
+    territories: toContentTerritories(territories.docs),
+  })
 }
