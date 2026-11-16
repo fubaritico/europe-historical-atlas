@@ -10,6 +10,7 @@ import {
 
 import { testStore } from '../../../canvas/testGestureContext'
 import { createPolityColourSource } from '../../../state/polityColourSource'
+import { cityDetailText } from '../../testing/cityDetailText'
 import { renderInEnglish } from '../../testing/renderInEnglish'
 import { showRow } from '../../utils/showRow'
 
@@ -96,7 +97,7 @@ function mount(cities: readonly CityMark[] | null = [PARIS, METZ, LATER]) {
  */
 async function detailOf(user: ReturnType<typeof userEvent.setup>, name: string): Promise<string> {
   await user.dblClick(screen.getByText(name))
-  return screen.getByRole('region', { name }).textContent ?? ''
+  return cityDetailText(screen.getByRole('region', { name })).join('\n')
 }
 
 // CARTO-193, the dev, 2026-11-02: an eye per city, none at opening; a double-click says who holds it, by the sources
@@ -118,7 +119,7 @@ describe('CitiesPanel', () => {
       const { user } = mount()
       const detail = await detailOf(user, 'Metz')
       expect(detail).toContain('By the sources: Sacrum Imperium')
-      expect(detail).toContain('Source: Duby, Atlas historique, p. 46')
+      expect(detail).toContain('Sources: Duby, Atlas historique, p. 46')
       expect(detail).toContain('On the map: Sacrum Imperium')
       expect(detail).toContain('At the right place.')
     })
@@ -130,7 +131,8 @@ describe('CitiesPanel', () => {
       expect(await detailOf(user, 'Metz')).toContain(
         'Not at the right place: the sources put it in Sacrum Imperium.'
       )
-      expect(screen.getByRole('listitem').getAttribute('data-verdict')).toBe('misplaced')
+      const row = screen.getByRole('button', { name: 'Metz' }).closest('li')
+      expect(row?.getAttribute('data-verdict')).toBe('misplaced')
       // The detail carries it too: its verdict line takes the same yellow (CARTO-386).
       expect(screen.getByRole('region', { name: 'Metz' }).getAttribute('data-verdict')).toBe(
         'misplaced'

@@ -15,18 +15,19 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `failed` — The export could not be read; `reason` is what went wrong.
  * - `none` — No city of the export covers the year open; `year` is that year.
  * - `hint` — Under the list: what a double-click does.
- * - `onMap` — The polity the map has under the city; `polity` is its name.
- * - `unclaimed` — The map has no polity under the city.
- * - `bySources` — The holder the sources give (CMS-335); `polity` is its name.
- * - `notEntered` — Nobody has entered the holder yet.
+ * - `coordinatesTitle`, `bySourcesTitle`, `sourcesTitle`, `onMapTitle`, `chainTitle` — The headings of a city's detail
+ *   (the dev's screen of 2026-11-16).
+ * - `unclaimed` — The verdict when the map has no polity under the city: not at the right place.
+ * - `noPolity` — Under « On the map », no polity under the city.
+ * - `notEntered` — Under « By the sources », nobody has entered the holder yet.
  * - `agrees`, `misplaced`, `toDeclare`, `cannotCompare` — The verdict of the comparison by Wikidata id; `polity` is the
  *   sources' holder.
  * - `misplacedChain`, `incomplete`, `cannotCompareMap` — The verdict by the city's chain of vassalage (CARTO-435);
  *   `polity` is the polity the map has under it.
- * - `chain` — One reading of the chain; `titles` its titles from the holder's up, `end` how it ends —
+ * - `chainTop` — The last title of a reading of the chain, one per line; `title` is its name, `end` how the chain ends —
  *   `chainSovereign`, `chainUnknown`, `chainLoop`.
  * - `stateIncomplete` — The state box of the cities whose chain stops short; `count` how many.
- * - `source`, `sourceWhere` — A source saying who held it; `title` is its title, `where` where in it.
+ * - `sourceWhere` — A source saying who held it, with where in it; `title` is its title, `where` the place.
  * - `closeDetail` — The button that closes a city's detail.
  * - `filter` — The filter field's accessible name (CARTO-360).
  * - `showFound` — That box while a filter is typed; `count` is how many cities answer it.

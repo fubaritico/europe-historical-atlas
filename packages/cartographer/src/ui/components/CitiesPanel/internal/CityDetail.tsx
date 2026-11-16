@@ -1,17 +1,20 @@
 import { formatLonLat } from '../../../../viewport/coordinateLabel'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
-import { CHAIN_END_TEXT, verdictText } from '../utils/verdictText'
+import { verdictText } from '../utils/verdictText'
+
+import { CityChain } from './CityChain'
+import { CityDetailSection } from './CityDetailSection'
 
 import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { HolderSource } from '../../../../state/citiesSlice'
 import type { LonLat } from '../../../../viewport/coordinateLabel'
 
 /**
- * Where a city is, and who holds it: by the sources, with the lines saying so, its chain of vassalage (CARTO-435), and
- * on the map — and whether they agree.
- * The body of its information box ({@link CityDialog}). **Its coordinates are written as the status bar writes the
- * pointer's** (CARTO-368): degrees and minutes, a hemisphere letter, never a minus sign.
+ * Where a city is, and who holds it — the body of its information box ({@link CityDialog}), as the dev's screen of
+ * 2026-11-16 draws it: a heading per section — its coordinates, the holder by the sources, the sources numbered, the
+ * polity on the map, the chain of vassalage one title per line — then the verdict. **Its coordinates are written as
+ * the status bar writes the pointer's** (CARTO-368): degrees and minutes, a hemisphere letter, never a minus sign.
  * @param props - the city's name, its position, its verdict and its sources
  * @param props.name - the city's name, which names the region
  * @param props.at - its position, longitude first
@@ -35,35 +38,36 @@ export function CityDetail({
 
   // Derived
   const { onMap, bySources, kind, chain } = verdict
-  const holder = bySources?.name ?? ''
   const said = verdictText(verdict)
 
   // Render
   return (
     <section className="city-detail" aria-label={name} data-verdict={kind}>
-      <p className="city-detail__line">{t('coordinates', { position: formatLonLat(at) })}</p>
-      <p className="city-detail__line">
-        {bySources === null ? t('notEntered') : t('bySources', { polity: holder })}
-      </p>
-      {sources.map(({ title, where }) => (
-        <p key={`${title}|${where ?? ''}`} className="city-detail__line city-detail__line--source">
-          {where === null ? t('source', { title }) : t('sourceWhere', { title, where })}
-        </p>
-      ))}
-      <p className="city-detail__line">
-        {onMap === null ? t('unclaimed') : t('onMap', { polity: onMap.name })}
-      </p>
-      {chain?.map((reading) => (
-        <p
-          key={`${reading.titles.map((title) => title.name).join('>')}|${reading.end}`}
-          className="city-detail__line city-detail__line--chain"
-        >
-          {t('chain', {
-            titles: reading.titles.map((title) => title.name).join(' → '),
-            end: t(CHAIN_END_TEXT[reading.end]),
-          })}
-        </p>
-      ))}
+      <CityDetailSection title={t('coordinatesTitle')}>
+        <p>{formatLonLat(at)}</p>
+      </CityDetailSection>
+      <CityDetailSection title={t('bySourcesTitle')}>
+        <p>{bySources === null ? t('notEntered') : bySources.name}</p>
+      </CityDetailSection>
+      {sources.length > 0 && (
+        <CityDetailSection title={t('sourcesTitle')}>
+          <ol className="city-detail__sources">
+            {sources.map(({ title, where }) => (
+              <li key={`${title}|${where ?? ''}`}>
+                {where === null ? title : t('sourceWhere', { title, where })}
+              </li>
+            ))}
+          </ol>
+        </CityDetailSection>
+      )}
+      <CityDetailSection title={t('onMapTitle')}>
+        <p>{onMap === null ? t('noPolity') : onMap.name}</p>
+      </CityDetailSection>
+      {chain !== null && chain.length > 0 && (
+        <CityDetailSection title={t('chainTitle')}>
+          <CityChain readings={chain} />
+        </CityDetailSection>
+      )}
       {said !== null && (
         <p className="city-detail__verdict">{t(said.key, { polity: said.polity })}</p>
       )}

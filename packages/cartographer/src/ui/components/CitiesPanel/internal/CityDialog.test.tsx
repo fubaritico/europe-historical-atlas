@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { cityDetailText } from '../../../testing/cityDetailText'
 import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { CityDialog } from './CityDialog'
@@ -53,22 +54,53 @@ describe('CityDialog', () => {
   describe('happy path', () => {
     it('opens on Metz, named by it, and says who holds it by the sources and on the map', () => {
       mount()
-      const dialogue = screen.getByRole('dialog', { name: 'Metz' })
-      expect(dialogue.textContent).toContain('By the sources: Sacrum Imperium')
-      expect(dialogue.textContent).toContain('Source: Duby, Atlas historique, p. 46')
-      expect(dialogue.textContent).toContain('On the map: Sacrum Imperium')
-      expect(dialogue.textContent).toContain('At the right place.')
+      expect(screen.getByRole('dialog', { name: 'Metz' })).toBeTruthy()
+      expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toEqual([
+        'Coordinates: 6°11′E 49°07′N',
+        'By the sources: Sacrum Imperium',
+        'Sources: Duby, Atlas historique, p. 46',
+        'On the map: Sacrum Imperium',
+        'At the right place.',
+      ])
     })
 
     // CARTO-368, the dev, 2026-11-07: the box says where the city is, not only whom it belongs to.
-    it("gives Metz's coordinates first, as the status bar writes a position", () => {
+    it("gives Metz's coordinates first, under their heading, as the status bar writes a position", () => {
       mount()
-      const lines = screen.getByRole('region', { name: 'Metz' }).querySelectorAll('p')
-      expect(lines[0]?.textContent).toBe('Coordinates: 6°11′E 49°07′N')
+      const headings = screen.getAllByRole('heading').map((heading) => heading.textContent)
+      expect(headings[0]).toBe('Coordinates')
+      expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))[0]).toBe(
+        'Coordinates: 6°11′E 49°07′N'
+      )
     })
   })
 
   describe('variants', () => {
+    // The dev's screen of 2026-11-16: the chain one title per line, the last saying how it ends
+    it('writes the chain of vassalage one title per line, the last « sovereign »', () => {
+      const chain = [
+        {
+          titles: [
+            { name: 'Baudouin III — comté de Hainaut', wikidata: 'Q1' },
+            { name: 'Henri IV — royaume de Germanie', wikidata: 'Q2' },
+            { name: 'Henri IV — Saint-Empire', wikidata: 'Q12548' },
+          ],
+          end: 'sovereign' as const,
+        },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain }}
+          openedVerdict={{ ...AGREES, chain }}
+          onClose={vi.fn()}
+        />
+      )
+      expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
+        'Chain of vassalage: Baudouin III — comté de Hainaut; Henri IV — royaume de Germanie; ' +
+          'Henri IV — Saint-Empire — sovereign'
+      )
+    })
+
     it('closes on « Close »', async () => {
       const { onClose, user } = mount()
       await user.click(screen.getByRole('button', { name: 'Close' }))
@@ -79,6 +111,42 @@ describe('CityDialog', () => {
   // L3–L4: N/A — it shows what it is handed.
 
   describe('edge cases', () => {
+    it('ends each reading of a divergent chain with how it ends: unknown, or links that contradict', () => {
+      const count = { name: 'Comté de Hainaut', wikidata: 'Q1' }
+      const chain = [
+        {
+          titles: [count, { name: 'Royaume de Germanie', wikidata: 'Q2' }],
+          end: 'unknown' as const,
+        },
+        { titles: [count, { name: 'Royaume de France', wikidata: 'Q3' }], end: 'loop' as const },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain }}
+          openedVerdict={{ ...AGREES, chain }}
+          onClose={vi.fn()}
+        />
+      )
+      const region = screen.getByRole('region', { name: 'Metz' })
+      expect(region.querySelectorAll('.city-detail__chain')).toHaveLength(2)
+      expect(cityDetailText(region)).toContain(
+        'Chain of vassalage: Comté de Hainaut; Royaume de Germanie — beyond, we do not know; ' +
+          'Comté de Hainaut; Royaume de France — the links contradict one another'
+      )
+    })
+
+    it('leaves out the sources and the chain when the city has none', () => {
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, holderSources: [] }}
+          openedVerdict={AGREES}
+          onClose={vi.fn()}
+        />
+      )
+      const headings = screen.getAllByRole('heading').map((heading) => heading.textContent)
+      expect(headings).toEqual(['Coordinates', 'By the sources', 'On the map'])
+    })
+
     // The letters are French in either language, as the status bar's (`viewport/coordinateLabel`): `O`, never `W`.
     it('writes a city west of Greenwich with its letter, never a minus sign', () => {
       const onClose = vi.fn()
@@ -89,7 +157,7 @@ describe('CityDialog', () => {
           onClose={onClose}
         />
       )
-      expect(screen.getByRole('dialog', { name: 'Huesca' }).textContent).toContain(
+      expect(cityDetailText(screen.getByRole('region', { name: 'Huesca' }))[0]).toBe(
         'Coordinates: 0°25′O 42°08′N'
       )
     })

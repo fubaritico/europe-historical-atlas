@@ -1503,12 +1503,31 @@
   font-size: 11.5px;
 }
 
+/* A city's detail as the dev's screen of 2026-11-16 draws it: a heading per section, what it says under it. */
 .city-detail p {
-  margin: 0 0 4px;
+  margin: 0;
 }
 
-.city-detail__line--source {
-  color: var(--ink-dim);
+.city-detail__section {
+  margin: 0 0 14px;
+}
+
+.city-detail__heading {
+  margin: 0 0 4px;
+  font-size: inherit;
+  font-weight: 600;
+}
+
+.city-detail__sources {
+  margin: 0;
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+.city-detail__chain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /*
