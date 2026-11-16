@@ -56,24 +56,23 @@ export async function saveVassalLink(
   if (response.status >= 500) {
     throw new Error(`[CMS] the API failed to save a link of vassalage (${String(response.status)})`)
   }
-  return { kind: 'refused', message: await refusalOf(response) }
+  return { kind: 'refused', message: await refusalOf(response, 'a link of vassalage') }
 }
 
 /**
  * The sentence of a refusal: the field's own when the refusal names a field, else the refusal's.
  * @param response - the server's refusal
+ * @param what - what was refused, for the console: `a link of vassalage`
  * @returns the sentence
  * @throws {Error} when the refusal carries none — a body that is not Payload's, JSON or not
  */
-async function refusalOf(response: Response): Promise<string> {
+export async function refusalOf(response: Response, what: string): Promise<string> {
   // A body that is not JSON has no sentence either: the throw below says so, with the status
   const answer = (await response.json().catch(() => ({}))) as PayloadErrors
   const first = answer.errors?.[0]
   const message = first?.data?.errors?.[0]?.message ?? first?.message
   if (message === undefined) {
-    throw new Error(
-      `[CMS] the API refused a link of vassalage without a message (${String(response.status)})`
-    )
+    throw new Error(`[CMS] the API refused ${what} without a message (${String(response.status)})`)
   }
   return message
 }

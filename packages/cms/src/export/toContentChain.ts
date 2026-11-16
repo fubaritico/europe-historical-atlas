@@ -5,11 +5,13 @@ import {
 } from '@europe-historical-atlas/core/data/vassalChain'
 
 import { relationId } from '../fields/relationId'
+import { sovereignLinkOf } from '../fields/sovereignLinkOf'
 import { vassalLinkOf } from '../fields/vassalLinkOf'
 
 import { resolved } from './docRecords'
 
 import type { DocId } from './docRecords'
+import type { EventDateFields } from '../fields/historicalDate'
 import type { StoredLink } from '../fields/vassalLinkOf'
 import type {
   ContentChainReading,
@@ -33,6 +35,10 @@ export interface DocTitle {
   label?: string | null
   /** The territory it holds. */
   territory?: DocTerritory | DocId | null
+  /** Whether it is ticked « souverain »: the chain stops at it over its dates. */
+  sovereign?: boolean | null
+  /** Its date group. */
+  date?: EventDateFields | null
 }
 
 /** What every city's chain is computed from: the titles, named, and the links — read once for the whole export. */
@@ -69,7 +75,9 @@ export function chainRegister(
   }
   return {
     titles: named,
-    links: links.map(vassalLinkOf).filter((link): link is VassalLink => link !== null),
+    links: [...links.map(vassalLinkOf), ...titles.map(sovereignLinkOf)].filter(
+      (link): link is VassalLink => link !== null
+    ),
   }
 }
 

@@ -68,7 +68,7 @@ export function CitySheetForm({
   const handleSubmit = useSheetSubmit(id === undefined ? { api, admin } : { id, api, admin }, say)
 
   const searches = useRecordSearches(api, contentLocale)
-  const { readChain, saveLink } = useVassalLinks(api)
+  const { readChain, ...writers } = useVassalLinks(api)
   const overlap = useOverlapCheck(api, locale, id)
   const validate = (values: SheetValues) =>
     validateSheet(values, say, overlap.current(values.place?.id ?? null))
@@ -91,7 +91,7 @@ export function CitySheetForm({
           <SheetFields
             searches={searches}
             readChain={readChain}
-            saveLink={saveLink}
+            writers={writers}
             overlap={overlap}
             lists={lists}
             say={say}

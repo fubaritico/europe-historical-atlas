@@ -54,6 +54,18 @@ describe('contentChain', () => {
       expect(contentChain(chainRegister(TITLES, LINKS), null, 1100, 'city sheet 1')).toBeNull()
     })
 
+    // The dev, 2026-11-16: the sovereign is ticked on its title, never a link to no one.
+    it('ends the chain on a sovereign at a title ticked « souverain », over its dates', () => {
+      const king = { ...TITLES[2], id: 30, sovereign: true, date: span(1060, 1108) }
+      const titles = [TITLES[0], TITLES[1], king] as DocTitle[]
+      expect(contentChain(chainRegister(titles, LINKS), 10, 1100, 'city sheet 1')?.[0]?.end).toBe(
+        'sovereign'
+      )
+      expect(
+        contentChain(chainRegister(titles, LINKS), 10, 1110, 'city sheet 1')?.[0]?.end
+      ).not.toBe('sovereign')
+    })
+
     it('writes two links entered alike as one reading', () => {
       const twice = [...LINKS, { ...LINKS[0], id: 9 }]
       expect(contentChain(chainRegister(TITLES, twice), 10, 1100, 'city sheet 1')).toHaveLength(1)

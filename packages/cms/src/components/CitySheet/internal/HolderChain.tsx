@@ -1,62 +1,73 @@
+import { toast } from '@payloadcms/ui'
 import { useFormikContext } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
+import { useLastRead } from '../hooks/useLastRead'
+import { useOnChange } from '../hooks/useOnChange'
+import { usePendingLinks } from '../hooks/usePendingLinks'
 import { useVassalChain } from '../hooks/useVassalChain'
 import { sheetYear } from '../utils/sheetYear'
 
-import { ChainReadings } from './ChainReadings'
+import { ChainReadings, topOf } from './ChainReadings'
 
 import type { ChainReading } from '../utils/readVassalChain'
+import type { SaveSovereign } from '../utils/saveSovereign'
 import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
 import type { Say } from '../utils/say'
 import type { SheetValues } from '../utils/sheetValues'
 
+/** What the chain writes to the base. */
+export interface ChainWriters {
+  /** Saves a link of vassalage. */
+  readonly saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
+  /** Ticks or unticks « souverain » on a title. */
+  readonly saveSovereign: SaveSovereign
+}
+
 /**
  * The chain of vassalage under the holder (CMS-422, the dev's mock-up), read at the sheet's year from the links the
- * base holds: one line « Vassal de » per link already entered, then, where a reading stops for want of a link,
- * « Vassal de ⊕ » to enter the next one — its suzerain and its source on the line — and the chain is read again. Under
- * the lines, the chain in one line, how it ends included (the dev, 2026-11-16: the summary stays). Where the sources
- * diverge, every reading is listed (`files/plans/contribution/vassal-chain.md`, layer 3).
- * @param props - the chain's reader, the link's writer and the translator
+ * base holds: one line « Vassal de » per link already entered, then the repeating block — « Vassal de ⊕ » lines,
+ * each saved on its own, until the top is ticked « Souverain » — and the chain in one line below (the dev, 2026-11-16).
+ * The block's lines live here, above the reading, so a line saved — the chain read again — leaves the others as they
+ * were; and while it is read again, the last reading stays on screen. Where the sources diverge, every reading is listed
+ * (`files/plans/contribution/vassal-chain.md`, layer 3).
+ * @param props - the chain's reader, its writers and the translator
  * @param props.read - the chain of a title at a year, from the base
- * @param props.saveLink - saves a link of vassalage
+ * @param props.writers - what the chain writes to the base
  * @param props.say - the translator
  * @returns the chain, or nothing while no title is chosen
  */
 export function HolderChain({
   read,
-  saveLink,
+  writers,
   say,
 }: {
   read: (title: number | string, year: number) => Promise<ChainReading[]>
-  saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
+  writers: ChainWriters
   say: Say
 }) {
   const { values } = useFormikContext<SheetValues>()
   const year = sheetYear(values.date.start.year)
   const [generation, setGeneration] = useState(0)
   const state = useVassalChain(values.holderTitle, year, read, generation)
-  const region = useRef<HTMLDivElement>(null)
-  const refocus = useRef(false)
-
-  // The line that entered a link is gone with the reading it ended: once the chain is read again, the keyboard lands
-  // on it rather than on nothing
-  useEffect(() => {
-    if (!refocus.current || state.kind === 'loading') return
-    refocus.current = false
-    region.current?.focus()
-  }, [state])
-
-  // Handlers
-  const handleAdded = () => {
-    refocus.current = true
+  const shown = useLastRead(state)
+  const reread = () => {
     setGeneration((current) => current + 1)
   }
+  const top = shown?.readings[0] === undefined ? null : topOf(shown.readings[0]).id
+  const pending = usePendingLinks(top, year, {
+    saveLink: writers.saveLink,
+    onSaved: reread,
+    onFailed: () => toast.error(say('linkFailed')),
+  })
+
+  // Another holder chosen: the lines entered under the last one are not its chain
+  useOnChange(values.holderTitle, pending.clear)
 
   // Render — the live region stays mounted, empty while no title is chosen: a reader announces only the changes
   // inside a region already there
   return (
-    <div ref={region} tabIndex={-1} aria-live="polite">
+    <div aria-live="polite">
       {state.kind !== 'none' && (
         <div className="city-sheet__chain">
           {state.kind === 'no-year' && <p className="city-sheet__help">{say('chainNoYear')}</p>}
@@ -64,12 +75,13 @@ export function HolderChain({
           {state.kind === 'failed' && (
             <p className="city-sheet__help city-sheet__help--error">{say('chainFailed')}</p>
           )}
-          {state.kind === 'read' && (
+          {shown !== null && state.kind !== 'failed' && state.kind !== 'no-year' && (
             <ChainReadings
-              readings={state.readings}
-              year={state.year}
-              saveLink={saveLink}
-              onAdded={handleAdded}
+              readings={shown.readings}
+              year={shown.year}
+              pending={pending}
+              saveSovereign={writers.saveSovereign}
+              onReread={reread}
               say={say}
             />
           )}

@@ -1,8 +1,8 @@
 import { FormRelationField } from './FormRelationField'
 import { HolderChain } from './HolderChain'
 
+import type { ChainWriters } from './HolderChain'
 import type { ChainReading } from '../utils/readVassalChain'
-import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
 import type { Say } from '../utils/say'
 
 /**
@@ -15,17 +15,17 @@ import type { Say } from '../utils/say'
  * them for a city with no title yet, until 1100 is taken over into the titles (step 3).
  * @param props - the chain's reader, the link's writer and the translator
  * @param props.readChain - the chain of a title at a year, from the base
- * @param props.saveLink - saves a link of vassalage
+ * @param props.writers - what the chain writes to the base
  * @param props.say - the translator
  * @returns the fields
  */
 export function HolderFields({
   readChain,
-  saveLink,
+  writers,
   say,
 }: {
   readChain: (title: number | string, year: number) => Promise<ChainReading[]>
-  saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
+  writers: ChainWriters
   say: Say
 }) {
   // Render
@@ -38,7 +38,7 @@ export function HolderFields({
         label={say('holderTitle')}
         description={say('holderTitleHelp')}
       />
-      <HolderChain read={readChain} saveLink={saveLink} say={say} />
+      <HolderChain read={readChain} writers={writers} say={say} />
     </fieldset>
   )
 }

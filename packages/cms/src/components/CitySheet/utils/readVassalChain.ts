@@ -4,11 +4,13 @@ import {
   vassalChain,
 } from '@europe-historical-atlas/core/data/vassalChain'
 
+import { sovereignLinkOf } from '../../../fields/sovereignLinkOf'
 import { vassalLinkOf } from '../../../fields/vassalLinkOf'
 
 import { readDocs } from './readDocs'
 
 import type { RecordChoice } from './sheetValues'
+import type { StoredTitle } from '../../../fields/sovereignLinkOf'
 import type { StoredLink } from '../../../fields/vassalLinkOf'
 import type { ChainEnd, VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
 
@@ -50,6 +52,33 @@ export async function fetchVassalLinks(fetcher: typeof fetch, api: string): Prom
       }
       return vassalLinkOf(link)
     })
+    .filter((link): link is VassalLink => link !== null)
+}
+
+/**
+ * The titles ticked « souverain », as the ends of the chain they stop (the dev, 2026-11-16) — `core` reads each as a
+ * link to no one over the title's dates.
+ * @param fetcher - the `fetch` to use
+ * @param api - the API's root
+ * @returns their links
+ * @throws {TypeError} when the server cannot be reached
+ * @throws {Error} when the server refuses
+ */
+export async function fetchSovereignLinks(
+  fetcher: typeof fetch,
+  api: string
+): Promise<VassalLink[]> {
+  const params = new URLSearchParams({
+    'where[sovereign][equals]': 'true',
+    depth: '0',
+    pagination: 'false',
+    'select[sovereign]': 'true',
+    'select[date]': 'true',
+  })
+  const response = await fetcher(`${api}/titles?${params.toString()}`, { credentials: 'include' })
+  const docs = await readDocs(response, 'the sovereign titles', 'could not be read')
+  return docs
+    .map((doc) => sovereignLinkOf((doc ?? {}) as StoredTitle))
     .filter((link): link is VassalLink => link !== null)
 }
 
@@ -108,7 +137,10 @@ export async function readVassalChain(
   title: number | string,
   year: number
 ): Promise<ChainReading[]> {
-  const links = await fetchVassalLinks(fetcher, api)
+  const links = [
+    ...(await fetchVassalLinks(fetcher, api)),
+    ...(await fetchSovereignLinks(fetcher, api)),
+  ]
   const paths = chainPaths(vassalChain(String(title), year, links))
   const ids = [...new Set(paths.flatMap((path) => path.titles))]
   const names = await fetchTitleNames(fetcher, api, ids)

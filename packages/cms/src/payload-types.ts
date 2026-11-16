@@ -623,6 +623,10 @@ export interface Title {
     };
   };
   /**
+   * Coché : ce titre ne relève de personne à ces dates — la chaîne de vassalité s’arrête à lui.
+   */
+  sovereign?: boolean | null;
+  /**
    * Au moins une : la source qui dit que cette personne tenait ce territoire à cette date.
    */
   lines: {
@@ -732,9 +736,6 @@ export interface VassalLink {
    * Le titre qui relève d’un autre, choisi dans « Titres ».
    */
   vassal: number | Title;
-  /**
-   * « Personne » seulement quand une source dit qu’il ne relève de personne à cette date.
-   */
   answersTo: 'suzerain' | 'no-one';
   /**
    * Le titre dont il relève, choisi dans « Titres ».
@@ -1433,6 +1434,7 @@ export interface TitlesSelect<T extends boolean = true> {
               calendar?: T;
             };
       };
+  sovereign?: T;
   lines?:
     | T
     | {

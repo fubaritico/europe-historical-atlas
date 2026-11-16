@@ -146,5 +146,9 @@
   "weightDominant": "Dominante",
   "weightPresent": "Présente",
   "weightAttested": "Poids attesté par une source",
-  "weightAttestedHelp": "Cochée quand une source dit ce poids. Décochée, le poids est une déduction : la présence est attestée, le poids supposé, et la carte le montrera incertain."
+  "weightAttestedHelp": "Cochée quand une source dit ce poids. Décochée, le poids est une déduction : la présence est attestée, le poids supposé, et la carte le montrera incertain.",
+  "sovereign": "Souverain",
+  "sovereignHelp": "Coché : il ne relève de personne à cette date — la chaîne s’arrête à lui, sans ⊕ au-dessus.",
+  "sovereignFailed": "« Souverain » n’a pas pu être enregistré. Réessayez dans un instant.",
+  "linkAbove": "la ligne au-dessous"
 }

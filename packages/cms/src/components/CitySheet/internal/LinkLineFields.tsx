@@ -1,70 +1,54 @@
-import { IconButton } from '@fubaritico/react/IconButton'
-
+import { LinkLinePair } from './LinkLinePair'
 import { LinkLineStatus } from './LinkLineStatus'
-import { RelationField } from './RelationField'
 
-import type { NewLink } from '../hooks/useNewLink'
+import type { PendingLine } from '../hooks/usePendingLinks'
 import type { Say } from '../utils/say'
-import type { RecordChoice } from '../utils/sheetValues'
+import type { ReactNode } from 'react'
 
 /**
- * A line « Vassal de » once opened by ⊕ (CMS-422, the dev's mock-up): the suzerain, the ✕ closing the line unsaved,
- * and the source under it, each Payload's own field with its « + », held while their link is saved — then where the
- * line stands: being saved, refused in the server's words, or failed. Named by the title it is for, since several
- * readings may each have one; focusable, for the keyboard to land on it when ⊕ opens it.
- * @param props - the line, the title it is for, what closes it, the translator
- * @param props.line - what is chosen on the line, where it stands, and how to choose
- * @param props.vassal - the title the chain stops at
- * @param props.onClose - closes the line unsaved
+ * One line « Vassal de » of the repeating block (CMS-422, the dev's mock-up): the suzerain, the ✕ closing the line
+ * unsaved, and the source under it, each Payload's own field with its « + », held while their link is saved — then
+ * where the line stands, and, on the last line, « Souverain » under its suzerain. Focusable, for the keyboard to land
+ * on it when ⊕ adds it.
+ * @param props - the line, its vassal's name, its gestures, what follows its fields, the translator
+ * @param props.line - the line
+ * @param props.vassalName - the name of the title it is the suzerain of, for its label
+ * @param props.onChoose - chooses its suzerain or its source
+ * @param props.onClose - closes it unsaved
+ * @param props.children - what follows its fields: « Souverain », on the last line
  * @param props.say - the translator
  * @returns the line
  */
 export function LinkLineFields({
   line,
-  vassal,
+  vassalName,
+  onChoose,
   onClose,
+  children,
   say,
 }: {
-  line: NewLink
-  vassal: RecordChoice
+  line: PendingLine
+  vassalName: string
+  onChoose: (field: 'suzerain' | 'source', id: number | string | null) => void
   onClose: () => void
+  children?: ReactNode
   say: Say
 }) {
-  const prefix = `link-${String(vassal.id)}`
   return (
     <div
       className="city-sheet__chain-new"
       role="group"
-      aria-label={say('linkLineOf', { name: vassal.name })}
+      aria-label={say('linkLineOf', { name: vassalName })}
       tabIndex={-1}
     >
-      <div className="city-sheet__chain-new-fields">
-        <RelationField
-          path={`${prefix}-suzerain`}
-          collection="titles"
-          label={say('vassalOf')}
-          description={say('linkSuzerainHelp', { name: vassal.name })}
-          value={line.suzerain}
-          onChange={line.chooseSuzerain}
-          readOnly={line.status.kind === 'saving'}
-        />
-        <RelationField
-          path={`${prefix}-source`}
-          collection="sources"
-          label={say('linkSource')}
-          description={say('linkSourceHelp')}
-          value={line.source}
-          onChange={line.chooseSource}
-          readOnly={line.status.kind === 'saving'}
-        />
-        <IconButton
-          type="button"
-          size="sm"
-          icon="XMark"
-          aria-label={say('linkClose')}
-          onClick={onClose}
-        />
-      </div>
+      <LinkLinePair
+        line={line}
+        vassalName={vassalName}
+        onChoose={onChoose}
+        onClose={onClose}
+        say={say}
+      />
+      {children}
       <LinkLineStatus status={line.status} say={say} />
     </div>
   )

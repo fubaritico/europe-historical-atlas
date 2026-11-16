@@ -1,4 +1,4 @@
-import type { NewLinkStatus } from '../hooks/useNewLink'
+import type { NewLinkStatus } from '../hooks/usePendingLinks'
 import type { Say } from '../utils/say'
 
 /**

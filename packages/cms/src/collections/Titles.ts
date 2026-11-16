@@ -76,6 +76,16 @@ export const Titles: CollectionConfig = {
       description:
         'Une année suffit ; remplir la fin en fait une durée : de son avènement à sa mort ou à sa perte.',
     }),
+    {
+      name: 'sovereign',
+      type: 'checkbox',
+      label: 'Souverain',
+      defaultValue: false,
+      admin: {
+        description:
+          'Coché : ce titre ne relève de personne à ces dates — la chaîne de vassalité s’arrête à lui.',
+      },
+    },
     claimLines(
       'Au moins une : la source qui dit que cette personne tenait ce territoire à cette date.'
     ),

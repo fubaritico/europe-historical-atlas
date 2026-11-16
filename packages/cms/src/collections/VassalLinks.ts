@@ -88,10 +88,9 @@ export const VassalLinks: CollectionConfig = {
       required: true,
       defaultValue: 'suzerain',
       options: ANSWERS_TO.map((value) => ({ value, label: ANSWER_LABELS[value] })),
-      admin: {
-        description:
-          '« Personne » seulement quand une source dit qu’il ne relève de personne à cette date.',
-      },
+      // Hidden (the dev, 2026-11-16: a sovereign is ticked « Souverain » on its title, never a link to no one) — kept
+      // in the base, every link answering to a suzerain
+      admin: { hidden: true },
     },
     {
       name: 'suzerain',

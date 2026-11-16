@@ -91,16 +91,17 @@ export const MCP_COLLECTIONS = {
     description:
       'A title: a `person` (an id from people) holding a `territory` (an id from territories) over a `date` ' +
       '({ start, end }, each { year, month, day, circa, margin, calendar }; end empty for a single year), with its ' +
-      '`lines` — at least one, each { source, where, quotation, asWritten }. `label` is written by the server. Search ' +
-      'by person and territory before creating.',
+      '`lines` — at least one, each { source, where, quotation, asWritten }. `sovereign` true when the title answers ' +
+      'to no one over its dates: the chain of vassalage stops at it (the dev, 2026-11-16 — never a link to no one). ' +
+      '`label` is written by the server. Search by person and territory before creating.',
   },
   [VassalLinks.slug]: {
     enabled: ENTER_NEVER_DELETE,
     description:
       'A link of vassalage: the title `vassal` answers, over a `date`, to the title `suzerain` (`answersTo` ' +
-      '"suzerain") — or to no one (`answersTo` "no-one", only when a source states it: a sovereign; `suzerain` then ' +
-      'stays empty). With its `lines`. Entered once per pair and period, reused by every place under it; a divergent ' +
-      'reading is a second link. `label` is written by the server.',
+      '"suzerain", always — a sovereign is ticked on its title, `sovereign`, never entered as a link to no one). With ' +
+      'its `lines`. Entered once per pair and period, reused by every place under it; a divergent reading is a second ' +
+      'link. `label` is written by the server.',
   },
 } as const
 

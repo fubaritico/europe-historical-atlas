@@ -146,5 +146,9 @@
   "weightDominant": "Dominant",
   "weightPresent": "Present",
   "weightAttested": "Weight attested by a source",
-  "weightAttestedHelp": "Ticked when a source says that weight. Unticked, the weight is a deduction: the presence is attested, the weight supposed, and the map will show it uncertain."
+  "weightAttestedHelp": "Ticked when a source says that weight. Unticked, the weight is a deduction: the presence is attested, the weight supposed, and the map will show it uncertain.",
+  "sovereign": "Sovereign",
+  "sovereignHelp": "Ticked: it answers to no one at this date — the chain stops at it, with no ⊕ above.",
+  "sovereignFailed": "“Sovereign” could not be saved. Try again in a moment.",
+  "linkAbove": "the line below"
 }

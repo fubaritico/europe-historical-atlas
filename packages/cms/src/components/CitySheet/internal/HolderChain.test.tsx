@@ -53,16 +53,19 @@ function values(year: string, titled = true): SheetValues {
  * @param initial - the form's values
  * @param read - the chain's reader
  * @param saveLink - the link's writer
+ * @param saveSovereign - the « souverain » box's writer
  * @returns the rendered chain
  */
 function renderChain(
   initial: SheetValues,
   read: (title: number | string, year: number) => Promise<ChainReading[]>,
-  saveLink: (link: NewVassalLink) => Promise<LinkAnswer> = () => Promise.resolve({ kind: 'saved' })
+  saveLink: (link: NewVassalLink) => Promise<LinkAnswer> = () => Promise.resolve({ kind: 'saved' }),
+  saveSovereign: (title: number | string, sovereign: boolean) => Promise<LinkAnswer> = () =>
+    Promise.resolve({ kind: 'saved' })
 ) {
   return render(
     <Formik initialValues={initial} onSubmit={() => undefined}>
-      <HolderChain read={read} saveLink={saveLink} say={say} />
+      <HolderChain read={read} writers={{ saveLink, saveSovereign }} say={say} />
     </Formik>
   )
 }
@@ -131,7 +134,7 @@ describe('HolderChain', () => {
       const read = vi
         .fn()
         .mockResolvedValueOnce([{ titles: [COUNT], end: 'unknown' }])
-        .mockResolvedValueOnce([{ titles: [COUNT, DUKE], end: 'sovereign' }])
+        .mockResolvedValueOnce([{ titles: [COUNT, DUKE], end: 'unknown' }])
       const saveLink = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
       const { container } = renderChain(values('1100'), read, saveLink)
       await enterLink('20')
@@ -139,10 +142,84 @@ describe('HolderChain', () => {
       await userEvent.setup().type(screen.getByLabelText('Source'), '4')
       expect(saveLink).toHaveBeenCalledWith({ vassal: 10, suzerain: 20, source: 4, year: 1100 })
       await waitFor(() => {
-        expect(summary(container)).toBe(`${COUNT.name} → ${DUKE.name} — souverain`)
+        expect(summary(container)).toBe(`${COUNT.name} → ${DUKE.name} — au-delà, on ne sait pas`)
       })
       expect(read).toHaveBeenCalledTimes(2)
-      expect(document.activeElement?.getAttribute('aria-live')).toBe('polite')
+      // The line saved left the block with the keyboard in it: the keyboard is back on ⊕
+      expect(document.activeElement?.getAttribute('aria-label')).toBe(
+        `Ajouter le suzerain de ${DUKE.name}`
+      )
+    })
+
+    // The dev, 2026-11-16: a repeating block — ⊕ again as soon as the line has its suzerain, sources or not.
+    it("chains a second line on the first one's suzerain, without waiting for its source", async () => {
+      const saveLink = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
+      renderChain(
+        values('1100'),
+        () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
+        saveLink
+      )
+      await enterLink('20')
+      const user = userEvent.setup()
+      await user.click(
+        screen.getByRole('button', { name: 'Ajouter le suzerain de la ligne au-dessous' })
+      )
+      const second = screen.getByRole('group', {
+        name: 'Vassal de : le suzerain de la ligne au-dessous',
+      })
+      await user.type(within(second).getByLabelText('Vassal de'), '40')
+      await user.type(within(second).getByLabelText('Source'), '4')
+      expect(saveLink).toHaveBeenCalledWith({ vassal: 20, suzerain: 40, source: 4, year: 1100 })
+      expect(screen.getByRole('group', { name: LINE })).toBeTruthy()
+    })
+
+    it('ticks « Souverain » on the title the chain stops at, and offers no ⊕ once it is', async () => {
+      const saveSovereign = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
+      const read = vi
+        .fn()
+        .mockResolvedValueOnce([{ titles: [COUNT], end: 'unknown' }])
+        .mockResolvedValueOnce([{ titles: [COUNT], end: 'sovereign' }])
+      renderChain(values('1100'), read, undefined, saveSovereign)
+      await userEvent.setup().click(await screen.findByRole('checkbox', { name: 'Souverain' }))
+      expect(saveSovereign).toHaveBeenCalledWith(10, true)
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
+      })
+      expect(screen.getByRole('checkbox', { name: 'Souverain' })).toHaveProperty('checked', true)
+    })
+
+    it('moves « Souverain » to the suzerain of the last line, and hides ⊕ once it is ticked', async () => {
+      const saveSovereign = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
+      renderChain(
+        values('1100'),
+        () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
+        undefined,
+        saveSovereign
+      )
+      const line = await enterLink('20')
+      expect(screen.getAllByRole('checkbox', { name: 'Souverain' })).toHaveLength(1)
+      await userEvent.setup().click(within(line).getByRole('checkbox', { name: 'Souverain' }))
+      expect(saveSovereign).toHaveBeenCalledWith(20, true)
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
+      })
+    })
+
+    // Review ARCH-001: a suzerain changed is not the one ticked
+    it("unticks « Souverain » when the line's suzerain is changed, and offers ⊕ again", async () => {
+      renderChain(values('1100'), () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]))
+      const line = await enterLink('20')
+      const user = userEvent.setup()
+      await user.click(within(line).getByRole('checkbox', { name: 'Souverain' }))
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
+      })
+      await user.type(within(line).getByLabelText('Vassal de'), '1')
+      expect(within(line).getByRole('checkbox', { name: 'Souverain' })).toHaveProperty(
+        'checked',
+        false
+      )
+      expect(screen.getByRole('button', { name: /^Ajouter le suzerain/ })).toBeTruthy()
     })
 
     it('lists every reading when the sources diverge, and says how many', async () => {

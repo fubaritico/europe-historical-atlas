@@ -1,8 +1,10 @@
+import { ChainLinks } from './ChainLinks'
 import { ChainReadingLine } from './ChainReadingLine'
-import { NewLinkLine } from './NewLinkLine'
+import { PendingBlock } from './PendingBlock'
 
+import type { PendingLinks } from '../hooks/usePendingLinks'
 import type { ChainReading } from '../utils/readVassalChain'
-import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
+import type { SaveSovereign } from '../utils/saveSovereign'
 import type { Say } from '../utils/say'
 import type { RecordChoice } from '../utils/sheetValues'
 
@@ -12,7 +14,7 @@ import type { RecordChoice } from '../utils/sheetValues'
  * @returns its top title
  * @throws {Error} when the reading holds no title, which `chainPaths` never gives
  */
-function topOf(reading: ChainReading): RecordChoice {
+export function topOf(reading: ChainReading): RecordChoice {
   const top = reading.titles.at(-1)
   if (top === undefined) throw new Error('[CMS] a reading of the chain came with no title')
   return top
@@ -20,28 +22,31 @@ function topOf(reading: ChainReading): RecordChoice {
 
 /**
  * The chain once read (the dev's mock-up, CMS-422): for each reading, one line « Vassal de » per link entered —
- * entered once, it shows on every city under that title — then « Vassal de ⊕ » where it stops for want of a link,
- * then the reading in one line, how it ends included. A heading names the year; a sentence says how many readings
- * when the sources diverge.
- * @param props - the readings, their year, the link's writer, what to do once a link is added, the translator
+ * entered once, it shows on every city under that title — then, on the first reading, the repeating block: « Vassal
+ * de ⊕ » until its top is ticked « Souverain »; then the reading in one line, how it ends included. A heading names
+ * the year; a sentence says how many readings when the sources diverge.
+ * @param props - the readings, their year, the block's lines, the box's save, the re-read, the translator
  * @param props.readings - the readings
  * @param props.year - the year they were read at
- * @param props.saveLink - saves a link of vassalage
- * @param props.onAdded - called once a link is saved from the sheet
+ * @param props.pending - the lines being entered at the top of the first reading
+ * @param props.saveSovereign - ticks or unticks « souverain » on a title
+ * @param props.onReread - reads the chain again
  * @param props.say - the translator
  * @returns the readings
  */
 export function ChainReadings({
   readings,
   year,
-  saveLink,
-  onAdded,
+  pending,
+  saveSovereign,
+  onReread,
   say,
 }: {
   readings: ChainReading[]
   year: number
-  saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
-  onAdded: () => void
+  pending: PendingLinks
+  saveSovereign: SaveSovereign
+  onReread: () => void
   say: Say
 }) {
   return (
@@ -51,25 +56,20 @@ export function ChainReadings({
       {readings.length > 1 && (
         <p className="city-sheet__help">{say('chainReadings', { count: readings.length })}</p>
       )}
-      {readings.map((reading) => (
+      {readings.map((reading, index) => (
         <div
-          key={`${reading.titles.map((title) => title.id).join('>')}|${reading.end}`}
+          // By its rank: read again after a line is saved, the first reading keeps its block and the lines in it
+          key={index}
           className="city-sheet__chain-reading-block"
         >
-          <ul className="city-sheet__chain-links">
-            {reading.titles.slice(1).map((suzerain) => (
-              <li key={String(suzerain.id)} className="city-sheet__chain-link">
-                <span className="city-sheet__label">{say('vassalOf')}</span>
-                <span className="city-sheet__chain-suzerain">{suzerain.name}</span>
-              </li>
-            ))}
-          </ul>
-          {reading.end === 'unknown' && (
-            <NewLinkLine
-              vassal={topOf(reading)}
-              year={year}
-              saveLink={saveLink}
-              onAdded={onAdded}
+          <ChainLinks reading={reading} say={say} />
+          {index === 0 && reading.end !== 'loop' && (
+            <PendingBlock
+              pending={pending}
+              top={topOf(reading)}
+              topSovereign={reading.end === 'sovereign'}
+              saveSovereign={saveSovereign}
+              onReread={onReread}
               say={say}
             />
           )}
