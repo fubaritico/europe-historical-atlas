@@ -40,7 +40,7 @@ export function PendingBlock({
   const { lines } = pending
   const last = lines.at(-1)
   const canAdd = last === undefined ? !topSovereign : last.suzerain !== null && !last.sovereign
-  const box = useLineFocus(lines.length)
+  const box = useLineFocus(lines.length, last !== undefined && last.link === undefined)
 
   // Render
   return (

@@ -11,9 +11,10 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { useOverlapCheck } from './hooks/useOverlapCheck'
 import { useRecordSearches } from './hooks/useRecordSearches'
+import { useSheetSave } from './hooks/useSheetSave'
 import { useSheetSubmit } from './hooks/useSheetSubmit'
-import { useVassalLinks } from './hooks/useVassalLinks'
 import { CITY_SHEET_MESSAGES } from './i18n'
+import { SheetAlerts } from './internal/SheetAlerts'
 import { SheetFields } from './internal/SheetFields'
 import { validateSheet } from './utils/validateSheet'
 
@@ -68,26 +69,22 @@ export function CitySheetForm({
   const handleSubmit = useSheetSubmit(id === undefined ? { api, admin } : { id, api, admin }, say)
 
   const searches = useRecordSearches(api, contentLocale)
-  const { readChain, ...writers } = useVassalLinks(api)
+  const { readChain, writers, submit } = useSheetSave(api, initialValues, handleSubmit, say)
   const overlap = useOverlapCheck(api, locale, id)
   const validate = (values: SheetValues) =>
     validateSheet(values, say, overlap.current(values.place?.id ?? null))
 
   // Render
   return (
-    <Formik
-      initialValues={initialValues}
-      validate={validate}
-      validateOnMount
-      onSubmit={handleSubmit}
-    >
-      {({ isValid, dirty, isSubmitting, status }) => (
+    <Formik initialValues={initialValues} validate={validate} validateOnMount onSubmit={submit}>
+      {({ isValid, isSubmitting, status, submitCount }) => (
         <Form className="city-sheet" noValidate>
-          {typeof status === 'string' && (
-            <p className="city-sheet__status" role="alert">
-              {status}
-            </p>
-          )}
+          {/* Formik types its status `any`: read as unknown, the alert checks it is a sentence */}
+          <SheetAlerts
+            status={status as unknown}
+            fieldsToFix={submitCount > 0 && !isValid}
+            say={say}
+          />
           <SheetFields
             searches={searches}
             readChain={readChain}
@@ -97,7 +94,8 @@ export function CitySheetForm({
             say={say}
           />
           <div className="city-sheet__actions">
-            <Button type="submit" disabled={!isValid || !dirty || isSubmitting}>
+            {/* Always there to click (the dev, 2026-11-16): it says what is missing, rather than staying grey */}
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? say('saving') : id === undefined ? say('create') : say('save')}
             </Button>
           </div>

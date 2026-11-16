@@ -102,7 +102,7 @@
   "addSuzerainOf": "Ajouter le suzerain de {name}",
   "vassalOf": "Vassal de",
   "linkLineOf": "Vassal de : le suzerain de {name}",
-  "linkSuzerainHelp": "Celui dont relève {name} à cette date. Absent de la liste, « + » le crée. Le maillon s’enregistre dès qu’il est choisi.",
+  "linkSuzerainHelp": "Celui dont relève {name} à cette date. Absent de la liste, « + » le crée.",
   "linkSaving": "Enregistrement du maillon…",
   "linkFailed": "Le maillon n’a pas pu être enregistré. Changez le suzerain ou la source pour réessayer.",
   "linkClose": "Fermer cette ligne sans l’enregistrer",
@@ -148,5 +148,12 @@
   "sovereign": "Souverain",
   "sovereignHelp": "Coché : il ne relève de personne à cette date — la chaîne s’arrête à lui, sans ⊕ au-dessus.",
   "sovereignFailed": "« Souverain » n’a pas pu être enregistré. Réessayez dans un instant.",
-  "linkAbove": "la ligne au-dessous"
+  "linkAbove": "la ligne au-dessous",
+  "linkSource": "Source",
+  "linkSourceHelp": "Facultatif : celle qui dit ce lien.",
+  "linkSuzerainMissing": "Choisissez le suzerain, ou fermez la ligne avec ✕.",
+  "chainNotSaved": "La chaîne de vassalité n’est pas enregistrée : voyez le message rouge sous la ligne « Vassal de ».",
+  "fixFields": "Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.",
+  "nothingToSave": "Rien à enregistrer : rien n’a changé.",
+  "linkShared": "Ce maillon sert à toutes les villes tenues sous ce titre : le changer ou le retirer vaut pour elles aussi."
 }

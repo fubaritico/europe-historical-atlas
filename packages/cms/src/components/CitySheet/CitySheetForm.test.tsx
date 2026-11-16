@@ -188,15 +188,13 @@ afterEach(() => {
 
 describe('CitySheetForm', () => {
   describe('happy path', () => {
-    it('opens Rome with its place, its year, and the button greyed while nothing has changed', async () => {
+    // The dev, 2026-11-16: the button is always there to click, and says what is wrong rather than staying grey
+    it('opens Rome with its place and its year, and says « nothing to save » when nothing changed', async () => {
       renderForm(rome, 1)
       expect(screen.getByText('Rome')).toBeTruthy()
       expect(startYear().value).toBe('1100')
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
-          true
-        )
-      })
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Enregistrer' }))
+      expect(await screen.findByText('Rien à enregistrer : rien n’a changé.')).toBeTruthy()
     })
 
     it('enables the button once a valid change is typed, saves, and says so', async () => {
@@ -266,13 +264,17 @@ describe('CitySheetForm', () => {
       expect(screen.getByText('— souverain', { exact: false })).toBeTruthy()
     })
 
-    it('opens a new sheet with its « Ajouter » greyed, and no error before anything is touched', async () => {
+    it('opens a new sheet with no error before anything is touched, and says them all at « Ajouter »', async () => {
       renderForm(empty)
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
-      })
       expect(screen.queryByText('Il faut au moins une année.')).toBeNull()
       expect(screen.queryByText('Choisissez un lieu.')).toBeNull()
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Ajouter' }))
+      expect(
+        await screen.findByText(
+          'Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.'
+        )
+      ).toBeTruthy()
+      expect(screen.getByText('Choisissez un lieu.')).toBeTruthy()
     })
 
     it('says a field’s error once it is touched, and the help again once it is right', async () => {
@@ -315,7 +317,7 @@ describe('CitySheetForm', () => {
       expect(document.activeElement).toBe(screen.getByRole('combobox', { name: 'Lieu' }))
       expect(await screen.findByText('Choisissez un lieu.')).toBeTruthy()
     })
-    it('refuses a year the place already has a sheet for while it is typed — the button greyed, the sentence under the year', async () => {
+    it('refuses a year the place already has a sheet for while it is typed — the sentence under the year, and at « Ajouter »', async () => {
       serverWithRome1100()
       renderForm({ ...empty, importance: 'capital' })
       const user = userEvent.setup()
@@ -324,7 +326,12 @@ describe('CitySheetForm', () => {
       await user.type(startYear(), '1100')
       await user.tab()
       expect(await screen.findByText(/^Rome a déjà une fiche pour vers 1100\./)).toBeTruthy()
-      expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
+      await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+      expect(
+        await screen.findByText(
+          'Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.'
+        )
+      ).toBeTruthy()
       await user.clear(startYear())
       await user.type(startYear(), '1101')
       await waitFor(() => {
@@ -332,7 +339,7 @@ describe('CitySheetForm', () => {
       })
     })
 
-    it('greys the button once the place is chosen after its year: the sheets read run the check again', async () => {
+    it('refuses the year once the place is chosen after it: the sheets read run the check again', async () => {
       serverWithRome1100()
       renderForm({ ...empty, importance: 'capital' })
       const user = userEvent.setup()
@@ -342,7 +349,12 @@ describe('CitySheetForm', () => {
       await waitFor(() => {
         expect(screen.getByText(/^Rome a déjà une fiche pour vers 1100\./)).toBeTruthy()
       })
-      expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
+      await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+      expect(
+        await screen.findByText(
+          'Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.'
+        )
+      ).toBeTruthy()
     })
 
     it('keeps Rome’s own sheet valid: it is not compared with itself', async () => {
@@ -415,9 +427,6 @@ describe('CitySheetForm', () => {
       renderForm(rome, 1)
       const user = userEvent.setup()
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
-      expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
-        true
-      )
       await user.type(screen.getByLabelText('Source'), '4')
       await user.click(screen.getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Population' }))
@@ -507,7 +516,12 @@ describe('CitySheetForm', () => {
       expect(
         await within(community).findByText(/une ligne « Une communauté » qui cite cette confession/)
       ).toBeTruthy()
-      expect(screen.getByRole('button', { name: 'Enregistrer' })).toHaveProperty('disabled', true)
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      expect(
+        await screen.findByText(
+          'Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.'
+        )
+      ).toBeTruthy()
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
       const line = screen.getByRole('group', { name: 'Source 1' })
       await user.type(within(line).getByLabelText('Source'), '4')

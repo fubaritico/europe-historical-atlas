@@ -9,6 +9,18 @@ import type { Say } from '../utils/say'
 import type { RecordChoice } from '../utils/sheetValues'
 
 /**
+ * The holder's title of a reading — its first; `core` never gives a reading without it.
+ * @param reading - the reading
+ * @returns the holder's title
+ * @throws {Error} when the reading holds no title, which `chainPaths` never gives
+ */
+function holderOf(reading: ChainReading): RecordChoice {
+  const holder = reading.titles[0]
+  if (holder === undefined) throw new Error('[CMS] a reading of the chain came with no title')
+  return holder
+}
+
+/**
  * The title a reading stops at — the last of it; `core` never gives a reading without its holder's title.
  * @param reading - the reading
  * @returns its top title
@@ -62,12 +74,13 @@ export function ChainReadings({
           key={index}
           className="city-sheet__chain-reading-block"
         >
-          <ChainLinks reading={reading} say={say} />
+          {/* The first reading's links are the block's lines, to change; another reading's, read only */}
+          {index > 0 && <ChainLinks reading={reading} say={say} />}
           {index === 0 && reading.end !== 'loop' && (
             <PendingBlock
               pending={pending}
-              top={topOf(reading)}
-              topSovereign={reading.end === 'sovereign'}
+              top={holderOf(reading)}
+              topSovereign={reading.end === 'sovereign' && reading.titles.length === 1}
               saveSovereign={saveSovereign}
               onReread={onReread}
               say={say}

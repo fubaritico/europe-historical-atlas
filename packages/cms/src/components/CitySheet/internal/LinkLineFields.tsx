@@ -1,7 +1,7 @@
 import { LinkLinePair } from './LinkLinePair'
 import { LinkLineStatus } from './LinkLineStatus'
 
-import type { PendingLine } from '../hooks/usePendingLinks'
+import type { PendingLine } from '../utils/pendingLine'
 import type { Say } from '../utils/say'
 import type { ReactNode } from 'react'
 
@@ -48,6 +48,7 @@ export function LinkLineFields({
         onClose={onClose}
         say={say}
       />
+      {line.link !== undefined && <p className="city-sheet__help">{say('linkShared')}</p>}
       {children}
       <LinkLineStatus status={line.status} say={say} />
     </div>

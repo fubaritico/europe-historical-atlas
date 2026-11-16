@@ -102,7 +102,7 @@
   "addSuzerainOf": "Add the suzerain of {name}",
   "vassalOf": "Vassal of",
   "linkLineOf": "Vassal of: the suzerain of {name}",
-  "linkSuzerainHelp": "The one {name} answered to at this date. Missing from the list, “+” creates it. The link is saved as soon as it is chosen.",
+  "linkSuzerainHelp": "The one {name} answered to at this date. Missing from the list, “+” creates it.",
   "linkSaving": "Saving the link…",
   "linkFailed": "The link could not be saved. Change the suzerain or the source to try again.",
   "linkClose": "Close this line without saving it",
@@ -148,5 +148,12 @@
   "sovereign": "Sovereign",
   "sovereignHelp": "Ticked: it answers to no one at this date — the chain stops at it, with no ⊕ above.",
   "sovereignFailed": "“Sovereign” could not be saved. Try again in a moment.",
-  "linkAbove": "the line below"
+  "linkAbove": "the line below",
+  "linkSource": "Source",
+  "linkSourceHelp": "Optional: the one that states this link.",
+  "linkSuzerainMissing": "Choose the suzerain, or close the line with ✕.",
+  "chainNotSaved": "The chain of vassalage is not saved: see the red message under the « Vassal of » line.",
+  "fixFields": "Nothing is saved: some fields are to correct, see the messages in red.",
+  "nothingToSave": "Nothing to save: nothing changed.",
+  "linkShared": "This link serves every city held under this title: changing or removing it does for them too."
 }

@@ -54,8 +54,27 @@ describe('readVassalChain', () => {
             { id: 20, name: NAMES['20'] },
             { id: 30, name: NAMES['30'] },
           ],
+          // Each step's link, for the sheet to change it — none of these links has a source line
+          steps: [
+            { link: '1', source: null },
+            { link: '2', source: null },
+          ],
           end: 'sovereign',
         },
+      ])
+    })
+
+    // 2026-11-16: the chain is edited in its blocks — each link with its source, read from the base
+    it("gives each step the source of its link's first line", async () => {
+      const sourced = [
+        { ...LINKS[0], lines: [{ source: 4 }] },
+        { ...LINKS[1], lines: [] },
+        LINKS[2],
+      ]
+      const [reading] = await readVassalChain(stubFetch(sourced), '/api', 10, 1100)
+      expect(reading?.steps).toEqual([
+        { link: '1', source: 4 },
+        { link: '2', source: null },
       ])
     })
 
@@ -75,7 +94,9 @@ describe('readVassalChain', () => {
   describe('variants', () => {
     it('stops where no link is known in the year: beyond, we do not know', async () => {
       const chain = await readVassalChain(stubFetch(), '/api', 10, 1110)
-      expect(chain).toEqual([{ titles: [{ id: 10, name: NAMES['10'] }], end: 'unknown' }])
+      expect(chain).toEqual([
+        { titles: [{ id: 10, name: NAMES['10'] }], steps: [], end: 'unknown' },
+      ])
     })
 
     it('keeps both readings when the sources diverge', async () => {

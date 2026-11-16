@@ -76,3 +76,76 @@ export async function refusalOf(response: Response, what: string): Promise<strin
   }
   return message
 }
+
+/** A link of vassalage changed from the city sheet: its suzerain, and its source. */
+export interface ChangedVassalLink {
+  /** The link's id. */
+  readonly link: string
+  /** Its suzerain now. */
+  readonly suzerain: number | string
+  /** Its source now — facultative —, `null` for none. */
+  readonly source: number | string | null
+}
+
+/**
+ * Changes a link of vassalage from the city sheet (the dev, 2026-11-16: the chain is edited in the same blocks it was
+ * entered in) — its suzerain, and its source: one line with it, none without. Through Payload's API, its rules holding.
+ * @param fetcher - the `fetch` to use
+ * @param api - the API's root: `/api`
+ * @param change - the link, its suzerain and its source
+ * @returns saved, or refused with the server's sentence
+ * @throws {TypeError} when the server cannot be reached
+ * @throws {Error} when the server fails, or refuses without a sentence
+ */
+export async function updateVassalLink(
+  fetcher: typeof fetch,
+  api: string,
+  change: ChangedVassalLink
+): Promise<LinkAnswer> {
+  const response = await fetcher(`${api}/vassal-links/${change.link}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      suzerain: change.suzerain,
+      lines: change.source === null ? [] : [{ source: change.source }],
+    }),
+  })
+  if (response.ok) return { kind: 'saved' }
+  if (response.status >= 500) {
+    throw new Error(
+      `[CMS] the API failed to change a link of vassalage (${String(response.status)})`
+    )
+  }
+  return { kind: 'refused', message: await refusalOf(response, 'a change of a link of vassalage') }
+}
+
+/**
+ * Removes a link of vassalage from the city sheet — its ✕, saved at « Enregistrer ».
+ * @param fetcher - the `fetch` to use
+ * @param api - the API's root: `/api`
+ * @param link - the link's id
+ * @returns saved, or refused with the server's sentence
+ * @throws {TypeError} when the server cannot be reached
+ * @throws {Error} when the server fails, or refuses without a sentence
+ */
+export async function deleteVassalLink(
+  fetcher: typeof fetch,
+  api: string,
+  link: string
+): Promise<LinkAnswer> {
+  const response = await fetcher(`${api}/vassal-links/${link}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (response.ok) return { kind: 'saved' }
+  if (response.status >= 500) {
+    throw new Error(
+      `[CMS] the API failed to remove a link of vassalage (${String(response.status)})`
+    )
+  }
+  return {
+    kind: 'refused',
+    message: await refusalOf(response, 'the removal of a link of vassalage'),
+  }
+}

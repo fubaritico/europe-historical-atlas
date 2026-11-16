@@ -7,7 +7,7 @@ import { useVassalChain } from './useVassalChain'
 import type { ChainReading } from '../utils/readVassalChain'
 
 const READING: ChainReading[] = [
-  { titles: [{ id: '10', name: 'Mathias II — comté de Nantes' }], end: 'unknown' },
+  { titles: [{ id: '10', name: 'Mathias II — comté de Nantes' }], steps: [], end: 'unknown' },
 ]
 
 afterEach(() => {
@@ -81,7 +81,11 @@ describe('useVassalChain', () => {
         late = resolve
       })
       const newer: ChainReading[] = [
-        { titles: [{ id: '20', name: 'Alain IV — duché de Bretagne' }], end: 'sovereign' },
+        {
+          titles: [{ id: '20', name: 'Alain IV — duché de Bretagne' }],
+          steps: [],
+          end: 'sovereign',
+        },
       ]
       const read = vi.fn((title: number | string) =>
         title === 10 ? older : Promise.resolve(newer)

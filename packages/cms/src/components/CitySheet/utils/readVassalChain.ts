@@ -3,7 +3,9 @@ import {
   distinctPaths,
   vassalChain,
 } from '@europe-historical-atlas/core/data/vassalChain'
+import { dateCoversYear } from '@europe-historical-atlas/core/time/dateOverlap'
 
+import { relationId } from '../../../fields/relationId'
 import { sovereignLinkOf } from '../../../fields/sovereignLinkOf'
 import { vassalLinkOf } from '../../../fields/vassalLinkOf'
 
@@ -14,10 +16,20 @@ import type { StoredTitle } from '../../../fields/sovereignLinkOf'
 import type { StoredLink } from '../../../fields/vassalLinkOf'
 import type { ChainEnd, VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
 
+/** One step of a reading above the holder: the link it came by, and that link's source. */
+export interface ChainStep {
+  /** The link's id, for the sheet to change or remove it. */
+  link: string
+  /** The source of its first line, `null` for a link entered without one. */
+  source: number | string | null
+}
+
 /** One reading of the chain: the titles from the holder's up, named, and why it stops. */
 export interface ChainReading {
   /** The titles, the holder's first, each with its id as the base gives it. */
   titles: RecordChoice[]
+  /** The link of each title above the holder's — `steps[i]` brought `titles[i + 1]` — so the sheet can edit it. */
+  steps: ChainStep[]
   /** Why it stops where it does: a sovereign, « we do not know », or links that contradict one another. */
   end: ChainEnd
 }
@@ -141,13 +153,77 @@ export async function readVassalChain(
     ...(await fetchVassalLinks(fetcher, api)),
     ...(await fetchSovereignLinks(fetcher, api)),
   ]
-  const paths = chainPaths(vassalChain(String(title), year, links))
+  const paths = distinctPaths(chainPaths(vassalChain(String(title), year, links)))
   const ids = [...new Set(paths.flatMap((path) => path.titles))]
   const names = await fetchTitleNames(fetcher, api, ids)
-  return distinctPaths(paths).map((path) => ({
+  const steps = paths.map((path) => stepsOf(path.titles, links, year))
+  const sources = await fetchLinkSources(fetcher, api, [
+    ...new Set(steps.flat().filter((link): link is string => link !== null)),
+  ])
+  return paths.map((path, index) => ({
     titles: path.titles.map((id) => titleOf(names, id)),
+    steps: (steps[index] ?? []).flatMap((link) =>
+      link === null ? [] : [{ link, source: sources.get(link) ?? null }]
+    ),
     end: path.end,
   }))
+}
+
+/**
+ * The link each title of a path came by, from the second up — the one valid in the year, from the title below to it;
+ * `null` where none is found, which `vassalChain`, having climbed by them, never leaves.
+ * @param titles - the path's titles, the holder's first
+ * @param links - the links read
+ * @param year - the sheet's year
+ * @returns each step's link id
+ */
+function stepsOf(
+  titles: readonly string[],
+  links: readonly VassalLink[],
+  year: number
+): (string | null)[] {
+  return titles.slice(1).map((suzerain, index) => {
+    const vassal = titles[index]
+    const link = links.find(
+      (one) => one.vassal === vassal && one.suzerain === suzerain && dateCoversYear(one.date, year)
+    )
+    return link?.id ?? null
+  })
+}
+
+/**
+ * The source of each link's first line, by its id — what the sheet shows on the link's block.
+ * @param fetcher - the `fetch` to use
+ * @param api - the API's root
+ * @param ids - the links
+ * @returns each link's first source, by id; a link without one absent
+ * @throws {TypeError} when the server cannot be reached
+ * @throws {Error} when the server refuses
+ */
+export async function fetchLinkSources(
+  fetcher: typeof fetch,
+  api: string,
+  ids: readonly string[]
+): Promise<Map<string, number | string>> {
+  const sources = new Map<string, number | string>()
+  if (ids.length === 0) return sources
+  const params = new URLSearchParams({
+    'where[id][in]': ids.join(','),
+    depth: '0',
+    pagination: 'false',
+    'select[lines]': 'true',
+  })
+  const response = await fetcher(`${api}/vassal-links?${params.toString()}`, {
+    credentials: 'include',
+  })
+  const docs = await readDocs(response, 'the sources of the chain', 'could not be read')
+  for (const doc of docs) {
+    const { id, lines } = (doc ?? {}) as { id?: unknown; lines?: { source?: unknown }[] }
+    const source = relationId(lines?.[0]?.source)
+    if ((typeof id === 'number' || typeof id === 'string') && source !== null)
+      sources.set(String(id), source)
+  }
+  return sources
 }
 
 /**

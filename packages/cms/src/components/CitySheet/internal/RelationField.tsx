@@ -18,6 +18,7 @@ import type { CollectionSlug, ValueWithRelation } from 'payload'
  * @param props.value - the id chosen, `null` for none
  * @param props.onChange - called with the id chosen, or `null` once emptied
  * @param props.readOnly - held as it is: while what it chose is being saved
+ * @param props.required - marked required — its star; the form says what is missing
  * @returns the field
  */
 export function RelationField({
@@ -28,6 +29,7 @@ export function RelationField({
   value,
   onChange,
   readOnly = false,
+  required = false,
 }: {
   path: string
   collection: CollectionSlug
@@ -36,6 +38,7 @@ export function RelationField({
   value: number | string | null
   onChange: (id: number | string | null) => void
   readOnly?: boolean
+  required?: boolean
 }) {
   // Handlers — Payload hands `null` once the field is emptied, whatever its type says
   const handleChange = (next: ValueWithRelation | null) => {
@@ -51,6 +54,7 @@ export function RelationField({
       allowCreate
       allowEdit
       readOnly={readOnly}
+      required={required}
       label={label}
       description={description}
       value={value === null ? null : { relationTo: collection, value }}
