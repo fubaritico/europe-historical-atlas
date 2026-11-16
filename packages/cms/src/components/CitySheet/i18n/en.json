@@ -157,5 +157,12 @@
   "chainNotSaved": "The chain of vassalage is not saved: see the red message under the « Vassal of » line.",
   "fixFields": "Nothing is saved: some fields are to correct, see the messages in red.",
   "nothingToSave": "Nothing to save: nothing changed.",
-  "linkShared": "This link serves every city held under this title: changing or removing it does for them too."
+  "linkShared": "This link serves every city held under this title: changing or removing it does for them too.",
+  "chainHolderNotSaved": "The chain of vassalage is not saved: see the red message under the « Sovereign » box of « Held by ».",
+  "chainNotSavedNoYear": "The chain of vassalage is not saved: enter the sheet’s year, the chain is read at that year.",
+  "chainNotSavedNoHolder": "The chain of vassalage is not saved: first choose the person and title of « Held by ».",
+  "removalRefused": "The link « {vassal}, vassal of {suzerain} » was not removed: the server refused — « {message} ». It is still in the base; the rest of the chain and the sheet are not saved.",
+  "removalFailed": "The link « {vassal}, vassal of {suzerain} » was not removed: the server does not answer. It is still in the base; the rest of the chain and the sheet are not saved. Try again in a moment.",
+  "removalRefusedUnnamed": "A link closed by ✕ was not removed: the server refused — « {message} ». It is still in the base; the rest of the chain and the sheet are not saved.",
+  "removalFailedUnnamed": "A link closed by ✕ was not removed: the server does not answer. It is still in the base; the rest of the chain and the sheet are not saved. Try again in a moment."
 }

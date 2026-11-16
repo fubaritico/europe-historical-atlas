@@ -52,8 +52,13 @@ export interface PendingWiring {
   readonly saveSovereign: SaveSovereign
   /** Reads the chain again once something is saved. */
   readonly onSaved: () => void
-  /** Called with the error once a save fails, for the screen to say it. */
-  readonly onFailed: (error: unknown) => void
+  /** Called once a line's or the holder's save fails — the console already keeps why — for a toast to say it. */
+  readonly onFailed: () => void
+  /**
+   * Called once a link closed by ✕ is not removed — its line already gone from the screen —, with the server's
+   * sentence, `null` when the server did not answer: for a toast to say which link stays in the base.
+   */
+  readonly onRemovalStopped: (link: string, message: string | null) => void
 }
 
 /**

@@ -157,5 +157,12 @@
   "chainNotSaved": "La chaîne de vassalité n’est pas enregistrée : voyez le message rouge sous la ligne « Vassal de ».",
   "fixFields": "Rien n’est enregistré : des champs sont à corriger, voyez les messages en rouge.",
   "nothingToSave": "Rien à enregistrer : rien n’a changé.",
-  "linkShared": "Ce maillon sert à toutes les villes tenues sous ce titre : le changer ou le retirer vaut pour elles aussi."
+  "linkShared": "Ce maillon sert à toutes les villes tenues sous ce titre : le changer ou le retirer vaut pour elles aussi.",
+  "chainHolderNotSaved": "La chaîne de vassalité n’est pas enregistrée : voyez le message rouge sous la case « Souverain » de « Tenue par ».",
+  "chainNotSavedNoYear": "La chaîne de vassalité n’est pas enregistrée : saisissez l’année de la fiche, la chaîne se lit à cette année.",
+  "chainNotSavedNoHolder": "La chaîne de vassalité n’est pas enregistrée : choisissez d’abord le personnage et le titre de « Tenue par ».",
+  "removalRefused": "Le maillon « {vassal}, vassal de {suzerain} » n’a pas été retiré : le serveur a refusé — « {message} ». Il est toujours dans la base ; la suite de la chaîne et la fiche ne sont pas enregistrées.",
+  "removalFailed": "Le maillon « {vassal}, vassal de {suzerain} » n’a pas été retiré : le serveur ne répond pas. Il est toujours dans la base ; la suite de la chaîne et la fiche ne sont pas enregistrées. Réessayez dans un instant.",
+  "removalRefusedUnnamed": "Un maillon fermé par ✕ n’a pas été retiré : le serveur a refusé — « {message} ». Il est toujours dans la base ; la suite de la chaîne et la fiche ne sont pas enregistrées.",
+  "removalFailedUnnamed": "Un maillon fermé par ✕ n’a pas été retiré : le serveur ne répond pas. Il est toujours dans la base ; la suite de la chaîne et la fiche ne sont pas enregistrées. Réessayez dans un instant."
 }

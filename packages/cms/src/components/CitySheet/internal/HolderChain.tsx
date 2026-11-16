@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useBlockWiring } from '../hooks/useBlockWiring'
 import { usePendingLinks } from '../hooks/usePendingLinks'
 import { useVassalChain } from '../hooks/useVassalChain'
+import { removalSentence } from '../utils/removalSentence'
 import { sheetYear } from '../utils/sheetYear'
 
 import { SovereignOrChain } from './SovereignOrChain'
@@ -69,6 +70,8 @@ export function HolderChain({
     saveSovereign: writers.saveSovereign,
     onSaved: reread,
     onFailed: () => toast.error(say('linkFailed')),
+    // Its line already gone from the screen, a link the server kept is said in a toast (the dev, 2026-11-16)
+    onRemovalStopped: (names, message) => toast.error(removalSentence(names, message, say)),
   })
 
   // Each chain read is loaded into the block; the sheet's « Enregistrer » saves it first

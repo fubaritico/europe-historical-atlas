@@ -8,26 +8,26 @@ describe('useOneSave', () => {
   describe('happy path', () => {
     it('runs a save and gives its answer', async () => {
       const { result } = renderHook(() => useOneSave())
-      expect(await result.current.run(() => Promise.resolve(false))).toBe(false)
+      expect(await result.current.run(() => Promise.resolve('line' as const))).toBe('line')
     })
   })
 
   describe('variants', () => {
     it('sends nothing for a second save while the first runs, and says it is busy', async () => {
       const { result } = renderHook(() => useOneSave())
-      let release: (done: boolean) => void = () => undefined
+      let release: (done: 'saved') => void = () => undefined
       const first = result.current.run(
         () =>
-          new Promise<boolean>((resolve) => {
+          new Promise<'saved'>((resolve) => {
             release = resolve
           })
       )
-      const second = vi.fn(() => Promise.resolve(false))
+      const second = vi.fn(() => Promise.resolve('line' as const))
       expect(result.current.busy()).toBe(true)
-      expect(await result.current.run(second)).toBe(true)
+      expect(await result.current.run(second)).toBe('busy')
       expect(second).not.toHaveBeenCalled()
       await act(async () => {
-        release(true)
+        release('saved')
         await first
       })
       expect(result.current.busy()).toBe(false)

@@ -38,6 +38,7 @@ function wiringOf(
     ),
     onSaved: vi.fn(),
     onFailed: vi.fn(),
+    onRemovalStopped: vi.fn(),
   }
   return { wiring, log }
 }
@@ -111,7 +112,7 @@ describe('saveLines', () => {
         removed: ['9'],
         sovereignty: { sovereign: false, was: true, links: [] },
       })
-      expect(await saveLines(state, targets)).toBe(true)
+      expect(await saveLines(state, targets)).toBe('saved')
       expect(log).toEqual([
         'deleteLink 9',
         'updateLink 7',
@@ -131,7 +132,7 @@ describe('saveLines', () => {
         removed: ['7'],
         sovereignty: { sovereign: true, was: false, links: ['7', '8'] },
       })
-      expect(await saveLines(state, targets)).toBe(true)
+      expect(await saveLines(state, targets)).toBe('saved')
       expect(log).toEqual(['saveSovereign 10 true', 'deleteLink 7', 'deleteLink 8'])
     })
 
@@ -139,7 +140,7 @@ describe('saveLines', () => {
       const { wiring, log } = wiringOf()
       const { targets } = targetsOf(wiring, [])
       const state = stateOf([], { sovereignty: { sovereign: true, was: true, links: ['8'] } })
-      expect(await saveLines(state, targets)).toBe(true)
+      expect(await saveLines(state, targets)).toBe('saved')
       expect(log).toEqual(['deleteLink 8'])
     })
   })
@@ -149,7 +150,7 @@ describe('saveLines', () => {
       const { wiring, log } = wiringOf({ saveSovereign: REFUSED })
       const { targets, kept } = targetsOf(wiring, [])
       const state = stateOf([], { sovereignty: { sovereign: true, was: false, links: ['8'] } })
-      expect(await saveLines(state, targets)).toBe(false)
+      expect(await saveLines(state, targets)).toBe('holder')
       expect(log).toEqual(['saveSovereign 10 true'])
       expect(kept.error).toEqual({ kind: 'refused', message: 'Refusé.' })
       expect(wiring.onSaved).not.toHaveBeenCalled()
@@ -159,7 +160,7 @@ describe('saveLines', () => {
       const { wiring, log } = wiringOf({ deleteLink: REFUSED })
       const { targets, kept } = targetsOf(wiring, [])
       const state = stateOf([], { sovereignty: { sovereign: true, was: false, links: ['8'] } })
-      expect(await saveLines(state, targets)).toBe(false)
+      expect(await saveLines(state, targets)).toBe('holder')
       expect(log).toEqual(['saveSovereign 10 true', 'deleteLink 8'])
       expect(kept.error).toEqual({ kind: 'refused', message: 'Refusé.' })
       expect(wiring.onSaved).toHaveBeenCalledOnce()
@@ -170,7 +171,7 @@ describe('saveLines', () => {
       const added = { ...emptyLine(), suzerain: 40, sovereign: true }
       const { targets, kept } = targetsOf(wiring, [added])
       const state = stateOf([added], { sovereignty: { sovereign: false, was: true, links: [] } })
-      expect(await saveLines(state, targets)).toBe(false)
+      expect(await saveLines(state, targets)).toBe('line')
       expect(log).toEqual(['saveLink 10→40'])
       expect(kept.lines[0]?.status).toEqual({ kind: 'refused', message: 'Refusé.' })
     })
@@ -178,9 +179,35 @@ describe('saveLines', () => {
     it('sends nothing while a line misses its suzerain, and says it on the line', async () => {
       const { wiring, log } = wiringOf()
       const { targets, kept } = targetsOf(wiring, [emptyLine()])
-      expect(await saveLines(stateOf(kept.lines), targets)).toBe(false)
+      expect(await saveLines(stateOf(kept.lines), targets)).toBe('line')
       expect(log).toEqual([])
       expect(kept.lines[0]?.status).toEqual({ kind: 'missing' })
+    })
+
+    it('stops at a link the server keeps, hands it with its sentence to the toast, and sends nothing after it', async () => {
+      const { wiring, log } = wiringOf({ deleteLink: REFUSED })
+      const changed = { ...stored('7'), suzerain: 30 }
+      const { targets } = targetsOf(wiring, [changed])
+      expect(await saveLines(stateOf([changed], { removed: ['9'] }), targets)).toBe('removal')
+      expect(log).toEqual(['deleteLink 9'])
+      expect(wiring.onRemovalStopped).toHaveBeenCalledWith('9', 'Refusé.')
+      expect(wiring.onFailed).not.toHaveBeenCalled()
+    })
+
+    it('sends nothing for a sheet with no year, and says it', async () => {
+      const { wiring, log } = wiringOf()
+      const changed = { ...stored('7'), suzerain: 30 }
+      const { targets } = targetsOf(wiring, [changed])
+      expect(await saveLines({ ...stateOf([changed]), year: null }, targets)).toBe('no-year')
+      expect(log).toEqual([])
+    })
+
+    it('sends nothing for a sheet with no holder, and says it', async () => {
+      const { wiring, log } = wiringOf()
+      const changed = { ...stored('7'), suzerain: 30 }
+      const { targets } = targetsOf(wiring, [changed])
+      expect(await saveLines({ ...stateOf([changed]), holder: null }, targets)).toBe('no-holder')
+      expect(log).toEqual([])
     })
   })
 
@@ -194,9 +221,22 @@ describe('saveLines', () => {
       }
       const { targets, kept } = targetsOf(wiring, [])
       const state = stateOf([], { sovereignty: { sovereign: true, was: false, links: [] } })
-      expect(await saveLines(state, targets)).toBe(false)
+      expect(await saveLines(state, targets)).toBe('holder')
       expect(kept.error).toEqual({ kind: 'failed' })
       expect(wiring.onFailed).toHaveBeenCalledOnce()
+    })
+
+    it('says a thrown removal in the toast of the link alone, not in the toast of a line', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { wiring: saving } = wiringOf()
+      const wiring: PendingWiring = {
+        ...saving,
+        deleteLink: vi.fn(() => Promise.reject(new TypeError('offline'))),
+      }
+      const { targets } = targetsOf(wiring, [])
+      expect(await saveLines(stateOf([], { removed: ['9'] }), targets)).toBe('removal')
+      expect(wiring.onRemovalStopped).toHaveBeenCalledWith('9', null)
+      expect(wiring.onFailed).not.toHaveBeenCalled()
     })
   })
 
@@ -204,7 +244,7 @@ describe('saveLines', () => {
     it('saves nothing and reads nothing again for a block left as the base holds it', async () => {
       const { wiring, log } = wiringOf()
       const { targets } = targetsOf(wiring, [stored('7')])
-      expect(await saveLines(stateOf([stored('7')]), targets)).toBe(true)
+      expect(await saveLines(stateOf([stored('7')]), targets)).toBe('saved')
       expect(log).toEqual([])
       expect(wiring.onSaved).not.toHaveBeenCalled()
     })

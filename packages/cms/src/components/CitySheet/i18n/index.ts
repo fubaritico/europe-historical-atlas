@@ -19,6 +19,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   the invitation to choose.
  * - `importanceNamed` — `value`, the importance chosen, or the invitation to choose one.
  * - `unexpected` — `detail`, the schema's own wording of an issue the form has no sentence for.
+ * - `removalRefused`, `removalFailed` — `vassal` and `suzerain`, the titles of a link the server kept; `removalRefused`
+ *   and `removalRefusedUnnamed` — `message`, the server's sentence.
  */
 export type CitySheetMessageKey = keyof typeof en
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Formik } from 'formik'
+import { Formik, useFormikContext } from 'formik'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
@@ -15,6 +15,7 @@ import { HolderChain } from './HolderChain'
 import type { ChainWriters } from './HolderChain'
 import type { ChainSaver } from '../hooks/useChainSaver'
 import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainAnswer } from '../utils/saveLines'
 import type { LinkAnswer } from '../utils/saveVassalLink'
 import type { SheetValues } from '../utils/sheetValues'
 
@@ -63,7 +64,7 @@ function values(year: string, titled = true): SheetValues {
  * @returns the bridge and a way to press « Enregistrer »
  */
 function bridge() {
-  let saveAll: () => Promise<boolean> = () => Promise.resolve(true)
+  let saveAll: () => Promise<ChainAnswer> = () => Promise.resolve('saved')
   const saver: ChainSaver = {
     waiting: 0,
     setWaiting: vi.fn(),
@@ -75,13 +76,26 @@ function bridge() {
   return {
     saver,
     save: async () => {
-      let done = false
+      const result: { answer: ChainAnswer | null } = { answer: null }
       await act(async () => {
-        done = await saver.saveAll()
+        result.answer = await saver.saveAll()
       })
-      return done
+      return result.answer === 'saved'
     },
   }
+}
+
+/**
+ * A button that chooses another holder, as the field « Tenue par » would.
+ * @returns the button
+ */
+function OtherHolder() {
+  const { setFieldValue } = useFormikContext<SheetValues>()
+  return (
+    <button type="button" onClick={() => void setFieldValue('holderTitle', 99)}>
+      Autre tenant
+    </button>
+  )
 }
 
 /**
@@ -107,7 +121,10 @@ function renderChain(
   }
   const view = render(
     <Formik initialValues={initial} onSubmit={() => undefined}>
-      <HolderChain read={read} writers={all} say={say} />
+      <>
+        <HolderChain read={read} writers={all} say={say} />
+        <OtherHolder />
+      </>
     </Formik>
   )
   return { ...view, writers: all, save }
@@ -419,6 +436,24 @@ describe('HolderChain', () => {
   })
 
   describe('unmanaged errors', () => {
+    // The dev, 2026-11-16: « c'est un toast », the line already gone from the screen
+    it('says a link closed with ✕ that the server keeps in a toast, by its two titles', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { save } = renderChain(() => Promise.resolve(UNDER_DUKE), {
+        deleteLink: vi.fn(() =>
+          Promise.resolve({ kind: 'refused', message: 'Accès refusé.' } as const)
+        ),
+      })
+      const line = await screen.findByRole('group', { name: LINE })
+      await userEvent
+        .setup()
+        .click(within(line).getByRole('button', { name: 'Fermer cette ligne sans l’enregistrer' }))
+      expect(await save()).toBe(false)
+      expect(toast.error).toHaveBeenCalledWith(
+        say('removalRefused', { vassal: COUNT.name, suzerain: DUKE.name, message: 'Accès refusé.' })
+      )
+    })
+
     it('says a failed save under its block, in a toast and the console', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
       const { save } = renderChain(() => Promise.resolve(ALONE), {
@@ -439,6 +474,24 @@ describe('HolderChain', () => {
   })
 
   describe('edge cases', () => {
+    // Review QUAL-001, 2026-11-16: the old title's lines were saved under the new one while it was read
+    it('saves nothing of the old holder’s block once another holder is chosen, before its chain is read', async () => {
+      const read = vi
+        .fn()
+        .mockResolvedValueOnce(UNDER_DUKE)
+        .mockReturnValue(new Promise<ChainReading[]>(() => undefined))
+      const { writers, save } = renderChain(read)
+      const line = await screen.findByRole('group', { name: LINE })
+      const user = userEvent.setup()
+      await user.click(
+        within(line).getByRole('button', { name: 'Fermer cette ligne sans l’enregistrer' })
+      )
+      await user.click(screen.getByRole('button', { name: 'Autre tenant' }))
+      expect(await save()).toBe(true)
+      expect(writers.deleteLink).not.toHaveBeenCalled()
+      expect(writers.saveLink).not.toHaveBeenCalled()
+    })
+
     it('says links that contradict one another, rather than climbing forever', async () => {
       const { container } = renderChain(() =>
         Promise.resolve([

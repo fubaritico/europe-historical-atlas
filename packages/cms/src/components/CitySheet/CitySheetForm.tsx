@@ -41,9 +41,9 @@ export interface CitySheetFormProps {
 
 /**
  * The « Ville à une date » form (ATLAS-295, `files/plans/atlas/city-sheet-screen.md`): Formik for its state, the rules
- * of `core`, the design system's fields. **Valid as it is typed**: an error shows only on a field already touched,
- * and the button stays greyed until every field is valid and something has changed (the dev: *« tant que tous les
- * champs ne sont pas valides, il n'y a pas de bouton ajouter »*). Saved through Payload's API, so the server's own
+ * of `core`, the design system's fields. **Valid as it is typed**: an error shows only on a field already touched.
+ * **« Enregistrer » is always there to click** (the dev, 2026-11-16): a click with a field to fix says that nothing is
+ * saved and shows each field's error; the chain under the holder is saved first (`useSaveAll`). Saved through Payload's API, so the server's own
  * rules — the overlap among them — still hold behind it. A refusal or a silence of the server is said at the top of
  * the form, under the field it names, in a toast and in the console; what was typed is kept (the dev, 2026-10-30).
  * @param props - the values, the id, the languages and the routes
