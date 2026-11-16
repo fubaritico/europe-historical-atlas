@@ -1,13 +1,21 @@
 import { citiesOfYear, shownCityPoints } from '../state/citiesSlice'
 
-import { cityAlert, cityVerdicts } from './cityVerdict'
+import { cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
 
 import type { CityAlert } from './paint/cityPainter'
 import type { CitiesState, CityMark, ShownCity } from '../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
+/** What a city's point shows: its alert ring, and the Wikidata id of the polity whose colour fills it. */
+export interface CityPaint {
+  /** Its alert, or `null` at the right place. */
+  readonly alert: CityAlert | null
+  /** The polity whose colour fills the dot, by its Wikidata id — `null` for a hollow dot. */
+  readonly holder: string | null
+}
+
 /**
- * Each city's alert on the map (CARTO-389), kept for one document version — a pan repaints on every pointer move, and
+ * Each city's alert and colour on the map (CARTO-389), kept for one document version — a pan repaints on every pointer move, and
  * a verdict projects every anchor of the document. **Keyed on the document, its version and the cities read**: a
  * gesture, another map opened, or the cities read again computes them anew; nothing else does.
  */
@@ -15,17 +23,17 @@ import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocume
 /** The cache. */
 export interface CityAlertCache {
   /**
-   * The alerts of the cities of the year open.
+   * The alerts and colours of the cities of the year open.
    * @param document - the year open
    * @param version - the edition's version counter
    * @param cities - every city of the export
-   * @returns each city's alert, by its id — a city with none is absent
+   * @returns each city's paint, by its id
    */
   alertsOf: (
     document: YearDocument,
     version: number,
     cities: readonly CityMark[]
-  ) => ReadonlyMap<string, CityAlert>
+  ) => ReadonlyMap<string, CityPaint>
 }
 
 /**
@@ -37,7 +45,7 @@ export function createCityAlertCache(): CityAlertCache {
     document: YearDocument
     version: number
     cities: readonly CityMark[]
-    alerts: ReadonlyMap<string, CityAlert>
+    alerts: ReadonlyMap<string, CityPaint>
   } | null = null
   return {
     alertsOf: (document, version, cities) => {
@@ -49,10 +57,12 @@ export function createCityAlertCache(): CityAlertCache {
       ) {
         return last.alerts
       }
-      const alerts = new Map<string, CityAlert>()
-      for (const [id, { kind }] of cityVerdicts(document, citiesOfYear(cities, document.year))) {
-        const alert = cityAlert(kind)
-        if (alert !== null) alerts.set(id, alert)
+      const alerts = new Map<string, CityPaint>()
+      const declared = new Set(
+        document.polities.flatMap(({ wikidata }) => (wikidata === null ? [] : [wikidata]))
+      )
+      for (const [id, verdict] of cityVerdicts(document, citiesOfYear(cities, document.year))) {
+        alerts.set(id, { alert: cityAlert(verdict.kind), holder: paintedHolder(verdict, declared) })
       }
       last = { document, version, cities, alerts }
       return alerts
@@ -61,7 +71,7 @@ export function createCityAlertCache(): CityAlertCache {
 }
 
 /** No city's alert — the cities drawn as a dot and its name, or none shown. */
-const NO_ALERTS: ReadonlyMap<string, CityAlert> = new Map()
+const NO_ALERTS: ReadonlyMap<string, CityPaint> = new Map()
 
 /**
  * The cities the canvas paints, each with its alert (CARTO-389). The alerts are asked of the cache only where they are
@@ -89,8 +99,11 @@ export function citiesToPaint(
     state.shownCities,
     state.document.year,
     state.listedCities
-  ).map((city) => ({
-    ...city,
-    alert: alerts.get(city.id) ?? null,
-  }))
+  ).map((city) => {
+    const paint = alerts.get(city.id)
+    // Not judged — the cities shown as names, or none shown: the dot keeps the sources' holder, as before
+    return paint === undefined
+      ? { ...city, alert: null }
+      : { ...city, holder: paint.holder, alert: paint.alert }
+  })
 }

@@ -102,11 +102,12 @@ describe('editor-chrome.css — the {Cities} alerts', () => {
     })
 
     // CARTO-435, the dev of 2026-11-15: « we don't know » never looks like « right ».
-    it('writes « we do not know » in slate: a city that cannot be compared, or whose chain stops short', () => {
-      for (const kind of ['cannotCompare', 'incomplete']) {
-        expect(declarationsFor(row(kind))).toContain('color: var(--uncertain);')
-        expect(declarationsFor(detail(kind))).toContain('color: var(--uncertain);')
-      }
+    // The dev's rule of 2026-11-16: the slate is gone — a chain that stops short is yellow, no Wikidata id is red.
+    it('writes a chain that stops short in yellow, and a polity with no Wikidata id in red', () => {
+      expect(declarationsFor(row('incomplete'))).toContain('color: var(--caution);')
+      expect(declarationsFor(detail('incomplete'))).toContain('color: var(--caution);')
+      expect(declarationsFor(row('cannotCompare'))).toContain('color: var(--warn);')
+      expect(declarationsFor(detail('cannotCompare'))).toContain('color: var(--warn);')
     })
   })
 

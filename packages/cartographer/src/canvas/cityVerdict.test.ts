@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { byChain, cityAlert, cityVerdicts } from './cityVerdict'
+import { byChain, cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
 
+import type { CityVerdictKind } from './cityVerdict'
 import type { CityMark } from '../state/citiesSlice'
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 
@@ -117,11 +118,11 @@ describe('cityAlert', () => {
   // L3–L4: N/A — a total mapping of a closed union.
 
   describe('edge cases', () => {
-    // CARTO-435, the dev of 2026-11-15 on the white points: « we don't know » must never look like « right ».
-    it('marks uncertain a city with nothing to compare by, or whose chain stops short — never plain', () => {
-      expect([cityAlert('cannotCompare'), cityAlert('incomplete'), cityAlert('agrees')]).toEqual([
-        'uncertain',
-        'uncertain',
+    // The dev's rule of 2026-11-16: yellow not at the right place, red a problem in the data, plain at the right place.
+    it('rings yellow a chain that stops short, red a polity with no Wikidata id — never plain', () => {
+      expect([cityAlert('incomplete'), cityAlert('cannotCompare'), cityAlert('agrees')]).toEqual([
+        'toCorrect',
+        'missing',
         null,
       ])
     })
@@ -175,6 +176,62 @@ describe('byChain', () => {
     it('finds wrong a chain whose links contradict one another, the polity not in it', () => {
       const loop: ContentChainReading[] = [{ titles: [MAINZ, EMPIRE, MAINZ], end: 'loop' }]
       expect(byChain(loop, { name: 'Thuringia', wikidata: 'Q2' })).toBe('misplaced')
+    })
+  })
+})
+
+/**
+ * A city's verdict over the Kingdom of France drawn, with no holder by the sources.
+ * @param kind - the verdict
+ * @param chain - its chain
+ * @returns the verdict
+ */
+function verdict(kind: CityVerdictKind, chain: ContentChainReading[] | null) {
+  return {
+    onMap: { name: 'Kingdom of France', wikidata: 'Q70972' },
+    bySources: null,
+    kind,
+    chain,
+  }
+}
+
+// The dev, 2026-11-16: *"well placed, it has the colour of the country it is in"* — in France, the points blue.
+describe('paintedHolder', () => {
+  const FRANCE = { name: 'Philippe Ier — royaume de France', wikidata: 'Q70972' }
+  const BOURGES = { name: 'Eudes Arpin — vicomté de Bourges', wikidata: 'Q999' }
+  const PONTHIEU = { name: 'Guy Ier — comté de Ponthieu', wikidata: 'Q60930' }
+  const drawn = new Set(['Q70972', 'Q12548'])
+
+  describe('happy path', () => {
+    it('paints a city at the right place in the colour of the polity under it — its chain naming no colour', () => {
+      const chain: ContentChainReading[] = [{ titles: [BOURGES, FRANCE], end: 'unknown' }]
+      expect(paintedHolder(verdict('agrees', chain), drawn)).toBe('Q70972')
+    })
+  })
+
+  describe('variants', () => {
+    it('paints a misplaced city in the first title of its chain the map has drawn', () => {
+      const chain: ContentChainReading[] = [{ titles: [BOURGES, FRANCE], end: 'unknown' }]
+      const under = {
+        ...verdict('misplaced', chain),
+        onMap: { name: 'Vermandois', wikidata: 'Q2' },
+      }
+      expect(paintedHolder(under, drawn)).toBe('Q70972')
+    })
+
+    it("paints a city without a chain in the sources' holder, as before", () => {
+      const city = {
+        ...verdict('misplaced', null),
+        bySources: { name: 'Empire', wikidata: 'Q12548' },
+      }
+      expect(paintedHolder(city, drawn)).toBe('Q12548')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('leaves the dot hollow when the map has drawn no title of the chain', () => {
+      const chain: ContentChainReading[] = [{ titles: [PONTHIEU], end: 'unknown' }]
+      expect(paintedHolder(verdict('incomplete', chain), drawn)).toBeNull()
     })
   })
 })

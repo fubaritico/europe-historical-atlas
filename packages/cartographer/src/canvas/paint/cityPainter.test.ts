@@ -9,7 +9,6 @@ const STYLE: CityStyle = {
   cityHalo: '#f3e7cd',
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
-  cityUncertain: '#6f8396',
   cityRadius: 3,
   cityFontSize: 11,
 }

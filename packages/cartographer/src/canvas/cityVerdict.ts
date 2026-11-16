@@ -133,15 +133,37 @@ export function cityVerdicts(
 }
 
 /**
- * The alert a verdict raises, or none — only a city where all is well keeps its plain look. One that cannot be
- * compared, or whose chain stops short of the polity under it, is **uncertain**, never plain (the dev, 2026-11-15, on
- * the white points: *"we don't understand"* — « right » and « we don't know » looked alike).
+ * The polity whose colour fills a city's dot, by its Wikidata id (the dev, 2026-11-16: *"well placed, it has the
+ * colour of the country it is in"*). At the right place, the polity under it. Elsewhere, the one that holds it — by
+ * its chain, the first title from the holder up that the map has drawn; without a chain, the sources' holder — so a
+ * dot of one colour on another's ground shows at once (2026-11-05). `null` — a hollow dot — when the map has none.
+ * @param verdict - the city's verdict
+ * @param declared - the Wikidata ids the map's polities carry
+ * @returns the Wikidata id to paint, or `null`
+ */
+export function paintedHolder(verdict: CityVerdict, declared: ReadonlySet<string>): string | null {
+  if (verdict.kind === 'agrees') return verdict.onMap?.wikidata ?? null
+  if (verdict.chain === null) return verdict.bySources?.wikidata ?? null
+  for (const reading of verdict.chain) {
+    const drawn = reading.titles.find(
+      (title) => title.wikidata !== null && declared.has(title.wikidata)
+    )
+    if (drawn !== undefined) return drawn.wikidata
+  }
+  return null
+}
+
+/**
+ * The alert a verdict raises, or none — the dev's rule, 2026-11-16 (*"a point not at the right place is yellow; a
+ * technical problem is red; well placed, it has the colour of the country it is in"*): **yellow** for a city the map
+ * does not put in its chain — misplaced, a holder not drawn yet, or a chain that stops short of the polity under it;
+ * **red** for what the data cannot answer — no holder entered, or a polity under it with no Wikidata id to compare.
+ * Only a city at the right place keeps its plain look. The slate of CARTO-435 is gone: it hid the yellow.
  * @param kind - the verdict
  * @returns the alert, or `null`
  */
 export function cityAlert(kind: CityVerdictKind): CityAlert | null {
-  if (kind === 'notEntered') return 'missing'
-  if (kind === 'misplaced' || kind === 'toDeclare') return 'toCorrect'
-  if (kind === 'cannotCompare' || kind === 'incomplete') return 'uncertain'
+  if (kind === 'notEntered' || kind === 'cannotCompare') return 'missing'
+  if (kind === 'misplaced' || kind === 'toDeclare' || kind === 'incomplete') return 'toCorrect'
   return null
 }

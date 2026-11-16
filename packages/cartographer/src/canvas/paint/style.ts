@@ -54,9 +54,6 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   // A city's alert on its point (CARTO-389): the list's two inks, `--warn` and `--caution` (theme.css, CARTO-386).
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
-  // An uncertain city (CARTO-435): a slate, apart from the red and the yellow — « we do not know », not « wrong ».
-  // Provisional: the colour is the dev's to choose (CARTO-435, « à trancher »).
-  cityUncertain: '#6f8396',
   cityRadius: 3,
   cityFontSize: 11,
   // An overlap's stripes (CARTO-364): wide enough to read a colour, narrow enough to read two in a small piece.
