@@ -324,7 +324,7 @@ describe('formatCityAlerts', () => {
       )
 
       expect(alone).toContain(
-        'Metz — fiche 9 — cannotCompare : rouge — le pays dessiné sous elle n’a ni identifiant Wikidata ni territoire du CMS'
+        'Metz — fiche 9 — cannotCompare : rouge — le pays dessiné sous elle n’a ni identifiant Wikidata ni CMS ID'
       )
     })
 

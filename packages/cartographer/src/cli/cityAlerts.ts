@@ -69,7 +69,7 @@ const SAID: Readonly<Record<AlertKind, string>> = {
   misplaced: 'le pays dessiné sous elle n’est pas dans sa chaîne',
   incomplete: 'sa chaîne s’arrête faute de maillon, le pays dessiné sous elle n’y est pas',
   toDeclare: 'le titre vérifié n’est pas dessiné sur la carte',
-  cannotCompare: 'rien à comparer : ni identifiant Wikidata ni territoire du CMS',
+  cannotCompare: 'rien à comparer : ni identifiant Wikidata ni CMS ID',
   notEntered: 'aucun détenteur saisi dans le CMS',
 }
 
@@ -128,9 +128,7 @@ function isAlert(kind: CityVerdictKind): kind is AlertKind {
  */
 function idText(ids: { wikidata: string | null; territory?: number }): string {
   if (ids.wikidata !== null) return ids.wikidata
-  return ids.territory === undefined
-    ? 'sans identifiant'
-    : `territoire ${String(ids.territory)} du CMS`
+  return ids.territory === undefined ? 'sans identifiant' : `CMS ID ${String(ids.territory)}`
 }
 
 /** How a reading ends, in French. */
@@ -274,7 +272,7 @@ function reasonOf(verdict: CityVerdict, kind: AlertKind): string {
     kind,
     verdict.chain === null
       ? 'le détenteur saisi en texte n’a pas d’identifiant Wikidata'
-      : 'le pays dessiné sous elle n’a ni identifiant Wikidata ni territoire du CMS'
+      : 'le pays dessiné sous elle n’a ni identifiant Wikidata ni CMS ID'
   )
 }
 

@@ -22,12 +22,12 @@
   "idMissing": "Il faut un identifiant — ce nom n’a pas permis d’en faire un.",
   "idTaken": "Cet identifiant est déjà pris dans cette année.",
   "notAYear": "Une année, en nombre entier.",
-  "territory": "Territoire du CMS",
-  "territoryHelp": "Celui que la chaîne d’une ville nomme, quand le pays n’a pas d’identifiant Wikidata : la Thuringe de 1100.",
+  "territory": "CMS ID",
+  "territoryHelp": "La fiche du CMS (menu Territoires) qui est ce pays : la chaîne de ses villes s’y compare quand il n’a pas d’identifiant Wikidata, comme la Thuringe de 1100.",
   "territoryPlaceholder": "Tapez un nom pour choisir…",
   "territoryList": "Territoires du CMS",
   "noTerritoryMatch": "Aucun territoire de ce nom dans le CMS.",
   "noTerritories": "Aucun territoire lu : relancez l’export du CMS (pnpm export:content).",
-  "removeTerritory": "Retirer le territoire {name}",
-  "territoryLabel": "{name} — n° {id}"
+  "removeTerritory": "Retirer {name}",
+  "territoryLabel": "{name} — CMS ID {id}"
 }

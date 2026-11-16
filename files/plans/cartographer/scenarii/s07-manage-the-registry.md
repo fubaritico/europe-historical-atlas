@@ -60,12 +60,12 @@ Scenario: reopen a polity's form and change it
 Scenario: tie a polity with no Wikidata id to its CMS territory
   Given the map 1100 is open, and its « Thuringia » has no Wikidata id
   And the CMS export lists the territory « Thuringe », number 42
-  When I open Thuringia's form and type « thur » in « CMS territory »
-  Then « Thuringe — no. 42 » is offered, and I choose it
+  When I open Thuringia's form and type « thur » in « CMS ID »
+  Then « Thuringe — CMS ID 42 » is offered, and I choose it
   When I validate
   Then Thuringia carries the territory 42 in the registry
   And every city whose chain goes through the CMS territory 42 is judged by it, as by a Wikidata id
-  And a cross beside « Thuringe — no. 42 » removes the tie
+  And a cross beside « Thuringe — CMS ID 42 » removes the tie
   But an export older than CARTO-450 lists no territory: the field says to run the CMS export again
 ```
 

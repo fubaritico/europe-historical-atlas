@@ -22,12 +22,12 @@
   "idMissing": "An id is needed — none could be made from this name.",
   "idTaken": "This id is already used in this year.",
   "notAYear": "A year, as a whole number.",
-  "territory": "CMS territory",
-  "territoryHelp": "The one a city's chain names, when the polity has no Wikidata id: the Thuringia of 1100.",
+  "territory": "CMS ID",
+  "territoryHelp": "The CMS sheet (menu Territories) that is this polity: its cities' chains are compared to it when it has no Wikidata id, as the Thuringia of 1100.",
   "territoryPlaceholder": "Type a name to choose…",
   "territoryList": "Territories of the CMS",
   "noTerritoryMatch": "No territory of that name in the CMS.",
   "noTerritories": "No territory read: run the CMS export again (pnpm export:content).",
-  "removeTerritory": "Remove the territory {name}",
-  "territoryLabel": "{name} — no. {id}"
+  "removeTerritory": "Remove {name}",
+  "territoryLabel": "{name} — CMS ID {id}"
 }

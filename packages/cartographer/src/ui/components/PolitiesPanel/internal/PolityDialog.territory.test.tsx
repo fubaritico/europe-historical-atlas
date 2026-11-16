@@ -53,7 +53,7 @@ function openDialog(editing: YearPolity | null, territories = [THURINGIA_CMS, ME
   return { store, user: userEvent.setup() }
 }
 
-const territoryField = () => screen.getByRole('combobox', { name: 'CMS territory' })
+const territoryField = () => screen.getByRole('combobox', { name: 'CMS ID' })
 
 // CARTO-450, the dev's rule of 2026-11-16: no Wikidata id, the CMS's territory number
 describe('PolityDialog — the CMS territory', () => {
@@ -61,7 +61,7 @@ describe('PolityDialog — the CMS territory', () => {
     it('ties the Thuringia of 1100 to its CMS territory, chosen by typing', async () => {
       const { store, user } = openDialog(THURINGIA)
       await user.type(territoryField(), 'thur')
-      await user.click(await screen.findByRole('option', { name: 'Thuringe — no. 42' }))
+      await user.click(await screen.findByRole('option', { name: 'Thuringe — CMS ID 42' }))
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[0]?.territory).toBe(42)
     })
@@ -70,9 +70,7 @@ describe('PolityDialog — the CMS territory', () => {
   describe('variants', () => {
     it('opens a polity with its territory held, and removes it with its cross', async () => {
       const { store, user } = openDialog({ ...THURINGIA, territory: 42 })
-      await user.click(
-        screen.getByRole('button', { name: 'Remove the territory Thuringe — no. 42' })
-      )
+      await user.click(screen.getByRole('button', { name: 'Remove Thuringe — CMS ID 42' }))
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[0]?.territory).toBeUndefined()
     })
@@ -91,7 +89,7 @@ describe('PolityDialog — the CMS territory', () => {
   describe('edge cases', () => {
     it('shows a territory the export no longer lists by its number, kept in the file', async () => {
       const { store, user } = openDialog({ ...THURINGIA, territory: 99 }, [THURINGIA_CMS])
-      expect(screen.getByRole('button', { name: 'Remove the territory 99' })).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Remove 99' })).toBeTruthy()
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[0]?.territory).toBe(99)
     })
