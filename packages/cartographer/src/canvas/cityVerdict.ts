@@ -54,8 +54,9 @@ export interface CityVerdict {
   /** The city's chain of vassalage it was judged by, or `null` when its sheet names no title (CARTO-435). */
   readonly chain: readonly ContentChainReading[] | null
   /**
-   * The title of its chain the polity under it must be, or lie under — the level below the sovereign (the dev,
-   * 2026-11-16) — by its name; `null` when the chain reaches no sovereign.
+   * The title of its chain the polity under it must be, or lie under — the level below the sovereign, or the
+   * sovereign itself when that level is the holder (the dev, 2026-11-16) — by its name; `null` when the chain
+   * reaches no sovereign.
    */
   readonly expected: string | null
 }
@@ -118,17 +119,21 @@ function liesWithin(
 
 /**
  * The rank, from the holder's title up, of the title a chain ending on a sovereign is checked at: n-1 under a kingdom,
- * n-2 under an empire, n-1 where an empire has no level two below, the sovereign itself when it holds the city.
+ * n-2 under an empire, n-1 where an empire has no level two below — **never the first link, the city and its holder**:
+ * where n-1 is the holder, the sovereign itself is checked (the dev, 2026-11-16,
+ * `files/plans/contribution/vassals/saisie-et-exploitation-des-chaines-de-vassalité.md`). The holder is checked only
+ * when it is the sovereign — a city-state, Florence and its elected head, the one case.
  * @param reading - the reading that ends on a sovereign
  * @param map - the map's polities, for the sovereign's rank
  * @returns the title's rank in the reading
  */
 function checkedLevel(reading: ContentChainReading, map: MapPolities): number {
   const top = reading.titles.length - 1
+  if (top <= 0) return 0
   const sovereign = reading.titles[top]?.wikidata ?? null
   const rank = sovereign === null ? null : map.rankOf(sovereign)
   const wanted = (rank === null ? undefined : LEVELS_BELOW[rank]) ?? 1
-  return Math.max(0, top - (top >= wanted ? wanted : 1))
+  return Math.max(1, top - wanted)
 }
 
 /**
