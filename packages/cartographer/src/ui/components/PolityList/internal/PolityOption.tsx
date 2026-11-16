@@ -7,7 +7,8 @@ import { rowGestures } from '../utils/rowGestures'
 
 import type { ViewportPoint } from '../../../../viewport/viewport'
 import type { PolityRow } from '../../../utils/polityRows'
-import type { CSSProperties } from 'react'
+import type { StackingSide } from '@europe-historical-atlas/core/editor/stacking'
+import type { CSSProperties, PointerEvent } from 'react'
 
 /** What a row shows and reports — its values, and the list's three callbacks. */
 interface PolityOptionProps {
@@ -27,6 +28,10 @@ interface PolityOptionProps {
   onMenu: (id: string, at: ViewportPoint) => void
   /** Opens its polity's dialogue. */
   onEdit: (id: string) => void
+  /** The side a row dragged over it would land on, or `null` when none is (CARTO-457). */
+  dropSide: StackingSide | null
+  /** A press on it, which may begin a drag. */
+  onPointerDown: (id: string, event: PointerEvent) => void
 }
 
 /**
@@ -41,6 +46,8 @@ interface PolityOptionProps {
  * @param props.onChoose - aims at its polity, given the polity's id
  * @param props.onMenu - opens its menu, given the polity's id and the pointer in viewport pixels
  * @param props.onEdit - opens its polity's dialogue, given the polity's id
+ * @param props.dropSide - the side a dragged row would land on, marked by a line; `null` for none
+ * @param props.onPointerDown - a press on it, given the polity's id — the start of a drag (CARTO-457)
  * @returns the option
  */
 export function PolityOption({
@@ -52,10 +59,17 @@ export function PolityOption({
   onChoose,
   onMenu,
   onEdit,
+  dropSide,
+  onPointerDown,
 }: PolityOptionProps) {
   // Context
   const t = useTranslation(POLITY_LIST_MESSAGES)
   const polity = useTranslation(POLITY_MESSAGES)
+
+  // Handlers
+  const handlePointerDown = (event: PointerEvent) => {
+    onPointerDown(row.id, event)
+  }
 
   // Render
   return (
@@ -69,6 +83,9 @@ export function PolityOption({
       // not support on an option: the hierarchy is announced by the hidden suzerain below instead.
       data-depth={row.depth}
       data-dimmed={dimmed}
+      data-polity-id={row.id}
+      data-drop={dropSide ?? undefined}
+      onPointerDown={handlePointerDown}
       // The tree's indent, one step per level of homage — the width is the stylesheet's.
       style={{ '--polity-depth': row.depth } as CSSProperties}
       {...rowGestures(row.id, onChoose, onMenu, onEdit)}

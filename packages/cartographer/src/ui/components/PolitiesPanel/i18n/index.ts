@@ -17,6 +17,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `createStep`, `editStep`, `deleteStep` — The history's names for a creation, a change of properties and
  *   a deletion.
  * - `deleteGone` — The polity was gone by the time the author confirmed — an undo in between.
+ * - `dropStep`, `dropped`, `dropRefused`, `dropInPlace` — A row dragged onto another (CARTO-457): the history's name,
+ *   the result, the refusal between non-siblings, nothing to move; `beside` is the other polity's name, `side`
+ *   `front` or `back`.
  */
 export type PolitiesPanelMessageKey = keyof typeof en
 

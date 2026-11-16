@@ -185,6 +185,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           onChoose={() => undefined}
           onMenu={() => undefined}
           onEdit={() => undefined}
+          onRestack={() => undefined}
           rows={PLATE_ROWS}
           search={['', () => undefined]}
         />

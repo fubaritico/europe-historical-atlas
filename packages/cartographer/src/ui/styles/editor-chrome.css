@@ -621,6 +621,15 @@
   box-shadow: inset 0 0 0 1.5px var(--accent);
 }
 
+/* A row dragged over another (CARTO-457): a line on the side it would land — above, in front of it; below, behind */
+.polity-row[data-drop='front'] {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+.polity-row[data-drop='back'] {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
 .polity-row__swatch {
   width: 11px;
   height: 11px;

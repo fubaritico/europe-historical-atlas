@@ -138,3 +138,29 @@ Scenario: not in the same group, or nothing selected — the top of its own grou
 > **Tested by the dev, 2026-10-17**: *« ça me l'ajoute bien au-dessus. C'est bon, ça fonctionne. »* (the
 > ticket); no walk written down. A selected polity deleted or undone away before validation counts as
 > nothing selected.
+
+## Dragging a row among its siblings — CARTO-457
+
+> The dev, 2026-11-16: *« j'appuie sur County of Barcelona et je veux le remonter, plutôt que de faire ça avec les menus
+> contextuels »* — *« c'est un déplacement entre siblings, il faut pas plus que ça »*.
+
+```gherkin
+Scenario: drag a polity in front of a sibling
+  Given France owes nobody, and Anjou and Blois owe France, Blois in front of Anjou
+  When I press on Anjou's row in {Polities} and move the pointer onto the upper half of Blois' row
+  Then a line marks the top of Blois' row
+  When I release
+  Then Anjou is in front of Blois, its vassals with it, and the map repaints in that order
+  And the result zone says « Anjou placé devant Blois · ctrl+Z l'annule »
+  And ctrl+Z puts Anjou back, in one step
+
+Scenario: a drop beside a polity of another suzerain is refused
+  When I drag Anjou onto the Empire's row and release
+  Then nothing moves, and the result zone says Anjou is ranged among its siblings and the Empire owes another suzerain
+  And a drag never changes a polity's suzerain
+
+Scenario: a click is not a drag
+  When I press on a row and release within 4 pixels
+  Then the row is chosen, as before
+  But a drag released on a row does not choose it; ‹escape› cancels the drag, a release off the rows moves nothing
+```

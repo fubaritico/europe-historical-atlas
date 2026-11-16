@@ -4,7 +4,7 @@ import { paintOrder } from '../data/paintOrder'
 import { createYearDocument } from '../data/yearDocument'
 
 import { FIXTURE_SOURCES } from './documentFixtures'
-import { availableMoves, restack } from './stacking'
+import { areSiblings, availableMoves, restack, restackBeside } from './stacking'
 
 import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
@@ -160,6 +160,68 @@ describe('stacking', () => {
 
     it('refuses every move on an empty year', () => {
       expect(restack(yearOf(), 'fr', 'back')).toBe(false)
+    })
+  })
+})
+
+/**
+ * The ids in list order, back to front.
+ * @param doc - the document
+ * @returns its polities' ids
+ */
+const order = (doc: YearDocument) => doc.polities.map((each) => each.id)
+
+// CARTO-457, the dev, 2026-11-16: a row dragged in {Polities} lands beside a sibling — « c'est un déplacement entre siblings »
+describe('restackBeside', () => {
+  describe('happy path', () => {
+    it('puts the back vassal in front of the front one, in one move', () => {
+      const doc = yearOf(polity('fr'), polity('a', 'fr'), polity('b', 'fr'), polity('c', 'fr'))
+      expect(restackBeside(doc, 'a', 'c', 'front')).toBe(true)
+      expect(order(doc)).toEqual(['fr', 'b', 'c', 'a'])
+    })
+  })
+
+  describe('variants', () => {
+    it('puts a polity behind a sibling', () => {
+      const doc = yearOf(polity('fr'), polity('a', 'fr'), polity('b', 'fr'), polity('c', 'fr'))
+      expect(restackBeside(doc, 'c', 'a', 'back')).toBe(true)
+      expect(order(doc)).toEqual(['fr', 'c', 'a', 'b'])
+    })
+
+    it('moves a top-level group with its vassals, the others in their slots', () => {
+      const doc = yearOf(polity('fr'), polity('norm', 'fr'), polity('hre'))
+      expect(restackBeside(doc, 'hre', 'fr', 'back')).toBe(true)
+      expect(paintOrder(doc.polities).order).toEqual(['hre', 'fr', 'norm'])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a polity dropped among another suzerain’s vassals, nothing moved', () => {
+      const doc = yearOf(polity('fr'), polity('a', 'fr'), polity('hre'), polity('b', 'hre'))
+      expect(areSiblings(doc, 'a', 'b')).toBe(false)
+      expect(restackBeside(doc, 'a', 'b', 'front')).toBe(false)
+      expect(order(doc)).toEqual(['fr', 'a', 'hre', 'b'])
+    })
+
+    it('refuses a vassal dropped on its own suzerain — never siblings', () => {
+      const doc = yearOf(polity('fr'), polity('a', 'fr'))
+      expect(restackBeside(doc, 'a', 'fr', 'front')).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses an id the list does not hold', () => {
+      const doc = yearOf(polity('fr'), polity('hre'))
+      expect(restackBeside(doc, 'nobody', 'fr', 'front')).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('changes nothing for a polity dropped on itself, or where it already stands', () => {
+      const doc = yearOf(polity('a'), polity('b'))
+      expect(restackBeside(doc, 'a', 'a', 'front')).toBe(false)
+      expect(restackBeside(doc, 'a', 'b', 'back')).toBe(false)
+      expect(order(doc)).toEqual(['a', 'b'])
     })
   })
 })

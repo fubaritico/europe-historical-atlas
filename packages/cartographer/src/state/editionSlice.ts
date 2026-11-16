@@ -21,7 +21,7 @@ import {
 import { eraseEdge } from '@europe-historical-atlas/core/editor/eraseEdge'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
-import { restack } from '@europe-historical-atlas/core/editor/stacking'
+import { restack, restackBeside } from '@europe-historical-atlas/core/editor/stacking'
 
 import { outlineActions } from './outlineActions'
 import { pasteActions } from './pasteActions'
@@ -47,7 +47,7 @@ import type {
   HistoryStep,
 } from '@europe-historical-atlas/core/editor/history'
 import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
-import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
+import type { StackingMove, StackingSide } from '@europe-historical-atlas/core/editor/stacking'
 import type { StateCreator } from 'zustand'
 
 /**
@@ -285,6 +285,21 @@ export interface EditionActions extends OutlineActions, PasteActions {
    * @returns `false` when the polity is unknown or the move would change nothing — and nothing happened
    */
   restackPolity: (polityId: string, move: StackingMove, step: HistoryStep) => boolean
+  /**
+   * Put a polity just in front of, or behind, a sibling, its vassals with it, as one undoable step — a row dragged and
+   * dropped in `{Polities}` (CARTO-457).
+   * @param polityId - the polity dragged
+   * @param besideId - the sibling it is dropped on
+   * @param side - in front of it, or behind it
+   * @param step - how the gesture is named
+   * @returns `false` when the two are not siblings or nothing would change — and nothing happened
+   */
+  restackPolityBeside: (
+    polityId: string,
+    besideId: string,
+    side: StackingSide,
+    step: HistoryStep
+  ) => boolean
   /** Take back the last gesture. Does nothing at the origin: `ctrl+z` at the end of the line is ordinary. */
   undo: () => void
   /** Apply an undone gesture again. Does nothing at the end of the line. */
@@ -396,6 +411,23 @@ function disagreement(what: string): Error {
 function required(restored: YearDocument | null, what: string): YearDocument {
   if (restored === null) throw disagreement(what)
   return restored
+}
+
+/**
+ * The stacking order's two gestures, each one step of the history: a command of `s16`, and a row dropped beside a
+ * sibling (CARTO-457).
+ * @param record - the store's recorder: an edit and how its step is named
+ * @returns the two actions
+ */
+function stackingActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionSlice, 'restackPolity' | 'restackPolityBeside'> {
+  return {
+    restackPolity: (polityId, move, step) =>
+      record((document) => restack(document, polityId, move), step),
+    restackPolityBeside: (polityId, besideId, side, step) =>
+      record((document) => restackBeside(document, polityId, besideId, side), step),
+  }
 }
 
 /**
@@ -591,8 +623,7 @@ export function editionActions(
     ...overrideActions(record),
     ...outlineActions(record),
     moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),
-    restackPolity: (polityId, move, step): boolean =>
-      record((document) => restack(document, polityId, move), step),
+    ...stackingActions(record),
     ...anchorActions(record),
     ...weldActions(record),
     undo: (): void => {

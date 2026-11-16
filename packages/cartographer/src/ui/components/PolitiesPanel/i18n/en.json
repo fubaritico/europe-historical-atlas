@@ -7,5 +7,9 @@
   "createStep": "create {name}",
   "editStep": "edit {name}",
   "deleteStep": "delete {name}",
-  "deleteGone": "nothing deleted: {name} is no longer in the year"
+  "deleteGone": "nothing deleted: {name} is no longer in the year",
+  "dropStep": "put {name} {side, select, front {in front of} back {behind} other {{side}}} {beside}",
+  "dropped": "{name} put {side, select, front {in front of} back {behind} other {{side}}} {beside} · ctrl+Z undoes it",
+  "dropRefused": "nothing moved: {name} is ranged among its siblings, and {beside} owes another suzerain",
+  "dropInPlace": "nothing moved: {name} already stands there"
 }

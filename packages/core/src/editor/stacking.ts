@@ -14,6 +14,7 @@
 import { effectiveSuzerains } from '../data/paintOrder'
 
 import type { YearDocument } from '../data/yearDocument'
+import type { YearPolity } from '../data/yearFormat'
 
 /** Illustrator's four Arrange commands, front first. */
 export const STACKING_MOVES = ['front', 'forward', 'backward', 'back'] as const
@@ -78,19 +79,78 @@ export function availableMoves(doc: YearDocument, polityId: string): Record<Stac
  * @returns `false` when the polity is unknown or the move would change nothing — and nothing moved
  */
 export function restack(doc: YearDocument, polityId: string, move: StackingMove): boolean {
+  return moveAmongSiblings(doc, polityId, (others, from) =>
+    destination(from, others.length + 1, move)
+  )
+}
+
+/**
+ * Move a polity to a new rank among its siblings, its vassals with it — the siblings permuted among the slots they
+ * already hold, so no other polity moves (review ARCH-001: one permutation for the commands and the drop).
+ * @param doc - the document to edit
+ * @param polityId - which polity
+ * @param rankOf - its new rank, back to front, given its siblings without it and its old rank; `null` to refuse
+ * @returns `false` when the polity is unknown, refused, or stays where it was — and nothing moved
+ */
+function moveAmongSiblings(
+  doc: YearDocument,
+  polityId: string,
+  rankOf: (others: readonly YearPolity[], from: number) => number | null
+): boolean {
   const slots = siblingSlots(doc, polityId)
   const siblings = slots.flatMap((slot) => {
     const polity = doc.polities[slot]
     return polity === undefined ? [] : [polity]
   })
   const from = siblings.findIndex((polity) => polity.id === polityId)
-  if (from < 0) return false
-  const to = destination(from, siblings.length, move)
-  if (to === from) return false
-  siblings.splice(to, 0, ...siblings.splice(from, 1))
+  const [moved] = from < 0 ? [] : siblings.splice(from, 1)
+  if (moved === undefined) return false
+  const to = rankOf(siblings, from)
+  if (to === null || to === from) return false
+  siblings.splice(to, 0, moved)
   slots.forEach((slot, rank) => {
     const polity = siblings[rank]
     if (polity !== undefined) doc.polities[slot] = polity
   })
   return true
+}
+
+/** Which side of a sibling a polity is put on: in front of it, or behind it (CARTO-457). */
+export type StackingSide = 'front' | 'back'
+
+/**
+ * Whether two polities are siblings — they owe the same suzerain, or both nobody — the only ones a polity is ranged
+ * among (the dev, 2026-11-16: *« c'est un déplacement entre siblings »*).
+ * @param doc - the document
+ * @param a - one polity's id
+ * @param b - the other's
+ * @returns whether both are in the list and share an effective suzerain
+ */
+export function areSiblings(doc: YearDocument, a: string, b: string): boolean {
+  const suzerains = effectiveSuzerains(doc.polities)
+  return suzerains.has(a) && suzerains.has(b) && suzerains.get(a) === suzerains.get(b)
+}
+
+/**
+ * Put a polity just in front of, or just behind, one of its siblings, its vassals with it — the drop of a row dragged
+ * in `{Polities}` (CARTO-457).
+ * @param doc - the document to edit
+ * @param polityId - the polity dragged
+ * @param besideId - the sibling it is dropped on
+ * @param side - in front of it, or behind it
+ * @returns `false` when the two are not siblings, are one, or the move would change nothing — and nothing moved
+ */
+export function restackBeside(
+  doc: YearDocument,
+  polityId: string,
+  besideId: string,
+  side: StackingSide
+): boolean {
+  if (polityId === besideId || !areSiblings(doc, polityId, besideId)) return false
+  return moveAmongSiblings(doc, polityId, (others) => {
+    const at = others.findIndex((polity) => polity.id === besideId)
+    if (at < 0) return null
+    // The list is back to front: in front of a sibling is just after it
+    return side === 'front' ? at + 1 : at
+  })
 }

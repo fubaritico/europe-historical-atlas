@@ -6,14 +6,17 @@ import { showRow } from '../../utils/showRow'
 import { ListFilter } from '../ListFilter'
 
 import { useListCursor } from './hooks/useListCursor'
+import { useRowDrag } from './hooks/useRowDrag'
 import { useRowFilter } from './hooks/useRowFilter'
 import { POLITY_LIST_MESSAGES } from './i18n'
 import { PolitiesSubhead } from './internal/PolitiesSubhead'
 import { PolityOption } from './internal/PolityOption'
+import { dropSideOf } from './utils/dropSideOf'
 import { optionId } from './utils/optionId'
 
 import type { ViewportPoint } from '../../../viewport/viewport'
 import type { PolityRow } from '../../utils/polityRows'
+import type { StackingSide } from '@europe-historical-atlas/core/editor/stacking'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */
 export interface PolityListProps {
@@ -32,6 +35,11 @@ export interface PolityListProps {
   onMenu: (id: string, at: ViewportPoint) => void
   /** A row was double-clicked — its polity's dialogue, as a layer's options in Illustrator (`s07`). */
   onEdit: (id: string) => void
+  /**
+   * A row was dragged onto another and released — to be put in front of it or behind it, among siblings only
+   * (CARTO-457); the panel decides and says what happened.
+   */
+  onRestack: (id: string, besideId: string, side: StackingSide) => void
   /** What is typed in the filter and its setter — the store's, kept across a reload (CARTO-427). */
   search: readonly [string, (query: string) => void]
 }
@@ -55,6 +63,7 @@ export interface PolityListProps {
  * @param props.onChoose - aims at a polity, given its id — a click, or ‹enter› on the active row
  * @param props.onMenu - opens a row's menu, given its id and where to open it in viewport pixels
  * @param props.onEdit - opens a polity's dialogue, given its id — a double-click, or ‹enter› on the polity chosen
+ * @param props.onRestack - a row dropped on another, given both ids and the side (CARTO-457)
  * @param props.search - what is typed in the filter, and its setter
  * @returns the filter, the subhead and the list — or a line saying the year is empty, or that nothing answers
  */
@@ -65,6 +74,7 @@ export function PolityList({ year, rows, targetId, search, ...on }: PolityListPr
   // State
   const { query, setQuery, filtered, keysTarget } = useRowFilter(rows, targetId, search)
   const cursor = useListCursor(filtered.rows, keysTarget, on.onChoose, on.onMenu, on.onEdit)
+  const drag = useRowDrag(on.onRestack, on.onChoose)
 
   // Effects
   useEffect(() => {
@@ -104,9 +114,11 @@ export function PolityList({ year, rows, targetId, search, ...on }: PolityListPr
               selected={row.id === targetId}
               active={row.id === cursor.activeId}
               dimmed={filtered.dimmed.has(row.id)}
-              onChoose={on.onChoose}
+              onChoose={drag.choose}
               onMenu={on.onMenu}
               onEdit={on.onEdit}
+              dropSide={dropSideOf(drag.drop, row, filtered.rows)}
+              onPointerDown={drag.onPointerDown}
             />
           ))}
         </ListboxList>

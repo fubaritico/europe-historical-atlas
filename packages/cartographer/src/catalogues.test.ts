@@ -18,6 +18,7 @@ import type {
 import type { HandPattern } from '@europe-historical-atlas/core/data/borderHands'
 import type { BorderRelation } from '@europe-historical-atlas/core/data/borderRelation'
 import type { WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
+import type { StackingSide } from '@europe-historical-atlas/core/editor/stacking'
 import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { MessageNode } from '@europe-historical-atlas/core/i18n/messageFormat'
 
@@ -65,6 +66,8 @@ const YES_NO = all<'yes' | 'no'>({ yes: true, no: true })
  * a defect reaches, and visibly. Keyed by catalogue, message and argument.
  */
 const CLOSED: Readonly<Record<string, readonly string[]>> = {
+  'POLITIES_PANEL_MESSAGES.dropStep.side': all<StackingSide>({ front: true, back: true }),
+  'POLITIES_PANEL_MESSAGES.dropped.side': all<StackingSide>({ front: true, back: true }),
   'ALARM_MESSAGES.title.topic': all<NoticeTopic>({
     year: true,
     autosave: true,

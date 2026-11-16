@@ -75,6 +75,7 @@ function list(targetId: string | null) {
       targetId={targetId}
       onChoose={vi.fn()}
       onMenu={vi.fn()}
+      onRestack={vi.fn()}
       onEdit={vi.fn()}
     />
   )
@@ -152,6 +153,7 @@ function tree(targetId: string | null = null) {
       targetId={targetId}
       onChoose={onChoose}
       onMenu={vi.fn()}
+      onRestack={vi.fn()}
       onEdit={onEdit}
     />
   )
@@ -241,6 +243,7 @@ describe('PolityList — the filter (CARTO-360)', () => {
           targetId={null}
           onChoose={vi.fn()}
           onMenu={vi.fn()}
+          onRestack={vi.fn()}
           onEdit={vi.fn()}
         />
       )

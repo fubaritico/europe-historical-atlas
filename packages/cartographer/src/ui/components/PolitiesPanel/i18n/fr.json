@@ -7,5 +7,9 @@
   "createStep": "créer {name}",
   "editStep": "modifier {name}",
   "deleteStep": "supprimer {name}",
-  "deleteGone": "rien n’a été supprimé : {name} n’est plus dans l’année"
+  "deleteGone": "rien n’a été supprimé : {name} n’est plus dans l’année",
+  "dropStep": "placer {name} {side, select, front {devant} back {derrière} other {{side}}} {beside}",
+  "dropped": "{name} placé {side, select, front {devant} back {derrière} other {{side}}} {beside} · ctrl+Z l’annule",
+  "dropRefused": "rien n’a bougé : {name} se range parmi ses frères, et {beside} n’a pas le même suzerain",
+  "dropInPlace": "rien n’a bougé : {name} est déjà à cette place"
 }

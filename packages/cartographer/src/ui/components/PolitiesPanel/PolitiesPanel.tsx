@@ -7,6 +7,7 @@ import { PolityList } from '../PolityList'
 
 import { useArrangeMenu } from './hooks/useArrangeMenu'
 import { usePolityForm } from './hooks/usePolityForm'
+import { useRowRestack } from './hooks/useRowRestack'
 import { POLITIES_PANEL_MESSAGES } from './i18n'
 import { EditDialog } from './internal/EditDialog'
 import { PolitiesFoot } from './internal/PolitiesFoot'
@@ -63,6 +64,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
   const { document } = store.getState()
 
   // Handlers
+  const restack = useRowRestack(store, onResult)
   // A dialogue unmounted rather than closed gives the focus back to nothing: it is handed to the list.
   const focusList = () => {
     panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
@@ -92,6 +94,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
         onChoose={chooseTarget}
         onMenu={openMenu}
         onEdit={form.open}
+        onRestack={restack}
         search={search}
       />
       {arranging === null ? null : (
