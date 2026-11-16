@@ -128,7 +128,7 @@ export function withoutSaved(
 /**
  * Saves one line: held while it goes; saved, it leaves the block and the chain is read again; refused or failed, it
  * says so — on the line only while it still lives (QUAL-022), the console always.
- * @param line - the line, its suzerain and its source chosen
+ * @param line - the line, its suzerain chosen
  * @param at - its vassal and the sheet's year
  * @param at.vassal - the title it is the suzerain of
  * @param at.year - the sheet's year
@@ -139,7 +139,7 @@ function sendLine(
   at: { vassal: number | string; year: number },
   targets: LineTargets
 ): void {
-  if (line.suzerain === null || line.source === null) return
+  if (line.suzerain === null) return
   const { wiring, setLines, update, live } = targets
   update(line.key, { status: { kind: 'saving' } })
   wiring
@@ -165,9 +165,8 @@ function sendLine(
 
 /**
  * The lines « Vassal de » under the chain (the dev's mock-up, 2026-11-15, and his words of 2026-11-16: *"a repeating
- * block, which one is free to edit"*): ⊕ adds a line as soon as the one below has its suzerain — Strasbourg → Swabia,
- * ⊕, Swabia → the Empire — without waiting for the sources. **Each line is saved on its own** once its suzerain and its
- * source are chosen, in whatever order; its vassal is the suzerain of the line below, or the title the chain stops at
+ * block, which one is free to edit"*): ⊕ adds a line, and **each line is saved on its own as soon as its suzerain is
+ * chosen** — Strasbourg → Swabia, ⊕, Swabia → the Empire — the source facultative (2026-11-16), in whatever order; its vassal is the suzerain of the line below, or the title the chain stops at
  * for the first. A line saved leaves the block, and the chain read again shows it; the lines still being entered stay,
  * since they live here, above the reading.
  *

@@ -80,12 +80,12 @@ function summary(container: HTMLElement): string | null | undefined {
 }
 
 /**
- * Opens the line « Vassal de » where the chain stops at the count, and chooses its suzerain and its source.
- * @param suzerain - the suzerain's id, typed
- * @param source - the source's id, typed; nothing when omitted
+ * Opens the line « Vassal de » where the chain stops at the count, and chooses its suzerain — pasted, one choice, as
+ * Payload's field makes it.
+ * @param suzerain - the suzerain's id; nothing chosen when omitted
  * @returns the line
  */
-async function enterLink(suzerain: string, source?: string): Promise<HTMLElement> {
+async function enterLink(suzerain?: string): Promise<HTMLElement> {
   const user = userEvent.setup()
   await user.click(
     await screen.findByRole('button', {
@@ -93,9 +93,21 @@ async function enterLink(suzerain: string, source?: string): Promise<HTMLElement
     })
   )
   const line = screen.getByRole('group', { name: LINE })
-  await user.type(within(line).getByLabelText('Vassal de'), suzerain)
-  if (source !== undefined) await user.type(within(line).getByLabelText('Source'), source)
+  if (suzerain !== undefined) await choose(line, suzerain)
   return line
+}
+
+/**
+ * Chooses a line's suzerain, in one gesture.
+ * @param line - the line
+ * @param id - the suzerain's id
+ */
+async function choose(line: HTMLElement, id: string): Promise<void> {
+  const user = userEvent.setup()
+  const field = within(line).getByLabelText('Vassal de')
+  await user.clear(field)
+  await user.click(field)
+  await user.paste(id)
 }
 
 afterEach(() => {
@@ -130,7 +142,8 @@ describe('HolderChain', () => {
       expect(summary(container)).toBe(`${COUNT.name} — au-delà, on ne sait pas`)
     })
 
-    it('saves the link once its suzerain and its source are chosen, and reads the chain again', async () => {
+    // 2026-11-16: the source facultative — the link leaves as soon as its suzerain is chosen
+    it('saves the link as soon as its suzerain is chosen, without a source, and reads the chain again', async () => {
       const read = vi
         .fn()
         .mockResolvedValueOnce([{ titles: [COUNT], end: 'unknown' }])
@@ -138,39 +151,39 @@ describe('HolderChain', () => {
       const saveLink = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
       const { container } = renderChain(values('1100'), read, saveLink)
       await enterLink('20')
-      expect(saveLink).not.toHaveBeenCalled()
-      await userEvent.setup().type(screen.getByLabelText('Source'), '4')
-      expect(saveLink).toHaveBeenCalledWith({ vassal: 10, suzerain: 20, source: 4, year: 1100 })
+      expect(saveLink).toHaveBeenCalledWith({ vassal: 10, suzerain: 20, source: null, year: 1100 })
       await waitFor(() => {
         expect(summary(container)).toBe(`${COUNT.name} → ${DUKE.name} — au-delà, on ne sait pas`)
       })
       expect(read).toHaveBeenCalledTimes(2)
-      // The line saved left the block with the keyboard in it: the keyboard is back on ⊕
-      expect(document.activeElement?.getAttribute('aria-label')).toBe(
-        `Ajouter le suzerain de ${DUKE.name}`
-      )
+      expect(screen.queryByLabelText('Source')).toBeNull()
     })
 
     // The dev, 2026-11-16: a repeating block — ⊕ again as soon as the line has its suzerain, sources or not.
-    it("chains a second line on the first one's suzerain, without waiting for its source", async () => {
-      const saveLink = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
+    it("chains a second line on the first one's suzerain while the first is still being saved", async () => {
+      const saveLink = vi
+        .fn<(link: NewVassalLink) => Promise<LinkAnswer>>()
+        .mockImplementationOnce(() => new Promise<LinkAnswer>(() => undefined))
+        .mockResolvedValueOnce({ kind: 'saved' })
       renderChain(
         values('1100'),
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         saveLink
       )
       await enterLink('20')
-      const user = userEvent.setup()
-      await user.click(
-        screen.getByRole('button', { name: 'Ajouter le suzerain de la ligne au-dessous' })
-      )
+      await userEvent
+        .setup()
+        .click(screen.getByRole('button', { name: 'Ajouter le suzerain de la ligne au-dessous' }))
       const second = screen.getByRole('group', {
         name: 'Vassal de : le suzerain de la ligne au-dessous',
       })
-      await user.type(within(second).getByLabelText('Vassal de'), '40')
-      await user.type(within(second).getByLabelText('Source'), '4')
-      expect(saveLink).toHaveBeenCalledWith({ vassal: 20, suzerain: 40, source: 4, year: 1100 })
-      expect(screen.getByRole('group', { name: LINE })).toBeTruthy()
+      await choose(second, '40')
+      expect(saveLink).toHaveBeenLastCalledWith({
+        vassal: 20,
+        suzerain: 40,
+        source: null,
+        year: 1100,
+      })
     })
 
     it('ticks « Souverain » on the title the chain stops at, and offers no ⊕ once it is', async () => {
@@ -193,7 +206,7 @@ describe('HolderChain', () => {
       renderChain(
         values('1100'),
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
-        undefined,
+        () => new Promise<LinkAnswer>(() => undefined),
         saveSovereign
       )
       const line = await enterLink('20')
@@ -207,14 +220,19 @@ describe('HolderChain', () => {
 
     // Review ARCH-001: a suzerain changed is not the one ticked
     it("unticks « Souverain » when the line's suzerain is changed, and offers ⊕ again", async () => {
-      renderChain(values('1100'), () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]))
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      renderChain(
+        values('1100'),
+        () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
+        () => Promise.resolve<LinkAnswer>({ kind: 'refused', message: 'Ce maillon existe déjà.' })
+      )
       const line = await enterLink('20')
-      const user = userEvent.setup()
-      await user.click(within(line).getByRole('checkbox', { name: 'Souverain' }))
+      await within(line).findByRole('alert')
+      await userEvent.setup().click(within(line).getByRole('checkbox', { name: 'Souverain' }))
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
       })
-      await user.type(within(line).getByLabelText('Vassal de'), '1')
+      await choose(line, '21')
       expect(within(line).getByRole('checkbox', { name: 'Souverain' })).toHaveProperty(
         'checked',
         false
@@ -269,7 +287,7 @@ describe('HolderChain', () => {
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         () => Promise.resolve({ kind: 'refused', message: refusal })
       )
-      const line = await enterLink('20', '4')
+      const line = await enterLink('20')
       expect((await within(line).findByRole('alert')).textContent).toBe(refusal)
       expect(warn).toHaveBeenCalledWith(`[CMS] a link of vassalage was refused: ${refusal}`)
       expect(within(line).getByLabelText<HTMLInputElement>('Vassal de').value).toBe('20')
@@ -288,13 +306,13 @@ describe('HolderChain', () => {
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         saveLink
       )
-      const line = await enterLink('20', '4')
+      const line = await enterLink('20')
       await within(line).findByRole('alert')
-      await userEvent.setup().type(within(line).getByLabelText('Vassal de'), '1')
+      await choose(line, '21')
       expect(saveLink).toHaveBeenLastCalledWith({
         vassal: 10,
-        suzerain: 201,
-        source: 4,
+        suzerain: 21,
+        source: null,
         year: 1100,
       })
       expect(saveLink).toHaveBeenCalledTimes(2)
@@ -313,7 +331,7 @@ describe('HolderChain', () => {
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         saveLink
       )
-      const line = await enterLink('20', '4')
+      const line = await enterLink('20')
       expect(within(line).getByText('Enregistrement du maillon…')).toBeTruthy()
       await userEvent.setup().type(within(line).getByLabelText('Vassal de'), '1')
       expect(saveLink).toHaveBeenCalledTimes(1)
@@ -331,7 +349,7 @@ describe('HolderChain', () => {
             answer = resolve
           })
       )
-      const line = await enterLink('20', '4')
+      const line = await enterLink('20')
       const user = userEvent.setup()
       await user.click(
         within(line).getByRole('button', { name: 'Fermer cette ligne sans l’enregistrer' })
@@ -353,7 +371,7 @@ describe('HolderChain', () => {
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         () => Promise.reject(new TypeError('Failed to fetch'))
       )
-      const line = await enterLink('20', '4')
+      const line = await enterLink('20')
       const message =
         'Le maillon n’a pas pu être enregistré. Changez le suzerain ou la source pour réessayer.'
       expect((await within(line).findByRole('alert')).textContent).toBe(message)
@@ -390,24 +408,21 @@ describe('HolderChain', () => {
       )
     })
 
-    it('closes the line unsaved and forgotten with ✕, and saves nothing once the suzerain is emptied', async () => {
+    it('closes a line with nothing chosen with ✕, saving nothing, and ⊕ opens it again empty', async () => {
       const saveLink = vi.fn(() => Promise.resolve<LinkAnswer>({ kind: 'saved' }))
       renderChain(
         values('1100'),
         () => Promise.resolve([{ titles: [COUNT], end: 'unknown' }]),
         saveLink
       )
-      const line = await enterLink('20')
+      const line = await enterLink()
       const user = userEvent.setup()
-      await user.clear(within(line).getByLabelText('Vassal de'))
-      await user.type(within(line).getByLabelText('Source'), '4')
-      expect(saveLink).not.toHaveBeenCalled()
       await user.click(
         within(line).getByRole('button', { name: 'Fermer cette ligne sans l’enregistrer' })
       )
       expect(screen.queryByRole('group', { name: LINE })).toBeNull()
       await user.click(screen.getByRole('button', { name: `Ajouter le suzerain de ${COUNT.name}` }))
-      expect(screen.getByLabelText<HTMLInputElement>('Source').value).toBe('')
+      expect(screen.getByLabelText<HTMLInputElement>('Vassal de').value).toBe('')
       expect(saveLink).not.toHaveBeenCalled()
     })
   })

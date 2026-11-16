@@ -87,7 +87,7 @@ export const Titles: CollectionConfig = {
       },
     },
     claimLines(
-      'Au moins une : la source qui dit que cette personne tenait ce territoire à cette date.'
+      'Facultatif : la source qui dit que cette personne tenait ce territoire à cette date.'
     ),
   ],
 }

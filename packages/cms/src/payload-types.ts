@@ -627,27 +627,29 @@ export interface Title {
    */
   sovereign?: boolean | null;
   /**
-   * Au moins une : la source qui dit que cette personne tenait ce territoire à cette date.
+   * Facultatif : la source qui dit que cette personne tenait ce territoire à cette date.
    */
-  lines: {
-    /**
-     * Choisie parmi celles déjà saisies dans « Sources ».
-     */
-    source: number | Source;
-    /**
-     * Une page, une ligne, une colonne. Facultatif.
-     */
-    where?: string | null;
-    /**
-     * Les mots de la source, recopiés tels quels.
-     */
-    quotation?: string | null;
-    /**
-     * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
-     */
-    asWritten?: string | null;
-    id?: string | null;
-  }[];
+  lines?:
+    | {
+        /**
+         * Choisie parmi celles déjà saisies dans « Sources ».
+         */
+        source: number | Source;
+        /**
+         * Une page, une ligne, une colonne. Facultatif.
+         */
+        where?: string | null;
+        /**
+         * Les mots de la source, recopiés tels quels.
+         */
+        quotation?: string | null;
+        /**
+         * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+         */
+        asWritten?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -769,27 +771,29 @@ export interface VassalLink {
     };
   };
   /**
-   * Au moins une : la source qui dit ce lien à cette date.
+   * Facultatif : la source qui dit ce lien à cette date.
    */
-  lines: {
-    /**
-     * Choisie parmi celles déjà saisies dans « Sources ».
-     */
-    source: number | Source;
-    /**
-     * Une page, une ligne, une colonne. Facultatif.
-     */
-    where?: string | null;
-    /**
-     * Les mots de la source, recopiés tels quels.
-     */
-    quotation?: string | null;
-    /**
-     * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
-     */
-    asWritten?: string | null;
-    id?: string | null;
-  }[];
+  lines?:
+    | {
+        /**
+         * Choisie parmi celles déjà saisies dans « Sources ».
+         */
+        source: number | Source;
+        /**
+         * Une page, une ligne, une colonne. Facultatif.
+         */
+        where?: string | null;
+        /**
+         * Les mots de la source, recopiés tels quels.
+         */
+        quotation?: string | null;
+        /**
+         * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+         */
+        asWritten?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }

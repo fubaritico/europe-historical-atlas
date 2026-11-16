@@ -246,10 +246,11 @@ describe('titles and links', () => {
   })
 
   describe('managed errors', () => {
-    it('refuses a link with no source line', async () => {
-      await expect(
-        link({ vassal: count, suzerain: duke, date: years(1100, 1100), lines: [] })
-      ).rejects.toThrow('Ce que disent les sources')
+    // The dev, 2026-11-16: the sources are facultative — a link may be entered first, sourced later
+    it('accepts a link with no source line', async () => {
+      const bare = await link({ vassal: count, suzerain: duke, date: years(1090, 1090), lines: [] })
+      expect(bare.lines ?? []).toEqual([])
+      await payload.delete({ collection: 'vassal-links', id: bare.id })
     })
 
     it('refuses a title that answers to itself', async () => {

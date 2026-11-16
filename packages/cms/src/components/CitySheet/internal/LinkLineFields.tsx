@@ -6,8 +6,8 @@ import type { Say } from '../utils/say'
 import type { ReactNode } from 'react'
 
 /**
- * One line « Vassal de » of the repeating block (CMS-422, the dev's mock-up): the suzerain, the ✕ closing the line
- * unsaved, and the source under it, each Payload's own field with its « + », held while their link is saved — then
+ * One line « Vassal de » of the repeating block (CMS-422, the dev's mock-up): the suzerain, Payload's own field with its
+ * « + », held while its link is saved, and the ✕ closing the line unsaved — then
  * where the line stands, and, on the last line, « Souverain » under its suzerain. Focusable, for the keyboard to land
  * on it when ⊕ adds it.
  * @param props - the line, its vassal's name, its gestures, what follows its fields, the translator

@@ -4,8 +4,8 @@ export interface NewVassalLink {
   readonly vassal: number | string
   /** The title it answers to, chosen on the line. */
   readonly suzerain: number | string
-  /** The source that says it, chosen on the line — a link is refused without one. */
-  readonly source: number | string
+  /** The source that says it, when one is chosen — facultative (the dev, 2026-11-16). */
+  readonly source: number | string | null
   /** The sheet's year: the link holds from it. */
   readonly year: number
 }
@@ -49,7 +49,7 @@ export async function saveVassalLink(
       answersTo: 'suzerain',
       suzerain: link.suzerain,
       date: { start: { year: link.year } },
-      lines: [{ source: link.source }],
+      lines: link.source === null ? [] : [{ source: link.source }],
     }),
   })
   if (response.ok) return { kind: 'saved' }

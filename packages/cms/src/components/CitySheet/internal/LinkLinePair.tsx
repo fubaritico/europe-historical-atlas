@@ -6,12 +6,13 @@ import type { PendingLine } from '../hooks/usePendingLinks'
 import type { Say } from '../utils/say'
 
 /**
- * A line's two fields (CMS-422): the suzerain, the ✕ closing the line at its right, and the source under it — each
- * Payload's own field with its « + », held while their link is saved.
+ * A line's field (CMS-422, the dev's mock-up): the suzerain — Payload's own field with its « + », held while its link
+ * is saved — and the ✕ closing the line at its right. No source on the line: facultative (2026-11-16), it is added to
+ * the link in « Maillons » when there is one.
  * @param props - the line, its vassal's name, its gestures, the translator
  * @param props.line - the line
  * @param props.vassalName - the name of the title it is the suzerain of
- * @param props.onChoose - chooses its suzerain or its source
+ * @param props.onChoose - chooses its suzerain
  * @param props.onClose - closes it unsaved
  * @param props.say - the translator
  * @returns the fields
@@ -40,17 +41,6 @@ export function LinkLinePair({
         value={line.suzerain}
         onChange={(id) => {
           onChoose('suzerain', id)
-        }}
-        readOnly={saving}
-      />
-      <RelationField
-        path={`link-${line.key}-source`}
-        collection="sources"
-        label={say('linkSource')}
-        description={say('linkSourceHelp')}
-        value={line.source}
-        onChange={(id) => {
-          onChoose('source', id)
         }}
         readOnly={saving}
       />

@@ -108,6 +108,6 @@ export const VassalLinks: CollectionConfig = {
       label: 'Date',
       description: 'Quand ce lien vaut. Une année suffit ; remplir la fin en fait une durée.',
     }),
-    claimLines('Au moins une : la source qui dit ce lien à cette date.'),
+    claimLines('Facultatif : la source qui dit ce lien à cette date.'),
   ],
 }
