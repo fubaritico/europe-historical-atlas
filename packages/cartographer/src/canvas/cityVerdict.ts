@@ -31,7 +31,10 @@ export type CityVerdictKind =
   | 'notEntered'
   /** The sources' holder has no Wikidata id: nothing to compare by. */
   | 'cannotCompare'
-  /** No polity of the map carries the sources' holder's id: it has to be declared. */
+  /**
+   * The map draws no polity to check the city in: none carrying the holder's id — or, for a chain that reaches a
+   * sovereign, none of the titles checked, from the level below the sovereign up to the sovereign itself.
+   */
   | 'toDeclare'
   /** The map has the sources' holder under the city. */
   | 'agrees'
@@ -54,8 +57,9 @@ export interface CityVerdict {
   /** The city's chain of vassalage it was judged by, or `null` when its sheet names no title (CARTO-435). */
   readonly chain: readonly ContentChainReading[] | null
   /**
-   * The title of its chain the polity under it must be, or lie under — the level below the sovereign (the dev,
-   * 2026-11-16) — by its name; `null` when the chain reaches no sovereign.
+   * The title of its chain the polity under it must be, or lie under — the level below the sovereign, or, when the
+   * map does not draw it, the next one up that it draws, the sovereign at last (the dev, 2026-11-16) — by its name;
+   * `null` when the chain reaches no sovereign.
    */
   readonly expected: string | null
 }
@@ -78,8 +82,9 @@ const LEVELS_BELOW: Readonly<Record<string, number>> = { empire: 2 }
 /**
  * The verdict of a city whose chain reaches a sovereign (the dev, 2026-11-16): the check goes to the level below it —
  * n-1 under a kingdom (the duchy, or the viscounty of Bourges held of the king), n-2 under an empire (empire → kingdom
- * → duchy), n-1 where an empire has no level two below. Right when the polity under the city is that title or one
- * below it in the chain; **to declare** (red) when the map has not drawn that title; wrong (yellow) otherwise.
+ * → duchy), n-1 where an empire has no level two below — **or, when the map does not draw that title, the next one up
+ * it draws, the sovereign at last**. Right when the polity under the city is the title checked or one below it in the
+ * chain; **to declare** (red) only when the map draws none of them, not even the sovereign; wrong (yellow) otherwise.
  * @param reading - the reading that ends on a sovereign
  * @param onMap - the polity under the city, or `null`
  * @param map - the map's polities
@@ -90,13 +95,31 @@ export function bySovereignLevel(
   onMap: PolityOnMap | null,
   map: MapPolities
 ): { kind: CityVerdictKind; expected: string } {
-  const level = checkedLevel(reading, map)
+  const level = drawnLevel(reading, checkedLevel(reading, map), map)
   const target = reading.titles[level]
   const expected = target?.name ?? ''
   if (liesWithin(reading, level, onMap)) return { kind: 'agrees', expected }
   const drawn = target?.wikidata ?? null
   if (drawn === null || !map.declared.has(drawn)) return { kind: 'toDeclare', expected }
   return { kind: 'misplaced', expected }
+}
+
+/**
+ * The level actually checked: the one below the sovereign when the map draws it, else the next one up the chain the
+ * map draws — up to the sovereign itself (the dev, 2026-11-16, on Laon: *"it depends directly on the kingdom of
+ * France, so a circle has to be drawn around it?"* — no: a vassal too small to draw is checked in its suzerain).
+ * @param reading - the reading that ends on a sovereign
+ * @param from - the level below the sovereign
+ * @param map - the map's polities
+ * @returns the rank of the title checked
+ */
+function drawnLevel(reading: ContentChainReading, from: number, map: MapPolities): number {
+  const top = reading.titles.length - 1
+  for (let level = from; level < top; level += 1) {
+    const id = reading.titles[level]?.wikidata ?? null
+    if (id !== null && map.declared.has(id)) return level
+  }
+  return top
 }
 
 /**
