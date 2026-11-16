@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  YEAR_REQUIRED,
   describeDateRefusalFr,
   groupAt,
   isMomentRefusal,
@@ -92,6 +93,17 @@ describe('historicalDate', () => {
 
     it('accepts an end left empty', () => {
       expect(own(null, { siblingData: {}, data: {} })).toBe(true)
+    })
+
+    // 2026-11-16: a field's own validate replaces Payload's, so `required` is checked here or nowhere
+    it('refuses a required year left empty, under the field — never a server error', () => {
+      expect(own(null, { siblingData: {}, data: {}, required: true })).toBe(YEAR_REQUIRED)
+      expect(own(undefined, { siblingData: {}, data: {}, required: true })).toBe(YEAR_REQUIRED)
+    })
+
+    it('accepts a required year of 1, and lets its own rules refuse a year 0', () => {
+      expect(own(1, { siblingData: { year: 1 }, data: {}, required: true })).toBe(true)
+      expect(own(0, { siblingData: { year: 0 }, data: {}, required: true })).not.toBe(YEAR_REQUIRED)
     })
 
     it('shows the refusal of the end itself', () => {

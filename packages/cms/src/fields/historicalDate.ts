@@ -69,17 +69,29 @@ function part(name: string, label: string, min: number, max?: number): Field {
   }
 }
 
+/** The sentence under a required year left empty. */
+export const YEAR_REQUIRED = 'Il faut au moins une année.'
+
 /**
  * The validation of one end, run from its year field, which sees its siblings — Payload validates a field, not a
- * group.
+ * group. **It checks `required` itself**: a field's own `validate` replaces Payload's, which would have refused an
+ * empty required year — without this, a title saved with no year reached the base and failed there, a server error
+ * instead of a sentence under the field (the dev, 2026-11-16, a title created from the city sheet's « + »).
  * @param earlier - where its beginning is, for an end
  * @returns the validate function
  */
 export function validateMoment(earlier: EarlierOf | undefined) {
   return (
-    _value: unknown,
-    { siblingData, data }: { siblingData: MomentFields; data: Record<string, unknown> }
+    value: unknown,
+    {
+      siblingData,
+      data,
+      required,
+    }: { siblingData: MomentFields; data: Record<string, unknown>; required?: boolean }
   ): true | string => {
+    if (required === true && (value === null || value === undefined || value === '')) {
+      return YEAR_REQUIRED
+    }
     const own = toHistoricalMoment(siblingData)
     if (own !== null && isMomentRefusal(own)) return describeDateRefusalFr(own)
     const reversed = earlier === undefined ? null : orderRefusal(earlier(data), siblingData)
