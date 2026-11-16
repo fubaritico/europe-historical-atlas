@@ -109,17 +109,17 @@ const SMALL: SeedData = {
       sources: ['Gesta'],
     },
   ],
-  reasons: ['archevêché'],
+  reasons: ['siège archiépiscopal'],
   cities: [
     {
       place: 'Q41621',
       year: 1100,
       importance: 'large-city',
-      reasons: ['archevêché'],
+      reasons: ['siège archiépiscopal'],
       testimonies: [
         { source: 'Gesta', subject: 'population', population: 5000, where: 'p. 12' },
         { source: 'Gesta', subject: 'importance', importance: 'large-city' },
-        { source: 'Gesta', subject: 'reason', reason: 'archevêché' },
+        { source: 'Gesta', subject: 'reason', reason: 'siège archiépiscopal' },
       ],
     },
   ],
@@ -412,7 +412,7 @@ describe('seed', () => {
 
     it('reuses a reason the dev already wrote', async () => {
       const base = memoryStore()
-      const theirs = await base.store.create('importance-reasons', { name: 'archevêché' })
+      const theirs = await base.store.create('importance-reasons', { name: 'siège archiépiscopal' })
 
       await seed(base.store, atParis, SMALL)
 
@@ -424,7 +424,7 @@ describe('seed', () => {
       const base = memoryStore()
 
       await expect(seed(base.store, atParis, { ...SMALL, reasons: [] })).rejects.toThrow(
-        'reason « archevêché » is not declared'
+        'reason « siège archiépiscopal » is not declared'
       )
     })
 

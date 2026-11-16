@@ -93,7 +93,11 @@ export const CITY_SOURCES: readonly SeedSource[] = [
 ]
 
 /** The reasons the cities give, by French name. */
-export const CITY_REASONS: readonly string[] = ['archevêché', 'université', 'évêché']
+export const CITY_REASONS: readonly string[] = [
+  'siège archiépiscopal',
+  'université',
+  'siège épiscopal',
+]
 
 /** The places of the cities. */
 export const CITY_PLACES: readonly SeedPlace[] = [
@@ -557,7 +561,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1530',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -570,7 +574,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -593,7 +597,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q16869',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché', 'université'],
+    reasons: ['siège archiépiscopal', 'université'],
     testimonies: [
       {
         source:
@@ -606,7 +610,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -642,7 +646,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q839456',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché', 'université'],
+    reasons: ['siège épiscopal', 'université'],
     testimonies: [
       {
         source:
@@ -655,7 +659,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -714,7 +718,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q2656',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -727,7 +731,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -841,7 +845,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q90',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -854,7 +858,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -905,7 +909,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q641',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -918,7 +922,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -947,13 +951,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1083',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché', 'université'],
+    reasons: ['siège archiépiscopal', 'université'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -989,13 +993,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q17151',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1024,13 +1028,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q490',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1059,13 +1063,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q87',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1081,13 +1085,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q107401',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1110,7 +1114,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q80561',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -1123,7 +1127,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1146,7 +1150,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q133118',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -1159,7 +1163,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1182,13 +1186,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q3766',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1204,13 +1208,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q365',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1232,7 +1236,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q220',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -1245,7 +1249,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1267,7 +1271,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q5836',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -1280,7 +1284,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1302,7 +1306,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q84',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -1315,7 +1319,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1337,13 +1341,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q2634',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1365,7 +1369,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q79857',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -1378,7 +1382,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1394,13 +1398,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q47611',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1416,13 +1420,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1720',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1500,7 +1504,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q15699',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -1513,7 +1517,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1535,13 +1539,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q217125',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1557,13 +1561,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q48338',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1579,7 +1583,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1218',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -1592,7 +1596,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1608,13 +1612,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q6555',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1636,13 +1640,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q3138',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1664,13 +1668,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q456',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1692,13 +1696,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q22690',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1727,13 +1731,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q6616',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1762,13 +1766,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q30974',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1853,13 +1857,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q43387',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1881,13 +1885,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q82070',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1903,13 +1907,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q459',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1931,13 +1935,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q6221',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -1966,13 +1970,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q7880',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2001,13 +2005,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1729',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2057,13 +2061,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q45301',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2079,13 +2083,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q35997',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2101,7 +2105,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q168954',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -2114,7 +2118,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2130,13 +2134,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q41876',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2158,13 +2162,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q42462',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2186,7 +2190,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1085',
     year: 1100,
     importance: 'capital',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
@@ -2199,7 +2203,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2221,13 +2225,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q48292',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2249,13 +2253,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q134287',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2271,7 +2275,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q1223508',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -2284,7 +2288,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2306,13 +2310,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q83285',
     year: 1100,
     importance: 'large-city',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2335,7 +2339,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q3640',
     year: 1100,
     importance: 'capital',
-    reasons: ['archevêché'],
+    reasons: ['siège archiépiscopal'],
     testimonies: [
       {
         source:
@@ -2348,7 +2352,7 @@ export const CITIES_1100: readonly SeedCity[] = [
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'archevêché',
+        reason: 'siège archiépiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2858,13 +2862,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q48195',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
@@ -2909,13 +2913,13 @@ export const CITIES_1100: readonly SeedCity[] = [
     place: 'Q283368',
     year: 1100,
     importance: 'city',
-    reasons: ['évêché'],
+    reasons: ['siège épiscopal'],
     testimonies: [
       {
         source:
           'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
         subject: 'reason',
-        reason: 'évêché',
+        reason: 'siège épiscopal',
         where: 'rôles de la ville en 1100',
       },
       {
