@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { byChain, cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
+import { byChain, bySovereignLevel, cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
 
 import type { CityVerdictKind } from './cityVerdict'
 import type { CityMark } from '../state/citiesSlice'
@@ -82,7 +82,8 @@ describe('cityVerdicts', () => {
       const wrong = cityVerdicts(withDuchy(), [
         { ...CITY, holder: { name: 'Duchy', wikidata: 'Q1' }, chain: elsewhere },
       ]).get('c')
-      expect(wrong?.kind).toBe('misplaced')
+      // A chain ending on its own holder as sovereign: the map has not drawn that sovereign — to declare
+      expect(wrong?.kind).toBe('toDeclare')
     })
   })
 
@@ -106,8 +107,8 @@ describe('cityAlert', () => {
   })
 
   describe('variants', () => {
-    it('raises « toCorrect » for a city on the wrong side and for a holder the map lacks', () => {
-      expect([cityAlert('misplaced'), cityAlert('toDeclare')]).toEqual(['toCorrect', 'toCorrect'])
+    it('raises « toCorrect » for a city on the wrong side, « missing » for a holder the map lacks', () => {
+      expect([cityAlert('misplaced'), cityAlert('toDeclare')]).toEqual(['toCorrect', 'missing'])
     })
 
     it('raises nothing for a city where all is well', () => {
@@ -192,6 +193,7 @@ function verdict(kind: CityVerdictKind, chain: ContentChainReading[] | null) {
     bySources: null,
     kind,
     chain,
+    expected: null,
   }
 }
 
@@ -232,6 +234,91 @@ describe('paintedHolder', () => {
     it('leaves the dot hollow when the map has drawn no title of the chain', () => {
       const chain: ContentChainReading[] = [{ titles: [PONTHIEU], end: 'unknown' }]
       expect(paintedHolder(verdict('incomplete', chain), drawn)).toBeNull()
+    })
+  })
+})
+
+/**
+ * A map drawing these ids, the Empire its one empire.
+ * @param drawn - the Wikidata ids its polities carry
+ * @returns the map's polities
+ */
+function map(drawn: string[]) {
+  return {
+    declared: new Set(drawn),
+    rankOf: (wikidata: string) => (wikidata === 'Q12548' ? 'empire' : 'kingdom'),
+  }
+}
+
+/**
+ * The polity under a city.
+ * @param wikidata - its id, `null` for none
+ * @returns it
+ */
+function on(wikidata: string | null) {
+  return { name: wikidata ?? 'Elsass', wikidata }
+}
+
+// The dev, 2026-11-16: with the sovereign ticked, the check goes to n-1 under a kingdom, n-2 under an empire.
+describe('bySovereignLevel', () => {
+  const FRANCE = { name: 'Philippe Ier — royaume de France', wikidata: 'Q70972' }
+  const BOURGES = { name: 'Eudes Arpin — vicomté de Bourges', wikidata: 'Q999' }
+  const BLOIS = { name: 'Étienne — comté de Blois', wikidata: 'Q5' }
+  const NORMANDY = { name: 'Robert — duché de Normandie', wikidata: 'Q6' }
+  const SWABIA = { name: 'Frédéric Ier — duché de Souabe', wikidata: 'Q693980' }
+  const EMPIRE = { name: 'Henri IV — Saint-Empire', wikidata: 'Q12548' }
+
+  describe('happy path', () => {
+    it('agrees with a city in the duchy below the king, its chain count → duchy → king', () => {
+      const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q6'), map(['Q6', 'Q70972']))).toEqual({
+        kind: 'agrees',
+        expected: NORMANDY.name,
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('agrees with a city in a county drawn below that duchy', () => {
+      const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q5'), map(['Q5', 'Q6', 'Q70972'])).kind).toBe('agrees')
+    })
+
+    it('marks yellow a city in the kingdom but not in its duchy, drawn elsewhere', () => {
+      const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q6', 'Q70972'])).kind).toBe('misplaced')
+    })
+
+    it('checks two levels below an empire, and one where it has no second level', () => {
+      const deep = { titles: [BLOIS, SWABIA, NORMANDY, EMPIRE], end: 'sovereign' as const }
+      expect(bySovereignLevel(deep, on('Q693980'), map(['Q693980', 'Q6'])).expected).toBe(
+        SWABIA.name
+      )
+      const shallow = { titles: [SWABIA, EMPIRE], end: 'sovereign' as const }
+      expect(bySovereignLevel(shallow, on('Q693980'), map(['Q693980'])).kind).toBe('agrees')
+    })
+  })
+
+  describe('managed errors', () => {
+    // *"Red, when the duchy does not exist"*: Bourges held of the king, the viscounty not drawn
+    it('asks to declare the level below the sovereign when the map has not drawn it', () => {
+      const reading = { titles: [BOURGES, FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toEqual({
+        kind: 'toDeclare',
+        expected: BOURGES.name,
+      })
+    })
+  })
+
+  describe('edge cases', () => {
+    it('checks the sovereign itself when it holds the city', () => {
+      const reading = { titles: [FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972'])).kind).toBe('agrees')
+    })
+
+    it('never agrees on a polity with no Wikidata id', () => {
+      const reading = { titles: [SWABIA, EMPIRE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on(null), map(['Q693980'])).kind).toBe('misplaced')
     })
   })
 })

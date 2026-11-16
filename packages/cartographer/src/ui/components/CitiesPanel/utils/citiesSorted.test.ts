@@ -49,7 +49,7 @@ const VERDICTS: ReadonlyMap<string, CityVerdict> = new Map(
       ['Aachen', 'toDeclare'],
       ['Trier', 'agrees'],
     ] as const satisfies readonly (readonly [string, CityVerdictKind])[]
-  ).map(([id, kind]) => [id, { onMap: null, bySources: null, kind, chain: null }])
+  ).map(([id, kind]) => [id, { onMap: null, bySources: null, kind, chain: null, expected: null }])
 )
 
 const names = (sort: Parameters<typeof citiesSorted>[1]): string[] =>

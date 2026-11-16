@@ -82,9 +82,10 @@ describe('editor-chrome.css — the {Cities} alerts', () => {
   })
 
   describe('variants', () => {
-    it('gives a holder the map has not drawn yet the same yellow, in the list and the detail', () => {
-      expect(declarationsFor(row('toDeclare'))).toContain('color: var(--caution);')
-      expect(declarationsFor(detail('toDeclare'))).toContain('color: var(--caution);')
+    // The dev, 2026-11-16: red when what the city must lie in does not exist on the map.
+    it('gives a holder the map has not drawn yet the red, in the list and the detail', () => {
+      expect(declarationsFor(row('toDeclare'))).toContain('color: var(--warn);')
+      expect(declarationsFor(detail('toDeclare'))).toContain('color: var(--warn);')
     })
   })
 

@@ -60,5 +60,6 @@
   "chainSovereign": "sovereign",
   "chainUnknown": "beyond, we do not know",
   "chainLoop": "the links contradict one another",
-  "stateIncomplete": "Chain incomplete ({count})"
+  "stateIncomplete": "Chain incomplete ({count})",
+  "misplacedLevel": "Not at the right place: its chain puts it in {polity}."
 }

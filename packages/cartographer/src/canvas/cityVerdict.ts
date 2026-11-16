@@ -53,6 +53,82 @@ export interface CityVerdict {
   readonly kind: CityVerdictKind
   /** The city's chain of vassalage it was judged by, or `null` when its sheet names no title (CARTO-435). */
   readonly chain: readonly ContentChainReading[] | null
+  /**
+   * The title of its chain the polity under it must be, or lie under — the level below the sovereign (the dev,
+   * 2026-11-16) — by its name; `null` when the chain reaches no sovereign.
+   */
+  readonly expected: string | null
+}
+
+/** What the map says of its polities, for the level check: which ids it draws, and each one's rank. */
+export interface MapPolities {
+  /** The Wikidata ids its polities carry. */
+  readonly declared: ReadonlySet<string>
+  /**
+   * The rank of the polity carrying an id.
+   * @param wikidata - the id
+   * @returns its rank, or `null`
+   */
+  readonly rankOf: (wikidata: string) => string | null
+}
+
+/** How far below the sovereign the check goes: an empire's kingdoms and duchies are two levels down, a kingdom's one. */
+const LEVELS_BELOW: Readonly<Record<string, number>> = { empire: 2 }
+
+/**
+ * The verdict of a city whose chain reaches a sovereign (the dev, 2026-11-16): the check goes to the level below it —
+ * n-1 under a kingdom (the duchy, or the viscounty of Bourges held of the king), n-2 under an empire (empire → kingdom
+ * → duchy), n-1 where an empire has no level two below. Right when the polity under the city is that title or one
+ * below it in the chain; **to declare** (red) when the map has not drawn that title; wrong (yellow) otherwise.
+ * @param reading - the reading that ends on a sovereign
+ * @param onMap - the polity under the city, or `null`
+ * @param map - the map's polities
+ * @returns the verdict and the title checked
+ */
+export function bySovereignLevel(
+  reading: ContentChainReading,
+  onMap: PolityOnMap | null,
+  map: MapPolities
+): { kind: CityVerdictKind; expected: string } {
+  const level = checkedLevel(reading, map)
+  const target = reading.titles[level]
+  const expected = target?.name ?? ''
+  if (liesWithin(reading, level, onMap)) return { kind: 'agrees', expected }
+  const drawn = target?.wikidata ?? null
+  if (drawn === null || !map.declared.has(drawn)) return { kind: 'toDeclare', expected }
+  return { kind: 'misplaced', expected }
+}
+
+/**
+ * Whether the polity under a city is the title checked, or one below it in the chain — by its Wikidata id, a polity
+ * without one never.
+ * @param reading - the reading
+ * @param level - the rank of the title checked
+ * @param onMap - the polity under the city, or `null`
+ * @returns whether it lies within
+ */
+function liesWithin(
+  reading: ContentChainReading,
+  level: number,
+  onMap: PolityOnMap | null
+): boolean {
+  const id = onMap?.wikidata ?? null
+  return id !== null && reading.titles.slice(0, level + 1).some((title) => title.wikidata === id)
+}
+
+/**
+ * The rank, from the holder's title up, of the title a chain ending on a sovereign is checked at: n-1 under a kingdom,
+ * n-2 under an empire, n-1 where an empire has no level two below, the sovereign itself when it holds the city.
+ * @param reading - the reading that ends on a sovereign
+ * @param map - the map's polities, for the sovereign's rank
+ * @returns the title's rank in the reading
+ */
+function checkedLevel(reading: ContentChainReading, map: MapPolities): number {
+  const top = reading.titles.length - 1
+  const sovereign = reading.titles[top]?.wikidata ?? null
+  const rank = sovereign === null ? null : map.rankOf(sovereign)
+  const wanted = (rank === null ? undefined : LEVELS_BELOW[rank]) ?? 1
+  return Math.max(0, top - (top >= wanted ? wanted : 1))
 }
 
 /**
@@ -115,14 +191,24 @@ export function cityVerdicts(
   const declared = new Set(
     document.polities.flatMap(({ wikidata }) => (wikidata === null ? [] : [wikidata]))
   )
+  const map: MapPolities = {
+    declared,
+    rankOf: (wikidata) =>
+      document.polities.find((polity) => polity.wikidata === wikidata)?.rank ?? null,
+  }
   return new Map(
     cities.map((city) => {
       const onMap = polityOnMap(document, territories, [city.lon, city.lat])
       const bySources = city.holder
-      const verdict = (kind: CityVerdictKind): [string, CityVerdict] => [
-        city.id,
-        { onMap, bySources, kind, chain: city.chain },
-      ]
+      const verdict = (
+        kind: CityVerdictKind,
+        expected: string | null = null
+      ): [string, CityVerdict] => [city.id, { onMap, bySources, kind, chain: city.chain, expected }]
+      const crowned = city.chain?.find((reading) => reading.end === 'sovereign')
+      if (crowned !== undefined) {
+        const { kind, expected } = bySovereignLevel(crowned, onMap, map)
+        return verdict(kind, expected)
+      }
       if (city.chain !== null) return verdict(byChain(city.chain, onMap))
       if (bySources === null) return verdict('notEntered')
       if (bySources.wikidata === null) return verdict('cannotCompare')
@@ -157,13 +243,14 @@ export function paintedHolder(verdict: CityVerdict, declared: ReadonlySet<string
  * The alert a verdict raises, or none — the dev's rule, 2026-11-16 (*"a point not at the right place is yellow; a
  * technical problem is red; well placed, it has the colour of the country it is in"*): **yellow** for a city the map
  * does not put in its chain — misplaced, a holder not drawn yet, or a chain that stops short of the polity under it;
- * **red** for what the data cannot answer — no holder entered, or a polity under it with no Wikidata id to compare.
+ * **red** for what the data cannot answer — no holder entered, a polity under it with no Wikidata id to compare, or
+ * a title the check needs that the map has not drawn (*"red, when the duchy does not exist"*).
  * Only a city at the right place keeps its plain look. The slate of CARTO-435 is gone: it hid the yellow.
  * @param kind - the verdict
  * @returns the alert, or `null`
  */
 export function cityAlert(kind: CityVerdictKind): CityAlert | null {
-  if (kind === 'notEntered' || kind === 'cannotCompare') return 'missing'
-  if (kind === 'misplaced' || kind === 'toDeclare' || kind === 'incomplete') return 'toCorrect'
+  if (kind === 'notEntered' || kind === 'cannotCompare' || kind === 'toDeclare') return 'missing'
+  if (kind === 'misplaced' || kind === 'incomplete') return 'toCorrect'
   return null
 }

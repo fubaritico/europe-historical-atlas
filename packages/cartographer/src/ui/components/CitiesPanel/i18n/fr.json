@@ -60,5 +60,6 @@
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
   "chainLoop": "les maillons se contredisent",
-  "stateIncomplete": "Chaîne incomplète ({count})"
+  "stateIncomplete": "Chaîne incomplète ({count})",
+  "misplacedLevel": "Pas au bon endroit : sa chaîne la met dans {polity}."
 }

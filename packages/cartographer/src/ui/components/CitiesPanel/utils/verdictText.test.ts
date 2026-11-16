@@ -13,7 +13,7 @@ const CHAIN = [{ titles: [{ name: 'Ruthard — Mayence', wikidata: 'Q1' }], end:
  * @returns the verdict
  */
 function verdict(fields: Partial<CityVerdict>): CityVerdict {
-  return { onMap: MAINZ, bySources: MAINZ, kind: 'agrees', chain: null, ...fields }
+  return { onMap: MAINZ, bySources: MAINZ, kind: 'agrees', chain: null, expected: null, ...fields }
 }
 
 describe('verdictText', () => {
