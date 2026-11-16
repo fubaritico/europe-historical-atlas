@@ -13,7 +13,15 @@ const CHAIN = [{ titles: [{ name: 'Ruthard — Mayence', wikidata: 'Q1' }], end:
  * @returns the verdict
  */
 function verdict(fields: Partial<CityVerdict>): CityVerdict {
-  return { onMap: MAINZ, bySources: MAINZ, kind: 'agrees', chain: null, expected: null, ...fields }
+  return {
+    onMap: MAINZ,
+    bySources: MAINZ,
+    kind: 'agrees',
+    chain: null,
+    expected: null,
+    expectedOnMap: null,
+    ...fields,
+  }
 }
 
 describe('verdictText', () => {
@@ -29,6 +37,23 @@ describe('verdictText', () => {
   })
 
   describe('variants', () => {
+    // The dev, 2026-11-16: « … doit dépendre de Henri IV — Saint-Empire (Holy Roman Empire), 1100. Pas … »
+    it('names the title checked with the map’s name for it, for a chain not followed on the map', () => {
+      expect(
+        verdictText(
+          verdict({
+            kind: 'misplaced',
+            chain: CHAIN,
+            expected: 'Henri IV — Saint-Empire, 1100',
+            expectedOnMap: 'Holy Roman Empire',
+          })
+        )
+      ).toEqual({
+        key: 'misplacedLevel',
+        polity: 'Henri IV — Saint-Empire (Holy Roman Empire), 1100',
+      })
+    })
+
     it('names the polity under the city for a city judged by its chain', () => {
       expect(verdictText(verdict({ kind: 'misplaced', chain: CHAIN }))).toEqual({
         key: 'misplacedChain',

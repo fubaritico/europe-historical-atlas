@@ -34,7 +34,7 @@ export function CityDialog({
   return (
     <Modal isOpen={open} onClose={onClose} aria-label={openedCity?.name ?? ''}>
       {open && (
-        <div className="short-dialogue">
+        <div className="short-dialogue short-dialogue--city">
           <Card>
             <Card.Header>{openedCity.name}</Card.Header>
             <Card.Body>

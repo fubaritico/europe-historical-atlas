@@ -50,7 +50,10 @@ const VERDICTS: ReadonlyMap<string, CityVerdict> = new Map(
       ['Paris', 'notEntered'],
       ['Man', 'cannotCompare'],
     ] as const
-  ).map(([id, kind]) => [id, { onMap: null, bySources: null, kind, chain: null, expected: null }])
+  ).map(([id, kind]) => [
+    id,
+    { onMap: null, bySources: null, kind, chain: null, expected: null, expectedOnMap: null },
+  ])
 )
 
 /**

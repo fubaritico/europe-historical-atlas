@@ -30,7 +30,7 @@ function year(kinds: readonly CityVerdictKind[]): {
   const verdicts = new Map(
     kinds.map((kind, index): [string, CityVerdict] => [
       String(index),
-      { onMap: null, bySources: null, kind, chain: null, expected: null },
+      { onMap: null, bySources: null, kind, chain: null, expected: null, expectedOnMap: null },
     ])
   )
   return { cities, verdicts }

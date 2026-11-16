@@ -1,3 +1,5 @@
+import { withMapName } from './titleFormat'
+
 import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CitiesPanelMessageKey } from '../i18n'
 import type { ChainEnd } from '@europe-historical-atlas/core/data/vassalChain'
@@ -26,7 +28,12 @@ export const CHAIN_END_TEXT: Readonly<Record<ChainEnd, CitiesPanelMessageKey>> =
 function levelText(verdict: CityVerdict): VerdictText | null {
   if (verdict.expected === null) return null
   if (verdict.kind === 'toDeclare') return { key: 'toDeclare', polity: verdict.expected }
-  if (verdict.kind === 'misplaced') return { key: 'misplacedLevel', polity: verdict.expected }
+  if (verdict.kind === 'misplaced') {
+    // Said with the city and the polity under it (the dev, 2026-11-16) — over unclaimed ground, that no polity is
+    return verdict.onMap === null
+      ? { key: 'unclaimed', polity: verdict.expected }
+      : { key: 'misplacedLevel', polity: withMapName(verdict.expected, verdict.expectedOnMap) }
+  }
   return null
 }
 

@@ -194,6 +194,7 @@ function verdict(kind: CityVerdictKind, chain: ContentChainReading[] | null) {
     kind,
     chain,
     expected: null,
+    expectedOnMap: null,
   }
 }
 
@@ -247,6 +248,7 @@ function map(drawn: string[]) {
   return {
     declared: new Set(drawn),
     rankOf: (wikidata: string) => (wikidata === 'Q12548' ? 'empire' : 'kingdom'),
+    nameOf: (wikidata: string) => `map:${wikidata}`,
   }
 }
 
@@ -271,10 +273,34 @@ describe('bySovereignLevel', () => {
   describe('happy path', () => {
     it('agrees with a city in the duchy below the king, its chain count → duchy → king', () => {
       const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q6'), map(['Q6', 'Q70972']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q6'), map(['Q6', 'Q70972']))).toMatchObject({
         kind: 'agrees',
         expected: NORMANDY.name,
       })
+    })
+  })
+
+  // The dev, 2026-11-16: the message names the title checked with the name the map gives its polity
+  describe('the map’s name of the title checked', () => {
+    it('gives the name of the polity carrying the title checked, wherever the city lies', () => {
+      const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
+      const named = {
+        declared: new Set(['Q6', 'Q70972']),
+        rankOf: () => 'kingdom',
+        nameOf: (wikidata: string) => (wikidata === 'Q6' ? 'Duchy of Normandy' : 'France'),
+      }
+      expect(bySovereignLevel(reading, on('Q6'), named)).toEqual({
+        kind: 'agrees',
+        expected: NORMANDY.name,
+        expectedOnMap: 'Duchy of Normandy',
+      })
+      expect(bySovereignLevel(reading, on('Q70972'), named).expectedOnMap).toBe('Duchy of Normandy')
+    })
+
+    it('gives none for a title with no Wikidata id', () => {
+      const nameless = { name: 'Sans identifiant', wikidata: null }
+      const reading = { titles: [BLOIS, nameless, FRANCE], end: 'sovereign' as const }
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972'])).expectedOnMap).toBeNull()
     })
   })
 
@@ -303,7 +329,7 @@ describe('bySovereignLevel', () => {
     // *"Red, when the duchy does not exist"*: the level below the king not drawn
     it('asks to declare the level below the sovereign when the map has not drawn it', () => {
       const reading = { titles: [BLOIS, NORMANDY, FRANCE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toMatchObject({
         kind: 'toDeclare',
         expected: NORMANDY.name,
       })
@@ -314,7 +340,7 @@ describe('bySovereignLevel', () => {
     // The dev, 2026-11-16: the first link, the city and its holder, is never what is drawn
     it('checks the kingdom, not the holder, when the holder is the level below it', () => {
       const reading = { titles: [BOURGES, FRANCE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toMatchObject({
         kind: 'agrees',
         expected: FRANCE.name,
       })
@@ -322,7 +348,7 @@ describe('bySovereignLevel', () => {
 
     it('checks the empire, not the holder, when the holder answers to it directly', () => {
       const reading = { titles: [SWABIA, EMPIRE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q12548'), map(['Q12548']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q12548'), map(['Q12548']))).toMatchObject({
         kind: 'agrees',
         expected: EMPIRE.name,
       })
@@ -330,14 +356,14 @@ describe('bySovereignLevel', () => {
 
     it('checks n-1, not the holder, under an empire when the holder is n-2', () => {
       const reading = { titles: [BLOIS, SWABIA, EMPIRE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q693980'), map(['Q693980', 'Q12548']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q693980'), map(['Q693980', 'Q12548']))).toMatchObject({
         kind: 'agrees',
         expected: SWABIA.name,
       })
     })
 
     it('checks n-1 under a sovereign whose rank the map does not know, or with no Wikidata id', () => {
-      const unknown = { declared: new Set(['Q6']), rankOf: () => null }
+      const unknown = { declared: new Set(['Q6']), rankOf: () => null, nameOf: () => null }
       const deep = { titles: [BLOIS, SWABIA, NORMANDY, EMPIRE], end: 'sovereign' as const }
       expect(bySovereignLevel(deep, on('Q6'), unknown).expected).toBe(NORMANDY.name)
       const nameless = { name: 'Sans identifiant', wikidata: null }

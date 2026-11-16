@@ -59,9 +59,14 @@ export interface CityVerdict {
    * reaches no sovereign.
    */
   readonly expected: string | null
+  /**
+   * The name the map gives the polity carrying that title — « Kingdom of Germany » for « Henri IV — royaume de
+   * Germanie, 1100 » (the dev, 2026-11-16) —; `null` when the map draws none, or no title is checked.
+   */
+  readonly expectedOnMap: string | null
 }
 
-/** What the map says of its polities, for the level check: which ids it draws, and each one's rank. */
+/** What the map says of its polities, for the level check: which ids it draws, each one's rank and name. */
 export interface MapPolities {
   /** The Wikidata ids its polities carry. */
   readonly declared: ReadonlySet<string>
@@ -71,6 +76,12 @@ export interface MapPolities {
    * @returns its rank, or `null`
    */
   readonly rankOf: (wikidata: string) => string | null
+  /**
+   * The name of the polity carrying an id.
+   * @param wikidata - the id
+   * @returns its name, or `null`
+   */
+  readonly nameOf: (wikidata: string) => string | null
 }
 
 /** How far below the sovereign the check goes: an empire's kingdoms and duchies are two levels down, a kingdom's one. */
@@ -84,20 +95,22 @@ const LEVELS_BELOW: Readonly<Record<string, number>> = { empire: 2 }
  * @param reading - the reading that ends on a sovereign
  * @param onMap - the polity under the city, or `null`
  * @param map - the map's polities
- * @returns the verdict and the title checked
+ * @returns the verdict, the title checked and the name the map gives it
  */
 export function bySovereignLevel(
   reading: ContentChainReading,
   onMap: PolityOnMap | null,
   map: MapPolities
-): { kind: CityVerdictKind; expected: string } {
+): { kind: CityVerdictKind; expected: string; expectedOnMap: string | null } {
   const level = checkedLevel(reading, map)
   const target = reading.titles[level]
   const expected = target?.name ?? ''
-  if (liesWithin(reading, level, onMap)) return { kind: 'agrees', expected }
   const drawn = target?.wikidata ?? null
-  if (drawn === null || !map.declared.has(drawn)) return { kind: 'toDeclare', expected }
-  return { kind: 'misplaced', expected }
+  const expectedOnMap = drawn === null ? null : map.nameOf(drawn)
+  if (liesWithin(reading, level, onMap)) return { kind: 'agrees', expected, expectedOnMap }
+  if (drawn === null || !map.declared.has(drawn))
+    return { kind: 'toDeclare', expected, expectedOnMap }
+  return { kind: 'misplaced', expected, expectedOnMap }
 }
 
 /**
@@ -200,6 +213,8 @@ export function cityVerdicts(
     declared,
     rankOf: (wikidata) =>
       document.polities.find((polity) => polity.wikidata === wikidata)?.rank ?? null,
+    nameOf: (wikidata) =>
+      document.polities.find((polity) => polity.wikidata === wikidata)?.name ?? null,
   }
   return new Map(
     cities.map((city) => {
@@ -207,12 +222,16 @@ export function cityVerdicts(
       const bySources = city.holder
       const verdict = (
         kind: CityVerdictKind,
-        expected: string | null = null
-      ): [string, CityVerdict] => [city.id, { onMap, bySources, kind, chain: city.chain, expected }]
+        expected: string | null = null,
+        expectedOnMap: string | null = null
+      ): [string, CityVerdict] => [
+        city.id,
+        { onMap, bySources, kind, chain: city.chain, expected, expectedOnMap },
+      ]
       const crowned = city.chain?.find((reading) => reading.end === 'sovereign')
       if (crowned !== undefined) {
-        const { kind, expected } = bySovereignLevel(crowned, onMap, map)
-        return verdict(kind, expected)
+        const { kind, expected, expectedOnMap } = bySovereignLevel(crowned, onMap, map)
+        return verdict(kind, expected, expectedOnMap)
       }
       if (city.chain !== null) return verdict(byChain(city.chain, onMap))
       if (bySources === null) return verdict('notEntered')

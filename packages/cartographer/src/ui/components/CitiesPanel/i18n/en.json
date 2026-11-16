@@ -14,7 +14,7 @@
   "misplaced": "Not at the right place: the sources put it in {polity}.",
   "toDeclare": "{polity} is not declared in this map: to declare.",
   "cannotCompare": "{polity} has no Wikidata id: nothing to compare by.",
-  "sourceWhere": "{title}, {where}",
+  "sourceWhere": ", {where}",
   "filter": "Filter the cities",
   "showFound": "{count, plural, one {Show the city found} other {Show the # cities found}}",
   "noMatch": "No city answers “{query}”.",
@@ -43,7 +43,7 @@
   "onMapTitle": "On the map",
   "chainTitle": "Chain of vassalage",
   "noPolity": "no polity",
-  "chainTop": "{title} — {end}",
+  "chainEnd": " — {end}",
   "byState": "By verification",
   "byStateHint": "The map checked against the sources: a city stays when its result is ticked. “No holder” is with the countries, below.",
   "stateMisplaced": "Not at the right place ({count})",
@@ -63,5 +63,5 @@
   "chainUnknown": "beyond, we do not know",
   "chainLoop": "the links contradict one another",
   "stateIncomplete": "Chain incomplete ({count})",
-  "misplacedLevel": "Not at the right place: its chain puts it in {polity}."
+  "misplacedLevel": "Chain of vassalage not followed on the map: {city} should depend on {polity}. Not {onMap}."
 }

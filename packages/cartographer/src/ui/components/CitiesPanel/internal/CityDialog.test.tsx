@@ -30,6 +30,7 @@ const AGREES: CityVerdict = {
   kind: 'agrees',
   chain: null,
   expected: null,
+  expectedOnMap: null,
 }
 
 /**
@@ -99,6 +100,10 @@ describe('CityDialog', () => {
         'Chain of vassalage: Baudouin III — comté de Hainaut; Henri IV — royaume de Germanie; ' +
           'Henri IV — Saint-Empire — sovereign'
       )
+      // The dev, 2026-11-16: each person's name in italics
+      expect(
+        [...document.querySelectorAll('.city-detail__person')].map((name) => name.textContent)
+      ).toEqual(['Baudouin III', 'Henri IV', 'Henri IV'])
     })
 
     it('closes on « Close »', async () => {
