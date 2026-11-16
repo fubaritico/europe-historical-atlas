@@ -82,6 +82,12 @@ const CARTOGRAPHER_BOUNDARIES = [
     why: 'loaders/ fetches, bakes and projects what the editor draws on. These modules sat beside the composition root until 2026-10-18, because they are what it wires together — but they are not it: they hold real logic and real tests, so they must not reach into the store, the painter, a component, or the entry. Found in review on 2026-10-07, when they had no row at all and only the package-wide three.js ban covered them; the atlas gets away with the same shape because nothing there interrogates its config, while this package has boundaries.test.ts precisely so a missing row cannot go quiet.',
   }),
   layerBoundary({
+    files: ['src/cli/**/*.{ts,tsx}'],
+    forbid: ['ui', 'persistence', 'devServer', 'workbench', 'main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'cli/ runs in a terminal, not the page (CARTO-456): it judges a map’s cities by the code the canvas paints them by, so it reads the canvas’s verdict, the store’s pure helpers and the loaders’ shapes — never the chrome, the year on disk through the page’s port, the dev server or the entry, which would boot the editor in a terminal.',
+  }),
+  layerBoundary({
     files: ['src/persistence/**/*.{ts,tsx}'],
     forbid: ['geometry', 'canvas', 'ui', 'devServer', 'workbench', 'main'],
     paths: CARTOGRAPHER_IS_2D,

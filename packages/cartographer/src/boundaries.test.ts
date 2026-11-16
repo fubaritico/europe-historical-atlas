@@ -82,6 +82,7 @@ const LAYERS = {
   persistence: 'src/persistence/yearSession.ts',
   devServer: 'src/devServer/yearWritePlan.ts',
   wikidata: 'src/wikidata/wikidataFacts.ts',
+  cli: 'src/cli/cityAlerts.ts',
   root: 'src/main.tsx',
 } as const
 
@@ -176,6 +177,21 @@ describe('architecture boundaries', () => {
       expect(forbiddenPackages(loaders)).toContain('three')
     })
 
+    it('holds the terminal command off the chrome, the page’s port, the dev server and the entry', () => {
+      // CARTO-456: cli/ judges cities by the canvas's verdict in a terminal; reaching ui/ or main would boot the editor
+      // there, persistence/ would read the year through the page's HTTP port.
+      const patterns = forbiddenPatterns(resolved.get('cli') ?? {})
+
+      for (const layer of ['ui', 'persistence', 'devServer', 'main']) {
+        expect(
+          patterns.some((pattern) => pattern.includes(layer)),
+          `cli must not reach ${layer}`
+        ).toBe(true)
+      }
+      expect(patterns).not.toContain('**/canvas/**')
+      expect(forbiddenPackages(resolved.get('cli') ?? {})).toContain('three')
+    })
+
     it('keeps the whole chrome out of every layer it sits on, not only its components', () => {
       // Since 2026-10-22 the chrome is one folder, `ui/`, and it reads the layers, never the reverse (the
       // dev's call). A row still naming `components/` would let a layer import every hook, util and sheet.
@@ -188,6 +204,7 @@ describe('architecture boundaries', () => {
         'persistence',
         'devServer',
         'wikidata',
+        'cli',
       ]) {
         expect(
           forbiddenPatterns(resolved.get(layer) ?? {}),

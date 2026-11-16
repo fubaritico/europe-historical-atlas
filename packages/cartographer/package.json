@@ -10,10 +10,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit && tsc --noEmit -p scripts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "cities:alerts": "tsx scripts/cityAlerts.ts"
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
@@ -41,6 +42,7 @@
     "eslint-plugin-react-refresh": "catalog:",
     "globals": "catalog:",
     "jsdom": "catalog:",
+    "tsx": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"

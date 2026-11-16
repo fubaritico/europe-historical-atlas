@@ -26,6 +26,8 @@ import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
 import { mcpAccess } from './mcp/mcpAccess'
 import { MIGRATION_DIR } from './migrate/paths'
 
+import type { Config } from 'payload'
+
 /** This file's folder: the import map and the generated types are written beside it. */
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -52,14 +54,12 @@ function required(name: string): string {
 }
 
 /**
- * The contribution tool — local, a SQLite file, French first (CMS-219).
- *
- * **No locale fallback**: an English field nobody wrote stays empty, in the admin and in the export, rather than
- * showing the French under an English label — what the atlas does with a missing English text is CMS-227's
- * decision.
+ * The admin: the dev's user, the import map, the dark theme, the atlas's mark and its tab title — a new object at
+ * each call, as {@link cmsConfig}'s.
+ * @returns the admin's configuration
  */
-export default buildConfig({
-  admin: {
+function adminConfig(): NonNullable<Config['admin']> {
+  return {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     // Dark only, the dev's call (2026-10-30)
@@ -74,38 +74,60 @@ export default buildConfig({
       titleSuffix: ` — ${ATLAS_NAME}`,
       icons: [{ rel: 'icon', type: 'image/svg+xml', url: brandMarkDataUri(TAB_MARK_SIDE) }],
     },
-  },
-  collections: [
-    Events,
-    EventTypes,
-    SiegeEngines,
-    Places,
-    PlacePeriods,
-    ImportanceReasons,
-    Confessions,
-    People,
-    Territories,
-    Titles,
-    VassalLinks,
-    Sources,
-    Users,
-  ],
-  localization: {
-    locales: [
-      { code: 'fr', label: 'Français' },
-      { code: 'en', label: 'English' },
+  }
+}
+
+/**
+ * The contribution tool — local, a SQLite file, French first (CMS-219).
+ *
+ * **No locale fallback**: an English field nobody wrote stays empty, in the admin and in the export, rather than
+ * showing the French under an English label — what the atlas does with a missing English text is CMS-227's
+ * decision.
+ *
+ * Exported raw beside its built form, so a command can build it with one thing changed — the print of the content
+ * sends Payload's log to the standard error (CARTO-456). **A new object at each call**: building runs the plugins, and
+ * the MCP plugin adds its collection to the object it is given — built twice, one object refuses its own slug
+ * (measured: `DuplicateCollection`, « payload-mcp-api-keys »).
+ * @returns the configuration, not built
+ */
+export function cmsConfig(): Config {
+  return {
+    admin: adminConfig(),
+    collections: [
+      Events,
+      EventTypes,
+      SiegeEngines,
+      Places,
+      PlacePeriods,
+      ImportanceReasons,
+      Confessions,
+      People,
+      Territories,
+      Titles,
+      VassalLinks,
+      Sources,
+      Users,
     ],
-    defaultLocale: 'fr',
-    fallback: false,
-  },
-  i18n: { supportedLanguages: { fr, en }, fallbackLanguage: 'fr' },
-  plugins: [mcpAccess()],
-  secret: required('PAYLOAD_SECRET'),
-  typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
-  // Migrations, never the push (CMS-276): the push asks its questions in the dev's terminal and freezes his server.
-  db: sqliteAdapter({
-    client: { url: required('DATABASE_URL') },
-    push: false,
-    migrationDir: MIGRATION_DIR,
-  }),
-})
+    localization: {
+      locales: [
+        { code: 'fr', label: 'Français' },
+        { code: 'en', label: 'English' },
+      ],
+      defaultLocale: 'fr',
+      fallback: false,
+    },
+    i18n: { supportedLanguages: { fr, en }, fallbackLanguage: 'fr' },
+    plugins: [mcpAccess()],
+    secret: required('PAYLOAD_SECRET'),
+    typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
+    // Migrations, never the push (CMS-276): the push asks its questions in the dev's terminal and freezes his server.
+    db: sqliteAdapter({
+      client: { url: required('DATABASE_URL') },
+      push: false,
+      migrationDir: MIGRATION_DIR,
+    }),
+  }
+}
+
+/** The configuration, built — what Payload, Next and the scripts load. */
+export default buildConfig(cmsConfig())

@@ -1,0 +1,14 @@
+{
+  // The Cartographer's terminal commands (CARTO-456): they run under Node through `tsx`, so they are typed with Node's
+  // declarations, apart from `src`, which is a browser app and never sees `process` — the split the atlas draws for its
+  // `bake/` (`tsconfig.build.json`). Its own `tsconfig.json`, so ESLint's project service finds it for these files.
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "jsx": "react-jsx"
+  },
+  // `src` with them: a module of src read alone misses the Zustand middleware's declarations another file of src brings
+  // (measured: `citiesSlice.ts` refused, 2026-11-16).
+  "include": [".", "../src", "../vitest.setup.ts"]
+}

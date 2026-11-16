@@ -331,6 +331,9 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 30.0.1
+      tsx:
+        specifier: 'catalog:'
+        version: 4.23.15
       typescript-eslint:
         specifier: 'catalog:'
         version: 8.70.0(eslint@9.39.5(jiti@2.6.1))(typescript@5.7.3)
