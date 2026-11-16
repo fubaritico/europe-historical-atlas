@@ -29,7 +29,7 @@ Prepare and propose a conventional commit message only for the current changes.
 ## Commit format
 
 ```
-type(scope): subject
+type(scope): subject [TICKET-123]
 
 - bullet point detail if needed
 ```
@@ -41,6 +41,11 @@ type(scope): subject
 ## Rules
 
 - Subject: lowercase, no trailing period, max 100 chars total
+- **The header ends with its ticket** (REPO-460, the dev, 2026-11-16: *« il faut que tu aies la référence du ticket quand
+  tu commites quelque chose »*): `[CARTO-457]`, several split by a comma (`[CMS-422, CARTO-453]`), or `[no-ticket]` written
+  on purpose — the historian's data, a note no ticket serves. Seen in `git log --oneline` and on GitHub, where a line of
+  the body is not. **commitlint refuses a header without it** (`header-ticket`, `commitlint.config.js`). The ticket
+  counts in the 100 characters.
 - Body: bullet points for non-obvious changes
 - Never skip pre-commit hook (runs typecheck + lint + test automatically)
 - One feature per commit — do not accumulate unrelated changes
