@@ -42,16 +42,7 @@ describe('useRecordSearches', () => {
     })
   })
 
-  describe('variants', () => {
-    it('searches the sources by their title', async () => {
-      const fetcher = stubFetch()
-      const { result } = renderHook(() => useRecordSearches('/api', 'fr'))
-      await result.current.sources('Bur')
-      const url = calledUrl(fetcher)
-      expect(url.pathname).toBe('/api/sources')
-      expect(url.searchParams.get('where[title][like]')).toBe('Bur')
-    })
-  })
+  // L2: N/A — one search left, the places' (the sources and the titles are Payload's own fields since 2026-11-16).
 
   describe('managed errors', () => {
     it('lets a failed search through, for the field to say', async () => {
@@ -60,7 +51,7 @@ describe('useRecordSearches', () => {
         vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
       )
       const { result } = renderHook(() => useRecordSearches('/api', 'fr'))
-      await expect(result.current.sources('Bur')).rejects.toThrow('Failed to fetch')
+      await expect(result.current.places('Ro')).rejects.toThrow('Failed to fetch')
     })
   })
 
@@ -75,7 +66,7 @@ describe('useRecordSearches', () => {
       rerender({ locale: 'fr' })
       expect(result.current.places).toBe(first.places)
       rerender({ locale: 'en' })
-      expect(result.current.sources).not.toBe(first.sources)
+      expect(result.current.places).not.toBe(first.places)
     })
   })
 })

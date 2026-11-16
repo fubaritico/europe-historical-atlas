@@ -7,27 +7,18 @@ import { emptyTestimony } from '../utils/sheetValues'
 import { TestimonyLine } from './TestimonyLine'
 
 import type { Say } from '../utils/say'
-import type { RecordChoice, SheetLists, SheetValues } from '../utils/sheetValues'
+import type { SheetLists, SheetValues } from '../utils/sheetValues'
 
 /**
  * What the sources say of the city, one line a thing said (decision 5) — Formik's `FieldArray`: a button adds a line,
  * each line has its own to remove it, after which the keyboard is on the add button. None is a sheet with no source
  * yet.
- * @param props - the CMS's lists, the search of the sources and the translator
+ * @param props - the CMS's lists and the translator
  * @param props.lists - the reasons a line may give, the confessions it may name
- * @param props.searchSources - the sources matching what was typed, from the base
  * @param props.say - the translator
  * @returns the field
  */
-export function TestimoniesField({
-  lists,
-  searchSources,
-  say,
-}: {
-  lists: SheetLists
-  searchSources: (query: string) => Promise<RecordChoice[]>
-  say: Say
-}) {
+export function TestimoniesField({ lists, say }: { lists: SheetLists; say: Say }) {
   const { values } = useFormikContext<SheetValues>()
   // The line's remove button goes with the line: the focus goes to the add button, never to the page
   const adder = useRef<HTMLDivElement>(null)
@@ -43,7 +34,6 @@ export function TestimoniesField({
                 key={line.key}
                 index={index}
                 lists={lists}
-                searchSources={searchSources}
                 onRemove={() => {
                   lines.remove(index)
                   adder.current?.querySelector('button')?.focus()

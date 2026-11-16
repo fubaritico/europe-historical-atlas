@@ -7,7 +7,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * A text of the « Ville à une date » screen: a label, the sentence under a field, a refusal.
  *
  * Its messages that take values:
- * - `placeRemove`, `sourceRemove`, `reasonRemove`, `reasonAdded`, `reasonRemoved` — `name`, the place, source or
+ * - `placeRemove`, `reasonRemove`, `reasonAdded`, `reasonRemoved` — `name`, the place or
  *   reason.
  * - `addSuzerainOf`, `linkLineOf`, `linkSuzerainHelp` — `name`, the title the chain of vassalage stops at.
  * - `chain` — `year`, as text. `chainReadings` — `count`, how many readings.

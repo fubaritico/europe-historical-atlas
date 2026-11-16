@@ -25,7 +25,7 @@ const saved = {
 describe('sheetValues', () => {
   describe('happy path', () => {
     it('reads a saved sheet into the form, its place named', () => {
-      expect(sheetValues(saved, 'Rome', new Map())).toEqual({
+      expect(sheetValues(saved, 'Rome')).toEqual({
         place: { id: 5, name: 'Rome' },
         date: { start: { ...EMPTY_MOMENT, year: '1100' }, end: EMPTY_MOMENT },
         importance: 'capital',
@@ -41,16 +41,16 @@ describe('sheetValues', () => {
 
     // CMS-391: the box as the base holds it, a new sheet unticked.
     it('reads a sheet ticked « show in the atlas » as ticked, and sends it back so', () => {
-      const values = sheetValues({ ...saved, showInAtlas: true }, 'Rome', new Map())
+      const values = sheetValues({ ...saved, showInAtlas: true }, 'Rome')
       expect([values.showInAtlas, sheetBody(values).showInAtlas]).toEqual([true, true])
     })
 
     it('starts a new sheet unticked', () => {
-      expect(sheetValues({}, null, new Map()).showInAtlas).toBe(false)
+      expect(sheetValues({}, null).showInAtlas).toBe(false)
     })
 
     it('sends back what it read, to the field', () => {
-      expect(sheetBody(sheetValues(saved, 'Rome', new Map()))).toEqual({
+      expect(sheetBody(sheetValues(saved, 'Rome'))).toEqual({
         place: 5,
         date: {
           start: saved.date.start,
@@ -71,14 +71,12 @@ describe('sheetValues', () => {
   describe('variants', () => {
     // CMS-422: the holder as a title, by its id alone — Payload's own field reads its name.
     it('reads a populated holder title as its id, and sends back its id', () => {
-      const values = sheetValues({ ...saved, holderTitle: { id: 9 } }, 'Rome', new Map())
+      const values = sheetValues({ ...saved, holderTitle: { id: 9 } }, 'Rome')
       expect([values.holderTitle, sheetBody(values).holderTitle]).toEqual([9, 9])
     })
 
     it('reads a populated place by its id', () => {
-      expect(
-        sheetValues({ ...saved, place: { id: 5, name: 'Rome' } }, 'Rome', new Map()).place
-      ).toEqual({
+      expect(sheetValues({ ...saved, place: { id: 5, name: 'Rome' } }, 'Rome').place).toEqual({
         id: 5,
         name: 'Rome',
       })
@@ -112,17 +110,13 @@ describe('sheetValues', () => {
         where: 'p. 12',
         quotation: null,
       }
-      const values = sheetValues(
-        { ...saved, reasons: [1, { id: 2 }], testimonies: [row] },
-        'Rome',
-        new Map([['4', 'Buringh 2021']])
-      )
+      const values = sheetValues({ ...saved, reasons: [1, { id: 2 }], testimonies: [row] }, 'Rome')
       expect(values.reasons).toEqual([1, 2])
       expect(values.testimonies).toEqual([
         {
           key: 'r1',
           rowId: 'r1',
-          source: { id: 4, name: 'Buringh 2021' },
+          source: 4,
           subject: 'population',
           population: '35000',
           importance: '',
@@ -160,7 +154,7 @@ describe('sheetValues', () => {
         holderQid: 'Q4948',
         showInAtlas: false,
       }
-      const values = sheetValues(doc, 'Zadar', new Map([['4', 'Horvat 1924']]))
+      const values = sheetValues(doc, 'Zadar')
       expect([values.holderName, values.holderQid]).toEqual(['Republic of Venice', 'Q4948'])
       const body = sheetBody(values)
       expect([body.holderName, body.holderQid]).toEqual(['Republic of Venice', 'Q4948'])
@@ -168,7 +162,7 @@ describe('sheetValues', () => {
     })
 
     it('sends a holder left blank as none, and a line’s holder only when it speaks of one', () => {
-      const values = { ...sheetValues({}, null, new Map()), holderName: '  ', holderQid: '' }
+      const values = { ...sheetValues({}, null), holderName: '  ', holderQid: '' }
       expect(sheetBody(values)).toMatchObject({ holderName: null, holderQid: null })
       const line = {
         ...emptyTestimony(),
@@ -185,7 +179,7 @@ describe('sheetValues', () => {
 
     it('cuts the blanks around a typed holder and its id, never around a quotation', () => {
       const values = {
-        ...sheetValues({}, null, new Map()),
+        ...sheetValues({}, null),
         holderName: ' Venise ',
         holderQid: 'Q4948 ',
         showInAtlas: false,
@@ -231,7 +225,7 @@ describe('sheetValues', () => {
           { id: 'c1', confession: { id: 9 }, weight: 'dominant', weightAttested: true },
         ],
       }
-      const values = sheetValues(saved, null, new Map([['4', 'Horvat 1924']]))
+      const values = sheetValues(saved, null)
       const body = sheetBody(values)
       expect([values.communities[0], body.communities, body.testimonies[0]?.confession]).toEqual([
         { key: 'c1', rowId: 'c1', confession: 9, weight: 'dominant', weightAttested: true },
@@ -256,7 +250,7 @@ describe('sheetValues', () => {
 
   describe('managed errors', () => {
     it('starts a new sheet empty', () => {
-      expect(sheetValues({}, null, new Map())).toEqual({
+      expect(sheetValues({}, null)).toEqual({
         place: null,
         date: { start: EMPTY_MOMENT, end: EMPTY_MOMENT },
         importance: '',
@@ -271,7 +265,7 @@ describe('sheetValues', () => {
     })
 
     it('sends no place and no importance as null, for the server to refuse', () => {
-      expect(sheetBody(sheetValues({}, null, new Map()))).toMatchObject({
+      expect(sheetBody(sheetValues({}, null))).toMatchObject({
         place: null,
         importance: null,
       })
@@ -280,7 +274,7 @@ describe('sheetValues', () => {
 
   describe('unmanaged errors', () => {
     it('shows no place when its name could not be read', () => {
-      expect(sheetValues(saved, null, new Map()).place).toBeNull()
+      expect(sheetValues(saved, null).place).toBeNull()
     })
   })
 

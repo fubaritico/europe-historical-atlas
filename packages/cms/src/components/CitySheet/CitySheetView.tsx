@@ -45,14 +45,13 @@ export async function CitySheetView({ doc, initPageResult }: DocumentViewServerP
     reasons: await choiceList(req, 'importance-reasons', contentLocale),
     confessions: await choiceList(req, 'confessions', contentLocale),
   }
-  const sourceNames = await citedSourceNames(req, sheet)
   const id = relationId(sheet.id)
   const { api, admin } = req.payload.config.routes
   return (
     // Keyed by the sheet: Formik reads its initial values once, so another sheet in the same view gets a new form
     <CitySheetForm
       key={id === null ? 'new' : String(id)}
-      initialValues={sheetValues(sheet, place?.name ?? null, sourceNames)}
+      initialValues={sheetValues(sheet, place?.name ?? null)}
       lists={lists}
       {...(id === null ? {} : { id })}
       locale={pickLocale([req.i18n.language])}
@@ -87,33 +86,4 @@ async function choiceList(
     req,
   })
   return docs.map((entry) => ({ id: entry.id, name: entry.name }))
-}
-
-/**
- * The titles of the sources a sheet's lines cite, by id — for the form to show each line's source by name.
- * @param req - the request, whose Payload reads them
- * @param sheet - the sheet
- * @returns the titles, by id as text
- */
-async function citedSourceNames(
-  req: PayloadRequest,
-  sheet: SheetDocument
-): Promise<ReadonlyMap<string, string>> {
-  const rows = Array.isArray(sheet.testimonies)
-    ? (sheet.testimonies as Record<string, unknown>[])
-    : []
-  const ids = rows
-    .map((row) => relationId(row.source))
-    .filter((one): one is number | string => one !== null)
-  if (ids.length === 0) return new Map()
-  const { docs } = await req.payload.find({
-    collection: 'sources',
-    where: { id: { in: ids } },
-    depth: 0,
-    pagination: false,
-    overrideAccess: false,
-    user: req.user,
-    req,
-  })
-  return new Map(docs.map((source) => [String(source.id), source.title]))
 }

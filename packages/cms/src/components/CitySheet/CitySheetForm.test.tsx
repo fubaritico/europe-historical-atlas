@@ -418,8 +418,7 @@ describe('CitySheetForm', () => {
       expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
         true
       )
-      await user.type(screen.getByRole('combobox', { name: 'Source' }), 'Bur')
-      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.type(screen.getByLabelText('Source'), '4')
       await user.click(screen.getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Population' }))
       await user.type(screen.getByLabelText('Habitants'), '35000')
@@ -461,8 +460,7 @@ describe('CitySheetForm', () => {
       expect(within(holder).queryByLabelText('Pays')).toBeNull()
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
       const line = screen.getByRole('group', { name: 'Source 1' })
-      await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
-      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.type(within(line).getByLabelText('Source'), '4')
       await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Le pays qui la tient' }))
       await paste(within(line).getByLabelText('Pays'), 'Papal States')
@@ -512,8 +510,7 @@ describe('CitySheetForm', () => {
       expect(screen.getByRole('button', { name: 'Enregistrer' })).toHaveProperty('disabled', true)
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
       const line = screen.getByRole('group', { name: 'Source 1' })
-      await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
-      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.type(within(line).getByLabelText('Source'), '4')
       await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Une communauté' }))
       await user.click(

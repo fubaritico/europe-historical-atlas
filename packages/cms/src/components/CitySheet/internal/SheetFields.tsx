@@ -60,7 +60,7 @@ export function SheetFields({
       <ReasonsField reasons={lists.reasons} say={say} />
       <HolderFields readChain={readChain} saveLink={saveLink} say={say} />
       <CommunitiesField confessions={lists.confessions} say={say} />
-      <TestimoniesField lists={lists} searchSources={searches.sources} say={say} />
+      <TestimoniesField lists={lists} say={say} />
     </>
   )
 }

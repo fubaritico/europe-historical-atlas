@@ -72,18 +72,17 @@ describe('CitySheetView', () => {
       expect(form.key).toBe('1')
     })
 
-    it('hands the form the reasons’ and the confessions’ lists, and names the sources its lines cite', async () => {
+    // 2026-11-16: a line's source is Payload's own field, which reads its title — the view reads none
+    it('hands the form the reasons’ and the confessions’ lists, and each line’s source by its id', async () => {
       const line = { id: 'r1', source: 4, subject: 'population', population: 35000 }
-      const { props } = viewProps({ id: 1, place: 5, testimonies: [line] }, { code: 'fr' })
+      const { props, find } = viewProps({ id: 1, place: 5, testimonies: [line] }, { code: 'fr' })
       const form = await formOf(props)
       expect(form.props.lists).toEqual({
         reasons: [{ id: 1, name: 'Pouvoir' }],
         confessions: [{ id: 9, name: 'Juive' }],
       })
-      expect(form.props.initialValues.testimonies[0]?.source).toEqual({
-        id: 4,
-        name: 'Buringh 2021',
-      })
+      expect(form.props.initialValues.testimonies[0]?.source).toBe(4)
+      expect(find).not.toHaveBeenCalledWith(expect.objectContaining({ collection: 'sources' }))
     })
   })
 

@@ -46,8 +46,8 @@ export interface TestimonyValues {
   key: string
   /** Payload's row id, kept so a saved line is updated rather than replaced; absent for a new line. */
   rowId?: string
-  /** The source, or `null` before one is chosen. */
-  source: RecordChoice | null
+  /** The source's id, or `null` before one is chosen — Payload's own field reads its title (2026-11-16). */
+  source: number | string | null
   /** What it speaks about, or `''` before it is chosen. */
   subject: TestimonySubject | ''
   /** The population it gives, as typed — read when the subject is the population. */
@@ -262,20 +262,14 @@ function communityValues(row: Record<string, unknown>): CommunityValues {
 /**
  * One saved line as the form holds it.
  * @param row - the line as Payload stores it
- * @param sourceNames - the sources' titles, by id, read by the server
  * @returns the line
  */
-function testimonyValues(
-  row: Record<string, unknown>,
-  sourceNames: ReadonlyMap<string, string>
-): TestimonyValues {
-  const source = relationId(row.source)
-  const name = source === null ? undefined : sourceNames.get(String(source))
+function testimonyValues(row: Record<string, unknown>): TestimonyValues {
   const rowId = typeof row.id === 'string' ? row.id : undefined
   return {
     key: rowId ?? crypto.randomUUID(),
     ...(rowId === undefined ? {} : { rowId }),
-    source: source === null || name === undefined ? null : { id: source, name },
+    source: relationId(row.source),
     subject: (row.subject as TestimonySubject | null | undefined) ?? '',
     population: asText(row.population as number | null | undefined),
     importance: (row.importance as CityImportance | null | undefined) ?? '',
@@ -302,14 +296,9 @@ function textOf(value: unknown): string {
  * The form's values for a saved sheet, or a new one.
  * @param doc - the sheet as Payload hands it; `{}` for a new one
  * @param placeName - the name of its place, read by the server; `null` for a new sheet
- * @param sourceNames - the titles of the sources its lines cite, by id, read by the server
  * @returns the values
  */
-export function sheetValues(
-  doc: SheetDocument,
-  placeName: string | null,
-  sourceNames: ReadonlyMap<string, string>
-): SheetValues {
+export function sheetValues(doc: SheetDocument, placeName: string | null): SheetValues {
   const id = relationId(doc.place)
   const date = (doc.date ?? {}) as EventDateFields
   const importance = doc.importance as CityImportance | null | undefined
@@ -322,7 +311,7 @@ export function sheetValues(
     date: { start: momentValues(date.start), end: momentValues(date.end) },
     importance: importance ?? '',
     reasons: relationIds(doc.reasons),
-    testimonies: rows.map((row) => testimonyValues(row, sourceNames)),
+    testimonies: rows.map(testimonyValues),
     communities: communities.map(communityValues),
     holderTitle: relationId(doc.holderTitle),
     holderName: textOf(doc.holderName),
@@ -406,7 +395,7 @@ function trimmed(text: string): string | null {
 export function testimonyBody(line: TestimonyValues): TestimonyBody {
   return {
     ...(line.rowId === undefined ? {} : { id: line.rowId }),
-    source: line.source?.id ?? null,
+    source: line.source,
     subject: line.subject === '' ? null : line.subject,
     population: line.subject === 'population' ? readNumber(line.population) : null,
     importance: line.subject === 'importance' && line.importance !== '' ? line.importance : null,

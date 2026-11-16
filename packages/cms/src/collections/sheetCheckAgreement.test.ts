@@ -13,9 +13,6 @@ import type { CollectionBeforeChangeHook } from 'payload'
 /** The form's French texts. */
 const say = createTranslator(CITY_SHEET_MESSAGES, 'fr')
 
-/** The sources' titles, as the form's server half reads them. */
-const NAMES = new Map([['4', 'Buringh 2021']])
-
 /** Rome in 1100, as the base holds it. */
 const rome = {
   place: 5,
@@ -61,7 +58,7 @@ function serverRefuses(doc: Record<string, unknown>): boolean {
  * @returns `true` when it does
  */
 function formRefuses(doc: Record<string, unknown>): boolean {
-  return Object.keys(validateSheet(sheetValues(doc, 'Rome', NAMES), say)).length > 0
+  return Object.keys(validateSheet(sheetValues(doc, 'Rome'), say)).length > 0
 }
 
 /** Sheets each side must judge alike, by what is wrong with them. */

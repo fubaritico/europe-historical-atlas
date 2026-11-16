@@ -1,6 +1,6 @@
 import type { Say } from './say'
 
-/** Every sentence a record field says: the place's, a line's source's. */
+/** Every sentence a record field says: the place's. */
 export interface RecordFieldTexts {
   /** Its label. */
   label: string
@@ -36,22 +36,5 @@ export function placeTexts(say: Say): RecordFieldTexts {
     none: say('placeNone'),
     searchFailed: say('placeSearchFailed'),
     remove: (name) => say('placeRemove', { name }),
-  }
-}
-
-/**
- * A line's source field's texts.
- * @param say - the translator
- * @returns its sentences
- */
-export function sourceTexts(say: Say): RecordFieldTexts {
-  return {
-    label: say('source'),
-    placeholder: say('sourcePlaceholder'),
-    help: say('sourceHelp'),
-    list: say('sourceList'),
-    none: say('sourceNone'),
-    searchFailed: say('sourceSearchFailed'),
-    remove: (name) => say('sourceRemove', { name }),
   }
 }

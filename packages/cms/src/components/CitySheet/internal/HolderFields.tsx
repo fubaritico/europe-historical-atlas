@@ -1,12 +1,9 @@
-import { useFormikContext } from 'formik'
-
+import { FormRelationField } from './FormRelationField'
 import { HolderChain } from './HolderChain'
-import { RelationField } from './RelationField'
 
 import type { ChainReading } from '../utils/readVassalChain'
 import type { LinkAnswer, NewVassalLink } from '../utils/saveVassalLink'
 import type { Say } from '../utils/say'
-import type { SheetValues } from '../utils/sheetValues'
 
 /**
  * « Tenue par » (CMS-422, the dev's mock-up of 2026-11-15 and his words of 2026-11-16): **one** field, the holder of
@@ -31,25 +28,15 @@ export function HolderFields({
   saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
   say: Say
 }) {
-  const { values, setFieldValue, setFieldTouched } = useFormikContext<SheetValues>()
-
-  // Handlers
-  const handleChange = (id: number | string | null) => {
-    void setFieldValue('holderTitle', id)
-    void setFieldTouched('holderTitle', true, false)
-  }
-
   // Render
   return (
     <fieldset className="city-sheet__group">
       <legend className="city-sheet__legend">{say('holder')}</legend>
-      <RelationField
-        path="holderTitle"
+      <FormRelationField
+        name="holderTitle"
         collection="titles"
         label={say('holderTitle')}
         description={say('holderTitleHelp')}
-        value={values.holderTitle}
-        onChange={handleChange}
       />
       <HolderChain read={readChain} saveLink={saveLink} say={say} />
     </fieldset>

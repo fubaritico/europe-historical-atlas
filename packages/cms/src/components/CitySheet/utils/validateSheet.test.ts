@@ -201,7 +201,7 @@ describe('validateSheet', () => {
     it('puts each fault of a line under its own field, by its rank', () => {
       const good = {
         ...emptyTestimony(),
-        source: { id: 4, name: 'Buringh 2021' },
+        source: 4,
         subject: 'population' as const,
         population: '35000',
       }
@@ -218,7 +218,7 @@ describe('validateSheet', () => {
     })
 
     it('asks what a new line speaks about, and for the reason a reason line gives', () => {
-      const source = { id: 4, name: 'Buringh 2021' }
+      const source = 4
       expect(
         validateSheet({ ...rome, testimonies: [{ ...emptyTestimony(), source }] }, say)
       ).toEqual({
@@ -243,7 +243,7 @@ describe('validateSheet', () => {
     })
 
     it('asks a holder line for the polity it names, and checks its id', () => {
-      const source = { id: 4, name: 'Horvat 1924' }
+      const source = 4
       const line = { ...emptyTestimony(), source, subject: 'holder' as const, holderQid: 'Venise' }
       expect(validateSheet({ ...rome, testimonies: [line] }, say)).toEqual({
         testimonies: [{ holderName: say('lineHolderMissing'), holderQid: say('qidInvalid') }],
@@ -265,7 +265,7 @@ describe('validateSheet', () => {
     })
 
     it('refuses a confession already in the list, under the second community only', () => {
-      const source = { id: 4, name: 'Horvat 1924' }
+      const source = 4
       const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }
       const named = { ...emptyTestimony(), source, subject: 'community' as const, confession: 9 }
       const sheet = {
@@ -279,7 +279,7 @@ describe('validateSheet', () => {
     })
 
     it('takes a community a line names, and asks a community line for its confession', () => {
-      const source = { id: 4, name: 'Horvat 1924' }
+      const source = 4
       const jews = { ...emptyCommunity(), confession: 9, weight: 'present' as const }
       const named = { ...emptyTestimony(), source, subject: 'community' as const, confession: 9 }
       const unnamed = { ...emptyTestimony(), source, subject: 'community' as const }
