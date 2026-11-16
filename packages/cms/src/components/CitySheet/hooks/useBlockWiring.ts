@@ -18,7 +18,7 @@ export function useBlockWiring(
   saver: ChainSaver
 ): void {
   useOnChange(state, () => {
-    if (state.kind === 'read') pending.load(state.readings[0] ?? null)
+    if (state.kind === 'read') pending.load({ readings: state.readings, year: state.year })
     if (state.kind === 'none') pending.load(null)
   })
   saver.register(pending.saveAll)

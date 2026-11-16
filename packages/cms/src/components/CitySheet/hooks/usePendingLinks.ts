@@ -1,27 +1,64 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { changed, emptyLine, linesOf, withChoice, withSovereign } from '../utils/pendingLine'
+import {
+  closeLine,
+  emptyLine,
+  linesOf,
+  waitingOf,
+  withChoice,
+  withSovereign,
+} from '../utils/pendingLine'
 import { saveLines } from '../utils/saveLines'
 
-import type { PendingLine, PendingWiring } from '../utils/pendingLine'
+import { useHolderSovereignty } from './useHolderSovereignty'
+import { useOneSave } from './useOneSave'
+
+import type {
+  HolderSovereignty,
+  PendingLine,
+  PendingWiring,
+  SovereigntyError,
+} from '../utils/pendingLine'
 import type { ChainReading } from '../utils/readVassalChain'
+
+/** A chain read, as the block was loaded from it: its readings and the year they were read at. */
+export interface LoadedChain {
+  /** The readings. */
+  readonly readings: ChainReading[]
+  /** The year they were read at. */
+  readonly year: number
+}
 
 /** The block's lines, and their gestures. */
 export interface PendingLinks {
   /** The lines, from the lowest up. */
   readonly lines: readonly PendingLine[]
-  /** How many changes wait for « Enregistrer »: new lines, lines changed, links removed. */
+  /**
+   * How many changes wait for « Enregistrer »: the holder ticked, its tick and its links to remove; otherwise the new
+   * lines, the lines changed, the links closed by ✕, the boxes changed and the holder unticked (`waitingOf`).
+   */
   readonly waiting: number
+  /** The holder's own « Souverain »: ticked, the city is a sovereign state and the block is closed. */
+  readonly sovereignty: HolderSovereignty
+  /** Why the holder's « Souverain » was not saved, `null` when nothing went wrong. */
+  readonly sovereigntyError: SovereigntyError | null
+  /** Ticks or unticks the holder « Souverain » — saved at « Enregistrer ». */
+  readonly markHolderSovereign: (sovereign: boolean) => void
   /** Adds a line above the last. */
   readonly add: () => void
   /** Closes a line with ✕ — its link removed at « Enregistrer » — and the lines above it, no longer this chain's. */
   readonly remove: (key: string) => void
   /** Chooses a line's suzerain or source, or empties it — ignored while the lines are being saved. */
   readonly choose: (key: string, field: 'suzerain' | 'source', id: number | string | null) => void
-  /** Says a title was ticked or unticked « souverain » — on the line only while that title is still its suzerain. */
+  /** Ticks or unticks a line's suzerain « souverain » — on the line only while that title is still its suzerain. */
   readonly markSovereign: (key: string, title: number | string, sovereign: boolean) => void
-  /** Loads the chain read into the block — its links as lines — forgetting what was not saved. */
-  readonly load: (reading: ChainReading | null) => void
+  /** The chain the block was last loaded from, kept while it is read again; `null` once no title is chosen. */
+  readonly loaded: LoadedChain | null
+  /**
+   * Loads the chain read into the block — the first reading's links as lines, the holder's sovereignty from every
+   * reading — forgetting what was not saved; `null` once no title is chosen.
+   */
+  readonly load: (chain: LoadedChain | null) => void
   /** Saves every change, at the sheet's « Enregistrer »; `true` when none is left behind. */
   readonly saveAll: () => Promise<boolean>
 }
@@ -44,46 +81,46 @@ export function usePendingLinks(
 ): PendingLinks {
   const [lines, setLines] = useState<readonly PendingLine[]>([])
   const [removed, setRemoved] = useState<readonly string[]>([])
-  const saving = useRef(false)
-  const update = (key: string, change: Partial<PendingLine>) => {
-    setLines((current) => current.map((line) => (line.key === key ? { ...line, ...change } : line)))
-  }
+  const holderSovereignty = useHolderSovereignty()
+  const [loaded, setLoaded] = useState<LoadedChain | null>(null)
+  const saving = useOneSave()
 
   return {
     lines,
-    waiting: lines.filter(changed).length + removed.length,
+    waiting: waitingOf(lines, removed, holderSovereignty.sovereignty),
+    sovereignty: holderSovereignty.sovereignty,
+    sovereigntyError: holderSovereignty.error,
+    markHolderSovereign: holderSovereignty.mark,
     add: () => {
       setLines((current) => [...current, emptyLine()])
     },
     remove: (key) => {
-      const at = lines.findIndex((line) => line.key === key)
-      const link = lines[at]?.link
-      if (at === -1) return
+      const closed = closeLine(lines, key)
+      if (closed === null) return
+      const { kept, link } = closed
       if (link !== undefined) setRemoved((current) => [...current, link])
-      setLines((current) => current.slice(0, at))
+      setLines(kept)
     },
     choose: (key, field, id) => {
-      if (saving.current) return
+      if (saving.busy()) return
       setLines((current) => withChoice(current, { key, field, id }))
     },
     markSovereign: (key, title, sovereign) => {
       setLines((current) => withSovereign(current, { key, title, sovereign }))
     },
-    load: (reading) => {
-      setLines(reading === null ? [] : linesOf(reading))
+    loaded,
+    load: (chain) => {
+      setLoaded(chain)
+      setLines(linesOf(chain?.readings[0]))
       setRemoved([])
+      holderSovereignty.load(chain?.readings ?? [])
     },
-    saveAll: async () => {
-      if (saving.current) return true
-      saving.current = true
-      try {
-        return await saveLines(
-          { lines, removed, holder, year },
-          { wiring, setLines, setRemoved, update }
+    saveAll: () =>
+      saving.run(() =>
+        saveLines(
+          { lines, removed, holder, sovereignty: holderSovereignty.sovereignty, year },
+          { wiring, setLines, setRemoved, setSovereigntyError: holderSovereignty.setError }
         )
-      } finally {
-        saving.current = false
-      }
-    },
+      ),
   }
 }

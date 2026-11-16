@@ -1,4 +1,5 @@
 import type { ChainReading } from './readVassalChain'
+import type { SaveSovereign } from './saveSovereign'
 import type { ChangedVassalLink, LinkAnswer, NewVassalLink } from './saveVassalLink'
 
 /** Where a line « Vassal de » stands. */
@@ -31,8 +32,10 @@ export interface PendingLine {
   readonly source: number | string | null
   /** Where it stands. */
   readonly status: NewLinkStatus
-  /** Whether its suzerain is ticked « souverain » — the chain stops there, no ⊕ after it. */
+  /** Whether its suzerain is ticked « souverain » — the chain stops there, no ⊕ after it. Saved at « Enregistrer ». */
   readonly sovereign: boolean
+  /** Whether the base holds its suzerain « souverain » — what tells the box changed. */
+  readonly wasSovereign: boolean
   /** Its vassal, once the line below it was saved and left the block (review ARCH-002). */
   readonly vassal?: number | string
 }
@@ -45,6 +48,8 @@ export interface PendingWiring {
   readonly updateLink: (change: ChangedVassalLink) => Promise<LinkAnswer>
   /** Removes a link of vassalage. */
   readonly deleteLink: (link: string) => Promise<LinkAnswer>
+  /** Ticks or unticks « souverain » on a title. */
+  readonly saveSovereign: SaveSovereign
   /** Reads the chain again once something is saved. */
   readonly onSaved: () => void
   /** Called with the error once a save fails, for the screen to say it. */
@@ -60,6 +65,68 @@ export function changed(line: PendingLine): boolean {
   const { original } = line
   if (original === undefined) return true
   return original.suzerain !== line.suzerain || original.source !== line.source
+}
+
+/**
+ * Whether a line's « Souverain » differs from the base — for a line whose suzerain is chosen.
+ * @param line - the line
+ * @returns whether « Enregistrer » has its suzerain's sovereignty to save
+ */
+export function sovereignChanged(line: PendingLine): boolean {
+  return line.suzerain !== null && line.sovereign !== line.wasSovereign
+}
+
+/** The holder's own « Souverain » (the dev, 2026-11-16): a sovereignty of one link, the city a sovereign state. */
+export interface HolderSovereignty {
+  /** Whether it is ticked on the screen. */
+  readonly sovereign: boolean
+  /** Whether the base holds it so. */
+  readonly was: boolean
+  /** The holder's own links of vassalage, in every reading — removed at « Enregistrer » once it is ticked. */
+  readonly links: readonly string[]
+}
+
+/** Why the holder's « Souverain » was not saved: the server's sentence, or a failure the console keeps. */
+export type SovereigntyError = { kind: 'refused'; message: string } | { kind: 'failed' }
+
+/** The holder answering to someone, with no link of its own: what the block holds before any chain is read. */
+export const NO_SOVEREIGNTY: HolderSovereignty = { sovereign: false, was: false, links: [] }
+
+/**
+ * How many changes wait for « Enregistrer »: ticked sovereign, the holder's links to remove and its tick; otherwise the
+ * lines new or changed, the links closed by ✕, the boxes changed, and the holder unticked.
+ * @param lines - the block's lines
+ * @param removed - the links closed by ✕
+ * @param holder - the holder's sovereignty
+ * @returns the count
+ */
+export function waitingOf(
+  lines: readonly PendingLine[],
+  removed: readonly string[],
+  holder: HolderSovereignty
+): number {
+  if (holder.sovereign) return new Set([...removed, ...holder.links]).size + (holder.was ? 0 : 1)
+  return (
+    lines.filter(changed).length +
+    removed.length +
+    lines.filter(sovereignChanged).length +
+    (holder.was ? 1 : 0)
+  )
+}
+
+/**
+ * The holder's sovereignty in the readings of its chain: ticked when the first stops on the holder itself, a
+ * sovereign; its links, the first step of every reading.
+ * @param readings - the chain's readings at the sheet's year
+ * @returns the holder's sovereignty
+ */
+export function sovereigntyOf(readings: readonly ChainReading[]): HolderSovereignty {
+  const first = readings[0]
+  const was = first?.end === 'sovereign' && first.titles.length === 1
+  const links = readings.flatMap((reading) =>
+    reading.steps[0] === undefined ? [] : [reading.steps[0].link]
+  )
+  return { sovereign: was, was, links: [...new Set(links)] }
 }
 
 /**
@@ -79,11 +146,12 @@ export function vassalsOf(
 
 /**
  * The lines of a chain read: one per link above the holder, its suzerain and source as the base holds them; the last
- * ticked when the chain ends on a sovereign there.
- * @param reading - the reading
+ * ticked when the chain ends on a sovereign there. No reading, no line.
+ * @param reading - the reading, `undefined` for none
  * @returns the lines
  */
-export function linesOf(reading: ChainReading): PendingLine[] {
+export function linesOf(reading: ChainReading | undefined): PendingLine[] {
+  if (reading === undefined) return []
   return reading.steps.map((step, index) => {
     const suzerain = reading.titles[index + 1]?.id ?? null
     const last = index === reading.steps.length - 1
@@ -95,8 +163,24 @@ export function linesOf(reading: ChainReading): PendingLine[] {
       source: step.source,
       status: { kind: 'filling' },
       sovereign: last && reading.end === 'sovereign',
+      wasSovereign: last && reading.end === 'sovereign',
     }
   })
+}
+
+/**
+ * The lines once one is closed by ✕: it and the lines above it go — no longer this chain's.
+ * @param lines - the lines
+ * @param key - the line closed
+ * @returns the lines kept, and the link the line showed, to remove; `null` when no line has that key
+ */
+export function closeLine(
+  lines: readonly PendingLine[],
+  key: string
+): { kept: readonly PendingLine[]; link: string | undefined } | null {
+  const at = lines.findIndex((line) => line.key === key)
+  if (at === -1) return null
+  return { kept: lines.slice(0, at), link: lines[at]?.link }
 }
 
 /**
@@ -110,12 +194,14 @@ export function emptyLine(): PendingLine {
     source: null,
     status: { kind: 'filling' },
     sovereign: false,
+    wasSovereign: false,
   }
 }
 
 /**
  * The lines once one is chosen in: its suzerain or source set, its status reset; a link's suzerain changed drops the
- * lines above it — the old suzerain's chain — and unticks it (review ARCH-001).
+ * lines above it — the old suzerain's chain — and unticks it (review ARCH-001), the base's value forgotten with the old
+ * suzerain: a new one is saved sovereign only once ticked.
  * @param lines - the lines
  * @param choice - the line, the field and the id
  * @param choice.key - the line's key
@@ -129,7 +215,7 @@ export function withChoice(
 ): readonly PendingLine[] {
   const at = lines.findIndex((line) => line.key === choice.key)
   const keep = choice.field === 'suzerain' && lines[at]?.link !== undefined ? at + 1 : lines.length
-  const reset = choice.field === 'suzerain' ? { sovereign: false } : {}
+  const reset = choice.field === 'suzerain' ? { sovereign: false, wasSovereign: false } : {}
   return lines
     .slice(0, keep)
     .map((line) =>

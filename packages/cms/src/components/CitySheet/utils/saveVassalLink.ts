@@ -102,7 +102,7 @@ export async function updateVassalLink(
   api: string,
   change: ChangedVassalLink
 ): Promise<LinkAnswer> {
-  const response = await fetcher(`${api}/vassal-links/${change.link}`, {
+  const response = await fetcher(`${api}/vassal-links/${encodeURIComponent(change.link)}`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -134,7 +134,7 @@ export async function deleteVassalLink(
   api: string,
   link: string
 ): Promise<LinkAnswer> {
-  const response = await fetcher(`${api}/vassal-links/${link}`, {
+  const response = await fetcher(`${api}/vassal-links/${encodeURIComponent(link)}`, {
     method: 'DELETE',
     credentials: 'include',
   })

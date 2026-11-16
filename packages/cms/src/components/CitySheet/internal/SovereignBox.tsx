@@ -1,58 +1,51 @@
 import { Checkbox } from '@fubaritico/react/Checkbox'
-import { toast } from '@payloadcms/ui'
 
-import { useSovereignSave } from '../hooks/useSovereignSave'
-
-import type { SaveSovereign } from '../utils/saveSovereign'
+import type { SovereigntyError } from '../utils/pendingLine'
 import type { Say } from '../utils/say'
 
 /**
- * « Souverain » under the last block of the chain (the dev, 2026-11-16): only the top of the chain has it — ⊕ moves it
- * to the new block, the suzerain who may be the sovereign. Ticked, it is saved on that title at once, and no ⊕ follows:
- * the chain stops there. One save at a time; a refusal or a failure is said under it, and the box shows the title as
- * the base holds it.
- * @param props - the title, whether it is sovereign, the save, what follows it, the translator
- * @param props.title - the title's id
- * @param props.checked - whether the base holds it sovereign
- * @param props.save - ticks or unticks it in the base
- * @param props.onSaved - called with the new value once saved
+ * « Souverain » (the dev, 2026-11-16) — beside « Tenue par » for the holder, under the last block of the chain for its
+ * top. **Nothing saves on a tick**: the sheet's « Enregistrer » saves it with the rest. Why it was not saved, if it was
+ * not, is said under it.
+ * @param props - its name, whether it is ticked, its gesture, its help, its error, the translator
+ * @param props.name - its name in the form, unique on the sheet
+ * @param props.checked - whether it is ticked on the screen
+ * @param props.onChange - ticks or unticks it
+ * @param props.help - the sentence under it
+ * @param props.error - why it was not saved, `null` when nothing went wrong
  * @param props.say - the translator
  * @returns the box
  */
 export function SovereignBox({
-  title,
+  name,
   checked,
-  save,
-  onSaved,
+  onChange,
+  help,
+  error = null,
   say,
 }: {
-  title: number | string
+  name: string
   checked: boolean
-  save: SaveSovereign
-  onSaved: (sovereign: boolean) => void
+  onChange: (sovereign: boolean) => void
+  help: string
+  error?: SovereigntyError | null
   say: Say
 }) {
-  const { state, toggle } = useSovereignSave(save, () => {
-    toast.error(say('sovereignFailed'))
-  })
-  const handleChange = () => {
-    toggle(title, !checked, onSaved)
-  }
-
   // Render
   return (
     <div className="city-sheet__field">
       <Checkbox
-        name={`sovereign-${String(title)}`}
+        name={name}
         checked={checked}
-        disabled={state.kind === 'saving'}
-        onChange={handleChange}
+        onChange={() => {
+          onChange(!checked)
+        }}
         label={say('sovereign')}
       />
-      <p className="city-sheet__help">{say('sovereignHelp')}</p>
-      {(state.kind === 'refused' || state.kind === 'failed') && (
+      <p className="city-sheet__help">{help}</p>
+      {error !== null && (
         <p className="city-sheet__help city-sheet__help--error" role="alert">
-          {state.kind === 'refused' ? state.message : say('sovereignFailed')}
+          {error.kind === 'refused' ? error.message : say('sovereignFailed')}
         </p>
       )}
     </div>

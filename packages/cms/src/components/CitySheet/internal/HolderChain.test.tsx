@@ -235,33 +235,73 @@ describe('HolderChain', () => {
       expect(writers.deleteLink).not.toHaveBeenCalled()
     })
 
-    it('ticks « Souverain » on the title the chain stops at, and offers no ⊕ once it is', async () => {
-      const read = vi
-        .fn()
-        .mockResolvedValueOnce(ALONE)
-        .mockResolvedValueOnce([{ titles: [COUNT], steps: [], end: 'sovereign' }])
-      const { writers } = renderChain(read)
+    // The dev, 2026-11-16: « Souverain » beside « Tenue par » — a sovereignty of one link, the city a sovereign state
+    it('ticks the holder « Souverain »: no ⊕ at once, the title ticked only at « Enregistrer »', async () => {
+      const { writers, save } = renderChain(() => Promise.resolve(ALONE))
       await userEvent.setup().click(await screen.findByRole('checkbox', { name: 'Souverain' }))
+      expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
+      expect(writers.saveSovereign).not.toHaveBeenCalled()
+      expect(await save()).toBe(true)
       expect(writers.saveSovereign).toHaveBeenCalledWith(10, true)
-      await waitFor(() => {
-        expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
-      })
     })
 
-    it("moves « Souverain » to the last block, and unticks it when that block's suzerain changes", async () => {
-      renderChain(() => Promise.resolve(ALONE))
+    it('says the holder’s links will go, and removes them once it is ticked at « Enregistrer »', async () => {
+      const { writers, save } = renderChain(() => Promise.resolve(UNDER_DUKE))
+      await screen.findByRole('group', { name: LINE })
+      // The holder's box comes first, before the block's own
+      const [holderBox] = screen.getAllByRole('checkbox', { name: 'Souverain' })
+      if (holderBox === undefined) throw new Error('no « Souverain » beside the holder')
+      await userEvent.setup().click(holderBox)
+      expect(screen.queryByRole('group', { name: LINE })).toBeNull()
+      expect(
+        screen.getByText(
+          'Son lien de vassalité sera retiré à l’enregistrement — pour toutes les villes de ce titre.'
+        )
+      ).toBeTruthy()
+      expect(await save()).toBe(true)
+      expect(writers.deleteLink).toHaveBeenCalledWith('7')
+      expect(writers.saveSovereign).toHaveBeenCalledWith(10, true)
+      // The tick first (review SEC-001): a removal that fails after it loses nothing
+      expect(vi.mocked(writers.saveSovereign).mock.invocationCallOrder[0]).toBeLessThan(
+        vi.mocked(writers.deleteLink).mock.invocationCallOrder[0] ?? 0
+      )
+    })
+
+    it('unticks a sovereign holder: the blocks come back, the title unticked at « Enregistrer »', async () => {
+      const { writers, save } = renderChain(() =>
+        Promise.resolve([{ titles: [COUNT], steps: [], end: 'sovereign' }])
+      )
+      const box = await screen.findByRole('checkbox', { name: 'Souverain' })
+      expect(box).toHaveProperty('checked', true)
+      await userEvent.setup().click(box)
+      expect(
+        screen.getByRole('button', { name: `Ajouter le suzerain de ${COUNT.name}` })
+      ).toBeTruthy()
+      expect(await save()).toBe(true)
+      expect(writers.saveSovereign).toHaveBeenCalledWith(10, false)
+    })
+
+    it("ticks the last block's « Souverain » at « Enregistrer », and unticks it when its suzerain changes", async () => {
+      const { writers, save } = renderChain(() => Promise.resolve(ALONE))
       const line = await addLine()
       await choose(line, 'Vassal de', '20')
-      expect(screen.getAllByRole('checkbox', { name: 'Souverain' })).toHaveLength(1)
       await userEvent.setup().click(within(line).getByRole('checkbox', { name: 'Souverain' }))
-      await waitFor(() => {
-        expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
-      })
+      expect(screen.queryByRole('button', { name: /^Ajouter le suzerain/ })).toBeNull()
+      expect(writers.saveSovereign).not.toHaveBeenCalled()
       await choose(line, 'Vassal de', '21')
       expect(within(line).getByRole('checkbox', { name: 'Souverain' })).toHaveProperty(
         'checked',
         false
       )
+      await userEvent.setup().click(within(line).getByRole('checkbox', { name: 'Souverain' }))
+      await save()
+      expect(writers.saveLink).toHaveBeenCalledWith({
+        vassal: 10,
+        suzerain: 21,
+        source: null,
+        year: 1100,
+      })
+      expect(writers.saveSovereign).toHaveBeenCalledWith(21, true)
     })
 
     it('lists every reading when the sources diverge, and says how many', async () => {
@@ -291,6 +331,56 @@ describe('HolderChain', () => {
   })
 
   describe('managed errors', () => {
+    // Reviews ARCH-001, QUAL-001: read again after part of it was saved, the box keeps the gesture and says why
+    it('keeps the holder ticked, and the refusal under it, once the chain is read again', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const read = vi.fn(() => Promise.resolve(UNDER_DUKE))
+      const { save } = renderChain(read, {
+        deleteLink: vi.fn(() =>
+          Promise.resolve<LinkAnswer>({ kind: 'refused', message: 'Ce maillon est cité.' })
+        ),
+      })
+      await screen.findByRole('group', { name: LINE })
+      const [holderBox] = screen.getAllByRole('checkbox', { name: 'Souverain' })
+      if (holderBox === undefined) throw new Error('no « Souverain » beside the holder')
+      await userEvent.setup().click(holderBox)
+      expect(await save()).toBe(false)
+      await waitFor(() => {
+        expect(read).toHaveBeenCalledTimes(2)
+      })
+      expect(screen.getByRole('alert').textContent).toBe('Ce maillon est cité.')
+      expect(screen.getByRole('checkbox', { name: 'Souverain' })).toHaveProperty('checked', true)
+    })
+
+    it('removes none of the holder’s links when its tick is refused', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { writers, save } = renderChain(() => Promise.resolve(UNDER_DUKE), {
+        saveSovereign: vi.fn(() =>
+          Promise.resolve<LinkAnswer>({ kind: 'refused', message: 'Ce titre est verrouillé.' })
+        ),
+      })
+      await screen.findByRole('group', { name: LINE })
+      const [holderBox] = screen.getAllByRole('checkbox', { name: 'Souverain' })
+      if (holderBox === undefined) throw new Error('no « Souverain » beside the holder')
+      await userEvent.setup().click(holderBox)
+      expect(await save()).toBe(false)
+      expect(writers.deleteLink).not.toHaveBeenCalled()
+    })
+
+    it('says under the holder’s box why its « Souverain » was refused, and keeps it ticked', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { save } = renderChain(() => Promise.resolve(ALONE), {
+        saveSovereign: vi.fn(() =>
+          Promise.resolve<LinkAnswer>({ kind: 'refused', message: 'Ce titre est verrouillé.' })
+        ),
+      })
+      const box = await screen.findByRole('checkbox', { name: 'Souverain' })
+      await userEvent.setup().click(box)
+      expect(await save()).toBe(false)
+      expect(screen.getByRole('alert').textContent).toBe('Ce titre est verrouillé.')
+      expect(box).toHaveProperty('checked', true)
+    })
+
     it('says a failed read under the holder', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       renderChain(() => Promise.reject(new Error('refused')))
