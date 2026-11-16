@@ -300,49 +300,17 @@ describe('bySovereignLevel', () => {
   })
 
   describe('managed errors', () => {
-    // The dev, 2026-11-16, on Laon: a vassal too small to draw is checked in its suzerain — no circle around it
-    it('checks the kingdom itself when the vassal below it is not drawn: right inside it, yellow in another vassal', () => {
+    // *"Red, when the duchy does not exist"*: Bourges held of the king, the viscounty not drawn
+    it('asks to declare the level below the sovereign when the map has not drawn it', () => {
       const reading = { titles: [BOURGES, FRANCE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972', 'Q6']))).toEqual({
-        kind: 'agrees',
-        expected: FRANCE.name,
-      })
-      expect(bySovereignLevel(reading, on('Q6'), map(['Q70972', 'Q6'])).kind).toBe('misplaced')
-    })
-
-    it('asks to declare only when the map draws nothing of the chain, not even the sovereign', () => {
-      const reading = { titles: [BOURGES, FRANCE], end: 'sovereign' as const }
-      expect(bySovereignLevel(reading, on('Q6'), map(['Q6']))).toEqual({
+      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toEqual({
         kind: 'toDeclare',
-        expected: FRANCE.name,
+        expected: BOURGES.name,
       })
     })
   })
 
   describe('edge cases', () => {
-    it('climbs past two levels not drawn under an empire, to the next one drawn', () => {
-      const deep = { titles: [BLOIS, SWABIA, NORMANDY, EMPIRE], end: 'sovereign' as const }
-      expect(bySovereignLevel(deep, on('Q6'), map(['Q6', 'Q12548']))).toEqual({
-        kind: 'agrees',
-        expected: NORMANDY.name,
-      })
-      expect(bySovereignLevel(deep, on('Q12548'), map(['Q12548']))).toEqual({
-        kind: 'agrees',
-        expected: EMPIRE.name,
-      })
-    })
-
-    it('climbs past a title with no Wikidata id, which the map cannot draw', () => {
-      const reading = {
-        titles: [BLOIS, { name: 'Sans identifiant', wikidata: null }, FRANCE],
-        end: 'sovereign' as const,
-      }
-      expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972']))).toEqual({
-        kind: 'agrees',
-        expected: FRANCE.name,
-      })
-    })
-
     it('checks the sovereign itself when it holds the city', () => {
       const reading = { titles: [FRANCE], end: 'sovereign' as const }
       expect(bySovereignLevel(reading, on('Q70972'), map(['Q70972'])).kind).toBe('agrees')
