@@ -176,7 +176,12 @@ async function saveChanged(
       () =>
         line.link === undefined
           ? targets.wiring.saveLink({ vassal, suzerain, source, year })
-          : targets.wiring.updateLink({ link: line.link, suzerain, source }),
+          : targets.wiring.updateLink({
+              link: line.link,
+              suzerain,
+              source,
+              sourceChanged: line.original?.source !== source,
+            }),
       targets,
       'a link of vassalage',
       line.key

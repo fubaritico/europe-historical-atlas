@@ -208,7 +208,12 @@ describe('HolderChain', () => {
       await choose(line, 'Vassal de', '30')
       await choose(line, 'Source', '5')
       await save()
-      expect(writers.updateLink).toHaveBeenCalledWith({ link: '7', suzerain: 30, source: 5 })
+      expect(writers.updateLink).toHaveBeenCalledWith({
+        link: '7',
+        suzerain: 30,
+        source: 5,
+        sourceChanged: true,
+      })
       expect(writers.saveLink).not.toHaveBeenCalled()
     })
 

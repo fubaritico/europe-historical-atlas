@@ -85,11 +85,20 @@ export interface ChangedVassalLink {
   readonly suzerain: number | string
   /** Its source now — facultative —, `null` for none. */
   readonly source: number | string | null
+  /** Whether the source changed on the sheet — else its lines are not touched. */
+  readonly sourceChanged: boolean
 }
+
+/** A link's line of source as Payload holds it: its source, and what the historian wrote on it. */
+type StoredLine = Record<string, unknown>
 
 /**
  * Changes a link of vassalage from the city sheet (the dev, 2026-11-16: the chain is edited in the same blocks it was
- * entered in) — its suzerain, and its source: one line with it, none without. Through Payload's API, its rules holding.
+ * entered in) — its suzerain, and its source. **The lines of source are never rewritten from the sheet's copy**, which
+ * holds the first source only (review ARCH-001 of 2026-11-16: a changed suzerain once wiped the other lines and their
+ * quotations): untouched when the source did not change; when it did, the link's lines are read again and only the
+ * first is replaced — or removed, the source emptied —, the others kept whole. Through Payload's API, its rules
+ * holding.
  * @param fetcher - the `fetch` to use
  * @param api - the API's root: `/api`
  * @param change - the link, its suzerain and its source
@@ -102,14 +111,17 @@ export async function updateVassalLink(
   api: string,
   change: ChangedVassalLink
 ): Promise<LinkAnswer> {
-  const response = await fetcher(`${api}/vassal-links/${encodeURIComponent(change.link)}`, {
+  const url = `${api}/vassal-links/${encodeURIComponent(change.link)}`
+  const lines = change.sourceChanged
+    ? withFirstSource(await linesOf(fetcher, url), change.source)
+    : null
+  const response = await fetcher(url, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      suzerain: change.suzerain,
-      lines: change.source === null ? [] : [{ source: change.source }],
-    }),
+    body: JSON.stringify(
+      lines === null ? { suzerain: change.suzerain } : { suzerain: change.suzerain, lines }
+    ),
   })
   if (response.ok) return { kind: 'saved' }
   if (response.status >= 500) {
@@ -118,6 +130,39 @@ export async function updateVassalLink(
     )
   }
   return { kind: 'refused', message: await refusalOf(response, 'a change of a link of vassalage') }
+}
+
+/**
+ * A link's lines of source, as the base holds them.
+ * @param fetcher - the `fetch` to use
+ * @param url - the link's address in the API
+ * @returns its lines
+ * @throws {Error} when the link cannot be read
+ */
+async function linesOf(fetcher: typeof fetch, url: string): Promise<StoredLine[]> {
+  const response = await fetcher(`${url}?depth=0`, { credentials: 'include' })
+  if (!response.ok) {
+    throw new Error(
+      `[CMS] the API refused to read a link of vassalage (${String(response.status)})`
+    )
+  }
+  const body = (await response.json()) as { lines?: StoredLine[] | null }
+  return body.lines ?? []
+}
+
+/**
+ * A link's lines with its first source changed: the first line replaced by the new source — its passage and its
+ * quotation went with the old one —, or removed when the source is emptied; the other lines kept whole.
+ * @param lines - the lines as the base holds them
+ * @param source - the new first source, `null` for none
+ * @returns the lines to save
+ */
+export function withFirstSource(
+  lines: readonly StoredLine[],
+  source: number | string | null
+): StoredLine[] {
+  const rest = lines.slice(1)
+  return source === null ? rest : [{ source }, ...rest]
 }
 
 /**

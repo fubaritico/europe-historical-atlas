@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { saveVassalLink } from './saveVassalLink'
+import { saveVassalLink, updateVassalLink, withFirstSource } from './saveVassalLink'
 
 const LINK = { vassal: 10, suzerain: 20, source: 4, year: 1100 }
 
@@ -94,4 +94,97 @@ describe('saveVassalLink', () => {
   })
 
   // L5: N/A — one request, no boundary of its own; the ids are the server's to check.
+})
+
+/** A link the historian sourced twice, the first line with its passage and quotation. */
+const STORED = {
+  lines: [
+    { id: 'a', source: 4, where: 'p. 12', quotation: 'comes Hainoensis' },
+    { id: 'b', source: 9, where: '§ 3', quotation: 'fidelis regis' },
+  ],
+}
+
+/**
+ * A `fetch` that reads the link, then saves it — every call kept.
+ * @returns the stub
+ */
+function readingThenSaving() {
+  return vi.fn((_url: RequestInfo | URL, init?: RequestInit) =>
+    Promise.resolve(
+      init?.method === 'PATCH'
+        ? new Response(JSON.stringify({ doc: { id: 7 } }), { status: 200 })
+        : new Response(JSON.stringify(STORED), { status: 200 })
+    )
+  )
+}
+
+/**
+ * The body of the PATCH a stub received.
+ * @param fetcher - the stub
+ * @returns the body, parsed
+ */
+function patched(fetcher: ReturnType<typeof readingThenSaving>): unknown {
+  const call = fetcher.mock.calls.find(([, init]) => init?.method === 'PATCH')
+  return JSON.parse(call?.[1]?.body as string)
+}
+
+// Review ARCH-001, 2026-11-16: a changed suzerain once rewrote the lines from the sheet's copy, wiping the others
+describe('updateVassalLink', () => {
+  describe('happy path', () => {
+    it('changes the suzerain alone, never touching the lines, when the source did not change', async () => {
+      const fetcher = readingThenSaving()
+      const change = { link: '7', suzerain: 30, source: 4, sourceChanged: false }
+      expect(await updateVassalLink(fetcher, '/api', change)).toEqual({ kind: 'saved' })
+      expect(patched(fetcher)).toEqual({ suzerain: 30 })
+      expect(fetcher).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('variants', () => {
+    it('replaces the first line only when the source changed, the others kept whole', async () => {
+      const fetcher = readingThenSaving()
+      await updateVassalLink(fetcher, '/api', {
+        link: '7',
+        suzerain: 30,
+        source: 5,
+        sourceChanged: true,
+      })
+      expect(patched(fetcher)).toEqual({
+        suzerain: 30,
+        lines: [{ source: 5 }, STORED.lines[1]],
+      })
+    })
+
+    it('removes the first line only when the source is emptied', async () => {
+      const fetcher = readingThenSaving()
+      await updateVassalLink(fetcher, '/api', {
+        link: '7',
+        suzerain: 30,
+        source: null,
+        sourceChanged: true,
+      })
+      expect(patched(fetcher)).toEqual({ suzerain: 30, lines: [STORED.lines[1]] })
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('saves nothing when the link cannot be read', async () => {
+      const fetcher = vi.fn(() => Promise.resolve(new Response('', { status: 404 })))
+      await expect(
+        updateVassalLink(fetcher, '/api', {
+          link: '7',
+          suzerain: 30,
+          source: 5,
+          sourceChanged: true,
+        })
+      ).rejects.toThrow('read a link of vassalage')
+      expect(fetcher).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('sets the source as the one line of a link that had none', () => {
+      expect(withFirstSource([], 5)).toEqual([{ source: 5 }])
+    })
+  })
 })
