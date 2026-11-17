@@ -118,17 +118,30 @@ export const ICON_SOIL: Record<EventIconKind, number> = {
 
 /**
  * Which kinds are buildings (the dev, 2026-11-17: « quand c'est un bâtiment, pour faire ressortir son volume, on sera
- * obligé d'avoir recours à ce genre d'artifice »). A building has **no halo** behind its 3D model (« tu peux retirer le
- * halo blanc ») and, when one stands on the map, the lights take their **counter-light** from the camera
- * (`light/lighting`) — which then lights every 3D marker of that map, the lights being one rig: to settle the day
- * buildings and other icons stand on the same published map.
+ * obligé d'avoir recours à ce genre d'artifice »): when one stands on the map, the lights take their **counter-light**
+ * from the camera (`light/lighting`) — which then lights every 3D marker of that map, the lights being one rig: to
+ * settle the day buildings and other icons stand on the same published map.
  */
 export const ICON_BUILDING: Record<EventIconKind, boolean> = {
   swords: false,
   tower: false,
   crown: false,
   cathedral: true,
-  // A grave is no building: it keeps its halo, and the map's own lights.
+  // A grave is no building: the map's own lights are enough for it.
+  tomb: false,
+}
+
+/**
+ * Which kinds have the white halo behind their 3D model, close up. Not a building (the dev, 2026-11-17, of the
+ * cathedral: « tu peux retirer le halo blanc »), nor the tomb: on the map its halo drew the eye more than the stone
+ * did, against the reserve he wanted for it (« pudique » — « retravaille la lumière »). Its soiled ground and its
+ * shadow set it on the map. From afar every flat drawing keeps its own, for legibility.
+ */
+export const ICON_HALO: Record<EventIconKind, boolean> = {
+  swords: true,
+  tower: true,
+  crown: true,
+  cathedral: false,
   tomb: false,
 }
 

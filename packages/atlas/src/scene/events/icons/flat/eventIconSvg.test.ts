@@ -141,6 +141,18 @@ describe('eventIconSvg', () => {
     })
   })
 
+  describe('the cathedral', () => {
+    it('shows its west front: one silhouette, and a rose, a door and two openings in the rim’s light', () => {
+      // The dev, 2026-11-17: « tu peux faire le fronton avec les deux tours ».
+      const svg = eventIconSvg('cathedral')
+      // The shapes of the second pass alone end on their fill: the rim's pass strokes them too.
+      const bodies = [...svg.matchAll(/ fill="([^"]+)"\/>/g)].map((shape) => shape[1])
+
+      expect(bodies[0]).toBe(EVENT_ICON_SVG_STYLE.silhouette)
+      expect(bodies.slice(1)).toEqual(Array.from({ length: 4 }, () => EVENT_ICON_SVG_STYLE.rim))
+    })
+  })
+
   describe('the tomb', () => {
     it('sets its cross solid on the stone, in the rim’s own light', () => {
       // The dev, 2026-11-17: « il faut que ce soit blanc plein, pour la croix ».

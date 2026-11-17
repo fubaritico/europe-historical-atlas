@@ -12,7 +12,7 @@
  * **Set on the map at Cologne, the same day** (« tous les éléments […] rangés sur une étagère, prêts à être mis en
  * place »), each in its kind's line of `../settings`: 0.6 of an icon's height tall — half a trebuchet's; turned 36°
  * about its upright, its west front toward the reader, a three-quarter; still; its ground soiled; and, as a building,
- * no halo behind it and the counter-light from the camera (`ICON_BUILDING`).
+ * no halo behind it (`ICON_HALO`) and the counter-light from the camera (`ICON_BUILDING`).
  *
  * Built as it stands on the ground: its nave along the west–east line (`x`, the towers to the west), seen from the
  * south (`+z`), as the map's camera looks.

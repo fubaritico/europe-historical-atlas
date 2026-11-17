@@ -25,9 +25,9 @@ import { createHaloSquares, withHalos } from './light/haloSquares'
 import {
   EVENT_ICON_HEIGHT,
   FLAT_HALO_SPAN,
-  ICON_BUILDING,
   ICON_DEPTH_PULL,
   ICON_FLAT_SPAN,
+  ICON_HALO,
   ICON_HALO_SPAN,
 } from './settings'
 
@@ -58,12 +58,12 @@ function iconGroups(close: Group[], afar: Group): { object: Group; near: Group; 
 }
 
 /**
- * Whether an icon is a building, which has no halo behind it (`ICON_BUILDING`).
+ * Whether an icon has the white halo behind its 3D model (`ICON_HALO`).
  * @param kind - its kind, or `undefined` for a rank no icon holds
- * @returns `true` for a building
+ * @returns `true` for a kind that has one
  */
-function isBuilding(kind: EventIconKind | undefined): boolean {
-  return kind !== undefined && ICON_BUILDING[kind]
+function hasHalo(kind: EventIconKind | undefined): boolean {
+  return kind !== undefined && ICON_HALO[kind]
 }
 
 /**
@@ -88,8 +88,8 @@ function buildForms(
   const depthPull = height * ICON_DEPTH_PULL
   const instances = createIconInstances(kinds, height, depthPull)
   const materials = billboardMaterials(loadTexture)
-  // The halos just before the icons, the drawings after the borders, like every marker — none behind a building.
-  const haloed = icons.filter((_, index) => !isBuilding(kinds[index]))
+  // The halos just before the icons, the drawings after the borders, like every marker — for the kinds that have one.
+  const haloed = icons.filter((_, index) => hasHalo(kinds[index]))
   const halos = createHaloSquares(haloed.length, 'marker', { value: depthPull })
   // From afar, the flat drawings pulled too, by their own width — which the zoom changes, so the pull follows it —
   // each with its own halo behind it (ATLAS-306).

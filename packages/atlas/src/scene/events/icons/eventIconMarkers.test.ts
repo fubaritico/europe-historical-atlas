@@ -213,13 +213,14 @@ describe('createEventIconMarkers', () => {
   })
 
   describe('variants', () => {
-    it('stands no halo behind a building, and one behind every other icon', () => {
-      // The dev, 2026-11-17, of the cathedral on the map: « tu peux retirer le halo blanc ».
+    it('stands no halo behind a building nor a tomb, and one behind every other icon', () => {
+      // The dev, 2026-11-17, of the cathedral on the map: « tu peux retirer le halo blanc »; of the tomb: « pudique ».
       const markers = createEventIconMarkers(
         [
           { ground: [0, 0, 0], kind: 'swords' },
           { ground: [1, 0, 0], kind: 'cathedral' },
           { ground: [2, 0, 0], kind: 'crown' },
+          { ground: [3, 0, 0], kind: 'tomb' },
         ],
         STUB,
         FLAT,
@@ -228,7 +229,7 @@ describe('createEventIconMarkers', () => {
 
       expect(squareCount(markers.object, 'halo')).toBe(2)
       // From afar every flat drawing keeps its own.
-      expect(squareCount(markers.object, 'flat halo')).toBe(3)
+      expect(squareCount(markers.object, 'flat halo')).toBe(4)
     })
 
     it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {
