@@ -121,8 +121,8 @@ describe('createIconInstances', () => {
       // And what fades is faded as it is at the same moment.
       expect(fadeAt).toHaveBeenCalledWith(3)
       expect(poseOf(instances.object, 0).position.x).toBe(5)
-      // The placement's 3 along X, scaled by the icon's 2, from where the icon stands.
-      expect(poseOf(instances.object, 1).position.x).toBe(5 + 6)
+      // The placement's 3 along X, scaled by the icon's 2 and by the crown's own size, from where the icon stands.
+      expect(poseOf(instances.object, 1).position.x).toBeCloseTo(5 + 6 * ICON_SIZE.crown)
     })
 
     it('moves the siege’s arm with the moment, and leaves its frame', () => {

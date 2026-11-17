@@ -7,7 +7,15 @@ import { buildIconModel, buildModel, placedGeometry } from './iconModel'
 
 import type { EventIconKind } from '../kinds'
 
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
+/**
+ * How tall each kind's model stands: one unit, but the crown — a low band and its lilies, brought down so it is no
+ * wider than a crown with tall points (the dev, 2026-11-17: « le modèle, il est trop gros »).
+ */
+const TALLS: [EventIconKind, number][] = [
+  ['swords', 1],
+  ['tower', 1],
+  ['crown', 0.44],
+]
 
 /**
  * A small box, for a part of a model built from literals.
@@ -29,7 +37,7 @@ describe('buildIconModel', () => {
   })
 
   describe('variants', () => {
-    it.each(KINDS)('keeps the %s one unit high on the origin once fused', (kind) => {
+    it.each(TALLS)('keeps the %s %d high on the origin once fused', (kind, tall) => {
       // A moving piece is built about its own origin: placed as its motion has it at rest, it stands where the
       // model has it — the stone is nowhere at rest, so it is left out.
       const model = buildIconModel(kind)
@@ -41,7 +49,19 @@ describe('buildIconModel', () => {
           return motion === null ? box : box?.applyMatrix4(model.placeAt(motion, 0, new Matrix4()))
         })
       expect(Math.min(...tops.map((box) => box?.min.y ?? Number.NaN))).toBeCloseTo(0, 5)
-      expect(Math.max(...tops.map((box) => box?.max.y ?? Number.NaN))).toBeCloseTo(1, 5)
+      expect(Math.max(...tops.map((box) => box?.max.y ?? Number.NaN))).toBeCloseTo(tall, 5)
+    })
+
+    it('keeps the crown, low as it is, no wider than a unit and a third', () => {
+      // Fitted one unit high like the others, its band and lilies came out 2.8 wide.
+      const widths = buildIconModel('crown').pieces.map(({ geometry }) => {
+        geometry.computeBoundingBox()
+        return (
+          (geometry.boundingBox?.max.x ?? Number.NaN) - (geometry.boundingBox?.min.x ?? Number.NaN)
+        )
+      })
+      expect(Math.max(...widths)).toBeLessThan(1.34)
+      expect(Math.max(...widths)).toBeGreaterThan(1)
     })
 
     it('bakes a placed part where it sits: the crown’s stones stand around the band, not at its axis', () => {
@@ -49,7 +69,8 @@ describe('buildIconModel', () => {
       jewel?.geometry.computeBoundingBox()
       const box = jewel?.geometry.boundingBox
       if (!box) throw new Error('no jewel piece')
-      // Five stones set in the band, all around: the piece spans the band's width, not a single stone's.
+      // Four red stones set in the band, one in two of the eight, all around: the piece spans the band's width, not a
+      // single stone's.
       expect(box.max.x - box.min.x).toBeGreaterThan(0.5)
     })
 

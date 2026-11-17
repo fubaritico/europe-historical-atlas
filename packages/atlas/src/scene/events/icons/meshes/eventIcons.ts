@@ -13,7 +13,7 @@ import type { IconModel } from './iconModel'
 import type { EventIconKind } from '../kinds'
 import type { EventIconPalette } from '../palette'
 
-/** One icon: a group one unit high, standing on its base at the origin. */
+/** One icon: a group one unit high — lower for a kind `iconModel`'s `MODEL_TALL` names — standing on its base at the origin. */
 export interface EventIcon {
   /** The meshes, to add to a scene and scale to the map. */
   readonly object: Group
@@ -37,7 +37,7 @@ export interface EventIcon {
  * Build one icon: its kind's model, a mesh per piece.
  * @param kind - which shape
  * @param palette - its colours
- * @returns the icon, one unit high, standing at the origin
+ * @returns the icon, as high as its kind's model, standing at the origin
  */
 export function createEventIcon(
   kind: EventIconKind,

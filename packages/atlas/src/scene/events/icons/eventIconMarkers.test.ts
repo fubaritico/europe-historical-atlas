@@ -369,6 +369,33 @@ describe('createEventIconMarkers', () => {
       }
     })
 
+    it('sways the crown either side of how it was stood, upright, wherever the camera stands', () => {
+      const markers = createEventIconMarkers(
+        [{ ground: [1, 0.2, -1], kind: 'crown' }],
+        STUB,
+        FLAT,
+        TARGETS
+      )
+      const turn = (): Quaternion => iconPose(markers.object, 'crown').quaternion
+      const cameras = [
+        cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0)),
+        cameraAt(new Vector3(-7, 1, -2), new Euler(0.2, -1.1, 0)),
+      ]
+      for (const camera of cameras) {
+        // A quarter of a period in, the far end of its swing; three quarters in, the other end.
+        markers.faceCamera(camera, ICON_SWAY.periodSeconds / 4)
+        expect(new Euler().setFromQuaternion(turn()).y).toBeCloseTo(
+          ICON_YAW.crown + ICON_SWAY.amplitudeRad
+        )
+        markers.faceCamera(camera, (3 * ICON_SWAY.periodSeconds) / 4)
+        expect(new Euler().setFromQuaternion(turn()).y).toBeCloseTo(
+          ICON_YAW.crown - ICON_SWAY.amplitudeRad
+        )
+        // It never leans back toward the reader as the swords do: its upright stays the world's.
+        expect(new Vector3(0, 1, 0).applyQuaternion(turn()).y).toBeCloseTo(1)
+      }
+    })
+
     it('still turns the swords beside a still tower', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const swords = (): Quaternion => iconPose(markers.object, 'swords').quaternion.clone()

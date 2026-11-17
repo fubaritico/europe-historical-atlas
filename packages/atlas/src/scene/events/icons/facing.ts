@@ -57,17 +57,24 @@ export function facingCamera(
   return into.setFromRotationMatrix(scratch.lookAt(eye, at, up))
 }
 
-/** What a turned icon carries: where it stands, and the orientation written into it. */
+/** What a turned icon carries: where it stands, how it moves, and the orientation written into it. */
 export interface Turned {
   /** Where it stands, in the world. */
   readonly position: Vector3
   /** Its orientation, written at each frame. */
   readonly quaternion: Quaternion
+  /** Whether it faces the camera; one that does not starts each frame from how it was stood (`rest`). */
+  readonly turns: boolean
+  /** Whether it sways about its own upright. */
+  readonly sways: boolean
+  /** How it was stood for good about its upright. */
+  readonly rest: Quaternion
 }
 
 /**
  * A turner for a set of icons, holding what it works in so a frame allocates nothing however many icons it turns.
- * @returns the function that turns every icon toward a camera, then sways each about its own upright
+ * @returns the function that turns each icon toward a camera or leaves it as it was stood, by its kind's rule, then
+ *   sways about their own upright those that sway
  */
 export function createIconTurner(): (
   icons: readonly Turned[],
@@ -80,10 +87,13 @@ export function createIconTurner(): (
   return (icons, camera, seconds): void => {
     // The camera's up, once for every icon.
     cameraUp(camera, up)
-    // Each icon turned to face the camera, then swayed about its own upright, out of step with the one before.
+    // Each icon turned to face the camera, or back as it was stood; then swayed about its own upright, out of step
+    // with the one before, if its kind sways.
     icons.forEach((icon, index) => {
-      sway.setFromAxisAngle(UPRIGHT, iconSway(seconds, index))
-      facingCamera(icon.position, camera.position, up, icon.quaternion, look).multiply(sway)
+      if (icon.turns) facingCamera(icon.position, camera.position, up, icon.quaternion, look)
+      else icon.quaternion.copy(icon.rest)
+      if (icon.sways)
+        icon.quaternion.multiply(sway.setFromAxisAngle(UPRIGHT, iconSway(seconds, index)))
     })
   }
 }

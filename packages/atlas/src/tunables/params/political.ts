@@ -183,8 +183,10 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // gold border on a gold country.
   // Claude's start, to tune on the map.
   borderBlur: 1,
-  // The borders' less a little: « un tout petit peu moins de flou juste sur les icônes » (the dev, 29/10).
-  iconBlur: 0.75,
+  // The borders' less a little: « un tout petit peu moins de flou juste sur les icônes » (the dev, 29/10), 0.75;
+  // halved for legibility once the icons stood at three quarters of their size (the dev, 2026-11-17: « réduire le
+  // flou qu'il y a sur les icônes », then « on va garder ça comme ça »).
+  iconBlur: 0.35,
   borderColor: '#f3e7cd',
   // At 0.7 each stroke is 30 % of whatever lies under it, which collapses the casing back toward the
   // fill it is meant to separate from. 0.9 is what makes the line read as a border rather than a scratch.

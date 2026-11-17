@@ -33,16 +33,34 @@ export const ICON_DEPTH_PULL = 1
  * How tall each kind's 3D model stands, in icon heights. The siege's was cut down on sight when it was a tower (the dev,
  * 2026-10-27: *« réduis la taille de la tour »*), 0.7; the trebuchet that replaced it twice that (*« deux fois plus
  * grande par rapport à la taille de départ »*). The battle's swords, 1 first, then 0.85 (the dev, 2026-10-31: *« réduis-la
- * un petit peu »*).
+ * un petit peu »*). The accession's crown, 1 first, then 0.7 (the dev, 2026-11-17, of the crown chosen that day: *« la
+ * couronne doit être plus petite »*). **Then every kind at three quarters of that** — 0.85, 1.4 and 0.7 before it — set
+ * on the map the same day, half tried first (the dev: *« on va garder ça comme ça »*).
  */
-export const ICON_SIZE: Record<EventIconKind, number> = { swords: 0.85, tower: 1.4, crown: 1 }
+export const ICON_SIZE: Record<EventIconKind, number> = {
+  swords: 0.6375,
+  tower: 1.05,
+  crown: 0.525,
+}
 
 /**
  * Which kinds of 3D icon turn to face the camera, and sway as they do. The crossed swords float and turn; the siege
  * stands on the ground and does not follow the camera (the dev, 2026-10-27, of the tower: *« posée sur le sol, ne pas
  * suivre la caméra »*) — a trebuchet seen side on from the south, its arm throwing east — every kind has its own rule.
+ * The crown stands on the ground too (the dev, 2026-11-17: *« elle ne doit pas regarder vers la caméra »*).
  */
 export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
+  swords: true,
+  tower: false,
+  crown: false,
+}
+
+/**
+ * Which kinds of 3D icon sway about their own upright (`ICON_SWAY`), whether or not they face the camera. The swords
+ * sway either side of facing it; the siege stands still; the crown stands on the ground without following the camera
+ * and still sways, so the light runs over its points (the dev, 2026-11-17: *« elle peut rester animée »*).
+ */
+export const ICON_SWAYS: Record<EventIconKind, boolean> = {
   swords: true,
   tower: false,
   crown: true,
@@ -68,9 +86,11 @@ export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 
  * The zoom (0 zoomed out, 1 in) around which the icons pass from flat to 3D (the dev, 2026-10-26), and the span over
  * which the one fades into the other — the vassals' reveal does the same (`scene/political/homageReveal`). Moved in from
  * 0.45 so the flat drawing holds longer as the camera closes in (the dev, 2026-10-27: *« le sprite devrait survivre plus
- * longtemps au zoom »*) — a first value, to be set on the map.
+ * longtemps au zoom »*), then to 0.85, so the 3D icon comes within the closest level of detail only (its stop is at
+ * 0.8, `scene/detail/detailLevels`) — the dev, 2026-11-17: *« elles apparaissent trop tôt lorsque l'on zoome »*, 0.75
+ * tried first, then *« c'est mieux quand ça apparaît au dernier moment »*.
  */
-export const ICON_CROSS_FADE = { zoom: 0.6, span: 0.1 }
+export const ICON_CROSS_FADE = { zoom: 0.85, span: 0.1 }
 
 /**
  * How wide a flat icon is, in 3D icon heights. Its drawing is cropped to the swords (`flat/eventIconSvg`), so the

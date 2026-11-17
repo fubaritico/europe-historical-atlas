@@ -2,7 +2,8 @@
  * The flat icons' legibility bench (ATLAS-156): each kind's drawing at the sizes it has on the map, over the
  * parchment and the strong colours of 1100's countries — `/svg-icons.html` on the atlas's dev server, never built.
  * It shows the map's own drawings (`scene/events/icons/flat/eventIconSvg`); a candidate for a new icon is tried here before it moves
- * there — the battle's was chosen this way, « C2 », on 2026-10-26, both silhouettes, « B », and the siege's trebuchet, « C2 », on 2026-10-27, the plain pin, « A », the same evening.
+ * there — the battle's was chosen this way, « C2 », on 2026-10-26, both silhouettes, « B », and the siege's trebuchet, « C2 », on 2026-10-27, the plain pin, « A », the same evening,
+ * the crown's silhouette, « S3 », on 2026-11-17.
  */
 
 import {
@@ -31,7 +32,7 @@ const GROUNDS: [string, string][] = [
 const CANDIDATES: [string, string][] = [
   ['Bataille — épées croisées (validée le 27/10, « B »)', eventIconSvg('swords')],
   ['Siège, prise — trébuchet (validé le 27/10, « C2 »)', eventIconSvg('tower')],
-  ['Accession — couronne (provisoire)', eventIconSvg('crown')],
+  ['Accession — couronne (validée le 17/11, « S3 »)', eventIconSvg('crown')],
   [
     'Épingle — droite (validée le 27/10, « A »)',
     drawingSvg(PIN_DRAWING, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE),

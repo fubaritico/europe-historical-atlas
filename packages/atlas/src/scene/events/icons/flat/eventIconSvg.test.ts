@@ -7,6 +7,7 @@ import { PIN_DRAWING } from './pin'
 import { TOWER_DRAWING } from './tower'
 import { TREBUCHET_DRAWING } from './trebuchet'
 
+import type { Drawing } from './drawing'
 import type { EventIconKind } from '../kinds'
 
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
@@ -86,18 +87,57 @@ describe('eventIconSvg', () => {
       expect(widthOf(eventIconSvg('tower'))).toBeCloseTo((swords * 82) / 44, 1)
     })
 
-    it('outlines the detailed drawings', () => {
-      expect(eventIconSvg('crown')).toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
-    })
-
-    it('paints in the palette and the style given', () => {
-      const svg = eventIconSvg(
-        'crown',
+    it('outlines a detailed drawing, and paints it in the palette and the style given', () => {
+      // No kind is outlined since the crown became a silhouette (2026-11-17): a drawing of the test's own.
+      const detailed: Drawing = {
+        viewBox: [0, 0, 44, 44],
+        outlined: true,
+        groups: [
+          { transform: '', shapes: [{ element: '<rect width="9" height="9"/>', colour: 'gold' }] },
+        ],
+      }
+      const svg = drawingSvg(
+        detailed,
         { ...EVENT_ICON_PALETTE, gold: '#00ff00' },
         { ...EVENT_ICON_SVG_STYLE, rim: '#ff00ff' }
       )
+      expect(svg).toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
       expect(svg).toContain('fill="#00ff00"')
       expect(svg).toContain('stroke="#ff00ff"')
+    })
+
+    it('draws the crown in the swords’ 44 frame, one dark silhouette with no line: saw teeth and three balls', () => {
+      // ATLAS-287, « S3 » on the bench (the dev, 2026-11-17).
+      const svg = eventIconSvg('crown')
+      expect(svg).toContain('viewBox="0 0 44 44"')
+      expect(widthOf(svg)).toBeCloseTo(EVENT_ICON_SVG_STYLE.rimWidth)
+      expect(svg).not.toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
+      expect(svg).not.toContain(EVENT_ICON_PALETTE.gold)
+      // Each shape is drawn twice, rim then body: one body, three balls.
+      expect(svg.match(/<path /g)).toHaveLength(2)
+      expect(svg.match(/<circle /g)).toHaveLength(6)
+    })
+
+    it('sets each ball of the crown on a point of its body, so they read as one shape', () => {
+      const svg = eventIconSvg('crown')
+      const body = /<path d="([^"]+)"/.exec(svg)?.[1] ?? ''
+      const points = [...body.matchAll(/L([\d.]+) ([\d.]+)/g)].map((point) => [
+        Number(point[1]),
+        Number(point[2]),
+      ])
+      const balls = [
+        ...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)" fill="#fdf6e3"/g),
+      ]
+      expect(balls).toHaveLength(3)
+      for (const ball of balls) {
+        // A point of the body lies inside the ball.
+        const reached = points.some(
+          ([x, y]) =>
+            Math.hypot((x ?? Number.NaN) - Number(ball[1]), (y ?? Number.NaN) - Number(ball[2])) <
+            Number(ball[3])
+        )
+        expect(reached).toBe(true)
+      }
     })
   })
 

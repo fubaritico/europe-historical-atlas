@@ -30,6 +30,20 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   crown: crownParts,
 }
 
+/**
+ * How tall a kind's model stands in the icon's unit, for a kind one unit high is wrong for. Every model is fitted one
+ * unit **high**, its width left free: the crown, a low band and its lilies (0.42 high as built, where the crown with
+ * tall points before it was 0.95), came out more than twice as wide as any other icon (the dev, 2026-11-17: « le
+ * modèle, il est trop gros […] c'est dans le modèle qu'il faut faire quelque chose »). At 0.44 its band is as wide as
+ * that crown's was — two crowns made for the same head. Goes when every model is fitted in one box (ATLAS-469).
+ *
+ * **Known, until then**: what stands about the icon — its halo, its flat drawing's middle, its shadow's tile — still
+ * reads the kind's height from `ICON_SIZE` (`../forms`), as if the model filled its unit; for the crown they are set
+ * for a box 2.3 times taller than the crown. Judged as it is on the map by the dev, 2026-11-17. **Only for a kind that
+ * stands still**: a moving piece is placed through the fit alone (`placeAt`), which knows nothing of this height.
+ */
+const MODEL_TALL: Partial<Record<EventIconKind, number>> = { crown: 0.44 }
+
 /** The kinds whose model moves, and how: each motion its parts name. A kind left out stands still. */
 const MOTIONS: Partial<Record<EventIconKind, Motions>> = { tower: TREBUCHET_MOTIONS }
 
@@ -37,7 +51,7 @@ const MOTIONS: Partial<Record<EventIconKind, Motions>> = { tower: TREBUCHET_MOTI
 export interface IconPiece {
   /** The colour, a key of the palette. */
   colour: keyof EventIconPalette
-  /** The fused geometry, one unit high with the rest of the model, standing on the origin. */
+  /** The fused geometry, standing on the origin: one unit high with the rest of the model, or as `MODEL_TALL` has its kind. */
   geometry: BufferGeometry
   /** Its faceted material. */
   material: MeshStandardMaterial
@@ -181,14 +195,18 @@ function fitPlacement(placement: Matrix4, fit: Fit): Matrix4 {
  * Build a kind's model.
  * @param kind - which shape
  * @param palette - its colours
- * @returns the model, one unit high, standing on the origin
+ * @returns the model, one unit high — or as tall as `MODEL_TALL` says for its kind — standing on the origin
  * @throws when a colour's parts cannot be fused (`buildModel`)
  */
 export function buildIconModel(
   kind: EventIconKind,
   palette: EventIconPalette = EVENT_ICON_PALETTE
 ): IconModel {
-  return buildModel(kind, PARTS[kind](), MOTIONS[kind], palette)
+  const model = buildModel(kind, PARTS[kind](), MOTIONS[kind], palette)
+  // A kind that stands lower than the unit: its fused pieces brought down to its own height, about the foot.
+  const tall = MODEL_TALL[kind]
+  if (tall !== undefined) for (const { geometry } of model.pieces) geometry.scale(tall, tall, tall)
+  return model
 }
 
 /**

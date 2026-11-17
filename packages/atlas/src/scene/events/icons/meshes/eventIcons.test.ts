@@ -9,8 +9,6 @@ import { towerParts } from './tower'
 import type { EventIconKind } from '../kinds'
 import type { Material, Object3D } from 'three'
 
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
-
 /**
  * The meshes of an icon.
  * @param object - the icon's group
@@ -22,10 +20,15 @@ function meshes(object: Object3D): Mesh[] {
 
 describe('createEventIcon', () => {
   describe('happy path', () => {
-    it.each(KINDS)('stands the %s one unit high on the origin', (kind) => {
+    it.each<[EventIconKind, number]>([
+      ['swords', 1],
+      ['tower', 1],
+      // The crown, a low band and its lilies, stands lower so it is no wider than the others (`MODEL_TALL`).
+      ['crown', 0.44],
+    ])('stands the %s %d high on the origin', (kind, tall) => {
       const box = new Box3().setFromObject(createEventIcon(kind).object)
       expect(box.min.y).toBeCloseTo(0, 5)
-      expect(box.max.y).toBeCloseTo(1, 5)
+      expect(box.max.y).toBeCloseTo(tall, 5)
     })
   })
 

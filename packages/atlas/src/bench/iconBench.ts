@@ -2,15 +2,20 @@
  * The icons' bench (ATLAS-156): the event icons alone on the parchment, under the lights they have on the map, on the atlas's dev
  * server at `/icons.html`, never built. Two rows: the icons large and facing the viewer, to judge their shapes from
  * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
- * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27).
+ * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27). At
+ * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287).
  */
 
-import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import { Box3, Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
 import { createIconLights } from '../scene/events/icons/light/lighting'
-import { createEventIcon } from '../scene/events/icons/meshes/eventIcons'
+import { createEventIcon, iconOf } from '../scene/events/icons/meshes/eventIcons'
+import { buildModel } from '../scene/events/icons/meshes/iconModel'
+import { EVENT_ICON_PALETTE } from '../scene/events/icons/palette'
 import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
 import { svgToTexture } from '../scene/svgTexture'
+
+import { CROWN_CANDIDATES } from './crownCandidates'
 
 import type { EventIconKind } from '../scene/events/icons/kinds'
 
@@ -29,21 +34,53 @@ const lights = createIconLights()
 lights.quaternion.copy(camera.quaternion)
 scene.add(lights)
 
+// `?crowns`: the crown's candidates alone, left to right in their letters' order (ATLAS-287) — else the map's kinds.
+const crowns = new URLSearchParams(window.location.search).has('crowns')
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
-const icons = KINDS.map((kind, index) => {
-  const large = createEventIcon(kind)
-  large.object.position.set((index - 1) * 1.3, 0, 0)
-  const small = createEventIcon(kind)
+const builders = crowns
+  ? CROWN_CANDIDATES.map(
+      (candidate) => () =>
+        iconOf(
+          buildModel(`crown ${candidate.letter}`, candidate.parts(), undefined, EVENT_ICON_PALETTE)
+        )
+    )
+  : KINDS.map((kind) => () => createEventIcon(kind))
+const middle = (builders.length - 1) / 2
+const icons = builders.map((build, index) => {
+  const large = build()
+  const small = build()
   small.object.scale.setScalar(0.25)
-  small.object.position.set((index - 1) * 0.5, 0, 1.4)
+  if (crowns) {
+    // A low open crown, fitted one unit high like any icon, is far wider than a closed one: the candidates are shown
+    // at one width — crowns made for the same head — so two neighbours never overlap.
+    const box = new Box3().setFromObject(large.object)
+    const width = box.max.x - box.min.x
+    large.object.scale.setScalar(1 / width)
+    small.object.scale.setScalar(0.34 / width)
+  }
+  large.object.position.set((index - middle) * 1.3, 0, 0)
+  small.object.position.set((index - middle) * 0.5, 0, 1.4)
   scene.add(large.object, small.object)
   return { large, small }
 })
+if (crowns) {
+  // The candidates side by side: the camera stands further back, at the same angle.
+  camera.position.set(0, 3.1, 6.6)
+  camera.lookAt(0, 0.3, 0.5)
+  lights.quaternion.copy(camera.quaternion)
+  const caption = document.createElement('p')
+  caption.textContent = CROWN_CANDIDATES.map(({ letter, idea }) => `${letter} — ${idea}`).join(
+    ' · '
+  )
+  caption.style.cssText =
+    'position:fixed;top:12px;left:0;right:0;margin:0;text-align:center;font:14px system-ui;color:#3b2a1e'
+  document.body.append(caption)
+}
 
 // The plain pin (ATLAS-298), behind the icons, as tall as they are: chosen here, « B » (the dev, 2026-10-27). One per
 // colour the contribution offers an event type (`cms/src/fields/eventColours`).
 const PIN_COLOURS = ['#e3170a', '#ff7a00', '#ffc300', '#1fa33a', '#1565e8', '#8a2be2', '#d4148a']
-const pins = PIN_COLOURS.map((colour, index) => {
+const pins = (crowns ? [] : PIN_COLOURS).map((colour, index) => {
   const pin = createPinMarkers([{ ground: [0, 0, 0], colour }], svgToTexture).object
   pin.scale.setScalar(0.8 / EVENT_MARKER_STYLE.height)
   pin.position.set((index - (PIN_COLOURS.length - 1) / 2) * 0.55, 0.5, -1.6)

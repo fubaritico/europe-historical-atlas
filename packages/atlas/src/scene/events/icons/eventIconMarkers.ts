@@ -249,7 +249,7 @@ export function createEventIconMarkers(
   // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()
   const turnIcons = createIconTurner()
-  const turning = icons.filter(({ turns }) => turns)
+  const turning = icons.filter(({ turns, sways }) => turns || sways)
   // How wide a flat drawing stands, set by the zoom; the last frame's moment, for the models that move (a trebuchet).
   let flatSize = height * ICON_FLAT_SPAN
   let now = 0
@@ -275,7 +275,8 @@ export function createEventIconMarkers(
     faceCamera(camera: CameraPose, seconds: number): void {
       facing.copy(camera.quaternion)
       now = seconds
-      // The 3D icons whose kind faces the camera turned and swayed, the others left still; then every form posed.
+      // The 3D icons whose kind faces the camera or sways turned and swayed, the others left still; then every form
+      // posed.
       turnIcons(turning, camera, seconds)
       poseAll()
       // The shadows drawn from the icons as they now stand.

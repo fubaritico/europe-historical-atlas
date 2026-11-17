@@ -6,7 +6,14 @@
 
 import { Quaternion, Vector3 } from 'three'
 
-import { ICON_FACES_CAMERA, ICON_FLAT_RAISE, ICON_LIFT, ICON_SIZE, ICON_YAW } from './settings'
+import {
+  ICON_FACES_CAMERA,
+  ICON_FLAT_RAISE,
+  ICON_LIFT,
+  ICON_SIZE,
+  ICON_SWAYS,
+  ICON_YAW,
+} from './settings'
 
 import type { EventIconKind } from './kinds'
 import type { WorldPoint } from '../../relief/drapeProjection'
@@ -35,7 +42,14 @@ export interface PlacedForms {
   lift: number
   /** Whether its 3D icon turns to face the camera at each frame; one that does not keeps the pose it was stood in. */
   turns: boolean
-  /** How tall its own 3D model stands, in world units — the icon height times its kind's size (`ICON_SIZE`). */
+  /** Whether its 3D icon sways about its own upright at each frame, either side of where it faces. */
+  sways: boolean
+  /** How it was stood for good about its upright — what a kind that does not face the camera sways either side of. */
+  rest: Quaternion
+  /**
+   * How tall its own 3D model stands, in world units — the icon height times its kind's size (`ICON_SIZE`); the unit
+   * a model is fitted in, which a low model does not fill (`meshes/iconModel`, `MODEL_TALL`).
+   */
   size: number
 }
 
@@ -67,15 +81,18 @@ const UPRIGHT_AXIS = new Vector3(0, 1, 0)
  */
 export function placeIcon(at: PlacedEventIcon, height: number): PlacedForms {
   const [x, y, z] = at.ground
+  // Turned for good about its upright; a kind that follows the camera or sways is turned again at every frame.
+  const rest = new Quaternion().setFromAxisAngle(UPRIGHT_AXIS, ICON_YAW[at.kind])
   const forms = {
     position: new Vector3(x, 0, z),
-    // Turned for good about its upright; a kind that follows the camera is turned again at every frame.
-    quaternion: new Quaternion().setFromAxisAngle(UPRIGHT_AXIS, ICON_YAW[at.kind]),
+    quaternion: rest.clone(),
     haloAt: new Vector3(x, 0, z),
     flatAt: new Vector3(x, 0, z),
     ground: y,
     lift: ICON_LIFT[at.kind] * height,
     turns: ICON_FACES_CAMERA[at.kind],
+    sways: ICON_SWAYS[at.kind],
+    rest,
     size: ICON_SIZE[at.kind] * height,
   }
   // Every height is set here, in the one place that writes them.

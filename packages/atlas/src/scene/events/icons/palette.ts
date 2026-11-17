@@ -18,6 +18,12 @@ export interface EventIconPalette {
   gold: string
   /** A crown's stones. */
   jewel: string
+  /** A crown's pearls (ATLAS-287). */
+  pearl: string
+  /** A closed crown's cap. */
+  velvet: string
+  /** A crown's blue stones and enamels. */
+  sapphire: string
   /** A trebuchet's timber. */
   wood: string
   /** A trebuchet's stone: a small grey ball (the dev, 2026-10-27). */
@@ -33,6 +39,9 @@ export const EVENT_ICON_PALETTE: EventIconPalette = {
   door: '#3b2a1e',
   gold: '#d4a53a',
   jewel: '#9b1c1c',
+  pearl: '#f2ede1',
+  velvet: '#8e1b2a',
+  sapphire: '#2f4a9c',
   wood: '#8a6440',
   rock: '#8d8c87',
 }
