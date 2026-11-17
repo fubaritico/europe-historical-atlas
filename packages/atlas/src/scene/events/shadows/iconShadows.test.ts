@@ -1,8 +1,9 @@
 import { BufferAttribute, Matrix4, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { ICON_SHADOW_OPTIONS, createIconShadows, iconShadowFrame } from './iconShadows'
+import { ICON_SHADOW_OPTIONS, createIconShadows, iconShadowFrame, modelExtent } from './iconShadows'
 import { SHADOW_OPACITY, SHADOW_SUN, shadowReach } from './shadowFootprint'
+import { SOIL_OPACITY } from './soil'
 
 import type { IconInstances } from '../icons/iconInstances'
 import type { BufferGeometry, DataTexture, Mesh, MeshBasicMaterial } from 'three'
@@ -65,6 +66,138 @@ describe('createIconShadows', () => {
     })
   })
 
+  describe('the soiled ground', () => {
+    // The dev, 2026-11-17, of the cathedral: « une texture un peu noircie […] pour voir qu'elle est dans le sol ».
+    it('keeps a cast shadow as dark as every marker’s, in an image drawn dark enough for the soil', () => {
+      const shadows = createIconShadows([ICON], standing([ICON.position]), () => 0)
+      shadows.faceCamera({} as never, 0)
+      const mesh = meshOf(shadows.object)
+
+      const darkest = (Math.max(...alphas(mesh)) / 255) * mesh.material.opacity
+
+      expect(darkest).toBeCloseTo(SHADOW_OPACITY, 2)
+    })
+
+    it('keeps room in the frame for the soil and its soft end, so it never stops in a straight edge', () => {
+      // The dev, 2026-11-17: « on voit un bord droit ».
+      const bare = iconShadowFrame({ lift: 0, size: 1 }, 0.7, { radius: 1, top: 1 })
+      const soiled = iconShadowFrame({ lift: 0, size: 1 }, 0.7, {
+        radius: 1,
+        top: 1,
+        soilReach: 0.2,
+      })
+
+      expect(soiled.tHalf - bare.tHalf).toBeGreaterThan(0.2 * 1.5)
+      expect(bare.sMin - soiled.sMin).toBeGreaterThan(0.2 * 1.5)
+    })
+
+    it('fades the soil out before the edges of its image', () => {
+      const flat = [
+        -0.3, 0.1, -0.3, 0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1,
+        0.3,
+      ]
+      const slab = new BufferAttribute(new Float32Array(flat), 3)
+      const lying: Pick<IconInstances, 'forEachPiece'> = {
+        forEachPiece(_index, visit) {
+          visit(slab, new Matrix4())
+        },
+      }
+      const shadows = createIconShadows([{ ...ICON, soil: 1 }], lying, () => 0)
+      shadows.faceCamera({} as never, 0)
+
+      const { along, across } = ICON_SHADOW_OPTIONS.tile
+      const all = alphas(meshOf(shadows.object))
+      const firstRow = all.slice(0, along)
+      const lastRow = all.slice((across - 1) * along, across * along)
+      const firstColumn = Array.from({ length: across }, (_, row) => all[row * along] ?? Number.NaN)
+      // Of 255: under three hundredths of the soil's darkest, nothing the eye reads as an edge.
+      expect(Math.max(...firstRow, ...lastRow, ...firstColumn)).toBeLessThan(8)
+    })
+
+    it('spreads the soil further the further its reach is set', () => {
+      const flat = [
+        -0.3, 0.1, -0.3, 0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1,
+        0.3,
+      ]
+      const slab = new BufferAttribute(new Float32Array(flat), 3)
+      const lying: Pick<IconInstances, 'forEachPiece'> = {
+        forEachPiece(_index, visit) {
+          visit(slab, new Matrix4())
+        },
+      }
+      // How much of the ground the soil reaches, as a share of the world: the frame grows with the reach, so pixels
+      // are counted in the world's units, not the image's.
+      const ground = (soilReach: number): number => {
+        const shadows = createIconShadows([{ ...ICON, soil: 1 }], lying, () => 0, {
+          ...ICON_SHADOW_OPTIONS,
+          soilReach,
+        })
+        shadows.faceCamera({} as never, 0)
+        const all = alphas(meshOf(shadows.object))
+        const frame = iconShadowFrame(ICON, ICON_SHADOW_OPTIONS.margin, {
+          radius: 0.43,
+          top: 0.1,
+          soilReach,
+        })
+        const area = (frame.sMax - frame.sMin) * 2 * frame.tHalf
+        // Darker than a cast shadow can be: the soil alone.
+        const cast = (SHADOW_OPACITY / SOIL_OPACITY) * 255
+        return (all.filter((value) => value > cast + 4).length / all.length) * area
+      }
+
+      expect(ground(0.4)).toBeGreaterThan(ground(0.05) * 1.5)
+    })
+
+    it('darkens the ground about a soiled icon’s foot past its cast shadow', () => {
+      // A slab lying flat a little over the ground: unlike the upright square, it has a footprint.
+      const flat = [
+        -0.3, 0.1, -0.3, 0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1, -0.3, 0.3, 0.1, 0.3, -0.3, 0.1,
+        0.3,
+      ]
+      const slab = new BufferAttribute(new Float32Array(flat), 3)
+      const lying: Pick<IconInstances, 'forEachPiece'> = {
+        forEachPiece(_index, visit) {
+          visit(slab, new Matrix4())
+        },
+      }
+      const soiled = createIconShadows([{ ...ICON, soil: 1 }], lying, () => 0)
+      soiled.faceCamera({} as never, 0)
+      const mesh = meshOf(soiled.object)
+
+      const darkest = (Math.max(...alphas(mesh)) / 255) * mesh.material.opacity
+
+      expect(darkest).toBeGreaterThan(SHADOW_OPACITY * 1.2)
+    })
+  })
+
+  describe('a model wider than it is tall', () => {
+    // The dev, 2026-11-17, of a cathedral twice as long as it is tall: « l'ombre ne fait pas la bonne taille ».
+    it('reads how far a model reaches from its pieces as built, whatever its pose', () => {
+      const extent = modelExtent(standing([new Vector3(9, 0, 9)]), 0)
+      expect(extent.radius).toBeCloseTo(0.3)
+      expect(extent.top).toBeCloseTo(1)
+    })
+
+    it('widens the frame to a model reaching past its size, across and along', () => {
+      const frame = iconShadowFrame({ lift: 0, size: 2 }, 0.7, { radius: 1, top: 1 })
+      // One size from its upright, and the room past it: more than the 0.7 of its size kept by default.
+      expect(frame.tHalf).toBeCloseTo(2 * 1.15)
+      expect(frame.sMin).toBeCloseTo(-2 * 1.15)
+      expect(frame.sMax).toBeCloseTo(shadowReach(2, SHADOW_SUN) + 2 * 1.15)
+    })
+
+    it('reaches past the top of a model taller than its size', () => {
+      const frame = iconShadowFrame({ lift: 0, size: 1 }, 0.7, { radius: 0.3, top: 1.5 })
+      expect(frame.sMax).toBeCloseTo(shadowReach(1.5, SHADOW_SUN) + 0.7)
+    })
+
+    it('keeps the frame its size gives for a model that stays within it', () => {
+      expect(iconShadowFrame({ lift: 0.5, size: 1 }, 0.7, { radius: 0.3, top: 1 })).toEqual(
+        iconShadowFrame({ lift: 0.5, size: 1 }, 0.7)
+      )
+    })
+  })
+
   describe('variants', () => {
     it('draws every icon in one mesh, its tile in one texture', () => {
       const at = [new Vector3(0, 0, 0), new Vector3(3, 0, 0), new Vector3(6, 0, 0)]
@@ -101,7 +234,7 @@ describe('createIconShadows', () => {
     it('fades with the 3D icons, from the markers’ darkness', () => {
       const shadows = createIconShadows([ICON], standing([ICON.position]), () => 0)
       shadows.setOpacity(0.5)
-      expect(meshOf(shadows.object).material.opacity).toBeCloseTo(SHADOW_OPACITY * 0.5)
+      expect(meshOf(shadows.object).material.opacity).toBeCloseTo(SOIL_OPACITY * 0.5)
     })
   })
 
@@ -112,6 +245,8 @@ describe('createIconShadows', () => {
     it('draws again no sooner than its interval', () => {
       const visit = vi.fn(standing([ICON.position]).forEachPiece)
       const shadows = createIconShadows([ICON], { forEachPiece: visit }, () => 0)
+      // Its model is read once as the shadows are built, to frame it: what is counted is the drawings after.
+      visit.mockClear()
       shadows.faceCamera({} as never, 0)
       shadows.faceCamera({} as never, ICON_SHADOW_OPTIONS.interval / 2)
       expect(visit).toHaveBeenCalledTimes(1)
@@ -123,6 +258,8 @@ describe('createIconShadows', () => {
       // From afar the 3D icons are gone: drawing their shadows there would cost every frame for nothing.
       const visit = vi.fn(standing([ICON.position]).forEachPiece)
       const shadows = createIconShadows([ICON], { forEachPiece: visit }, () => 0)
+      // Its model is read once as the shadows are built, to frame it: what is counted is the drawings after.
+      visit.mockClear()
       shadows.setOpacity(0)
       shadows.faceCamera({} as never, 5)
       expect(visit).not.toHaveBeenCalled()

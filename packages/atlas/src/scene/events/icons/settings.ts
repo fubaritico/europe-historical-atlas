@@ -79,6 +79,12 @@ export const ICON_YAW: Record<EventIconKind, number> = {
   crown: 0,
 }
 
+/**
+ * How dark the soiled ground about each kind's foot is, 0 none to 1 as dark as its cast shadow — a building's, so it
+ * reads as set in the ground (the dev, 2026-11-17, of the cathedral; `shadows/soil`). No kind of the map has it yet.
+ */
+export const ICON_SOIL: Record<EventIconKind, number> = { swords: 0, tower: 0, crown: 0 }
+
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */
 export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 }
 

@@ -18,12 +18,14 @@ import {
   sunFall,
 } from './shadowFootprint'
 import { blurCoverage, fillTriangle, framePixel, groundPoint } from './silhouette'
+import { SOIL_OPACITY, soiled } from './soil'
 
 import type { IconInstances } from '../icons/iconInstances'
 import type { EventMarkers } from '../markers'
 import type { GroundAt, ShadowSpot } from './groundShadows'
 import type { ShadowFrame } from './shadowAlpha'
 import type { SilhouetteGround } from './silhouette'
+import type { Soil } from './soil'
 import type { Matrix4 } from 'three'
 
 /** One icon as its shadow needs it: where its base stands, how far it floats, how tall it is. */
@@ -34,12 +36,18 @@ export interface ShadowedIcon {
   readonly lift: number
   /** How tall it stands. */
   readonly size: number
+  /**
+   * How dark the soiled ground about its foot is, 0 to 1 — a building's, so it reads as set in the ground (`soil`).
+   * Left out or `0`: none.
+   */
+  readonly soil?: number
 }
 
 /**
  * How the icons' shadows are drawn. The sun, the darkness and the grid are not among them on purpose: they are the
  * markers' own constants (`SHADOW_SUN`, `SHADOW_OPACITY`, `GROUND_SHADOW_OPTIONS`), read by the pins' shadows too, so
- * the two can never cast differently.
+ * the two can never cast differently. The icons' image is drawn darker than that, at the soil's `SOIL_OPACITY`, and a
+ * cast shadow takes only its share of it (`CAST_SHARE`): on the ground it is `SHADOW_OPACITY` still.
  */
 export interface IconShadowOptions {
   /** One tile's pixels, along the shadow's axis and across it. */
@@ -50,6 +58,8 @@ export interface IconShadowOptions {
   margin: number
   /** The shortest time between two drawings of an icon that moves, in seconds. */
   interval: number
+  /** How far the soiled ground spreads past a building's walls, as a share of its size. */
+  soilReach: number
 }
 
 /**
@@ -63,21 +73,74 @@ export const ICON_SHADOW_OPTIONS: IconShadowOptions = {
   softness: 0.012,
   margin: 0.7,
   interval: 1 / 15,
+  soilReach: 0.2,
+}
+
+/** How far an icon's own model reaches, in its sizes — its model is built one size high, and as wide as it is. */
+export interface ModelExtent {
+  /** The furthest it reaches from its upright, whichever way it is turned. */
+  readonly radius: number
+  /** Its top above its base. */
+  readonly top: number
+  /**
+   * How far the soiled ground spreads past its walls, for a model that has it; left out, none. The frame keeps room
+   * for it and for its soft end, or the soil stops at the frame in a straight edge (the dev, 2026-11-17: « on voit un
+   * bord droit »).
+   */
+  readonly soilReach?: number
+}
+
+/** How much room is kept past a model's own reach, so its shadow's soft edge is not cut: a share of that reach. */
+const REACH_ROOM = 1.15
+
+/** How much room the soil takes past the walls, in its own reaches: its spread, then the soft end half as long again. */
+const SOIL_ROOM = 1.8
+
+/**
+ * How far an icon's model reaches, read from its pieces as they are built — before any pose, which only turns and
+ * places it.
+ * @param instances - the icons as drawn
+ * @param index - which icon
+ * @returns its reach, in its sizes
+ */
+export function modelExtent(
+  instances: Pick<IconInstances, 'forEachPiece'>,
+  index: number
+): ModelExtent {
+  let radius = 0
+  let top = 0
+  instances.forEachPiece(index, (positions) => {
+    for (let k = 0; k < positions.count; k++) {
+      radius = Math.max(radius, Math.hypot(positions.getX(k), positions.getZ(k)))
+      top = Math.max(top, positions.getY(k))
+    }
+  })
+  return { radius, top }
 }
 
 /**
- * The rectangle an icon's shadow fits in: room around its foot, and past where the light lays its top.
+ * The rectangle an icon's shadow fits in: room around its foot, and past where the light lays its top. A model that
+ * reaches further than its size — a cathedral twice as long as it is tall, whose shadow was cut at both ends (the
+ * dev, 2026-11-17: « l'ombre ne fait pas la bonne taille ») — widens it to its own reach; one that does not keeps the
+ * frame its size gives.
  * @param icon - the icon
  * @param margin - the room, as a share of its size
+ * @param extent - how far its model reaches, in its sizes; left out, the icon's size alone frames it
  * @returns the frame
  */
 export function iconShadowFrame(
   icon: Pick<ShadowedIcon, 'lift' | 'size'>,
-  margin: number
+  margin: number,
+  extent?: ModelExtent
 ): ShadowFrame {
-  const room = icon.size * margin
-  return { sMin: -room, sMax: shadowReach(icon.lift + icon.size, SHADOW_SUN) + room, tHalf: room }
+  const reach = (extent?.radius ?? 0) * REACH_ROOM + (extent?.soilReach ?? 0) * SOIL_ROOM
+  const room = Math.max(icon.size * margin, reach * icon.size)
+  const top = Math.max(icon.size, (extent?.top ?? 0) * icon.size)
+  return { sMin: -room, sMax: shadowReach(icon.lift + top, SHADOW_SUN) + room, tHalf: room }
 }
+
+/** The share of the image's opacity a cast shadow takes, so it stays as dark as every marker's (`SHADOW_OPACITY`). */
+const CAST_SHARE = SHADOW_OPACITY / SOIL_OPACITY
 
 /**
  * Draw one icon's shadow into its tile: every triangle of every piece, slid to the ground and filled, then blurred.
@@ -88,6 +151,7 @@ export function iconShadowFrame(
  * @param options - the tile's size and the edge's softness, in pixels
  * @param options.tile - the tile's pixels
  * @param options.blur - the blur's half-width, in pixels
+ * @param options.soil - the soiled ground about its foot, for an icon that has it
  * @returns the tile's coverage, 0 to 1, row by row
  */
 function drawIconShadow(
@@ -95,10 +159,12 @@ function drawIconShadow(
   index: number,
   ground: SilhouetteGround,
   frame: ShadowFrame,
-  options: { tile: IconShadowOptions['tile']; blur: number }
+  options: { tile: IconShadowOptions['tile']; blur: number; soil?: Soil }
 ): Float32Array {
   const { along: width, across: height } = options.tile
   const coverage = new Float32Array(width * height)
+  // Its footprint, straight under it — drawn only for an icon whose ground is soiled.
+  const footprint = options.soil === undefined ? null : new Float32Array(width * height)
   const point = new Vector3()
   const corners: [number, number, number, number, number, number] = [0, 0, 0, 0, 0, 0]
   instances.forEachPiece(index, (positions, matrix: Matrix4) => {
@@ -111,9 +177,24 @@ function drawIconShadow(
         corners[corner * 2 + 1] = py
       }
       fillTriangle(coverage, width, height, corners)
+      if (footprint === null) continue
+      // The same triangle again, dropped straight down: taken at the ground's own height, the light slides it nowhere.
+      for (let corner = 0; corner < 3; corner++) {
+        point.fromBufferAttribute(positions, k + corner).applyMatrix4(matrix)
+        const [s, t] = groundPoint(point.x, ground.y, point.z, ground)
+        const [px, py] = framePixel(s, t, frame, width, height)
+        corners[corner * 2] = px
+        corners[corner * 2 + 1] = py
+      }
+      fillTriangle(footprint, width, height, corners)
     }
   })
-  return blurCoverage(coverage, width, height, options.blur)
+  // The cast shadow at its own darkness, within an image drawn dark enough for the soil (`SOIL_OPACITY`).
+  const cast = blurCoverage(coverage, width, height, options.blur)
+  for (let k = 0; k < cast.length; k++) cast[k] = (cast[k] ?? 0) * CAST_SHARE
+  return footprint === null || options.soil === undefined
+    ? cast
+    : soiled(cast, footprint, width, height, options.soil)
 }
 
 /** The tiles' layout in the one texture: how many across, how many down, and its pixels. */
@@ -186,6 +267,16 @@ function writeTile(
 }
 
 /**
+ * How dark an icon's soiled ground is — the one place that says whether it has any, for its frame and its drawing
+ * alike: a frame with no room for a soil that is drawn would cut it in a straight edge.
+ * @param icon - the icon
+ * @returns its darkness, 0 for an icon with none
+ */
+function soilOf(icon: Pick<ShadowedIcon, 'soil'>): number {
+  return icon.soil !== undefined && icon.soil > 0 ? icon.soil : 0
+}
+
+/**
  * How an icon's tile is drawn: its shadow from its pose, slid to its ground, its blur the softness over one pixel's
  * length, written into the sheet.
  * @param sheet - the sheet the tiles are in
@@ -196,7 +287,7 @@ function writeTile(
 function tileDrawer(
   sheet: TileSheet,
   instances: Pick<IconInstances, 'forEachPiece'>,
-  options: Pick<IconShadowOptions, 'tile' | 'softness'>
+  options: Pick<IconShadowOptions, 'tile' | 'softness' | 'soilReach'>
 ): (index: number, icon: ShadowedIcon, frame: ShadowFrame) => void {
   const axis = shadowDirection(SHADOW_SUN)
   const fall = sunFall(SHADOW_SUN)
@@ -206,9 +297,45 @@ function tileDrawer(
     const blur = Math.round(
       (icon.size * options.softness * options.tile.along) / (frame.sMax - frame.sMin)
     )
-    const coverage = drawIconShadow(instances, index, ground, frame, { tile: options.tile, blur })
+    // Pixels a unit of the world, along the tile.
+    const density = options.tile.along / (frame.sMax - frame.sMin)
+    const darkness = soilOf(icon)
+    const soil =
+      darkness === 0
+        ? {}
+        : { soil: { darkness, spread: Math.round(icon.size * options.soilReach * density) } }
+    const coverage = drawIconShadow(instances, index, ground, frame, {
+      tile: options.tile,
+      blur,
+      ...soil,
+    })
     writeTile(sheet, index, coverage, options.tile)
   }
+}
+
+/**
+ * Each icon with the frame its shadow fits in, from its size and its model's own reach.
+ * @param icons - each icon, in the instances' order
+ * @param instances - the icons as drawn, read for how far each model reaches
+ * @param margin - the room around an icon's foot, as a share of its size
+ * @param soilReach - how far the soil spreads past a soiled icon's walls, as a share of its size
+ * @returns the icons, framed
+ */
+function framedIcons(
+  icons: readonly ShadowedIcon[],
+  instances: Pick<IconInstances, 'forEachPiece'>,
+  margin: number,
+  soilReach: number
+): { icon: ShadowedIcon; frame: ShadowFrame }[] {
+  return icons.map((icon, index) => {
+    const extent = modelExtent(instances, index)
+    // Room for the soil only where there is some: the frame and the drawing ask the one question (`soilOf`).
+    const inSoil = soilOf(icon) > 0
+    return {
+      icon,
+      frame: iconShadowFrame(icon, margin, inSoil ? { ...extent, soilReach } : extent),
+    }
+  })
 }
 
 /**
@@ -227,7 +354,7 @@ export function createIconShadows(
 ): EventMarkers & { setOpacity: (opacity: number) => void } {
   // 1. One texture for every tile; each icon's frame and tile, and the grids laid on the relief.
   const sheet = tileSheet(icons.length, options.tile)
-  const framed = icons.map((icon) => ({ icon, frame: iconShadowFrame(icon, options.margin) }))
+  const framed = framedIcons(icons, instances, options.margin, options.soilReach)
   const spots = framed.map(({ icon, frame }, index) => ({
     x: icon.position.x,
     z: icon.position.z,
@@ -236,7 +363,7 @@ export function createIconShadows(
   }))
   const { geometry, grounds } = shadowGrids(spots, groundAt, GROUND_SHADOW_OPTIONS)
   const { object, material } = shadowMesh(geometry, sheet.texture, {
-    opacity: SHADOW_OPACITY,
+    opacity: SOIL_OPACITY,
     depthPull: GROUND_SHADOW_OPTIONS.depthPull,
   })
 
@@ -268,7 +395,7 @@ export function createIconShadows(
     setOpacity(opacity: number): void {
       // Coming back into view: drawn at the next frame, never shown as it stood when it faded out.
       if (material.opacity === 0 && opacity > 0) last = Number.NEGATIVE_INFINITY
-      material.opacity = SHADOW_OPACITY * opacity
+      material.opacity = SOIL_OPACITY * opacity
     },
     dispose(): void {
       geometry.dispose()

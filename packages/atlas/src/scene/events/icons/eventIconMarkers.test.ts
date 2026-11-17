@@ -17,7 +17,7 @@ import { createSeparateImagesBlur } from '../../blur/separateImages'
 import { DEPTH_BIAS_UNIFORM } from '../../depthBias'
 import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from '../markers'
-import { SHADOW_OPACITY } from '../shadows/shadowFootprint'
+import { SOIL_OPACITY } from '../shadows/soil'
 
 import { EVENT_BLUR_LAYER, createEventIconMarkers } from './eventIconMarkers'
 import {
@@ -447,7 +447,8 @@ describe('createEventIconMarkers', () => {
       for (const mesh of instanced(markers.object).filter(({ name }) => !name.endsWith(' stone')))
         expect((mesh.material as Material).opacity).toBeCloseTo(0.5)
       // The shadows fade with the 3D icons, from their own darkness.
-      expect(shadowMesh(markers.object).material.opacity).toBeCloseTo(SHADOW_OPACITY * 0.5)
+      // The shadows' image is drawn at the soil's opacity, a cast shadow taking its share of it (`shadows/soil`).
+      expect(shadowMesh(markers.object).material.opacity).toBeCloseTo(SOIL_OPACITY * 0.5)
     })
 
     it('casts every icon’s shadow in one mesh, drawn from its pose as one shape', () => {

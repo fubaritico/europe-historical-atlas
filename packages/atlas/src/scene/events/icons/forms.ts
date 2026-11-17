@@ -11,6 +11,7 @@ import {
   ICON_FLAT_RAISE,
   ICON_LIFT,
   ICON_SIZE,
+  ICON_SOIL,
   ICON_SWAYS,
   ICON_YAW,
 } from './settings'
@@ -46,6 +47,8 @@ export interface PlacedForms {
   sways: boolean
   /** How it was stood for good about its upright — what a kind that does not face the camera sways either side of. */
   rest: Quaternion
+  /** How dark the soiled ground about its foot is, 0 to 1 (`ICON_SOIL`) — read by its shadow. */
+  soil: number
   /**
    * How tall its own 3D model stands, in world units — the icon height times its kind's size (`ICON_SIZE`); the unit
    * a model is fitted in, which a low model does not fill (`meshes/iconModel`, `MODEL_TALL`).
@@ -94,6 +97,7 @@ export function placeIcon(at: PlacedEventIcon, height: number): PlacedForms {
     sways: ICON_SWAYS[at.kind],
     rest,
     size: ICON_SIZE[at.kind] * height,
+    soil: ICON_SOIL[at.kind],
   }
   // Every height is set here, in the one place that writes them.
   standForms(forms, 1)
