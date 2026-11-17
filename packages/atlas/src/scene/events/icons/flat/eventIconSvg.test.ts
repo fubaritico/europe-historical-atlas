@@ -142,14 +142,15 @@ describe('eventIconSvg', () => {
   })
 
   describe('the cathedral', () => {
-    it('shows its west front: one silhouette, and a rose, a door and two openings in the rim’s light', () => {
-      // The dev, 2026-11-17: « tu peux faire le fronton avec les deux tours ».
+    it('shows its west front: one silhouette, its openings, gallery, rose and doors in the rim’s light', () => {
+      // The dev, 2026-11-17: « tu peux faire le fronton avec les deux tours », then « trop brut […] on voit la rosace ».
       const svg = eventIconSvg('cathedral')
       // The shapes of the second pass alone end on their fill: the rim's pass strokes them too.
       const bodies = [...svg.matchAll(/ fill="([^"]+)"\/>/g)].map((shape) => shape[1])
 
       expect(bodies[0]).toBe(EVENT_ICON_SVG_STYLE.silhouette)
-      expect(bodies.slice(1)).toEqual(Array.from({ length: 4 }, () => EVENT_ICON_SVG_STYLE.rim))
+      // Four openings, the gallery, the rose, three doors, two round windows.
+      expect(bodies.slice(1)).toEqual(Array.from({ length: 11 }, () => EVENT_ICON_SVG_STYLE.rim))
     })
   })
 
