@@ -3,7 +3,8 @@
  * server at `/icons.html`, never built. Two rows: the icons large and facing the viewer, to judge their shapes from
  * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
  * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27). At
- * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287).
+ * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287); at `/icons.html?cathedral`, the
+ * cathedral's (ATLAS-288).
  */
 
 import { Box3, Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
@@ -15,6 +16,7 @@ import { EVENT_ICON_PALETTE } from '../scene/events/icons/palette'
 import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
 import { svgToTexture } from '../scene/svgTexture'
 
+import { CATHEDRAL_CANDIDATES } from './cathedralCandidates'
 import { CROWN_CANDIDATES } from './crownCandidates'
 
 import type { EventIconKind } from '../scene/events/icons/kinds'
@@ -34,14 +36,25 @@ const lights = createIconLights()
 lights.quaternion.copy(camera.quaternion)
 scene.add(lights)
 
-// `?crowns`: the crown's candidates alone, left to right in their letters' order (ATLAS-287) — else the map's kinds.
-const crowns = new URLSearchParams(window.location.search).has('crowns')
+// `?crowns`: the crown's candidates alone, left to right in their letters' order (ATLAS-287); `?cathedral`: the
+// cathedral's (ATLAS-288) — else the map's kinds.
+const asked = new URLSearchParams(window.location.search)
+const cathedral = asked.has('cathedral')
+const candidates = asked.has('crowns') ? CROWN_CANDIDATES : cathedral ? CATHEDRAL_CANDIDATES : null
+const crowns = candidates !== null
+/** How wide a candidate is shown, large: a crown one unit, the cathedral — alone, and long — more than two. */
+const CANDIDATE_WIDTH = cathedral ? 2.4 : 1
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
-const builders = crowns
-  ? CROWN_CANDIDATES.map(
+const builders = candidates
+  ? candidates.map(
       (candidate) => () =>
         iconOf(
-          buildModel(`crown ${candidate.letter}`, candidate.parts(), undefined, EVENT_ICON_PALETTE)
+          buildModel(
+            `candidate ${candidate.letter}`,
+            candidate.parts(),
+            undefined,
+            EVENT_ICON_PALETTE
+          )
         )
     )
   : KINDS.map((kind) => () => createEventIcon(kind))
@@ -55,23 +68,21 @@ const icons = builders.map((build, index) => {
     // at one width — crowns made for the same head — so two neighbours never overlap.
     const box = new Box3().setFromObject(large.object)
     const width = box.max.x - box.min.x
-    large.object.scale.setScalar(1 / width)
-    small.object.scale.setScalar(0.34 / width)
+    large.object.scale.setScalar(CANDIDATE_WIDTH / width)
+    small.object.scale.setScalar((0.34 * CANDIDATE_WIDTH) / width)
   }
   large.object.position.set((index - middle) * 1.3, 0, 0)
   small.object.position.set((index - middle) * 0.5, 0, 1.4)
   scene.add(large.object, small.object)
   return { large, small }
 })
-if (crowns) {
+if (candidates) {
   // The candidates side by side: the camera stands further back, at the same angle.
   camera.position.set(0, 3.1, 6.6)
   camera.lookAt(0, 0.3, 0.5)
   lights.quaternion.copy(camera.quaternion)
   const caption = document.createElement('p')
-  caption.textContent = CROWN_CANDIDATES.map(({ letter, idea }) => `${letter} — ${idea}`).join(
-    ' · '
-  )
+  caption.textContent = candidates.map(({ letter, idea }) => `${letter} — ${idea}`).join(' · ')
   caption.style.cssText =
     'position:fixed;top:12px;left:0;right:0;margin:0;text-align:center;font:14px system-ui;color:#3b2a1e'
   document.body.append(caption)

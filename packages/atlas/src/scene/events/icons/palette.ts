@@ -24,6 +24,12 @@ export interface EventIconPalette {
   velvet: string
   /** A crown's blue stones and enamels. */
   sapphire: string
+  /** A cathedral's walls: a pale limestone, lighter than a tower's stone (ATLAS-288). */
+  limestone: string
+  /** A cathedral's walls behind what stands out of them: the same limestone, in the shade (ATLAS-288). */
+  limestoneShade: string
+  /** A cathedral's roofs and spire: lead and slate (ATLAS-288). */
+  slate: string
   /** A trebuchet's timber. */
   wood: string
   /** A trebuchet's stone: a small grey ball (the dev, 2026-10-27). */
@@ -42,6 +48,9 @@ export const EVENT_ICON_PALETTE: EventIconPalette = {
   pearl: '#f2ede1',
   velvet: '#8e1b2a',
   sapphire: '#2f4a9c',
+  limestone: '#e8dfc8',
+  limestoneShade: '#b9ad92',
+  slate: '#66748a',
   wood: '#8a6440',
   rock: '#8d8c87',
 }
