@@ -10,7 +10,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `area`, `saturation`, `brightness`, `hue`, `alpha`, `hex`, `automatic`, `automaticDescription`,
- *   `areaRoleDescription`, `hexInvalid`, `picker` — The picker's labels, one per `ColorPickerLabels` entry.
+ *   `areaRoleDescription`, `hexInvalid`, `picker`, `mode`, `modeColor`, `none`, `noneDescription`, `copy`, `paste`,
+ *   `copied`, `pasteInvalid`, `clipboardFailed` — The picker's labels, one per `ColorPickerLabels` entry (the last
+ *   nine since the design system's 0.10.0, CARTO-465: its mode group, « no colour », and its copy and paste).
  * - `trigger` — The field's swatch button.
  * - `achromatic` — A colour with no perceivable hue; `shade` is `black`, `white`, `darkGray`, `lightGray`
  *   or `gray`.

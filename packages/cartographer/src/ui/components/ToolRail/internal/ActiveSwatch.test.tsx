@@ -1,4 +1,5 @@
-import { screen } from '@testing-library/react'
+import { hsvaToHex } from '@fubaritico/behaviors'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -13,6 +14,9 @@ const FRANCE: SwatchPolity = {
   colour: '#54719b',
   picked: { h: 215, s: 46, v: 61, a: 1 },
 }
+
+/** A colour that is not France's, should the fixture ever lose its own. */
+const RED = { h: 0, s: 100, v: 100, a: 1 }
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -44,8 +48,25 @@ describe('ActiveSwatch', () => {
 
     it('hands "automatic" to the document when the picker’s gesture ends on it', async () => {
       const { onColour, user } = mount(FRANCE, true)
-      await user.click(screen.getByRole('button', { name: 'Automatic' }))
+      await user.click(screen.getByRole('radio', { name: 'Automatic' }))
       expect(onColour).toHaveBeenCalledWith(null)
+    })
+
+    // CARTO-465, the dev, 2026-11-17: copy a polity's colour, select another, paste it
+    it('hands the document a colour pasted from the clipboard', async () => {
+      const { onColour, user } = mount({ ...FRANCE, picked: null }, true)
+      await navigator.clipboard.writeText('#ff0000')
+      await user.click(screen.getByRole('button', { name: 'Paste color' }))
+      // The paste reads the clipboard asynchronously: the colour arrives after the click has returned
+      await waitFor(() => {
+        expect(onColour).toHaveBeenCalledWith({ h: 0, s: 100, v: 100, a: 1 })
+      })
+    })
+
+    it('copies the polity’s colour to the clipboard', async () => {
+      const { user } = mount(FRANCE, true)
+      await user.click(screen.getByRole('button', { name: 'Copy color' }))
+      expect(await navigator.clipboard.readText()).toBe(hsvaToHex(FRANCE.picked ?? RED))
     })
   })
 
@@ -53,9 +74,7 @@ describe('ActiveSwatch', () => {
     it('names the picker after the polity, and starts it from the polity’s colour', () => {
       mount(FRANCE, true)
       expect(screen.getByRole('dialog', { name: 'Colour of Reaume de France' })).toBeDefined()
-      expect(screen.getByRole('button', { name: 'Automatic' }).getAttribute('aria-pressed')).toBe(
-        'false'
-      )
+      expect(screen.getByRole('radio', { name: 'Automatic', checked: false })).toBeDefined()
     })
   })
 
@@ -80,9 +99,7 @@ describe('ActiveSwatch', () => {
   describe('edge cases', () => {
     it('opens on "automatic" when the polity has no colour of its own', () => {
       mount({ ...FRANCE, picked: null }, true)
-      expect(screen.getByRole('button', { name: 'Automatic' }).getAttribute('aria-pressed')).toBe(
-        'true'
-      )
+      expect(screen.getByRole('radio', { name: 'Automatic', checked: true })).toBeDefined()
     })
   })
 })

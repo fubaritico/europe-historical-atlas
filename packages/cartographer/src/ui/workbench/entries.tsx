@@ -143,7 +143,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'colour-field',
     title: 'Colour field',
-    note: "The design system's ColorField alone, between two Inputs so the label column and the 22px line can be compared. Top: automatic, as the form opens. Bottom: a colour chosen.",
+    note: "The design system's ColorField alone, between two Inputs so the label column and the 22px line can be compared — its row wider since 0.10.0 by the copy and paste buttons. Top: automatic, as the form opens. Bottom: a colour chosen.",
     width: 340,
     render: () => (
       <div style={{ display: 'grid', gap: 10 }}>
@@ -169,7 +169,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'colour-picker',
     title: 'Colour picker, flat',
-    note: "The panel the popover holds, laid flat — area, hue, the automatic toggle and the hex — to tune it without the popover's positioning in the way.",
+    note: "The panel the popover holds, laid flat — area, hue, the colour / automatic choice, the hex and its copy and paste (0.10.0) — to tune it without the popover's positioning in the way.",
     width: 340,
     render: () => <ColorPicker defaultValue={BLUE} nullable density="compact" />,
   },

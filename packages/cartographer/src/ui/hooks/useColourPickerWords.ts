@@ -27,6 +27,15 @@ export function useColourPickerWords() {
     areaRoleDescription: t('areaRoleDescription'),
     hexInvalid: t('hexInvalid'),
     picker: t('picker'),
+    mode: t('mode'),
+    modeColor: t('modeColor'),
+    none: t('none'),
+    noneDescription: t('noneDescription'),
+    copy: t('copy'),
+    paste: t('paste'),
+    copied: t('copied'),
+    pasteInvalid: t('pasteInvalid'),
+    clipboardFailed: t('clipboardFailed'),
   }
 
   // Return

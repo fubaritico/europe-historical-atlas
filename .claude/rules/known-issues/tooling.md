@@ -1,26 +1,27 @@
 ---
 paths:
-  - "package.json"
-  - "**/package.json"
-  - "pnpm-workspace.yaml"
-  - "pnpm-lock.yaml"
-  - "turbo.json"
-  - "**/eslint.config.js"
-  - "**/tsconfig*.json"
-  - "**/vitest.config.ts"
-  - ".github/**"
-  - ".husky/**"
-  - "**/.gitignore"
-  - ".npmrc"
-  - ".nvmrc"
-  - "scripts/**"
-  - "packages/eslint-plugin-eha/**"
-  - ".lintstagedrc.json"
-  - "commitlint.config.*"
-  - "sonar-project.properties"
-  - ".prettierrc"
-  - ".prettierignore"
+  - 'package.json'
+  - '**/package.json'
+  - 'pnpm-workspace.yaml'
+  - 'pnpm-lock.yaml'
+  - 'turbo.json'
+  - '**/eslint.config.js'
+  - '**/tsconfig*.json'
+  - '**/vitest.config.ts'
+  - '.github/**'
+  - '.husky/**'
+  - '**/.gitignore'
+  - '.npmrc'
+  - '.nvmrc'
+  - 'scripts/**'
+  - 'packages/eslint-plugin-eha/**'
+  - '.lintstagedrc.json'
+  - 'commitlint.config.*'
+  - 'sonar-project.properties'
+  - '.prettierrc'
+  - '.prettierignore'
 ---
+
 # Known issues — the tooling
 
 Open issues of the repository's tooling: install, lint, Turbo, CI, commits, ignores. Loaded by path; indexed in `.claude/known-issues.md`.
@@ -80,10 +81,14 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
      à l'install veut dire que son accès n'a pas été accordé, pas que le token est faux.
   3. **Depuis le 19/10 le dépôt est public, et un visiteur qui le clone ne peut pas l'installer** sans un
      token GitHub à lui. La sortie est de publier le DS sur npmjs. **À décider à ce moment-là.**
-  **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
-  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.9.0` ne prendra jamais `0.10.0` seul —
-  il faut bumper les quatre lignes ensemble.
-  **Sévérité : à savoir.**
+     **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
+     mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.9.0` ne prendra jamais `0.10.0` seul —
+     il faut bumper les quatre lignes ensemble.
+     **Un arbre de travail secondaire (`.claude/worktrees/*`) n'a pas le `.npmrc`** (17/11, CARTO-465) : le fichier est ignoré
+     par git (`.gitignore`), donc absent de tout arbre créé depuis le dépôt, et `pnpm install` y cherche `@fubaritico` sur
+     npmjs — « not in the npm registry ». **Remède** : copier le `.npmrc` de l'arbre de `main` (une ligne de routage, aucun
+     jeton) dans l'arbre avant d'installer.
+     **Sévérité : à savoir.**
 - **Depuis le 12/10, `lint` attend `^lint` : si le plugin `eslint-plugin-eha` échoue à son propre lint,
   Turbo n'exécute pas le lint des quatre autres paquets.** C'est le prix de la correction du cache (sans
   `^lint`, un changement de règle laissait le lint des paquets en `cache hit`, vert sur du code que la règle
@@ -140,7 +145,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   prochain déplacement. **Règle générale** : dans ce dépôt, un motif d'ignore s'écrit avec `**/` sauf
   raison explicite, parce que l'arborescence bougera encore.
   **Et la leçon de procédure, qui vaut plus que la règle** : l'audit « rien d'interdit ne part » avait
-  été fait *avant* le déplacement et jamais rejoué après. Un audit d'ignore se refait **après** tout
+  été fait _avant_ le déplacement et jamais rejoué après. Un audit d'ignore se refait **après** tout
   déplacement de dossier, pas avant.
   Résolu : historique réécrit, dépôt supprimé et recréé, et la CI **assère** désormais l'absence de
   `dist/borders`.

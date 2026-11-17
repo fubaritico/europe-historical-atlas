@@ -35,7 +35,7 @@ describe('describeColour', () => {
 
     it('names a colour with no hue, and a translucent one', () => {
       expect(describeColour({ h: 0, s: 0, v: 50, a: 1 }, FR)).toBe('gris')
-      expect(describeColour({ h: 0, s: 0, v: 100, a: 0.5 }, FR)).toBe('blanc, opacité 50 %')
+      expect(describeColour({ h: 0, s: 0, v: 100, a: 0.5 }, FR)).toBe('blanc, opacité 50 %')
     })
   })
 

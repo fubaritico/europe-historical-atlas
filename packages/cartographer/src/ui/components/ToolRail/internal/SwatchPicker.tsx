@@ -4,9 +4,10 @@ import { useState } from 'react'
 
 import { useColourPickerWords } from '../../../hooks/useColourPickerWords'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { pickedColour } from '../../../utils/pickedColour'
 import { TOOL_RAIL_MESSAGES } from '../i18n'
 
-import type { HsvaColor } from '@fubaritico/behaviors'
+import type { ColorValue, HsvaColor } from '@fubaritico/behaviors'
 
 /** The polity the swatch shows. */
 export interface SwatchPolity {
@@ -29,7 +30,8 @@ export interface SwatchPickerProps {
 }
 
 /**
- * The swatch of a polity, and the picker it opens.
+ * The swatch of a polity, and the picker it opens — with, beside its hex, the design system's « copy » and « paste »
+ * (0.10.0, CARTO-465, the dev, 2026-11-17): copy a polity's colour, select another, paste it.
  * @param props - the polity, where a chosen colour goes, and whether it starts open
  * @param props.polity - the polity aimed at
  * @param props.onColour - a gesture ended on a colour
@@ -53,6 +55,15 @@ export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProp
     // Every opening starts from the document's colour, not from where an earlier gesture left the picker.
     if (open) setDraft(polity.picked)
   }
+  const handleChange = (value: ColorValue) => {
+    const picked = pickedColour(value)
+    if (picked !== undefined) setDraft(picked)
+  }
+  // A gesture's end — a drag let go, a hex typed, a colour pasted (design system 0.10.0, CARTO-465) — reaches the document
+  const handleChangeComplete = (value: ColorValue) => {
+    const picked = pickedColour(value)
+    if (picked !== undefined) onColour(picked)
+  }
 
   // Render
   return (
@@ -66,8 +77,8 @@ export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProp
       <Popover.Content className="tool-rail__picker">
         <ColorPicker
           value={draft}
-          onChange={setDraft}
-          onChangeComplete={onColour}
+          onChange={handleChange}
+          onChangeComplete={handleChangeComplete}
           nullable
           density="compact"
           labels={labels}
