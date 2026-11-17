@@ -415,3 +415,15 @@ target.z)` would be coherent with the navigation that already exists.
   ink blur's members — the ordinary names soften close up, the distant ones stay crisp, as the tribes' white ink does.
   Close up on India or Africa is rare. **Remedy if it shows**: the faint inks among the blur's members, their opacity kept
   through the blur's image. **Severity: cosmétique.**
+- **A building on a map lights every 3D marker of that map** (2026-11-17, ATLAS-434): the counter-light from the camera
+  comes on when a kind of `ICON_BUILDING` stands (`scene/events/mapEventLayer`), and the lights are one rig — so in 1100
+  the swords and the trebuchet take it too, since the cathedral of Poitiers. Not yet judged by the dev on his screen.
+  **Remedy**: lights per kind (a layer of their own for buildings), a line of the epic ATLAS-471. **Severity: à savoir.**
+- **The crown stands lower than its unit, and what stands about it does not know** (2026-11-17, review ARCH-001): its
+  model is brought to 0.44 of the icon's unit (`meshes/iconModel`, `MODEL_TALL`), while its halo, its flat drawing's
+  middle and its place before a city's name are still told from `ICON_SIZE`. Judged as it is on the map. **Remedy**:
+  ATLAS-469, every model fitted in one box. **Severity: cosmétique.**
+- **The flat drawings are read without mipmaps** (2026-11-17, `icons/billboardMaterials`): sharp from afar, the dev's
+  call (« le flou est gênant » → « c'est net »); the cost is that a very thin edge may shimmer as the map moves, on a
+  screen of normal density. He saw none on his two screens. **Remedy if it shows**: drawings rasterised at the sizes
+  they are shown at. **Severity: cosmétique.**

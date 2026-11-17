@@ -4,46 +4,54 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-12 — le codeur : le rôle par session, la sécurité, la coupe par la terre (CORE-421), trois cartes reconstruites
+### 2026-11-17 (après-midi et soir) — le codeur : la couronne en ligne, la cathédrale, la pierre tombale, CMS-468
 
-Plage **12/11 13:36 → 21:34** (7 h 57) ; le chantier ouvert le 05/10 totalise **269 h 43 sur 45 plages**. **Poussé** : `main` =
-`b867422`. **Sur `main`, non poussé** : `fc72157`. **Non commité** : la Croatie sortie de la Hongrie dans la 1100.
+Plage **17/11 09:43 → 19:52** (10 h 08, la même que le matin) ; le chantier totalise **354 h 36 sur 54 plages**. Tout
+est commité et poussé (`8c98ff8b`), onze commits de `f2552600` à `8c98ff8b`.
 
-- **Les rôles** : une note par session au lieu d'une par arbre — ses deux consoles se volaient le rôle ; le pourcentage du
-  contexte dans la ligne d'état (60/75/85/95) ; `idleCompaction` coupé, par lui (`40f4e01`). Vérifié par lui côte à côte.
-- **La sécurité** : une faille ouverte n'est jamais écrite dans un fichier publié ; `SECURITY.md` ; le signalement privé de
-  GitHub activé, sur son accord (`a1d4b1e`). Le dépôt : un produit, plus un portfolio (mémoire corrigée).
-- **ATLAS-396, Fait** : la pose mesurée en ligne, 327 ms, qu'il ne sent pas ; la pose en morceaux en ATLAS-420 (Backlog).
-- **CORE-421** : la mesure des côtes ; la coupe par la terre dans les deux applications, une seule côte (`a1a7ea9`) ; 1100,
-  1200, 1300 reconstruites — îles nettoyées et réattribuées, surfaces en mer de 15 km, union, lamelles retirées, cinq fois
-  moins de points (`6638a30`) ; les scripts (`809d629`). Revue à cinq agents, tableau donné. Ses mots : *« on a frôlé le
-  rabbit hole »*, puis *« ton script fonctionne bien, je valide 1200 »*.
-- **L'historien vérifié** en lecture seule : l'arrière-pays croate (CARTO-417) et le premier lot de 1100 — propres.
-- **Le soir** : la Bohême et la Croatie creusées par script dans leurs suzerains ; CARTO-424 et CARTO-425 en À faire. Ses
-  mots : *« ton outil de merde »*, *« il commence à me prendre la tête »*.
-- **Mes fautes** : ATLAS-396 mesuré alors qu'il ne sentait rien ; deux `cd` ; une première fusion par « couture » qui
-  perdait 1,5 million de cases, mon contrôle ne mesurant la perte que sur les îles ; deux scripts qui sautaient Byzance et
-  Venise (le champ `open` mal lu) ; le masquage lancé dans mon Cartographe sans le prévenir ; le creusement écrit pendant que
-  sa page était ouverte (écrasé à la première tentative).
+- **Fermés** : ATLAS-287 (la couronne d'Occident des XIe–XIIe à la place de celle à pointes : *« beaucoup plus iconique »* ;
+  de loin la silhouette S3, base resserrée) et CMS-468 (Next 16.4.6, le kit MCP forcé en 1.32.0 ; alertes de 10 à 3).
+- **« Un seul signe par lieu »** : le point de la ville s'efface sous une icône, son nom commence après (*« ça se lit
+  mieux »*). Icônes 3D à 75 %, visibles au dernier cran seulement (*« c'est mieux quand ça apparaît au dernier
+  moment »*), flou réduit de moitié.
+- **La cathédrale** (ATLAS-434), d'après ses photos, réglée par lui à Cologne : la moitié du trébuchet, trois quarts,
+  sans halo, **contre-éclairage venu de la caméra réservé aux bâtiments**, **terre noircie et granuleuse au pied**
+  (*« planté dans le sol »*), l'ombre qui suit l'étendue du modèle. De loin, le fronton à deux tours dans l'esprit de
+  Notre-Dame (*« on reconnaît directement »*). **Épique créé : ATLAS-471, les landmarks.**
+- **La pierre tombale** (ATLAS-288) : le signe de la confession **gravé en creux** (croix, croissant, étoile) ; taille
+  *« pudique »* ; de loin, croix en blanc plein, lueur gardée *« pour la lisibilité »* ; de près, plus de halo. Toutes les
+  images plates rendues nettes de loin (*« le flou est gênant »* → *« c'est net »*).
+- **En ligne sans flag** : « Mort », « Accession au trône », « Intronisation », « Concile » ont leur icône — à sa demande,
+  lui en Remote Control, **j'ai arrêté et relancé son serveur du CMS**, réglé les quatre types par l'API locale de Payload
+  (copie de la base avant), exporté, poussé. `?cathedral` et `?tomb` marchent aussi sur le site publié.
+- **Créés** : ATLAS-469 (chaque icône dans la même boîte, taille cuite), ATLAS-470 (l'encombrement), ATLAS-472 (un
+  mausolée pour un très grand).
+- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé, encore) ; 1,5 Go de profils Chrome laissés dans
+  le scratchpad (dans sa Corbeille depuis, un seul profil réutilisé ensuite) ; un push parti avant son « peaufine
+  d'abord, envoie-moi les captures » ; trois scripts de retouche cassés par une ligne remise en forme, à refaire ; une
+  question de lui restée sans réponse le temps qu'il la répète.
 
-### 2026-11-12 nuit — le codeur : ses retours de dessin, les outils débloqués, la 1100 des Balkans poussée
+### 2026-11-17 (matin et midi) — le codeur : cinq tickets du matin, puis les couronnes, deux coupures et le ménage du disque
 
-Plage **12/11 21:36 → 13/11 02:24** (4 h 48, dans la plage du journal 13:36 → 02:19) ; le chantier ouvert le 05/10 totalise
-**274 h 29 sur 45 plages**. **Poussé** : `main` = `3e5d00c` (huit commits).
+Plage **17/11 09:43 → 14:25** (4 h 41) ; le chantier totalise **349 h 09 sur 54 plages**. Le matin est commité et poussé
+(`3ef4ef3`) ; **rien des couronnes n'est commité**.
 
-- **La soudure** qui replie une épine au lieu de refuser (`b0baf3f`, CARTO-425) ; **le creusement par différence de
-  surfaces**, au suzerain et à ses co-vassaux (`dad8373`, CORE-426) — la Zachlumie, la Bosnie creusées ; **la fermeture
-  avec ⌥** qui prend la terre de la famille (`33fe68b`) ; **la retouche** qui finit au clic, un voisin effondré qui garde
-  ses points (`4e563cb`) ; **la vue et les filtres gardés au rechargement** (`c0bec21`, CARTO-427, Fait). Ses mots :
-  *« ça fonctionne, même entre fichiers… vraiment très pratique »*, puis *« l'Atlas fonctionne… félicitations »*.
-- **Revue à six agents** : constats moyens corrigés (un contour ouvert pris pour voisin, le stockage de l'onglet non
-  protégé, un échec des villes qui effaçait la sélection, la transaction du creusement copiée) ; bas ouverts, notés.
-- **La 1100** : la Croatie, la Bosnie, la Zachlumie, la Dioclée sous Byzance, les exclaves hongroises (`81c7d8f`) — elle
-  cassait l'atlas (un coin d'exclave à 40 m hors de la Croatie, le trou débordant) ; corrigée de 60 m (`3e5d00c`).
-  Tickets : CORE-428 (diagnostic des cartes dans la CI), CORE-429 (simplifier les points), ATLAS-430 (la côte à la publication).
-- **Sa règle** : *« moi ce que je veux c'est la liberté de manipulation »*, et l'outil choisi reste choisi.
-- **Mes fautes** : des règles de ses anciennes remarques expliquées comme « ses règles » ; des hypothèses données sans
-  reproduire (la côte, le focus) avant de refaire son geste au bon endroit ; une bascule d'outil ajoutée sans qu'il la
-  demande, retirée ; la carte de 1100 commitée et poussée sans la vérifier dans l'atlas ; un `rm -rf` glissé dans une
-  commande (refusé) ; *« ton outil de merde »*, *« c'est super fatiguant »*.
-
+- **Le matin, commité** : CMS-431, CARTO-453, CARTO-464, CARTO-465 (design system 0.10.0) et la demande au design system
+  de CARTO-467 ; il a vidé « À valider ».
+- **Les couronnes** (ATLAS-287, ATLAS-288), sur le banc `/icons.html?crowns`, d'après ses photos : ses verdicts — **B la
+  générique** en attendant les régionalismes (*« il n'y a pas de croix, il n'y a rien »*), C jetée, D roi d'Europe russe,
+  E Saint-Empire, F Europe de l'Est, G tsar, H Occident haut Moyen Âge (l'anneau de G, lys droits, à sa demande). **La G
+  refaite** : la première ne ressemblait pas à ses photos (*« il manque la couronne de tsar »*, dit deux fois). La B
+  passée dans la carte, plus petite (0,7), sans regarder la caméra, et *« elle peut rester animée »* : un réglage
+  `ICON_SWAYS` à part. Il n'a pas encore jugé la taille ni le balancement sur la carte.
+- **Sa règle du jour** (mémoire `clean-up-after-every-trial`), après un disque plein qui a coupé la session : seuls les
+  worktrees codeur et historien, tout essai nettoyé, le scratchpad aussi (*« vous n'avez pas la primeur de faire ce que
+  vous voulez sur mon ordinateur »*). Il ne reste que `historian` ; `coder-2` retiré, ses 19 fichiers du 13/11 en remise.
+- **CMS-468 créé**, en tête d'« À faire » : Next 16.4.6 et le kit MCP 1.32.0 avant de relancer le CMS.
+- **La galère des sessions** : le plugin Air de son IDE relançait la session dans une fenêtre qu'il ne retrouvait plus,
+  lui sur l'iPhone ; l'IDE à 568 % de processeur. Il a désactivé le plugin et repris par `claude --resume`.
+- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé) ; je lui ai renvoyé trois fois la même commande
+  à taper au lieu de trouver la Corbeille ; une demande d'autorisation d'accessibilité déclenchée sur son écran ; l'IDE
+  dit « fermé » avant de l'avoir vérifié (corrigé au message suivant) ; des étapes de CMS données à faire alors que la
+  couronne n'était visible nulle part (*« elle est où la putain de couronne ? »*) ; la H réduite à tort après son « c'est
+  bien là ».

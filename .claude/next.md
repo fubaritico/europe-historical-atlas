@@ -8,55 +8,72 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-## ▶ ON REPREND ICI — après le 13/11 (les noms des mers poussés ; l'historien travaille dans la nuit)
+**L'historien, 16/11 23:30** : 1100 de 399 à 54 villes en alerte (`cities:alerts`), 101 villes de l'Empire de l'Ouest
+saisies et validées ; la carte `years/1100/` de `main` modifiée, non commitée (les Lotharingies échangées, la Provence, trois
+archevêchés, le comté palatin de Saxe) ; prochaine session : plus de villes en France, Pologne, Russie, Grèce, Turquie —
+son point de reprise, `next-historian.md`.
 
-**Ce soir et cette nuit, l'historien seul** : il lui fait glaner plusieurs sujets, en plusieurs sessions jusque tard. **Sa
-consigne : qu'il ne nous mange pas nos jetons** — peu d'agents, ceux qu'il fixe (la règle du nombre est dans les skills de
-l'historien). Ce que l'historien saisit, je le vérifie en lecture seule quand il me l'annonce ; une fiche dont aucune ligne
-ne cite le détenteur est à signaler (vu sur Smolensk, Rostov, Souzdal le 13/11, corrigé).
+## ▶ ON REPREND ICI — le 17/11, 19 h 50 : les icônes 3D des événements, puis les landmarks
+
+**Sa ligne** (17/11) : _« on va rester concentré sur les icônes 3D des événements. On va les terminer et après »_ l'épique
+**ATLAS-471, les landmarks** (les monuments en 3D). Tout est commité et poussé (`8c98ff8b`) ; **« À valider » est vide**.
+
+**La suite convenue, lui en Remote Control** — rien poussé sans lui avoir envoyé les captures et reçu son accord (sa
+règle du soir, mémoire `captures-before-pushing-when-remote`) :
+
+1. **ATLAS-469, la boîte commune** : chaque modèle dans un cube de 1, la taille cuite dans ses sommets, **rien ne bouge
+   à l'écran** (le prouver par des mesures et des captures) ; le halo, l'image plate, le flottement et l'emprise lisent
+   la vraie hauteur du modèle ; `MODEL_TALL` (la couronne à 0,44) disparaît ; y joindre « ne redessiner que les ombres
+   des icônes qui bougent » (sa crainte pour la performance).
+2. **CMS-223, l'export en deux fichiers** : `content/events.json` pèse **20 Mo** (11 600 villes, 116 affichées). Le plus
+   complexe : **en parler avec lui avant de commencer**.
+3. ATLAS-373 et CARTO-375, deux nettoyages ; puis **rédiger le ticket « la confession d'une personne et le signe
+   gravé »** (champ Confession sur la fiche Personne, le signe sur la fiche de la confession, qui est le mort parmi les
+   acteurs) — le croissant et l'étoile attendent sur le banc `/icons.html?tomb`.
+
+**Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; les épées et le trébuchet de 1100 sous le
+contre-éclairage que la cathédrale de Poitiers allume ; l'angle de la tombe (trois quarts gauche, un essai).
+
+**Son serveur du CMS tourne dans ma session** (relancé à sa demande, port 3100) : il s'arrête si elle se ferme — le lui
+redire. Une copie de la base du soir : `packages/cms/cms-backup-2026-11-17-1930.db`.
+
+**Pour photographier une page sans toucher à son écran** : un Chrome sans fenêtre piloté par un petit script (protocole
+de débogage, port 9377), **un seul profil réutilisé** dans le scratchpad, la caméra posée par `sessionStorage`
+(`europe-map:map-camera`, cible et zoom) ; lui envoyer l'image par `SendUserFile`. **Ne jamais pousser pendant qu'une CI
+déploie** : le push suivant l'annule (`known-issues/tooling.md`).
+
+**L'historien** : pays et région des lieux anglais remplis (8 357) ; environ 1 550 autres lieux sans pays ; 21 villages
+du Domesday dessinés sous Gwynedd et Powys que les sources donnent au comte de Chester — **une retouche de carte, à
+lui**. ATLAS-448 (une seule langue) reste en tête d'« À faire » : pas faisable sans lui, sauf son inventaire.
+
+## Ce qui reste d'avant, toujours vrai
+
+- **En haut d'« À faire »** : ATLAS-448, CMS-454, CMS-441 ; **CMS-459** (les citations en code wiki, critique)
+  est toujours en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
+- **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-136, ATLAS-152, ATLAS-408…) — à trier avec lui.
+  CMS-279 : il reste la garde du seed (une heure). ATLAS-461 : j'attends ses premiers fragments SVG.
+- **1100** : la carte de `main` porte les retouches non commitées du dev et de l'historien.
+- **Ses décisions en attente**, une à la fois : la case « Souverain » qui s'enregistre au clic (pas à « Enregistrer ») ; une
+  personne son propre parent (revue QUAL-002) ; une chaîne divergente vérifiée sur sa première lecture souveraine
+  (QUAL-003) ; six vassaux à deux suzerains en 1100 (Champagne, Anjou, Bellême, Carcassonne, Naples, Lérida).
+
+**Le CMS** : les migrations (`packages/cms/README.md`) ; **relire chaque `down` généré** (il a reconstruit une table pour
+une simple colonne le 15/11) ; jamais de DROP TABLE ; prouver sur une copie (`sqlite3 ".backup"`, `DATABASE_URL=file:…`).
+Le format de l'export est à la **version 9** (la chaîne de chaque ville).
 
 **Sa règle, la nuit du 12/11 : la liberté de manipulation** (mémoire `freedom-of-handling`) — un geste n'est jamais bloqué
 par une règle qu'il n'a pas demandée ; **l'outil choisi reste choisi**. Quand un geste échoue : le refaire dans mon
 Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me met**, jamais deviné.
 
-**L'état** : `main` = le dépôt distant = `b655b0b` (les noms des mers, ATLAS-440, et le diagnostic d'un enregistrement
-refusé) ; la CI de `b655b0b` suivie au moment de clore. **Non commités, à l'historien** : `content/events.json`,
-`years/1100/{polities,registry}.json`, `files/plans/sources/1100/{france-empire,lusatia}.md`, `next-historian.md`. **Dans
-l'arbre `coder`, non commité** : CMS-433 (les communautés religieuses) — attend **sa bascule** : fusion, son CMS relancé
-(deux fois peut-être : le piège du mode push sur une collection neuve), l'export, puis je commite `events.json`.
-
-**Sur le tableau** : À valider — **CMS-431** (« forteresse » à voir dans le prochain export, puis Fait). En cours —
-**CMS-433**. Fait aujourd'hui — CARTO-439 (la tribu à contour), ATLAS-440 (les noms des mers). Créés — CMS-436 (l'historique
-des écritures MCP), CMS-437 (la limite de fréquence), ATLAS-434 (le signe d'une ville selon sa confession, à trancher avec
-lui). Haut de À faire — CARTO-336, puis les icônes ATLAS-287, ATLAS-288.
-
-**Proposé, sans son feu vert** : une épique d'audit des refus du Cartographe — ne garder que ceux qui protègent le fichier,
-dire les autres par une fenêtre. Son idée, *« en tout dernier »* : un agent dans le Cartographe à qui dicter un geste.
-
-**Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
-souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README
-(`.github/brand-mark.png`) ne se régénère pas seul — à refaire si la marque change (dessiné par Core Graphics depuis
-`brandMarkSvg(64)`).
-
-**L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
-montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
-reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
-reprendre la retouche des frontières dans le Cartographe.
+**Proposé, sans son feu vert** : une épique d'audit des refus du Cartographe ; son idée, _« en tout dernier »_ : un agent à qui dicter un geste.
 
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
 **L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `content/events.json`**.
 
-**À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
-`pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
-les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
-
-**Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS ; **CARTO-365**, des hachures cuites comme
-une texture (_« sinon ça vibre »_).
-
-**En cours** : le tableau, `/trello` → `list` — il juge l'état, plusieurs sujets en parallèle ; la liste n'est pas recopiée
-ici.
+**À lui, en attente** : son icône `error.svg` à la place de la mienne ; plus tard : CARTO-365 ; **à arbitrer** : le suzerain du royaume d'Arles
+et les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
@@ -83,9 +100,6 @@ noms est son choix (A11Y-001) ; l'encre blanche des tribus n'est pas floutée de
 
 **Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
 après, posté par `commentfile` depuis un fichier (skill `/trello`, « The closing comment »).
-
-**Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
-« réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
 
 **Pour faire ou régler une icône** : la skill `/make-event-icon` (une image plate se dessine dans un cadre 44 × 44). **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
@@ -122,10 +136,9 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                                                                                 |
 
 **Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
-montées, rapport `files/versions/2026-11-06.md`. **Le kit MCP forcé en 1.32.0** (six failles) : d'accord sur le
-principe, **à faire à la prochaine relance de son CMS** — pas tant que l'historien y travaille (06/11).
-**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **08/11**, appliqué avec son accord le même matin (rapport `files/prompt-audit-2026-11-08.md` ; laissé ouvert : les
-`allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; le suivant dès le 15/11.
+montées, rapport `files/versions/2026-11-06.md`. **Fait le 17/11 (CMS-468)** : Next 16.4.6 et le kit MCP forcé en 1.32.0 ; il reste 3 alertes (zod, minimatch, esbuild).
+**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **15/11**, ses sept corrections appliquées avec son accord le jour même (rapport `files/prompt-audit-2026-11-15.md` ;
+laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; le suivant dû le 22/11.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),

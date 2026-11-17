@@ -149,3 +149,10 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   déplacement de dossier, pas avant.
   Résolu : historique réécrit, dépôt supprimé et recréé, et la CI **assère** désormais l'absence de
   `dist/borders`.
+- **A push while the CI deploys cancels that deploy** (2026-11-17): a newer push to `main` cancels the run in progress
+  (the run of `c27432e9` ended « cancelled » when `79de18d5` was pushed), so what the dev waits to see online is delayed
+  by a whole run, about a quarter of an hour. **Remedy**: `gh run list -L 2` before pushing; while a run deploys, commit
+  and wait. **Severity: à savoir.**
+- **`content/events.json` is 20 MB since the export of 2026-11-17** (4.9 before): it carries the 11 600 city sheets of
+  1100 where the atlas shows 116 (`showInAtlas`). The site downloads it whole and each export adds its size to the
+  repository's history. **Remedy**: CMS-223, the index apart from the body. **Severity: gênant.**
