@@ -3,7 +3,7 @@
  * sprite's are, and writing no depth. The halos have their own material (`light/haloSquares`).
  */
 
-import { MeshBasicMaterial } from 'three'
+import { LinearFilter, MeshBasicMaterial } from 'three'
 
 import { eventIconSvg } from './flat/eventIconSvg'
 
@@ -32,11 +32,16 @@ export interface BillboardMaterials {
 }
 
 /**
- * A material that draws a texture as a sprite does: unlit, see-through, writing no depth.
- * @param map - the texture
+ * A material that draws a texture as a sprite does: unlit, see-through, writing no depth — and sharp from afar.
+ * @param map - the texture, which is set to be read without mipmaps
  * @returns the material
  */
 function spriteLike(map: Texture): MeshBasicMaterial {
+  // Read at its own pixels, with no smaller copies blended in: drawn 128 wide and shown at 20 to 40, a drawing read
+  // through its mipmaps had every edge softened (the dev, 2026-11-17, of the flat drawings from afar: « le flou est
+  // gênant », then « là, c'est bon, c'est net »). The cities' names are read the same way, for the same reason.
+  map.generateMipmaps = false
+  map.minFilter = LinearFilter
   return new MeshBasicMaterial({ map, transparent: true, depthWrite: false })
 }
 

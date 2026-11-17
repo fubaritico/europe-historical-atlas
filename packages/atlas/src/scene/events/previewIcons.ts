@@ -1,7 +1,7 @@
 /**
  * Icons stood on the map at places no event of the content names — the dev's preview of a kind that has no event type
  * yet (the cathedral, ATLAS-434). Data in, data out, so it is exercised with literals; who asks for them is the
- * composition root's to say (`app/devPreview`), never this module's.
+ * composition root's to say (`app/preview`), never this module's.
  */
 
 import {

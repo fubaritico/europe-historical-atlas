@@ -23,6 +23,7 @@ export const ICON_LIFT: Record<EventIconKind, number> = {
   tower: 0,
   crown: 0,
   cathedral: 0,
+  tomb: 0,
 }
 
 /**
@@ -48,6 +49,9 @@ export const ICON_SIZE: Record<EventIconKind, number> = {
   tower: 1.05,
   crown: 0.525,
   cathedral: 0.6,
+  // A grave is a small thing: judged on the map at Cluny (the dev, 2026-11-17: « c'est juste la bonne taille […]
+  // ça peut pas être gros […] c'est pudique, c'est bien »).
+  tomb: 0.45,
 }
 
 /**
@@ -62,6 +66,8 @@ export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
   crown: false,
   // A building stands on the ground, as it was built.
   cathedral: false,
+  // So does a grave, its face to the reader.
+  tomb: false,
 }
 
 /**
@@ -74,6 +80,7 @@ export const ICON_SWAYS: Record<EventIconKind, boolean> = {
   tower: false,
   crown: true,
   cathedral: false,
+  tomb: false,
 }
 
 /**
@@ -90,6 +97,9 @@ export const ICON_YAW: Record<EventIconKind, number> = {
   tower: (-5 * Math.PI) / 6,
   crown: 0,
   cathedral: Math.PI / 5,
+  // A slight three-quarter, its face turned to the reader's left — to the right first, toward the key light (the dev,
+  // 2026-11-17: « c'est 3/4 droit, peut-être 3/4 gauche »): a trial on sight.
+  tomb: -Math.PI / 8,
 }
 
 /**
@@ -102,6 +112,8 @@ export const ICON_SOIL: Record<EventIconKind, number> = {
   tower: 0,
   crown: 0,
   cathedral: 1,
+  // The same ground as the cathedral's (the dev, 2026-11-17: « avec le même effet au sol que pour la cathédrale »).
+  tomb: 1,
 }
 
 /**
@@ -116,6 +128,8 @@ export const ICON_BUILDING: Record<EventIconKind, boolean> = {
   tower: false,
   crown: false,
   cathedral: true,
+  // A grave is no building: it keeps its halo, and the map's own lights.
+  tomb: false,
 }
 
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */

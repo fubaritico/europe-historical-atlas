@@ -81,7 +81,7 @@ function placedCities(
  * Only the events of the year asked are pinned; the cities are pinned whatever their date, for now (the dev, 2026-11-02).
  * A no-op until the content is in, a year is asked and the map is drawn (`mapDrawn`) — whichever comes last draws them. The markers
  * follow the relief's exaggeration from the next frame on.
- * The dev's preview icons, on the dev server alone (`context.previewIcons`), are stood with the events and count as
+ * The dev's preview icons, when the page's address asks for them (`context.previewIcons`), are stood with the events and count as
  * something to pin, whatever the content holds; a building among the icons takes the counter-light with it.
  * @param context - the layers and what they read
  * @returns nothing

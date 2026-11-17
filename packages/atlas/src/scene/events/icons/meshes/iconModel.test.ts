@@ -16,6 +16,7 @@ const TALLS: [EventIconKind, number][] = [
   ['tower', 1],
   ['crown', 0.44],
   ['cathedral', 1],
+  ['tomb', 1],
 ]
 
 /**

@@ -4,8 +4,11 @@
 
 import type { EventIconPalette } from '../palette'
 
-/** Where a shape's colour comes from: the 3D icon's palette, or the flat drawing's one dark silhouette. */
-export type Paint = keyof EventIconPalette | 'silhouette'
+/**
+ * Where a shape's colour comes from: the 3D icon's palette, the flat drawing's one dark silhouette, or the light of
+ * its rim — a sign set solid on the silhouette, as the tomb's cross is.
+ */
+export type Paint = keyof EventIconPalette | 'silhouette' | 'rim'
 
 /** One shape of the drawing: its SVG element, and its colour. */
 export interface FlatShape {

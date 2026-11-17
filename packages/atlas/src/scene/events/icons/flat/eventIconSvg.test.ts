@@ -10,7 +10,7 @@ import { TREBUCHET_DRAWING } from './trebuchet'
 import type { Drawing } from './drawing'
 import type { EventIconKind } from '../kinds'
 
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral']
+const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral', 'tomb']
 
 /**
  * The rim's width a drawing is given: its first stroke, the rim pass coming first.
@@ -138,6 +138,17 @@ describe('eventIconSvg', () => {
         )
         expect(reached).toBe(true)
       }
+    })
+  })
+
+  describe('the tomb', () => {
+    it('sets its cross solid on the stone, in the rim’s own light', () => {
+      // The dev, 2026-11-17: « il faut que ce soit blanc plein, pour la croix ».
+      const svg = eventIconSvg('tomb')
+      const bodies = [...svg.matchAll(/<path d="[^"]+" fill="([^"]+)"\/>/g)].map((path) => path[1])
+
+      // After the rim's pass: the stone in the silhouette's brown, then the cross in the rim's colour.
+      expect(bodies).toEqual([EVENT_ICON_SVG_STYLE.silhouette, EVENT_ICON_SVG_STYLE.rim])
     })
   })
 

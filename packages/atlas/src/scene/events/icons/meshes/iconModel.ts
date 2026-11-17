@@ -13,6 +13,7 @@ import { cathedralParts } from './cathedral'
 import { crownParts } from './crown'
 import { faceted, standUnitHigh } from './parts'
 import { swordParts } from './swords'
+import { tombParts } from './tomb'
 import { TREBUCHET_MOTIONS, trebuchetParts } from './trebuchet'
 
 import type { EventIconKind } from '../kinds'
@@ -30,6 +31,7 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   tower: trebuchetParts,
   crown: crownParts,
   cathedral: cathedralParts,
+  tomb: tombParts,
 }
 
 /**

@@ -130,8 +130,8 @@ export interface MapLayersDeps {
   /** The reader's language, the seas' names written in it (ATLAS-440, the dev: *"multilingual"*). */
   locale: Locale
   /**
-   * Icons stood on the map at places no event names: the dev's preview (`app/devPreview`), empty on the published
-   * site. Stood with the events, whatever the year asked.
+   * Icons stood on the map at places no event names: the dev's preview (`app/preview`), asked for by the page's
+   * address, empty otherwise. Stood with the events, whatever the year asked.
    */
   previewIcons: readonly PreviewIcon[]
   /**

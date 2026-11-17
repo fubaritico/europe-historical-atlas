@@ -1,0 +1,37 @@
+/**
+ * The dev's preview (the dev, 2026-11-17, of the cathedral taken off the map once its trial was over: « elle me manque
+ * déjà […] je veux pouvoir la voir […] remets le flag, proprement »): `?cathedral` in the address stands a cathedral
+ * at Cologne and at Paris, and `?tomb` a grave at Cluny and at Canterbury, so a kind that has no event type yet can
+ * be judged on the map — how it zooms, how it lives. The two may be asked together.
+ *
+ * **On the published site too** (the dev, the same evening: « qu'avec le flag en ligne, je puisse voir la cathédrale,
+ * qu'on ait tout ce que l'on a fait aujourd'hui en ligne ») — on the dev server alone at first. Unasked, the map shows
+ * nothing of it: these icons state no fact of the content, and no reader meets them without the flag.
+ */
+
+import type { PreviewIcon } from '../scene/events/previewIcons'
+
+/** Where the preview stands its cathedrals: the two places the dev named. */
+const CATHEDRALS: readonly PreviewIcon[] = [
+  { lon: 6.96, lat: 50.94, kind: 'cathedral' }, // Cologne
+  { lon: 2.35, lat: 48.85, kind: 'cathedral' }, // Paris
+]
+
+/**
+ * Where the preview stands its graves: two places clear of the map's own events of 1100 — Rome, tried first, already
+ * holds one.
+ */
+const TOMBS: readonly PreviewIcon[] = [
+  { lon: 4.66, lat: 46.43, kind: 'tomb' }, // Cluny
+  { lon: 1.08, lat: 51.28, kind: 'tomb' }, // Canterbury
+]
+
+/**
+ * The icons the address asks the preview for.
+ * @param search - the address's query (`window.location.search`)
+ * @returns the icons to stand on the map, none unless asked
+ */
+export function previewIcons(search: string): readonly PreviewIcon[] {
+  const asked = new URLSearchParams(search)
+  return [...(asked.has('cathedral') ? CATHEDRALS : []), ...(asked.has('tomb') ? TOMBS : [])]
+}

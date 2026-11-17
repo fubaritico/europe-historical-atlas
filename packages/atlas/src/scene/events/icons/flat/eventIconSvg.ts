@@ -8,6 +8,7 @@ import { EVENT_ICON_PALETTE } from '../palette'
 import { CATHEDRAL_DRAWING } from './cathedral'
 import { CROWN_DRAWING } from './crown'
 import { SWORDS_DRAWING } from './swords'
+import { TOMB_DRAWING } from './tomb'
 import { TREBUCHET_DRAWING } from './trebuchet'
 
 import type { Drawing, FlatShape, Paint } from './drawing'
@@ -57,6 +58,7 @@ const DRAWINGS: Record<EventIconKind, Drawing> = {
   tower: TREBUCHET_DRAWING,
   crown: CROWN_DRAWING,
   cathedral: CATHEDRAL_DRAWING,
+  tomb: TOMB_DRAWING,
 }
 
 /**
@@ -88,9 +90,12 @@ export function drawingSvg(
   palette: EventIconPalette,
   style: EventIconSvgStyle
 ): string {
-  // A shape's colour: the flat drawing's own for a silhouette, the 3D palette's otherwise.
-  const colourOf = (paint: Paint): string =>
-    paint === 'silhouette' ? style.silhouette : palette[paint]
+  // A shape's colour: the flat drawing's own for a silhouette, the rim's for a sign set on it, the 3D palette's
+  // otherwise.
+  const colourOf = (paint: Paint): string => {
+    if (paint === 'silhouette') return style.silhouette
+    return paint === 'rim' ? style.rim : palette[paint]
+  }
   // The drawing's groups as SVG, each shape given the paint `paint` says.
   const layer = (paint: (shape: FlatShape) => string): string =>
     drawing.groups
