@@ -9,6 +9,12 @@ packages:
 # `@types/node` at the root for commitlint's TypeScript config loader.
 autoInstallPeers: false
 
+# One transitive dependency forced past what its parent pins. `@payloadcms/plugin-mcp` 3.92.0 depends on
+# `@modelcontextprotocol/sdk` 1.30.0 exactly, which carries six published advisories fixed by 1.32.0; Payload has no
+# release that moves it yet. To drop the day the plugin pins 1.32.0 or later (CMS-468, the dev, 2026-11-17).
+overrides:
+  '@modelcontextprotocol/sdk': 1.32.0
+
 # One declared version per dependency, referenced as `catalog:` from each package.json. The reason that bites
 # here is React: the Cartographer needs it now and the Payload admin will need it next, and two Reacts at
 # different versions in one workspace give hook errors that read like application bugs.
