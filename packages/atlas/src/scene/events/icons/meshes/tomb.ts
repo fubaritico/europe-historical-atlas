@@ -6,9 +6,9 @@
  * three faiths, so the sign is what is compared (« c'est d'avoir quelque chose de lisible »); for one who is neither
  * king, sultan nor tsar it is enough (« ça peut suffire ») — a mausoleum is ATLAS-472.
  *
- * **On the map through the dev's preview alone** (`app/preview`), with the cross: no event type of the content
- * chooses it yet, and where the dead's faith comes from is not decided. The crescent and the star are on the icons'
- * bench, `/icons.html?tomb`.
+ * **On the map with the cross, whatever the dead's faith**, wherever an event type of the contribution chooses it,
+ * and through the dev's preview (`app/preview`): a person's sheet carries no faith yet, so the sign cannot follow it.
+ * The crescent and the star wait on the icons' bench, `/icons.html?tomb`.
  *
  * Built as it stands on the ground, its face to the south (`+z`), where the map's camera looks from.
  */

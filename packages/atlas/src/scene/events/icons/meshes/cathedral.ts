@@ -1,8 +1,9 @@
 /**
  * The cathedral: a building, tried for the councils' icon (ATLAS-288; the dev, 2026-11-17: « un mélange : une nef, un transept, un
  * chœur, deux tours, les rosaces suggérées […] juste pour voir le rendu »), drawn from his photographs of Notre-Dame
- * de Paris, Rouen, Reims, Quimper, Bordeaux and Le Mans. Shown on the icons' bench at `/icons.html?cathedral`, and on
- * the map through the dev's preview alone (`app/preview`): no event type of the content chooses it yet (ATLAS-434).
+ * de Paris, Rouen, Reims, Quimper, Bordeaux and Le Mans. Shown on the icons' bench at `/icons.html?cathedral`; on the
+ * map wherever an event type of the contribution chooses it — « les cathédrales, c'est greffé sur concile » — and
+ * through the dev's preview (`app/preview`).
  *
  * **Two tones of stone** bring its volumes out under the icons' lights, which give every face turned the same way
  * the same tone: the walls in the shade, what stands out of them — buttresses, turrets, cornices, pinnacles — in the

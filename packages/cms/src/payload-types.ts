@@ -213,7 +213,7 @@ export interface Event {
 export interface EventType {
   id: number;
   name: string;
-  icon: 'pin' | 'swords' | 'tower' | 'crown';
+  icon: 'pin' | 'swords' | 'tower' | 'crown' | 'cathedral' | 'tomb';
   colour: '#e3170a' | '#ff7a00' | '#ffc300' | '#1fa33a' | '#1565e8' | '#8a2be2' | '#d4148a';
   updatedAt: string;
   createdAt: string;

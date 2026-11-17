@@ -57,9 +57,12 @@ const recordId = z.string().check(z.minLength(1))
 
 /**
  * The shapes an event stands on the map as, chosen once per type in the contribution (ATLAS-156): `pin` until a
- * shape is chosen for it, `swords` the crossed swords of a battle, `tower` a siege or a taking, `crown` an accession.
+ * shape is chosen for it, `swords` the crossed swords of a battle, `tower` a siege or a taking, `crown` an accession,
+ * `cathedral` a cathedral — a council's, the dev's first use of it — and `tomb` a death's grave (ATLAS-288, ATLAS-434,
+ * the dev, 2026-11-17: « ce que je voudrais, c'est déjà les deux événements, mort et couronnement, qu'on puisse les
+ * voir en ligne »).
  */
-export const EVENT_ICONS = ['pin', 'swords', 'tower', 'crown'] as const
+export const EVENT_ICONS = ['pin', 'swords', 'tower', 'crown', 'cathedral', 'tomb'] as const
 
 /** One of {@link EVENT_ICONS}. */
 export type EventIcon = (typeof EVENT_ICONS)[number]

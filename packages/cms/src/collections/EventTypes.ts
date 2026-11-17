@@ -10,6 +10,8 @@ const ICON_LABELS: Record<EventIcon, string> = {
   swords: 'Épées croisées',
   tower: 'Tour et engin de siège',
   crown: 'Couronne',
+  cathedral: 'Cathédrale',
+  tomb: 'Pierre tombale',
 }
 
 /**
