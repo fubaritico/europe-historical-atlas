@@ -4,6 +4,9 @@
  * zoom. **The level of detail lights them** (`scene/detail`): a city's point comes a level before its name. Held as one
  * of the event markers (`events/markers`), so the layers move, fade and free them with the events.
  *
+ * **One sign per place** (the dev, 2026-11-17): a city an event's icon stands on shows no point — the icon is its sign
+ * — and its name starts past the icon (`iconFootprint`).
+ *
  * **Over the relief, under the events** (the dev, 2026-10-31): drawn with no depth test, as the countries' names are, so
  * no slope or ridge ever cuts a point or a name — depth-tested, « Tyr » read « Tur » and Tripoli lost its name behind a
  * crest; and drawn after the events' shadows and before their halos, pins and icons, which stand in front of a city
@@ -24,6 +27,7 @@ import { coveredByNames } from './nameCover'
 import { inNameReach, lookedAt } from './nameReach'
 
 import type { CityLabelImage, DrawCityLabel } from './cityLabel'
+import type { IconFootprint } from './iconFootprint'
 import type { DetailView } from '../detail/detailView'
 import type { LoadSvgTexture } from '../events/icons/billboardMaterials'
 import type { CameraPose, EventMarkers } from '../events/markers'
@@ -56,6 +60,8 @@ export interface PlacedCity {
   readonly u: number
   /** See {@link PlacedCity.u}. */
   readonly v: number
+  /** The room of the event's icon standing on its point (`iconFootprint`); absent when none does. */
+  readonly icon?: IconFootprint
 }
 
 /** One city's two sprites. */
@@ -66,6 +72,10 @@ interface CitySprites {
   readonly point: Sprite
   /** Its name, to the right, once drawn. */
   readonly name: Sprite
+  /** The room of the event's icon standing on its point, or `null`: its point gives way, its name starts past it. */
+  readonly icon: IconFootprint | null
+  /** The city's point from the name's left edge, in CSS pixels, once drawn (`CityLabelImage.anchorX`); zero before. */
+  anchorX: number
   /** The name's size on screen, in CSS pixels, once drawn; zero before. */
   nameWidth: number
   /** The name's height on screen, in CSS pixels, once drawn; zero before. */
@@ -132,6 +142,10 @@ function applyFrame(city: CitySprites, frame: CityFrame): void {
   const mark = CITY_MARKS[city.importance].size / pixelsPerUnit
   city.point.scale.set(mark, mark, 1)
   city.name.scale.set(city.nameWidth / pixelsPerUnit, city.nameHeight / pixelsPerUnit, 1)
+  // The name starts past the icon standing on the point, as far from its edge as from the mark's.
+  if (city.nameWidth > 0) {
+    city.name.center.setX((city.anchorX - iconOverhang(city, pixelsPerUnit)) / city.nameWidth)
+  }
   if (view === null) {
     fade(city.point, 0)
     fade(city.name, 0)
@@ -139,8 +153,21 @@ function applyFrame(city: CitySprites, frame: CityFrame): void {
   }
   // A point on a country's name yields to it while the city has no name of its own; it comes back with its name.
   const yields = city.covered ? view.cityNames[city.importance] : 1
-  fade(city.point, view.cityPoints[city.importance] * yields * reveal)
+  // One sign per place: under an event's icon the point is not drawn.
+  fade(city.point, city.icon === null ? view.cityPoints[city.importance] * yields * reveal : 0)
   fade(city.name, city.nameWidth === 0 ? 0 : view.cityNames[city.importance] * city.reach * reveal)
+}
+
+/**
+ * How far past the mark's edge the icon standing on a city's point reaches, on screen: what its name is pushed by.
+ * @param city - its sprites
+ * @param pixelsPerUnit - screen pixels per world unit where the camera looks
+ * @returns the reach, in CSS pixels; zero with no icon, or one narrower than the mark
+ */
+function iconOverhang(city: CitySprites, pixelsPerUnit: number): number {
+  if (city.icon === null) return 0
+  const across = Math.max(city.icon.width * pixelsPerUnit, city.icon.minPixels)
+  return Math.max(0, (across - CITY_MARKS[city.importance].size) / 2)
 }
 
 /**
@@ -158,6 +185,7 @@ function takeName(city: CitySprites, label: CityLabelImage): void {
   city.name.material.map = texture
   city.name.material.needsUpdate = true
   city.name.center.set(label.anchorX / label.width, 0.5)
+  city.anchorX = label.anchorX
   city.nameWidth = label.width
   city.nameHeight = label.height
 }
@@ -213,6 +241,8 @@ function buildSprites(
       importance: city.importance,
       point,
       name,
+      icon: city.icon ?? null,
+      anchorX: 0,
       nameWidth: 0,
       nameHeight: 0,
       inReach: true,

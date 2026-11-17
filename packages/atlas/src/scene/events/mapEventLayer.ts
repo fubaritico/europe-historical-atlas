@@ -7,12 +7,15 @@
 
 import { createCityMarkers } from '../cities/cityMarkers'
 import { cityPins } from '../cities/cityPins'
+import { iconOver } from '../cities/iconFootprint'
 import { disposeHandle } from '../layers/disposeHandle'
 import { svgToTexture } from '../svgTexture'
 
 import { eventPins } from './eventPins'
 import { eventsOfYear } from './eventsOfYear'
+import { iconFootprint } from './icons/crossFade'
 import { createEventIconMarkers } from './icons/eventIconMarkers'
+import { EVENT_ICON_HEIGHT } from './icons/settings'
 import { createMarkerLights } from './markerLights'
 import { combineEventMarkers } from './markers'
 import { EVENT_MARKER_STYLE, createPinMarkers, pinMeasures } from './pin'
@@ -20,7 +23,10 @@ import { groundAtFrom } from './shadows/groundAt'
 import { createGroundShadows } from './shadows/groundShadows'
 import { SHADOW_SUN, pinFootprint } from './shadows/shadowFootprint'
 
+import type { PlacedCity } from '../cities/cityMarkers'
+import type { StandingIcon } from '../cities/iconFootprint'
 import type { LayerContext } from '../layers/layerContext'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
 /**
  * Whether the events can be pinned: the map drawn on its relief, a year asked, and something to pin.
@@ -35,6 +41,34 @@ function readyToPin(sources: LayerContext['sources']): boolean {
     sources.askedYear !== null &&
     (sources.events.length > 0 || sources.cities.length > 0)
   )
+}
+
+/**
+ * The cities to draw, each at its point on the relief — and, one sign per place (the dev, 2026-11-17), with the room of
+ * the event's icon standing on it, for that city to give the icon its point and start its name past it.
+ * @param context - the layers and what they read
+ * @param bounds - the map's frame
+ * @param standing - the events' shaped icons on the map
+ * @returns the cities, in the order of the content's
+ */
+function placedCities(
+  context: LayerContext,
+  bounds: GeoBounds,
+  standing: readonly StandingIcon[]
+): PlacedCity[] {
+  return cityPins(context.sources.cities, bounds).map(({ city, u, v }) => {
+    const ground = context.projection.draped(u, v)
+    const icon = iconOver(ground, standing)
+    return {
+      ground,
+      importance: city.importance,
+      name: city.place.name.fr,
+      u,
+      v,
+      // Absent, never `undefined`: a city with no icon on it keeps its point.
+      ...(icon === undefined ? {} : { icon }),
+    }
+  })
 }
 
 /**
@@ -75,6 +109,11 @@ export function rebuildEvents(context: LayerContext): void {
     icon === 'pin' ? [{ ground, colour }] : []
   )
   const groundAt = groundAtFrom(projection)
+  // One sign per place: the room each shaped icon takes, for the city under it to give it its point.
+  const standing = shaped.map(({ ground, kind }) => ({
+    ground,
+    footprint: iconFootprint(kind, EVENT_ICON_HEIGHT),
+  }))
   handles.events = combineEventMarkers([
     createMarkerLights(),
     createGroundShadows(
@@ -83,16 +122,11 @@ export function rebuildEvents(context: LayerContext): void {
       groundAt
     ),
     createPinMarkers(plain, svgToTexture),
-    createEventIconMarkers(shaped, svgToTexture, groundAt, blurMethod),
+    // The one height the icons are built at and their room is told from.
+    createEventIconMarkers(shaped, svgToTexture, groundAt, blurMethod, EVENT_ICON_HEIGHT),
     // 5. The cities, lit by the level of detail (ATLAS-295) — held with the events, moved and freed with them.
     createCityMarkers(
-      cityPins(sources.cities, sources.heightmap.meta.bbox).map(({ city, u, v }) => ({
-        ground: projection.draped(u, v),
-        importance: city.importance,
-        name: city.place.name.fr,
-        u,
-        v,
-      })),
+      placedCities(context, sources.heightmap.meta.bbox, standing),
       svgToTexture,
       context.cityLabels
     ),

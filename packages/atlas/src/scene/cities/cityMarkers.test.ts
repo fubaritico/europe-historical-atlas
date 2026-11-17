@@ -108,6 +108,53 @@ describe('createCityMarkers', () => {
     })
   })
 
+  describe('one sign per place', () => {
+    // The dev, 2026-11-17: the crown stood on Jerusalem's point and hid the « J » of its name.
+    it('draws no point under an event’s icon, and still its name', async () => {
+      const crowned: PlacedCity = { ...PARIS, icon: { width: 0.5, minPixels: 20 } }
+      const markers = createCityMarkers([crowned], loadTexture, drawn)
+      await settle()
+      markers.setZoom(0, 100)
+
+      markers.setDetailView(level(1))
+
+      const { point, name } = city(markers.object, 0)
+      expect([point.visible, name.visible]).toEqual([false, true])
+    })
+
+    it('starts the name past the icon: pushed by what the icon reaches beyond the mark', async () => {
+      // 0.5 of a unit at 100 pixels a unit: 50 pixels across, 17.5 past the capital's mark of 15 on each side.
+      const crowned: PlacedCity = { ...PARIS, icon: { width: 0.5, minPixels: 20 } }
+      const markers = createCityMarkers([crowned], loadTexture, drawn)
+      await settle()
+
+      markers.setZoom(0, 100)
+
+      expect(city(markers.object, 0).name.center.x).toBeCloseTo((-10 - 17.5) / 60)
+    })
+
+    it('keeps the name clear of the icon’s fewest pixels from afar', async () => {
+      // 0.5 of a unit at 10 pixels a unit would be 5 pixels: the icon keeps 20, 2.5 past the mark on each side.
+      const crowned: PlacedCity = { ...PARIS, icon: { width: 0.5, minPixels: 20 } }
+      const markers = createCityMarkers([crowned], loadTexture, drawn)
+      await settle()
+
+      markers.setZoom(0, 10)
+
+      expect(city(markers.object, 0).name.center.x).toBeCloseTo((-10 - 2.5) / 60)
+    })
+
+    it('leaves the name where it was under an icon narrower than the mark', async () => {
+      const crowned: PlacedCity = { ...PARIS, icon: { width: 0.1, minPixels: 5 } }
+      const markers = createCityMarkers([crowned], loadTexture, drawn)
+      await settle()
+
+      markers.setZoom(0, 100)
+
+      expect(city(markers.object, 0).name.center.x).toBeCloseTo(-10 / 60)
+    })
+  })
+
   describe('variants', () => {
     it('brings a large city’s point at the second level and its name at the third', async () => {
       const markers = createCityMarkers([COLOGNE], loadTexture, drawn)

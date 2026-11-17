@@ -5,7 +5,10 @@
 
 import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
-import { ICON_CROSS_FADE, ICON_FLAT_MIN_PIXELS, ICON_FLAT_SPAN } from './settings'
+import { ICON_CROSS_FADE, ICON_FLAT_MIN_PIXELS, ICON_FLAT_SPAN, ICON_SIZE } from './settings'
+
+import type { EventIconKind } from './kinds'
+import type { IconFootprint } from '../../cities/iconFootprint'
 
 /**
  * How far the 3D icon is in, at a zoom: 0 the flat icon alone, 1 the 3D icon alone, linear across the span.
@@ -25,6 +28,20 @@ export function iconCrossFade(zoom: number): number {
  */
 export function flatIconSize(height: number, pixelsPerUnit: number): number {
   return Math.max(height * ICON_FLAT_SPAN, ICON_FLAT_MIN_PIXELS / pixelsPerUnit)
+}
+
+/**
+ * The room a kind's icon takes about its place, whichever form the zoom shows: the wider of its flat drawing and its
+ * 3D model, and the flat drawing's fewest pixels — what a city under it sets its name against (`cities/iconFootprint`).
+ * @param kind - which icon
+ * @param height - how tall an icon stands
+ * @returns its room
+ */
+export function iconFootprint(kind: EventIconKind, height: number): IconFootprint {
+  return {
+    width: height * Math.max(ICON_FLAT_SPAN, ICON_SIZE[kind]),
+    minPixels: ICON_FLAT_MIN_PIXELS,
+  }
 }
 
 /** The two forms' shares as the zoom and the startup's fade set them. */

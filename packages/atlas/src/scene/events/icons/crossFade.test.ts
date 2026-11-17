@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { crossFading, flatIconSize, iconCrossFade } from './crossFade'
-import { ICON_CROSS_FADE, ICON_FLAT_MIN_PIXELS, ICON_FLAT_SPAN } from './settings'
+import { crossFading, flatIconSize, iconCrossFade, iconFootprint } from './crossFade'
+import { ICON_CROSS_FADE, ICON_FLAT_MIN_PIXELS, ICON_FLAT_SPAN, ICON_SIZE } from './settings'
 
 // L3: N/A — pure arithmetic over numbers; nothing is refused
 // L4: N/A — no async work, nothing external
@@ -25,6 +25,16 @@ describe('flatIconSize', () => {
 
   it('keeps its fewest pixels when the 3D icon would be smaller on screen', () => {
     expect(flatIconSize(0.05, 10) * 10).toBeCloseTo(ICON_FLAT_MIN_PIXELS)
+  })
+})
+
+describe('iconFootprint', () => {
+  it('is as wide as the wider of the flat drawing and the 3D model, with the flat drawing’s fewest pixels', () => {
+    const { width, minPixels } = iconFootprint('tower', 2)
+
+    expect(width).toBeCloseTo(2 * Math.max(ICON_FLAT_SPAN, ICON_SIZE.tower))
+    expect(width).toBeGreaterThanOrEqual(2 * ICON_FLAT_SPAN)
+    expect(minPixels).toBe(ICON_FLAT_MIN_PIXELS)
   })
 })
 

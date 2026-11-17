@@ -25,6 +25,7 @@ import { createMapSources, refreshReliefSource } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { createSeparateImagesBlur } from '../blur/separateImages'
 import { createSharedImagesBlur } from '../blur/sharedImages'
+import { CITY_RENDER_ORDER, CITY_UNDER_NAMES_ORDER } from '../cities/cityMarkers'
 import { DEPTH_BIAS_UNIFORM } from '../depthBias'
 import { DETAIL_FADE_SECONDS } from '../detail/detailView'
 import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
@@ -385,6 +386,55 @@ describe('createMapLayers', () => {
 
       expect(sprites()).toHaveLength(2)
       expect(freed).toHaveBeenCalled()
+    })
+
+    it.each<[string, 'swords' | 'pin', boolean]>([
+      ['gives its point up to a battle’s icon standing on it', 'swords', false],
+      ['keeps its point under a plain pin', 'pin', true],
+    ])('one sign per place: a city %s', (_name, icon, pointShown) => {
+      // The dev, 2026-11-17: the crown stood on Jerusalem's point and hid the « J » of its name.
+      const { scene, sources, layers } = build()
+      sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon } }]
+      // A capital on the battle's own place.
+      sources.cities = [
+        {
+          id: 'c1',
+          place: {
+            id: 'p',
+            name: { fr: 'Paris', en: null },
+            lon: 0,
+            lat: 48,
+            wikidata: null,
+            existsFrom: null,
+            existsTo: null,
+          },
+          date: BATTLE.date,
+          importance: 'capital',
+          reasons: [],
+          testimonies: [],
+          holder: null,
+          communities: [],
+          chain: null,
+          showInAtlas: true,
+        },
+      ]
+      sources.askedYear = 1100
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+
+      layers.frame(0, 100, tick())
+
+      // The cities' group holds each city's two sprites, its point first.
+      const cities: Sprite[] = []
+      scene.traverse((object) => {
+        const order = object.parent?.renderOrder
+        const ofCities = order === CITY_RENDER_ORDER || order === CITY_UNDER_NAMES_ORDER
+        if (object instanceof Sprite && ofCities) {
+          cities.push(object as Sprite)
+        }
+      })
+      expect(cities).toHaveLength(2)
+      expect(cities[0]?.visible).toBe(pointShown)
     })
 
     it('carries each frame’s zoom and camera to the icons', () => {
