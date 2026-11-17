@@ -287,6 +287,21 @@
   width: 460px;
 }
 
+/*
+ * Every dialogue at most 80 % of the window's height, its body scrolling between the title and the buttons, which stay
+ * in view (CARTO-464, the dev, 2026-11-17: a city's or a polity's sheet can be very tall). The design system's card is
+ * already a column that clips; its body takes the room left and scrolls. Its menus (Dropdown, Typeahead, the colour
+ * field's Popover) open in a portal or the top layer, so the scroll never cuts them.
+ */
+.ui-modal .ui-card {
+  max-height: 80vh;
+}
+
+.ui-modal .ui-card__body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
 /* A city's information box (the dev, 2026-11-16: « élargis la modale »): its sources and chain on long lines. */
 .short-dialogue--city {
   width: 520px;
