@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createIconLights } from './lighting'
+import { BUILDING_LIGHTING, ICON_LIGHTING, createIconLights } from './lighting'
 
 import type { DirectionalLight } from 'three'
 
@@ -37,6 +37,18 @@ describe('createIconLights', () => {
       expect(counter?.position.z).toBeGreaterThan(0)
       // The key stands to the right, the counter-light to the left.
       expect(Math.sign(counter?.position.x ?? 0)).toBe(-Math.sign(key?.position.x ?? 0))
+    })
+
+    it('lights a map where a building stands as the others, plus the counter-light from the camera', () => {
+      const plain = createIconLights(ICON_LIGHTING).children as DirectionalLight[]
+      const building = createIconLights(BUILDING_LIGHTING).children as DirectionalLight[]
+
+      expect(plain).toHaveLength(3)
+      expect(building).toHaveLength(4)
+      expect(building.slice(0, 3).map(({ intensity }) => intensity)).toEqual(
+        plain.map(({ intensity }) => intensity)
+      )
+      expect(building[3]?.position.x).toBe(0)
     })
 
     it('stands it where the lighting says: on the camera itself', () => {

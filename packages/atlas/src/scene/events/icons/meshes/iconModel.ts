@@ -9,6 +9,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 
 import { EVENT_ICON_PALETTE } from '../palette'
 
+import { cathedralParts } from './cathedral'
 import { crownParts } from './crown'
 import { faceted, standUnitHigh } from './parts'
 import { swordParts } from './swords'
@@ -28,6 +29,7 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   // The siege's icon keeps its stored name, `tower`; its 3D model is a trebuchet since 2026-10-27, the tower in reserve.
   tower: trebuchetParts,
   crown: crownParts,
+  cathedral: cathedralParts,
 }
 
 /**

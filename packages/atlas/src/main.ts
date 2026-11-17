@@ -12,6 +12,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
+import { devPreviewIcons } from './app/devPreview'
 import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
@@ -84,6 +85,7 @@ function createLayers(
     cityLabels,
     seaLabels,
     locale,
+    previewIcons: devPreviewIcons(window.location.search, import.meta.env.DEV),
     uploadUnseen,
   })
 }

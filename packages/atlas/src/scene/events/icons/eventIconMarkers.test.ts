@@ -164,6 +164,16 @@ function squareMaterial(object: Group, name: string): Material {
 }
 
 /**
+ * How many squares of a name the markers hold.
+ * @param object - the markers' group
+ * @param name - the squares' name
+ * @returns the count
+ */
+function squareCount(object: Group, name: string): number {
+  return allInstanced(object).find((each) => each.name === name)?.count ?? 0
+}
+
+/**
  * As many battles as asked, side by side.
  * @param count - how many
  * @returns their places
@@ -203,6 +213,24 @@ describe('createEventIconMarkers', () => {
   })
 
   describe('variants', () => {
+    it('stands no halo behind a building, and one behind every other icon', () => {
+      // The dev, 2026-11-17, of the cathedral on the map: « tu peux retirer le halo blanc ».
+      const markers = createEventIconMarkers(
+        [
+          { ground: [0, 0, 0], kind: 'swords' },
+          { ground: [1, 0, 0], kind: 'cathedral' },
+          { ground: [2, 0, 0], kind: 'crown' },
+        ],
+        STUB,
+        FLAT,
+        TARGETS
+      )
+
+      expect(squareCount(markers.object, 'halo')).toBe(2)
+      // From afar every flat drawing keeps its own.
+      expect(squareCount(markers.object, 'flat halo')).toBe(3)
+    })
+
     it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const turnOf = (name: string): number => {

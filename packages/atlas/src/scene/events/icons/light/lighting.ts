@@ -35,6 +35,17 @@ export interface IconLighting {
  */
 export const ICON_LIGHTING: IconLighting = { rim: 5, key: 1.3, sky: 0.35, counter: 0 }
 
+/**
+ * The lighting of a map on which a building stands: the default, and the counter-light from the camera itself, as set
+ * on the cathedral at Cologne (the dev, 2026-11-17: « un contre-éclairage comme s'il venait de la caméra », then « on
+ * voit mieux »).
+ */
+export const BUILDING_LIGHTING: IconLighting = {
+  ...ICON_LIGHTING,
+  counter: 1,
+  counterFrom: [0, 1, 10],
+}
+
 /** Where the rim light stands in the camera's frame (+Z toward the reader): behind the icon, above it, to the left. */
 const RIM_FROM: [number, number, number] = [-6, 8, -10]
 

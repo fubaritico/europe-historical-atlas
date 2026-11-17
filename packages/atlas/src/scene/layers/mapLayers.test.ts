@@ -43,6 +43,7 @@ import { createMapLayers } from './mapLayers'
 import type { MapSources } from '../../sources/mapSources'
 import type { BlurMethod } from '../blur/blurMethod'
 import type { DrawCityLabel } from '../cities/cityLabel'
+import type { PreviewIcon } from '../events/previewIcons'
 import type { FillArraysKey } from '../political/fills/mapFillLayer'
 import type { ContentCity, ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -140,7 +141,8 @@ const NAME_STUB: DrawCityLabel = () =>
  */
 function build(
   loaded = true,
-  blurMethod: BlurMethod = createSeparateImagesBlur()
+  blurMethod: BlurMethod = createSeparateImagesBlur(),
+  preview: readonly PreviewIcon[] = []
 ): {
   scene: Scene
   sources: MapSources
@@ -175,6 +177,7 @@ function build(
       blurMethod,
       cityLabels: NAME_STUB,
       seaLabels: () => Promise.resolve({ canvas: document.createElement('canvas'), aspect: 4 }),
+      previewIcons: preview,
       locale: 'en',
       uploadUnseen,
     }),
@@ -277,6 +280,19 @@ function eventGroups(scene: Scene): {
     close: child(icons, 0),
     afar: child(icons, 1),
   }
+}
+
+/**
+ * How many lights the events' rig holds.
+ * @param scene - the scene the layers drew into
+ * @returns the count
+ */
+function lightsOf(scene: Scene): number {
+  let count = 0
+  eventGroups(scene).lights.traverse((object) => {
+    if (object instanceof Light) count++
+  })
+  return count
 }
 
 /** A battle in the middle of the map's frame, for the event layer. */
@@ -435,6 +451,24 @@ describe('createMapLayers', () => {
       })
       expect(cities).toHaveLength(2)
       expect(cities[0]?.visible).toBe(pointShown)
+    })
+
+    it('stands the dev’s preview with the events, whatever the content holds, lit as a building is', () => {
+      // The dev, 2026-11-17: a cathedral at Cologne, a kind no event type of the content can choose yet.
+      const previewed = build(true, undefined, [{ lon: 0, lat: 48, kind: 'cathedral' }])
+      previewed.sources.askedYear = 1100
+      previewed.sources.mapDrawn = true
+      previewed.layers.rebuildEvents()
+      const plain = build()
+      plain.sources.events = [BATTLE]
+      plain.sources.askedYear = 1100
+      plain.sources.mapDrawn = true
+      plain.layers.rebuildEvents()
+
+      // One flat drawing for the cathedral, though the content holds no event.
+      expect(eventGroups(previewed.scene).afar.children).toHaveLength(1)
+      // The counter-light comes with a building, and only with one.
+      expect(lightsOf(previewed.scene)).toBe(lightsOf(plain.scene) + 1)
     })
 
     it('carries each frame’s zoom and camera to the icons', () => {

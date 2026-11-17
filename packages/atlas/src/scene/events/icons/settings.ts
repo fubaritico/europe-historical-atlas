@@ -18,7 +18,12 @@ export const EVENT_ICON_HEIGHT = 0.05
  * under them, so they float clear of the relief, which would otherwise swallow their hilts (the dev, 2026-10-26); a
  * shape with a base would stand on the ground — every kind has its own rule.
  */
-export const ICON_LIFT: Record<EventIconKind, number> = { swords: 0.6, tower: 0, crown: 0 }
+export const ICON_LIFT: Record<EventIconKind, number> = {
+  swords: 0.6,
+  tower: 0,
+  crown: 0,
+  cathedral: 0,
+}
 
 /**
  * How far the 3D markers and their halo are pulled toward the camera, in their heights (an icon's, a pin's), and the
@@ -35,12 +40,14 @@ export const ICON_DEPTH_PULL = 1
  * grande par rapport à la taille de départ »*). The battle's swords, 1 first, then 0.85 (the dev, 2026-10-31: *« réduis-la
  * un petit peu »*). The accession's crown, 1 first, then 0.7 (the dev, 2026-11-17, of the crown chosen that day: *« la
  * couronne doit être plus petite »*). **Then every kind at three quarters of that** — 0.85, 1.4 and 0.7 before it — set
- * on the map the same day, half tried first (the dev: *« on va garder ça comme ça »*).
+ * on the map the same day, half tried first (the dev: *« on va garder ça comme ça »*). The cathedral, 0.6: set on
+ * the map at Cologne the same day — 0.95 first, *« réduis sa taille par 2 »*, then *« tu peux l'agrandir un peu »*.
  */
 export const ICON_SIZE: Record<EventIconKind, number> = {
   swords: 0.6375,
   tower: 1.05,
   crown: 0.525,
+  cathedral: 0.6,
 }
 
 /**
@@ -53,6 +60,8 @@ export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
   swords: true,
   tower: false,
   crown: false,
+  // A building stands on the ground, as it was built.
+  cathedral: false,
 }
 
 /**
@@ -64,6 +73,7 @@ export const ICON_SWAYS: Record<EventIconKind, boolean> = {
   swords: true,
   tower: false,
   crown: true,
+  cathedral: false,
 }
 
 /**
@@ -72,18 +82,41 @@ export const ICON_SWAYS: Record<EventIconKind, boolean> = {
  * 2026-10-27: *« un trois quarts légèrement tourné vers la caméra »*), facing left (*« face vers la gauche »*): its
  * throw, built east, turned round to the west and 30° toward the reader.
  * Turned toward its target was the other way he named — no event carries where its target stands, so not yet.
+ * The cathedral, built with its towers to the west as a church is, is turned 36° so its west front comes toward the
+ * reader, a three-quarter (the dev, 2026-11-17, on the map at Cologne) — no longer its choir to the east.
  */
 export const ICON_YAW: Record<EventIconKind, number> = {
   swords: 0,
   tower: (-5 * Math.PI) / 6,
   crown: 0,
+  cathedral: Math.PI / 5,
 }
 
 /**
  * How dark the soiled ground about each kind's foot is, 0 none to 1 as dark as its cast shadow — a building's, so it
- * reads as set in the ground (the dev, 2026-11-17, of the cathedral; `shadows/soil`). No kind of the map has it yet.
+ * reads as set in the ground (the dev, 2026-11-17, of the cathedral; `shadows/soil`): « il y a suffisamment de
+ * granulés autour pour qu'on voit que c'est planté dans le sol ».
  */
-export const ICON_SOIL: Record<EventIconKind, number> = { swords: 0, tower: 0, crown: 0 }
+export const ICON_SOIL: Record<EventIconKind, number> = {
+  swords: 0,
+  tower: 0,
+  crown: 0,
+  cathedral: 1,
+}
+
+/**
+ * Which kinds are buildings (the dev, 2026-11-17: « quand c'est un bâtiment, pour faire ressortir son volume, on sera
+ * obligé d'avoir recours à ce genre d'artifice »). A building has **no halo** behind its 3D model (« tu peux retirer le
+ * halo blanc ») and, when one stands on the map, the lights take their **counter-light** from the camera
+ * (`light/lighting`) — which then lights every 3D marker of that map, the lights being one rig: to settle the day
+ * buildings and other icons stand on the same published map.
+ */
+export const ICON_BUILDING: Record<EventIconKind, boolean> = {
+  swords: false,
+  tower: false,
+  crown: false,
+  cathedral: true,
+}
 
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */
 export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 }

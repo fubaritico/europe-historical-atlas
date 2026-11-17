@@ -25,6 +25,7 @@ import { createHaloSquares, withHalos } from './light/haloSquares'
 import {
   EVENT_ICON_HEIGHT,
   FLAT_HALO_SPAN,
+  ICON_BUILDING,
   ICON_DEPTH_PULL,
   ICON_FLAT_SPAN,
   ICON_HALO_SPAN,
@@ -32,6 +33,7 @@ import {
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
+import type { EventIconKind } from './kinds'
 import type { BlurMethod, ScreenBlur } from '../../blur/blurMethod'
 import type { CameraPose, EventMarkers } from '../markers'
 import type { GroundAt } from '../shadows/groundShadows'
@@ -56,6 +58,15 @@ function iconGroups(close: Group[], afar: Group): { object: Group; near: Group; 
 }
 
 /**
+ * Whether an icon is a building, which has no halo behind it (`ICON_BUILDING`).
+ * @param kind - its kind, or `undefined` for a rank no icon holds
+ * @returns `true` for a building
+ */
+function isBuilding(kind: EventIconKind | undefined): boolean {
+  return kind !== undefined && ICON_BUILDING[kind]
+}
+
+/**
  * Each icon's place, then its three forms as instances — the 3D icons, the halos behind them, the drawings afar — in
  * their groups.
  * @param placed - each icon and where it stands
@@ -77,8 +88,9 @@ function buildForms(
   const depthPull = height * ICON_DEPTH_PULL
   const instances = createIconInstances(kinds, height, depthPull)
   const materials = billboardMaterials(loadTexture)
-  // The halos just before the icons, the drawings after the borders, like every marker.
-  const halos = createHaloSquares(kinds.length, 'marker', { value: depthPull })
+  // The halos just before the icons, the drawings after the borders, like every marker — none behind a building.
+  const haloed = icons.filter((_, index) => !isBuilding(kinds[index]))
+  const halos = createHaloSquares(haloed.length, 'marker', { value: depthPull })
   // From afar, the flat drawings pulled too, by their own width — which the zoom changes, so the pull follows it —
   // each with its own halo behind it (ATLAS-306).
   const flatPull = { value: flatDepthPull(height * ICON_FLAT_SPAN) }
@@ -91,7 +103,7 @@ function buildForms(
   const shadows = createIconShadows(icons, instances, groundAt)
   const groups = iconGroups([halos.object, instances.object, shadows.object], flats.object)
   // Each square's place, gathered once: the forms' own vectors, kept up to date by `standForms`.
-  const haloPositions = icons.map(({ haloAt }) => haloAt)
+  const haloPositions = haloed.map(({ haloAt }) => haloAt)
   const flatPositions = icons.map(({ flatAt }) => flatAt)
   // The two forms faded into each other by the zoom, the whole by the startup's fade.
   const fading = crossFading((near, far) => {

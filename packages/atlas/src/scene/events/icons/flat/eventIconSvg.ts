@@ -5,6 +5,7 @@
 
 import { EVENT_ICON_PALETTE } from '../palette'
 
+import { CATHEDRAL_DRAWING } from './cathedral'
 import { CROWN_DRAWING } from './crown'
 import { SWORDS_DRAWING } from './swords'
 import { TREBUCHET_DRAWING } from './trebuchet'
@@ -55,6 +56,7 @@ const DRAWINGS: Record<EventIconKind, Drawing> = {
   // The siege's icon keeps its stored name, `tower`; its drawing is a trebuchet since 2026-10-27, the tower in reserve.
   tower: TREBUCHET_DRAWING,
   crown: CROWN_DRAWING,
+  cathedral: CATHEDRAL_DRAWING,
 }
 
 /**

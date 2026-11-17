@@ -12,6 +12,7 @@ import type { DrawSeaLabel } from '../decor/seas/seaLabel'
 import type { SeaNameLayer } from '../decor/seas/seaNameLayer'
 import type { DetailState } from '../detail/detailView'
 import type { EventMarkers } from '../events/markers'
+import type { PreviewIcon } from '../events/previewIcons'
 import type { LineLayer } from '../lines/lineLayer'
 import type { LevelledBorderLayer } from '../political/borders/levelledBorderLayer'
 import type { FillLayer } from '../political/fills/fillLayer'
@@ -128,6 +129,11 @@ export interface MapLayersDeps {
   seaLabels: DrawSeaLabel
   /** The reader's language, the seas' names written in it (ATLAS-440, the dev: *"multilingual"*). */
   locale: Locale
+  /**
+   * Icons stood on the map at places no event names: the dev's preview (`app/devPreview`), empty on the published
+   * site. Stood with the events, whatever the year asked.
+   */
+  previewIcons: readonly PreviewIcon[]
   /**
    * Send objects to the GPU unseen (`app/gpuUpload`, ATLAS-396): a map prepared in the background, so its first showing
    * uploads nothing. The renderer's, handed in by the composition root — the layers never hold the renderer.

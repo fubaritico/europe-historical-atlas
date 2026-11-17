@@ -25,6 +25,7 @@ describe('createEventIcon', () => {
       ['tower', 1],
       // The crown, a low band and its lilies, stands lower so it is no wider than the others (`MODEL_TALL`).
       ['crown', 0.44],
+      ['cathedral', 1],
     ])('stands the %s %d high on the origin', (kind, tall) => {
       const box = new Box3().setFromObject(createEventIcon(kind).object)
       expect(box.min.y).toBeCloseTo(0, 5)
