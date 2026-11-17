@@ -28,6 +28,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `polity` is the polity the map has under it.
  * - `chainEnd` — After the last title of a reading of the chain, how the chain ends; `end` is one of
  *   `chainSovereign`, `chainUnknown`, `chainLoop`.
+ * - `chainTitleReadings` — The chain's heading when it has several readings (the dev, 2026-11-17); `count` how many.
+ * - `chainReading` — The label of one of those readings; `number` its rank, from 1.
  * - `stateIncomplete` — The state box of the cities whose chain stops short; `count` how many.
  * - `sourceWhere` — After a source's title (in italics), where in the work; `where` is the place.
  * - `closeDetail` — The button that closes a city's detail.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseTitle, withMapName } from './titleFormat'
+import { chainDates, parseTitle, withMapName } from './titleFormat'
 
 describe('parseTitle', () => {
   describe('happy path', () => {
@@ -74,4 +74,30 @@ describe('withMapName', () => {
   })
 
   // L3, L4: N/A — a pure composition of strings
+})
+
+describe('chainDates', () => {
+  describe('happy path', () => {
+    it('leaves out the lone year 1100', () => {
+      expect(chainDates('1100')).toBeNull()
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps the span 1087–1100', () => {
+      expect(chainDates('1087–1100')).toBe('1087–1100')
+    })
+
+    it('leaves out a three-figure year too', () => {
+      expect(chainDates('987')).toBeNull()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('writes nothing for a title with no dates', () => {
+      expect(chainDates(null)).toBeNull()
+    })
+  })
+
+  // L3, L4: N/A — a pure reading of a string
 })

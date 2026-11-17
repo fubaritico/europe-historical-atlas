@@ -97,13 +97,59 @@ describe('CityDialog', () => {
         />
       )
       expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
-        'Chain of vassalage: Baudouin III — comté de Hainaut; Henri IV — royaume de Germanie; ' +
-          'Henri IV — Saint-Empire — sovereign'
+        'Chain of vassalage: Baudouin III — comté de Hainaut; → Henri IV — royaume de Germanie; ' +
+          '→ Henri IV — Saint-Empire · sovereign'
       )
       // The dev, 2026-11-16: each person's name in italics
       expect(
         [...document.querySelectorAll('.city-detail__person')].map((name) => name.textContent)
       ).toEqual(['Baudouin III', 'Henri IV', 'Henri IV'])
+    })
+
+    // The dev, 2026-11-17: Carcassonne's four readings read as one list — each reading whole, numbered
+    it("writes each of Carcassonne's readings whole from its holder, numbered", () => {
+      const viscount = { name: 'Bernard Aton IV — Viscounty of Carcassonne, 1100', wikidata: 'Q1' }
+      const chain = [
+        { titles: [viscount], end: 'sovereign' as const },
+        {
+          titles: [viscount, { name: 'Raymond IV — comté de Toulouse, 1100', wikidata: 'Q2' }],
+          end: 'sovereign' as const,
+        },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain }}
+          openedVerdict={{ ...AGREES, chain }}
+          onClose={vi.fn()}
+        />
+      )
+      expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
+        'Chain of vassalage — 2 readings according to the sources: ' +
+          'Reading 1; Bernard Aton IV — Viscounty of Carcassonne · sovereign; ' +
+          'Reading 2; Bernard Aton IV — Viscounty of Carcassonne; → Raymond IV — comté de Toulouse · sovereign'
+      )
+    })
+
+    it("leaves out a title's lone year, the map's own, and keeps a span of years", () => {
+      const chain = [
+        {
+          titles: [
+            { name: 'Godefroy — Basse-Lotharingie, 1087–1100', wikidata: 'Q1' },
+            { name: 'Henri IV — Saint-Empire, 1100', wikidata: 'Q2' },
+          ],
+          end: 'sovereign' as const,
+        },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain }}
+          openedVerdict={{ ...AGREES, chain }}
+          onClose={vi.fn()}
+        />
+      )
+      expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
+        'Chain of vassalage: Godefroy — Basse-Lotharingie, 1087–1100; → Henri IV — Saint-Empire · sovereign'
+      )
     })
 
     it('closes on « Close »', async () => {
@@ -133,10 +179,11 @@ describe('CityDialog', () => {
         />
       )
       const region = screen.getByRole('region', { name: 'Metz' })
-      expect(region.querySelectorAll('.city-detail__chain')).toHaveLength(2)
+      expect(region.querySelectorAll('.city-detail__reading')).toHaveLength(2)
       expect(cityDetailText(region)).toContain(
-        'Chain of vassalage: Comté de Hainaut; Royaume de Germanie — beyond, we do not know; ' +
-          'Comté de Hainaut; Royaume de France — the links contradict one another'
+        'Chain of vassalage — 2 readings according to the sources: ' +
+          'Reading 1; Comté de Hainaut; → Royaume de Germanie · beyond, we do not know; ' +
+          'Reading 2; Comté de Hainaut; → Royaume de France · the links contradict one another'
       )
     })
 

@@ -1541,17 +1541,33 @@
   font-style: italic;
 }
 
-/* The reset takes every list's markers away (`reset.css`): the sources get their numbers back, the chain its bullets. */
+/* The reset takes every list's markers away (`reset.css`): the sources get their numbers back. */
 .city-detail__sources {
   margin: 0;
   padding-left: 18px;
   list-style: decimal outside;
 }
 
+/*
+ * The chain as the dev laid it on 2026-11-17: each reading whole, under its number and set apart from the next, its
+ * titles set in under the number and climbing behind an arrow — no bullets, the arrow is the mark of a step.
+ */
 .city-detail__chain {
   margin: 0;
-  padding-left: 18px;
-  list-style: disc outside;
+  padding: 0;
+  list-style: none;
+}
+
+.city-detail__reading + .city-detail__reading {
+  margin-top: 10px;
+}
+
+.city-detail__reading-label {
+  font-weight: 600;
+}
+
+.city-detail__reading .city-detail__chain {
+  padding-left: 14px;
 }
 
 /*

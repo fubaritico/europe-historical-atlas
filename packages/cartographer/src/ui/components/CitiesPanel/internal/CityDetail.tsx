@@ -62,7 +62,11 @@ export function CityDetail({
         <p>{onMap === null ? t('noPolity') : onMap.name}</p>
       </CityDetailSection>
       {chain !== null && chain.length > 0 && (
-        <CityDetailSection title={t('chainTitle')}>
+        <CityDetailSection
+          title={
+            chain.length > 1 ? t('chainTitleReadings', { count: chain.length }) : t('chainTitle')
+          }
+        >
           <CityChain readings={chain} />
         </CityDetailSection>
       )}

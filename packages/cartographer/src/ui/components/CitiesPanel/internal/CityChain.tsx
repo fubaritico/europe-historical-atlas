@@ -1,40 +1,47 @@
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
-import { parseTitle } from '../utils/titleFormat'
 import { CHAIN_END_TEXT } from '../utils/verdictText'
+
+import { ChainTitle } from './ChainTitle'
 
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 
 /**
- * A city's chain of vassalage as the CMS gives it (the dev's screen of 2026-11-16): each reading a list, one title per
- * line from the holder's up — the person's name in italics —, the last one saying how the chain ends: « souverain », or
- * why it stops.
+ * A city's chain of vassalage as the dev laid it on 2026-11-17, after Carcassonne's four readings read as one list:
+ * each reading whole, from the holder up — numbered when there are several, set apart from the next —, one title per
+ * line, each climbing behind an arrow, the last saying how the reading ends: « souverain », or why it stops. Nothing
+ * shared between readings is written once: each reads alone (the dev: _"once it is this chain, once that one"_).
  * @param props - the readings
  * @param props.readings - the chain's readings
- * @returns the lists
+ * @returns the chain
  */
 export function CityChain({ readings }: { readings: readonly ContentChainReading[] }) {
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
+  // Derived
+  const several = readings.length > 1
+
   // Render
-  return readings.map((reading) => (
-    <ul
+  return readings.map((reading, number) => (
+    <div
       key={`${reading.titles.map((title) => title.name).join('>')}|${reading.end}`}
-      className="city-detail__chain"
+      className={several ? 'city-detail__reading' : undefined}
     >
-      {reading.titles.map((title, index) => {
-        const { person } = parseTitle(title.name)
-        const rest = person === null ? title.name : title.name.slice(person.length)
-        return (
+      {several && (
+        <p className="city-detail__reading-label">{t('chainReading', { number: number + 1 })}</p>
+      )}
+      <ul className="city-detail__chain">
+        {reading.titles.map((title, index) => (
           <li key={`${String(index)}|${title.name}`}>
-            {person !== null && <em className="city-detail__person">{person}</em>}
-            {rest}
-            {index === reading.titles.length - 1 &&
-              t('chainEnd', { end: t(CHAIN_END_TEXT[reading.end]) })}
+            <ChainTitle
+              title={title}
+              arrow={index > 0}
+              end={index === reading.titles.length - 1 ? t(CHAIN_END_TEXT[reading.end]) : null}
+            />
           </li>
-        )
-      })}
-    </ul>
+        ))}
+      </ul>
+    </div>
   ))
 }

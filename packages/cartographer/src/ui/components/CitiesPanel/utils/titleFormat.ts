@@ -31,6 +31,20 @@ export function parseTitle(name: string): TitleName {
   return { person, territory: rest.slice(0, at), dates: tail }
 }
 
+/** A title's dates that are one year alone. */
+const ONE_YEAR = /^\d{3,4}$/u
+
+/**
+ * A title's dates as a city's chain writes them (the dev, 2026-11-17): **any** lone year is left out — in a chain read
+ * at the map's year it is that year, repeated on every line; it is not compared with the map's — and a span of years,
+ * which tells when the title was held, stays.
+ * @param dates - the title's dates, as {@link parseTitle} reads them
+ * @returns the dates to write after the territory, `null` for none
+ */
+export function chainDates(dates: string | null): string | null {
+  return dates === null || ONE_YEAR.test(dates) ? null : dates
+}
+
 /**
  * A title's name with the name the map gives its polity, after its territory and before its dates (the dev,
  * 2026-11-16): « Henri IV du Saint-Empire — Saint-Empire romain germanique (Holy Roman Empire), 1100 ».
