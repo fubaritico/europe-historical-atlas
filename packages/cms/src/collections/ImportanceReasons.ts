@@ -1,3 +1,5 @@
+import { trimmedText } from '../fields/trimmedText'
+
 import type { CollectionConfig } from 'payload'
 
 /**
@@ -13,5 +15,14 @@ export const ImportanceReasons: CollectionConfig = {
     description:
       'Les raisons qu’on peut cocher sur une fiche « Ville à une date » : pouvoir, religion, commerce, population… Ajoutez-en autant qu’il faut.',
   },
-  fields: [{ name: 'name', type: 'text', label: 'Nom', required: true, localized: true }],
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nom',
+      required: true,
+      localized: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
+  ],
 }

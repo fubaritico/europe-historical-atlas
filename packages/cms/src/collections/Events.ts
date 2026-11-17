@@ -1,4 +1,5 @@
 import { eventDateField } from '../fields/historicalDate'
+import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
 import type { CollectionConfig } from 'payload'
@@ -12,7 +13,14 @@ export const Events: CollectionConfig = {
   labels: { singular: 'Événement', plural: 'Événements' },
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'type', 'place'] },
   fields: [
-    { name: 'title', type: 'text', label: 'Titre', required: true, localized: true },
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Titre',
+      required: true,
+      localized: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
     {
       name: 'type',
       type: 'relationship',

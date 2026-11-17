@@ -1,4 +1,5 @@
 import { DEFAULT_EVENT_COLOUR, EVENT_COLOURS } from '../fields/eventColours'
+import { trimmedText } from '../fields/trimmedText'
 
 import type { EventIcon } from '@europe-historical-atlas/core/data/contentFormat'
 import type { CollectionConfig } from 'payload'
@@ -22,7 +23,14 @@ export const EventTypes: CollectionConfig = {
   labels: { singular: 'Type d’événement', plural: 'Types d’événement' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'icon', 'colour'] },
   fields: [
-    { name: 'name', type: 'text', label: 'Nom', required: true, localized: true },
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nom',
+      required: true,
+      localized: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
     {
       name: 'icon',
       type: 'select',

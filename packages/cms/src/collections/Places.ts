@@ -1,5 +1,6 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
 import { countryField, regionField } from '../fields/lot'
+import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 import { placeEndpoints } from '../wikidata/placeEndpoints'
 
@@ -31,6 +32,7 @@ export const Places: CollectionConfig = {
           label: 'Nom',
           required: true,
           localized: true,
+          hooks: { beforeValidate: [trimmedText] },
           admin: { width: '50%' },
         },
         {

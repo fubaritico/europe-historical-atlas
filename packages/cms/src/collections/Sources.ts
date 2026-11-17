@@ -1,3 +1,5 @@
+import { trimmedText } from '../fields/trimmedText'
+
 import type { CollectionConfig } from 'payload'
 
 /**
@@ -10,7 +12,13 @@ export const Sources: CollectionConfig = {
   labels: { singular: 'Source', plural: 'Sources' },
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'author', 'kind'] },
   fields: [
-    { name: 'title', type: 'text', label: 'Titre', required: true },
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Titre',
+      required: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
     { name: 'author', type: 'text', label: 'Auteur' },
     {
       type: 'row',

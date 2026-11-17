@@ -1,4 +1,5 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
+import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
 import { refreshTitlesOf, refuseDeletingCited } from './claimDependants'
@@ -59,7 +60,14 @@ export const People: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'name', type: 'text', label: 'Nom', required: true, localized: true },
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nom',
+      required: true,
+      localized: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
     {
       name: 'kind',
       type: 'select',

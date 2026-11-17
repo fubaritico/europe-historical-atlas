@@ -1,6 +1,7 @@
 import { SIEGE_ENGINES } from '@europe-historical-atlas/core/data/siegeEngines'
 
 import { historicalDateField } from '../fields/historicalDate'
+import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
 import type { SiegeEngine } from '@europe-historical-atlas/core/data/siegeEngines'
@@ -23,7 +24,14 @@ export const SiegeEngines: CollectionConfig = {
   labels: { singular: 'Engin de siège', plural: 'Engins de siège' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'engine'] },
   fields: [
-    { name: 'name', type: 'text', label: 'Nom', required: true, localized: true },
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Nom',
+      required: true,
+      localized: true,
+      hooks: { beforeValidate: [trimmedText] },
+    },
     {
       name: 'engine',
       type: 'select',
