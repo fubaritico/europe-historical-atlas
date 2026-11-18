@@ -24,6 +24,7 @@
 | Log a source used to draw a year, and its mention                                                            | `/create-data-mention`     |
 | Research who held a place at a date, beyond Wikipedia                                                        | `/find-sources`            |
 | Enter the research in the CMS                                                                                | `/enter-in-cms`            |
+| **Enter a whole region or a pool of a year at scale** (more than ~50 places, agents)                         | **`/bulk-entry`**          |
 | Reason about a subject whose rules are not loaded                                                            | `/rules`                   |
 | **Make an event icon, or change how one looks** — its 3D model or its flat drawing                           | **`/make-event-icon`**     |
 | Write or review a Cartographer component                                                                     | `/react-canvas-and-panels` |

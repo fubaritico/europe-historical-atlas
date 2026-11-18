@@ -25,8 +25,8 @@ connected (`/mcp`), and its tools are there. If not, **stop** and give the dev t
 
 1. **His CMS server runs** (`pnpm dev:cms`, port 3100) — his to start, never mine.
 2. **An API key** in the admin: menu **MCP › API Keys**, create; in the sidebar tick **find, create, update** for
-   `places`, `place-periods`, `sources`, `importance-reasons` and `confessions`; save, copy the key. A key made before 2026-11-13
-   (CMS-431) has only **find** for `importance-reasons`: he opens it and ticks **create** and **update** too.
+   `places`, `place-periods`, `sources`, `importance-reasons` and `confessions`; save, copy the key. If his key lacks
+   **create** or **update** for one of them, he opens it and ticks them.
 3. **The key in his own terminal**, never in the conversation: it sits in `.env.local` (ignored by git); he loads it
    into the shell, then, from the `europe-map` folder:
    `claude mcp add --transport http cms http://localhost:3100/api/mcp --header "Authorization: Bearer $<his variable>"`.
@@ -47,7 +47,7 @@ peut figer le serveur »). The same table is in `packages/cms/README.md`, for a 
 | ✘ *connection timed out after 30000ms* | **the CMS server is stuck, not the key** — a wrong key is refused at once | probe without a key (below); if the admin hangs too, his server's terminal holds the error |
 | `index … already exists` in his terminal | a schema push failed halfway after a field change; every request waits behind it | he stops his server; on **a copy** of `cms.db`, Payload's `pushSchema` without `apply` must list nothing; then he restarts — never a push tried on his base |
 | `401` on `/api/mcp` with the key | the key is wrong, or the variable was empty when `claude mcp add` ran | he reloads it from `.env.local`, `claude mcp remove cms`, adds it again |
-| a refusal on `importance-reasons` | the key's **find**, **create** or **update** box for it is not ticked — a key made before 13/11 has find only | admin › MCP › API Keys, tick the three |
+| a refusal on `importance-reasons` or `confessions` | the key's **find**, **create** or **update** box for it is not ticked | admin › MCP › API Keys, tick the three |
 
 **The probe, without a key** (it changes nothing): a `POST` of an MCP `initialize` to `http://localhost:3100/api/mcp`
 answers **401 in milliseconds** when the server is healthy; no answer in 20 s means the server is stuck. The same for
@@ -77,6 +77,26 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   keep every reading, the contrary one included; the sheet's `holderName` + `holderQid` is the reading the sources
   make most probable, and the summary to the code instance says why. A holder with no QID only when there is truly
   none to name (« Aucun — ville abandonnée »), declared as such.
+- **The holder is the nearest lord the sources prove, not the level the map draws** (the dev, 2026-11-14: the online
+  MVP stops at one level of vassalage for readability, *"but later we will have to send everything"*). Bautzen in 1100
+  is held by Wiprecht of Groitzsch, who holds it of the Duke of Bohemia: the sheet names Wiprecht, even though the map
+  draws only Bohemia. The Cartographer then says « to declare » until the base knows who that lord holds of — CMS-422
+  (a polity entered like a place, with the source of its suzerain) and CARTO-435 (climbing the chain) close it. A
+  sovereign or a polity is named only when no lord below it is proven.
+- **The holder is the superior, never the owner** (the dev, 2026-11-14: *"it lets us lay our little plots to cut the
+  territory — so stop this hypocrisy"*). The holder is the lord the place answers to — count, margrave, duke, a church
+  only where it holds the lordship (comital rights, an immunity). An abbey given the village, a bishop drawing a rent or
+  a tithe, a noble owning manses is the **owner**: useful, kept as a note or its own line, never the sheet's holder.
+  Pitten: the counts of Formbach owned the lands, the place obeyed Margrave Ottokar II — the sheet names Ottokar.
+- **Every place carries the tree of vassalage above its holder, up to the sovereign** (the dev, 2026-11-14: *"we must
+  have the tree of vassalage per place"* — held by Schmurtz, who answers to the counts of Basel, who answer to the duchy
+  of Alsace, which answers to the Holy Roman Empire). **A point in the Cartographer is valid only when this chain climbs
+  without a gap to the duchy drawn under it and to that duchy's suzerain.** Climbing it is also the check: each link —
+  this vassal really held of that suzerain at the date — is proven by its own witness, so a wrong holder shows up as a
+  link no source carries. **Each link is established once for a given date**, then reused by every place under that
+  lord: more work once, more reliability everywhere (the dev, same day). Until the base carries the links (CMS-422), they
+  live in the year's register `files/plans/sources/<year>/vassalage.md` — one line per link: the vassal, its suzerain,
+  the witness, the doubt if any — which every research lot reads first and extends.
 - **The map is the dev's.** A fact that changes a border or a suzerain is entered as a source line *and* sent to the
   code instance; nobody touches `years/` — he decides in the Cartographer.
 - **His server is his.** If `localhost:3100` does not answer, tell him; never start, stop or restart it.
@@ -101,6 +121,23 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   year's file (`files/plans/sources/1100/questions.md`), the home of the questions.
 - **A source created is cited by a line of the same batch.** A source attached to nothing is a fault (06/11, « Sos,
   castillo », created and never cited).
+- **A QID written in an entry brief is read on Wikidata first, never from memory** (2026-11-14: three Czech regions given
+  from memory were a calendar, a national anthem and a TV series — the agent caught them). The brief gives the place's
+  QID from the report and lets the agent read the region on Wikidata.
+- **A work in copyright is quoted short** (the coder's remark, 2026-11-14, as for the Duby): the lines go out in the public
+  export (`content/cartographer.json`), so a quotation from a recent book or article is the one fact — one stretch of its own
+  words, under about 200 characters — never a passage. Public-domain editions and CC texts are quoted as needed.
+- **Every place has a belonging — climb until there is one** (the dev, 2026-11-14: *"tous les lieux doivent avoir une
+  appartenance, c'est ça le jeu, il faut les trouver"*). When no witness names a local lord, the holder is **the vassal
+  that holds the district** at the date (the duke, the margrave, the count of the county — the map's vassal when a source
+  confirms it), with a line citing a source on that vassal's tenure; the holderName is that vassal's own name, nothing
+  added (Kraubath → the duke of Carinthia, Würmla → the margrave of Austria). The sheet names the first link only: the
+  chain above it, up to the highest suzerain, is the register's (« Every place carries the tree of vassalage », above),
+  each link proven once. « No witness names a lord below the Empire » is never a reason
+  to leave a place out: climb one level, not to nothing. Only the Empire itself, when no vassal is between, is the holder.
+- **No sheet without a line** (the coder's remark, 2026-11-14, taken by the historian): a sheet with no line asserts the
+  place at the date with no source — so the climb above always brings its line. A place is left out only when it did not
+  exist at the date (`not-yet`) or its existence is unknown; it is listed in the region's note (`files/plans/sources/<year>/`).
 
 ## The order — sources first, then the place, then the city at a date
 
@@ -128,7 +165,8 @@ that exists is reused (its id), never created again.
    - `testimonies`, one line per thing a source says: `source` (its id), `subject` and the one value it names —
      `holder` → `holderName` (+ `holderQid`) · `population` → `population` · `importance` → `importance` ·
      `reason` → `reason` · `community` → `confession` — plus `where` (page, chapter, section) and `quotation` (the
-     source's own words).
+     source's own words). A `holder` line also keeps **`holderAsWritten`**, the name exactly as the source writes it
+     (« Mathieu, comte nantais ») — identity is a claim (`../../../files/plans/contribution/vassals/vassal-chain.md`); never normalise it.
    - `communities` (CMS-433), one per religious community a source attests: `confession` (its id, from
      `confessions`), `weight` — `dominant` (the larger part of the city) or `present` (a quarter, a minority) — and
      `weightAttested`, **`true` only when a source's words say that weight**; the presence alone attested, it stays
@@ -136,6 +174,26 @@ that exists is reused (its id), never created again.
      citing the same confession, or the sheet is refused. The holder's confession is never entered: it follows from the
      holder.
    - `title` is written by the server (« Paris — 1100 »): never set it.
+4. **A person or a house** (`people`, « Personnes », CMS-422 step 1). Search by `wikidata`, then by `name`: **two
+   records for one person is the error this register exists to avoid** — in doubt between two homonyms, create
+   nothing and ask. Any person the sources name, lord or not.
+   - `name` (localized, French first), `kind` — `person` or `house` (a dynasty, a noble family: Wikidata P31 Q13417114,
+     Q8436, Q164950), `wikidata`.
+   - A person: `born`, `died` — each `{ year, month, day, circa, margin, calendar }`, **the calendar as Wikidata gives
+     it** (Q1985786 = `julian`), never converted; `house` = the id of the house's record, entered first.
+   - A house: `founded`, `ended`, `founder` (a person's id).
+   - **No rank, no role, no confession** on the record: they are claims (titles, events, communities).
+   - Pre-filled from the Wikidata id (P569, P570, P53); a date Wikidata lacks stays empty — never guessed.
+   - **`wikidata` is unique** in places, people and territories (b76c62c, 15/11): a create or a correction that
+     repeats a QID another record carries is refused (a validation error on « wikidata »). Never retry with an altered
+     QID: find the record that carries it and reuse it. An empty `wikidata` is stored as absent.
+5. **Titles and links of vassalage** (`titles`, `vassal-links`, CMS-422). A title is a person holding a territory over a
+   date; a link, a title answering to another (« no-one » only when a source says so). **One of each per person,
+   territory and years — per vassal, suzerain and years** (e3f15e4, 15/11): a second one is refused and the refusal
+   names the existing record; a second source saying the same thing is **one more line on it**, never a second record.
+   Enter titles and links **in series, never in parallel** (two creates sent together can both pass). A person holding
+   several titles is given the one under which the place lies; a family named as holder is the person at its head in
+   1100, the family being his `house`. Our own register (`vassalage.md`) is never a source.
 
 ## Entry by agents — the dev sets how many
 
@@ -150,11 +208,14 @@ Two batches never write the same sheet at once — an update re-sends all its li
 2. **Send the code instance one message** (`ListAgents`, then `SendMessage`): the collection and the ids created or
    changed. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
    any fault to the dev; the historian then corrects it by `update`.
-3. **The year's file stays the home of the questions** (`files/plans/sources/1100/questions.md`, `1200.md`): the question, the
+3. **The year's file stays the home of the questions** (`files/plans/sources/<year>/questions.md`): the question, the
    answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338).
 
 ## Gotchas
 
+- **A grouped update (`where`) is run in parallel by Payload** (3.92, `operations/update.js`): when the list holds both
+  ends of one link (a vassal title and its suzerain title), that link is rewritten twice at once and the refusal names a
+  duplicate line id in `vassal_links_lines` (16/11, titles 29 and 11). Nothing is lost, but update such titles one by one.
 - **A refusal names every issue** (the sheet is checked by `core/data/citySheet.ts` before it is saved): read them all,
   fix them all, then retry once. Never retry blind.
 - **An interrupted or refused call may have acted**: search for the record before creating it again.

@@ -19,7 +19,7 @@ table (never re-decide what is decided).
 
 | step | where |
 | --- | --- |
-| measure | `scripts/` below — run with `node`, Node 24 (`PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`) |
+| measure | `scripts/` below — run with `node`, Node 24 (`PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`), or with `tsx` where the script's usage says so (those that read `core`) |
 | decide | [`references/decide.md`](references/decide.md) — the table: border move, enclave, disputed zone, river, straight line, spikes |
 | draw | [`references/gestures.md`](references/gestures.md) — the Pen's roles, retracing, moving, giving a territory |
 | record | [`references/journal.md`](references/journal.md) — local, never committed; a dated section per session |
@@ -55,6 +55,12 @@ Each prints plain lines; `--help` gives its usage. `--map` is a folder of `years
 | `shape.mjs --map 1100 [--polity <id>] [--against <copy>] [--stiff]` | the spikes (at the anchors added) and the straight cuts |
 | `registry.mjs --map 1100` | every polity with a Wikidata id and no dates — the « Use » forgotten in its form |
 | `screen.mjs --a "x,y,<bar text>" --b "x,y,<bar text>" -- lon,lat …` | the pixel of each target, from two hovers |
+| `lint.mjs --map 1100 [--polity <id>] [--box=…] [--stairs] [--drawn]` | what the import left: rings of three or four points, pixelated paths; with `--stairs`, the steps inside the paths that stay |
+| `overlaps.mjs --map 1100 [--box=…] [--min-km2 0.1]` (`tsx`) | every zone two polities or more cover, largest first — each one erased and redrawn whole |
+| `coasts.mjs --map 1100 [--polity <id>] [--refused] [--json out.json] [--sea] [--lobes islands.json]` (`tsx`) | every coast run planned: the junctions inland, the old anchors that leave, the area gained or lost |
+| `islands.mjs --map 1100 [--owners-from <copy>] [--box=…] [--all] [--json out.json]` (`tsx`) | every island of the coast: its polity, and `done`, `redo` or `missing` |
+| `lakes.mjs --map 1100 [--crossed] [--json out.json]` (`tsx`) | the lakes to carve, wholly in one polity; with `--crossed`, those two polities share |
+| `offcoast.mjs --map 1100 [--min-km 5]` (`tsx`) | the coasts the shore pass left wrong: `out` over the sea, `short` before the shore |
 
 The CMS base is read **read-only**, from the main checkout when the worktree has none. The tests, from the checkout's
 root: `node --test ".claude/skills/use-cartographer/scripts/lib/*.test.mjs"`. The commands only parse, call a measure
