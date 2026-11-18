@@ -16,7 +16,7 @@ son point de reprise, `next-historian.md`.
 ## ▶ ON REPREND ICI — le 18/11, 20 h 20 : les icônes des événements, ticket parent ATLAS-288
 
 **Sa ligne** (17/11) : _« on va rester concentré sur les icônes 3D des événements. On va les terminer et après »_ l'épique
-**ATLAS-471, les landmarks**. Tout est commité et poussé (`77cb1589`) ; **« À valider » : CMS-454**.
+**ATLAS-471, les landmarks**. Tout est commité et poussé (`77cb1589`) ; **« À valider » est vide**.
 
 **L'organisation qu'il a demandée le 18/11** : **ATLAS-288 est le ticket parent** (En cours), une ligne par type
 d'événement du CMS — cinq cochées (Bataille, Siège, Accession au trône, Intronisation, Mort), huit tickets enfants
@@ -33,11 +33,10 @@ choisir cette icône sur le type « Concile » dans le CMS et à exporter. Ensui
 petits modèles (église, petite maison, grande maison) iront au statut d'une ville ; ils remplaceront peut-être les points,
 _« ce n'est pas sûr »_ — _« il faut y aller progressivement »_.
 
-**CMS-454, À valider** (`77cb1589`, demandé par lui le 18/11 au soir) : l'historien peut supprimer par le MCP ses fiches
-de ville, lieux, sources, titres et maillons — une fiche à la fois, jamais ce qu'une autre fiche cite. **À lui** :
-relancer son CMS (la migration ajoute cinq cases à la clé, sa base est copiée avant), cocher « delete » sur la clé
-(MCP › API Keys) pour ces cinq collections ; l'historien supprime alors Ohligs (fiche 11749, puis son lieu, puis sa
-source). **Pas tenu** : rien ne dit quelles fiches la clé a créées (`known-issues/cms.md`).
+**CMS-454, clos le 18/11 au soir** (`77cb1589`) : l'historien supprime par le MCP ses fiches de ville, lieux, sources,
+titres et maillons — une fiche à la fois, jamais ce qu'une autre fiche cite. Le dev a relancé son CMS et coché les cinq
+cases de la clé ; première suppression faite par l'historien, Ohligs (fiche, lieu, source), contrôlée dans la base.
+**Pas tenu** : rien ne dit quelles fiches la clé a créées (`known-issues/cms.md`).
 
 **En Idées, à valider par lui** : ATLAS-473 (les branches « année non dessinée » que plus rien n'atteint), CMS-474 (la
 confession d'une personne et le signe gravé sur sa tombe), ATLAS-475 (un affichage générique des capitales).
