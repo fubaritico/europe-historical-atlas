@@ -70,7 +70,7 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
   on 18/11. An agent's « created 67 » can be a miscount: the check decides, not the report.
 - **A wave's files go in their own folder** (`wave1/`, `wave2/`) before the next build, or the builder overwrites them.
 - **The sorting can accept a neighbour**: « Als erste Ohligser Hofschaften wurden 980 n. Chr. Barl … » proves Barl, not
-  Ohligs. A wrong sheet is reported to the dev, who deletes it; never deleted by me.
+  Ohligs. A wrong sheet of mine I delete myself (sheet, then place, then source — `/enter-in-cms`), never left to the dev.
 - **Local wikitext is not a quotation**: it may serve the sorting, never the line — the line is the rendered sentence.
 - **The clean-up comes after the last record of the run, never before**: on 18/11 the copies were deleted while 25 weak
   cases and 10 pages were still open, and `mkv.py` rewrote `weak.json` — 35 pages to download again. Before step 9:

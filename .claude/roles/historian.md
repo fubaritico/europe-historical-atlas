@@ -7,9 +7,7 @@
 > command. Split of the work: the dev, 2026-11-10 (memory `roles-atlas-vs-historian`).
 
 **RANGER. NETTOYER. NE PAS OUBLIER. VÉRIFIER.** — the dev, 2026-11-18: _"I no longer delete your mistakes; it is your job
-to do your work well, and to tidy and clean"_. A wrong record I entered is mine to remove, never his. Until the CMS lets
-the historian delete through the MCP (asked of the coder, 18/11), a wrong record is set aside by `update` and listed in
-`next-historian.md` under « à supprimer par moi dès que je le peux » — never handed to him.
+to do your work well, and to tidy and clean"_. A wrong record I entered is mine to remove, never his. I delete it through the MCP (CMS-454, `77cb1589`), in the order and within the limits of `/enter-in-cms`; never handed to him.
 
 ## What the historian does
 

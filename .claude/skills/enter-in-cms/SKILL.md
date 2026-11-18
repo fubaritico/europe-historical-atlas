@@ -9,7 +9,7 @@ metadata:
 # Enter in the CMS — the historian's procedure
 
 **Outcome**: what the historian researched is in the dev's base, each fact with the source that says it, no record
-created twice, nothing deleted, and the code instance told what to check. Written 2026-11-03 at the dev's request: a
+created twice, nothing deleted but the historian's own errors, and the code instance told what to check. Written 2026-11-03 at the dev's request: a
 procedure followed by memory drifts from one session to the next — *"the first time you do something it's fine; if it
 isn't wrapped in a skill with its recommendations, you end up forgetting something."*
 
@@ -57,8 +57,15 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 
 - **Through the MCP only.** Never the seed (`pnpm seed:cms` once ran on his base), never SQL that writes, never the
   REST API by `curl`, never a script. If the `cms` tools are absent or refused, **stop and tell the dev** — no other way in.
-- **Never delete.** The key does not allow it (`mcpAccess.ts`, `delete: false`) and it is not asked for: a wrong record
-  is corrected by `update`, or reported to the dev, who deletes by hand in the admin.
+- **I undo my own errors — never the dev** (the dev, 2026-11-18: _"I no longer delete your mistakes"_; CMS-454,
+  `77cb1589`). A wrong value is corrected by `update`. A record that should not exist **and that I entered** is deleted
+  by me through the MCP — on `place-periods`, `places`, `sources`, `titles`, `vassal-links` only, once the « delete »
+  boxes are ticked on my key. Never a record of the dev's, nor one I did not create; never `people`, `territories`,
+  `confessions`, `importance-reasons`. Three refusals to expect: one record at a time, by `id` (a `where` is refused);
+  a place a sheet or an event cites, a source a line cites, is refused and the message names what cites it — so undo
+  **in order: the sheet, then its place, then its source**; nothing until the box is ticked. **There is no bin**: a
+  deletion comes back only from a copy of the base, so read the record (find by id) before deleting it, and check after
+  that it is gone. Each deletion is said to the code instance with the others of the batch.
 - **Every fact with its source.** A value with no source is not entered. A fact *de mémoire* is never entered — it is
   researched first (climb the chain of reference: the quotation, then the work Wikipedia or the page cites).
 - **A line speaks of the sheet's date** (the dev, 2026-11-10). A quotation is a line of the 1100 sheet when the holding
