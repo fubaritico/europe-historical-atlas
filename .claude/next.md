@@ -56,13 +56,11 @@ l'historien saisis ensuite n'y sont pas. Je le lance sur une copie de sa base (`
 **Sa règle du 18/11** (mémoire `decided-removals-need-no-validation`) : un ménage qui exécute un retrait déjà décidé ne
 passe pas par lui. **Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; l'angle de la tombe.
 
-**Mon dossier d'essai** (le profil du Chrome sans fenêtre, les captures, les planches d'ornements, ~270 Mo) : à supprimer
-avec son accord — demandé trois fois le 18/11, sans réponse.
-
-**Pour photographier une page sans toucher à son écran** : un Chrome sans fenêtre piloté par un petit script (protocole
-de débogage, port 9377), **un seul profil réutilisé** dans le scratchpad, la caméra posée par `sessionStorage`
-(`europe-map:map-camera`, cible et zoom) ; lui envoyer l'image par `SendUserFile`. **Ne jamais pousser pendant qu'une CI
-déploie** : le push suivant l'annule (`known-issues/tooling.md`).
+**Pour photographier une page sans toucher à son écran** : le spike `files/spikes/headless-shots/` (`shoot-map.mjs`, la
+carte à un lieu et un zoom ; `shoot-page.mjs`, un banc ou une page) — un Chrome sans fenêtre, son profil jeté à chaque
+fois ; lui envoyer l'image par `SendUserFile`. **Sa règle du 18/11** : ce qui resservira va dans un spike, le reste est
+supprimé — _« faut rien laisser derrière vous »_ (mémoire `clean-up-after-every-trial`). **Ne jamais pousser pendant
+qu'une CI déploie** : le push suivant l'annule (`known-issues/tooling.md`).
 
 ## Ce qui reste d'avant, toujours vrai
 

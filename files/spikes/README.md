@@ -26,5 +26,6 @@
 | [`name-fixture`](name-fixture/) | Does a change of the countries' names' construction make them better — measured on six frozen countries of 1100 rather than by eye across the map? | **in use** (feeds `core`'s `namePlacement.fixture.test.ts`) |
 
 | [`cliopatria-import`](cliopatria-import/) | Can **Cliopatria** (CC BY 4.0, the data YearMaps runs on) open in the Cartographer as a year, to be looked at and retouched? | **first run** (1100: 106 polities, schema and assembly pass; coarser than the dev's 1100) |
+| [`headless-shots`](headless-shots/) | Can the dev be shown what a change does on the map, or on a bench, without his screen being touched — a headless Chrome photographing a page at a place and a zoom? | **in use** (the captures sent before a push, 2026-11-17 and 18) |
 
 _(Add a row per new spike. Mark `done` / `graduated` / `dropped` as they evolve.)_
