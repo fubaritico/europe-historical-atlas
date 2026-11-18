@@ -20,6 +20,13 @@ describe('previewIcons', () => {
       expect(icons.map(({ lat }) => lat)).toEqual([46.43, 51.28])
     })
 
+    it('stands the council’s tiara at Lyon and at Pisa when asked for the tiara', () => {
+      const icons = previewIcons('?tiara')
+
+      expect(icons.map(({ kind }) => kind)).toEqual(['tiara', 'tiara'])
+      expect(icons.map(({ lon }) => lon)).toEqual([4.84, 10.4])
+    })
+
     it('stands both kinds when both are asked', () => {
       expect(previewIcons('?cathedral&tomb').map(({ kind }) => kind)).toEqual([
         'cathedral',

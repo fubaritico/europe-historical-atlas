@@ -15,6 +15,7 @@ import { cathedralParts } from './cathedral'
 import { crownParts } from './crown'
 import { faceted, fitInBox } from './parts'
 import { swordParts } from './swords'
+import { tiaraParts } from './tiara'
 import { tombParts } from './tomb'
 import { TREBUCHET_MOTIONS, trebuchetParts } from './trebuchet'
 
@@ -34,6 +35,7 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   crown: crownParts,
   cathedral: cathedralParts,
   tomb: tombParts,
+  tiara: tiaraParts,
 }
 
 /** The kinds whose model moves, and how: each motion its parts name. A kind left out stands still. */

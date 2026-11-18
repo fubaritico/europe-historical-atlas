@@ -228,15 +228,17 @@ describe('createEventIconMarkers', () => {
           { ground: [1, 0, 0], kind: 'cathedral' },
           { ground: [2, 0, 0], kind: 'crown' },
           { ground: [3, 0, 0], kind: 'tomb' },
+          // The council's tiara is no building: it keeps its halo (ATLAS-476).
+          { ground: [4, 0, 0], kind: 'tiara' },
         ],
         STUB,
         FLAT,
         TARGETS
       )
 
-      expect(squareCount(markers.object, 'halo')).toBe(2)
+      expect(squareCount(markers.object, 'halo')).toBe(3)
       // From afar every flat drawing keeps its own.
-      expect(squareCount(markers.object, 'flat halo')).toBe(4)
+      expect(squareCount(markers.object, 'flat halo')).toBe(5)
     })
 
     it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {

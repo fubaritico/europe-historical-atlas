@@ -25,6 +25,7 @@ export const ICON_LIFT: Record<EventIconKind, number> = {
   crown: 0,
   cathedral: 0,
   tomb: 0,
+  tiara: 0,
 }
 
 /**
@@ -65,6 +66,8 @@ export const ICON_SIZE: Record<EventIconKind, number> = {
   // A grave is a small thing: judged on the map at Cluny (the dev, 2026-11-17: « c'est juste la bonne taille […]
   // ça peut pas être gros […] c'est pudique, c'est bien »).
   tomb: 45,
+  // The council's tiara and its crozier: taller than the crown, a first size to judge on the map (2026-11-18).
+  tiara: 60,
 }
 
 /**
@@ -91,6 +94,8 @@ export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
   cathedral: false,
   // So does a grave, its face to the reader.
   tomb: false,
+  // Stood on the ground, its face to the reader, as the crown and the grave.
+  tiara: false,
 }
 
 /**
@@ -104,6 +109,7 @@ export const ICON_SWAYS: Record<EventIconKind, boolean> = {
   crown: true,
   cathedral: false,
   tomb: false,
+  tiara: false,
 }
 
 /**
@@ -123,6 +129,7 @@ export const ICON_YAW: Record<EventIconKind, number> = {
   // A slight three-quarter, its face turned to the reader's left — to the right first, toward the key light (the dev,
   // 2026-11-17: « c'est 3/4 droit, peut-être 3/4 gauche »): a trial on sight.
   tomb: -Math.PI / 8,
+  tiara: 0,
 }
 
 /**
@@ -137,6 +144,7 @@ export const ICON_SOIL: Record<EventIconKind, number> = {
   cathedral: 1,
   // The same ground as the cathedral's (the dev, 2026-11-17: « avec le même effet au sol que pour la cathédrale »).
   tomb: 1,
+  tiara: 0,
 }
 
 /**
@@ -152,6 +160,7 @@ export const ICON_BUILDING: Record<EventIconKind, boolean> = {
   cathedral: true,
   // A grave is no building: the map's own lights are enough for it.
   tomb: false,
+  tiara: false,
 }
 
 /**
@@ -166,6 +175,7 @@ export const ICON_HALO: Record<EventIconKind, boolean> = {
   crown: true,
   cathedral: false,
   tomb: false,
+  tiara: true,
 }
 
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */

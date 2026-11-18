@@ -4,7 +4,7 @@
  * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
  * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27). At
  * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287); at `/icons.html?cathedral`, the
- * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288).
+ * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288), at `/icons.html?council`, the council's (ATLAS-476).
  */
 
 import { Box3, Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
@@ -17,6 +17,7 @@ import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
 import { svgToTexture } from '../scene/svgTexture'
 
 import { CATHEDRAL_CANDIDATES } from './cathedralCandidates'
+import { COUNCIL_CANDIDATES } from './councilCandidates'
 import { CROWN_CANDIDATES } from './crownCandidates'
 import { TOMB_CANDIDATES } from './tombCandidates'
 
@@ -38,17 +39,20 @@ lights.quaternion.copy(camera.quaternion)
 scene.add(lights)
 
 // `?crowns`: the crown's candidates alone, left to right in their letters' order (ATLAS-287); `?cathedral`: the
-// cathedral's, `?tomb`: the grave's (ATLAS-288) — else the map's kinds.
+// cathedral's, `?tomb`: the grave's (ATLAS-288), `?council`: the council's (ATLAS-476) — else the map's kinds. One
+// flag at a time: asked together, the first of this list wins.
 const asked = new URLSearchParams(window.location.search)
 const cathedral = asked.has('cathedral')
 const tomb = asked.has('tomb')
 const candidates = asked.has('crowns')
   ? CROWN_CANDIDATES
-  : cathedral
-    ? CATHEDRAL_CANDIDATES
-    : tomb
-      ? TOMB_CANDIDATES
-      : null
+  : asked.has('council')
+    ? COUNCIL_CANDIDATES
+    : cathedral
+      ? CATHEDRAL_CANDIDATES
+      : tomb
+        ? TOMB_CANDIDATES
+        : null
 const crowns = candidates !== null
 /** How wide a candidate is shown, large: a crown one unit, the cathedral — alone, and long — more than two. */
 const CANDIDATE_WIDTH = cathedral ? 2.4 : 1

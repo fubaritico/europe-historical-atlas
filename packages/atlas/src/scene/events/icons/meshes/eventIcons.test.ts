@@ -21,7 +21,7 @@ function meshes(object: Object3D): Mesh[] {
 
 describe('createEventIcon', () => {
   describe('happy path', () => {
-    it.each<EventIconKind>(['swords', 'tower', 'crown', 'cathedral', 'tomb'])(
+    it.each<EventIconKind>(['swords', 'tower', 'crown', 'cathedral', 'tomb', 'tiara'])(
       'stands the %s on the origin, within the box of its kind’s size',
       (kind) => {
         const box = new Box3().setFromObject(createEventIcon(kind).object)

@@ -10,7 +10,7 @@ import { TREBUCHET_DRAWING } from './trebuchet'
 import type { Drawing } from './drawing'
 import type { EventIconKind } from '../kinds'
 
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral', 'tomb']
+const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral', 'tomb', 'tiara']
 
 /**
  * The rim's width a drawing is given: its first stroke, the rim pass coming first.

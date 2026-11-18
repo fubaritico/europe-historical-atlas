@@ -8,6 +8,7 @@ import { EVENT_ICON_PALETTE } from '../palette'
 import { CATHEDRAL_DRAWING } from './cathedral'
 import { CROWN_DRAWING } from './crown'
 import { SWORDS_DRAWING } from './swords'
+import { TIARA_DRAWING } from './tiara'
 import { TOMB_DRAWING } from './tomb'
 import { TREBUCHET_DRAWING } from './trebuchet'
 
@@ -59,6 +60,7 @@ const DRAWINGS: Record<EventIconKind, Drawing> = {
   crown: CROWN_DRAWING,
   cathedral: CATHEDRAL_DRAWING,
   tomb: TOMB_DRAWING,
+  tiara: TIARA_DRAWING,
 }
 
 /**
