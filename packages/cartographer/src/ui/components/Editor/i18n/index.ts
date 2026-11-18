@@ -11,7 +11,6 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `notBuilt` — Why a button does nothing yet; `scenarios` names the scenarios that will build it.
  * - `openHint`, `saveHint`, `saveAsHint`, `saveCopyHint` — The tooltips of *Open…*, *Save*, *Save as…* and *Save a
  *   copy* (`s19`); `keys`, the first three's shortcut as the system writes it (CARTO-345).
- * - `registry` — The year's registry — a command not built yet.
  * - `closeYear` — Close the open year; `close` is the shared action's label, `year` the year as text.
  * - `nothingToUndo`, `nothingToRedo` — Why undo or redo is unavailable.
  * - `undoHint`, `redoHint` — The tooltip of undo and redo; `label` is the button's name, `keys` its shortcut.

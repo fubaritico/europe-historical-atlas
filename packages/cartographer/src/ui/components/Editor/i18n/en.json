@@ -4,7 +4,6 @@
   "saveHint": "Save the map ({keys})",
   "saveAsHint": "Save the map under another name, and go on working on the new one ({keys})",
   "saveCopyHint": "Save a copy of the map, and stay on this one",
-  "registry": "Registry",
   "closeYear": "{close} {year}",
   "nothingToUndo": "nothing to undo",
   "nothingToRedo": "nothing to redo",

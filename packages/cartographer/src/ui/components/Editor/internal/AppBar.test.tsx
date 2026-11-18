@@ -59,10 +59,12 @@ describe('AppBar', () => {
   })
 
   describe('variants', () => {
-    it('lays out the four gestures on a map, then the registry, with no [Open snapshot…]', () => {
+    it('lays out the four gestures on a map and nothing else: no [Registry], no [Open snapshot…]', () => {
+      // The registry's own panel is not built, by decision (the dev, 2026-11-06, CARTO-184): {Polities}, a polity's
+      // form and the Wikidata panel hold all of it — so no button promises it (CARTO-375).
       mount()
       const labels = screen.getAllByRole('button').map((button) => button.textContent)
-      expect(labels).toEqual(['Open…', 'Save', 'Save as…', 'Save a copy', 'Registry'])
+      expect(labels).toEqual(['Open…', 'Save', 'Save as…', 'Save a copy'])
     })
 
     it('writes a working map’s name as it is', () => {
@@ -72,13 +74,10 @@ describe('AppBar', () => {
   })
 
   describe('managed errors', () => {
-    it('marks the registry unavailable, naming its scenario, and the four gestures available', () => {
+    it('leaves every gesture of the bar available: none is a promise of something not built', () => {
       mount()
-      const registry = screen.getByRole('button', { name: 'Registry' })
-      expect(registry.getAttribute('aria-disabled')).toBe('true')
-      expect(registry.getAttribute('title')).toContain('s07')
-      for (const name of ['Open…', 'Save', 'Save as…', 'Save a copy'])
-        expect(screen.getByRole('button', { name }).getAttribute('aria-disabled')).toBeNull()
+      for (const button of screen.getAllByRole('button'))
+        expect(button.getAttribute('aria-disabled')).toBeNull()
     })
   })
 

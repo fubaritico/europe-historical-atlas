@@ -142,6 +142,11 @@ Scenario: with the keys, ‹enter› chooses, a second ‹enter› opens
 > forgotten, so a redo does not reopen it. Amends `H-04` in [s99](s99-holes.md), which said double-click
 > was not used.
 
+> **Not built, by decision** (the dev, 2026-11-06, CARTO-184 archived; its greyed button removed from the top bar on
+> 2026-11-18, CARTO-375). The registry is read and edited through `{Polities}` — its tree and its filter by name —
+> a polity's form and the Wikidata panel; a table of its own would only have added the columns and the filter by
+> rank. The scenario below stays as what was planned, not as something to build.
+
 ```gherkin
 Scenario: open the registry
   When I press [Registry]

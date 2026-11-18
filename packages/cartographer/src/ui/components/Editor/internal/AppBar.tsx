@@ -88,7 +88,6 @@ export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy, menus 
           hint={t('saveAsHint', { keys: shortcut('saveAs').shown })}
         />
         <BarButton label={action('saveCopy')} onPress={onSaveCopy} hint={t('saveCopyHint')} />
-        <BarButton label={t('registry')} unavailable={t('notBuilt', { scenarios: 's07' })} />
       </div>
     </>
   )
