@@ -5,7 +5,6 @@
 import { createFetchContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
-import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import {
   createAuthoredYearSource,
@@ -65,10 +64,9 @@ export interface MapAssetSources {
  * A function rather than a constant so nothing is created until a pipeline asks, and so a test that
  * replaces one port still gets working implementations of the other four.
  *
- * **Years are read from the Cartographer's format where one has been authored**, and from the
- * per-century payloads everywhere else. The manifest decides which, rather than a 404 — a year nobody has
- * drawn yet is a fact about the corpus, while a year that is listed and fails to load is a failure, and
- * letting one stand in for the other is how last century's borders would be shown with nothing said.
+ * **Years are read from the Cartographer's format**, the ones its manifest lists; a year it does not list has no
+ * map, and asking for it is an error (ATLAS-373) — the manifest says so, rather than a 404, which a hiccupping
+ * server answers too.
  * @returns the five ports
  */
 export function createFetchAssets(): MapAssetSources {
@@ -80,7 +78,6 @@ export function createFetchAssets(): MapAssetSources {
     regions: createAuthoredYearSource({
       manifestUrl: YEAR_MANIFEST_URL,
       yearsBase: YEARS_BASE,
-      unauthored: createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`),
     }),
     bakedNames: createFetchBakedNamesSource(YEARS_BASE),
     bakedOverlaps: createFetchBakedOverlapsSource(YEARS_BASE),

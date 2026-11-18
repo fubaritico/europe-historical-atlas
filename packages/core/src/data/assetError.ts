@@ -46,8 +46,10 @@ export type AssetKind = (typeof ASSET_KINDS)[number]
  *   declares.
  * - `semantic` — internally valid, wrong for us: a mask cropped to a different part of the world than
  *   the relief it is meant to sit on. The class that bites once files are imported by hand.
+ * - `absent` — nothing failed: what was asked for does not exist. A year no map was drawn for (ATLAS-373; the dev,
+ *   2026-11-18: said as what it is, « Cette année n'a pas encore de carte »).
  */
-export type AssetFailure = 'transport' | 'schema' | 'consistency' | 'semantic'
+export type AssetFailure = 'transport' | 'schema' | 'consistency' | 'semantic' | 'absent'
 
 /** An asset failure, carrying enough to tell a reader which file broke and where. */
 export interface AssetError extends Error {

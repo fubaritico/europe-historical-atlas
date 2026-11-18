@@ -101,6 +101,20 @@ describe('assetNotice', () => {
       expect(new Set(phrases).size).toBe(4)
     })
 
+    it('says a year that has no map as what it is, not as borders that do not match', () => {
+      // ATLAS-373, the dev, 2026-11-18: « Cette année n'a pas encore de carte ».
+      const absent = assetError(
+        'regions',
+        'absent',
+        '/years/index.json',
+        'the year 1500 has no map'
+      )
+      expect(assetNotice('regions', absent, fr).title).toContain(
+        'Cette année n’a pas encore de carte'
+      )
+      expect(assetNotice('regions', absent, fr).title).not.toContain('ne correspondent pas')
+    })
+
     it('takes its severity from the policy, not from the failure', () => {
       // A missing river and a missing relief fail the same way and cost completely different things.
       expect(assetNotice('rivers', assetError('rivers', 'transport', '/x', 'd'), fr).severity).toBe(

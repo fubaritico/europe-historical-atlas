@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { isAssetError } from './assetError'
 import { createAuthoredYearSource, parseYearManifest } from './yearManifest'
 
-import type { RegionSet, RegionSource } from './regionSource'
+import type { RegionSource } from './regionSource'
 
 const bbox = { west: -45, south: 11.178401873711783, east: 78.75, north: 76.84081641443098 }
 
@@ -67,25 +67,9 @@ function stubFetch(table: Record<string, unknown>, missing: string[] = []): void
   )
 }
 
-/** A stand-in for the per-century payloads, recording what it was asked for. */
-function unauthoredSource(): RegionSource & { asked: number[] } {
-  const asked: number[] = []
-  return {
-    asked,
-    load(year: number): Promise<RegionSet> {
-      asked.push(year)
-      return Promise.resolve({ year, regions: [] })
-    },
-  }
-}
-
 /** The source under test, wired to the stubbed server. */
-function source(unauthored: RegionSource): RegionSource {
-  return createAuthoredYearSource({
-    manifestUrl: '/years/index.json',
-    yearsBase: '/years',
-    unauthored,
-  })
+function source(): RegionSource {
+  return createAuthoredYearSource({ manifestUrl: '/years/index.json', yearsBase: '/years' })
 }
 
 afterEach(() => {
@@ -144,7 +128,7 @@ describe('createAuthoredYearSource', () => {
   describe('happy path', () => {
     it('reads a listed year from its folder and projects it', async () => {
       stubFetch(served)
-      const set = await source(unauthoredSource()).load(1100)
+      const set = await source().load(1100)
       expect(set.year).toBe(1100)
       expect(set.regions).toHaveLength(1)
       expect(set.regions[0]?.name).toBe('Reaume de France')
@@ -152,66 +136,74 @@ describe('createAuthoredYearSource', () => {
 
     it('keeps the year as authored, with the manifest’s frame, for the exact borders', async () => {
       stubFetch(served)
-      const set = await source(unauthoredSource()).load(1100)
+      const set = await source().load(1100)
       expect(set.authored?.bbox).toEqual(bbox)
       expect(set.authored?.year.polities.anchors).toEqual(polities.anchors)
-    })
-
-    it('leaves a year nobody has drawn to the source it was given', async () => {
-      stubFetch(served)
-      const unauthored = unauthoredSource()
-      const set = await source(unauthored).load(1500)
-      expect(unauthored.asked).toEqual([1500])
-      expect(set.year).toBe(1500)
     })
   })
 
   describe('variants', () => {
     it('fetches the manifest once and keeps it, so a slider costs no round trip', async () => {
       stubFetch(served)
-      const source_ = source(unauthoredSource())
-      await source_.load(1500)
-      await source_.load(1600)
-      await source_.load(1700)
+      const source_ = source()
+      await source_.load(1100)
+      await source_.load(1100)
+      await source_.load(1500).catch(() => undefined)
       const manifestCalls = vi
         .mocked(fetch)
         .mock.calls.filter(([path]) => path === '/years/index.json')
       expect(manifestCalls).toHaveLength(1)
     })
 
-    it('never touches a year folder for an unauthored year', async () => {
+    it('never touches a year folder for a year that has no map', async () => {
       stubFetch(served)
-      await source(unauthoredSource()).load(1500)
+      await source()
+        .load(1500)
+        .catch(() => undefined)
       const folderCalls = vi
         .mocked(fetch)
         .mock.calls.filter(([path]) => typeof path === 'string' && path.startsWith('/years/1500/'))
       expect(folderCalls).toHaveLength(0)
     })
-
-    it('ships with an empty list, in which case nothing changes for anyone', async () => {
-      stubFetch({ ...served, '/years/index.json': { version: 1, bbox, years: [] } })
-      const unauthored = unauthoredSource()
-      await source(unauthored).load(1100)
-      expect(unauthored.asked).toEqual([1100])
-    })
   })
 
   describe('managed errors', () => {
-    it('fails loudly when a LISTED year cannot be loaded, rather than falling back', async () => {
-      // The whole reason the manifest exists. A 404 on a listed folder is a failure, and answering it
-      // with the old payload would show last century's borders with nothing said.
+    it('refuses a year the manifest does not list: it has no map, and says which years have one', async () => {
+      // Read from the per-century borders before, under the GPL: nothing reads them any more (ATLAS-373).
+      stubFetch(served)
+      const failure: unknown = await source()
+        .load(1500)
+        .catch((error: unknown) => error)
+      expect(failure).toMatchObject({ asset: 'regions', failure: 'absent' })
+      expect(isAssetError(failure) ? failure.detail : '').toMatch(/1500 has no map.*1100/)
+    })
+
+    it('refuses every year when the manifest lists none', async () => {
+      stubFetch({ ...served, '/years/index.json': { version: 1, bbox, years: [] } })
+      await expect(source().load(1100)).rejects.toMatchObject({ asset: 'regions' })
+    })
+
+    it('asks for no other file when the year has no map', async () => {
+      stubFetch(served)
+      await source()
+        .load(1500)
+        .catch(() => undefined)
+      const asked = vi.mocked(fetch).mock.calls.map(([path]) => path)
+      expect(asked).toEqual(['/years/index.json'])
+    })
+
+    it('fails loudly when a LISTED year cannot be loaded', async () => {
+      // The whole reason the manifest exists: a 404 on a listed folder is a failure, said as one.
       stubFetch(served, ['/years/1100/polities.json'])
-      const unauthored = unauthoredSource()
-      await expect(source(unauthored).load(1100)).rejects.toMatchObject({
+      await expect(source().load(1100)).rejects.toMatchObject({
         asset: 'yearPolities',
         failure: 'transport',
       })
-      expect(unauthored.asked).toEqual([])
     })
 
     it('fails loudly when a listed year is malformed', async () => {
       stubFetch({ ...served, '/years/1100/registry.json': { version: 1 } })
-      await expect(source(unauthoredSource()).load(1100)).rejects.toMatchObject({
+      await expect(source().load(1100)).rejects.toMatchObject({
         asset: 'yearRegistry',
         failure: 'schema',
       })
@@ -219,19 +211,17 @@ describe('createAuthoredYearSource', () => {
 
     it('fails loudly when a listed year disagrees with itself', async () => {
       stubFetch({ ...served, '/years/1100/borders.json': { ...borders, year: 1110 } })
-      await expect(source(unauthoredSource()).load(1100)).rejects.toMatchObject({
+      await expect(source().load(1100)).rejects.toMatchObject({
         failure: 'consistency',
       })
     })
 
-    it('reports a missing manifest as transport, and asks nobody for anything', async () => {
+    it('reports a missing manifest as transport', async () => {
       stubFetch({}, ['/years/index.json'])
-      const unauthored = unauthoredSource()
-      await expect(source(unauthored).load(1100)).rejects.toMatchObject({
+      await expect(source().load(1100)).rejects.toMatchObject({
         asset: 'yearRegistry',
         failure: 'transport',
       })
-      expect(unauthored.asked).toEqual([])
     })
   })
 
@@ -241,7 +231,7 @@ describe('createAuthoredYearSource', () => {
         'fetch',
         vi.fn(() => Promise.reject(new Error('offline')))
       )
-      await expect(source(unauthoredSource()).load(1100)).rejects.toThrow('offline')
+      await expect(source().load(1100)).rejects.toThrow('offline')
     })
   })
 
@@ -250,17 +240,18 @@ describe('createAuthoredYearSource', () => {
       // The DEM's frame is the only box a year projects against; any other would slide every
       // border off the terrain, so the check is that the first anchor lands where the DEM's frame puts it.
       stubFetch(served)
-      const set = await source(unauthoredSource()).load(1100)
+      const set = await source().load(1100)
       const first = set.regions[0]?.rings[0]?.[0]
       const expectedU = (0 - bbox.west) / (bbox.east - bbox.west)
       expect(first?.u).toBeCloseTo(expectedU, 10)
     })
 
-    it('handles a year before the common era', async () => {
+    it('lists a year before the common era, and still refuses one it does not list', async () => {
       stubFetch({ ...served, '/years/index.json': { version: 1, bbox, years: [-500] } })
-      const unauthored = unauthoredSource()
-      await source(unauthored).load(1100)
-      expect(unauthored.asked).toEqual([1100])
+      await expect(source().load(1100)).rejects.toMatchObject({
+        asset: 'regions',
+        detail: expect.stringContaining('-500') as string,
+      })
     })
   })
 })

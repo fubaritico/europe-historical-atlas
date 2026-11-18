@@ -1,17 +1,4 @@
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
-import { fetchWithin } from '../utils/fetchWithin'
-
-import {
-  expectArray,
-  expectBounds,
-  expectLonLat,
-  expectNullableString,
-  expectNumber,
-  expectString,
-  field,
-  httpError,
-  parseAsset,
-} from './assetError'
 
 import type { UvPoint } from './coastlineSource'
 import type { AuthoredYear } from './yearFormat'
@@ -28,8 +15,8 @@ export interface Region {
   /** A wider cultural grouping (`PARTOF`). */
   partOf: string | null
   /**
-   * The id of the polity it was adapted from — only for an authored year, whose colours are the
-   * Cartographer's and are looked up by it. The per-century payloads have no ids.
+   * The id of the polity it was adapted from, whose colours are the Cartographer's and are looked up by it. Absent
+   * from a region built by hand, in a test or a bench.
    */
   polityId?: string
   /**
@@ -66,7 +53,10 @@ export interface RegionSource {
   load(year: number): Promise<RegionSet>
 }
 
-/** The on-disk payload emitted by `files/spikes/fetch-borders` (lon/lat rings). */
+/**
+ * A year's polities as lon/lat rings, before projection — what an authored year is adapted to (`toRegionPayload`). The
+ * per-century files it was first read from, under the GPL, are no longer read by anything (ATLAS-373).
+ */
 export interface RegionPayload {
   /** Where the data came from, and under what terms. */
   source: string
@@ -81,7 +71,7 @@ export interface RegionPayload {
     name: string | null
     subjectTo: string | null
     partOf: string | null
-    /** The authored polity's id; absent from the per-century payloads. */
+    /** The authored polity's id. */
     polityId?: string
     rings: [number, number][][]
   }[]
@@ -117,57 +107,4 @@ export function projectRegions(payload: RegionPayload): RegionSet {
     })
   }
   return { year: payload.year, regions }
-}
-
-/**
- * Create a {@link RegionSource} that fetches one pre-cropped year and reprojects it.
- * @param pathForYear - builds the payload URL for a year, e.g. `` (year) => `/borders/europe-${year}.json` ``
- * @returns a fetch-backed region source
- */
-export function createFetchRegionSource(pathForYear: (year: number) => string): RegionSource {
-  return {
-    async load(year: number): Promise<RegionSet> {
-      const path = pathForYear(year)
-      const response = await fetchWithin(path)
-      if (!response.ok) throw httpError('regions', path, response.status)
-      return projectRegions(parseRegionPayload(await response.json(), path))
-    },
-  }
-}
-
-/**
- * Read a fetched value as a {@link RegionPayload}, or fail naming the field that is wrong.
- *
- * Rings are checked pair by pair rather than trusted wholesale: a single string where a longitude should
- * be turns into `NaN` on projection, and a `NaN` coordinate rasterises as a polity that claims nothing
- * anywhere — a country silently missing from the map, which is precisely the failure nobody notices.
- * @param value - the parsed JSON, of no known shape
- * @param source - where it came from, for the message
- * @returns the payload
- */
-export function parseRegionPayload(value: unknown, source: string): RegionPayload {
-  return parseAsset('regions', source, () => {
-    const at = field(value, 'payload')
-    const regions = expectArray(at('regions'), 'payload.regions').map((region, index) => {
-      const path = `payload.regions[${String(index)}]`
-      const on = field(region, path)
-      return {
-        name: expectNullableString(on('name'), `${path}.name`),
-        subjectTo: expectNullableString(on('subjectTo'), `${path}.subjectTo`),
-        partOf: expectNullableString(on('partOf'), `${path}.partOf`),
-        rings: expectArray(on('rings'), `${path}.rings`).map((ring, r) =>
-          expectArray(ring, `${path}.rings[${String(r)}]`).map((point, p) =>
-            expectLonLat(point, `${path}.rings[${String(r)}][${String(p)}]`)
-          )
-        ),
-      }
-    })
-    return {
-      source: expectString(at('source'), 'payload.source'),
-      year: expectNumber(at('year'), 'payload.year'),
-      bbox: expectBounds(at('bbox'), 'payload.bbox'),
-      tolerance: expectNumber(at('tolerance'), 'payload.tolerance'),
-      regions,
-    }
-  })
 }

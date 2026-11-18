@@ -9,8 +9,6 @@ import { DEFAULT_NAME_PARAMS } from '../src/tunables/params'
 
 import { bakeYearNames } from './bakeYearNames'
 
-import type { RegionSource } from '@europe-historical-atlas/core/data/regionSource'
-
 /** The manifest listing the fixture's year, on the fixture's frame. */
 const MANIFEST = { version: 1, bbox: META.bbox, years: [1100] }
 
@@ -56,11 +54,9 @@ async function pageKey(): Promise<string> {
       Promise.resolve(new Response(JSON.stringify(files[url]), { status: 200 }))
     )
   )
-  const unauthored: RegionSource = { load: () => Promise.reject(new Error('not authored')) }
   const loaded = await createAuthoredYearSource({
     manifestUrl: '/years/index.json',
     yearsBase: '/years',
-    unauthored,
   }).load(1100)
   if (loaded.authored === undefined) throw new Error('fixture: not an authored year')
   return namesKey(loaded.authored.year, {

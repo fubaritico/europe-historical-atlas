@@ -2,10 +2,11 @@
  * Which years have been authored in the Cartographer's format, and the source that reads them.
  *
  * **Why a manifest rather than trying a folder and seeing.** A `fetch` that 404s would be the obvious
- * signal, and it is the wrong one: a 404 is also what a hiccupping server returns, so the atlas would
- * quietly fall back to the old payload and show last century's borders with nothing said. Reading a list
- * first keeps the two cases apart — **a year absent from the manifest is a fact, a year present that fails
- * to load is a failure** — and no error is ever swallowed to stand in for the other.
+ * signal, and it is the wrong one: a 404 is also what a hiccupping server returns. Reading a list first
+ * keeps the two cases apart — **a year absent from the manifest has no map, a year present that fails to
+ * load is a failure** — and each is said as what it is. A year with no map was once read from the
+ * per-century borders, under the GPL; since ATLAS-373 nothing reads them, and asking for such a year is
+ * an error told on screen like any other (the dev, 2026-11-06, `rules/error-handling.md`).
  *
  * **The manifest declares the frame.** `projectRegions` maps lon/lat onto the grid using a bounding box,
  * and it has to be the render frame the terrain uses. Taking it from the loaded relief would make this
@@ -93,23 +94,17 @@ export interface AuthoredYearSourceDeps {
   manifestUrl: string
   /** The folder holding the year folders, e.g. `/years`. */
   yearsBase: string
-  /**
-   * Where a year with no folder is read from — today's per-century payloads.
-   *
-   * Not a fallback covering a failure: a year nobody has authored yet is a fact about the corpus, and this
-   * is the source that answers for it.
-   */
-  unauthored: RegionSource
 }
 
 /**
- * A {@link RegionSource} that reads authored years from the Cartographer's format and leaves the rest to
- * the source it was given.
+ * A {@link RegionSource} that reads authored years from the Cartographer's format, and refuses a year the
+ * manifest does not list: it has no map.
  *
  * The manifest is fetched once and kept: it is three fields, it changes when a year is published, and
  * asking for it on every change of year would put a round trip in front of a slider.
- * @param deps - where to read from, and who answers for unauthored years
- * @returns the source
+ * @param deps - where to read from
+ * @returns the source; its `load` rejects with an asset error under `regions` (`absent`) for a year the manifest
+ *   does not list
  */
 export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSource {
   let manifest: Promise<YearManifest> | null = null
@@ -118,7 +113,13 @@ export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSo
     async load(year: number): Promise<RegionSet> {
       manifest ??= readYearManifest(deps.manifestUrl)
       const list = await manifest
-      if (!list.years.includes(year)) return deps.unauthored.load(year)
+      if (!list.years.includes(year))
+        throw assetError(
+          'regions',
+          'absent',
+          deps.manifestUrl,
+          `the year ${String(year)} has no map: the years drawn are ${list.years.join(', ')}`
+        )
       const folder = `${deps.yearsBase.replace(/\/$/, '')}/${String(year)}`
       const files = await fetchYearFiles(yearPaths(deps.yearsBase, year))
       return authoredYearRegions(files, folder, list.bbox)

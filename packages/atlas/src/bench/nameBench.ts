@@ -139,10 +139,6 @@ async function prepare(): Promise<Prepared> {
   const source = createAuthoredYearSource({
     manifestUrl: '/years/index.json',
     yearsBase: '/years',
-    unauthored: {
-      load: (year) =>
-        Promise.reject(new Error(`[atlas] the bench reads authored years; ${String(year)} is not`)),
-    },
   })
   const set = await source.load(YEAR)
   if (set.authored === undefined) throw new Error(`[atlas] ${String(YEAR)} came back unauthored`)

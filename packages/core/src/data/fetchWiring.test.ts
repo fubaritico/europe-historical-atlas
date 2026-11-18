@@ -2,12 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createFetchHeightmapSource } from './heightmap'
 import { createFetchLandMaskSource } from './landMask'
-import { createFetchRegionSource } from './regionSource'
 import { createFetchRiverSource } from './riverSource'
 import { createAuthoredYearSource } from './yearManifest'
 import { fetchYearFiles, yearPaths } from './yearSource'
-
-import type { RegionSource } from './regionSource'
 
 /**
  * Every reader of the atlas's files goes through the answer delay of REPO-275: each request carries the
@@ -24,11 +21,6 @@ function recordingFetch() {
   return fetchMock
 }
 
-/** A region source that must not be reached. */
-const UNREACHED: RegionSource = {
-  load: () => Promise.reject(new Error('the unauthored source was reached')),
-}
-
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -39,10 +31,6 @@ describe('the readers of the atlas’s files', () => {
       ['the relief', () => createFetchHeightmapSource('/heightmaps/x').load()],
       ['the land mask', () => createFetchLandMaskSource('/masks/x').load()],
       ['the rivers', () => createFetchRiverSource('/rivers/x.json').load()],
-      [
-        'the regions of a century',
-        () => createFetchRegionSource((year) => `/borders/${String(year)}.json`).load(1100),
-      ],
       ['the files of a year', () => fetchYearFiles(yearPaths('/years', 1100))],
       [
         'the manifest of the years',
@@ -50,7 +38,6 @@ describe('the readers of the atlas’s files', () => {
           createAuthoredYearSource({
             manifestUrl: '/years/index.json',
             yearsBase: '/years',
-            unauthored: UNREACHED,
           }).load(1100),
       ],
     ])('%s: read through the answer delay', async (_name, load) => {

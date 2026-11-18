@@ -253,9 +253,8 @@ target.z)` would be coherent with the navigation that already exists.
   **Sévérité : à savoir — non branché par décision du dev (06/11, ATLAS-143 archivé)** : le Cartographe et l'atlas
   dessinent sur le même relief, donc un décalage ne vient que d'un **fichier de relief remplacé par un autre qui couvre
   une autre zone** (arrivé une fois, en septembre). **Déclencheur** : un changement du fichier du relief — rejouer alors
-  `boundsMatch` à la main. **Et une dette, à retirer, ATLAS-373** : `loading/assets.ts:70` (`unauthored`) va encore
-  chercher les frontières GPL (`/borders/europe-<année>.json`) pour une année non dessinée — code mort, le sélecteur
-  n'offre que les années dessinées.
+  `boundsMatch` à la main. **Depuis le 18/11 (ATLAS-373)** plus rien ne va chercher les frontières GPL : une année
+  que le manifeste ne liste pas est une erreur (`core/data/yearManifest`, sous `regions`), dite comme toute autre.
 - **The icons' shadows are rasterised on the CPU, up to fifteen times a second, for every icon** (2026-10-27, ATLAS-298,
   review ARCH-001). `scene/events/shadows/iconShadows` slides each 3D icon's triangles along the light, fills them as one
   shape and blurs it, in a 192 × 96 tile, then re-uploads the texture. Skipped while the 3D icons are faded out (from
@@ -423,6 +422,7 @@ target.z)` would be coherent with the navigation that already exists.
 - **The flat drawings are read without mipmaps** (2026-11-17, `icons/billboardMaterials`): sharp from afar, the dev's
   call (« le flou est gênant » → « c'est net »); the cost is that a very thin edge may shimmer as the map moves, on a
   screen of normal density. He saw none on his two screens. **Remedy if it shows**: drawings rasterised at the sizes
+  they are shown at. **Severity: cosmétique.**
 - **The siege's box is wider than what shows of it** (2026-11-17, ATLAS-469, `meshes/parts.fitInBox`): a moving part is
   counted in the box where it rests before the throw (its `at`) — the sling and the stone laid out — so the trebuchet's
   box is 116 % of an icon's height while it shows 105 tall and 95 wide. Its size was set so it stands as it did.
@@ -432,4 +432,3 @@ target.z)` would be coherent with the navigation that already exists.
   `iconFootprint`): the icon's room is its box's side — 108 % and 116 % of an icon's height, where it was told from the
   model's height before (100 and 105). A pixel or two close up; ATLAS-470 (the room an icon takes) is where it is
   settled. **Severity: cosmétique.**
-  they are shown at. **Severity: cosmétique.**
