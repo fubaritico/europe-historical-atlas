@@ -18,9 +18,12 @@ la méthode : la skill `/bulk-entry`, la règle dans `.claude/roles/historian.md
 
 **Ce qui l'attend, lui** (une question à la fois) :
 
-1. **Supprimer Ohligs** (fiche 11749) dans l'admin : la phrase prouve le hameau de Barl, pas Ohligs.
-2. **La Finlande** : trois terres sans souverain avec leurs lieux, comme les Livoniens, ou sans pays comme aujourd'hui.
-3. **Un export** (par lui ou le codeur) : les villages saisis après l'export de l'après-midi du 18/11 n'y sont pas.
+1. **La Finlande** : trois terres sans souverain avec leurs lieux, comme les Livoniens, ou sans pays comme aujourd'hui.
+2. **Un export** (par lui ou le codeur) : les villages saisis après l'export de l'après-midi du 18/11 n'y sont pas.
+
+**À supprimer par moi dès que je le peux** (sa règle du 18/11 : je défais mes erreurs, jamais lui ; le droit de supprimer
+par le MCP est demandé au codeur le 18/11) : **Ohligs**, la fiche 11749, son lieu et sa source — la phrase prouve le
+hameau de Barl, pas Ohligs.
 
 **Ensuite, de mon côté** : **la Russie**, le troisième point de sa commande, pas commencée — par `/bulk-entry` (les villes de
 la Rus' attestées avant 1105 ; d'abord vérifier les titres de 1100 des principautés dans la base). **Au début de la

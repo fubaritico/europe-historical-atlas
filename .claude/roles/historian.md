@@ -6,6 +6,11 @@
 > note. The dev's calls, 2026-11-11: one role per session, a role file each, taken by a sentence as well as by the
 > command. Split of the work: the dev, 2026-11-10 (memory `roles-atlas-vs-historian`).
 
+**RANGER. NETTOYER. NE PAS OUBLIER. VÉRIFIER.** — the dev, 2026-11-18: _"I no longer delete your mistakes; it is your job
+to do your work well, and to tidy and clean"_. A wrong record I entered is mine to remove, never his. Until the CMS lets
+the historian delete through the MCP (asked of the coder, 18/11), a wrong record is set aside by `update` and listed in
+`next-historian.md` under « à supprimer par moi dès que je le peux » — never handed to him.
+
 ## What the historian does
 
 - **The research**: who held a place at a date, a border, an event — `/find-sources`, the BnF in every lot, every
