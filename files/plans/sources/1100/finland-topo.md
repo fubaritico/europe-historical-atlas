@@ -64,12 +64,9 @@ north-east: the Sámi, the Kvens, the Biarmians (Ohthere).
 - **Whether any Finnish people had a ruler in 1100.** The sources show *groups acting together* (a levy, a raid), never a
   named ruler. The chronicle names no Yem prince; Gs 13 names no Tavastian leader.
 
-## The drawing chosen — three lands without a sovereign (the dev, 2026-11-18)
+## The drawing chosen — tribes, not a land without people (the dev, 2026-11-18)
 
-**His call**: draw the three peoples **as the Livonians are drawn** — three lands, **no sovereign, no suzerain**, their
-limits **blurred** (not known precisely). **No hatching**: a hatching is a dispute between two countries, and in 1100 no
-one disputes Karelia (the Swedes come after 1150). **Karelia is no longer drawn under Novgorod**: its loose link with
-Novgorod is told on click (the « why »), not by the colour. The north (Sámi, Kvens) stays a land without a country.
+**His call**: the peoples are drawn as **tribes** (rank `tribe`, glossary: « a small people not yet sovereign », as the Prussians, the Curonians, the Livonians) — **no sovereign, no suzerain, no outline**, their name over the land, their limits fading (the faded edge). **Five tribes**: Finns Proper, Tavastians, Karelians, and in the north the **Sámi** and the **Kvens** — a land without a country is not a land without people. **No hatching**: a hatching is a dispute between two countries, and in 1100 no one disputes Karelia (the Swedes come after 1150). **Karelia is no longer drawn under Novgorod**: its loose link with Novgorod is told on click (the « why »), not by the colour.
 The drawing is the dev's, in the Cartographer; below, its landmarks (coordinates read on Wikipedia, en and fi).
 
 | land | its core | landmarks (lat, lon) | witness for the core | its edges (blurred) |
