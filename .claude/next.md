@@ -56,7 +56,8 @@ l'historien saisis ensuite n'y sont pas. Je le lance sur une copie de sa base (`
 **Sa règle du 18/11** (mémoire `decided-removals-need-no-validation`) : un ménage qui exécute un retrait déjà décidé ne
 passe pas par lui. **Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; l'angle de la tombe.
 
-**Mon dossier d'essai pèse 229 Mo** (le profil du Chrome sans fenêtre, les captures) : à supprimer avec son accord.
+**Mon dossier d'essai** (le profil du Chrome sans fenêtre, les captures, les planches d'ornements, ~270 Mo) : à supprimer
+avec son accord — demandé trois fois le 18/11, sans réponse.
 
 **Pour photographier une page sans toucher à son écran** : un Chrome sans fenêtre piloté par un petit script (protocole
 de débogage, port 9377), **un seul profil réutilisé** dans le scratchpad, la caméra posée par `sessionStorage`
@@ -96,14 +97,6 @@ geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant
 **Décidé par lui, à garder en tête** : l'importance qui ordonne la carte est **politique**, et au Moyen Âge le religieux en est
 (_« le religieux et la politique, c'est la même chose »_) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
 crans** (_« des scroll top »_), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
-
-**Le compte de test** : `claude-test@localhost.test`, mot de passe dans `packages/cms/.env.test-user` (ignoré par git) — me
-connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
-aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
-supprimer dans « Contributeurs ».
-
-**Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
-lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
 
 **Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
 après, posté par `commentfile` depuis un fichier (skill `/trello`, « The closing comment »).

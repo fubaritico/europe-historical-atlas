@@ -1,6 +1,18 @@
 # Next — archive
 
 
+## Moved out of `next.md` on 2026-11-18, evening (the file past 200 lines) — verbatim
+
+**Mon dossier d'essai pèse 229 Mo** (le profil du Chrome sans fenêtre, les captures) : à supprimer avec son accord.
+
+**Le compte de test** : `claude-test@localhost.test`, mot de passe dans `packages/cms/.env.test-user` (ignoré par git) — me
+connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
+aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
+supprimer dans « Contributeurs ».
+
+**Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
+lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
+
 ## Moved out of `next.md` on 2026-11-18 (the file past 200 lines) — verbatim
 
 **L'historien** : pays et région des lieux anglais remplis (8 357) ; environ 1 550 autres lieux sans pays ; 21 villages
