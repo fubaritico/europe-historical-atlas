@@ -5,8 +5,8 @@ import type {
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 
 /**
- * The cities `{Cities}` lists (CARTO-193), read from the contribution's export — `content/events.json`, the file the
- * atlas reads too, served from the same public folder. The CMS's server need not run while the author draws.
+ * The cities `{Cities}` lists (CARTO-193), read from the contribution's export — `content/cartographer.json`, every
+ * city sheet, beside the atlas's own `atlas.json` in the public folder the two share (CMS-223). The CMS's server need not run while the author draws.
  */
 
 /**
@@ -37,7 +37,7 @@ export interface LoadedCity {
 }
 
 /** Where the export is, under the public folder the Cartographer shares with the atlas. */
-export const CONTENT_URL = '/content/events.json'
+export const CONTENT_URL = '/content/cartographer.json'
 
 /** Where the cities go once read, or the reason they could not be. */
 export interface CitySink {

@@ -38,7 +38,8 @@ export async function loadContent(deps: ContentLoadDeps, source: ContentSource):
     // Once torn down nothing is written; otherwise the events are stored and pinned.
     if (deps.isDisposed()) return
     deps.sources.events = loaded.events
-    // Only the cities whose sheet is ticked « show in the atlas » (CMS-391): the rest serve the Cartographer's borders.
+    // Only the cities whose sheet is ticked « show in the atlas » (CMS-391). The atlas's file holds no other since
+    // CMS-223 — the rest are in the Cartographer's — and the tick is still read: a file is not trusted on its name.
     deps.sources.cities = loaded.cities.filter(({ showInAtlas }) => showInAtlas)
     deps.layers.rebuildEvents()
   } catch (error: unknown) {

@@ -32,7 +32,7 @@ export const LAND_MASK_URL = '/masks/europe-land'
 export const RIVERS_URL = '/rivers/europe-rivers.json'
 
 /** The contribution's export: the events pinned on the map (CMS-223, CMS-224). */
-const CONTENT_URL = '/content/events.json'
+const CONTENT_URL = '/content/atlas.json'
 /** Where the years drawn in the Cartographer are, one folder each. */
 const YEARS_BASE = '/years'
 /** The list of the years drawn in the Cartographer, which decides how a year is read. */

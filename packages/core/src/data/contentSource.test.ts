@@ -22,7 +22,7 @@ describe('contentSource', () => {
   describe('happy path', () => {
     it('loads and checks the exported file', async () => {
       answer({ ok: true, json: () => Promise.resolve(EMPTY) })
-      await expect(createFetchContentSource('/content/events.json').load()).resolves.toEqual(EMPTY)
+      await expect(createFetchContentSource('/content/atlas.json').load()).resolves.toEqual(EMPTY)
     })
   })
 
@@ -35,7 +35,7 @@ describe('contentSource', () => {
   describe('managed errors', () => {
     it('refuses a missing file as a transport failure of the content', async () => {
       answer({ ok: false, status: 404 })
-      const error: unknown = await createFetchContentSource('/content/events.json')
+      const error: unknown = await createFetchContentSource('/content/atlas.json')
         .load()
         .catch((caught: unknown) => caught)
       expect(isAssetError(error) && [error.asset, error.failure]).toEqual(['content', 'transport'])

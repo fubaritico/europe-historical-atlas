@@ -402,7 +402,10 @@ const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   showInAtlas: z.boolean(),
 })
 
-/** `content/events.json` — every event and every city at a date the atlas can show. */
+/**
+ * The contribution's export — its events and its cities at a date. Written twice, one file per reader (CMS-223):
+ * `content/atlas.json`, the cities the atlas shows, and `content/cartographer.json`, every city sheet.
+ */
 export interface ContentFile {
   /** Format version, so a reader can refuse a shape it does not know. */
   version: number

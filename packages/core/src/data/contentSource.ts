@@ -34,7 +34,7 @@ export function parseContentFile(value: unknown, source: string): ContentFile {
 
 /**
  * Create a {@link ContentSource} that fetches the exported file.
- * @param path - its URL, `/content/events.json`
+ * @param path - its URL: `/content/atlas.json` for the atlas, `/content/cartographer.json` for the Cartographer
  * @returns a fetch-backed content source
  */
 export function createFetchContentSource(path: string): ContentSource {

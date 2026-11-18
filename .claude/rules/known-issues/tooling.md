@@ -153,6 +153,9 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   (the run of `c27432e9` ended « cancelled » when `79de18d5` was pushed), so what the dev waits to see online is delayed
   by a whole run, about a quarter of an hour. **Remedy**: `gh run list -L 2` before pushing; while a run deploys, commit
   and wait. **Severity: à savoir.**
-- **`content/events.json` is 20 MB since the export of 2026-11-17** (4.9 before): it carries the 11 600 city sheets of
-  1100 where the atlas shows 116 (`showInAtlas`). The site downloads it whole and each export adds its size to the
-  repository's history. **Remedy**: CMS-223, the index apart from the body. **Severity: gênant.**
+- **The export's whole file, `content/cartographer.json`, is 14.5 MB** (2026-11-18, CMS-223): every city sheet of the
+  base (12 762), written one record a line, so a city changed is one line of a diff. The atlas no longer reads it —
+  its own `content/atlas.json` holds the 116 cities it shows, 0.4 MB (79 kB gzipped) — but the built site still
+  carries it (the two apps share a public folder) and each export still adds to the repository's history. **Remedy
+  if it bites**: one file a year, and the Cartographer's kept out of the atlas's build. **Severity: à savoir** (was
+  gênant: one file of 21 MB, read whole at every visit).

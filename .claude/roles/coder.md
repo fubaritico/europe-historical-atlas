@@ -13,7 +13,7 @@
 - **Delivers**: `/test`, `/review`, `/commit` ticket by ticket, pushes when the dev says so; keeps the Trello board
   (`/trello`) for its tickets.
 - **Checks the historian's work read-only** when told of it: the CMS base (`sqlite3 "file:packages/cms/cms.db?mode=ro"`),
-  its notes, its maps; commits the content export (`content/events.json`) after the dev's `pnpm export:content`.
+  its notes, its maps; commits the content export (`content/atlas.json` and `content/cartographer.json`) after the dev's `pnpm export:content`.
 - **Fixes data on the dev's go** — a wrong Wikidata id, a file a bake reads — never redraws a map.
 
 ## What the coder does not do

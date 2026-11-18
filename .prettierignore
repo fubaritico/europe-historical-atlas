@@ -10,6 +10,8 @@ public/heightmaps
 pnpm-lock.yaml
 # Year files are written by the Cartographer and stay byte for byte as it saved them
 packages/atlas/public/years
+# The contribution's export, written by `pnpm export:content` one record a line (CMS-223): kept as it writes it
+packages/atlas/public/content
 # Written by Payload in its own format, at every reload of the CMS server's config — kept byte for byte as it writes
 # them, so a reload leaves no diff (CMS-290)
 packages/cms/src/payload-types.ts

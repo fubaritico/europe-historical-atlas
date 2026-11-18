@@ -13,7 +13,7 @@
 > - **a double-click says who holds it**: the polity the map has under it, and the one the sources give.
 >
 > **Proposed by Claude, not objected to**: one eye heading the list for every city of the year; the cities read from
-> the export the atlas reads (`content/events.json`), so the CMS's server need not run while drawing.
+> the contribution's export (`content/cartographer.json`, every city sheet — the atlas reads its own `atlas.json`, CMS-223), so the CMS's server need not run while drawing.
 >
 > **Built 2026-11-02 (uncommitted, CARTO-193), the holder read from the export since CMS-335 (`ecd33d8`) — not walked
 > yet.** The dev, the same evening: _"we need both: if it is not at the right place, say so; if the country does not

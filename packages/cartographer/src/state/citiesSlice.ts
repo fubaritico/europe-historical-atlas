@@ -14,7 +14,7 @@ import type { StateCreator } from 'zustand'
  * **Out of the undo line, like the layers**: showing a city changes what the author sees, never the year.
  */
 
-/** A city as the Cartographer reads it from the contribution's export (`content/events.json`). */
+/** A city as the Cartographer reads it from the contribution's export (`content/cartographer.json`). */
 export interface CityMark {
   /** The sheet's id in the contribution — one city at one date. */
   readonly id: string
