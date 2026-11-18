@@ -6,8 +6,7 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 ### 2026-11-17 (nuit) → 18/11 — le codeur : la boîte commune des icônes, l'export en deux fichiers, la tiare du concile
 
-Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 20:21** (5 h 42 la dernière, avec
-l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commité et poussé, sept commits de `42e4989c` à `77cb1589`, puis les notes.
+Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 22:35** (avec l'historien) ; le chantier totalisait **362 h 39 sur 57 plages** à 20 h 21. Tout est commité et poussé, sept commits de `42e4989c` à `77cb1589`, puis les notes.
 
 - **Fermés, validés par lui** : ATLAS-469 (chaque modèle 3D dans une boîte commune, sa taille cuite dans ses sommets, une
   seule échelle ; les ombres des icônes immobiles dessinées une fois), ATLAS-341 (les villes suivent l'année montrée —
@@ -26,9 +25,14 @@ l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commit�
 - **CMS-454, à sa demande en fin de session** (_« le droit de suppression à l'historien »_) : la suppression par le MCP
   ouverte sur cinq collections, tenue par trois refus (ce qui est cité, la suppression par filtre, la case de la clé) ;
   une migration, prouvée sur une copie (`77cb1589`). À valider par lui.
+- **Les ornements** (ATLAS-461), le soir : ses 568 SVG regardés sur des planches, 32 retenus qui font néoclassique, copiés
+  et nommés par rôle (`files/resources/ui-ornaments/selection-neoclassique/`). Son idée : de tout petits éléments, _« ou
+  peut-être même un morceau »_, composés en rythme sur le bord des fenêtres ; ce qu'il cherche d'abord, des coins. Deux
+  planches : les coins à 16–48 px, trois bords de fenêtre composés. _« Ça m'a donné des idées […] on verra demain. »_
 - **Contrôlés pour l'historien**, en lecture seule : 91 forteresses et abbayes, puis 1 838 villages — conformes.
 - **Le serveur du CMS** coupé trois fois à sa demande le 17 au soir (la session de l'historien le relançait).
-- **Mes fautes** : deux `cd` dans mes commandes ; un ticket renommé sans son numéro (remis aussitôt) ; je lui ai présenté
+- **Mes fautes** : les coins d'ornement posés à l'envers sur mes deux premières planches, sans m'en rendre compte (_« tu
+  les poses inversés »_) ; deux `cd` dans mes commandes ; un ticket renommé sans son numéro (remis aussitôt) ; je lui ai présenté
   un ménage de code mort comme une décision à prendre (_« je sais pas ce que c'est 373 »_) ; les territoires annoncés dans
   le fichier de l'atlas, puis laissés dehors.
 

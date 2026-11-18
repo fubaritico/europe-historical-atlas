@@ -38,6 +38,14 @@ titres et maillons — une fiche à la fois, jamais ce qu'une autre fiche cite. 
 cases de la clé ; première suppression faite par l'historien, Ohligs (fiche, lieu, source), contrôlée dans la base.
 **Pas tenu** : rien ne dit quelles fiches la clé a créées (`known-issues/cms.md`).
 
+**ATLAS-461, les ornements — En cours, à son rythme** (_« on verra demain »_) : 32 SVG néoclassiques retenus parmi ses 568,
+dans `files/resources/ui-ornaments/selection-neoclassique/` (fiche `LISEZ-MOI.md`, trois planches). Ce qu'il veut : **de
+tout petits éléments, ou un morceau d'un plus grand**, composés en rythme sur le bord des fenêtres — et d'abord des coins.
+Constat : tout petits, les coins qui se lisent le mieux sont les angles découpés dans les cadres. **Un coin se lit avant
+de se poser** : chaque fichier le dessine dans un angle différent (ma faute du 18/11, posés à l'envers). Reste : son tri,
+le nettoyage des morceaux retenus (recadrage, une couleur), la fiche pour Claude Design ; les licences des paquets à
+vérifier avant de publier (deux seulement en portent une).
+
 **En Idées, à valider par lui** : ATLAS-473 (les branches « année non dessinée » que plus rien n'atteint), CMS-474 (la
 confession d'une personne et le signe gravé sur sa tombe), ATLAS-475 (un affichage générique des capitales).
 
