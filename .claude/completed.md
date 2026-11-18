@@ -7,8 +7,7 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 ### 2026-11-17 (nuit) → 18/11 — le codeur : la boîte commune des icônes, l'export en deux fichiers, la tiare du concile
 
 Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 20:21** (5 h 42 la dernière, avec
-l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commité et poussé (`f4077218`), six commits de
-`42e4989c` à `f4077218`, puis les notes.
+l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commité et poussé, sept commits de `42e4989c` à `77cb1589`, puis les notes.
 
 - **Fermés, validés par lui** : ATLAS-469 (chaque modèle 3D dans une boîte commune, sa taille cuite dans ses sommets, une
   seule échelle ; les ombres des icônes immobiles dessinées une fois), ATLAS-341 (les villes suivent l'année montrée —
@@ -24,6 +23,9 @@ l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commit�
 - **Le concile** (ATLAS-476), d'après ses mots (_« le chapeau que porte le pape »_) : quatre candidates sur le banc, son
   choix « B2 », la tiare et la crosse tournée vers l'extérieur (_« simple et clair, le rendu est au rendez-vous »_) ;
   passée dans la carte et dans la liste du CMS (`f4077218`). Il n'a pas encore jugé son image plate ni sa taille.
+- **CMS-454, à sa demande en fin de session** (_« le droit de suppression à l'historien »_) : la suppression par le MCP
+  ouverte sur cinq collections, tenue par trois refus (ce qui est cité, la suppression par filtre, la case de la clé) ;
+  une migration, prouvée sur une copie (`77cb1589`). À valider par lui.
 - **Contrôlés pour l'historien**, en lecture seule : 91 forteresses et abbayes, puis 1 838 villages — conformes.
 - **Le serveur du CMS** coupé trois fois à sa demande le 17 au soir (la session de l'historien le relançait).
 - **Mes fautes** : deux `cd` dans mes commandes ; un ticket renommé sans son numéro (remis aussitôt) ; je lui ai présenté
@@ -37,7 +39,7 @@ journalisées) ; le chantier totalise **362 h 09 sur 57 plages**.
 
 - **Les villages** : 2 287 candidats triés par 8 agents (1 873 retenus), saisis en quatre vagues ; **1 871 villages en
   1100**, contrôlés par script et par le codeur ; la carte : 65 alertes sur 13 562 villes. Ohligs (fiche 11749) est
-  fausse : à lui de la supprimer.
+  fausse : à supprimer par moi dès que le CMS me le permet (sa règle du soir : je défais mes erreurs, jamais lui).
 - **Sa règle : le disque est prêté** (`.claude/roles/historian.md`). Mes 22 dossiers rangés dans
   `files/resources/historien/` ; 6,94 Go de copies supprimés sur son accord ; gardés : `extraits/` (les phrases datées de
   3 330 lieux, toutes années) et `registre/`.
