@@ -29,10 +29,12 @@ describe('flatIconSize', () => {
 })
 
 describe('iconFootprint', () => {
-  it('is as wide as the wider of the flat drawing and the 3D model, with the flat drawing’s fewest pixels', () => {
+  it('is as wide as the wider of the flat drawing and the 3D model’s box, with the flat drawing’s fewest pixels', () => {
     const { width, minPixels } = iconFootprint('tower', 2)
 
-    expect(width).toBeCloseTo(2 * Math.max(ICON_FLAT_SPAN, ICON_SIZE.tower))
+    // The sizes are percents of an icon's height.
+    expect(width).toBeCloseTo(2 * Math.max(ICON_FLAT_SPAN, ICON_SIZE.tower / 100))
+    expect(width).toBeLessThan(2 * 2)
     expect(width).toBeGreaterThanOrEqual(2 * ICON_FLAT_SPAN)
     expect(minPixels).toBe(ICON_FLAT_MIN_PIXELS)
   })

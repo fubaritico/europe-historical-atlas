@@ -259,8 +259,9 @@ target.z)` would be coherent with the navigation that already exists.
 - **The icons' shadows are rasterised on the CPU, up to fifteen times a second, for every icon** (2026-10-27, ATLAS-298,
   review ARCH-001). `scene/events/shadows/iconShadows` slides each 3D icon's triangles along the light, fills them as one
   shape and blurs it, in a 192 × 96 tile, then re-uploads the texture. Skipped while the 3D icons are faded out (from
-  afar); **still redrawn when nothing moves** — a static icon (a crown, the tower in reserve) costs as much as the
-  swaying swords. **Measured 2026-10-29** (ATLAS-304): at zoom 1, 43 frames of 195 carry a main-thread spike of 10–14 ms —
+  afar); **since 2026-11-17 (ATLAS-469) an icon that stands still — a cathedral, a grave — is drawn once**, and the
+  texture is uploaded only when a tile changed; one that turns, sways or moves (the swords, the crown, the trebuchet)
+  is still redrawn at every interval, in frame or not. **Measured 2026-10-29** (ATLAS-304): at zoom 1, 43 frames of 195 carry a main-thread spike of 10–14 ms —
   ~13 redraws a second, one texture upload each, icons off screen included. **Remedy**: the ticket's R4 — only the icons
   in frame, only when their pose changed, a lighter raster. **Severity: gênant close up.**
 - **`scene/events/icons/` and `scene/events/shadows/` import each other** (2026-10-27, review ARCH-003): the icons build
@@ -419,11 +420,16 @@ target.z)` would be coherent with the navigation that already exists.
   comes on when a kind of `ICON_BUILDING` stands (`scene/events/mapEventLayer`), and the lights are one rig — so in 1100
   the swords and the trebuchet take it too, since the cathedral of Poitiers. Not yet judged by the dev on his screen.
   **Remedy**: lights per kind (a layer of their own for buildings), a line of the epic ATLAS-471. **Severity: à savoir.**
-- **The crown stands lower than its unit, and what stands about it does not know** (2026-11-17, review ARCH-001): its
-  model is brought to 0.44 of the icon's unit (`meshes/iconModel`, `MODEL_TALL`), while its halo, its flat drawing's
-  middle and its place before a city's name are still told from `ICON_SIZE`. Judged as it is on the map. **Remedy**:
-  ATLAS-469, every model fitted in one box. **Severity: cosmétique.**
 - **The flat drawings are read without mipmaps** (2026-11-17, `icons/billboardMaterials`): sharp from afar, the dev's
   call (« le flou est gênant » → « c'est net »); the cost is that a very thin edge may shimmer as the map moves, on a
   screen of normal density. He saw none on his two screens. **Remedy if it shows**: drawings rasterised at the sizes
+- **The siege's box is wider than what shows of it** (2026-11-17, ATLAS-469, `meshes/parts.fitInBox`): a moving part is
+  counted in the box where it rests before the throw (its `at`) — the sling and the stone laid out — so the trebuchet's
+  box is 116 % of an icon's height while it shows 105 tall and 95 wide. Its size was set so it stands as it did.
+  **Remedy if a moving model must fill its box**: fit on the parts as their motion places them at rest. **Severity:
+  cosmétique.**
+- **A city's name under a cathedral or a siege starts a little further** (2026-11-17, ATLAS-469, `icons/crossFade`
+  `iconFootprint`): the icon's room is its box's side — 108 % and 116 % of an icon's height, where it was told from the
+  model's height before (100 and 105). A pixel or two close up; ATLAS-470 (the room an icon takes) is where it is
+  settled. **Severity: cosmétique.**
   they are shown at. **Severity: cosmétique.**

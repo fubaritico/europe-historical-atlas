@@ -11,11 +11,11 @@ import { applyDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { buildIconModel } from './meshes/iconModel'
-import { ICON_SIZE } from './settings'
 import { slotsByKey } from './slots'
 
 import type { EventIconKind } from './kinds'
 import type { IconModel } from './meshes/iconModel'
+import type { Reach } from './meshes/parts'
 import type { EventIconPalette } from './palette'
 import type { BufferAttribute, InterleavedBufferAttribute, Quaternion } from 'three'
 
@@ -43,6 +43,20 @@ export interface IconInstances {
     index: number,
     visit: (positions: BufferAttribute | InterleavedBufferAttribute, matrix: Matrix4) => void
   ): void
+  /**
+   * How far one icon's model reaches, in icon heights — its real height and width, which what stands about it reads.
+   * @param index - the icon, in the order the kinds were given
+   * @returns its model's reach
+   * @throws when no icon holds that rank — a defect of the caller
+   */
+  reachOf(index: number): Reach
+  /**
+   * Whether one icon's model moves by itself — a trebuchet's arm — whatever its pose does.
+   * @param index - the icon, in the order the kinds were given
+   * @returns `true` when a piece of its model follows a motion
+   * @throws when no icon holds that rank — a defect of the caller
+   */
+  movesAlone(index: number): boolean
   /**
    * Fade every icon, for the cross-fade with the flat drawings.
    * @param opacity - 0 gone, 1 solid
@@ -169,9 +183,36 @@ function pieceVisitor(
 }
 
 /**
+ * One icon's kind's model and pieces.
+ * @param iconMeshes - each icon's kind's model and pieces
+ * @param index - the icon, in the order the kinds were given
+ * @returns its kind's share
+ * @throws when no icon holds that rank — a defect of the caller
+ */
+function iconAt(iconMeshes: readonly KindInstances[], index: number): KindInstances {
+  const own = iconMeshes[index]
+  if (own === undefined) throw new Error(`[atlas] no icon ${String(index)}`)
+  return own
+}
+
+/**
+ * What is read of each icon's model: how far it reaches, whether it moves by itself.
+ * @param iconMeshes - each icon's kind's model and pieces
+ * @returns the two readers of `IconInstances`
+ */
+function modelReaders(
+  iconMeshes: readonly KindInstances[]
+): Pick<IconInstances, 'reachOf' | 'movesAlone'> {
+  return {
+    reachOf: (index) => iconAt(iconMeshes, index).model.reach,
+    movesAlone: (index) => iconAt(iconMeshes, index).meshes.some(({ motion }) => motion !== null),
+  }
+}
+
+/**
  * Build the instances for a set of icons.
  * @param kinds - each icon's kind, in the icons' order
- * @param height - how tall an icon stands, in world units
+ * @param height - an icon's height, in world units — what one unit of every model is drawn at
  * @param depthPull - how far the icons are pulled toward the camera, in world units — 0 leaves them where they are
  * @param build - how a kind's model is built: the map's models, unless a test stands one in
  * @returns the instances, every icon at the origin until it is posed
@@ -196,9 +237,6 @@ export function createIconInstances(
     return own
   })
 
-  // Each icon's size: the icon height times its kind's (`ICON_SIZE`).
-  const sizes = kinds.map((kind) => height * ICON_SIZE[kind])
-
   // Worked in at every pose, never reallocated.
   const matrix = new Matrix4()
   const scale = new Vector3()
@@ -214,10 +252,10 @@ export function createIconInstances(
       poses.forEach(({ position, quaternion }, index) => {
         const own = iconMeshes[index]
         const slot = slots[index]
-        const size = sizes[index]
-        if (own === undefined || slot === undefined || size === undefined)
+        if (own === undefined || slot === undefined)
           throw new Error(`[atlas] no icon ${String(index)} to pose`)
-        matrix.compose(position, quaternion, scale.setScalar(size))
+        // Every kind at the one scale: a model's size is in its own points (ATLAS-469).
+        matrix.compose(position, quaternion, scale.setScalar(height))
         writePose(own, slot, matrix, seconds, scratch)
       })
       // Then every piece's buffer handed over at once, and what fades faded as it is at this moment.
@@ -227,6 +265,7 @@ export function createIconInstances(
       }
     },
     forEachPiece: pieceVisitor(iconMeshes, slots),
+    ...modelReaders(iconMeshes),
     setOpacity(opacity: number): void {
       for (const { model } of byKind.values()) model.setOpacity(opacity)
     },

@@ -10,7 +10,6 @@ import {
   ICON_FACES_CAMERA,
   ICON_FLAT_RAISE,
   ICON_LIFT,
-  ICON_SIZE,
   ICON_SOIL,
   ICON_SWAYS,
   ICON_YAW,
@@ -50,10 +49,12 @@ export interface PlacedForms {
   /** How dark the soiled ground about its foot is, 0 to 1 (`ICON_SOIL`) — read by its shadow. */
   soil: number
   /**
-   * How tall its own 3D model stands, in world units — the icon height times its kind's size (`ICON_SIZE`); the unit
-   * a model is fitted in, which a low model does not fill (`meshes/iconModel`, `MODEL_TALL`).
+   * How tall its own 3D model stands, in world units: its real height, read from the model (`IconModel.reach`) — a
+   * low crown's is well under its box's side. Its halo, its flat drawing and its shadow are set from it.
    */
   size: number
+  /** How many world units one unit of its model is: the icon height, the same for every kind (ATLAS-469). */
+  unit: number
 }
 
 /**
@@ -79,10 +80,11 @@ const UPRIGHT_AXIS = new Vector3(0, 1, 0)
  * Place one icon: its three forms over the same point, standing on the relief at its unscaled height until the first
  * frame scales it (`setReliefScale`).
  * @param at - which icon and where it stands
- * @param height - how tall the 3D icon stands
+ * @param height - an icon's height, in world units
+ * @param tall - how tall its kind's model stands, in icon heights (`IconModel.reach`)
  * @returns the forms
  */
-export function placeIcon(at: PlacedEventIcon, height: number): PlacedForms {
+export function placeIcon(at: PlacedEventIcon, height: number, tall: number): PlacedForms {
   const [x, y, z] = at.ground
   // Turned for good about its upright; a kind that follows the camera or sways is turned again at every frame.
   const rest = new Quaternion().setFromAxisAngle(UPRIGHT_AXIS, ICON_YAW[at.kind])
@@ -96,7 +98,8 @@ export function placeIcon(at: PlacedEventIcon, height: number): PlacedForms {
     turns: ICON_FACES_CAMERA[at.kind],
     sways: ICON_SWAYS[at.kind],
     rest,
-    size: ICON_SIZE[at.kind] * height,
+    size: tall * height,
+    unit: height,
     soil: ICON_SOIL[at.kind],
   }
   // Every height is set here, in the one place that writes them.

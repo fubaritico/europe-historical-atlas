@@ -9,7 +9,8 @@ import type { EventIconKind } from './kinds'
 
 /**
  * How tall an icon stands, in world units — the map is 12 wide; a pin is 0.12 to the top of its head. Set on sight
- * (the dev, 2026-10-26): 0.13, halved, then a little smaller again.
+ * (the dev, 2026-10-26): 0.13, halved, then a little smaller again. **The one figure that makes every icon bigger or
+ * smaller at once** — its model, its lift, its halo and its flat drawing are all told in it (ATLAS-469).
  */
 export const EVENT_ICON_HEIGHT = 0.05
 
@@ -36,22 +37,44 @@ export const ICON_LIFT: Record<EventIconKind, number> = {
 export const ICON_DEPTH_PULL = 1
 
 /**
- * How tall each kind's 3D model stands, in icon heights. The siege's was cut down on sight when it was a tower (the dev,
- * 2026-10-27: *« réduis la taille de la tour »*), 0.7; the trebuchet that replaced it twice that (*« deux fois plus
- * grande par rapport à la taille de départ »*). The battle's swords, 1 first, then 0.85 (the dev, 2026-10-31: *« réduis-la
- * un petit peu »*). The accession's crown, 1 first, then 0.7 (the dev, 2026-11-17, of the crown chosen that day: *« la
- * couronne doit être plus petite »*). **Then every kind at three quarters of that** — 0.85, 1.4 and 0.7 before it — set
- * on the map the same day, half tried first (the dev: *« on va garder ça comme ça »*). The cathedral, 0.6: set on
- * the map at Cologne the same day — 0.95 first, *« réduis sa taille par 2 »*, then *« tu peux l'agrandir un peu »*.
+ * How big each kind's 3D model is: the side of the box it is fitted in, **in percent of an icon's height**
+ * (`EVENT_ICON_HEIGHT`) — its height, or its width for a kind wider than tall (ATLAS-469; the dev, 2026-11-17: *« une
+ * boîte […] le modèle est mis dedans avec son maximum de place, et tout le monde a la même échelle, 1 sur 1 »*). The
+ * size is written into the model's own points (`meshes/iconModel`): every kind is then drawn at the one scale, and
+ * what stands about a model reads its real height from it (`IconModel.reach`). **Every icon bigger or smaller at
+ * once is `EVENT_ICON_HEIGHT`**, the one figure.
+ *
+ * The figures are the sizes set on sight until then, carried into the box so that nothing moved on the map the day
+ * of the change (each within 0.4 % of what it was). Where they came from: the siege's was cut down when it was a
+ * tower (the dev, 2026-10-27: *« réduis la taille de la tour »*), the trebuchet that replaced it twice that (*« deux
+ * fois plus grande par rapport à la taille de départ »*); the swords reduced (2026-10-31: *« réduis-la un petit
+ * peu »*); the crown too (2026-11-17: *« la couronne doit être plus petite »*); **then every kind at three quarters
+ * of that**, set on the map the same day (*« on va garder ça comme ça »*). The cathedral was set on the map at
+ * Cologne the same day — *« réduis sa taille par 2 »*, then *« tu peux l'agrandir un peu »*.
  */
 export const ICON_SIZE: Record<EventIconKind, number> = {
-  swords: 0.6375,
-  tower: 1.05,
-  crown: 0.525,
-  cathedral: 0.6,
+  // As wide as tall, or nearly: its width fills the box, its height 98 % of it.
+  swords: 65,
+  // The trebuchet: 105 to its arm's tip, and 116 long with its sling and its stone laid out where they rest before
+  // the throw — its box is the longer.
+  tower: 116,
+  // A low band and its lilies: 60 wide, 23 high.
+  crown: 60,
+  // Longer than tall: 108 from its west front to its choir, 60 to the top of its towers.
+  cathedral: 108,
   // A grave is a small thing: judged on the map at Cluny (the dev, 2026-11-17: « c'est juste la bonne taille […]
   // ça peut pas être gros […] c'est pudique, c'est bien »).
-  tomb: 0.45,
+  tomb: 45,
+}
+
+/**
+ * The side of the box a kind's 3D model is fitted in, in icon heights — `ICON_SIZE`, out of its percent: the one
+ * place the percent is read.
+ * @param kind - which icon
+ * @returns the side, `1` being an icon's height
+ */
+export function iconBoxSide(kind: EventIconKind): number {
+  return ICON_SIZE[kind] / 100
 }
 
 /**

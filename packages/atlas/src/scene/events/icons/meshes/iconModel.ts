@@ -1,6 +1,7 @@
 /**
- * A kind's 3D model, built once and shared by every icon of that kind (ATLAS-289): its parts fitted one unit high,
- * then fused into one geometry per colour, each with its faceted material. A hundred battles draw these few pieces a
+ * A kind's 3D model, built once and shared by every icon of that kind (ATLAS-289): its parts fitted in the one box
+ * every kind is fitted in, at its kind's size (ATLAS-469), then fused into one geometry per colour, each with its
+ * faceted material. A hundred battles draw these few pieces a
  * hundred times over — they are never built a hundred times.
  */
 
@@ -8,22 +9,23 @@ import { Matrix4 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 
 import { EVENT_ICON_PALETTE } from '../palette'
+import { iconBoxSide } from '../settings'
 
 import { cathedralParts } from './cathedral'
 import { crownParts } from './crown'
-import { faceted, standUnitHigh } from './parts'
+import { faceted, fitInBox } from './parts'
 import { swordParts } from './swords'
 import { tombParts } from './tomb'
 import { TREBUCHET_MOTIONS, trebuchetParts } from './trebuchet'
 
 import type { EventIconKind } from '../kinds'
 import type { EventIconPalette } from '../palette'
-import type { Fit, Motions, Part } from './parts'
+import type { Fit, Motions, Part, Reach } from './parts'
 import type { BufferGeometry, MeshStandardMaterial } from 'three'
 
 /**
  * Each kind's parts. A new kind is a new file beside this one and a line here — plus its line in `ICON_LIFT`
- * (`../settings`) and in `DRAWINGS` (`../flat/eventIconSvg`), which type-check asks for.
+ * and in `ICON_SIZE` (`../settings`) and in `DRAWINGS` (`../flat/eventIconSvg`), which type-check asks for.
  */
 const PARTS: Record<EventIconKind, () => Part[]> = {
   swords: swordParts,
@@ -34,20 +36,6 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   tomb: tombParts,
 }
 
-/**
- * How tall a kind's model stands in the icon's unit, for a kind one unit high is wrong for. Every model is fitted one
- * unit **high**, its width left free: the crown, a low band and its lilies (0.42 high as built, where the crown with
- * tall points before it was 0.95), came out more than twice as wide as any other icon (the dev, 2026-11-17: « le
- * modèle, il est trop gros […] c'est dans le modèle qu'il faut faire quelque chose »). At 0.44 its band is as wide as
- * that crown's was — two crowns made for the same head. Goes when every model is fitted in one box (ATLAS-469).
- *
- * **Known, until then**: what stands about the icon — its halo, its flat drawing's middle, its shadow's tile — still
- * reads the kind's height from `ICON_SIZE` (`../forms`), as if the model filled its unit; for the crown they are set
- * for a box 2.3 times taller than the crown. Judged as it is on the map by the dev, 2026-11-17. **Only for a kind that
- * stands still**: a moving piece is placed through the fit alone (`placeAt`), which knows nothing of this height.
- */
-const MODEL_TALL: Partial<Record<EventIconKind, number>> = { crown: 0.44 }
-
 /** The kinds whose model moves, and how: each motion its parts name. A kind left out stands still. */
 const MOTIONS: Partial<Record<EventIconKind, Motions>> = { tower: TREBUCHET_MOTIONS }
 
@@ -55,7 +43,7 @@ const MOTIONS: Partial<Record<EventIconKind, Motions>> = { tower: TREBUCHET_MOTI
 export interface IconPiece {
   /** The colour, a key of the palette. */
   colour: keyof EventIconPalette
-  /** The fused geometry, standing on the origin: one unit high with the rest of the model, or as `MODEL_TALL` has its kind. */
+  /** The fused geometry, standing on the origin, in the model's units — its size is in its points. */
   geometry: BufferGeometry
   /** Its faceted material. */
   material: MeshStandardMaterial
@@ -67,6 +55,11 @@ export interface IconPiece {
 export interface IconModel {
   /** The pieces, in the order their colours first appear in the model; a colour that moves is a piece apart. */
   readonly pieces: readonly IconPiece[]
+  /**
+   * How far the model reaches, in its own units — an icon's height on the map for a kind's model: its top above its
+   * foot, its widest side. What stands about an icon — its halo, its flat drawing, its shadow — reads its height here.
+   */
+  readonly reach: Reach
   /**
    * Where a moving piece stands at a moment, in the model's units: its geometry, built about the point the motion
    * places, goes through this placement.
@@ -131,7 +124,7 @@ interface GatheredPiece {
 /**
  * Gather a model's parts into pieces: one per colour that stands still, its parts' places baked into their geometries;
  * one per colour and motion that moves, its parts kept about their origin. Frees each part's own geometry.
- * @param parts - the parts, fitted one unit high
+ * @param parts - the parts, fitted in their box
  * @returns the pieces, in the order they first appear
  */
 function gatherPieces(parts: Part[]): GatheredPiece[] {
@@ -199,18 +192,15 @@ function fitPlacement(placement: Matrix4, fit: Fit): Matrix4 {
  * Build a kind's model.
  * @param kind - which shape
  * @param palette - its colours
- * @returns the model, one unit high — or as tall as `MODEL_TALL` says for its kind — standing on the origin
+ * @returns the model, fitted in a box of its kind's size (`ICON_SIZE`), standing on the origin: one unit of it is one
+ *   icon height on the map, whatever its kind
  * @throws when a colour's parts cannot be fused (`buildModel`)
  */
 export function buildIconModel(
   kind: EventIconKind,
   palette: EventIconPalette = EVENT_ICON_PALETTE
 ): IconModel {
-  const model = buildModel(kind, PARTS[kind](), MOTIONS[kind], palette)
-  // A kind that stands lower than the unit: its fused pieces brought down to its own height, about the foot.
-  const tall = MODEL_TALL[kind]
-  if (tall !== undefined) for (const { geometry } of model.pieces) geometry.scale(tall, tall, tall)
-  return model
+  return buildModel(kind, PARTS[kind](), MOTIONS[kind], palette, iconBoxSide(kind))
 }
 
 /**
@@ -221,7 +211,8 @@ export function buildIconModel(
  * @param motions - how its moving parts are placed at a moment, by the names they use; `undefined` for a model that
  *   stands still
  * @param palette - its colours
- * @returns the model, one unit high, standing on the origin
+ * @param side - the side of the box it is fitted in: `1` for a candidate, its kind's size for a model of the map
+ * @returns the model, its longest side filling the box, standing on the origin
  * @throws when a colour's parts cannot be fused (`fusePieces`) — a model drawn without that colour would be a battle
  *   with no blades, said nowhere; or when a part names a motion the model does not have, the same kind of defect
  */
@@ -229,10 +220,11 @@ export function buildModel(
   name: string,
   parts: Part[],
   motions: Motions | undefined,
-  palette: EventIconPalette
+  palette: EventIconPalette,
+  side = 1
 ): IconModel {
-  // 1. The parts, fitted one unit high, gathered into pieces — each moving one's motion known.
-  const fitted = standUnitHigh(parts)
+  // 1. The parts, fitted in their box, gathered into pieces — each moving one's motion known.
+  const fitted = fitInBox(parts, side)
   const byPiece = gatherPieces(fitted.parts)
   const missing = byPiece.find(({ motion }) => motion !== null && motions?.[motion] === undefined)
   if (missing !== undefined) {
@@ -257,6 +249,7 @@ export function buildModel(
 
   return {
     pieces,
+    reach: fitted.reach,
     placeAt(motion: string, seconds: number, into: Matrix4): Matrix4 {
       const move = motions?.[motion]
       if (move === undefined) throw new Error(`[atlas] the ${name} icon has no ${motion} motion`)

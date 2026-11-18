@@ -377,3 +377,7 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   les deux fonds de carte ne sont plus cuits du même relief, ce que la table de parité promet (`0ee299d`). **Le dev garde le
   niveau 6** (19/10 : *« ça fonctionne »*). Remède : une ligne dans `packages/cartographer/src/main.tsx`
   (`/heightmaps/europe-dem-z6-1920`), puis son test. **Sévérité : à savoir.**
+- **[Closed 2026-11-17, ATLAS-469: every model fitted in one box, its real height read from the model (`IconModel.reach`)] The crown stands lower than its unit, and what stands about it does not know** (2026-11-17, review ARCH-001): its
+  model is brought to 0.44 of the icon's unit (`meshes/iconModel`, `MODEL_TALL`), while its halo, its flat drawing's
+  middle and its place before a city's name are still told from `ICON_SIZE`. Judged as it is on the map. **Remedy**:
+  ATLAS-469, every model fitted in one box. **Severity: cosmétique.**

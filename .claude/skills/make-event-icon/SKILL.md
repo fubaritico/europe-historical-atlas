@@ -80,6 +80,8 @@ bon », never before.
   right — but its own shapes are not, so a drawing outside 44 must be thought in proportions, which is how the
   trebuchet came out thin on the map at first (drawn 80 wide, timbers of 5.5). **Only the swords and the pin are drawn in
   44 today**; any other sprite is redrawn into the frame the next time it is touched.
-- **3D model**: one unit high on its base (`meshes/iconModel` normalises it); `flatShading` gives each face one tone,
+- **3D model**: fitted in the common box (`meshes/parts.fitInBox`: its longest side, height or width, fills a cube
+  whose side is its kind's `ICON_SIZE`, in percent of an icon's height — the size is in the model's points, every kind
+  drawn at one scale, ATLAS-469); `flatShading` gives each face one tone,
   so facets are what make it read; a light rim behind it that follows the camera; a halo to detach it from the map.
 - **One icon at a time**, each with its own specifics (« une icône à la fois, chacune ses spécificités »).

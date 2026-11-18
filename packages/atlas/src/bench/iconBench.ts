@@ -66,11 +66,14 @@ const builders = candidates
         )
     )
   : KINDS.map((kind) => () => createEventIcon(kind))
+/** How much bigger than on the map's own scale a kind is shown: each at its size beside the others (ATLAS-469). */
+const KIND_SCALE = 1.5
 const middle = (builders.length - 1) / 2
 const icons = builders.map((build, index) => {
   const large = build()
   const small = build()
-  small.object.scale.setScalar(0.25)
+  large.object.scale.setScalar(candidates ? 1 : KIND_SCALE)
+  small.object.scale.setScalar(0.25 * (candidates ? 1 : KIND_SCALE))
   if (crowns) {
     // A low open crown, fitted one unit high like any icon, is far wider than a closed one: the candidates are shown
     // at one width — crowns made for the same head — so two neighbours never overlap.

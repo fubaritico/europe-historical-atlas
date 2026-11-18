@@ -28,14 +28,20 @@ import type { SilhouetteGround } from './silhouette'
 import type { Soil } from './soil'
 import type { Matrix4 } from 'three'
 
-/** One icon as its shadow needs it: where its base stands, how far it floats, how tall it is. */
+/** One icon as its shadow needs it: where its base stands, how far it floats, how tall it is, whether it moves. */
 export interface ShadowedIcon {
   /** Where its base stands, scaled as the relief is. */
   readonly position: Vector3
   /** How far its base floats above its place. */
   readonly lift: number
-  /** How tall it stands. */
+  /** How tall its model stands, in world units. */
   readonly size: number
+  /** How many world units one unit of its model is. */
+  readonly unit: number
+  /** Whether it turns to face the camera at each frame. */
+  readonly turns: boolean
+  /** Whether it sways about its upright at each frame. */
+  readonly sways: boolean
   /**
    * How dark the soiled ground about its foot is, 0 to 1 — a building's, so it reads as set in the ground (`soil`).
    * Left out or `0`: none.
@@ -56,7 +62,10 @@ export interface IconShadowOptions {
   softness: number
   /** How much room is kept around the icon's foot, as a share of its size. */
   margin: number
-  /** The shortest time between two drawings of an icon that moves, in seconds. */
+  /**
+   * The shortest time between two drawings of an icon that moves, in seconds. One that stands still — a cathedral, a
+   * grave — is drawn once, and again only when the relief is rescaled or the icons come back into view (ATLAS-469).
+   */
   interval: number
   /** How far the soiled ground spreads past a building's walls, as a share of its size. */
   soilReach: number
@@ -76,14 +85,15 @@ export const ICON_SHADOW_OPTIONS: IconShadowOptions = {
   soilReach: 0.2,
 }
 
-/** How far an icon's own model reaches, in its sizes — its model is built one size high, and as wide as it is. */
+/** How far an icon's own model reaches, in its model's units (`ShadowedIcon.unit`). */
 export interface ModelExtent {
   /** The furthest it reaches from its upright, whichever way it is turned. */
   readonly radius: number
   /** Its top above its base. */
   readonly top: number
   /**
-   * How far the soiled ground spreads past its walls, for a model that has it; left out, none. The frame keeps room
+   * How far the soiled ground spreads past its walls, as a share of its height, for a model that has it; left out,
+   * none. The frame keeps room
    * for it and for its soft end, or the soil stops at the frame in a straight edge (the dev, 2026-11-17: « on voit un
    * bord droit »).
    */
@@ -101,7 +111,7 @@ const SOIL_ROOM = 1.8
  * places it.
  * @param instances - the icons as drawn
  * @param index - which icon
- * @returns its reach, in its sizes
+ * @returns its reach, in its model's units
  */
 export function modelExtent(
   instances: Pick<IconInstances, 'forEachPiece'>,
@@ -125,17 +135,19 @@ export function modelExtent(
  * frame its size gives.
  * @param icon - the icon
  * @param margin - the room, as a share of its size
- * @param extent - how far its model reaches, in its sizes; left out, the icon's size alone frames it
+ * @param extent - how far its model reaches, in its model's units; left out, the icon's size alone frames it
  * @returns the frame
  */
 export function iconShadowFrame(
-  icon: Pick<ShadowedIcon, 'lift' | 'size'>,
+  icon: Pick<ShadowedIcon, 'lift' | 'size' | 'unit'>,
   margin: number,
   extent?: ModelExtent
 ): ShadowFrame {
-  const reach = (extent?.radius ?? 0) * REACH_ROOM + (extent?.soilReach ?? 0) * SOIL_ROOM
-  const room = Math.max(icon.size * margin, reach * icon.size)
-  const top = Math.max(icon.size, (extent?.top ?? 0) * icon.size)
+  const reach =
+    (extent?.radius ?? 0) * REACH_ROOM * icon.unit +
+    (extent?.soilReach ?? 0) * SOIL_ROOM * icon.size
+  const room = Math.max(icon.size * margin, reach)
+  const top = Math.max(icon.size, (extent?.top ?? 0) * icon.unit)
   return { sMin: -room, sMax: shadowReach(icon.lift + top, SHADOW_SUN) + room, tHalf: room }
 }
 
@@ -338,6 +350,66 @@ function framedIcons(
   })
 }
 
+/** Which tiles are drawn again at a moment, and what makes the others due. */
+interface TileRedraw {
+  /**
+   * Draw the tiles that are due at a moment.
+   * @param seconds - the time since the map started
+   * @returns how many tiles were drawn
+   */
+  draw(seconds: number): number
+  /** The still icons stand elsewhere — the relief was rescaled: their tiles are due. */
+  forgetStill(): void
+  /** Every tile is due at the next drawing, whatever the interval. */
+  forgetAll(): void
+}
+
+/**
+ * When each icon's tile is drawn again (ATLAS-469; the dev's worry for the frame rate, 2026-11-17: only the shadows
+ * of the icons that move are redrawn). An icon whose shadow changes by itself — it turns to the camera, it sways, its
+ * model moves — is drawn again at every interval; one that stands still, a cathedral or a grave, once, and again only
+ * when it is forgotten.
+ * @param framed - each icon with its frame, in the instances' order
+ * @param instances - the icons as drawn, asked whether each one's model moves by itself
+ * @param drawTile - how one icon's tile is drawn
+ * @param interval - the shortest time between two drawings of an icon that moves, in seconds
+ * @returns the redraw
+ */
+function tileRedraw(
+  framed: readonly { icon: ShadowedIcon; frame: ShadowFrame }[],
+  instances: Pick<IconInstances, 'movesAlone'>,
+  drawTile: (index: number, icon: ShadowedIcon, frame: ShadowFrame) => void,
+  interval: number
+): TileRedraw {
+  const moving = framed.map(
+    ({ icon }, index) => icon.turns || icon.sways || instances.movesAlone(index)
+  )
+  let last = Number.NEGATIVE_INFINITY
+  let stillDrawn = false
+  return {
+    draw(seconds: number): number {
+      const due = seconds - last >= interval
+      if (due) last = seconds
+      let drawn = 0
+      for (const [index, { icon, frame }] of framed.entries()) {
+        // A moving icon waits for its interval; a still one is drawn the first time it is asked, at once.
+        if (moving[index] === true ? !due : stillDrawn) continue
+        drawTile(index, icon, frame)
+        drawn += 1
+      }
+      stillDrawn = true
+      return drawn
+    },
+    forgetStill(): void {
+      stillDrawn = false
+    },
+    forgetAll(): void {
+      last = Number.NEGATIVE_INFINITY
+      stillDrawn = false
+    },
+  }
+}
+
 /**
  * The icons' shadows, one tile each in one texture, laid on the relief.
  * @param icons - each icon, in the instances' order
@@ -348,7 +420,7 @@ function framedIcons(
  */
 export function createIconShadows(
   icons: readonly ShadowedIcon[],
-  instances: Pick<IconInstances, 'forEachPiece'>,
+  instances: Pick<IconInstances, 'forEachPiece' | 'movesAlone'>,
   groundAt: GroundAt,
   options: IconShadowOptions = ICON_SHADOW_OPTIONS
 ): EventMarkers & { setOpacity: (opacity: number) => void } {
@@ -368,13 +440,19 @@ export function createIconShadows(
   })
 
   // 2. Drawing a tile: the icon's shadow from its pose.
-  const drawTile = tileDrawer(sheet, instances, options)
-  let last = Number.NEGATIVE_INFINITY
+  const tiles = tileRedraw(
+    framed,
+    instances,
+    tileDrawer(sheet, instances, options),
+    options.interval
+  )
 
   return {
     object,
     setReliefScale(scale: number): void {
       restOnRelief(geometry, grounds, scale)
+      // The icons stand elsewhere: the still ones are drawn again.
+      tiles.forgetStill()
     },
     setZoom(): void {
       // The shadows fade with the 3D icons, through `setOpacity`.
@@ -385,16 +463,13 @@ export function createIconShadows(
     faceCamera(_camera, seconds: number): void {
       // Drawn again from the icons as they are posed now, at most every interval — and not at all while the 3D icons
       // are faded out, from afar: nothing would show it.
-      if (material.opacity === 0 || seconds - last < options.interval) return
-      last = seconds
-      framed.forEach(({ icon, frame }, index) => {
-        drawTile(index, icon, frame)
-      })
-      sheet.texture.needsUpdate = true
+      if (material.opacity === 0) return
+      // Handed to the GPU only when a tile changed: a map of buildings alone uploads nothing once drawn.
+      if (tiles.draw(seconds) > 0) sheet.texture.needsUpdate = true
     },
     setOpacity(opacity: number): void {
       // Coming back into view: drawn at the next frame, never shown as it stood when it faded out.
-      if (material.opacity === 0 && opacity > 0) last = Number.NEGATIVE_INFINITY
+      if (material.opacity === 0 && opacity > 0) tiles.forgetAll()
       material.opacity = SOIL_OPACITY * opacity
     },
     dispose(): void {

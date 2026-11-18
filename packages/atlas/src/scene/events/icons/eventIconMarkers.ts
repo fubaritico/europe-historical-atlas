@@ -82,11 +82,12 @@ function buildForms(
   groundAt: GroundAt,
   height: number
 ) {
-  const icons = placed.map((at) => placeIcon(at, height))
   const kinds = placed.map(({ kind }) => kind)
   // Close up, the icons and their halo pulled toward the camera alike, so the slopes cut neither.
   const depthPull = height * ICON_DEPTH_PULL
   const instances = createIconInstances(kinds, height, depthPull)
+  // Each icon's forms, set from its model's real height.
+  const icons = placed.map((at, index) => placeIcon(at, height, instances.reachOf(index).tall))
   const materials = billboardMaterials(loadTexture)
   // The halos just before the icons, the drawings after the borders, like every marker — for the kinds that have one.
   const haloed = icons.filter((_, index) => hasHalo(kinds[index]))

@@ -2,22 +2,48 @@ import { BoxGeometry, Matrix4, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { EVENT_ICON_PALETTE } from '../palette'
+import { ICON_SIZE } from '../settings'
 
 import { buildIconModel, buildModel, placedGeometry } from './iconModel'
+import { fitInBox } from './parts'
 
 import type { EventIconKind } from '../kinds'
 
 /**
- * How tall each kind's model stands: one unit, but the crown — a low band and its lilies, brought down so it is no
- * wider than a crown with tall points (the dev, 2026-11-17: « le modèle, il est trop gros »).
+ * How tall each kind's model stood on the map, in icon heights, the day before every model was fitted in one box
+ * (measured 2026-11-17, ATLAS-469): the sizes the dev set on sight, which the change was not to move.
  */
-const TALLS: [EventIconKind, number][] = [
-  ['swords', 1],
-  ['tower', 1],
-  ['crown', 0.44],
-  ['cathedral', 1],
-  ['tomb', 1],
+const TALLS_SET_ON_SIGHT: [EventIconKind, number][] = [
+  ['swords', 0.6375],
+  ['tower', 1.05],
+  ['crown', 0.231],
+  ['cathedral', 0.6],
+  ['tomb', 0.45],
 ]
+
+/**
+ * The box around a model's pieces, each moving one where its motion has it at rest — the stone, nowhere at rest,
+ * left out.
+ * @param kind - which model
+ * @returns the lowest and highest point, and the widest side on the ground
+ */
+function boxOfModel(kind: EventIconKind): { floor: number; top: number; wide: number } {
+  const model = buildIconModel(kind)
+  const boxes = model.pieces
+    .filter(({ motion }) => motion !== 'stone')
+    .map(({ geometry, motion }) => {
+      geometry.computeBoundingBox()
+      const own = geometry.boundingBox?.clone()
+      if (!own) throw new Error('no box')
+      return motion === null ? own : own.applyMatrix4(model.placeAt(motion, 0, new Matrix4()))
+    })
+  const span = (axis: 'x' | 'y' | 'z'): [number, number] => [
+    Math.min(...boxes.map((own) => own.min[axis])),
+    Math.max(...boxes.map((own) => own.max[axis])),
+  ]
+  const [x, y, z] = [span('x'), span('y'), span('z')]
+  return { floor: y[0], top: y[1], wide: Math.max(x[1] - x[0], z[1] - z[0]) }
+}
 
 /**
  * A small box, for a part of a model built from literals.
@@ -39,31 +65,78 @@ describe('buildIconModel', () => {
   })
 
   describe('variants', () => {
-    it.each(TALLS)('keeps the %s %d high on the origin once fused', (kind, tall) => {
-      // A moving piece is built about its own origin: placed as its motion has it at rest, it stands where the
-      // model has it — the stone is nowhere at rest, so it is left out.
-      const model = buildIconModel(kind)
-      const tops = model.pieces
-        .filter(({ motion }) => motion !== 'stone')
-        .map(({ geometry, motion }) => {
-          geometry.computeBoundingBox()
-          const box = geometry.boundingBox?.clone()
-          return motion === null ? box : box?.applyMatrix4(model.placeAt(motion, 0, new Matrix4()))
-        })
-      expect(Math.min(...tops.map((box) => box?.min.y ?? Number.NaN))).toBeCloseTo(0, 5)
-      expect(Math.max(...tops.map((box) => box?.max.y ?? Number.NaN))).toBeCloseTo(tall, 5)
+    it.each(TALLS_SET_ON_SIGHT)(
+      'stands the %s on the origin, its longest side filling the box of its kind’s size',
+      (kind) => {
+        const { floor, top, wide } = boxOfModel(kind)
+        expect(floor).toBeCloseTo(0, 5)
+        // The siege's box also holds its sling and its stone laid out where they rest before the throw, which the
+        // motion then places elsewhere: what shows of it stays within its box, without filling it.
+        if (kind === 'tower') {
+          expect(Math.max(top, wide)).toBeLessThan(ICON_SIZE[kind] / 100)
+          // Its box, the resting parts counted, is filled all the same: the model says so itself.
+          const { reach } = buildIconModel(kind)
+          expect(Math.max(reach.tall, reach.wide)).toBeCloseTo(ICON_SIZE[kind] / 100, 5)
+        } else expect(Math.max(top, wide)).toBeCloseTo(ICON_SIZE[kind] / 100, 3)
+      }
+    )
+
+    it.each(TALLS_SET_ON_SIGHT)(
+      'keeps the %s as tall on the map as it was set on sight, %d of an icon’s height, to half a percent',
+      (kind, tall) => {
+        // The day of the change nothing was to move on screen: half a percent is under a pixel of any icon.
+        expect(boxOfModel(kind).top / tall).toBeGreaterThan(0.995)
+        expect(boxOfModel(kind).top / tall).toBeLessThan(1.005)
+      }
+    )
+
+    it.each(TALLS_SET_ON_SIGHT)(
+      'says how far the %s reaches: its real height, its real width',
+      (kind) => {
+        const { top, wide } = boxOfModel(kind)
+        const { reach } = buildIconModel(kind)
+        expect(reach.tall).toBeCloseTo(top, 2)
+        // The siege's moving parts are counted where they rest, wider than its motion shows them.
+        if (kind === 'tower') expect(reach.wide).toBeGreaterThan(wide)
+        else expect(reach.wide).toBeCloseTo(wide, 3)
+      }
+    )
+
+    it('says a low crown stands well under its box: what stands about it reads that, not its size', () => {
+      expect(buildIconModel('crown').reach.tall).toBeLessThan((ICON_SIZE.crown / 100) * 0.5)
     })
 
-    it('keeps the crown, low as it is, no wider than a unit and a third', () => {
-      // Fitted one unit high like the others, its band and lilies came out 2.8 wide.
-      const widths = buildIconModel('crown').pieces.map(({ geometry }) => {
-        geometry.computeBoundingBox()
-        return (
-          (geometry.boundingBox?.max.x ?? Number.NaN) - (geometry.boundingBox?.min.x ?? Number.NaN)
-        )
-      })
-      expect(Math.max(...widths)).toBeLessThan(1.34)
-      expect(Math.max(...widths)).toBeGreaterThan(1)
+    it('brings a low and wide model to the width of a tall one, with no factor of its own', () => {
+      // The dev, 2026-11-17, of the low open crown: fitted one unit high it came out 2.8 wide, twice any other icon.
+      const low = buildModel(
+        'low',
+        [{ geometry: new BoxGeometry(2.8, 1, 2.8).translate(0, 0.5, 0), colour: 'gold' }],
+        undefined,
+        EVENT_ICON_PALETTE
+      )
+      const tall = buildModel(
+        'tall',
+        [{ geometry: new BoxGeometry(1, 1, 1).translate(0, 0.5, 0), colour: 'gold' }],
+        undefined,
+        EVENT_ICON_PALETTE
+      )
+      expect(low.reach.wide).toBeCloseTo(tall.reach.wide)
+      expect(low.reach.wide).toBeCloseTo(1)
+      expect(low.reach.tall).toBeCloseTo(1 / 2.8)
+    })
+
+    it('writes the size given into the model’s own points', () => {
+      const model = buildModel(
+        'sized',
+        [{ geometry: new BoxGeometry(1, 2, 1).translate(0, 1, 0), colour: 'gold' }],
+        undefined,
+        EVENT_ICON_PALETTE,
+        0.6
+      )
+      model.pieces[0]?.geometry.computeBoundingBox()
+      expect(model.pieces[0]?.geometry.boundingBox?.max.y).toBeCloseTo(0.6)
+      expect(model.reach.tall).toBeCloseTo(0.6)
+      expect(model.reach.wide).toBeCloseTo(0.3)
     })
 
     it('bakes a placed part where it sits: the crown’s stones stand around the band, not at its axis', () => {
@@ -183,6 +256,33 @@ describe('buildIconModel', () => {
       expect(() => buildIconModel('swords').placeAt('arm', 0, new Matrix4())).toThrow(
         /no arm motion/
       )
+    })
+  })
+
+  describe('fitInBox', () => {
+    it('measures a turned part as it is turned: a long beam turned a quarter is long the other way', () => {
+      // Long on X and thin on Z as built, placed far along Z: its width on the ground is what the turn makes it.
+      const { reach } = fitInBox([
+        { geometry: new BoxGeometry(4, 1, 0.2), colour: 'wood', turn: Math.PI / 2 },
+        { geometry: new BoxGeometry(0.2, 1, 0.2), colour: 'wood', at: [0, 0, 3] },
+      ])
+      // From z = -2 (the beam's end) to z = 3.1 (the post's far side): 5.1 long, the box's side.
+      expect(reach.wide).toBeCloseTo(1)
+      expect(reach.tall).toBeCloseTo(1 / 5.1)
+    })
+
+    it('counts a moving part where it stands at rest', () => {
+      const { reach } = fitInBox([
+        { geometry: new BoxGeometry(1, 1, 1), colour: 'wood' },
+        { geometry: new BoxGeometry(1, 1, 1), colour: 'wood', at: [0, 3, 0], moves: 'm' },
+      ])
+      // From -0.5 to 3.5: four high, one wide.
+      expect(reach.tall).toBeCloseTo(1)
+      expect(reach.wide).toBeCloseTo(0.25)
+    })
+
+    it('refuses parts with no extent: nothing to fit', () => {
+      expect(() => fitInBox([])).toThrow(/no extent/)
     })
   })
 

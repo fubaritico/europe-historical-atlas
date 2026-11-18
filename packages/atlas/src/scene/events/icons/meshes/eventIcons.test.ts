@@ -2,6 +2,7 @@ import { Box3, BoxGeometry, Mesh, MeshStandardMaterial } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { EVENT_ICON_PALETTE } from '../palette'
+import { ICON_SIZE } from '../settings'
 
 import { createEventIcon, iconOf } from './eventIcons'
 import { towerParts } from './tower'
@@ -20,18 +21,14 @@ function meshes(object: Object3D): Mesh[] {
 
 describe('createEventIcon', () => {
   describe('happy path', () => {
-    it.each<[EventIconKind, number]>([
-      ['swords', 1],
-      ['tower', 1],
-      // The crown, a low band and its lilies, stands lower so it is no wider than the others (`MODEL_TALL`).
-      ['crown', 0.44],
-      ['cathedral', 1],
-      ['tomb', 1],
-    ])('stands the %s %d high on the origin', (kind, tall) => {
-      const box = new Box3().setFromObject(createEventIcon(kind).object)
-      expect(box.min.y).toBeCloseTo(0, 5)
-      expect(box.max.y).toBeCloseTo(tall, 5)
-    })
+    it.each<EventIconKind>(['swords', 'tower', 'crown', 'cathedral', 'tomb'])(
+      'stands the %s on the origin, within the box of its kind’s size',
+      (kind) => {
+        const box = new Box3().setFromObject(createEventIcon(kind).object)
+        expect(box.min.y).toBeCloseTo(0, 5)
+        expect(box.max.y).toBeLessThanOrEqual(ICON_SIZE[kind] / 100 + 1e-5)
+      }
+    )
   })
 
   describe('variants', () => {
@@ -86,6 +83,7 @@ describe('createEventIcon', () => {
             motion: 'm',
           },
         ],
+        reach: { tall: 1, wide: 1 },
         placeAt: (_motion, seconds, into) => into.makeTranslation(seconds + 1, 0, 0),
         fadeAt: vi.fn(),
         setOpacity: vi.fn(),

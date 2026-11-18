@@ -20,6 +20,7 @@ import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from '../markers'
 import { SOIL_OPACITY } from '../shadows/soil'
 
 import { EVENT_BLUR_LAYER, createEventIconMarkers } from './eventIconMarkers'
+import { buildIconModel } from './meshes/iconModel'
 import {
   EVENT_ICON_HEIGHT,
   FLAT_HALO_SPAN,
@@ -30,7 +31,6 @@ import {
   ICON_FLAT_SPAN,
   ICON_HALO_SPAN,
   ICON_LIFT,
-  ICON_SIZE,
   ICON_SWAY,
   ICON_YAW,
 } from './settings'
@@ -38,6 +38,13 @@ import {
 import type { PlacedEventIcon } from './forms'
 import type { EventIconKind } from './kinds'
 import type { BufferGeometry, Material, Object3D } from 'three'
+
+/** How tall each kind's model really stands, in icon heights — what its halo and its flat drawing are set from. */
+const TALL = {
+  swords: buildIconModel('swords').reach.tall,
+  tower: buildIconModel('tower').reach.tall,
+  crown: buildIconModel('crown').reach.tall,
+}
 
 const TWO: PlacedEventIcon[] = [
   { ground: [1, 0.2, -1], kind: 'swords' },
@@ -208,7 +215,7 @@ describe('createEventIconMarkers', () => {
     it('scales each icon to the height given', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS, 0.5)
       for (const axis of iconPose(markers.object, 'swords').scale.toArray())
-        expect(axis).toBeCloseTo(0.5 * ICON_SIZE.swords)
+        expect(axis).toBeCloseTo(0.5)
     })
   })
 
@@ -249,14 +256,11 @@ describe('createEventIconMarkers', () => {
       expect(turnOf('tower wood')).toBeCloseTo(Math.abs(ICON_YAW.tower))
     })
 
-    it('stands them the default height when none is given, each kind at its own size', () => {
+    it('stands them the default height when none is given, every kind at the one scale', () => {
+      // A kind's size is in its model's own points (ATLAS-469): no factor stands beside it.
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
-      expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(
-        EVENT_ICON_HEIGHT * ICON_SIZE.swords
-      )
-      expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(
-        EVENT_ICON_HEIGHT * ICON_SIZE.tower
-      )
+      expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
+      expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
     })
 
     it('orders the 3D icons after the borders, and their halos just before them', () => {
@@ -495,7 +499,7 @@ describe('createEventIconMarkers', () => {
       const flatAt = (): number => squarePose(markers.object, 'swords').position.y
       const swordsAt = (): number => iconPose(markers.object, 'swords').position.y
       expect(flatAt()).toBeCloseTo(
-        swordsAt() + EVENT_ICON_HEIGHT * ICON_SIZE.swords * (0.5 + ICON_FLAT_RAISE)
+        swordsAt() + EVENT_ICON_HEIGHT * TALL.swords * (0.5 + ICON_FLAT_RAISE)
       )
       markers.setZoom(ICON_CROSS_FADE.zoom, 10_000)
       expect(squarePose(markers.object, 'swords').scale.x).toBeCloseTo(
@@ -503,7 +507,7 @@ describe('createEventIconMarkers', () => {
       )
       markers.setReliefScale(3)
       expect(flatAt()).toBeCloseTo(
-        swordsAt() + EVENT_ICON_HEIGHT * ICON_SIZE.swords * (0.5 + ICON_FLAT_RAISE)
+        swordsAt() + EVENT_ICON_HEIGHT * TALL.swords * (0.5 + ICON_FLAT_RAISE)
       )
     })
 
@@ -533,9 +537,24 @@ describe('createEventIconMarkers', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const halo = squarePose(markers.object, 'halo', 1)
       expect(halo.position.y).toBeCloseTo(
-        iconPose(markers.object, 'tower').position.y + (EVENT_ICON_HEIGHT * ICON_SIZE.tower) / 2
+        iconPose(markers.object, 'tower').position.y + (EVENT_ICON_HEIGHT * TALL.tower) / 2
       )
       expect(halo.scale.x).toBeCloseTo(EVENT_ICON_HEIGHT * ICON_HALO_SPAN)
+    })
+
+    it('sets a low crown’s halo at the middle of its real height, not of its box', () => {
+      // The crown is 60 % of an icon's height wide and 23 % tall: read from its box's side, its halo stood well
+      // above it (review of 2026-11-17, ATLAS-469).
+      const markers = createEventIconMarkers(
+        [{ ground: [0, 0, 0], kind: 'crown' }],
+        STUB,
+        FLAT,
+        TARGETS
+      )
+      const halo = squarePose(markers.object, 'halo', 0)
+      const middle = halo.position.y - iconPose(markers.object, 'crown').position.y
+      expect(middle).toBeCloseTo((EVENT_ICON_HEIGHT * TALL.crown) / 2)
+      expect(middle).toBeLessThan(EVENT_ICON_HEIGHT * 0.15)
     })
 
     // ATLAS-306: from afar too, so a drawing over a country's name detaches from it.

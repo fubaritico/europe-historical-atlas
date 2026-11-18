@@ -14,7 +14,7 @@ import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { createIconInstances } from './iconInstances'
-import { ICON_SIZE } from './settings'
+import { buildIconModel } from './meshes/iconModel'
 
 import type { IconPose } from './iconInstances'
 import type { Material } from 'three'
@@ -103,7 +103,8 @@ describe('createIconInstances', () => {
       const matrix = new Matrix4()
       meshes(instances.object)[0]?.getMatrixAt(0, matrix)
       matrix.decompose(new Vector3(), new Quaternion(), scale)
-      for (const axis of scale.toArray()) expect(axis).toBeCloseTo(0.5 * ICON_SIZE.swords)
+      // Every kind at the one scale, the icon's height: a model's size is in its own points (ATLAS-469).
+      for (const axis of scale.toArray()) expect(axis).toBeCloseTo(0.5)
     })
   })
 
@@ -112,6 +113,7 @@ describe('createIconInstances', () => {
       const fadeAt = vi.fn()
       const instances = createIconInstances(['crown'], 2, 0, () => ({
         pieces: [piece(null), piece('m')],
+        reach: { tall: 1, wide: 1 },
         placeAt: (_motion, seconds, into) => into.makeTranslation(seconds, 0, 0),
         fadeAt,
         setOpacity: vi.fn(),
@@ -121,8 +123,27 @@ describe('createIconInstances', () => {
       // And what fades is faded as it is at the same moment.
       expect(fadeAt).toHaveBeenCalledWith(3)
       expect(poseOf(instances.object, 0).position.x).toBe(5)
-      // The placement's 3 along X, scaled by the icon's 2 and by the crown's own size, from where the icon stands.
-      expect(poseOf(instances.object, 1).position.x).toBeCloseTo(5 + 6 * ICON_SIZE.crown)
+      // The placement's 3 along X, scaled by the icon's 2, from where the icon stands.
+      expect(poseOf(instances.object, 1).position.x).toBeCloseTo(5 + 6)
+    })
+
+    it('says how far each icon’s model reaches, its own kind’s', () => {
+      const instances = createIconInstances(['swords', 'crown', 'swords'], 1, 0)
+      expect(instances.reachOf(0)).toEqual(buildIconModel('swords').reach)
+      expect(instances.reachOf(1)).toEqual(buildIconModel('crown').reach)
+      expect(instances.reachOf(2)).toEqual(buildIconModel('swords').reach)
+    })
+
+    it('says the siege’s model moves by itself, and the swords’ does not', () => {
+      const instances = createIconInstances(['swords', 'tower'], 1, 0)
+      expect(instances.movesAlone(0)).toBe(false)
+      expect(instances.movesAlone(1)).toBe(true)
+    })
+
+    it('refuses to read the model of an icon that is not there', () => {
+      const instances = createIconInstances(['swords'], 1, 0)
+      expect(() => instances.reachOf(1)).toThrow(/no icon 1/)
+      expect(() => instances.movesAlone(1)).toThrow(/no icon 1/)
     })
 
     it('moves the siege’s arm with the moment, and leaves its frame', () => {
