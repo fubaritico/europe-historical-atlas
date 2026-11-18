@@ -39,7 +39,8 @@ Scenario: a year shows its own events only
 
 > **Built 2026-11-02 (`eb15874`), on the dev's word** — *"the events are shown on one year only; there, the events of 1100
 > were shown on 1200"*. A date covers its year, an interval each year it covers, circa does not widen
-> (`core/time/dateOverlap`, `dateCoversYear`, his rule of 30/10). The cities still show on every year (ATLAS-341).
+> (`core/time/dateOverlap`, `dateCoversYear`, his rule of 30/10). The cities follow the same rule since 2026-11-18
+> (ATLAS-341): a city shows on the year its sheet is dated, and on no other.
 > **Walked** by the dev, 03/11: *"I did see the events distributed by year; it works."*
 
 ## From afar a flat drawing, close up the 3D icon

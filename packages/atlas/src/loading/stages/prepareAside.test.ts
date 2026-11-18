@@ -76,6 +76,18 @@ describe('prepareAside', () => {
       expect(asMock(deps.layers.rebuildFills).mock.calls.length).toBe(fillsBefore + 1)
       expect([deps.sources.askedYear, deps.sources.regionSet?.year]).toEqual([1100, 1100])
     })
+
+    it('stands the events and the cities of the map laid aside under its own year, not the one shown', async () => {
+      // The cities and the events are those of the year asked when they are stood (ATLAS-341): a map laid aside
+      // under the shown year would be shelved with the shown year's cities.
+      const { deps, pipeline } = await startedOn1100()
+      const stoodUnder: (number | null)[] = []
+      asMock(deps.layers.rebuildEvents).mockImplementation(() => {
+        stoodUnder.push(deps.sources.askedYear)
+      })
+      await pipeline.prepareAside(1200, () => true, QUIET)
+      expect(stoodUnder).toEqual([1200])
+    })
   })
 
   describe('variants', () => {

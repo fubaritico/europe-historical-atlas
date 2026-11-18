@@ -48,19 +48,22 @@ function readyToPin(sources: LayerContext['sources'], previewed: number): boolea
 }
 
 /**
- * The cities to draw, each at its point on the relief — and, one sign per place (the dev, 2026-11-17), with the room of
+ * The cities to draw — those whose sheet's date covers the year shown, as the events' (ATLAS-341; the dev, 2026-11-18:
+ * a city is entered at a date, and the cities of 1100 stood on 1200 and 1300) — each at its point on the relief — and, one sign per place (the dev, 2026-11-17), with the room of
  * the event's icon standing on it, for that city to give the icon its point and start its name past it.
  * @param context - the layers and what they read
+ * @param year - the year shown
  * @param bounds - the map's frame
  * @param standing - the events' shaped icons on the map
- * @returns the cities, in the order of the content's
+ * @returns the cities of that year, in the order of the content's
  */
 function placedCities(
   context: LayerContext,
+  year: number,
   bounds: GeoBounds,
   standing: readonly StandingIcon[]
 ): PlacedCity[] {
-  return cityPins(context.sources.cities, bounds).map(({ city, u, v }) => {
+  return cityPins(eventsOfYear(context.sources.cities, year), bounds).map(({ city, u, v }) => {
     const ground = context.projection.draped(u, v)
     const icon = iconOver(ground, standing)
     return {
@@ -78,7 +81,7 @@ function placedCities(
 /**
  * Stand the contribution's events on the relief: its type's icon where one is chosen (ATLAS-156), a pin otherwise —
  * and its cities, each with its mark and its name (ATLAS-295).
- * Only the events of the year asked are pinned; the cities are pinned whatever their date, for now (the dev, 2026-11-02).
+ * Only the events and the cities of the year asked are pinned (the events since 2026-11-02, the cities since 2026-11-18).
  * A no-op until the content is in, a year is asked and the map is drawn (`mapDrawn`) — whichever comes last draws them. The markers
  * follow the relief's exaggeration from the next frame on.
  * The dev's preview icons, when the page's address asks for them (`context.previewIcons`), are stood with the events and count as
@@ -137,7 +140,7 @@ export function rebuildEvents(context: LayerContext): void {
     createEventIconMarkers(shaped, svgToTexture, groundAt, blurMethod, EVENT_ICON_HEIGHT),
     // 5. The cities, lit by the level of detail (ATLAS-295) — held with the events, moved and freed with them.
     createCityMarkers(
-      placedCities(context, sources.heightmap.meta.bbox, standing),
+      placedCities(context, sources.askedYear, sources.heightmap.meta.bbox, standing),
       svgToTexture,
       context.cityLabels
     ),

@@ -324,6 +324,30 @@ const BATTLE: ContentEvent = {
 let clock = 0
 const tick = (): number => (clock += 10)
 
+const city = (id: string, year: number): ContentCity => ({
+  id,
+  place: {
+    id: `p${id}`,
+    name: { fr: id, en: null },
+    lon: 0,
+    lat: 48,
+    wikidata: null,
+    existsFrom: null,
+    existsTo: null,
+  },
+  date: {
+    kind: 'instant',
+    at: { year, month: null, day: null, calendar: null, circa: false, margin: null },
+  },
+  importance: 'capital',
+  reasons: [],
+  testimonies: [],
+  holder: null,
+  communities: [],
+  chain: null,
+  showInAtlas: true,
+})
+
 describe('createMapLayers', () => {
   describe('happy path', () => {
     it('stands an event whose type has the pin as a pin, and a battle as an icon', () => {
@@ -402,6 +426,33 @@ describe('createMapLayers', () => {
 
       expect(sprites()).toHaveLength(2)
       expect(freed).toHaveBeenCalled()
+    })
+
+    it('draws a city on the year its sheet is dated, and on no other', () => {
+      // The dev, 2026-11-18: the cities entered for 1100 stood on 1200 and 1300 (ATLAS-341).
+      const { scene, sources, layers } = build()
+      sources.cities = [city('a', 1100), city('b', 1100), city('c', 1200)]
+      sources.mapDrawn = true
+      const sprites = (): number => {
+        let found = 0
+        scene.traverse((object) => {
+          if (object instanceof Sprite) found += 1
+        })
+        return found
+      }
+
+      sources.askedYear = 1100
+      layers.rebuildEvents()
+      // A mark and a name each.
+      expect(sprites()).toBe(4)
+
+      sources.askedYear = 1200
+      layers.rebuildEvents()
+      expect(sprites()).toBe(2)
+
+      sources.askedYear = 1300
+      layers.rebuildEvents()
+      expect(sprites()).toBe(0)
     })
 
     it.each<[string, 'swords' | 'pin', boolean]>([
