@@ -4,7 +4,7 @@ Research of 2026-11-10, at the dev's request (« toutes les villes d'Italie de p
 508 comuni (Wikidata, population > 20,000), ten lots by region, one research agent each under `/find-sources`;
 every quotation re-checked by the historian against the text the agent saved (1,579 quotations, none missing).
 
-**Where it lives**: the reports and every text read are in `files/resources/italy-1100-research/` (git-ignored) —
+**Where it lives**: the reports and every text read are in `files/resources/historien/1100/regions/italy-1100-research/` (git-ignored) —
 `reports/<lot>.md` (one block per town, its witnesses and quotations) and `reports/<lot>.json`.
 
 **In the CMS since 2026-11-10** (`/enter-in-cms`, one agent per lot, the record of each in `entered/<lot>.json`): the

@@ -1,7 +1,7 @@
 # Kosovo in 1100 — what the sources say against the map
 
 Lot ks-01, 2026-11-13: one `source-researcher` agent (Opus), 15 places, 132,500 tokens, 5 minutes; its 80 quotations
-re-checked by the historian against the saved texts, none missing. The work: `files/resources/kosovo-1100-research/`
+re-checked by the historian against the saved texts, none missing. The work: `files/resources/historien/1100/regions/kosovo-1100-research/`
 (report `reports/ks-01.md`).
 
 ## For the dev's map — the border runs at Zvečan, not across the plain

@@ -563,6 +563,8 @@ dot; Berga missing; eleven of its « counties » are not counties in 1100.
 
 - **Barbastro and Balaguer change hands in late 1100**: drawn as they stand on 1 January 1100 (Muslim), or as on 31
   December (Barbastro Aragonese, Balaguer briefly Christian)? A choice of the map's date, not of the sources.
+  **Settled 2026-11-15**: a map's date is the whole year (the dev's rule of 2026-10-30, `dateOverlap.ts`) — both
+  holders are true in 1100, in order; which one is painted is the drawing's, the dev's.
 - **Barbastro**: 18 Oct 1100 (Ubieto via Bielsa; Balaguer 1950) **vs** 1101 (GEC). Its Muslim holder before: Zaragoza or Lleida.
 - **Besalú**: Bernat II co-count until 1097 (GEC, the count) **vs** 1100 (GEC, the county; ca.wikipedia).
 - **Toulouse in 1100**: William IX occupying it **vs** Bertrand, mortgaged back in 1100 (en.wikipedia only).
@@ -734,3 +736,38 @@ Braničevo (no witness dated 1100) · Ston (from Zachlumia's secession) · Ras (
 
 **Not reached**: Ibn ʿIdhārī; Menéndez Pidal, *La España del Cid* (archive.org lending only); Stanojević 1908 (timed out);
 Dialnet full texts; the Serbian and Croatian journals (hrcak, doiSerbia) — the next pass, with the BnF Pass.
+
+## The chains checked at 1 January 1100 — 2026-11-16 (the historian)
+
+Every chain of the base re-read against the rule *a year without a month is its 1 January* (the dev, 16/11). What
+changed, and why:
+
+- **Normandy** (Rouen and six towns) → **William Rufus**, who held the duchy in pledge from September 1096 to his death
+  on 2 August 1100 (Orderic Vitalis, book X); Robert Curthose, on crusade, comes back only in September 1100. The pledge
+  is linked to Philip I as the duchy's overlord; Bellême's homage to the duke follows it.
+- **Edessa** → **Baldwin of Boulogne**, count until October 1100 (Stevenson 1907, ch. I; Matthew of Edessa), ticked
+  sovereign; Baldwin of Le Bourg comes after.
+- **Volodymyr, Lutsk, Czerwień** → **Davyd Igorevich**, who seized Lutsk and Vladimir after Mstislav's death (July 1099)
+  and was deprived of it at Uvetichi in August 1100 (Primary Chronicle, Cross 1953).
+- **Brno, Znojmo, Břeclav** → **Bořivoj II as prince of the appanages** (1099–1100, Cosmas III, the cs lists), under his
+  brother Bretislav II; Bořivoj is duke only from 25 December 1100. **Břeclav** is put in the Brno appanage, the nearer:
+  no source says which of the two held it — the chain is the same either way.
+- **Modena, Vignola** → **Matilda**, count of Modena: Bishop Dodo is attested only from 6 July 1100, and who held the
+  see on 1 January is open (Schwartz 1913, Benedict).
+- **Colmar** → **Otto of Hohenstaufen**, bishop of Strasbourg until 3 August 1100 (Baldwin and Kuno come after). The
+  link of his successor Baldwin moved from the duke of Swabia (no line) to the emperor, as every prince-bishop.
+- **Beauvais** → **Philip I**: Bishop Anseau died on 21 November 1099 after Prévost 1924 (fr Wikipedia), « in 1100,
+  perhaps 21 November » after Labande 1892 — **divergent**; in the more recent reading the see is vacant on 1 January,
+  Étienne de Garlande elected only after six months. Garlande is wrong in both; the county goes up to the king.
+- **Bergamo** kept to Arnolfo: deposed by the synod of Milan in April 1098, he « still held his see about 1106 »
+  (Schwartz 1913, p. 102) — the line added to his title.
+- **Jerusalem, Antioch** stay under Patriarch Daimbert, to whom Godfrey and Bohemond did homage (La Monte, in Setton):
+  the dev's text of 16/11 lets the historian enter any chain, a lay lord under a cleric included, as long as it ends
+  on a sovereign. Links 221 and 165 are kept.
+- **Schrenz** kept to Thimo of Wettin: died 1091 after the Naumburg annals, 1118 after others, present at Lippoldsberg in
+  1101 — **divergent**, the living reading kept.
+- **Seven links given back to their bishop** (the dev's text of 16/11 lets a count stand under a bishop; the night had
+  moved them to the king or the emperor by a rule that text does not hold): Champagne and Rethel → the archbishop of
+  Reims, Amiens → the bishop of Amiens, Corbeil and Montlhéry → the bishop of Paris (Longnon 1885, « La France en 1032 »),
+  Soissons → the bishop of Soissons (Leroux 1839), Bolzano → the bishop of Trento (Enciclopedia Italiana, « Tirolo »).
+  Saarbrücken stays under Henry IV: there the source itself gives the county to the king (Köllner 1841).

@@ -11,7 +11,7 @@ plus every Montenegrin settlement of that strip (the dev), plus **one town per i
 were too sparse to filter on (13 dated places of tens of thousands). The Aegean islands are listed (65) and left for
 later (the dev: « pas en 1100, mais pour plus tard »).
 
-**Where it lives**: `files/resources/adriatic-1100-research/` (git-ignored) — `BRIEF.md`, `candidates.json`, `lots/`,
+**Where it lives**: `files/resources/historien/1100/regions/adriatic-1100-research/` (git-ignored) — `BRIEF.md`, `candidates.json`, `lots/`,
 `reports/<lot>.md|json`, `sources/<lot>/` (every text read), `ENTRY.md` and `entered/` for the CMS. 26 lots, one research
 agent each under `/find-sources`; **2,231 quotations re-checked by the lead against the saved texts, none missing**
 (`work/lead/check.py`).

@@ -5,7 +5,7 @@ d'autres villes pour la Serbie, la Bosnie, la Croatie et la Roumanie »*, with t
 pinpointe un territoire »*), run overnight — *« tu ne t'arrêtes pas au premier truc, rapporte ce que tu n'as pas pu
 faire »*.
 
-**Where it lives**: `files/resources/hungary-1100-research/` (git-ignored) — `work/collect.py` and `work/forts.py`
+**Where it lives**: `files/resources/historien/1100/regions/hungary-1100-research/` (git-ignored) — `work/collect.py` and `work/forts.py`
 (Wikidata), `pool.json` (27,485 places), `wiki/` (37,033 articles: the Hungarian one and the country's own for each
 place), `work/extract.py` (the first mention), `dates.json`, `work/build.mjs`, `lots/`, `BRIEF.md`, `reports/`,
 `sources/`, `entered/`.

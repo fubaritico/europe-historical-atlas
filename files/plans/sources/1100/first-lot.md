@@ -5,7 +5,7 @@ at that lot too"*. The base held, for 1100, **98 sheets with no holder line** (9
 cities entered before the method existed — Paris, London, Constantinople, Kiev, Baghdad, Jerusalem… Each had an
 importance, no holder and no source.
 
-**Where it lives**: `files/resources/first-lot-1100-research/` (git-ignored) — `BRIEF.md`, `lots/` (built by
+**Where it lives**: `files/resources/historien/1100/regions/first-lot-1100-research/` (git-ignored) — `BRIEF.md`, `lots/` (built by
 `work/lead/build.mjs` from a read-only export of the 98 sheets, each city given the polities the dev's 1100 map puts it
 in), `reports/<lot>.md|json`, `sources/<lot>/`. Ten lots by historical area, one research agent each under
 `/find-sources`; **427 quotations re-checked by the lead against the saved texts, none missing** — three of the
