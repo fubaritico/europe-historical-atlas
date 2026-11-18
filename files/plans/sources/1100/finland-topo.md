@@ -64,6 +64,24 @@ north-east: the Sámi, the Kvens, the Biarmians (Ohthere).
 - **Whether any Finnish people had a ruler in 1100.** The sources show *groups acting together* (a levy, a raid), never a
   named ruler. The chronicle names no Yem prince; Gs 13 names no Tavastian leader.
 
+## The drawing chosen — three lands without a sovereign (the dev, 2026-11-18)
+
+**His call**: draw the three peoples **as the Livonians are drawn** — three lands, **no sovereign, no suzerain**, their
+limits **blurred** (not known precisely). **No hatching**: a hatching is a dispute between two countries, and in 1100 no
+one disputes Karelia (the Swedes come after 1150). **Karelia is no longer drawn under Novgorod**: its loose link with
+Novgorod is told on click (the « why »), not by the colour. The north (Sámi, Kvens) stays a land without a country.
+The drawing is the dev's, in the Cartographer; below, its landmarks (coordinates read on Wikipedia, en and fi).
+
+| land | its core | landmarks (lat, lon) | witness for the core | its edges (blurred) |
+| --- | --- | --- | --- | --- |
+| **Finns Proper** (Suomi) | the south-west coast, the Aura valley | Turku 60.45, 22.27 · the Aura 60.47, 22.34 · Pori / mouth of the Kokemäenjoki 61.48, 21.80 | settlement of the Aura valley since 400–500, burial grounds from the 1000s (SEEN, Ruohonen); rune stones *finlont* / *finlandi*, 11th c. (SEEN) | the coast from the Gulf of Finland to the Kokemäenjoki; inland to the edge of Tavastia |
+| **Tavastians** (Häme, *Yem*) | Lake Vanajavesi and the line of hillforts | Hämeenlinna 60.99, 24.47 · Vanajavesi 61.17, 24.25 · Rapola 61.21, 24.06 · Tenhola (Hattula) 61.10, 24.29 · Hakoinen 60.88, 24.59 | the core around Vanajavesi, the hillforts (SEEN, page « Tavastians »); Gs 13 « died in Tafeistaland » (READ, Rundata); the Novgorod Chronicle on the *Yem*, 1042–1149 (READ) | north and east into the lakeland, towards Saimaa (61.25, 28.25) — the least known edge |
+| **Karelians** (*Korela*) | the Karelian Isthmus, the west shore of Lake Ladoga, the Vuoksi | Käkisalmi / Priozersk 61.05, 30.13 · Sortavala 61.71, 30.70 · Vyborg 60.72, 28.77 (edge) · Kurkijoki, Tiurinlinna (no coordinates found) | Lind 2004, *Fennia* 182 (READ): the isthmus, the Ladoga shore, the Vuoksi, the fortifications of Käkisalmi, Tiurinlinna, Kurkijoki, Sortavala; the Chronicle, 1143 (READ) | south to the Neva (Novgorod's land: the Vod, the Izhora); west towards Saimaa |
+
+**On click, for Karelia** (Lind 2004, p. 5, READ, word for word): « When Karelia does appear in Russian sources, from 1143
+onwards, this link seems already to have been established. Presumably, however, the Karelians were a relatively
+independent agent. » — the link, without a suzerain drawn.
+
 ## Where it stands for the base
 
 Nothing to enter yet: no place is attested before 1105 by a source read, and no ruler exists to be a holder. What is
