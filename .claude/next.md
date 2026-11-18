@@ -9,8 +9,8 @@
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
 **L'historien, 18/11 19:50** : 1 871 villages d'Allemagne de l'Ouest en 1100 (fiches jusqu'à 13593, contrôlées par toi
-pour 1 838), 13 562 villes en 1100, 65 alertes ; **non exportés** depuis l'export de l'après-midi ; Ohligs (fiche 11749) à
-supprimer par le dev ; ses recherches rangées dans `files/resources/historien/`, sa méthode dans la skill `/bulk-entry` —
+pour 1 838), 13 561 villes en 1100, 65 alertes ; **non exportés** depuis l'export de l'après-midi ; Ohligs (fiche 11749)
+supprimée par lui, par le MCP (CMS-454) ; ses recherches rangées dans `files/resources/historien/`, sa méthode dans la skill `/bulk-entry` —
 son point de reprise, `next-historian.md`.
 
 ## ▶ ON REPREND ICI — le 18/11, 20 h 20 : les icônes des événements, ticket parent ATLAS-288
