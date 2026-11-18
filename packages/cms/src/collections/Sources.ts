@@ -1,6 +1,23 @@
 import { trimmedText } from '../fields/trimmedText'
+import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+
+import { refuseDeletingCited } from './claimDependants'
 
 import type { CollectionConfig } from 'payload'
+
+/**
+ * Everything that cites a source: the collection, the field that points at it, and what it is called in a refusal.
+ * Held against the collections themselves by `deleteGuards.test.ts`: a field added later that points at a source and
+ * is missing here fails there.
+ */
+export const SOURCE_CITERS = [
+  { collection: 'place-periods', field: 'testimonies.source', what: 'fiche(s) de ville' },
+  { collection: 'titles', field: 'lines.source', what: 'titre(s)' },
+  { collection: 'vassal-links', field: 'lines.source', what: 'maillon(s)' },
+  { collection: 'events', field: 'sources', what: 'événement(s)' },
+  { collection: 'siege-engines', field: 'sources', what: 'engin(s) de siège' },
+  { collection: 'sources', field: 'copyOf', what: 'source(s) qui la reprennent' },
+] as const
 
 /**
  * The source register: each source written once, then chosen from a list by every event that cites it — so one
@@ -11,6 +28,21 @@ export const Sources: CollectionConfig = {
   slug: 'sources',
   labels: { singular: 'Source', plural: 'Sources' },
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'author', 'kind'] },
+  hooks: {
+    // A source something still cites is never deleted from under it (CMS-454): a line would keep its quotation and
+    // lose where it comes from. What cites it is changed or deleted first.
+    // Over MCP, one record at a time (CMS-454).
+    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeDelete: SOURCE_CITERS.map(({ collection, field, what }) =>
+      refuseDeletingCited({
+        collection,
+        fields: [field],
+        subject: 'Cette source',
+        cited: 'citée',
+        what,
+      })
+    ),
+  },
   fields: [
     {
       name: 'title',

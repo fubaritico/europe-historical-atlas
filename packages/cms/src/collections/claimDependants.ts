@@ -58,9 +58,13 @@ export const refreshLinksOfTitle: CollectionAfterChangeHook = async ({ doc, oper
 
 /** Where a record is cited, for the refusal of its deletion: the collection that cites it, by which fields. */
 interface Citers {
-  /** The collection whose records cite it — a claim, or a city's sheet naming its holder (CMS-422 step 2c). */
-  readonly collection: 'titles' | 'vassal-links' | 'place-periods'
-  /** The fields that point at it. */
+  /**
+   * The collection whose records cite it — a claim, a city's sheet naming its holder (CMS-422 step 2c), and since
+   * CMS-454 whatever names a place or a source: an event, a siege engine, another source.
+   */
+  readonly collection:
+    'titles' | 'vassal-links' | 'place-periods' | 'events' | 'siege-engines' | 'sources'
+  /** The fields that point at it — a path for a field inside a list: `lines.source`. */
   readonly fields: readonly string[]
   /** The sentence's subject: « Ce titre », « Cette personne », « Ce territoire ». */
   readonly subject: string
@@ -71,11 +75,11 @@ interface Citers {
 }
 
 /**
- * Refuse to delete a record a claim or a city sheet still cites (the dev's « vas-y », 2026-11-15): the base would empty the claim's
+ * Refuse to delete a record another record still cites (the dev's « vas-y », 2026-11-15; a place and a source too since CMS-454): the base would empty the claim's
  * field under it (`ON DELETE set null`), and a sourced claim would change its meaning — a link turned sovereign, a
  * title holding nothing — with no one deciding. The citing records are named, to be changed or deleted first, by hand.
  * @param citers - where the record is cited, and how the refusal says it
- * @returns the hook — it throws when a claim or a sheet cites the record; Payload says it in the admin, the console keeps it
+ * @returns the hook — it throws when a record cites it; Payload says it in the admin, the console keeps it
  */
 export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook {
   return async ({ id, req }) => {
@@ -106,13 +110,10 @@ export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook 
  * @param cited - the citing record
  * @param cited.id - its id
  * @param cited.label - a claim's name
- * @param cited.title - a sheet's name
+ * @param cited.title - a sheet's or a source's name; an event's, a text per language, is not read
  * @returns its name
  */
-function nameOf(cited: {
-  id: number | string
-  label?: string | null
-  title?: string | null
-}): string {
-  return cited.label ?? cited.title ?? String(cited.id)
+function nameOf(cited: { id: number | string; label?: string | null; title?: unknown }): string {
+  // An event's title is one text per language: only a plain text is a name.
+  return cited.label ?? (typeof cited.title === 'string' ? cited.title : String(cited.id))
 }

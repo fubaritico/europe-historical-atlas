@@ -123,6 +123,32 @@ afterAll(async () => {
   rmSync(folder, { recursive: true, force: true })
 })
 
+/**
+ * Enter a place, a source of its own and its sheet for 1100, as the historian does for a village.
+ * @param name - the place's name
+ * @returns the three ids
+ */
+async function entered(name: string): Promise<{ place: number; own: number; sheet: number }> {
+  const place = await payload.create({
+    collection: 'places',
+    data: { name, location: [7.0, 51.2] },
+  })
+  const own = await payload.create({
+    collection: 'sources',
+    data: { title: `Page de ${name}`, kind: 'scholarly' },
+  })
+  const sheet = await payload.create({
+    collection: 'place-periods',
+    data: {
+      place: place.id,
+      date: { start: { year: 1100 } },
+      importance: 'city',
+      testimonies: [{ source: own.id, subject: 'importance', importance: 'city' }],
+    },
+  })
+  return { place: place.id, own: own.id, sheet: sheet.id }
+}
+
 describe('titles and links', () => {
   describe('happy path', () => {
     it('writes a title’s name from its holder, its territory and its years', async () => {
@@ -448,6 +474,67 @@ describe('titles and links', () => {
         'Ce territoire est cité par 1 titre(s)'
       )
     })
+  })
+
+  // CMS-454, the dev, 2026-11-18: the historian undoes its own errors over MCP — « je n'efface plus tes erreurs ». A
+  // deletion goes through these hooks whoever asks for it.
+  describe('undoing an entry: a sheet, its place, its source', () => {
+    it('refuses to delete a place a city sheet stands on, naming the sheet', async () => {
+      const { place } = await entered('Ohligs')
+      await expect(payload.delete({ collection: 'places', id: place })).rejects.toThrow(
+        'Ce lieu est cité par 1 fiche(s) de ville : « Ohligs — 1100 »'
+      )
+      expect((await payload.findByID({ collection: 'places', id: place })).id).toBe(place)
+    }, 60_000)
+
+    it('refuses to delete a source a city sheet’s line cites, naming the sheet', async () => {
+      const { own } = await entered('Barl')
+      await expect(payload.delete({ collection: 'sources', id: own })).rejects.toThrow(
+        'Cette source est citée par 1 fiche(s) de ville : « Barl — 1100 »'
+      )
+    }, 60_000)
+
+    it('refuses to delete a source a title’s or a link’s line cites', async () => {
+      // The suite's one source is cited by its three titles and its links.
+      await expect(payload.delete({ collection: 'sources', id: source })).rejects.toThrow(
+        'Cette source est citée par'
+      )
+      expect((await payload.findByID({ collection: 'sources', id: source })).id).toBe(source)
+    })
+
+    it('undoes an entry from the sheet down: the sheet, then its place, then its source', async () => {
+      const { place, own, sheet } = await entered('Solingen')
+      await payload.delete({ collection: 'place-periods', id: sheet })
+      await payload.delete({ collection: 'places', id: place })
+      await payload.delete({ collection: 'sources', id: own })
+      const left = await Promise.all([
+        payload.find({ collection: 'place-periods', where: { id: { equals: sheet } } }),
+        payload.find({ collection: 'places', where: { id: { equals: place } } }),
+        payload.find({ collection: 'sources', where: { id: { equals: own } } }),
+      ])
+      expect(left.map(({ totalDocs }) => totalDocs)).toEqual([0, 0, 0])
+    }, 60_000)
+
+    it('keeps a source two sheets cite when one of them is deleted, and still refuses its deletion', async () => {
+      const first = await entered('Wald')
+      const second = await payload.create({
+        collection: 'places',
+        data: { name: 'Gräfrath', location: [7.07, 51.21] },
+      })
+      await payload.create({
+        collection: 'place-periods',
+        data: {
+          place: second.id,
+          date: { start: { year: 1100 } },
+          importance: 'city',
+          testimonies: [{ source: first.own, subject: 'importance', importance: 'city' }],
+        },
+      })
+      await payload.delete({ collection: 'place-periods', id: first.sheet })
+      await expect(payload.delete({ collection: 'sources', id: first.own })).rejects.toThrow(
+        '« Gräfrath — 1100 »'
+      )
+    }, 60_000)
   })
 
   // L4: N/A — a failing database is Payload's, inside its transaction; the hooks add no I/O of their own past it.

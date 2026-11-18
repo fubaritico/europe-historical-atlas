@@ -1,6 +1,7 @@
 import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
+import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { refuseDuplicateClaim } from './refuseDuplicateClaim'
 import { writeLinkLabel } from './writeClaimTitles'
@@ -53,6 +54,8 @@ export const VassalLinks: CollectionConfig = {
   labels: { singular: 'Maillon', plural: 'Maillons' },
   admin: { useAsTitle: 'label', defaultColumns: ['label'] },
   hooks: {
+    // Over MCP, one record at a time (CMS-454).
+    beforeOperation: [refuseBulkDeleteOverMcp],
     // The label's hook first: it empties the suzerain of a « no one » link, so the twin is looked for as stored
     beforeChange: [
       writeLinkLabel,

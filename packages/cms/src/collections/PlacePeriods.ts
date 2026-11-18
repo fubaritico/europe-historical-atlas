@@ -12,6 +12,7 @@ import { formatHistoricalDate } from '@europe-historical-atlas/core/time/formatH
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
 import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
+import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { COLLECTION_MESSAGES } from './i18n'
 import { refuseInvalidSheet } from './refuseInvalidSheet'
@@ -141,7 +142,12 @@ export const PlacePeriods: CollectionConfig = {
     description:
       'Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».',
   },
-  hooks: { beforeValidate: [refuseOverlap], beforeChange: [refuseInvalidSheet, writeSheetTitle] },
+  hooks: {
+    // Over MCP, one record at a time (CMS-454).
+    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeValidate: [refuseOverlap],
+    beforeChange: [refuseInvalidSheet, writeSheetTitle],
+  },
   fields: [
     {
       name: 'title',

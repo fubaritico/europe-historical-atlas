@@ -2,11 +2,23 @@ import { groupAt, momentGroup } from '../fields/historicalDate'
 import { countryField, regionField } from '../fields/lot'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
+import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 import { placeEndpoints } from '../wikidata/placeEndpoints'
 
+import { refuseDeletingCited } from './claimDependants'
 import { retitlePlaceSheets } from './retitleSheets'
 
 import type { CollectionConfig } from 'payload'
+
+/**
+ * Everything that cites a place: the collection, the field that points at it, and what it is called in a refusal.
+ * Held against the collections themselves by `deleteGuards.test.ts`: a field added later that points at a place and
+ * is missing here fails there.
+ */
+export const PLACE_CITERS = [
+  { collection: 'place-periods', field: 'place', what: 'fiche(s) de ville' },
+  { collection: 'events', field: 'place', what: 'événement(s)' },
+] as const
 
 /**
  * A named point on the map — a city, an abbey, a battlefield — written once for every event that happens there.
@@ -20,8 +32,17 @@ export const Places: CollectionConfig = {
   labels: { singular: 'Lieu', plural: 'Lieux' },
   admin: { useAsTitle: 'name' },
   endpoints: placeEndpoints,
-  // A renamed place renames its cities' sheets: « Paris — 1100 » is written from the place's name.
-  hooks: { afterChange: [retitlePlaceSheets] },
+  hooks: {
+    // A renamed place renames its cities' sheets: « Paris — 1100 » is written from the place's name.
+    afterChange: [retitlePlaceSheets],
+    // A place a sheet or an event stands on is never deleted from under it (CMS-454): the base would empty their
+    // field, and a city at a date would be a city nowhere. The sheet goes first, then the place.
+    // Over MCP, one record at a time (CMS-454).
+    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeDelete: PLACE_CITERS.map(({ collection, field, what }) =>
+      refuseDeletingCited({ collection, fields: [field], subject: 'Ce lieu', cited: 'cité', what })
+    ),
+  },
   fields: [
     {
       type: 'row',

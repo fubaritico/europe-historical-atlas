@@ -13,10 +13,27 @@ import { VassalLinks } from '../collections/VassalLinks'
 import type { Plugin } from 'payload'
 
 /**
- * What a model may do in a collection over MCP: read, create and change — **never delete**. A deletion by a model is
- * the one gesture that is hard to take back; the dev deletes by hand, in the admin (the historian's call, 2026-11-02).
+ * What a model may do in a register over MCP: read, create and change — **never delete**. A person, a territory, a
+ * confession or a reason is shared by many sheets; the dev deletes those by hand, in the admin (2026-11-02).
  */
 const ENTER_NEVER_DELETE = { find: true, create: true, update: true, delete: false } as const
+
+/**
+ * What a model may do in a collection it enters its own records into: read, create, change — and **delete, to undo
+ * its own errors** (CMS-454; the dev, 2026-11-18: « je n'efface plus tes erreurs » — a sheet entered for the wrong
+ * place came back to him each time). Four guards hold it:
+ * - the key must be given the operation: the box « delete » is ticked by the dev on the key, per collection;
+ * - a record something still cites is refused, naming what cites it (`claimDependants.refuseDeletingCited`): a place
+ *   under a sheet or an event, a source under a line, a title under a link or a sheet — so an error is undone from
+ *   the sheet down to its place and its source, never the other way;
+ * - one record at a time, by its id: the plugin's tool also takes a filter, which one call could empty a collection
+ *   with — refused on these five collections (`refuseBulkDeleteOverMcp`);
+ * - a deletion is not taken back: there is no bin — the base's copies are the way back (CMS-278).
+ *
+ * **Not held**: nothing says which records a key created, so the model can delete a sheet the dev entered. Told to the
+ * dev; a « created by » on each record would need a migration.
+ */
+const ENTER_AND_DELETE = { find: true, create: true, update: true, delete: true } as const
 
 /** The kinds of land a territory can be, for its description — read from the collection, the office said apart. */
 const LAND_KINDS = TERRITORY_KINDS.filter((kind) => kind !== 'office').join(', ')
@@ -33,7 +50,7 @@ const LAND_KINDS = TERRITORY_KINDS.filter((kind) => kind !== 'office').join(', '
  */
 export const MCP_COLLECTIONS = {
   [Places.slug]: {
-    enabled: ENTER_NEVER_DELETE,
+    enabled: ENTER_AND_DELETE,
     description:
       // The plugin takes a point as an object and stores it as Payload's [longitude, latitude] tuple (3.92.0,
       // `utils/schemaConversion/transformPointFields.js`, `utils/transformPointDataToPayload.js`).
@@ -42,7 +59,7 @@ export const MCP_COLLECTIONS = {
       '`region`, each `{ name, wikidata }` — the country (P17) and the first-level division Wikidata gives.',
   },
   [PlacePeriods.slug]: {
-    enabled: ENTER_NEVER_DELETE,
+    enabled: ENTER_AND_DELETE,
     description:
       'A city at a date (« Ville à une date »): its importance; its holder `holderTitle`, an id from titles — the ' +
       'person, for the territory held, the city answers to at that date; its chain of vassalage is computed from the ' +
@@ -53,7 +70,7 @@ export const MCP_COLLECTIONS = {
       'decides whether the published atlas shows it — every city still reaches the Cartographer.',
   },
   [Sources.slug]: {
-    enabled: ENTER_NEVER_DELETE,
+    enabled: ENTER_AND_DELETE,
     description: 'A source: a book, an atlas, an encyclopaedia page or a database, with its kind.',
   },
   [ImportanceReasons.slug]: {
@@ -87,7 +104,7 @@ export const MCP_COLLECTIONS = {
       '`wikidata` before creating.',
   },
   [Titles.slug]: {
-    enabled: ENTER_NEVER_DELETE,
+    enabled: ENTER_AND_DELETE,
     description:
       'A title: a `person` (an id from people) holding a `territory` (an id from territories) over a `date` ' +
       '({ start, end }, each { year, month, day, circa, margin, calendar }; end empty for a single year), with its ' +
@@ -96,7 +113,7 @@ export const MCP_COLLECTIONS = {
       '`label` is written by the server. Search by person and territory before creating.',
   },
   [VassalLinks.slug]: {
-    enabled: ENTER_NEVER_DELETE,
+    enabled: ENTER_AND_DELETE,
     description:
       'A link of vassalage: the title `vassal` answers, over a `date`, to the title `suzerain` (`answersTo` ' +
       '"suzerain", always — a sovereign is ticked on its title, `sovereign`, never entered as a link to no one). With ' +

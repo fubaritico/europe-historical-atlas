@@ -99,3 +99,10 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   travers dans la base ; (2) la région annoncée aux lecteurs d'écran de la chaîne est plus large que ses messages, et l'aide
   de la case « Souverain » n'est pas reliée à elle (outil local, courtoisie) ; (3) `refusalOf` est rangé dans
   `saveVassalLink.ts` alors qu'il lit tout refus de Payload. **Sévérité : cosmétique.**
+- **L'historien supprime par le MCP, et rien ne dit quelles fiches sa clé a créées** (18/11, CMS-454, `mcp/mcpAccess.ts`) :
+  la suppression est ouverte sur les fiches de ville, les lieux, les sources, les titres et les maillons, case par case sur
+  la clé. Trois refus la tiennent : ce qu'une autre fiche cite (`claimDependants.refuseDeletingCited`, la liste tenue
+  contre le schéma par `deleteGuards.test.ts`), une suppression par filtre (`mcp/refuseBulkDelete.ts` : une fiche à la
+  fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
+  non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
+  un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**

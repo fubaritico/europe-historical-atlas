@@ -865,6 +865,10 @@ export interface PayloadMcpApiKey {
      * Allow clients to update places.
      */
     update?: boolean | null;
+    /**
+     * Allow clients to delete places.
+     */
+    delete?: boolean | null;
   };
   placePeriods?: {
     /**
@@ -879,6 +883,10 @@ export interface PayloadMcpApiKey {
      * Allow clients to update place-periods.
      */
     update?: boolean | null;
+    /**
+     * Allow clients to delete place-periods.
+     */
+    delete?: boolean | null;
   };
   sources?: {
     /**
@@ -893,6 +901,10 @@ export interface PayloadMcpApiKey {
      * Allow clients to update sources.
      */
     update?: boolean | null;
+    /**
+     * Allow clients to delete sources.
+     */
+    delete?: boolean | null;
   };
   importanceReasons?: {
     /**
@@ -963,6 +975,10 @@ export interface PayloadMcpApiKey {
      * Allow clients to update titles.
      */
     update?: boolean | null;
+    /**
+     * Allow clients to delete titles.
+     */
+    delete?: boolean | null;
   };
   vassalLinks?: {
     /**
@@ -977,6 +993,10 @@ export interface PayloadMcpApiKey {
      * Allow clients to update vassal-links.
      */
     update?: boolean | null;
+    /**
+     * Allow clients to delete vassal-links.
+     */
+    delete?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1558,6 +1578,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+        delete?: T;
       };
   placePeriods?:
     | T
@@ -1565,6 +1586,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+        delete?: T;
       };
   sources?:
     | T
@@ -1572,6 +1594,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+        delete?: T;
       };
   importanceReasons?:
     | T
@@ -1607,6 +1630,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+        delete?: T;
       };
   vassalLinks?:
     | T
@@ -1614,6 +1638,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+        delete?: T;
       };
   updatedAt?: T;
   createdAt?: T;

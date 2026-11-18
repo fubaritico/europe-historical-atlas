@@ -1,5 +1,6 @@
 import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
+import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { refreshLinksOfTitle, refuseDeletingCited } from './claimDependants'
 import { refuseDuplicateClaim } from './refuseDuplicateClaim'
@@ -18,6 +19,8 @@ export const Titles: CollectionConfig = {
   labels: { singular: 'Titre', plural: 'Titres' },
   admin: { useAsTitle: 'label', defaultColumns: ['label', 'person', 'territory'] },
   hooks: {
+    // Over MCP, one record at a time (CMS-454).
+    beforeOperation: [refuseBulkDeleteOverMcp],
     beforeChange: [
       writeTitleLabel,
       refuseDuplicateClaim({
