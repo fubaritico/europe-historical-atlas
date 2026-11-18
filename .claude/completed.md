@@ -4,6 +4,32 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
+### 2026-11-17 (nuit) → 18/11 — le codeur : la boîte commune des icônes, l'export en deux fichiers, la tiare du concile
+
+Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 20:21** (5 h 42 la dernière, avec
+l'historien) ; le chantier totalise **362 h 39 sur 57 plages**. Tout est commité et poussé (`f4077218`), six commits de
+`42e4989c` à `f4077218`, puis les notes.
+
+- **Fermés, validés par lui** : ATLAS-469 (chaque modèle 3D dans une boîte commune, sa taille cuite dans ses sommets, une
+  seule échelle ; les ombres des icônes immobiles dessinées une fois), ATLAS-341 (les villes suivent l'année montrée —
+  relevé par lui en testant : _« on retrouve les villes dans les années 1200 et 1300 »_), ATLAS-373 (plus rien ne lit les
+  frontières GPL ; une année sans carte dit « Cette année n'a pas encore de carte »), CARTO-375 (le bouton « Registre »),
+  CMS-223 (l'export écrit deux fichiers, `atlas.json` 0,4 Mo et `cartographer.json` 14,5 Mo ; l'atlas en lisait 21).
+- **Sa règle du jour** (mémoire `decided-removals-need-no-validation`) : _« je vois pas pourquoi ça doit passer par moi »_
+  — un ménage qui exécute un retrait déjà décidé se commite et se clôt sans attendre son test.
+- **Son point sur les icônes** : elles ne sont pas toutes faites ; la cathédrale illustre un évêché, pas un événement ;
+  les petits modèles 3D iront au statut d'une ville, _« il faut y aller progressivement »_. Et sa demande d'organisation
+  (_« c'est pas juste une question comme ça »_) : **ATLAS-288 devient le ticket parent**, une ligne par type d'événement,
+  huit tickets enfants créés (ATLAS-476 à 483 : le besoin, pourquoi pas encore d'icône, trois pistes).
+- **Le concile** (ATLAS-476), d'après ses mots (_« le chapeau que porte le pape »_) : quatre candidates sur le banc, son
+  choix « B2 », la tiare et la crosse tournée vers l'extérieur (_« simple et clair, le rendu est au rendez-vous »_) ;
+  passée dans la carte et dans la liste du CMS (`f4077218`). Il n'a pas encore jugé son image plate ni sa taille.
+- **Contrôlés pour l'historien**, en lecture seule : 91 forteresses et abbayes, puis 1 838 villages — conformes.
+- **Le serveur du CMS** coupé trois fois à sa demande le 17 au soir (la session de l'historien le relançait).
+- **Mes fautes** : deux `cd` dans mes commandes ; un ticket renommé sans son numéro (remis aussitôt) ; je lui ai présenté
+  un ménage de code mort comme une décision à prendre (_« je sais pas ce que c'est 373 »_) ; les territoires annoncés dans
+  le fichier de l'atlas, puis laissés dehors.
+
 ### 2026-11-18 — l'historien : 1 871 villages d'Allemagne de l'Ouest avec 8 agents, le rangement du disque, la méthode écrite
 
 Plages journalisées **18/11 12:09 → 12:22** et **14:39 → 19:51** (les saisies du CMS et des agents ne sont pas
@@ -20,19 +46,3 @@ journalisées) ; le chantier totalise **362 h 09 sur 57 plages**.
 - **Mes fautes** : le nettoyage lancé avant la fin du dernier lot (35 pages à retélécharger) ; le registre écrasé puis
   reconstruit à partir des extraits ; un tri qui a retenu un hameau voisin (Ohligs) ; des citations coupées à
   « n. Chr. » (19 corrigées) ; des messages en anglais.
-
-### 2026-11-17 (nuit) → 18/11 — l'historien : la Finlande avant les Suédois, 91 forteresses et abbayes en Allemagne de l'Ouest
-
-Plages journalisées **17/11 21:09 → 21:28** et **18/11 01:40 → 02:10** (les saisies du CMS entre les deux ne sont pas
-journalisées) ; le chantier totalise **356 h 43 sur 55 plages**. **Rien de commité.**
-
-- **Le CMS lancé par moi** sur son ordre explicite (_« lance ! »_), après deux refus du contrôleur de permissions et l'arrêt
-  (SIGTERM) d'une tâche de fond ; relancé détaché (`files/resources/historien/outils/start-cms.sh`).
-- **La Finlande, le topo** (`files/plans/sources/1100/finland-topo.md`) : trois peuples sans souverain (Tavastiens,
-  Finnois proprement dits, Caréliens), Sámi et Kvènes au nord, Novgorod et la Suède voisins sans régner ; lus : la
-  Chronique de Novgorod, Ohthere, Gs 13, Lind 2004. Rien à saisir ; sa réponse attendue sur le dessin.
-- **Allemagne de l'Ouest, 101 → 192** : 48 forteresses et 43 abbayes et stifts (fiches 11632–11722), chacun avec la phrase
-  de sa page allemande qui le date avant 1106, sous le titre du duché dessiné. Contrôlé par script et par le codeur en
-  lecture seule ; `cities:alerts` inchangé (65 sur 11 691).
-- **Mes fautes** : deux citations mal recopiées (rattrapées par le contrôle, corrigées) ; un `cd` ; trois messages avant de
-  dire clairement que le refus venait du contrôleur, pas de moi.

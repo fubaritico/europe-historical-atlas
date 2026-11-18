@@ -228,5 +228,11 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   palette, the painters and the atlas know it; the picker does not — it waits on the design system's third state
   (`files/plans/cartographer/ds-request-no-colour.md`). Until then: the list shows the struck swatch, the rail's swatch
   reads as « nothing aimed », and the form opens « automatic » and writes `none` back unless a colour is picked —
-  « automatic » cannot be reached from `none`, nor `none` from the interface. **Trigger**: the design system's release
-  with « no colour » — the draft's flag goes, the picker carries the state. **Severity: à savoir.**
+  « automatic » cannot be reached from `none`, nor `none` from the interface. CARTO-445 closed on 2026-11-16: the
+  « distant polity » legend (CARTO-447) answers the need; this state stays in the code, not taken up. **The design system
+  offers « no colour » since 0.10.0** (`allowNone`, CARTO-465, 2026-11-17) and **the Cartographer passes it to no picker**:
+  a `'none'` the picker would hand anyway is refused by `ui/utils/pickedColour`. **Trigger**: the dev taking « no colour »
+  up — `allowNone` on the form's field, the draft's flag gone. **Severity: à savoir.**
+- **Le glisser d'un pays dans `{Polities}` laisse deux points ouverts** (CARTO-457, revue du 16/11, ma décision) : un
+  relâcher hors des lignes n'est dit qu'en console, pas dans la zone de résultat ; les écouteurs du glisser se réinscrivent
+  à chaque rendu du panneau (correct, le glisser vit dans une référence). **Sévérité : cosmétique.**

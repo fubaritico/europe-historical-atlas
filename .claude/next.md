@@ -8,43 +8,51 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**L'historien, 16/11 23:30** : 1100 de 399 à 54 villes en alerte (`cities:alerts`), 101 villes de l'Empire de l'Ouest
-saisies et validées ; la carte `years/1100/` de `main` modifiée, non commitée (les Lotharingies échangées, la Provence, trois
-archevêchés, le comté palatin de Saxe) ; prochaine session : plus de villes en France, Pologne, Russie, Grèce, Turquie —
+**L'historien, 18/11 19:50** : 1 871 villages d'Allemagne de l'Ouest en 1100 (fiches jusqu'à 13593, contrôlées par toi
+pour 1 838), 13 562 villes en 1100, 65 alertes ; **non exportés** depuis l'export de l'après-midi ; Ohligs (fiche 11749) à
+supprimer par le dev ; ses recherches rangées dans `files/resources/historien/`, sa méthode dans la skill `/bulk-entry` —
 son point de reprise, `next-historian.md`.
 
-## ▶ ON REPREND ICI — le 17/11, 19 h 50 : les icônes 3D des événements, puis les landmarks
+## ▶ ON REPREND ICI — le 18/11, 20 h 20 : les icônes des événements, ticket parent ATLAS-288
 
 **Sa ligne** (17/11) : _« on va rester concentré sur les icônes 3D des événements. On va les terminer et après »_ l'épique
-**ATLAS-471, les landmarks** (les monuments en 3D). Tout est commité et poussé (`8c98ff8b`) ; **« À valider » est vide**.
+**ATLAS-471, les landmarks**. Tout est commité et poussé (`f4077218`) ; **« À valider » est vide**.
 
-**La suite convenue, lui en Remote Control** — rien poussé sans lui avoir envoyé les captures et reçu son accord (sa
-règle du soir, mémoire `captures-before-pushing-when-remote`) :
+**L'organisation qu'il a demandée le 18/11** : **ATLAS-288 est le ticket parent** (En cours), une ligne par type
+d'événement du CMS — cinq cochées (Bataille, Siège, Accession au trône, Intronisation, Mort), huit tickets enfants
+(ATLAS-476 à 483, en bas d'« À faire », étiquette « épique · icônes ») : pour chacun le besoin, pourquoi il n'a pas
+encore son icône, trois pistes à débattre. Ordre proposé : le concile, puis la conquête (les seuls qui ont un événement
+en 1100) ; les six autres quand un premier événement de leur type est saisi.
 
-1. **ATLAS-469, la boîte commune** : chaque modèle dans un cube de 1, la taille cuite dans ses sommets, **rien ne bouge
-   à l'écran** (le prouver par des mesures et des captures) ; le halo, l'image plate, le flottement et l'emprise lisent
-   la vraie hauteur du modèle ; `MODEL_TALL` (la couronne à 0,44) disparaît ; y joindre « ne redessiner que les ombres
-   des icônes qui bougent » (sa crainte pour la performance).
-2. **CMS-223, l'export en deux fichiers** : `content/events.json` pèse **20 Mo** (11 600 villes, 116 affichées). Le plus
-   complexe : **en parler avec lui avant de commencer**.
-3. ATLAS-373 et CARTO-375, deux nettoyages ; puis **rédiger le ticket « la confession d'une personne et le signe
-   gravé »** (champ Confession sur la fiche Personne, le signe sur la fiche de la confession, qui est le mort parmi les
-   acteurs) — le croissant et l'étoile attendent sur le banc `/icons.html?tomb`.
+**ATLAS-476, le concile — En cours** : la tiare et la crosse tournée vers l'extérieur (« B2 », son choix sur le banc
+`/icons.html?council`) sont dans la carte et dans la liste du CMS (« Tiare et crosse (concile) »), visibles par `?tiara`
+(Lyon, Pise). **Il lui reste à juger sur la carte** l'image plate de loin (mon premier dessin) et la taille (60), puis à
+choisir cette icône sur le type « Concile » dans le CMS et à exporter. Ensuite : ATLAS-477, la conquête.
 
-**Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; les épées et le trébuchet de 1100 sous le
-contre-éclairage que la cathédrale de Poitiers allume ; l'angle de la tombe (trois quarts gauche, un essai).
+**Ses mots sur les modèles 3D** (18/11) : la cathédrale illustre un archevêché ou un évêché, pas un événement ; les
+petits modèles (église, petite maison, grande maison) iront au statut d'une ville ; ils remplaceront peut-être les points,
+_« ce n'est pas sûr »_ — _« il faut y aller progressivement »_.
 
-**Son serveur du CMS tourne dans ma session** (relancé à sa demande, port 3100) : il s'arrête si elle se ferme — le lui
-redire. Une copie de la base du soir : `packages/cms/cms-backup-2026-11-17-1930.db`.
+**À confirmer par lui** (relayé par la session de l'historien, noté sur CMS-454, rien de fait) : donner à l'historien le
+droit de supprimer par le MCP ses fiches de ville, lieux et sources fautifs — premier cas, Ohligs (fiche 11749). Les
+garde-fous sont à décider avec lui.
+
+**En Idées, à valider par lui** : ATLAS-473 (les branches « année non dessinée » que plus rien n'atteint), CMS-474 (la
+confession d'une personne et le signe gravé sur sa tombe), ATLAS-475 (un affichage générique des capitales).
+
+**L'export** : `pnpm export:content` écrit `content/atlas.json` (les événements et les villes cochées) et
+`content/cartographer.json` (tout) ; le dernier commité date du 18/11 après-midi (12 762 fiches) — les 1 838 villages de
+l'historien saisis ensuite n'y sont pas. Je le lance sur une copie de sa base (`sqlite3 ".backup"`, `DATABASE_URL`).
+
+**Sa règle du 18/11** (mémoire `decided-removals-need-no-validation`) : un ménage qui exécute un retrait déjà décidé ne
+passe pas par lui. **Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; l'angle de la tombe.
+
+**Mon dossier d'essai pèse 229 Mo** (le profil du Chrome sans fenêtre, les captures) : à supprimer avec son accord.
 
 **Pour photographier une page sans toucher à son écran** : un Chrome sans fenêtre piloté par un petit script (protocole
 de débogage, port 9377), **un seul profil réutilisé** dans le scratchpad, la caméra posée par `sessionStorage`
 (`europe-map:map-camera`, cible et zoom) ; lui envoyer l'image par `SendUserFile`. **Ne jamais pousser pendant qu'une CI
 déploie** : le push suivant l'annule (`known-issues/tooling.md`).
-
-**L'historien** : pays et région des lieux anglais remplis (8 357) ; environ 1 550 autres lieux sans pays ; 21 villages
-du Domesday dessinés sous Gwynedd et Powys que les sources donnent au comte de Chester — **une retouche de carte, à
-lui**. ATLAS-448 (une seule langue) reste en tête d'« À faire » : pas faisable sans lui, sauf son inventaire.
 
 ## Ce qui reste d'avant, toujours vrai
 
@@ -65,12 +73,10 @@ Le format de l'export est à la **version 9** (la chaîne de chaque ville).
 par une règle qu'il n'a pas demandée ; **l'outil choisi reste choisi**. Quand un geste échoue : le refaire dans mon
 Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me met**, jamais deviné.
 
-**Proposé, sans son feu vert** : une épique d'audit des refus du Cartographe ; son idée, _« en tout dernier »_ : un agent à qui dicter un geste.
-
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `content/events.json`**.
+**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `content/atlas.json` et `content/cartographer.json`**.
 
 **À lui, en attente** : son icône `error.svg` à la place de la mienne ; plus tard : CARTO-365 ; **à arbitrer** : le suzerain du royaume d'Arles
 et les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
@@ -89,14 +95,6 @@ supprimer dans « Contributeurs ».
 
 **Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
 lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
-
-**Ses arbitrages en attente** (une question à la fois) :
-
-- **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
-
-**À savoir, laissé de côté** : un nom sur chaque îlot ; le trait parchemin de la frontière collé au brun à un zoom seulement
-(un décalage en pixels dans le shader le réglerait) ; le flou ne suit aucune préférence système (A11Y-002) ; le filigrane des
-noms est son choix (A11Y-001) ; l'encre blanche des tribus n'est pas floutée de près.
 
 **Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
 après, posté par `commentfile` depuis un fichier (skill `/trello`, « The closing comment »).

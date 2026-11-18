@@ -1,6 +1,22 @@
 # Next — archive
 
 
+## Moved out of `next.md` on 2026-11-18 (the file past 200 lines) — verbatim
+
+**L'historien** : pays et région des lieux anglais remplis (8 357) ; environ 1 550 autres lieux sans pays ; 21 villages
+du Domesday dessinés sous Gwynedd et Powys que les sources donnent au comte de Chester — **une retouche de carte, à
+lui**. ATLAS-448 (une seule langue) reste en tête d'« À faire » : pas faisable sans lui, sauf son inventaire.
+
+**Proposé, sans son feu vert** : une épique d'audit des refus du Cartographe ; son idée, _« en tout dernier »_ : un agent à qui dicter un geste.
+
+**Ses arbitrages en attente** (une question à la fois) :
+
+- **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
+
+**À savoir, laissé de côté** : un nom sur chaque îlot ; le trait parchemin de la frontière collé au brun à un zoom seulement
+(un décalage en pixels dans le shader le réglerait) ; le flou ne suit aucune préférence système (A11Y-002) ; le filigrane des
+noms est son choix (A11Y-001) ; l'encre blanche des tribus n'est pas floutée de près.
+
 ## Archivé de next-historian.md le 18/11 (historien) — les sections du 16/11 au 10/11
 
 ### ▶ 16/11, 23:30 : plus de villes (sa demande à la fermeture)

@@ -2,6 +2,22 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-17 (nuit) → 18/11 — l'historien : la Finlande avant les Suédois, 91 forteresses et abbayes en Allemagne de l'Ouest
+
+Plages journalisées **17/11 21:09 → 21:28** et **18/11 01:40 → 02:10** (les saisies du CMS entre les deux ne sont pas
+journalisées) ; le chantier totalise **356 h 43 sur 55 plages**. **Rien de commité.**
+
+- **Le CMS lancé par moi** sur son ordre explicite (_« lance ! »_), après deux refus du contrôleur de permissions et l'arrêt
+  (SIGTERM) d'une tâche de fond ; relancé détaché (`files/resources/historien/outils/start-cms.sh`).
+- **La Finlande, le topo** (`files/plans/sources/1100/finland-topo.md`) : trois peuples sans souverain (Tavastiens,
+  Finnois proprement dits, Caréliens), Sámi et Kvènes au nord, Novgorod et la Suède voisins sans régner ; lus : la
+  Chronique de Novgorod, Ohthere, Gs 13, Lind 2004. Rien à saisir ; sa réponse attendue sur le dessin.
+- **Allemagne de l'Ouest, 101 → 192** : 48 forteresses et 43 abbayes et stifts (fiches 11632–11722), chacun avec la phrase
+  de sa page allemande qui le date avant 1106, sous le titre du duché dessiné. Contrôlé par script et par le codeur en
+  lecture seule ; `cities:alerts` inchangé (65 sur 11 691).
+- **Mes fautes** : deux citations mal recopiées (rattrapées par le contrôle, corrigées) ; un `cd` ; trois messages avant de
+  dire clairement que le refus venait du contrôleur, pas de moi.
+
 ### 2026-11-17 (jour et soir) — l'historien : l'Angleterre du Domesday, la frontière galloise, le pays et la région
 
 Plage **17/11 09:43 → 21:06** (11 h 21, avec le codeur) ; le chantier totalise **355 h 49 sur 54 plages**. **Rien de

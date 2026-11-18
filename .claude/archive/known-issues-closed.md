@@ -1,5 +1,38 @@
 # Known issues — closed
 
+- **Closed 2026-11-15** (no push since CMS-276, `f49efbb`: a schema change goes through a migration before the server starts) — from `rules/known-issues/cms.md`:
+- **Un ajout de champ pur peut figer le serveur, sans question dans le terminal** (03/11, `49a623d`) : une collection
+  ajoutée au plugin MCP a ajouté une colonne à la table des clés. Le push l'a créée (`importance_reasons_find`), puis a
+  échoué sur `CREATE INDEX payload_preferences_rels_order_idx` — *already exists* ; l'initialisation de Payload est restée
+  en échec, chaque requête attendait derrière (admin, API, `/api/mcp` : 20 à 90 s). Une première relance du dev a
+  redonné l'erreur. **Mesuré ensuite sur une copie identique de la base** (`pushSchema` sans `apply`) : plus aucune
+  instruction en attente ; relancé à 13:21, le serveur répond (admin 200, MCP 401 sans clé en 7 ms). **Reproduit le 13/11
+  à coup sûr, dans un seul processus** (CMS-433, une collection ajoutée, sur une copie de sa base) : le premier démarrage
+  pousse, le **deuxième** échoue sur `CREATE INDEX payload_locked_documents_rels_order_idx` — *already exists* —, le
+  troisième et les suivants passent ; mêmes comptes dans dix tables, `integrity_check` ok. L'hypothèse de deux pushes
+  concurrents est donc **fausse** : c'est le push de Drizzle qui recrée une table (une colonne de relation ajoutée) et
+  bute sur son propre index. **Le 14/11, sur une copie de sa base d'aujourd'hui** (CMS-433 entier : une collection et une
+  relation ajoutée aux lignes) : **quatre démarrages** — le 2ᵉ bute sur `place_periods_testimonies_order_idx`, le 3ᵉ sur
+  `payload_locked_documents_rels_order_idx`, le 4ᵉ passe ; une table refaite par démarrage, mêmes comptes, `integrity_check`
+  ok. **Remède** : après un changement de schéma qui ajoute une collection ou une relation, le lui dire avant : relancer
+  tant que l'admin répond 500 ou que le terminal montre *already exists* — le nombre mesuré d'abord sur une copie, jamais
+  sur sa base. Durable : les migrations, CMS-276. **Sévérité : gênant.**
+
+- **Closed 2026-11-15** (CMS-276, `f49efbb`, his base adopted at his relaunch) — from `rules/known-issues/cms.md`:
+- **En mode push, un changement de schéma pose une question dans le terminal, et tout le serveur attend** — CMS-276
+  (25/10, mesuré). En développement, l'adaptateur SQLite pousse le schéma à la connexion (`db-sqlite/src/connect.ts`
+  l. 60–67, Payload 3.92.0 dans `opensrc/`). Une colonne retirée et une autre ajoutée dans la même table : Drizzle ne
+  sait pas si c'est un renommage et **demande** (`drizzle/src/utilities/pushDevSchema.ts` l. 47) ; un avertissement de
+  perte de données répondu « non » **arrête le serveur** (`process.exit(0)`). Payload ne se connecte qu'à la première
+  requête : la question tombe au milieu d'un clic, chaque requête attend derrière (2 min mesurées, puis plus rien). Sa
+  base a été supprimée le 25/10, avec son accord (elle ne tenait que son compte). **Remède en place, le 15/11** : les
+  migrations (`push: false`, `src/migrate/`, `packages/cms/README.md` « The schema changes by migrations ») — `pnpm
+  dev:cms` copie la base puis applique les migrations avant que Next démarre ; sa base, bâtie par le push, est adoptée à
+  la première relance une fois prouvée identique aux collections (mesuré sur une copie : 0 écart, 2 s). **L'entrée part
+  aux archives quand il aura relancé son serveur avec.** **Reste un piège, celui de `migrate:create`** : un renommage de
+  table ou de colonne y pose la même question — une telle migration s'écrit à la main, prouvée par
+  `migrateBase.test.ts`. **Sévérité : à savoir.**
+
 Entries closed and moved out of `known-issues.md`. Kept for the lessons they carry.
 
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
