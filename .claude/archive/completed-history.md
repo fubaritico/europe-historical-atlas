@@ -2,6 +2,80 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-17 (jour et soir) — l'historien : l'Angleterre du Domesday, la frontière galloise, le pays et la région
+
+Plage **17/11 09:43 → 21:06** (11 h 21, avec le codeur) ; le chantier totalise **355 h 49 sur 54 plages**. **Rien de
+commité** de l'historien : la base du CMS, `next-historian.md` et la note de l'année. Détail :
+`files/plans/sources/1100/villes-et-sites-nuit-2026-11-17.md`.
+
+- **Sa règle du matin** : _« la population, c'est pas forcément un critère ; notre critère, c'est la durée dans le
+  temps »_ — tous les lieux qu'une source atteste, villages compris. **L'Angleterre du Domesday Book** : 8 359 lieux
+  (5 729 le matin, session coupée par un disque plein, ses listes perdues ; 2 609 l'après-midi par huit agents, la liste
+  refaite ; 21 de la frontière galloise à la main). La base passe de 3 089 à **11 600 villes en 1100**.
+- **La frontière galloise** : 21 villages que le Domesday range sous le Cheshire et le Shropshire, dessinés sous le
+  Gwynedd et le Powys. Deux témoins indépendants (Lloyd 1912 ; le cartulaire de Sainte-Werburge, chartes de 1093 et de 1119) les donnent au comte de Chester et, pour Forden, de Shrewsbury — titres et maillons créés. **65 alertes** sur la
+  carte, dont ces 21 : la retouche est à lui.
+- **Le pays et la région d'aujourd'hui** des lieux anglais (_« faut finir le travail qui a été commencé »_) : lus sur
+  Wikidata avec la règle du CMS, écrits par mise à jour groupée du MCP, contrôlés (8 357 remplis, 2 laissés vides).
+- **L'export** fait et poussé par le codeur (`79de18d5`) : 11 600 fiches, 116 affichées dans l'atlas.
+- **La Finlande**, première lecture : trois peuples (Finnois proprement dits, Tavastiens, Caréliens), la Chronique de
+  Novgorod pour témoin ; sa réponse attendue (les dessiner comme les Livoniens, ou non).
+- **Mes fautes** : un briefing d'ouverture faux (3 089 villes annoncées quand la base en avait 8 966 — la session du
+  matin n'avait rien écrit au point de reprise) ; le CMS dit « coupé pendant ton export » sans vérifier qu'il exportait ;
+  la question des agents posée deux fois avant son « continue comme ça ».
+
+### 2026-11-17 (après-midi et soir) — le codeur : la couronne en ligne, la cathédrale, la pierre tombale, CMS-468
+
+Plage **17/11 09:43 → 19:52** (10 h 08, la même que le matin) ; le chantier totalise **354 h 36 sur 54 plages**. Tout
+est commité et poussé (`8c98ff8b`), onze commits de `f2552600` à `8c98ff8b`.
+
+- **Fermés** : ATLAS-287 (la couronne d'Occident des XIe–XIIe à la place de celle à pointes : *« beaucoup plus iconique »* ;
+  de loin la silhouette S3, base resserrée) et CMS-468 (Next 16.4.6, le kit MCP forcé en 1.32.0 ; alertes de 10 à 3).
+- **« Un seul signe par lieu »** : le point de la ville s'efface sous une icône, son nom commence après (*« ça se lit
+  mieux »*). Icônes 3D à 75 %, visibles au dernier cran seulement (*« c'est mieux quand ça apparaît au dernier
+  moment »*), flou réduit de moitié.
+- **La cathédrale** (ATLAS-434), d'après ses photos, réglée par lui à Cologne : la moitié du trébuchet, trois quarts,
+  sans halo, **contre-éclairage venu de la caméra réservé aux bâtiments**, **terre noircie et granuleuse au pied**
+  (*« planté dans le sol »*), l'ombre qui suit l'étendue du modèle. De loin, le fronton à deux tours dans l'esprit de
+  Notre-Dame (*« on reconnaît directement »*). **Épique créé : ATLAS-471, les landmarks.**
+- **La pierre tombale** (ATLAS-288) : le signe de la confession **gravé en creux** (croix, croissant, étoile) ; taille
+  *« pudique »* ; de loin, croix en blanc plein, lueur gardée *« pour la lisibilité »* ; de près, plus de halo. Toutes les
+  images plates rendues nettes de loin (*« le flou est gênant »* → *« c'est net »*).
+- **En ligne sans flag** : « Mort », « Accession au trône », « Intronisation », « Concile » ont leur icône — à sa demande,
+  lui en Remote Control, **j'ai arrêté et relancé son serveur du CMS**, réglé les quatre types par l'API locale de Payload
+  (copie de la base avant), exporté, poussé. `?cathedral` et `?tomb` marchent aussi sur le site publié.
+- **Créés** : ATLAS-469 (chaque icône dans la même boîte, taille cuite), ATLAS-470 (l'encombrement), ATLAS-472 (un
+  mausolée pour un très grand).
+- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé, encore) ; 1,5 Go de profils Chrome laissés dans
+  le scratchpad (dans sa Corbeille depuis, un seul profil réutilisé ensuite) ; un push parti avant son « peaufine
+  d'abord, envoie-moi les captures » ; trois scripts de retouche cassés par une ligne remise en forme, à refaire ; une
+  question de lui restée sans réponse le temps qu'il la répète.
+
+### 2026-11-17 (matin et midi) — le codeur : cinq tickets du matin, puis les couronnes, deux coupures et le ménage du disque
+
+Plage **17/11 09:43 → 14:25** (4 h 41) ; le chantier totalise **349 h 09 sur 54 plages**. Le matin est commité et poussé
+(`3ef4ef3`) ; **rien des couronnes n'est commité**.
+
+- **Le matin, commité** : CMS-431, CARTO-453, CARTO-464, CARTO-465 (design system 0.10.0) et la demande au design system
+  de CARTO-467 ; il a vidé « À valider ».
+- **Les couronnes** (ATLAS-287, ATLAS-288), sur le banc `/icons.html?crowns`, d'après ses photos : ses verdicts — **B la
+  générique** en attendant les régionalismes (*« il n'y a pas de croix, il n'y a rien »*), C jetée, D roi d'Europe russe,
+  E Saint-Empire, F Europe de l'Est, G tsar, H Occident haut Moyen Âge (l'anneau de G, lys droits, à sa demande). **La G
+  refaite** : la première ne ressemblait pas à ses photos (*« il manque la couronne de tsar »*, dit deux fois). La B
+  passée dans la carte, plus petite (0,7), sans regarder la caméra, et *« elle peut rester animée »* : un réglage
+  `ICON_SWAYS` à part. Il n'a pas encore jugé la taille ni le balancement sur la carte.
+- **Sa règle du jour** (mémoire `clean-up-after-every-trial`), après un disque plein qui a coupé la session : seuls les
+  worktrees codeur et historien, tout essai nettoyé, le scratchpad aussi (*« vous n'avez pas la primeur de faire ce que
+  vous voulez sur mon ordinateur »*). Il ne reste que `historian` ; `coder-2` retiré, ses 19 fichiers du 13/11 en remise.
+- **CMS-468 créé**, en tête d'« À faire » : Next 16.4.6 et le kit MCP 1.32.0 avant de relancer le CMS.
+- **La galère des sessions** : le plugin Air de son IDE relançait la session dans une fenêtre qu'il ne retrouvait plus,
+  lui sur l'iPhone ; l'IDE à 568 % de processeur. Il a désactivé le plugin et repris par `claude --resume`.
+- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé) ; je lui ai renvoyé trois fois la même commande
+  à taper au lieu de trouver la Corbeille ; une demande d'autorisation d'accessibilité déclenchée sur son écran ; l'IDE
+  dit « fermé » avant de l'avoir vérifié (corrigé au message suivant) ; des étapes de CMS données à faire alors que la
+  couronne n'était visible nulle part (*« elle est où la putain de couronne ? »*) ; la H réduite à tort après son « c'est
+  bien là ».
+
 ### 2026-11-16 (soir) — le codeur : la revue des commits non relus, le CMS ID, le glisser des pays, le ménage du tableau
 
 Plage **16/11 11:40 → 17/11 00:01** (12 h 21, avec l'historien) ; le chantier totalise **340 h 41 sur 53 plages**.
@@ -70,7 +144,7 @@ Plage **16/11 11:40 → 16:23** (4 h 43) ; le chantier totalise **333 h 03 sur 5
 
 Suite de la plage **15/11 13:50 → 16/11 06:47**, puis 10:40 → 11:45 (le chantier totalise **328 h 20 sur 52 plages**),
 après un blocage de macOS (accès au Bureau retiré au terminal, rétabli par lui). **Rien de commité.** Travail :
-`files/resources/chains-1100-review/` ; ticket CMS-422.
+`files/resources/historien/1100/chaines/chains-1100-review/` ; ticket CMS-422.
 
 - **La revue demandée par lui** (*« faut tout qu'il passe en revue »*) : **1 529 villes de 1100 sur 1 622** ont une chaîne
   fermée jusqu'à un souverain (888 sur 1 292 n'avaient que leur détenteur la veille). 15 lots de recherche, un agent à la

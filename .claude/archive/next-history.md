@@ -1,5 +1,350 @@
 # Next — archive
 
+
+## Archivé de next-historian.md le 18/11 (historien) — les sections du 16/11 au 10/11
+
+### ▶ 16/11, 23:30 : plus de villes (sa demande à la fermeture)
+
+**Sa demande pour la session suivante** : un travail de sources pour **plus de villes en France, en Pologne, en Russie si
+possible, en Grèce et en Turquie** — il donnera aussi d'autres villes à rechercher. Même méthode qu'au soir du 16/11 :
+une liste par l'importance (Bosker-Buringh, `files/spikes/city-sources/out/buringh-2021.tsv`, villes absentes du CMS,
+attestées avant 1105), QID vérifiés sur Wikidata **par la position** (jamais de mémoire : la moitié étaient faux le 16/11),
+saisie par un agent, puis `pnpm cities:alerts --map 1100` pour vérifier. Aussi en attente : dessiner la **vicomté de
+Carcassonne** (Carcassonne, Agde en rouge) quand il lâche la carte ; la passe sièges, abbayes, forteresses de l'Empire de
+l'Ouest ; les maillons 91 (Carcassonne → Barcelone, faux) et 83 à supprimer par lui.
+**Commits, depuis le 16/11 (REPO-460)** : la première ligne finit par son ticket, « … [CARTO-457] », ou par « [no-ticket] »
+pour des données ou une note qu'aucun ticket ne sert ; commitlint refuse sinon, et le ticket compte dans les 100 caractères.
+
+### ▶ 16/11, soir : les alertes de la carte 1100, de 399 à 54
+
+**L'outil** : `pnpm cities:alerts --map 1100 [--box=…]` (CARTO-456), lancé depuis l'arbre de `main` — il juge chaque ville
+comme l'écran. Un pays sans QID se reconnaît par le numéro de son territoire du CMS (CARTO-450, champ `territory` du pays).
+**La lecture choisie par le dev** : une ville suit le duché ou le comté dessiné sous elle quand sa chaîne le saute
+(Lorraine, Carinthie, Franconie, Thuringe, Frise, Romagne : titres créés, tenus par le duc ou par Henri IV). Les clercs
+hors des chaînes, sauf Cologne, Trèves et Mayence (dessinés sur la carte comme archevêchés, à retoucher par lui).
+**Les 101 villes de l'Empire de l'Ouest** (fiches 1654–1754, Bosker-Buringh ≥ 2 000 hab. en 1100, attestées avant 1105) :
+validées par lui, toutes bien placées dans leur duché. Leur détenteur vient du duché dessiné, pas d'une source.
+**Sa décision, 16/11 ~22:00 (par le codeur)** : l'Allemagne de l'Ouest jusqu'à au moins 200 points — les villes de plus de
+20 000 habitants attestées avant 1105, les sièges épiscopaux et grandes abbayes, **les forteresses** ; vivier
+`files/resources/historien/1100/regions/germany-west-1100-research/`. Reste : la passe des sièges, abbayes et forteresses ; 8 villes sans QID sûr
+(Quedlinburg, Courtrai, Nivelles, Tirlemont, Saint-Trond, Tiel, Zutphen, Kempten) ; Lübeck, Brandebourg, Burg (terres
+slaves sans pays). **Carcassonne tranché par les sources** : vicomté souveraine (titre 251), Albi et Castres sous
+Toulouse (titre 393).
+
+### ▶ ON REPREND ICI — 16/11, 16:24 : tout reprendre depuis le début
+
+**D'abord, lire ce qu'il a changé à la main** (16/11, 16:25) : **Mons et le duché de Basse-Lorraine**, qu'il crée lui-même
+dans la base — rien d'autre. Ne pas écraser ses fiches : chercher le territoire et le titre qu'il a créés avant tout geste.
+
+**Sa demande** : reprendre toutes les chaînes de 1100 depuis le début, région par région (la Lotharingie d'abord), avec
+**son critère** : le suzerain est **celui qui gouverne au-dessus** — un hommage, une génuflexion, un tribut, la prière du
+vendredi, une dignité ne font pas un suzerain ; un clerc n'entre que là où il gouverne la terre. Seul **son texte**
+fait foi (`files/plans/contribution/vassals/saisie-et-exploitation-des-chaines-de-vassalité.md`, en tête), jamais le
+tableau du débat dessous. Entrer les niveaux manquants (les duchés : la Haute-Lorraine porte un nom tronqué, « Duchy of »,
+territoire 270), corriger les maillons, trancher et finir dans la base. **Contrôle** : les planches **politiques** de
+Shepherd sur Commons (`File:Europe mediterranean 1097.jpg` ; « Germany and Italy 919–1125 » à chercher) — Shepherd
+sépare la carte religieuse de la politique ; le PDF de Google est illisible. Vérification de toute la base :
+`files/resources/historien/1100/chaines/chains-1100-verify/verify.py` (lecture seule).
+
+**Ce qui est en cours** :
+
+- **Les citations copiées du code wiki** (« [[…|…]] », « {{s-|XI|e}} ») : **bloquant, pour maintenant** (sa décision) —
+  une citation est la phrase lue sur la page. 1 546 lignes. `files/resources/historien/1100/chaines/chains-1100-verify/render_quotes.py` produit
+  `rendered.json` (la phrase de la page, vérifiée dessus ; à 650/1 546 au départ, 615 retrouvées) ; à finir, puis la
+  liste vérifiée au **codeur, qui l'applique d'un coup** sur une copie de sa base ; les « not-found » se reprennent à la main.
+  Wikipédia et Wikidata refusent plus d'une demande par seconde (429).
+- **Les souverains cochés au critère** : comtés catalans, Apulie, Pologne, Rascie, Dioclée, Venise, Écosse, taïfas
+  tributaires, Zirides, Médine, Jérusalem, Antioche ; Champagne, Rethel, Amiens, Corbeil, Montlhéry sous le roi. À revoir
+  dans la reprise comme le reste.
+- **CMS-454** (supprimer moi-même titres et maillons) : codé par le codeur, puis la case « delete » sur ma clé et son CMS
+  relancé ; d'ici là, **jamais de suppression**. Alors : les maillons 103 (Soissons → évêque), 221 et 165 (Godefroy,
+  Bohémond → patriarche).
+- **Une mise à jour groupée** qui touche les deux bouts d'un maillon le réécrit deux fois (Payload, en parallèle) : un par un.
+
+**Ensuite** : 26 QID de territoires désignent une entité d'une autre époque (diocèses modernes, principautés plus tardives —
+`badqid` à refaire par script, Wikidata P571/P576) : les retirer (le numéro du CMS sert d'identifiant) ou trouver le bon ;
+les noms de diocèses modernes (Modène-Nonantola, Plaisance-Bobbio…) au nom de 1100 ; 7 maillons et 4 maisons sans source.
+**Sa décision attendue** : l'ancien champ texte du détenteur (holderName/holderQid) tiré du titre, proposition du codeur.
+
+### ▶ 16/11, 11:45 : les chaînes de 1100 presque toutes fermées
+
+**Fait** (détail : `completed.md`) : 1 529 villes de 1100 sur 1 622 ont une chaîne fermée jusqu'à un souverain. Ses
+règles, toutes dans le tableau de `../files/plans/contribution/vassals/vassal-chain.md` : pas de diocèse dans une chaîne, pas de
+comte sous un évêque, les rois sous l'Empire (Italie 359, Arles 356, Germanie 360), la chaîne complète, **une année sans
+mois = le 1ᵉʳ janvier**. Travail : `files/resources/historien/1100/chaines/chains-1100-review/` (rapports par lot, sources, scripts ;
+`work-dupes.sh` = la requête des doublons, à relancer après chaque passe).
+
+**Reste, dans l'ordre** :
+
+1. **Quand le codeur aura les deux types** (« Diocèse », « Seigneurie ecclésiastique ») : retyper les 117 territoires
+   d'après `classement-religieux.md` (72 seigneuries, 40 diocèses, 5 sans réponse) — et les 6 créés depuis (345, 348,
+   351, 353, 354 : seigneuries).
+2. **32 villes à chaîne ouverte** : leur titre n'a pas de suzerain trouvé après deux recherches (Längwitzgau, Tortosa,
+   Luni, Bologne, Beichlingen, Foix, Comminges, Molina, Ariano, Grandpré, Mottola, Dießen, Wettin, Médine, Inalides…) —
+   une troisième recherche, autres bibliothèques (BnF, Gallica, MGH), ou les holders faux d'abord (`holders-to-fix.md`).
+3. **61 villes sans titre** : rivaux (Cambrai, Côme, Concordia, Chalon, Sorrente, Sarno, Labourd), lieux sans seigneur
+   nommé (Lomello, Sondrio, Carmagnola, Bizerte, Béja, Azov, Acerra, Gênes, Bâgé, Novi Ligure, Treviglio, Verbania, Massa,
+   Trieste, Termonde, Rehehausen, Vaucouleurs, Molfetta, Terlizzi, Poreč, Plötzkau, Domersleben…), Toropets.
+4. **Détenteurs faux** (`holders-to-fix.md`) : Verceil, Vérone, Ceneda (un évêque de 1152), Albenga, Sienne, Gubbio,
+   Valence (Henri), le palatin de Saxe (Sommerschenburg), Wettin, les Cadolingi (Ugolino).
+
+**À lui, sans urgence** : supprimer les titres que plus rien ne cite (24, 43, 45, 61, 99, 137, 327, 328) et le territoire
+308 ; les doublons Saint-Siège 176 / États pontificaux 1, Adria 222 / 60, Passau 220 / 94 ; les Zirides gardent un maillon
+« nominal » vers le calife quand Almoravides, Seldjoukides, Hammadides sont souverains — à harmoniser.
+
+**Ma règle à moi, apprise le 16/11** : finir dans la base, ne pas rendre de comptes rendus en fichiers ni de listes de
+questions ; trancher d'après les sources, dire en une ligne ce que j'ai tranché.
+
+### ▶ 15/11 : la nuit des chaînes de vassalité (compte rendu : `files/plans/sources/1100/compte-rendu-nuit-2026-11-15.md`)
+
+**À la reprise, d'abord** (sa demande, 15/11) : **confronter nos deux modèles de déclaration de la chaîne** (CMS-422). Le
+mien : des _entités_ (seigneuries, charges ; QID, type, souveraine), des _tenures_ (qui tient l'entité, de quand à quand),
+des _liens_ (telle entité relève de telle autre, avec lignes ; une divergence = un second lien) ; la certitude calculée,
+jamais tapée ; la fiche pointe vers une entité. Dette : cette nuit les détenteurs sont tantôt des personnes, tantôt des
+entités — une passe de normalisation par script une fois le modèle choisi.
+
+**Ses décisions en attente** : le périmètre (viviers prêts : **France 15 393, Allemagne de l'Ouest 7 140** candidats ≤ 1105 —
+`files/resources/{france,germany-west}-1100-research/` ; faits : les villes françaises ≥ 20 000 hab. des provinces ; restent
+fr-08…14, les banlieues d'Île-de-France, mises de côté) ; la date de la carte — **réglée** : une année entière (sa décision du 30/10, `dateOverlap.ts`), un changement dans l'année donne les deux détenteurs dans l'ordre ; Lodi (la ville
+moderne, pas Lodi Vecchio) ; les seigneurs sans élément Wikidata ; la liste d'attente
+`files/resources/historien/1100/chaines/belonging-1100-research/pending-owner-sheets.md` (~50 fiches, la source orpheline 1595).
+
+**Régions restantes de son plan** (`files/plans/sources/1100/night-plan-2026-11-15.md`) : les îles Britanniques, la Serbie et
+l'Ukraine (seconde passe), la Turquie, le Levant, l'Irak, le Caucase.
+
+**Les outils de la nuit** (`files/resources/historien/1100/chaines/belonging-1100-research/`) : `REGION-belonging.md`, `REGION-links.md`,
+`REGION-sheets.md`, `france-1100-research/REGION-france.md` (les notes données aux agents) ; `FIX-sheets.md` (corriger une
+fiche existante) et `ENTER-towns.md` (saisir une ville nouvelle) ; `work/snapshot.py` (photo de la base avant une saisie),
+`work/check-fix.py --any <ids>` (aucune citation changée, une ligne au QID du détenteur, pas de « par le district » sur la
+fiche), `work/register.py` (régénère `vassalage.md`). **La chaîne** : un lot de recherche (`source-researcher`, ≤ 35 tours),
+puis sa saisie (general-purpose, Sonnet) pendant la recherche du suivant, puis mes contrôles par script.
+
+### ▶ ON REPREND ICI — 14/11 : la Pologne faite, l'est de l'Allemagne en cours, un agent à la fois
+
+**La méthode du 14/11** (validée par l'usage, sur son mot « un agent à la fois ») : un lot de recherche
+(`source-researcher`), puis sa saisie confiée à un agent de saisie (general-purpose, consignes de `/enter-in-cms`), puis
+ma vérification par script (citations dans leur texte, aucune source orpheline, une ligne au QID du détenteur), puis le
+codeur en lecture seule. Environ 130–150 k jetons la recherche, autant la saisie. **Sa règle du 14/11** : le détenteur
+d'une fiche est le seigneur le plus proche que les sources prouvent (écrite dans `/enter-in-cms`). **Jamais** une ligne
+de détenteur pour une preuve d'existence (CMS-442 attend).
+
+**Pologne, fini** : 16 villes saisies (Wrocław, Sandomierz, Kruszwica, Bardo, Kamieniec, Czerwień, Giecz, Głogów,
+Kołobrzeg, Międzyrzecz, Nakło, Niemcza, Przemyśl, Santok, Wolin, Łęczyca). Les villages ne rendent rien (0 sur 12) : ce
+sont les châtellenies qui rendent. **En attente de sa décision, l'archéologie seule** (question posée plusieurs fois,
+sans réponse) : Bytom, Czersk, Kalisz, Kamień, Legnica, Ląd, Opole, Płońsk, Radom, Szczecin, Wizna, Wiślica, Wojnicz,
+Wyszogród, Włocławek ; aussi Krosno et Lubusz (détenteur non daté). Travail : `files/resources/historien/1100/regions/central-europe-1100-research/`.
+
+**▶ À FAIRE EN PREMIER (le dev, 14/11 au soir) — chaque lieu doit avoir une appartenance.** Ma dérive du 14/11 : les lieux
+qui existaient en 1100 mais dont le rapport disait « aucun seigneur sous l'Empire » ont été laissés hors de la base (et 27 fiches
+vides supprimées par lui), au lieu de remonter **au vassal du district** avec une ligne qui le prouve (règle écrite dans
+`enter-in-cms`, « Every place has a belonging »). **Rattrapage** : reprendre tous ces lieux — dans les rapports
+`files/resources/historien/1100/regions/germany-east-1100-research/reports/de-*.json` et `central-europe-1100-research/reports/{pl,plc,cz,czc,at}-*.json`,
+les `towns` avec `existed1100 == "existed"` et sans fiche dans la base (par QID) — les 27 de la liste de
+`files/plans/sources/1100/germany-east.md`, ceux de de-11 à de-13, Oedt, Assling, Tristach, Leisach, Göming (hameau), Mělník,
+Stará Boleslav, Netolice, Litomyšl, Břeclav, Tetín… ; pour chacun, le vassal du district en 1100 et sa source. Puis l'Angleterre
+(feu vert du dev : bourgs du Domesday, chefs-lieux de comté, **châteaux et abbayes comme lieux**, avec leur raison d'importance),
+et rattraper la raison « forteresse » (CMS-431) sur les châteaux déjà saisis (Vyšehrad, Kłodzko, Dřevíč, Eckartsburg…).
+
+**Est de l'Allemagne, fini (14/11)** : 13 lots, 125 lieux (fiches 1052–1176) ; le raisonnement, les écarts avec sa
+carte, les lieux sans seigneur prouvé ; les 27 fiches vides supprimées par lui le 14/11 : `files/plans/sources/1100/germany-east.md`.
+Saalfeld pour l'Orlagau et Cologne à l'archevêché Q11805 : **signés par lui le 14/11**.
+Méthode retenue le 14/11 : agent de recherche sur Opus, saisie sur Sonnet, **en chaîne** (la recherche du lot N+1 pendant la
+saisie du lot N), **pas de fiche sans ligne**, une question part en notification et je continue.
+
+**Tchéquie, en cours** : `central-europe-1100-research/`, `REGION-czechia.md`, `work/mklot-cz.mjs <C> Q213 cz-NN <start> 15`
+(Autriche : `Q40 at-NN`) ; 181 pistes tchèques avant 1105, 126 autrichiennes. **cz-01** : 2 fiches (Svojšice, Dřevíč ;
+1177–1178) ; Přerov en attente (archéologie seule). **cz-02 : 0** — les chartes « 1043–1073 » de Břevnov, Ostrov, Rajhrad,
+Opatovice sont des faux du XIIe–XIIIe s. (CDB I n° 378–386). **Pistes tchèques arrêtées** (règle d'arrêt, 14/11). **Puis les châteaux** (`REGION-czechia-castles.md`, lots czc-01–02,
+Cosmas 1607/1783 et CDB I) : 12 fiches (1261–1272) — Vyšehrad, Litoměřice, Žatec, Bílina, Starý Plzenec (le Plzeň de 1100),
+Hradec Králové, Chrudim, Libice, Olomouc (Svatopluk), Brno et Znojmo (Bořivoj II), Kłodzko. Pour sa carte : **Znojmo et Břeclav
+moraves** (carte : Bavière). **Autriche, finie (14/11)** (`REGION-austria.md`, 8 lots, 126 pistes) : 64 fiches (1179–1242). **À lui** : le château de
+Pitten (fiche 844, Saint-Empire) au comte Ekbert de Formbach ? ; Aflenz (1185) et Stolzalpe (1227) gardent une ligne « Herzog
+Heinrich III. 1090—1122 » (titre de section) — je la retire ou lui ? Un hameau attesté se saisit sous son propre QID (Kröllendorf, Laabach, Tiffen, Maria Feicht, Oberthern). Pour sa carte :
+Pfons et Sistrans à Brixen (carte : Bavière), Reisenberg dans la Marche d'Autriche (carte : Hongrie).
+
+**Sa carte de 1100, retouchée par moi le 14/11 à sa demande** (« au plus simple, géométriques », lui repasse) : Normandie,
+Hainaut–Cambrésis, Mâcon, Lusace–Nisan, Reims, Erfurt, Marche du Nord ; copie `years/1100.before-claude-2026-11-14` ; détail
+dans `.claude/skills/use-cartographer/references/journal.md`. **Non commité.** Reste à lui : Douai, Groitzsch–Wiederau,
+l'Orlagau, Lehesten–Coburg, deux angles aigus. `files/resources/1100-retouches.md` à effacer quand il a repassé dessus.
+**L'archéologie seule : oui** (14/11) — les 18 saisis (fiches 1243–1260).
+
+**Le rattrapage des QID de détenteur** (14/11) : 63 lignes sur 49 fiches ; restent 306 lignes sans QID sûr (constats,
+groupes, noms vagues). Travail : `files/resources/historien/1100/passes/qid-backfill-1113/`.
+
+**Ses tickets du 14/11** : CMS-441 (le lien qui ouvre la page de la source, le passage surligné — en tête d'À faire),
+CARTO-435 (accord par le suzerain), CMS-442 (une ligne d'existence, en Idées par le codeur), l'épique DESIGN-432.
+
+### ▶ ON REPREND ICI — 10/11, après la nuit des sept cartes
+
+**Où je travaille** : le worktree `.claude/worktrees/historian`, branche `historian-1109`, **jamais l'arbre de `main`**
+(sa préférence, 09/11) — sauf pour lui livrer une carte quand il dit qu'elle est prête. **Le resynchroniser sur `main`**
+dès que `main` bouge et à chaque carte finie (`git merge --ff-only main`, ou `git rebase --autostash main` quand un
+commit à moi y a été reporté ; mémoire `resync-worktree-with-main`). Mon serveur du Cartographe : port **5180**, lancé
+depuis le worktree (`pnpm -C <worktree>/packages/cartographer exec vite --port 5180 --strictPort`).
+
+**Mes commits en attente de fusion** : `7cc7251` (la recette de numérisation) — l'instance principale fusionne mes
+commits sur `main` en avance rapide ; vérifier qu'il y est (`git log main`).
+
+
+## Archivé de next.md le 17/11 à 14:25 (reprise du 17/11 à 00:05)
+
+### ▶ ON REPREND ICI — le 17/11 : il valide, l'historien finit sa nuit, les icônes 3D avec le modèle Fable
+
+Session du codeur fermée le 17/11 à 00:05 (détail dans `completed.md`). **Son usage : 26 % pour 1 jour et 6 heures.**
+
+- **REPO-460 n'est pas poussé** : `67736ea` est dans `main` (le ticket en fin de première ligne de chaque commit, tenu par
+  commitlint) — à pousser sur son mot. Tout le reste de la session est sur GitHub (`91208b0`).
+- **Demain, dans son ordre** : (1) **il valide des tickets** — à valider : CMS-422 (la chaîne sur la fiche, le toast du
+  maillon refusé), CMS-431, CARTO-453, REPO-460 ; (2) **le travail de nuit de l'historien** : les correspondances de cartes,
+  les sources des derniers éléments ajoutés dans le Cartographe ; (3) **les icônes 3D avec le modèle Fable**, qu'il me
+  donnera (ATLAS-287, ATLAS-288, épique ATLAS-132).
+- **En haut d'« À faire »** : ATLAS-448, CMS-454, CMS-441, CMS-455 — et **CMS-459** (les 1 546 citations en code wiki,
+  critique), créé ce soir, en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
+- **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-134, ATLAS-136…) — à trier avec lui. CMS-279 : il reste
+  la garde du seed (une heure), noté sur le ticket. ATLAS-461 : ses ornements en vecteur, j'attends ses premiers fragments
+  SVG (le dossier et les noms).
+- **1100** : 69 villes en alerte sur 1 622 (`pnpm cities:alerts --map 1100`), dont 18 du Saint-Empire listées ce soir (Vérone,
+  Pitten, la Silésie…) ; la carte de `main` porte les retouches non commitées du dev et de l'historien.
+- **Ses décisions en attente**, une à la fois : la case « Souverain » qui s'enregistre au clic (pas à « Enregistrer ») ; une
+  personne son propre parent (revue QUAL-002) ; une chaîne divergente vérifiée sur sa première lecture souveraine
+  (QUAL-003) ; six vassaux à deux suzerains en 1100 (Champagne, Anjou, Bellême, Carcassonne, Naples, Lérida).
+
+**Sur le tableau** : À valider — **CMS-422** (la fiche de ville, les deux types à venir), **CARTO-435**, CMS-431, CMS-433.
+En cours — CARTO-445 (attend le design system 0.10.0, `HANDOFF-from-fubaritico-ds.md`). Backlog — **CARTO-450** (Wikidata
+d'abord, à défaut le numéro du territoire du CMS — sa règle du 16/11), CMS-451. Haut d'À faire — ATLAS-448, CMS-441.
+
+## Archivé de next.md le 17/11 (reprise du 16/11 à 04:20)
+
+### ▶ ON REPREND ICI — le 16/11 à 04:20, session fermée à sa demande (13:50 → 04:20, avec un /clear à 00:10)
+
+**Ajouté vers 05:30, après la fermeture** (le codeur n'a fait que relire la base de l'historien, rien d'écrit ni de commité) ;
+le dev, épuisé et en colère : _« vous vous perdez en cours de route »_. **À la reprise, une chose à la fois, la sienne d'abord.**
+
+- **Sa règle, ~05:40 : le type d'un territoire est indicatif, jamais une règle** — _« c'est la raison d'être de la ville, c'est
+  pas sa fonction ; on ne peut pas aller jusqu'à ce niveau de granularité, il faut arrêter »_. Aucun code (verdict, chaîne,
+  refus du CMS) ne décide sur le type. **Retiré** : ma proposition du type dans l'export pour reconnaître un roi sous l'Empire.
+- **Les règles des chaînes sont dans son document du 16/11 au matin**, seule source :
+  `files/plans/contribution/vassals/saisie-et-exploitation-des-chaines-de-vassalité.md` — N-1 sous un souverain, N-2 sous un
+  empire sans condition, jamais le premier maillon (ville + tenant) sauf la cité-État, toujours quelque chose à dessiner,
+  aucune ville sans titre, le diocèse une raison (« siège épiscopal »), deux rangs du clergé. Codé : `7fbc120`, `e19262c`.
+- **Le territoire 42 (Saint-Empire) est typé « royaume »** dans la base, pas « empire » : à corriger par l'historien avant la règle.
+- **Huit titres orphelins, vérifiés cités nulle part** (seulement leurs lignes de source) : 24, 43, 45, 61, 99, 137, 327, 328 —
+  à lui de les supprimer.
+- **Des évêchés sont entrés dans les chaînes cette nuit** (Turin, Naumbourg, Mersebourg, Halberstadt, Novigrad, Lodi, Parme…) :
+  ils attendent les deux types ; le classement de l'historien est prêt (`files/resources/historien/1100/chaines/chains-1100-review/classement-religieux.md`).
+- **Six vassaux à deux suzerains en 1100** (Champagne, Anjou, Bellême, Carcassonne, Naples, Lérida) : fief annexe ou vrai lien,
+  non tranché.
+
+**D'abord, les deux types qu'il a validés à 04:10** (CMS-422) : le type de territoire « Évêché » devient **« Diocèse »**
+(circonscription religieuse — **jamais dans une chaîne** : le CMS refuse un diocèse comme suzerain, vassal ou détenteur,
+le dit en rouge sous le champ) et **« Seigneurie ecclésiastique »** (le pouvoir temporel d'un évêque, archevêque ou abbé :
+Cologne, Liège, Strasbourg, Trente, Laon, Reims, Fulda — politique, dans la chaîne comme un comté ; au-dessus d'un comte
+seulement si une source le dit : Hainaut fief de Liège en 1071, **cité de mémoire**). Pas d'« électeur » en 1100 (qualité
+datée, pour plus tard). Son principe : _« un diocèse n'a jamais été plus fort qu'un comté »_. Puis le **feu vert à
+l'historien**, qui a préparé cette nuit, en recherche seule, le reclassement des 88 évêchés et 29 abbayes et les
+corrections des 12 maillons à suzerain religieux (Soissons 103, Paris 95 et 97, Amiens 93…), 46 à vassal religieux, 59
+titres religieux détenteurs — dans `files/resources/historien/1100/chaines/chains-1100-review/`.
+
+**Ensuite, le Cartographe ne doit jamais obliger à dessiner** (sa colère de 04:30 : *« pourquoi je dois dessiner un truc
+déclaré dans le CMS ? »*, *« on ne peut pas dessiner aussi fin »*) — trois corrections proposées, **sa réponse attendue
+(« maintenant ou demain »)** : ~~(1) le niveau vérifié non dessiné → le suivant dessiné~~ — **refusé** (le dev, 16/11 :
+_« il y aura toujours quelque chose à dessiner »_ ; codé `455074b`, annulé `55ca4db`) : le rouge reste, le niveau se dessine ;
+~~(2) une ville sans titre~~ — **il n'y en aura pas** (faute de source, l'historien en crée un) ; (3) la boîte de la ville dit
+d'où vient le détenteur (« Tenue par (CMS) », ou « ancien texte : … » — l'ancien champ « Pays » n'est plus à l'écran du
+CMS). **La fenêtre de la ville refaite** — la réponse en couleur en haut, la chaîne en colonne, les sources repliées
+(plan montré à 04:40, sa réponse attendue : *« illisible, tout est serré, c'est moche »*).
+
+**Fait cette session, tout dans `main` = `56d06d2`, rien de poussé** (détail dans `completed.md`) : la fiche de ville
+refaite — champ de Payload (✎ ✕ +) pour « Tenue par » et les sources ; la chaîne en **blocs répétitifs**, les mêmes pour
+saisir et modifier, tout part à « Enregistrer », toujours cliquable, ce qui manque dit en rouge ; source facultative ;
+case « Souverain » (migration `sovereign`, il a relancé son CMS) ; père et mère dans « Personnes » ; CARTO-435 corrigé
+(jaune, couleur du pays, plus d'ardoise) et la règle des niveaux.
+
+**Tranché par lui le 16/11** : une année sans mois = le 1ᵉʳ janvier (47 fiches rattachées par l'historien).
+**Ses décisions en attente**, une à la fois : la case « Souverain » s'enregistre encore au clic (pas à
+« Enregistrer ») ; une personne son propre parent, un parent supprimé qui se vide chez ses enfants (revue QUAL-002) ;
+une chaîne divergente n'est vérifiée par niveau que sur sa première lecture souveraine (revue QUAL-003).
+
+**À savoir** : la revue à plusieurs agents n'a pas tourné sur `6f910fd` ni `56d06d2` (à faire avant de pousser) ;
+l'outil MCP `updateTitles` ne décrit pas le champ `sovereign` (l'historien l'écrit quand même) ; trois fiches orphelines
+(titre 137, territoire 308, titres 327, 328, et le titre 61) — il refuse de les supprimer, elles restent.
+
+**L'historien** (16/11, 11:45) : 1 529 villes de 1100 sur 1 622 ont une chaîne fermée jusqu'au souverain ; 32 ouvertes, 61
+sans titre ; les 117 territoires religieux classés pour tes deux types (`files/resources/historien/1100/chaines/chains-1100-review/classement-religieux.md`).
+Ses règles de la nuit dans `vassal-chain.md` (dont **une année sans mois = le 1ᵉʳ janvier**). Son point de reprise : `next-historian.md`.
+
+
+
+## Archivé de next-historian.md le 16/11 (reprises du 15–16/11)
+
+## ▶ ON REPREND ICI — 15/11 au soir : la périphérie saisie, le registre « Personnes » rempli
+
+**Son but, ses mots (15/11)** : *« des villes, le plus de villes possibles, les attacher à une date, les attacher à une
+vassalité »*. **Fait ce soir** : 151 villes de la périphérie (fiches 1502–1652, sources 1621–1696) — Afrique du Nord,
+Espagne-Portugal, Rus', Crimée-Alanie-Volga, Biélorussie, Scandinavie ; la Finlande n'a rien donné (aucun détenteur).
+Travail : `files/resources/historien/1100/regions/periphery-1100-research/` (notes `REGION-*.md`, consigne `ENTER.md`, contrôle
+`work/check-entry.py`, les atlas en texte `sources/atlases/`, l'atlas des Vikings lu par la reconnaissance de macOS).
+**« Personnes »** : 110 maisons, 186 personnes (`files/resources/historien/1100/chaines/people-1100/`, à revoir : `review.md`) ; **à lui** :
+supprimer les fiches 172 (doublon d'Humbert II, ma faute) et 178. **CMS-422** : étapes 1 et 2 du codeur faites
+(territoires, titres, maillons) ; reste à moi l'étape 3 — les détenteurs des ~270 entités (Wikidata n'en donne que 30 :
+recherche à faire), puis les maillons de `vassalage.md`. **Le serveur de requêtes de Wikidata** était en panne le 15/11
+(une requête par minute) : les viviers larges attendent son retour. Sonnet ne fait que la saisie, la recherche reste
+sur Opus (sa question du 15/11). ## ▶ ON REPREND ICI — 16/11 : la chaîne de 1100 dans le CMS
+
+**Ce qui l'attend, à lui** (une question à la fois) : **Riazan** sur sa carte — la principauté de Riazan (Q269109) ou
+Mourom-Riazan (Q549817), comme le disent les sources pour 1100 ; **la couleur des villes** dans le Cartographe — la
+chaîne dans l'export et CARTO-435 sont au codeur : le lui demander ? ; **ses suppressions dans le CMS** : les titres
+341, 242, 332 (doublons, plus rien ne les cite), les maillons 57, 63, 64 (sans témoin), puis la source 1954 (notre
+registre, jamais une source). Passau est une histoire divisée (Ulrich grégorien / Thiemo l'impérial) : deux titres à
+saisir, pas une erreur. **Ma règle de saisie** est dans `/enter-in-cms` (titres et maillons en série, un par personne,
+territoire et années ; la famille comme `house` ; jamais `vassalage.md` comme source).
+
+**Seconde vague, saisie (15/11, nuit)** : 113 titres de plus (241–353 ; titres des détenteurs qui n'en avaient pas,
+`titles/reports/pt-*.json`, `assemble_pt.py`), holderTitle sur **1 291 fiches sur 1 621**, **119 maillons** (69–119 :
+`assemble_links.py` → `entry-links-2.json`). **Reste** : ~330 fiches sans titre (abbayes et sièges sans titulaire connu,
+détenteurs à plusieurs titres, familles), les 62 maillons de `links-review-2.md`, Passau en histoire divisée, Brno
+(apanage), Empoli, Bolzano, Mansfeld, les 104 fiches sans ligne au détenteur ; au dev : supprimer les maillons 57, 63,
+64 puis la source 1954 ; arbitrer Riazan (Q269109 sur sa carte, Mourom-Riazan Q549817 dans les sources) ; le code de la
+couleur des villes (la chaîne dans l'export + CARTO-435) est au codeur.
+**CMS-422 étape 3, première vague (15/11, nuit)** : 229 territoires (1–229), 130 personnes (315–444), 256 sources (1695–1950),
+**240 titres** (1–240, 509 lignes), et **holderTitle sur 1 050 fiches** — tout contrôlé, le codeur a relu A–C. **Reste** :
+holderTitle pour 126 fiches (détenteur à plusieurs titres : choisir celui sous lequel est la ville), 57 (entité qui
+change de main dans l'année), 223 (personne sans titre : surtout la périphérie — créer son titre), 165 (sans titre ou
+hors registre) ; 13 titres dont le témoin n'est que le registre (recherche) ; **les maillons** (vassal-links) de
+`vassalage.md` ; 104 anciennes fiches sans ligne au détenteur (`titles/no-holder-line-sheets.txt`) ; au dev : supprimer
+les personnes 398, 399, 407, 408, 413, 415, 432. Détail : `titles/entry-review.md`.
+**Avant (15/11 au soir) — la recherche** : `files/resources/historien/1100/chaines/people-1100/titles/` — `from-base.json` (99
+entités résolues depuis la base) et `reports/ti-01…13.json` (137 détenteurs nommés) ; ~230 des 273 entités ont leur
+personne de 1100, 143 personnes avec QID, ~60 sans élément. **L'assembleur existe** (`titles/assemble.py` →
+`entry-titles.json` + `entry-review.md`, premier passage : 233 territoires dont 29 sans nature, 121 personnes à ajouter
+dont 74 sans QID, 237 titres, 83 cas mis de côté). **Avant toute saisie, trois reprises** : fondre les sources (300
+« à créer » = un même ouvrage sous plusieurs libellés, beaucoup déjà dans la base — chercher par titre et url
+d'abord) ; retrouver l'ouvrage des 18 lignes « registre seul » ; donner une nature aux 29 territoires (et lire la
+nature sur le libellé de l'entité, pas sur celui de la ligne — Q12544 lu « Alexis Ier »). **Rien de saisi pour les
+titres.** **Depuis da484d3 (15/11 au soir)** la fiche a `holderTitle` (l'id du titre, premier maillon) — après la
+relance de son CMS et `/mcp` : chaque fiche reçoit son `holderTitle` une fois les titres saisis ; `holderName`/`holderQid`
+restent remplis jusqu'à la fin de la reprise ; jamais de saisie pendant qu'il relance. Puis → territoires, personnes manquantes, titres, puis maillons de `vassalage.md` ; corriger en route les
+erreurs listées dans `people-1100/review.md` (événement/ville/famille comme détenteur, évêché pris pour l'évêque,
+Desmond, Thuringie, Nitra, Rupert de Bamberg). **Le registre de sa carte de 1100** donnait à la Norvège Q202266 (Marguerite Iʳᵉ de
+Danemark) : à remplacer par Q2196956 — **demandé au codeur le 15/11 au soir, sur son « vas-y »** (il avait d'abord dit
+d'attendre la fin des recherches) — détail dans `files/resources/historien/1100/chaines/people-1100/review.md`.
+
+
+## Moved out of next.md on 2026-11-15 (end of session, the file past 200 lines) — verbatim
+
+**L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
+montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
+reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
+reprendre la retouche des frontières dans le Cartographe.
+
+**Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
+« réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
+
+**Dettes, à savoir** : les scénarios des hachures et des paliers du 09/11 pas écrits (`/scenarii-to-code` §7) ; la bande des
+souverains absente du Cartographe (essai atlas seul) ; CARTO-365 (les rayures cuites côté Cartographe) ; le PNG du README
+(`.github/brand-mark.png`) ne se régénère pas seul — à refaire si la marque change (dessiné par Core Graphics depuis
+`brandMarkSvg(64)`).
+
 ## Moved out of next.md on 2026-11-11 (size), verbatim
 
 **Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
@@ -647,4 +992,74 @@ flou d'image ; parler franglais ; deux sondes dans un même onglet ; `delete` d'
 29/10 jour** : **relire le code avant de proposer un remède** (le nom court ne s'écrit que là où le complet ne tient pas) ;
 **jamais de `cd`**, même pour revenir à la racine ; quand sa phrase peut désigner deux options, dire celle que je comprends
 avant d'agir.
+
+## next-historian.md — sections of 11/11 and 13/11, moved 2026-11-15
+
+## ▶ 13/11 : la Hongrie de 1100 saisie ; l'agent de recherche, à mesurer
+
+**La nuit du 12 au 13/11** : le royaume de Hongrie et ses voisins (Slovaquie, Roumanie, Serbie, Transcarpatie,
+Burgenland, forteresses croates et bosniaques), 97 lots, 1 486 lieux ; 278 existaient en 1100. **Saisis** : lieux
+839–1040, fiches 830–1031, sources 891–1137 ; vérifiés par le codeur en lecture seule (aucun double). Le rapport et
+**ses décisions à prendre** : `files/plans/sources/1100/hungary.md` — Holíč et Kopčany (Morava) au Saint-Empire sur sa
+carte, hongrois dans les sources ; le bloc Galicie-Volhynie sans témoin ; le nord du Spiš ; les lieux sur l'archéologie
+seule ; les listes des chartes fausses ; sources 905 et 906 à supprimer par lui. Le travail : `files/resources/historien/1100/regions/hungary-1100-research/`.
+
+**Le coût** : la nuit a pris **27 % de son crédit de la semaine** (≈ 100 agents sur Opus, ~25 M de jetons). **Sa règle,
+13/11** : *c'est lui qui fixe le nombre d'agents* ; le temps ne compte pas (*« si ça met 8 heures, c'est pas grave »*) ;
+il reste sur Opus (*pas de faux positifs*) ; économiser le contexte. Écrite dans `/find-sources` et `/enter-in-cms`.
+**L'agent `source-researcher`** (`.claude/agents/source-researcher.md`, 13/11) : peu d'allers-retours, extraits au lieu
+des livres, témoins de district repris, `maxTurns: 40`. **Premier geste** : un lot test pour mesurer son compteur contre
+190–290 k jetons par lot de la nuit ; il faudra écrire une note `REGION` par région (celle de la Hongrie : son `BRIEF.md`,
+à alléger de ce que l'agent porte déjà).
+
+**Validé par lui, à faire sur Sonnet ou Opus selon son mot, estimation d'abord** : les 382 lignes de détenteur sans
+QID de sa base (249 fiches, presque toutes d'avant le 12/11) ; 12 des 16 de la nuit faites (restent Dés, Kolos, la
+lignée de Docibile — pas d'élément Wikidata).
+
+**Non commités** : `hungary.md`, `first-lot.md`, les skills `find-sources` et `enter-in-cms`, l'agent — à son mot.
+
+## 11/11 : l'Adriatique de 1100 — CARTO-417 (l'arrière-pays fait et saisi le 12/11 ; les écarts ci-dessous restent)
+
+Sa demande du 10/11 au soir : *« on reprend et on termine cette question-là »*, sur cet inventaire. Tout le travail est dans
+`files/resources/historien/1100/regions/adriatic-1100-research/` (git-ignoré) ; la synthèse, commitée, `files/plans/sources/1100/adriatic.md`.
+
+**1. L'arrière-pays (Croatie et Bosnie hors de la bande côtière) — en cours, à finir.** Sa règle : *« des villes, des
+villes »*, ratisser large, **par la date de création, pas par la population**. Fait : le vivier, 13 358 localités de
+Croatie et de Bosnie pas encore étudiées (`inland/pool.json`) ; 424 forteresses de Wikidata (`inland/forts.json`, des
+repères) ; la collecte des articles hr, bs, sh, sr de chaque localité lancée (`inland/fetch.py`, reprend où elle s'est
+arrêtée : relancer `python3 -I inland/fetch.py inland`). **Reste** : extraire de chaque article la date de première
+mention (« prvi put se spominje 1103 », « u XI. stoljeću ») et garder ce qui est daté **avant 1150** ou du XIIᵉ siècle et
+avant ; y joindre les chefs-lieux de župa ; retirer quartiers et doublons ; lui donner le compte par région **avant** de
+lancer ; puis les lots (le `BRIEF.md` de la côte, plus la župa de chaque district), la revérification, la saisie.
+
+**2. Les écarts avec sa carte de 1100 — à lui, dans le Cartographe** (le détail par ville : la synthèse) :
+- **pas de royaume de Croatie** (1097–1102, sans roi ; la Hongrie de Coloman est l'autre lecture, proche) — hachures, ou un
+  pays de plus ;
+- **l'Istrie au Saint-Empire, pas à Venise** : Pula, Poreč, Buje, Tar, Rovinj, Galižana ; le territoire de Piran (Lucija,
+  Seča) ; Rijeka et Kastav, sur la Hongrie dans la carte ;
+- **Split** (carte : Hongrie) à Venise pour Byzance de 1097 à 1105 ; **Biograd** (carte : Venise) croate ou hongroise ;
+  **Mestre** (carte : Venise) au royaume d'Italie ;
+- **les îles** : Brač, Hvar, Vis plutôt croates (carte : Venise) ; Korčula et Lastovo à la Zachlumie de Bodin ;
+- **la Serbie de la carte** sur Vrgorac, Ploče, Grude, Vau i Dejës, Shëngjin : aucune source ;
+- **la côte dessinée trop courte** : Zadar, Trogir, Murano, Bibione, Rab, Hvar, Makarska, Budva → Petrovac, Kassiopi,
+  Piran, Umag, Novigrad, Rovinj ;
+- **des lieux qui n'existaient pas** encore sur la carte : Pag ville (c'était Novalja), Kamen, Košute, Loreto.
+
+**3. À commiter après son coup d'œil** : les identifiants Wikidata corrigés dans `years/1100`, `1200`, `1300`
+`registry.json` (Empire byzantin Q12544 et les onze de `1100/wikidata.md`) — **1000 jamais** (sa décision) ; `1100/polities.json`
+modifié est à lui (son Cartographe).
+
+**4. Dans la base, à trancher ou compléter** : deux villes sans fiche de 1100 faute de source datée (Himarë, Biševo) ;
+Massa Fiscaglia, détenteur sans ligne qui le porte ; les détenteurs hors de la carte (« Royaume de Croatie » Q858841,
+« Zachlumie » Q1311704) que le Cartographe dira « à déclarer » ; les régions slovènes saisies avec le nom anglais de la
+commune ; la licence « domaine public » posée par un agent sur Monticolo, Romanin, Arditi (à vérifier) ; la source 619
+(Benussi) sans adresse.
+
+**5. Les pistes à lire dans son Chrome** (refusées aux scripts) : HRČAK (Ančić 1998 et 2011, Šišić sur Coloman), Stephenson
+2000, Budak 2018, Kandler, la *Tabula Imperii Byzantini* 3, Ducellier sur Persée — chaque rapport liste les siennes.
+
+**6. Ensuite** : les îles de la mer Égée (65 listées, `islands-aegean.json` dans le scratchpad du 10/11, à refaire) ;
+CMS-414, ses 41 cas ; CMS-416, un sujet de conversation (une fiche par détenteur, la taille de la base).
+
+**L'Italie de 1100 est dans sa base** (357 villes, `1100/italy.md`), le nord-ouest corrigé (Novare et Trecate sur Savio).
 

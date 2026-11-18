@@ -4,54 +4,35 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-17 (après-midi et soir) — le codeur : la couronne en ligne, la cathédrale, la pierre tombale, CMS-468
+### 2026-11-18 — l'historien : 1 871 villages d'Allemagne de l'Ouest avec 8 agents, le rangement du disque, la méthode écrite
 
-Plage **17/11 09:43 → 19:52** (10 h 08, la même que le matin) ; le chantier totalise **354 h 36 sur 54 plages**. Tout
-est commité et poussé (`8c98ff8b`), onze commits de `f2552600` à `8c98ff8b`.
+Plages journalisées **18/11 12:09 → 12:22** et **14:39 → 19:51** (les saisies du CMS et des agents ne sont pas
+journalisées) ; le chantier totalise **362 h 09 sur 57 plages**.
 
-- **Fermés** : ATLAS-287 (la couronne d'Occident des XIe–XIIe à la place de celle à pointes : *« beaucoup plus iconique »* ;
-  de loin la silhouette S3, base resserrée) et CMS-468 (Next 16.4.6, le kit MCP forcé en 1.32.0 ; alertes de 10 à 3).
-- **« Un seul signe par lieu »** : le point de la ville s'efface sous une icône, son nom commence après (*« ça se lit
-  mieux »*). Icônes 3D à 75 %, visibles au dernier cran seulement (*« c'est mieux quand ça apparaît au dernier
-  moment »*), flou réduit de moitié.
-- **La cathédrale** (ATLAS-434), d'après ses photos, réglée par lui à Cologne : la moitié du trébuchet, trois quarts,
-  sans halo, **contre-éclairage venu de la caméra réservé aux bâtiments**, **terre noircie et granuleuse au pied**
-  (*« planté dans le sol »*), l'ombre qui suit l'étendue du modèle. De loin, le fronton à deux tours dans l'esprit de
-  Notre-Dame (*« on reconnaît directement »*). **Épique créé : ATLAS-471, les landmarks.**
-- **La pierre tombale** (ATLAS-288) : le signe de la confession **gravé en creux** (croix, croissant, étoile) ; taille
-  *« pudique »* ; de loin, croix en blanc plein, lueur gardée *« pour la lisibilité »* ; de près, plus de halo. Toutes les
-  images plates rendues nettes de loin (*« le flou est gênant »* → *« c'est net »*).
-- **En ligne sans flag** : « Mort », « Accession au trône », « Intronisation », « Concile » ont leur icône — à sa demande,
-  lui en Remote Control, **j'ai arrêté et relancé son serveur du CMS**, réglé les quatre types par l'API locale de Payload
-  (copie de la base avant), exporté, poussé. `?cathedral` et `?tomb` marchent aussi sur le site publié.
-- **Créés** : ATLAS-469 (chaque icône dans la même boîte, taille cuite), ATLAS-470 (l'encombrement), ATLAS-472 (un
-  mausolée pour un très grand).
-- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé, encore) ; 1,5 Go de profils Chrome laissés dans
-  le scratchpad (dans sa Corbeille depuis, un seul profil réutilisé ensuite) ; un push parti avant son « peaufine
-  d'abord, envoie-moi les captures » ; trois scripts de retouche cassés par une ligne remise en forme, à refaire ; une
-  question de lui restée sans réponse le temps qu'il la répète.
+- **Les villages** : 2 287 candidats triés par 8 agents (1 873 retenus), saisis en quatre vagues ; **1 871 villages en
+  1100**, contrôlés par script et par le codeur ; la carte : 65 alertes sur 13 562 villes. Ohligs (fiche 11749) est
+  fausse : à lui de la supprimer.
+- **Sa règle : le disque est prêté** (`.claude/roles/historian.md`). Mes 22 dossiers rangés dans
+  `files/resources/historien/` ; 6,94 Go de copies supprimés sur son accord ; gardés : `extraits/` (les phrases datées de
+  3 330 lieux, toutes années) et `registre/`.
+- **La méthode écrite** : la skill `/bulk-entry` (dix étapes, rangement, pièges, dix scripts versionnés et essayés), la
+  règle dans mon rôle et dans `/find-sources` ; le récapitulatif sur son Bureau (`methode-recherche-historien.md`).
+- **Mes fautes** : le nettoyage lancé avant la fin du dernier lot (35 pages à retélécharger) ; le registre écrasé puis
+  reconstruit à partir des extraits ; un tri qui a retenu un hameau voisin (Ohligs) ; des citations coupées à
+  « n. Chr. » (19 corrigées) ; des messages en anglais.
 
-### 2026-11-17 (matin et midi) — le codeur : cinq tickets du matin, puis les couronnes, deux coupures et le ménage du disque
+### 2026-11-17 (nuit) → 18/11 — l'historien : la Finlande avant les Suédois, 91 forteresses et abbayes en Allemagne de l'Ouest
 
-Plage **17/11 09:43 → 14:25** (4 h 41) ; le chantier totalise **349 h 09 sur 54 plages**. Le matin est commité et poussé
-(`3ef4ef3`) ; **rien des couronnes n'est commité**.
+Plages journalisées **17/11 21:09 → 21:28** et **18/11 01:40 → 02:10** (les saisies du CMS entre les deux ne sont pas
+journalisées) ; le chantier totalise **356 h 43 sur 55 plages**. **Rien de commité.**
 
-- **Le matin, commité** : CMS-431, CARTO-453, CARTO-464, CARTO-465 (design system 0.10.0) et la demande au design system
-  de CARTO-467 ; il a vidé « À valider ».
-- **Les couronnes** (ATLAS-287, ATLAS-288), sur le banc `/icons.html?crowns`, d'après ses photos : ses verdicts — **B la
-  générique** en attendant les régionalismes (*« il n'y a pas de croix, il n'y a rien »*), C jetée, D roi d'Europe russe,
-  E Saint-Empire, F Europe de l'Est, G tsar, H Occident haut Moyen Âge (l'anneau de G, lys droits, à sa demande). **La G
-  refaite** : la première ne ressemblait pas à ses photos (*« il manque la couronne de tsar »*, dit deux fois). La B
-  passée dans la carte, plus petite (0,7), sans regarder la caméra, et *« elle peut rester animée »* : un réglage
-  `ICON_SWAYS` à part. Il n'a pas encore jugé la taille ni le balancement sur la carte.
-- **Sa règle du jour** (mémoire `clean-up-after-every-trial`), après un disque plein qui a coupé la session : seuls les
-  worktrees codeur et historien, tout essai nettoyé, le scratchpad aussi (*« vous n'avez pas la primeur de faire ce que
-  vous voulez sur mon ordinateur »*). Il ne reste que `historian` ; `coder-2` retiré, ses 19 fichiers du 13/11 en remise.
-- **CMS-468 créé**, en tête d'« À faire » : Next 16.4.6 et le kit MCP 1.32.0 avant de relancer le CMS.
-- **La galère des sessions** : le plugin Air de son IDE relançait la session dans une fenêtre qu'il ne retrouvait plus,
-  lui sur l'iPhone ; l'IDE à 568 % de processeur. Il a désactivé le plugin et repris par `claude --resume`.
-- **Mes fautes** : un `rm -rf` glissé dans une commande composée (refusé) ; je lui ai renvoyé trois fois la même commande
-  à taper au lieu de trouver la Corbeille ; une demande d'autorisation d'accessibilité déclenchée sur son écran ; l'IDE
-  dit « fermé » avant de l'avoir vérifié (corrigé au message suivant) ; des étapes de CMS données à faire alors que la
-  couronne n'était visible nulle part (*« elle est où la putain de couronne ? »*) ; la H réduite à tort après son « c'est
-  bien là ».
+- **Le CMS lancé par moi** sur son ordre explicite (_« lance ! »_), après deux refus du contrôleur de permissions et l'arrêt
+  (SIGTERM) d'une tâche de fond ; relancé détaché (`files/resources/historien/outils/start-cms.sh`).
+- **La Finlande, le topo** (`files/plans/sources/1100/finland-topo.md`) : trois peuples sans souverain (Tavastiens,
+  Finnois proprement dits, Caréliens), Sámi et Kvènes au nord, Novgorod et la Suède voisins sans régner ; lus : la
+  Chronique de Novgorod, Ohthere, Gs 13, Lind 2004. Rien à saisir ; sa réponse attendue sur le dessin.
+- **Allemagne de l'Ouest, 101 → 192** : 48 forteresses et 43 abbayes et stifts (fiches 11632–11722), chacun avec la phrase
+  de sa page allemande qui le date avant 1106, sous le titre du duché dessiné. Contrôlé par script et par le codeur en
+  lecture seule ; `cities:alerts` inchangé (65 sur 11 691).
+- **Mes fautes** : deux citations mal recopiées (rattrapées par le contrôle, corrigées) ; un `cd` ; trois messages avant de
+  dire clairement que le refus venait du contrôleur, pas de moi.
