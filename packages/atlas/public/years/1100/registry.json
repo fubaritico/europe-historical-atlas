@@ -6,12 +6,23 @@
       "id": "kingdom-of-castile",
       "name": "Kingdom of Castile",
       "rank": "kingdom",
-      "status": "country",
+      "status": "personal_union",
       "suzerain": null,
       "existsFrom": 1065,
       "existsTo": 1833,
       "colour": "#d4982f",
       "wikidata": "Q179293"
+    },
+    {
+      "id": "kingdom-of-leon",
+      "name": "Kingdom of León",
+      "rank": "kingdom",
+      "status": "personal_union",
+      "suzerain": null,
+      "existsFrom": 910,
+      "existsTo": 1833,
+      "colour": "#c97676",
+      "wikidata": "Q175276"
     },
     {
       "id": "county-of-edessa",
@@ -45,6 +56,17 @@
       "existsTo": 1110,
       "colour": "#5987c0",
       "wikidata": "Q33061"
+    },
+    {
+      "id": "taifa-de-molina",
+      "name": "Taifa de Molina",
+      "rank": "kingdom",
+      "status": null,
+      "suzerain": "taifa-of-zaragoza",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q2232777"
     },
     {
       "id": "taifa-of-lerida",
@@ -175,7 +197,7 @@
       "name": "Republic of Genoa",
       "rank": "republic",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "holy-roman-empire",
       "existsFrom": 1005,
       "existsTo": 1797,
       "colour": "#c059b0",
@@ -250,6 +272,17 @@
       "wikidata": "Q199442"
     },
     {
+      "id": "kingdom-of-pamplona",
+      "name": "Kingdom of Pamplona",
+      "rank": null,
+      "status": null,
+      "suzerain": null,
+      "existsFrom": 824,
+      "existsTo": 1162,
+      "colour": null,
+      "wikidata": "Q3446210"
+    },
+    {
       "id": "western-chalukya-empire",
       "name": "Western Chalukya Empire",
       "rank": "distant",
@@ -274,11 +307,11 @@
     {
       "id": "holy-roman-empire",
       "name": "Holy Roman Empire",
-      "rank": null,
+      "rank": "empire",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 962,
+      "existsTo": 1806,
       "colour": "#c06c59",
       "wikidata": "Q12548"
     },
@@ -352,7 +385,7 @@
     {
       "id": "byzantine-empire",
       "name": "Byzantine Empire",
-      "rank": null,
+      "rank": "empire",
       "status": "country",
       "suzerain": null,
       "existsFrom": 395,
@@ -384,14 +417,14 @@
     },
     {
       "id": "principality-of-ryazan",
-      "name": "Principality of Ryazan",
+      "name": "Principality of Murom",
       "rank": "principality",
       "status": "country",
       "suzerain": null,
       "existsFrom": 1097,
       "existsTo": 1521,
       "colour": "#04a233",
-      "wikidata": "Q269109"
+      "wikidata": "Q549817"
     },
     {
       "id": "principality-of-antioch",
@@ -405,15 +438,15 @@
       "wikidata": "Q235030"
     },
     {
-      "id": "principality-of-kiev",
-      "name": "Principality of Kiev",
+      "id": "principality-of-chernigov",
+      "name": "Principality of Chernigov",
       "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": 500,
-      "existsTo": 1471,
+      "existsFrom": 988,
+      "existsTo": 1402,
       "colour": "#67a308",
-      "wikidata": "Q1483430"
+      "wikidata": "Q1322662"
     },
     {
       "id": "kimek-kipchak-confederation",
@@ -449,17 +482,6 @@
       "wikidata": "Q1122052"
     },
     {
-      "id": "principality-of-chernigov",
-      "name": "Principality of Chernigov",
-      "rank": "principality",
-      "status": "country",
-      "suzerain": "kievan-rus",
-      "existsFrom": 988,
-      "existsTo": 1402,
-      "colour": "#67a308",
-      "wikidata": "Q1322662"
-    },
-    {
       "id": "principality-of-rostov-suzdal",
       "name": "Principality of Rostov-Suzdal",
       "rank": "principality",
@@ -469,6 +491,17 @@
       "existsTo": 1389,
       "colour": "#67a308",
       "wikidata": "Q83546"
+    },
+    {
+      "id": "principality-of-kiev",
+      "name": "Principality of Kiev",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": "kievan-rus",
+      "existsFrom": 500,
+      "existsTo": 1471,
+      "colour": "#67a308",
+      "wikidata": "Q1483430"
     },
     {
       "id": "kingdom-of-duklja",
@@ -483,15 +516,15 @@
     },
     {
       "id": "norman-italy",
-      "name": "Norman conquest of southern Italy",
-      "shortName": "Norman Italy",
+      "name": "Duchy of Apulia and Calabria",
+      "shortName": "Apulia and Calabria",
       "rank": null,
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#a59249",
-      "wikidata": "Q74011"
+      "wikidata": "Q3715874"
     },
     {
       "id": "khwarezmid-dynasty",
@@ -560,15 +593,15 @@
       "wikidata": "Q546266"
     },
     {
-      "id": "principality-of-smolensk",
-      "name": "Principality of Smolensk",
-      "rank": "principality",
+      "id": "novgorod-republic",
+      "name": "Principality of Novgorod",
+      "rank": null,
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": 1010,
-      "existsTo": 1508,
-      "colour": "#64a005",
-      "wikidata": "Q1483495"
+      "existsFrom": 882,
+      "existsTo": 1136,
+      "colour": "#67a308",
+      "wikidata": "Q130499974"
     },
     {
       "id": "papal-states",
@@ -600,19 +633,19 @@
       "suzerain": null,
       "existsFrom": 987,
       "existsTo": 1791,
-      "colour": "#0768f0",
+      "colour": "#055dd9",
       "wikidata": "Q70972"
     },
     {
-      "id": "novgorod-republic",
-      "name": "Principality of Novgorod",
-      "rank": null,
+      "id": "principality-of-smolensk",
+      "name": "Principality of Smolensk",
+      "rank": "principality",
       "status": "country",
       "suzerain": "kievan-rus",
-      "existsFrom": 882,
-      "existsTo": 1136,
-      "colour": "#67a308",
-      "wikidata": "Q130499974"
+      "existsFrom": 1010,
+      "existsTo": 1508,
+      "colour": "#64a005",
+      "wikidata": "Q1483495"
     },
     {
       "id": "ghana-empire",
@@ -832,7 +865,7 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#c05980",
-      "wikidata": "Q202266"
+      "wikidata": "Q2196956"
     },
     {
       "id": "county-of-maine",
@@ -1198,6 +1231,17 @@
       "wikidata": "Q829356"
     },
     {
+      "id": "alania",
+      "name": "Alania",
+      "rank": "kingdom",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": 801,
+      "existsTo": 1201,
+      "colour": "#66b900",
+      "wikidata": "Q1771706"
+    },
+    {
       "id": "alodia",
       "name": "Alodia",
       "rank": null,
@@ -1288,17 +1332,6 @@
       "wikidata": "Q97223161"
     },
     {
-      "id": "zhmuds",
-      "name": "Samogitians",
-      "rank": "tribe",
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#305156",
-      "wikidata": "Q393779"
-    },
-    {
       "id": "semigallians",
       "name": "Semigallians",
       "rank": "tribe",
@@ -1308,6 +1341,17 @@
       "existsTo": null,
       "colour": "#36134b",
       "wikidata": "Q287800"
+    },
+    {
+      "id": "zhmuds",
+      "name": "Samogitians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#305156",
+      "wikidata": "Q393779"
     },
     {
       "id": "curonians",
@@ -1343,17 +1387,6 @@
       "wikidata": "Q2162698"
     },
     {
-      "id": "zachlumia",
-      "name": "Zachlumia",
-      "rank": "county",
-      "status": null,
-      "suzerain": "kingdom-of-duklja",
-      "existsFrom": null,
-      "existsTo": 1054,
-      "colour": "#c09c59",
-      "wikidata": "Q1311704"
-    },
-    {
       "id": "bosnia-early-medieval",
       "name": "Bosnia (early medieval)",
       "shortName": "Bosnia",
@@ -1370,7 +1403,7 @@
       "name": "Duchy of Saxony",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 804,
       "existsTo": 1296,
       "colour": "#c06c59",
@@ -1381,7 +1414,7 @@
       "name": "Northern March",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 965,
       "existsTo": 1157,
       "colour": "#c06c59",
@@ -1392,18 +1425,19 @@
       "name": "Thuringia",
       "rank": null,
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 908,
       "existsTo": 1131,
       "colour": "#c06c59",
-      "wikidata": null
+      "wikidata": null,
+      "territory": 367
     },
     {
       "id": "saxon-eastern-march",
       "name": "Saxon Eastern March",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 965,
       "existsTo": 1128,
       "colour": "#c06c59",
@@ -1414,18 +1448,19 @@
       "name": "Friesland",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#c06c59",
-      "wikidata": null
+      "wikidata": null,
+      "territory": 368
     },
     {
       "id": "upper-lotharingia",
       "name": "Upper Lotharingia",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 959,
       "existsTo": 1766,
       "colour": "#c06c59",
@@ -1436,7 +1471,7 @@
       "name": "Lower Lotharingia",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 959,
       "existsTo": 1190,
       "colour": "#c06c59",
@@ -1447,7 +1482,7 @@
       "name": "Margraviate of Meissen",
       "rank": "county",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 965,
       "existsTo": 1423,
       "colour": "#c06c59",
@@ -1458,7 +1493,7 @@
       "name": "Duchy of Franconia",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 906,
       "existsTo": 1168,
       "colour": "#c06c59",
@@ -1469,7 +1504,7 @@
       "name": "Duchy of Bavaria",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 907,
       "existsTo": 1805,
       "colour": "#c06c59",
@@ -1480,7 +1515,7 @@
       "name": "Duchy of Carinthia",
       "rank": "duchy",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 976,
       "existsTo": 1335,
       "colour": "#c06c59",
@@ -1491,29 +1526,18 @@
       "name": "March of Verona",
       "rank": "county",
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-italy",
       "existsFrom": 952,
       "existsTo": 1167,
       "colour": "#c06c59",
       "wikidata": "Q701920"
     },
     {
-      "id": "elsass",
-      "name": "Elsass",
-      "rank": "county",
-      "status": null,
-      "suzerain": "holy-roman-empire",
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#c06c59",
-      "wikidata": null
-    },
-    {
       "id": "duchy-of-swabia",
       "name": "Duchy of Swabia",
       "rank": null,
       "status": null,
-      "suzerain": "holy-roman-empire",
+      "suzerain": "kingdom-of-germany",
       "existsFrom": 917,
       "existsTo": 1313,
       "colour": "#c06c59",
@@ -1584,6 +1608,72 @@
       "existsTo": null,
       "colour": "#009d6e",
       "wikidata": "Q244482"
+    },
+    {
+      "id": "kingdom-of-germany",
+      "name": "Kingdom of Germany",
+      "rank": "kingdom",
+      "status": null,
+      "suzerain": "holy-roman-empire",
+      "existsFrom": 843,
+      "existsTo": 1806,
+      "colour": null,
+      "wikidata": "Q175211"
+    },
+    {
+      "id": "county-of-provence",
+      "name": "County of Provence",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "kingdom-of-arles-2",
+      "existsFrom": 879,
+      "existsTo": 1481,
+      "colour": null,
+      "wikidata": "Q2991382"
+    },
+    {
+      "id": "archbishopric-of-cologne",
+      "name": "Archbishopric of Cologne",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": "kingdom-of-germany",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q11805"
+    },
+    {
+      "id": "archbishopric-of-trier",
+      "name": "Archbishopric of Trier",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": "kingdom-of-germany",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q1794352"
+    },
+    {
+      "id": "archbishopric-of-mainz",
+      "name": "Archbishopric of Mainz",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": "kingdom-of-germany",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q284667"
+    },
+    {
+      "id": "county-palatine-of-saxony",
+      "name": "County Palatine of Saxony",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "kingdom-of-germany",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q102585753"
     }
   ]
 }
