@@ -1674,6 +1674,61 @@
       "existsTo": null,
       "colour": null,
       "wikidata": "Q102585753"
+    },
+    {
+      "id": "karelians",
+      "name": "Karelians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#2f8f8a",
+      "wikidata": "Q213470"
+    },
+    {
+      "id": "tavastians",
+      "name": "Tavastians",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#5b7fae",
+      "wikidata": "Q11864082"
+    },
+    {
+      "id": "sami",
+      "name": "Sámi",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "none",
+      "wikidata": "Q48199"
+    },
+    {
+      "id": "kvens",
+      "name": "Kvens",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "none",
+      "wikidata": "Q610315"
+    },
+    {
+      "id": "finns-proper",
+      "name": "Finns proper",
+      "rank": "tribe",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#c4634a",
+      "wikidata": "Q4446080"
     }
   ]
 }
