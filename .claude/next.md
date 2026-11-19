@@ -11,6 +11,9 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **L'historien, 19/11 au soir** : 51 lieux du Levant, de Chypre et de Mésopotamie saisis en 1100 (fiches 13627–13677,
 contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commitée (`1d8be087`) ; ses notes `levant.md` et
 `rus.md`, `fetch_rest.py` et son point de reprise commités le 19/11 au soir — son point de reprise, `next-historian.md`.
+**À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) l'export, pour les 51 lieux du
+Levant ; (2) ranger avec l'historien l'index de la mémoire (166 lignes, limite 200) ; (3) la côte libanaise de sa 1100,
+dessinée seldjoukide alors qu'elle était fatimide (`files/plans/sources/1100/levant.md`) ; (4) plus tard, CORE-486.
 
 ## ▶ ON REPREND ICI — le 20/11, 0 h 05 : choisir l'oriflamme de la conquête, ATLAS-477
 
