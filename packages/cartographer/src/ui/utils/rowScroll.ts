@@ -1,6 +1,7 @@
 /**
  * Where a list scrolls to bring a row into view — `{Polities}`' target (the dev, 2026-10-14: 137 polities, and
- * the one chosen on the map had to be looked for), `{Cities}`' city chosen on the map (CARTO-384). Pure arithmetic
+ * the one chosen on the map had to be looked for), `{Cities}`' city chosen on the map (CARTO-384, by the row's place:
+ * `showListRow`). Pure arithmetic
  * over the list's measures, so the rule is exercised with numbers — jsdom lays nothing out.
  */
 

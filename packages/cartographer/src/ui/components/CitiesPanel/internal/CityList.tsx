@@ -1,12 +1,8 @@
-import { useEffect } from 'react'
-
 import { useTranslation } from '../../../hooks/useTranslation'
-import { showRow } from '../../../utils/showRow'
 import { ListFilter } from '../../ListFilter'
 import { useListedCities } from '../hooks/useListedCities'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 import { citiesListed } from '../utils/citiesListed'
-import { cityRowId } from '../utils/cityRowId'
 
 import { CityBoxes } from './CityBoxes'
 import { CityRows } from './CityRows'
@@ -28,8 +24,6 @@ type CityListWithFiltersProps = CityListProps & { year: number; filters: CityFil
  * together with the name.
  * **What it lists is the map's too** (CARTO-390): the ids found are handed to the store at each change of the list, and
  * withdrawn when the list goes, so the canvas draws only the cities the filters keep.
- * **The city chosen is scrolled to** (CARTO-384) — on the map with the white arrow, as `{Polities}` scrolls to the
- * polity chosen there; a city the filters hide has no row, and nothing scrolls.
  * @param props - the cities, which are shown and opened, the advanced filters, and the callbacks
  * @param props.year - the year open, named on the box for them all
  * @param props.cities - the cities of the year, before the filters
@@ -56,9 +50,6 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
   }
 
   // Effects
-  useEffect(() => {
-    if (props.selected !== null) showRow(cityRowId(props.selected))
-  }, [props.selected])
   useListedCities(ids, filters.onListed)
 
   // Render

@@ -1,5 +1,6 @@
 /**
- * The DOM id of a city's row in `{Cities}` — what the list scrolls to when the city is chosen on the map (CARTO-384).
+ * The DOM id of a city's row in `{Cities}` — a name for the row in the page. The list no longer scrolls by it
+ * (CARTO-485: it draws only its rows in view, and scrolls by the row's place); the tests count the rows drawn by it.
  * @param id - the city's id
  * @returns the row's id
  */

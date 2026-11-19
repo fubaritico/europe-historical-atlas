@@ -13,7 +13,7 @@ import { testStore } from '../../../canvas/testGestureContext'
 import { createPolityColourSource } from '../../../state/polityColourSource'
 import { cityDetailText } from '../../testing/cityDetailText'
 import { renderInEnglish } from '../../testing/renderInEnglish'
-import { showRow } from '../../utils/showRow'
+import { showListRow } from '../../utils/showListRow'
 
 import { CitiesPanel } from './CitiesPanel'
 import { cityRowId } from './utils/cityRowId'
@@ -23,8 +23,8 @@ import type * as CityVerdictModule from '../../../canvas/cityVerdict'
 import type { CityMark } from '../../../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
-// The scroll is jsdom's blind spot (nothing is laid out): what is checked is which row it is asked for.
-vi.mock('../../utils/showRow', () => ({ showRow: vi.fn() }))
+// The scroll is jsdom's blind spot (nothing is laid out): what is checked is which row it is asked for, by its place.
+vi.mock('../../utils/showListRow', () => ({ showListRow: vi.fn() }))
 // CARTO-485: the real functions, watched — how often the cities are judged, and which rows are drawn.
 vi.mock('../../../canvas/cityVerdict', async (importOriginal) => {
   const actual = await importOriginal<typeof CityVerdictModule>()
@@ -921,13 +921,20 @@ describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
   describe('happy path', () => {
     it('marks Metz and scrolls to its row when the map chooses it', () => {
       const { store } = mount()
-      vi.mocked(showRow).mockClear()
+      vi.mocked(showListRow).mockClear()
       act(() => {
         store.getState().selectCity('metz')
       })
       expect(rowOf('Metz').getAttribute('data-selected')).toBe('true')
       expect(rowOf('Paris').getAttribute('data-selected')).toBe('false')
-      expect(vi.mocked(showRow)).toHaveBeenCalledWith('city-row-metz')
+      // Metz is the second row of the list: its top is one row down.
+      expect(vi.mocked(showListRow)).toHaveBeenCalledWith(
+        screen.getByRole('list', { name: 'Cities' }),
+        {
+          top: 24,
+          height: 24,
+        }
+      )
     })
 
     it("opens Metz's box when the map opens it, Metz chosen in the list", () => {
@@ -1113,11 +1120,9 @@ describe('CitiesPanel — only what changed is computed and drawn (CARTO-485)', 
         store.getState().selectCity('paris')
       })
       vi.mocked(cityRowId).mockClear()
-      vi.mocked(showRow).mockClear()
       act(() => {
         store.getState().selectCity('metz')
       })
-      // The scroll asks for the chosen row's id too, through the mocked `showRow`: counted with the rows, it is Metz.
       expect(rowsDrawn()).toEqual(['metz', 'paris'])
     })
 
@@ -1151,3 +1156,152 @@ describe('CitiesPanel — only what changed is computed and drawn (CARTO-485)', 
     })
   })
 })
+
+/**
+ * A hundred cities of 1100, « City 000 » to « City 099 », all in France.
+ * @returns the cities
+ */
+function hundredCities(): CityMark[] {
+  return Array.from({ length: 100 }, (_, index) => {
+    const number = String(index).padStart(3, '0')
+    return { ...PARIS, id: `city-${number}`, name: `City ${number}` }
+  })
+}
+
+/**
+ * The names of the cities whose row is in the page, in order.
+ * @returns the names
+ */
+function namesInThePage(): string[] {
+  return within(screen.getByRole('list', { name: 'Cities' }))
+    .getAllByRole('listitem')
+    .map((row) => row.textContent ?? '')
+}
+
+// CARTO-485: the list draws only the rows in view — jsdom lays nothing out, so the view is one row and the twenty
+// beyond it.
+describe('CitiesPanel — only the rows in view are in the page (CARTO-485)', () => {
+  describe('happy path', () => {
+    it('draws the first rows of a hundred cities, not the hundred', () => {
+      mount(hundredCities())
+      const names = namesInThePage()
+      expect([names.length, names[0], names.at(-1)]).toEqual([21, 'City 000', 'City 020'])
+    })
+
+    it('draws the rows around the fiftieth once the list is scrolled to it', () => {
+      mount(hundredCities())
+      const list = screen.getByRole('list', { name: 'Cities' })
+      act(() => {
+        list.scrollTop = 50 * 24
+        list.dispatchEvent(new Event('scroll'))
+      })
+      const names = namesInThePage()
+      expect([names[0], names.at(-1)]).toEqual(['City 030', 'City 070'])
+    })
+  })
+
+  describe('variants', () => {
+    it('still ticks every city of the hundred with the box heading the list', async () => {
+      const { store, user } = mount(hundredCities())
+      await user.click(screen.getByRole('checkbox', { name: 'Show all the cities of 1100' }))
+      expect(store.getState().shownCities.size).toBe(100)
+    })
+
+    it('asks the list to scroll to the eightieth city, chosen on the map, though its row is not drawn', () => {
+      const { store } = mount(hundredCities())
+      vi.mocked(showListRow).mockClear()
+      act(() => {
+        store.getState().selectCity('city-080')
+      })
+      expect(vi.mocked(showListRow)).toHaveBeenCalledWith(
+        screen.getByRole('list', { name: 'Cities' }),
+        { top: 80 * 24, height: 24 }
+      )
+    })
+
+    it('hands the map every city listed, drawn or not', () => {
+      const { store } = mount(hundredCities())
+      expect(store.getState().listedCities?.size).toBe(100)
+    })
+  })
+
+  // L3, L4: N/A — nothing here can fail: the same rows, fewer of them in the page.
+
+  describe('edge cases', () => {
+    it('draws the last rows again when a filter shortens the list under a far scroll', async () => {
+      const { user } = mount(hundredCities())
+      const list = screen.getByRole('list', { name: 'Cities' })
+      act(() => {
+        list.scrollTop = 90 * 24
+        list.dispatchEvent(new Event('scroll'))
+      })
+      await user.type(filter(), 'City 00')
+      expect(namesInThePage()).toHaveLength(10)
+    })
+
+    it('draws the rows a taller panel shows once the list is given its height: ten rows more', () => {
+      const observers = watchedSizes()
+      mount(hundredCities())
+      const list = screen.getByRole('list', { name: 'Cities' })
+      Object.defineProperty(list, 'clientHeight', { value: 240, configurable: true })
+      act(() => {
+        for (const observer of observers) observer.fire()
+      })
+      vi.unstubAllGlobals()
+      // Ten rows in view and the one the bottom edge cuts, then the twenty beyond.
+      expect(namesInThePage().at(-1)).toBe('City 030')
+    })
+
+    it('stops listening to the list’s scroll and to its size once the panel is gone', () => {
+      const observers = watchedSizes()
+      const { unmount } = mount(hundredCities())
+      const list = screen.getByRole('list', { name: 'Cities' })
+      const removed = vi.spyOn(list, 'removeEventListener')
+      unmount()
+      vi.unstubAllGlobals()
+      expect([
+        removed.mock.calls.some(([type]) => type === 'scroll'),
+        observers.some(({ watched, stopped }) => watched === list && stopped),
+      ]).toEqual([true, true])
+    })
+  })
+})
+
+/** A size observer the test can drive: what it watches, whether it was stopped, and its callback. */
+interface WatchedSize {
+  /** The element it watches, or `null` before `observe`. */
+  watched: Element | null
+  /** Whether `disconnect` was called. */
+  stopped: boolean
+  /** Call its callback, as the browser does when the element's size changes. */
+  fire: () => void
+}
+
+/**
+ * Stand in for `ResizeObserver` with one that writes down what it is asked — jsdom has none, and the package's own
+ * stand-in never fires. Undone by `vi.unstubAllGlobals()`.
+ * @returns every observer made since, in order
+ */
+function watchedSizes(): WatchedSize[] {
+  const observers: WatchedSize[] = []
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      private readonly entry: WatchedSize
+      constructor(callback: () => void) {
+        this.entry = { watched: null, stopped: false, fire: callback }
+        observers.push(this.entry)
+      }
+      observe(element: Element): void {
+        this.entry.watched = element
+      }
+      unobserve(): void {
+        this.entry.watched = null
+      }
+      disconnect(): void {
+        this.entry.stopped = true
+      }
+    }
+  )
+  return observers
+}

@@ -194,6 +194,8 @@ export default tseslint.config(
             useInsideWindow: 'ref',
             useListCursor: 'state',
             useListedCities: 'effect',
+            useRowWindow: 'state',
+            useShowChosenCity: 'effect',
             useMenuBar: 'state',
             useLocale: 'context',
             useLocaleStore: 'context',
