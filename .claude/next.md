@@ -20,8 +20,10 @@ ticket parent (six types sur treize ont leur icône). Tout est commité et pouss
 **ATLAS-477, la conquête — à commencer** : son idée, **une oriflamme**. Sur le ticket : le texte de Gemini (une oriflamme
 à queue d'aronde sur sa hampe, plate de loin, en 3D de près, qui ondule) et la description de ses quatre images (des
 bannières rouge carmin bordées d'or, pendues à une traverse ou sur hampe). Par `/make-event-icon` : des candidates sur le
-banc, il choisit à l'œil. **À lui dire avant de construire** : une icône qui ondule serait la première icône animée (les
-ombres sont dessinées une fois, ATLAS-469) ; une icône prend la couleur de son type, pas d'un pays. Ses quatre images
+banc, il choisit à l'œil. **Décidé par lui le 19/11** : quel que soit le choix, le tissu **flotte un peu** — _« c'est la
+seule animation que je te demanderai »_. À tenir : la première icône animée (les ombres sont dessinées une fois,
+ATLAS-469 ; la carte se redessine en continu, ATLAS-304) — elle ne flotte que de près, l'ombre fixe, le coût mesuré
+avant de lui montrer. Une icône prend la couleur de son type, pas d'un pays. Ses quatre images
 sont jointes au ticket et dans `files/resources/icons-references/conquete-oriflamme/` ; il en a d'autres, à demander.
 
 **CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
