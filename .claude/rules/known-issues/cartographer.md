@@ -224,15 +224,14 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
 - **The retrace's scenario still says the start moves to any anchor further along** (2026-11-13): since `4e563cb` a
   second click on a non-neighbouring anchor ends the run on a straight segment, and on an open outline the two ends are
   no neighbours. **Remedy**: `/scenarii-to-code` §7 on `s03`'s *Retracing a stretch*. **Severity: à savoir.**
-- **A polity with no colour (`none`, CARTO-445) has no swatch and no control of its own yet** (2026-11-14): the format, the
-  palette, the painters and the atlas know it; the picker does not — it waits on the design system's third state
-  (`files/plans/cartographer/ds-request-no-colour.md`). Until then: the list shows the struck swatch, the rail's swatch
-  reads as « nothing aimed », and the form opens « automatic » and writes `none` back unless a colour is picked —
-  « automatic » cannot be reached from `none`, nor `none` from the interface. CARTO-445 closed on 2026-11-16: the
-  « distant polity » legend (CARTO-447) answers the need; this state stays in the code, not taken up. **The design system
-  offers « no colour » since 0.10.0** (`allowNone`, CARTO-465, 2026-11-17) and **the Cartographer passes it to no picker**:
-  a `'none'` the picker would hand anyway is refused by `ui/utils/pickedColour`. **Trigger**: the dev taking « no colour »
-  up — `allowNone` on the form's field, the draft's flag gone. **Severity: à savoir.**
+- **A polity with no colour (`none`): the form offers it, the rail's swatch does not** (2026-11-19, CARTO-484). The
+  form's colour field holds three states — a colour, « automatic », « none » (`allowNone`, design system 0.10.0) — and a
+  tribe set to « none » is the **name-only people** (the Sámi and the Kvens of 1100): no fill, no fade, no edge, its
+  name alone; in the Cartographer it keeps the tool's blue outline, as every outline does. **Left as it is**: the rail's
+  swatch offers a colour or « automatic » only (`ui/utils/colourOrAutomatic` refuses a `'none'` there), and « automatic »
+  pressed in it on a polity with no colour changes nothing (`recolouring`); the list shows the struck swatch.
+  **An overlap with a polity with no colour is not hatched** (`core/data/overlapHatches`) — the dev wants to try
+  stripes of the other polity over bare ground for Karelia (CORE-486). **Severity: à savoir.**
 - **Le glisser d'un pays dans `{Polities}` laisse deux points ouverts** (CARTO-457, revue du 16/11, ma décision) : un
   relâcher hors des lignes n'est dit qu'en console, pas dans la zone de résultat ; les écouteurs du glisser se réinscrivent
   à chaque rendu du panneau (correct, le glisser vit dans une référence). **Sévérité : cosmétique.**
