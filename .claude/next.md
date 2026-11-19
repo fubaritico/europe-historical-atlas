@@ -12,19 +12,27 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commitée (`1d8be087`) ; ses notes `levant.md` et
 `rus.md`, `fetch_rest.py` et son point de reprise commités le 19/11 au soir — son point de reprise, `next-historian.md`.
 
-## ▶ ON REPREND ICI — le 19/11, 23 h 40 : l'oriflamme de la conquête, ATLAS-477
+## ▶ ON REPREND ICI — le 20/11, 0 h 05 : choisir l'oriflamme de la conquête, ATLAS-477
 
 **Sa ligne** (19/11) : _« j'aimerais bien qu'on continue sur les icônes 3D, notamment Conquête »_ ; ATLAS-288 reste le
-ticket parent (six types sur treize ont leur icône). Tout est commité et poussé (`9fd0c44f`) ; **« À valider » est vide**.
+ticket parent (six types sur treize ont leur icône). Tout est commité et poussé ; **« À valider » est vide**.
 
-**ATLAS-477, la conquête — à commencer** : son idée, **une oriflamme**. Sur le ticket : le texte de Gemini (une oriflamme
-à queue d'aronde sur sa hampe, plate de loin, en 3D de près, qui ondule) et la description de ses quatre images (des
-bannières rouge carmin bordées d'or, pendues à une traverse ou sur hampe). Par `/make-event-icon` : des candidates sur le
-banc, il choisit à l'œil. **Décidé par lui le 19/11** : quel que soit le choix, le tissu **flotte un peu** — _« c'est la
-seule animation que je te demanderai »_. À tenir : la première icône animée (les ombres sont dessinées une fois,
-ATLAS-469 ; la carte se redessine en continu, ATLAS-304) — elle ne flotte que de près, l'ombre fixe, le coût mesuré
-avant de lui montrer. Une icône prend la couleur de son type, pas d'un pays. Ses quatre images
-sont jointes au ticket et dans `files/resources/icons-references/conquete-oriflamme/` ; il en a d'autres, à demander.
+**ATLAS-477, la conquête — En cours, les candidates sont sur ses bancs** (_« ça donne presque envie de le mettre
+maintenant »_ ; _« on pourra reprendre par ça demain »_) :
+
+- **le modèle 3D**, `/icons.html?conquest` (`bench/conquestCandidates.ts`) : une hampe dorée sur un pied à deux marches,
+  un tissu rouge carmin. A, l'oriflamme à deux pointes, bordée d'or ; B, le drapeau bordé d'or ; C, le fanion en
+  triangle ; D, la bannière pendue à sa traverse, queue d'aronde ; E, la bannière pendue à trois langues. **Le tissu
+  flotte** — sa seule animation, sa décision : 24 bandes pour tous, chacune une pièce mobile le long d'une vague
+  (comme le trébuchet) ; l'ampleur de A, B, C montée à sa demande (0,13), D et E laissées (0,05) ;
+- **l'image plate**, `/svg-icons.html` (`bench/conquestFlatCandidates.ts`) : huit silhouettes, A à H, dans le cadre
+  44 × 44 — les lettres ne se correspondent pas d'un banc à l'autre.
+
+**Il n'a encore nommé aucune lettre.** Dès qu'il choisit (`/make-event-icon`, pas 5) : le modèle dans `meshes/`, le
+dessin dans `flat/`, une clé de palette pour le rouge (celui du banc, `#f0283c`, n'est qu'un essai), le type dans le
+CMS, les tests. **À faire avec le passage dans la carte, pas avant** : l'ombre d'une icône qui bouge se redessine
+(ATLAS-469), la carte se redessine en continu (ATLAS-304) — elle ne flotte que de près, et je mesure le coût avant de
+lui montrer. Ses quatre images de référence : jointes au ticket, et `files/resources/icons-references/conquete-oriflamme/`.
 
 **CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
 peut-être pas par ça »_) : la Carélie entre Novgorod et personne. Le remède proposé : un pays en « Aucune » qui en

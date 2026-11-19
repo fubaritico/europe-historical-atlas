@@ -14,6 +14,8 @@ import {
 import { PIN_DRAWING } from '../scene/events/icons/flat/pin'
 import { EVENT_ICON_PALETTE } from '../scene/events/icons/palette'
 
+import { CONQUEST_FLAT_CANDIDATES } from './conquestFlatCandidates'
+
 /** The sizes a flat icon has on screen, in CSS pixels — 20 is its floor zoomed out. */
 const SIZES = [16, 20, 24, 32, 48, 96]
 
@@ -37,6 +39,11 @@ const CANDIDATES: [string, string][] = [
     'Épingle — droite (validée le 27/10, « A »)',
     drawingSvg(PIN_DRAWING, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE),
   ],
+  // ATLAS-477: the conquest's candidates, under the map's own drawings until the dev names one.
+  ...CONQUEST_FLAT_CANDIDATES.map(([name, drawing]): [string, string] => [
+    name,
+    drawingSvg(drawing, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE),
+  ]),
 ]
 
 /**

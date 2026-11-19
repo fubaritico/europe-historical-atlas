@@ -4,10 +4,10 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-19 — le codeur : 13 594 villes sans attente, « Aucune » dans le formulaire, la Finlande relue, la consigne des ornements
+### 2026-11-19 → 20/11 — le codeur : 13 594 villes sans attente, « Aucune » dans le formulaire, la Finlande relue, les oriflammes sur le banc
 
-Plage **19/11 18:24 → 23:40** (5 h 15, avec l'historien dans une autre session) ; le chantier totalise **371 h 52 sur 58
-plages**. Tout est commité et poussé (`9fd0c44f`).
+Plage **19/11 18:24 → 20/11 00:04** (5 h 39, avec l'historien dans une autre session) ; le chantier totalise
+**372 h 16 sur 58 plages**. Tout est commité et poussé.
 
 - **Fermés, validés par lui** : CARTO-485 (le Cartographe ramait avec 13 594 villes : le verdict des villes de 0,8 s à
   0,05 s, une ligne de la liste redessinée seulement si elle change, la liste réduite à ses lignes visibles, le canevas
@@ -31,9 +31,14 @@ plages**. Tout est commité et poussé (`9fd0c44f`).
 - **Sa demande pour la suite** : des hachures moitié Novgorod, moitié transparentes sur la Carélie — ticket CORE-486, en
   bas d'« À faire », pas commencé (_« tu le fais pas ce soir »_) ; et pour la conquête, une oriflamme (texte de Gemini
   et quatre images, notés sur ATLAS-477).
+- **La conquête, en fin de soirée** (ATLAS-477) : _« pond-moi une planche d'oriflammes et de drapeaux »_ — huit images
+  plates puis cinq modèles 3D sur ses bancs, le tissu qui flotte (_« c'est la seule animation que je te
+  demanderai »_), réglés à ses mots : plus d'ondulation pour les trois sur hampe, 24 bandes pour tous, le bord doré sur
+  l'oriflamme, un pied à deux marches. _« Parfait. »_ Il n'a pas encore choisi de lettre.
 - **Mes fautes** : je lui ai demandé s'il fallait fusionner, puis parlé d'arbre et de branche quand il voulait tester ;
   un `cd` ; un trait d'éditeur proposé pour les zones sans couleur alors que le Cartographe trace déjà tous les contours
-  (corrigé avant de coder) ; la mesure faite dans un Chrome sans fenêtre pendant qu'il testait, contre la consigne du
+  (corrigé avant de coder) ; des heures écrites de tête dans trois commentaires de ticket (« 0 h 30 », « 1 h » : il
+  était minuit) ; la mesure faite dans un Chrome sans fenêtre pendant qu'il testait, contre la consigne du
   spike ; l'écriture de ces notes sans son accord préalable, parce qu'il partait se coucher.
 
 ### 2026-11-18 (nuit) → 19/11 — l'historien : la Rus', le Levant et la Mésopotamie en 1100, la Finlande dessinée

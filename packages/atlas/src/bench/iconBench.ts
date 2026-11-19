@@ -4,7 +4,8 @@
  * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
  * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27). At
  * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287); at `/icons.html?cathedral`, the
- * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288), at `/icons.html?council`, the council's (ATLAS-476).
+ * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288), at `/icons.html?council`, the council's (ATLAS-476), at
+ * `/icons.html?conquest`, the conquest's, their cloth floating (ATLAS-477).
  */
 
 import { Box3, Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
@@ -17,6 +18,7 @@ import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
 import { svgToTexture } from '../scene/svgTexture'
 
 import { CATHEDRAL_CANDIDATES } from './cathedralCandidates'
+import { CONQUEST_CANDIDATES, CONQUEST_CLOTH_RED } from './conquestCandidates'
 import { COUNCIL_CANDIDATES } from './councilCandidates'
 import { CROWN_CANDIDATES } from './crownCandidates'
 import { TOMB_CANDIDATES } from './tombCandidates'
@@ -44,28 +46,36 @@ scene.add(lights)
 const asked = new URLSearchParams(window.location.search)
 const cathedral = asked.has('cathedral')
 const tomb = asked.has('tomb')
-const candidates = asked.has('crowns')
-  ? CROWN_CANDIDATES
-  : asked.has('council')
-    ? COUNCIL_CANDIDATES
-    : cathedral
-      ? CATHEDRAL_CANDIDATES
-      : tomb
-        ? TOMB_CANDIDATES
-        : null
-const crowns = candidates !== null
+const conquest = asked.has('conquest') ? CONQUEST_CANDIDATES : null
+const candidates =
+  conquest ??
+  (asked.has('crowns')
+    ? CROWN_CANDIDATES
+    : asked.has('council')
+      ? COUNCIL_CANDIDATES
+      : cathedral
+        ? CATHEDRAL_CANDIDATES
+        : tomb
+          ? TOMB_CANDIDATES
+          : null)
+// The crown's, the building's and the grave's candidates are shown at one width; the conquest's at one height — a
+// banner is narrower than a flag, and widening it to match would make it the tallest.
+const crowns = candidates !== null && conquest === null
+/** How much bigger than their box the conquest's candidates are shown, large: tall thin things, seen from afar. */
+const CONQUEST_SCALE = 1.5
 /** How wide a candidate is shown, large: a crown one unit, the cathedral — alone, and long — more than two. */
 const CANDIDATE_WIDTH = cathedral ? 2.4 : 1
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
 const builders = candidates
   ? candidates.map(
-      (candidate) => () =>
+      (candidate, index) => () =>
         iconOf(
           buildModel(
             `candidate ${candidate.letter}`,
             candidate.parts(),
-            undefined,
-            EVENT_ICON_PALETTE
+            // The conquest's candidates move: each brings the motions of its cloth's strips.
+            conquest?.[index]?.motions,
+            conquest ? { ...EVENT_ICON_PALETTE, velvet: CONQUEST_CLOTH_RED } : EVENT_ICON_PALETTE
           )
         )
     )
@@ -76,8 +86,9 @@ const middle = (builders.length - 1) / 2
 const icons = builders.map((build, index) => {
   const large = build()
   const small = build()
-  large.object.scale.setScalar(candidates ? 1 : KIND_SCALE)
-  small.object.scale.setScalar(0.25 * (candidates ? 1 : KIND_SCALE))
+  const shown = conquest ? CONQUEST_SCALE : candidates ? 1 : KIND_SCALE
+  large.object.scale.setScalar(shown)
+  small.object.scale.setScalar(0.25 * shown)
   if (crowns) {
     // A low open crown, fitted one unit high like any icon, is far wider than a closed one: the candidates are shown
     // at one width — crowns made for the same head — so two neighbours never overlap.
@@ -106,7 +117,7 @@ if (candidates) {
 // The plain pin (ATLAS-298), behind the icons, as tall as they are: chosen here, « B » (the dev, 2026-10-27). One per
 // colour the contribution offers an event type (`cms/src/fields/eventColours`).
 const PIN_COLOURS = ['#e3170a', '#ff7a00', '#ffc300', '#1fa33a', '#1565e8', '#8a2be2', '#d4148a']
-const pins = (crowns ? [] : PIN_COLOURS).map((colour, index) => {
+const pins = (candidates ? [] : PIN_COLOURS).map((colour, index) => {
   const pin = createPinMarkers([{ ground: [0, 0, 0], colour }], svgToTexture).object
   pin.scale.setScalar(0.8 / EVENT_MARKER_STYLE.height)
   pin.position.set((index - (PIN_COLOURS.length - 1) / 2) * 0.55, 0.5, -1.6)
