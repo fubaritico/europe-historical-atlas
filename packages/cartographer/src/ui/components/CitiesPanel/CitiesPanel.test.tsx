@@ -8,6 +8,7 @@ import {
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
 
+import { cityVerdicts } from '../../../canvas/cityVerdict'
 import { testStore } from '../../../canvas/testGestureContext'
 import { createPolityColourSource } from '../../../state/polityColourSource'
 import { cityDetailText } from '../../testing/cityDetailText'
@@ -15,12 +16,24 @@ import { renderInEnglish } from '../../testing/renderInEnglish'
 import { showRow } from '../../utils/showRow'
 
 import { CitiesPanel } from './CitiesPanel'
+import { cityRowId } from './utils/cityRowId'
 
+import type * as CityRowIdModule from './utils/cityRowId'
+import type * as CityVerdictModule from '../../../canvas/cityVerdict'
 import type { CityMark } from '../../../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 // The scroll is jsdom's blind spot (nothing is laid out): what is checked is which row it is asked for.
 vi.mock('../../utils/showRow', () => ({ showRow: vi.fn() }))
+// CARTO-485: the real functions, watched — how often the cities are judged, and which rows are drawn.
+vi.mock('../../../canvas/cityVerdict', async (importOriginal) => {
+  const actual = await importOriginal<typeof CityVerdictModule>()
+  return { ...actual, cityVerdicts: vi.fn(actual.cityVerdicts) }
+})
+vi.mock('./utils/cityRowId', async (importOriginal) => {
+  const actual = await importOriginal<typeof CityRowIdModule>()
+  return { ...actual, cityRowId: vi.fn(actual.cityRowId) }
+})
 
 const in1100 = {
   kind: 'instant',
@@ -1057,6 +1070,84 @@ describe('CitiesPanel — the map filtered as the list (CARTO-390)', () => {
       const { store, unmount } = mount()
       unmount()
       expect(idsHandedToTheMap(store)).toBeNull()
+    })
+  })
+})
+
+/**
+ * The cities whose row was drawn since the watch was last cleared — a row asks for its DOM id each time it is drawn.
+ * @returns their ids, each once, sorted
+ */
+function rowsDrawn(): string[] {
+  const ids = vi.mocked(cityRowId).mock.calls.map(([id]) => id)
+  return [...new Set(ids)].sort((a, b) => a.localeCompare(b))
+}
+
+// CARTO-485, the dev, 2026-11-19: with thirteen thousand cities, ticking one took seconds — every city was judged
+// again and every row drawn again, at each click.
+describe('CitiesPanel — only what changed is computed and drawn (CARTO-485)', () => {
+  describe('happy path', () => {
+    it('draws Paris’s row alone, and judges no city, when Paris’s eye is ticked', async () => {
+      const { user } = mount()
+      vi.mocked(cityRowId).mockClear()
+      vi.mocked(cityVerdicts).mockClear()
+      await user.click(screen.getByRole('button', { name: 'Show Paris' }))
+      expect([rowsDrawn(), vi.mocked(cityVerdicts).mock.calls.length]).toEqual([['paris'], 0])
+    })
+  })
+
+  describe('variants', () => {
+    it('draws no row and judges no city when the cities are shown as points', () => {
+      const { store } = mount()
+      vi.mocked(cityRowId).mockClear()
+      vi.mocked(cityVerdicts).mockClear()
+      act(() => {
+        store.getState().setCitiesAsPoints(true)
+      })
+      expect([rowsDrawn(), vi.mocked(cityVerdicts).mock.calls.length]).toEqual([[], 0])
+    })
+
+    it('draws the rows of the city left and of the city chosen, and no other', () => {
+      const { store } = mount()
+      act(() => {
+        store.getState().selectCity('paris')
+      })
+      vi.mocked(cityRowId).mockClear()
+      vi.mocked(showRow).mockClear()
+      act(() => {
+        store.getState().selectCity('metz')
+      })
+      // The scroll asks for the chosen row's id too, through the mocked `showRow`: counted with the rows, it is Metz.
+      expect(rowsDrawn()).toEqual(['metz', 'paris'])
+    })
+
+    it('judges the cities once when a border is moved, and draws only Metz, whose verdict changed', () => {
+      const { store } = mount([PARIS, METZ])
+      vi.mocked(cityRowId).mockClear()
+      vi.mocked(cityVerdicts).mockClear()
+      act(() => {
+        store.getState().moveAnchors(
+          [
+            { index: 1, to: [4, 48] },
+            { index: 2, to: [4, 46] },
+          ],
+          { kind: 'move-anchor', label: 'move anchor' }
+        )
+      })
+      expect([rowsDrawn(), vi.mocked(cityVerdicts).mock.calls.length]).toEqual([['metz'], 1])
+    })
+  })
+
+  // L3, L4: N/A — nothing here can fail: the same values, drawn less often.
+
+  describe('edge cases', () => {
+    it('draws every row again when the cities are read again, each sheet a new one', () => {
+      const { store } = mount([PARIS, METZ])
+      vi.mocked(cityRowId).mockClear()
+      act(() => {
+        store.getState().setCities([{ ...PARIS }, { ...METZ }])
+      })
+      expect(rowsDrawn()).toEqual(['metz', 'paris'])
     })
   })
 })

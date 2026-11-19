@@ -764,7 +764,7 @@ export function paintCanvas(
   if (layerAlpha(ctx, scene.layers.backdrop)) paintSea(ctx, scene.backdrop)
   ctx.globalAlpha = 1
   paintVectors(ctx, size, scene, style)
-  paintCities(ctx, scene.cities, style, scene.citiesAsPoints)
+  paintCities(ctx, scene.cities, style, scene.citiesAsPoints, size)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)

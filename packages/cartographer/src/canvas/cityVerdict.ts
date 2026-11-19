@@ -1,12 +1,12 @@
 import { isIdentified, sameTerritory } from '@europe-historical-atlas/core/data/territoryMatch'
 
-import { polityAt } from '../geometry/fillHit'
+import { polityLocator } from '../geometry/fillHit'
 
 import { projectedTerritories } from './paint/scene'
 
 import type { CityAlert } from './paint/cityPainter'
-import type { PolityRings } from '../geometry/fillHit'
 import type { CityHolder, CityMark } from '../state/citiesSlice'
+import type { Point } from '../viewport/viewport'
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 import type { TerritoryIds } from '@europe-historical-atlas/core/data/territoryMatch'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
@@ -191,16 +191,17 @@ function checkedLevel(reading: ContentChainReading, map: MapPolities): number {
  * anchors and the city are — the one painted last wins, as on the canvas. Mercator keeps a point inside or outside a
  * ring.
  * @param document - the year open, for the polities' names and ids
- * @param territories - its territories in longitude and latitude, in paint order
+ * @param locate - which polity's territory a point is in, over the territories in longitude and latitude, prepared
+ *   once for every city (`geometry/fillHit.polityLocator`)
  * @param lonLat - the point, longitude first
  * @returns the polity, or `null` over ground nobody claims
  */
 function polityOnMap(
   document: YearDocument,
-  territories: readonly PolityRings[],
+  locate: (at: Point) => string | null,
   lonLat: [number, number]
 ): PolityOnMap | null {
-  const id = polityAt(territories, lonLat)
+  const id = locate(lonLat)
   if (id === null) return null
   const polity = document.polities.find((candidate) => candidate.id === id)
   // A claim naming a polity the registry lacks is never in the territories (`projectedTerritories`): the id stands in
@@ -243,11 +244,11 @@ export function cityVerdicts(
   document: YearDocument,
   cities: readonly CityMark[]
 ): ReadonlyMap<string, CityVerdict> {
-  const territories = projectedTerritories(document, document.anchors)
+  const locate = polityLocator(projectedTerritories(document, document.anchors))
   const map = mapPolities(document)
   return new Map(
     cities.map((city) => {
-      const onMap = polityOnMap(document, territories, [city.lon, city.lat])
+      const onMap = polityOnMap(document, locate, [city.lon, city.lat])
       const bySources = city.holder
       const verdict = (
         kind: CityVerdictKind,

@@ -13,6 +13,9 @@ const STYLE: CityStyle = {
   cityFontSize: 11,
 }
 
+/** The canvas the cities are painted on, in device pixels. */
+const SIZE = { width: 800, height: 600 }
+
 /** A context that writes down what it is asked, and in which colours. */
 function recorder() {
   const calls: { op: string; args: unknown[]; fill: unknown; stroke: unknown }[] = []
@@ -40,7 +43,13 @@ describe('paintCities', () => {
   describe('happy path', () => {
     it('paints Lyon as a dot at its point and its name beside it, halo under ink', () => {
       const { ctx, calls } = recorder()
-      paintCities(ctx, [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }], STYLE, false)
+      paintCities(
+        ctx,
+        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }],
+        STYLE,
+        false,
+        SIZE
+      )
       expect(calls.map(({ op }) => op)).toEqual(['arc', 'stroke', 'fill', 'strokeText', 'fillText'])
       expect(calls[0]?.args.slice(0, 3)).toEqual([100, 50, 3])
       expect(calls[4]).toEqual({
@@ -63,7 +72,8 @@ describe('paintCities', () => {
           { name: 'Zadar', at: [300, 80], colour: null, alert: null },
         ],
         STYLE,
-        false
+        false,
+        SIZE
       )
       expect(calls.filter(({ op }) => op === 'fillText').map(({ args }) => args[0])).toEqual([
         'Lyon',
@@ -80,7 +90,8 @@ describe('paintCities', () => {
         ctx,
         [{ name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null }],
         STYLE,
-        true
+        true,
+        SIZE
       )
 
       expect(calls.map(({ op }) => op)).toEqual(['arc', 'fill', 'arc', 'fill', 'arc', 'fill'])
@@ -95,7 +106,13 @@ describe('paintCities', () => {
 
     it('paints a city whose holder is unknown as a hollow ring, coloured by nothing', () => {
       const { ctx, calls } = recorder()
-      paintCities(ctx, [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }], STYLE, true)
+      paintCities(
+        ctx,
+        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }],
+        STYLE,
+        true,
+        SIZE
+      )
 
       expect(calls.map(({ op }) => op)).toEqual(['arc', 'fill', 'arc', 'fill', 'arc', 'stroke'])
     })
@@ -110,7 +127,8 @@ describe('paintCities', () => {
         ctx,
         [{ name: 'Valencia', at: [100, 50], colour: '#3355aa', alert: 'missing' }],
         STYLE,
-        true
+        true,
+        SIZE
       )
 
       expect(calls.filter(({ op }) => op === 'fill').map(({ fill }) => fill)).toEqual([
@@ -130,7 +148,8 @@ describe('paintCities', () => {
         ctx,
         [{ name: 'Metz', at: [100, 50], colour: '#3355aa', alert: 'toCorrect' }],
         STYLE,
-        true
+        true,
+        SIZE
       )
 
       expect(calls.filter(({ op }) => op === 'fill')[1]?.fill).toBe('#d9b44a')
@@ -142,7 +161,8 @@ describe('paintCities', () => {
         ctx,
         [{ name: 'Toledo', at: [100, 50], colour: '#3355aa', alert: null }],
         STYLE,
-        true
+        true,
+        SIZE
       )
 
       const fills = calls.filter(({ op }) => op === 'fill').map(({ fill }) => fill)
@@ -155,7 +175,8 @@ describe('paintCities', () => {
         ctx,
         [{ name: 'Caspe', at: [100, 50], colour: null, alert: 'missing' }],
         STYLE,
-        true
+        true,
+        SIZE
       )
 
       expect(calls.map(({ op }) => op)).toEqual([
@@ -174,10 +195,86 @@ describe('paintCities', () => {
 
   // L3, L4: N/A — drawing literals.
 
+  // CARTO-485: thirteen thousand cities shown, a few hundred in view — the rest is not painted.
+  describe('only the cities on the canvas', () => {
+    it('paints Lyon, on the canvas, and not Kiev, far off its right edge', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          { name: 'Lyon', at: [100, 50], colour: null, alert: null },
+          { name: 'Kiev', at: [2000, 50], colour: null, alert: null },
+        ],
+        STYLE,
+        false,
+        SIZE
+      )
+      expect(calls.filter(({ op }) => op === 'fillText').map(({ args }) => args[0])).toEqual([
+        'Lyon',
+      ])
+    })
+
+    it('still paints a named city whose dot is just off the left edge: its name runs into view', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [{ name: 'Lisbonne', at: [-20, 50], colour: null, alert: null }],
+        STYLE,
+        false,
+        SIZE
+      )
+      expect(calls.some(({ op, args }) => op === 'fillText' && args[0] === 'Lisbonne')).toBe(true)
+    })
+
+    it('paints no named city above or below the canvas', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          { name: 'Bergen', at: [100, -40], colour: null, alert: null },
+          { name: 'Tunis', at: [100, 640], colour: null, alert: null },
+        ],
+        STYLE,
+        false,
+        SIZE
+      )
+      expect(calls.length).toBe(0)
+    })
+
+    it('paints as a point Lyon on the canvas and not Kiev off it', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          { name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null },
+          { name: 'Kiev', at: [2000, 50], colour: '#3355aa', alert: null },
+        ],
+        STYLE,
+        true,
+        SIZE
+      )
+      expect(new Set(calls.filter(({ op }) => op === 'arc').map(({ args }) => args[0]))).toEqual(
+        new Set([100])
+      )
+    })
+
+    it('still paints a point whose centre is just off the edge: its rings reach the canvas', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [{ name: 'Brest', at: [-4, 50], colour: '#3355aa', alert: 'missing' }],
+        STYLE,
+        true,
+        SIZE
+      )
+      expect(calls.some(({ op }) => op === 'arc')).toBe(true)
+    })
+  })
+
   describe('edge cases', () => {
     it('paints nothing and sets no face when no city is shown', () => {
       const { ctx, calls } = recorder()
-      paintCities(ctx, [], STYLE, false)
+      paintCities(ctx, [], STYLE, false, SIZE)
       expect([calls.length, ctx.font]).toEqual([0, ''])
     })
   })

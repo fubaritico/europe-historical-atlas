@@ -69,29 +69,72 @@ export interface CityOnScreen {
 const FULL_TURN = Math.PI * 2
 
 /**
+ * How far left of the canvas a named city is still painted, in name sizes: its name runs to the right of its dot, so a
+ * dot off the left edge may still have its name on screen. Forty sizes is a name of some seventy letters.
+ */
+const NAME_REACH = 40
+
+/** How far outside the canvas a point is still painted, in dot radii: its widest ring is under three. */
+const POINT_REACH = 3
+
+/**
+ * Whether a city would leave a mark on the canvas (CARTO-485): thirteen thousand cities are shown and a zoomed view
+ * holds a few hundred — the rest is skipped, at every repaint of a pan.
+ * @param at - the city's point, in screen pixels
+ * @param size - the canvas, in the same pixels
+ * @param size.width - its width
+ * @param size.height - its height
+ * @param reach - how far outside the canvas a city still shows: to the left, and on the three other sides
+ * @param reach.left - past the left edge, where a name may still run into view
+ * @param reach.around - past the top, the right and the bottom
+ * @returns `true` when the city is on the canvas or within reach of it
+ */
+function onCanvas(
+  at: readonly [number, number],
+  size: { readonly width: number; readonly height: number },
+  reach: { readonly left: number; readonly around: number }
+): boolean {
+  return (
+    at[0] >= -reach.left &&
+    at[0] <= size.width + reach.around &&
+    at[1] >= -reach.around &&
+    at[1] <= size.height + reach.around
+  )
+}
+
+/**
  * Paint the cities shown: a dot ringed with light, and its name beside it, haloed — over the borders, under the edit
  * strokes, so a guide never hides the outline being drawn. **As points** (the dev, 2026-11-05), each a dot in its
- * holder's colour, ringed, no name.
+ * holder's colour, ringed, no name. **Only those on the canvas** (CARTO-485, {@link onCanvas}).
  * @param ctx - the context
  * @param cities - the cities shown, on screen
  * @param style - the colours and sizes, in device pixels
  * @param asPoints - whether they are drawn as points
+ * @param size - the canvas, in device pixels, to skip what falls outside it
+ * @param size.width - its width
+ * @param size.height - its height
  */
 export function paintCities(
   ctx: CityCanvas,
   cities: readonly CityOnScreen[],
   style: CityStyle,
-  asPoints: boolean
+  asPoints: boolean,
+  size: { readonly width: number; readonly height: number }
 ): void {
   if (cities.length === 0) return
   if (asPoints) {
-    for (const city of cities) paintPoint(ctx, city, style)
+    const around = style.cityRadius * POINT_REACH
+    for (const city of cities) {
+      if (onCanvas(city.at, size, { left: around, around })) paintPoint(ctx, city, style)
+    }
     return
   }
   ctx.font = `600 ${String(style.cityFontSize)}px system-ui, sans-serif`
   ctx.textBaseline = 'middle'
   ctx.lineWidth = style.cityRadius
+  const reach = { left: style.cityFontSize * NAME_REACH, around: style.cityFontSize }
   for (const { name, at } of cities) {
+    if (!onCanvas(at, size, reach)) continue
     ctx.beginPath()
     ctx.arc(at[0], at[1], style.cityRadius, 0, FULL_TURN)
     ctx.fillStyle = style.cityInk

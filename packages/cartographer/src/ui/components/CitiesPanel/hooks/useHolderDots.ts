@@ -1,4 +1,6 @@
-import { holderDot } from '../utils/holderDot'
+import { useMemo } from 'react'
+
+import { holderDotsOf } from '../utils/holderDotsOf'
 
 import type { CityMark } from '../../../../state/citiesSlice'
 import type { PolityColourSource } from '../../../../state/polityColourSource'
@@ -6,9 +8,10 @@ import type { CartographerStoreHook } from '../../../../state/store'
 import type { HolderDot } from '../utils/holderDot'
 
 /**
- * A city's dot in `{Cities}` (CARTO-367), bound to the store: its holder's colour and its bubble, read at each render as
- * the verdicts are, so a polity recoloured or made a vassal in the map shows at once. A function rather than a table:
- * every row gets its dot, with no city that could be missing from it.
+ * A city's dot in `{Cities}` (CARTO-367), bound to the store: its holder's colour and its bubble, read anew at each
+ * version of the map, as the verdicts are, so a polity recoloured or made a vassal shows at once. A function rather than a table:
+ * every row gets its dot, with no city that could be missing from it. **One dot per holder, kept while the map and
+ * its colours are the same** (CARTO-485, `holderDotsOf`), so a row is handed the very dot of its last render.
  * @param store - the store the document lives in
  * @param colours - the polities' colours — the canvas reads the same source, so the dot is the point's colour
  * @returns a city's dot
@@ -26,5 +29,7 @@ export function useHolderDots(
   const byId = colours.coloursOf(document, version)
 
   // Return
-  return (city) => holderDot(document, byId, city.holder)
+  // The colours are made anew at each version of the map (`polityColourSource`): they are the key that says it changed,
+  // the document itself being edited in place.
+  return useMemo(() => holderDotsOf(document, byId), [document, byId])
 }

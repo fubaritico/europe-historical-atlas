@@ -9,7 +9,7 @@ import { citiesListed } from '../utils/citiesListed'
 import { cityRowId } from '../utils/cityRowId'
 
 import { CityBoxes } from './CityBoxes'
-import { CityRow } from './CityRow'
+import { CityRows } from './CityRows'
 import { CityTools } from './CityTools'
 
 import type { CityFiltersProps } from '../cityFiltersProps'
@@ -84,11 +84,7 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
             asPoints={props.asPoints}
             onAsPoints={handleAsPoints}
           />
-          <ul className="layer-list city-list" aria-label={t('title')}>
-            {found.map((city) => (
-              <CityRow key={city.id} city={city} {...props} />
-            ))}
-          </ul>
+          <CityRows {...props} cities={found} />
         </>
       )}
     </>

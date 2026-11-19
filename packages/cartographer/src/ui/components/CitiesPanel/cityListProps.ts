@@ -37,3 +37,25 @@ export interface CityListProps {
   /** A city's name was double-clicked, or ‹enter› pressed on it: its information box opens. */
   onOpen: (id: string) => void
 }
+
+/** What one row of the list is handed: values of its own city only, so a row is drawn again only when one changes. */
+export interface CityRowProps {
+  /** The city. */
+  city: CityMark
+  /** Whether it is shown on the canvas. */
+  visible: boolean
+  /** Whether it is the city chosen. */
+  chosen: boolean
+  /** Whether its information box is open. */
+  opened: boolean
+  /** Its verdict's kind, marked on the row (CARTO-386), or `undefined` for a city not judged. */
+  verdict: CityVerdict['kind'] | undefined
+  /** Its dot: its holder's colour by the sources, and what its bubble says (CARTO-367). */
+  dot: HolderDot
+  /** Its eye was toggled. */
+  onShown: (id: string, shown: boolean) => void
+  /** Its name was clicked: it is chosen. */
+  onSelect: (id: string) => void
+  /** Its name was double-clicked, or ‹enter› pressed on it: its information box opens. */
+  onOpen: (id: string) => void
+}

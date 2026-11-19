@@ -41,15 +41,12 @@ export interface CitiesPanelProps {
  */
 export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   // Store
-  const all = store((state) => state.cities)
   const load = store((state) => state.citiesLoad)
   const shown = store((state) => state.shownCities)
   const asPoints = store((state) => state.citiesAsPoints)
   const document = store((state) => state.document)
   const selected = store((state) => state.selectedCity)
   const opened = store((state) => state.openedCity)
-  // Rendered again on each version: the document is mutated in place, so its identity does not say it changed.
-  store((state) => state.version)
 
   // Store actions
   const setCityShown = store((state) => state.setCityShown)
@@ -63,7 +60,7 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
   // Derived
-  const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
+  const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(store)
   const status = citiesStatus(load, cities.length, document.year)
   const filters = useCityFilters(store, colours, cities, verdicts)
   const dotOf = useHolderDots(store, colours)
