@@ -71,6 +71,15 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
 - **A wave's files go in their own folder** (`wave1/`, `wave2/`) before the next build, or the builder overwrites them.
 - **The sorting can accept a neighbour**: « Als erste Ohligser Hofschaften wurden 980 n. Chr. Barl … » proves Barl, not
   Ohligs. A wrong sheet of mine I delete myself (sheet, then place, then source — `/enter-in-cms`), never left to the dev.
+- **Wikidata keeps a former P131 beside the current one, and `meta.py` takes the first first-level division it meets**
+  (19/11: Selezivka entered under « oblast de Kiev », its page and its point say Zhytomyr; Bryn under « oblast de
+  Moscou », Kaluga by its page). Read each region against the page's first sentence before entry; a place Wikidata ties
+  to no division keeps an empty region, never a guessed one.
+- **`extract_backfill.py` splits sentences for German and English only**: on a Russian page it kept one paragraph and lost
+  the dated sentence (Vytatchiv, 19/11). For another script, split with that language's rules and write `extraits/` from
+  that split, the quotation checked inside each file.
+- **Two downloads at once are throttled** by Wikipedia (42 pages in a quarter of an hour, 19/11): one at a time, the
+  best-documented candidates first (sitelinks), and stop at the density asked (memory `enough-cities-not-all`).
 - **Local wikitext is not a quotation**: it may serve the sorting, never the line — the line is the rendered sentence.
 - **The clean-up comes after the last record of the run, never before**: on 18/11 the copies were deleted while 25 weak
   cases and 10 pages were still open, and `mkv.py` rewrote `weak.json` — 35 pages to download again. Before step 9:

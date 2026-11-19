@@ -1091,3 +1091,162 @@ CMS-414, ses 41 cas ; CMS-416, un sujet de conversation (une fiche par détenteu
 
 **L'Italie de 1100 est dans sa base** (357 villes, `1100/italy.md`), le nord-ouest corrigé (Novare et Trecate sur Savio).
 
+## Archivé de next-historian.md le 19/11
+
+## ▶ ON REPREND ICI — 18/11, 23 h 30 : la Rus' en 1100, commencée seul (sans agents)
+
+**Sa commande du 18/11, 23 h 25** : _« travaille et saisis les résultats de ton travail. On verra ça demain »_ — la Russie,
+troisième point de la commande du 17/11. **Aucun agent** (il n'a pas donné de nombre) : je trie et je saisis moi-même.
+Dossier de travail supprimé le 19/11 sur sa demande (restent la note, les extraits, le registre). La Finlande est tranchée (commits `0244e84b`, `d159bec4`).
+
+**Dessiné le 19/11 au soir** dans `years/1100` (arbre principal, non commité ; copie `1100.before-claude-2026-11-19`) :
+Novgorod reculé à la Neva et au Ladoga ; Karelians, Tavastians, Finns proper (tribus) ; Kvens et Sámi (couleur `none`).
+Relu conforme par le codeur ; **commité et poussé par le codeur (`1d8be087`)**, vu par lui : _« ça me convient tel
+que c'est »_. **Sa demande suivante, pas pour ce soir — CORE-486** : la Carélie en hachures moitié Novgorod, moitié
+transparentes (le code d'abord, par le codeur ; puis la carte : Caréliens en « Aucune », Novgorod étendu sur eux). Elle
+remplace sa décision du 18/11 « pas de hachures » de `finland-topo.md` : **la barrer dans la note quand CORE-486 est fait.**
+
+**Avant, en attente de son signal** (19/11) : les propositions de tracés des tribus de Finlande, de Carélie et du reste de la
+Scandinavie — _« on va attendre un petit peu »_, le temps que lui et le codeur règlent le Cartographe (le peuple au nom
+seul, CARTO-484). Ne pas commencer avant son mot. **Le découpage est validé par lui le 19/11** sur ma maquette (Finnois propres au
+sud-ouest, Tavastiens autour du Vanajavesi, Caréliens sur l'isthme et la rive ouest du Ladoga ; Sames et Kvènes en nom
+seul ; **Novgorod recule jusqu'au Ladoga et à la Neva** — sa réponse du 19/11, rapportée par le codeur).
+Ordre convenu avec le codeur : les trois tribus d'abord ; les Sames et les Kvènes par le formulaire après CARTO-484
+(« aucune couleur », construit par le codeur, qui prévient avant de le mettre dans `main`). **Plus tard, avec
+lui** : _« comment on peut faire une zone partiellement assurée »_. **Je commence quand le codeur a fini** sa tâche sur
+le Cartographe, accordé avec lui (un seul auteur par carte). **Je dessinerai dans l'arbre principal** (`main`, sa décision du
+19/11), pas dans l'arbre `historian` : ses retouches de 1100 sont commitées et poussées par le codeur (`0a27eccc`, 151 pays) ; le codeur a
+fini (CARTO-485), il ne touche plus au Cartographe ni à `years/` sans prévenir — je pars de sa carte
+telle qu'elle est sur le disque, et jamais pendant qu'il dessine (un seul auteur par carte).
+
+**Fait le 19/11 au soir, à sa demande** (_« il me faudrait des villes dans cette zone-là »_) : **51 lieux du Levant, de
+Chypre et de Mésopotamie** en 1100 (lieux 13609–13659, fiches 13627–13677, sources 5410–5460), contrôlés (51/51) ; 46
+alertes sur 13 645, dont six voulues ; note `files/plans/sources/1100/levant.md` (ce que la carte et les sources disent
+autrement sur la côte libanaise). Codeur prévenu. **Pas exporté.** Les pages téléchargées
+(`levant-1100-research/lot-l/rend`, `lot-m/rend`) sont à supprimer sur son accord. Reste, pour la densité : Beyrouth,
+Sidon, Nicosie, Paphos, Samarra, Wasit… (aucune phrase datée sur leur page) — une seconde passe.
+
+**Fait dans la nuit du 18 au 19/11** : **33 lieux de la Rus' en 1100** (lieux 13576–13608, fiches 13594–13626, sources
+5377–5409), triés par moi sur les pages russes, contrôlés par script (33/33), `cities:alerts` : 65 sur 13 594, aucune
+nouvelle ; extraits et registre mis à jour ; codeur prévenu. Note, refus et questions ouvertes :
+`files/plans/sources/1100/rus.md` (non commitée). Selezivka (région) corrigée et Bryn complétée après le contrôle du codeur. **Export fait par lui le
+19/11**, villes vues dans le Cartographe. Pages téléchargées supprimées ; le script de lecture de `/bulk-entry` lit désormais le Wikipédia de
+l'adresse (russe compris). **Ensuite** : la seconde passe sur la Chronique elle-même (Dorogobouj, Snovsk, Sosnytsia ; Bouzhsk
+donné à Davyd Igorevitch à Ouvetitchi en 1100, à lire avant toute ligne).
+**L'index de la mémoire, à ranger avec lui à la fin de la session** (sa décision) : 162 lignes, 20 Ko ; la limite de
+Claude Code est 200 lignes ou 25 Ko — le « 140 » écrit ici avant était une erreur de ma part, aucune source ne le dit.
+
+## ▶ 18/11, 19 h 50 : les villages d'Allemagne de l'Ouest finis, le disque rangé, la méthode écrite
+
+**Fait le 18/11** (détail : `completed.md`) : **1 871 villages d'Allemagne de l'Ouest en 1100** (tri et saisie par 8 agents,
+son accord), tous contrôlés ; 13 562 villes en 1100, 65 alertes. Le disque rangé et vidé de ses copies (`historien/LISEZ-MOI.md`) ;
+la méthode : la skill `/bulk-entry`, la règle dans `.claude/roles/historian.md`. Le travail du lot reste en exemple :
+`files/resources/historien/1100/regions/germany-west-1100-research/lot-v/` (vagues 1 à 4, verdicts).
+
+**Ce qui l'attend, lui** (une question à la fois) :
+
+1. **La Finlande** : trois terres sans souverain avec leurs lieux, comme les Livoniens, ou sans pays comme aujourd'hui.
+2. **Un export** (par lui ou le codeur) : les villages saisis après l'export de l'après-midi du 18/11 n'y sont pas.
+
+**Supprimé par moi le 18/11 au soir** (CMS-454) : Ohligs — fiche 11749, lieu 11732, source 3533 ; contrôlé, plus rien ne les cite.
+
+**Ensuite, de mon côté** : **la Russie**, le troisième point de sa commande, pas commencée — par `/bulk-entry` (les villes de
+la Rus' attestées avant 1105 ; d'abord vérifier les titres de 1100 des principautés dans la base).
+## ▶ 18/11, 02 h 10 (dépassé) : sa commande de la nuit, deux points faits, la Russie pas commencée
+
+**Sa commande du 17/11 au soir, dans son ordre** : (1) la Finlande, le topo de ce qu'elle était avant les Suédois ;
+(2) plus de villes en Allemagne de l'Ouest (_« un net contraste entre la densité des villes en France et celles des duchés
+de Basse et Haute-Lorraine, la Souabe, la Franconie, un peu la Saxe »_), son seuil du 16/11 : au moins 200 points ;
+(3) un peu de Russie. Son critère : tout lieu qu'une source atteste à la date, villages compris (mémoire
+`longevity-not-population`).
+
+**Ses deux réponses attendues** (une question à la fois, la première d'abord) :
+
+1. **Combien d'agents de saisie** pour les ~2 300 villages d'Allemagne de l'Ouest à date nette ≤ 1105
+   (`files/resources/historien/1100/regions/germany-west-1100-research/sel1.json`) — sans son nombre, aucun agent.
+2. **La Finlande** : dessiner trois terres sans souverain (Tavastiens, Finnois proprement dits, Caréliens) avec leurs lieux,
+   comme les Livoniens, ou la laisser sans pays comme aujourd'hui.
+
+**Fait cette nuit** (rien de commité) :
+
+- **La Finlande, le topo** : `files/plans/sources/1100/finland-topo.md` — lus : la Chronique de Novgorod (trad. 1914,
+  texte numérisé, les années à vérifier sur l'image), Ohthere, Gs 13 (Rundata), Lind 2004 (_Fennia_). Rien à saisir : aucun
+  lieu attesté avant 1105 par une source lue, aucun souverain. **À lire** : Korpela 2008 (`elibrary.petrsu.ru/books/show/23587`),
+  Adam de Brême (dMGH), la datation des forteresses tavastiennes (Rapola, Hakoinen, Tenhola), la BnF, Gallica, JSTOR. **Pour
+  sa carte** : l'isthme de Carélie est dessiné sous Novgorod ; Lind dit « vaguement lié, plutôt indépendant » en 1143.
+- **Allemagne de l'Ouest, 101 → 192** : 48 forteresses (raison 7) et 43 abbayes et stifts (raison 9), lieux 11614–11704,
+  fiches 11632–11722, sources 3415–3505 ; la citation est la phrase de la page allemande qui date le lieu avant 1106 ; le
+  détenteur, le titre de 1100 du duché dessiné dessous. Contrôlés par `verify.py` et par le codeur (lecture seule) ;
+  `cities:alerts` : 65 alertes sur 11 691, aucune nouvelle. Ehrenbreitstein écarté (1,4 km de Coblence) ; Zwiefalten sans
+  région (Wikidata n'en donne pas).
+
+**Reste, dans l'ordre** : 8 lieux pour les 200 — Maria Laach, Comburg, Hirsau et d'autres sièges dont la page ne donne pas
+de phrase de fondation (une passe `/find-sources`) ; puis **la Russie**, pas commencée (les villes de la Rus' attestées
+avant 1105 : la Chronique des temps passés, les titres de 1100 des principautés à vérifier dans la base d'abord).
+
+**Les outils des lots** (`files/resources/historien/1100/regions/germany-west-1100-research/`) : `lot-gN/build.py` (les phrases par un repère
+choisi à la main, les noms et le pays par QLever, le pays dessiné par `cities-1100-night-1117/under.mts`) → `mk.py lot-gN`
+(le titre détenteur, `enter-gN.json`) → la saisie par paquets de dix → **`verify.py lot-gN <raison>` après chaque paquet** (il
+a rattrapé deux citations que j'avais mal recopiées). Un candidat à moins de 1,5 km d'un lieu déjà saisi est écarté (un seul
+signe par lieu). Wikipédia répond 429 : attendre et réessayer, ne jamais réutiliser la réponse précédente.
+
+**Le CMS** : lancé par moi le 17/11 à 21 h 21 sur son ordre explicite, détaché de ma session
+(`files/resources/historien/outils/start-cms.sh`, journal `/private/tmp/claude-501/cms-dev.log`) ; il tourne tant que personne ne l'arrête.
+Le lancer exige son ordre en toutes lettres (détail : `rules/known-issues/cms.md`). **Agents** : son nombre, à chaque
+nouvelle région.
+
+**Mes règles apprises le 17/11** : (a) les listes et scripts d'une longue saisie vivent dans `files/resources/<lot>/`,
+jamais dans le dossier temporaire, et le point de reprise s'écrit **avant** une vague d'agents ; (b) toute valeur recopiée
+à la main (par un agent ou par moi) passe le contrôle par script contre le lot ; (c) une mise à jour groupée du MCP
+(`where` par tranche d'identifiants, 450 lieux) passe sur `places` ; `select: {"id": true}` pour une réponse courte ;
+(d) le dossier temporaire se vide à la fin de chaque essai (mémoire `clean-up-after-every-trial`).
+
+**Les sections du 16/11 au 10/11** (les chaînes de 1100, les alertes, la Pologne, l'est de l'Allemagne, les détenteurs
+faux, les villes sans titre) sont dans `archive/next-history.md`, « Archivé de next-historian.md le 18/11 » — à relire
+pour leurs restes ouverts.
+
+## ▶ 17/11, 17 h : l'Angleterre du Domesday est entrée (11 579 villes en 1100, 44 en alerte)
+
+**Fini le 17/11 à 17 h** : les 2 609 villages saisis par huit agents (~340 000 jetons chacun, une demi-heure), contrôlés
+par `mklots.py verify` (2 609 exacts, une citation corrigée, Downinney) ; `cities:alerts` : 44 alertes sur 11 579,
+aucune anglaise ; codeur prévenu. **Puis les 21 villages de la frontière galloise** (fiches 11611–11631) : sous le comte
+de Chester (titre 394, Lloyd 1912, source 3413) et, pour Forden, de Shrewsbury (titre 395), tous deux → le roi (maillons
+280, 281) ; **11 600 villes, 65 alertes** — ces 21 en alerte parce que la carte les dessine sous le Gwynedd et le Powys :
+à lui (détail : `files/plans/sources/1100/villes-et-sites-nuit-2026-11-17.md`). **Le pays et la région d'aujourd'hui
+des lieux anglais : faits** (sa demande, 17/11 au soir, _« faut finir le travail qui a été commencé »_) — lus sur
+Wikidata par QLever avec la règle du CMS (`lots.py`), écrits par `updatePlaces` groupé (`where` par tranches
+d'identifiants, 450 à la fois, une tranche après l'autre : aucune erreur) ; 8 309 Angleterre, 37 pays de Galles, 11 sans
+région, 2 laissés vides (9457 : deux pays ; 10254 : rien). **Reste** : ~1 550 autres lieux sans pays (la nuit du 16/11,
+~1 400 plus anciens) — pas demandé ; puis ses autres régions. **Export fait par le codeur le 17/11 à 19 h 30**
+(`79de18d5`, poussé) : 11 600 fiches, 116 affichées dans l'atlas. Ce soir-là le CMS tourne comme processus de la session
+du codeur (relancé à sa demande) : s'il ne répond plus à la reprise, c'est à lui de le relancer. Second témoin de la
+frontière galloise trouvé et saisi (cartulaire de Sainte-Werburge, source 3414, sur le titre 394). CMS-468 fait par le
+codeur le 17/11 au soir (Next 16.4.6, kit MCP 1.32.0) : le MCP `cms` répond, vérifié.
+
+## ▶ 17/11, après-midi : le déroulé de la saisie du Domesday
+
+**Le matin du 17/11** (une session coupée à 12 h 41 par un disque plein, son dossier temporaire effacé, rien d'écrit
+ici) : sa règle _« la durée dans le temps, pas la population »_ (mémoire `longevity-not-population`) — tous les lieux
+du Domesday Book, villages compris. 5 729 lieux anglais saisis (fiches 3121 → 9001) : source 3260 (Open Domesday),
+une ligne « importance » dont la citation est la première phrase de la page du lieu, `where` = l'adresse de la page,
+détenteur = titre 122 (Guillaume le Roux, royaume d'Angleterre). Plus ~150 lieux grecs (sources 3261 et suivantes).
+**L'après-midi** : la liste refaite dans `files/resources/historien/1100/passes/domesday-1100/` (ignoré par git) — `q-dom.rq` (Wikidata par
+QLever, propriété P3118), `domfetch.py` (la phrase de chaque page), `under.json` (le pays dessiné sous chaque point),
+`mklots.py build 8` puis **`mklots.py verify`** (la base contre les lots, en lecture seule). Huit agents de saisie
+(Sonnet, son accord : « continue comme ça ») sur `enter-d5a…h.json`, 2 609 villages. **À faire quand ils ont fini** :
+`verify`, corriger par `update` les citations mal recopiées (une sur 500 le matin — renvoyer la ligne entière), puis
+`pnpm cities:alerts --map 1100`, puis prévenir le codeur (les lieux anglais n'ont ni pays ni région d'aujourd'hui).
+**Mis de côté** (`aside.json`) : 21 villages dessinés sous le Gwynedd (Rhuddlan, Bodfari, Prestatyn, Dyserth…) et le
+Powys (Hawarden, Hope, Gresford, Pulford…) — aucun titre de 1100 pour ces deux royaumes dans la base : à rechercher
+(qui tenait le Tegeingl en 1100), puis saisir. ~1 400 éléments Wikidata « … Manor » sans coordonnées, laissés.
+
+## ▶ 17/11, nuit : ~1 370 lieux de plus en 1100 (villes, forteresses, abbayes)
+
+**Fait** (détail, méthode, ce qui reste : `files/plans/sources/1100/villes-et-sites-nuit-2026-11-17.md`, non commité) :
+villes de Bosker-Buringh (France, Espagne, Est), forteresses et abbayes de France et d'Espagne, villes et monastères de
+l'Est (Turquie, Pologne, Grèce, Rus'), communes notables de France et d'Espagne — chacune attestée avant 1105 par une
+phrase de sa page, détenteur = titre 1100 du pays dessiné. Raison « abbaye ou monastère » créée (n° 9). Codeur prévenu.
+**Reste** : ~400 lieux « non tranchés » (la page ne date rien) pour une seconde passe `/find-sources` ; les Baléares
+dessinées « Taifa of Dénia » (Mahón en alerte) — à lui ; le pipeline de la nuit (QLever, wikitext par 50, texte rendu
+par l'API REST, agents de tri puis de saisie, contrôle par script) est copié dans
+`files/resources/historien/1100/passes/cities-1100-night-1117/` (scripts, verdicts, lots ; les pages téléchargées non gardées).

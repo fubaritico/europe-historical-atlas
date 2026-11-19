@@ -10,7 +10,7 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 
 **L'historien, 19/11 au soir** : 51 lieux du Levant, de Chypre et de Mésopotamie saisis en 1100 (fiches 13627–13677,
 contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commitée (`1d8be087`) ; ses notes `levant.md` et
-`rus.md` et son point de reprise ne sont pas commités — son point de reprise, `next-historian.md`.
+`rus.md`, `fetch_rest.py` et son point de reprise commités le 19/11 au soir — son point de reprise, `next-historian.md`.
 
 ## ▶ ON REPREND ICI — le 19/11, 23 h 40 : l'oriflamme de la conquête, ATLAS-477
 
@@ -49,7 +49,7 @@ resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser
 suivant l'annule (`known-issues/tooling.md`) — `gh run list -L 1` avant.
 
 **Sur `main`, pas à moi** : `editor-chrome.css` (dix lignes, les icônes copier/coller du sélecteur, CARTO-465, qu'il n'a
-pas validées), `fetch_rest.py` et les notes de l'historien.
+pas validées) ; les notes de l'historien, elles, sont commitées depuis le 19/11 au soir.
 
 **En Idées, à valider par lui** : ATLAS-473, CMS-474, ATLAS-475. **Ce qu'il n'a pas encore jugé devant son écran** : la
 tombe 3D sans halo ; l'angle de la tombe.

@@ -28,7 +28,7 @@ def one(x):
     fn = OUT + '/' + x['q'] + '.json'
     if os.path.exists(fn): return 'skip'
     title = urllib.parse.unquote(x['url'].rsplit('/wiki/', 1)[1])
-    url = 'https://de.wikipedia.org/api/rest_v1/page/html/' + urllib.parse.quote(title, safe='')
+    url = x['url'].split('/wiki/', 1)[0] + '/api/rest_v1/page/html/' + urllib.parse.quote(title, safe='')  # the page's own wiki (de, ru…)
     for a in range(6):
         try:
             h = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read().decode('utf-8')

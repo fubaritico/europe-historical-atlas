@@ -36,19 +36,21 @@ plages**. Tout est commité et poussé (`9fd0c44f`).
   (corrigé avant de coder) ; la mesure faite dans un Chrome sans fenêtre pendant qu'il testait, contre la consigne du
   spike ; l'écriture de ces notes sans son accord préalable, parce qu'il partait se coucher.
 
-### 2026-11-18 — l'historien : 1 871 villages d'Allemagne de l'Ouest avec 8 agents, le rangement du disque, la méthode écrite
+### 2026-11-18 (nuit) → 19/11 — l'historien : la Rus', le Levant et la Mésopotamie en 1100, la Finlande dessinée
 
-Plages journalisées **18/11 12:09 → 12:22** et **14:39 → 19:51** (les saisies du CMS et des agents ne sont pas
-journalisées) ; le chantier totalise **362 h 09 sur 57 plages**.
+Plages journalisées **18/11 23:18 → 00:19** et **19/11 18:24 → 23:45** (avec le codeur dans une autre session ; les
+saisies du CMS ne sont pas journalisées) ; le chantier totalise **371 h 58 sur 58 plages**.
 
-- **Les villages** : 2 287 candidats triés par 8 agents (1 873 retenus), saisis en quatre vagues ; **1 871 villages en
-  1100**, contrôlés par script et par le codeur ; la carte : 65 alertes sur 13 562 villes. Ohligs (fiche 11749) est
-  fausse : à supprimer par moi dès que le CMS me le permet (sa règle du soir : je défais mes erreurs, jamais lui).
-- **Sa règle : le disque est prêté** (`.claude/roles/historian.md`). Mes 22 dossiers rangés dans
-  `files/resources/historien/` ; 6,94 Go de copies supprimés sur son accord ; gardés : `extraits/` (les phrases datées de
-  3 330 lieux, toutes années) et `registre/`.
-- **La méthode écrite** : la skill `/bulk-entry` (dix étapes, rangement, pièges, dix scripts versionnés et essayés), la
-  règle dans mon rôle et dans `/find-sources` ; le récapitulatif sur son Bureau (`methode-recherche-historien.md`).
-- **Mes fautes** : le nettoyage lancé avant la fin du dernier lot (35 pages à retélécharger) ; le registre écrasé puis
-  reconstruit à partir des extraits ; un tri qui a retenu un hameau voisin (Ohligs) ; des citations coupées à
-  « n. Chr. » (19 corrigées) ; des messages en anglais.
+- **La Rus'** (sa commande : _« travaille et saisis les résultats de ton travail »_) : 33 villes de 1100, triées par moi
+  sur les pages russes, sans agents ; Selezivka (région) corrigée et Bryn complétée après le contrôle du codeur ; note
+  `files/plans/sources/1100/rus.md` ; le dossier de travail supprimé à sa demande (_« tout ce dont tu t'es servi »_).
+- **Le Levant, Chypre, la Mésopotamie** (_« il me faudrait des villes dans cette zone-là »_, puis _« une partie de la
+  Mésopotamie »_) : 51 lieux d'Alep à Gaza et de Mossoul à Kerbala ; six détenteurs pris de la phrase retenue, en alerte
+  exprès ; Beït Shéan complétée après le contrôle du codeur ; note `levant.md` (la côte libanaise dessinée seldjoukide).
+- **Sa remarque** (mémoire `enough-cities-not-all`) : _« t'as mis tout le Domesday… la moitié aurait suffi »_ — une
+  région se remplit jusqu'à la densité de ses voisines.
+- **La Finlande** : une proposition puis une maquette en image ; son découpage validé ; dessinée dans l'arbre principal,
+  Novgorod reculé à la Neva et au Ladoga (sa réponse), trois tribus, les Sames et les Kvènes en « Aucune » (CARTO-484 du
+  codeur) ; relue par le codeur, commitée par lui (`1d8be087`) : _« ça me convient tel que c'est »_. Suite : CORE-486.
+- **Mes fautes** : un `cd` dans une commande ; un seuil de 140 lignes pour la mémoire écrit sans source ; trois régions
+  vides non annoncées au Levant ; deux téléchargements lancés ensemble, freinés par Wikipédia.

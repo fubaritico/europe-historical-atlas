@@ -2,6 +2,23 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-18 — l'historien : 1 871 villages d'Allemagne de l'Ouest avec 8 agents, le rangement du disque, la méthode écrite
+
+Plages journalisées **18/11 12:09 → 12:22** et **14:39 → 19:51** (les saisies du CMS et des agents ne sont pas
+journalisées) ; le chantier totalise **362 h 09 sur 57 plages**.
+
+- **Les villages** : 2 287 candidats triés par 8 agents (1 873 retenus), saisis en quatre vagues ; **1 871 villages en
+  1100**, contrôlés par script et par le codeur ; la carte : 65 alertes sur 13 562 villes. Ohligs (fiche 11749) est
+  fausse : à supprimer par moi dès que le CMS me le permet (sa règle du soir : je défais mes erreurs, jamais lui).
+- **Sa règle : le disque est prêté** (`.claude/roles/historian.md`). Mes 22 dossiers rangés dans
+  `files/resources/historien/` ; 6,94 Go de copies supprimés sur son accord ; gardés : `extraits/` (les phrases datées de
+  3 330 lieux, toutes années) et `registre/`.
+- **La méthode écrite** : la skill `/bulk-entry` (dix étapes, rangement, pièges, dix scripts versionnés et essayés), la
+  règle dans mon rôle et dans `/find-sources` ; le récapitulatif sur son Bureau (`methode-recherche-historien.md`).
+- **Mes fautes** : le nettoyage lancé avant la fin du dernier lot (35 pages à retélécharger) ; le registre écrasé puis
+  reconstruit à partir des extraits ; un tri qui a retenu un hameau voisin (Ohligs) ; des citations coupées à
+  « n. Chr. » (19 corrigées) ; des messages en anglais.
+
 ### 2026-11-17 (nuit) → 18/11 — le codeur : la boîte commune des icônes, l'export en deux fichiers, la tiare du concile
 
 Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 22:35** (avec l'historien) ; le chantier totalisait **362 h 39 sur 57 plages** à 20 h 21. Tout est commité et poussé, sept commits de `42e4989c` à `77cb1589`, puis les notes.
