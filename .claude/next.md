@@ -8,67 +8,57 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**L'historien, 18/11 19:50** : 1 871 villages d'Allemagne de l'Ouest en 1100 (fiches jusqu'à 13593, contrôlées par toi
-pour 1 838), 13 561 villes en 1100, 65 alertes ; **non exportés** depuis l'export de l'après-midi ; Ohligs (fiche 11749)
-supprimée par lui, par le MCP (CMS-454) ; ses recherches rangées dans `files/resources/historien/`, sa méthode dans la skill `/bulk-entry` —
-son point de reprise, `next-historian.md`.
+**L'historien, 19/11 au soir** : 51 lieux du Levant, de Chypre et de Mésopotamie saisis en 1100 (fiches 13627–13677,
+contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commitée (`1d8be087`) ; ses notes `levant.md` et
+`rus.md` et son point de reprise ne sont pas commités — son point de reprise, `next-historian.md`.
 
-## ▶ ON REPREND ICI — le 18/11, 20 h 20 : les icônes des événements, ticket parent ATLAS-288
+## ▶ ON REPREND ICI — le 19/11, 23 h 40 : l'oriflamme de la conquête, ATLAS-477
 
-**Sa ligne** (17/11) : _« on va rester concentré sur les icônes 3D des événements. On va les terminer et après »_ l'épique
-**ATLAS-471, les landmarks**. Tout est commité et poussé (`77cb1589`) ; **« À valider » est vide**.
+**Sa ligne** (19/11) : _« j'aimerais bien qu'on continue sur les icônes 3D, notamment Conquête »_ ; ATLAS-288 reste le
+ticket parent (six types sur treize ont leur icône). Tout est commité et poussé (`9fd0c44f`) ; **« À valider » est vide**.
 
-**L'organisation qu'il a demandée le 18/11** : **ATLAS-288 est le ticket parent** (En cours), une ligne par type
-d'événement du CMS — cinq cochées (Bataille, Siège, Accession au trône, Intronisation, Mort), huit tickets enfants
-(ATLAS-476 à 483, en bas d'« À faire », étiquette « épique · icônes ») : pour chacun le besoin, pourquoi il n'a pas
-encore son icône, trois pistes à débattre. Ordre proposé : le concile, puis la conquête (les seuls qui ont un événement
-en 1100) ; les six autres quand un premier événement de leur type est saisi.
+**ATLAS-477, la conquête — à commencer** : son idée, **une oriflamme**. Sur le ticket : le texte de Gemini (une oriflamme
+à queue d'aronde sur sa hampe, plate de loin, en 3D de près, qui ondule) et la description de ses quatre images (des
+bannières rouge carmin bordées d'or, pendues à une traverse ou sur hampe). Par `/make-event-icon` : des candidates sur le
+banc, il choisit à l'œil. **À lui dire avant de construire** : une icône qui ondule serait la première icône animée (les
+ombres sont dessinées une fois, ATLAS-469) ; une icône prend la couleur de son type, pas d'un pays. Ses images ne sont
+pas sur le disque : les lui redemander si besoin.
 
-**ATLAS-476, le concile — En cours** : la tiare et la crosse tournée vers l'extérieur (« B2 », son choix sur le banc
-`/icons.html?council`) sont dans la carte et dans la liste du CMS (« Tiare et crosse (concile) »), visibles par `?tiara`
-(Lyon, Pise). **Il lui reste à juger sur la carte** l'image plate de loin (mon premier dessin) et la taille (60), puis à
-choisir cette icône sur le type « Concile » dans le CMS et à exporter. Ensuite : ATLAS-477, la conquête.
+**CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
+peut-être pas par ça »_) : la Carélie entre Novgorod et personne. Le remède proposé : un pays en « Aucune » qui en
+chevauche un coloré pose une rayure vide, puis les Caréliens en « Aucune » et Novgorod étendu sur eux. À lire avant de
+chiffrer : si les rayures de l'atlas savent laisser une bande transparente.
 
-**Ses mots sur les modèles 3D** (18/11) : la cathédrale illustre un archevêché ou un évêché, pas un événement ; les
-petits modèles (église, petite maison, grande maison) iront au statut d'une ville ; ils remplaceront peut-être les points,
-_« ce n'est pas sûr »_ — _« il faut y aller progressivement »_.
+**ATLAS-461, les ornements — En cours, chez Claude Design** : il a déposé le dossier `~/Desktop/claude-design-ornements`
+(la consigne, 63 SVG, quatre planches). J'attends ce que Claude Design rend ; sa phrase : _« peut-être que ce sera la
+seule partie manuelle du projet »_. Les licences des paquets restent à vérifier avant de publier un de ces dessins.
 
-**CMS-454, clos le 18/11 au soir** (`77cb1589`) : l'historien supprime par le MCP ses fiches de ville, lieux, sources,
-titres et maillons — une fiche à la fois, jamais ce qu'une autre fiche cite. Le dev a relancé son CMS et coché les cinq
-cases de la clé ; première suppression faite par l'historien, Ohligs (fiche, lieu, source), contrôlée dans la base.
-**Pas tenu** : rien ne dit quelles fiches la clé a créées (`known-issues/cms.md`).
+**Le Cartographe et ses 13 594 villes** (CARTO-485, clos) : la liste des villes ne met dans la page que ses lignes
+visibles — ne jamais compter les villes par les lignes du DOM. Laissé tel quel : cmd+F ne trouve plus une ville hors
+écran ; le verdict est calculé deux fois par geste quand les villes sont en points (0,05 s chacun). Pour mesurer un
+geste dans un vrai navigateur : `files/spikes/headless-shots/measure-page.mjs` — **pas pendant qu'il teste**.
 
-**ATLAS-461, les ornements — En cours, à son rythme** (_« on verra demain »_) : 32 SVG néoclassiques retenus parmi ses 568,
-dans `files/resources/ui-ornaments/selection-neoclassique/` (fiche `LISEZ-MOI.md`, trois planches). Ce qu'il veut : **de
-tout petits éléments, ou un morceau d'un plus grand**, composés en rythme sur le bord des fenêtres — et d'abord des coins.
-Constat : tout petits, les coins qui se lisent le mieux sont les angles découpés dans les cadres. **Un coin se lit avant
-de se poser** : chaque fichier le dessine dans un angle différent (ma faute du 18/11, posés à l'envers). Reste : son tri,
-le nettoyage des morceaux retenus (recadrage, une couleur), la fiche pour Claude Design ; les licences des paquets à
-vérifier avant de publier (deux seulement en portent une).
+**L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
+du 19/11 (la tiare du concile, `096fd115`) — les 51 lieux du Levant n'y sont pas. Je le commite après son export.
 
-**En Idées, à valider par lui** : ATLAS-473 (les branches « année non dessinée » que plus rien n'atteint), CMS-474 (la
-confession d'une personne et le signe gravé sur sa tombe), ATLAS-475 (un affichage générique des capitales).
+**Ses règles récentes** : une correction prête va dans `main` tout de suite, sans lui parler de branches (19/11, mémoire
+`he-tests-on-main-no-branch-talk`) ; un ménage qui exécute un retrait déjà décidé ne passe pas par lui (18/11) ; ce qui
+resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser pendant qu'une CI déploie** : le push
+suivant l'annule (`known-issues/tooling.md`) — `gh run list -L 1` avant.
 
-**L'export** : `pnpm export:content` écrit `content/atlas.json` (les événements et les villes cochées) et
-`content/cartographer.json` (tout) ; le dernier commité date du 18/11 après-midi (12 762 fiches) — les 1 838 villages de
-l'historien saisis ensuite n'y sont pas. Je le lance sur une copie de sa base (`sqlite3 ".backup"`, `DATABASE_URL`).
+**Sur `main`, pas à moi** : `editor-chrome.css` (dix lignes, les icônes copier/coller du sélecteur, CARTO-465, qu'il n'a
+pas validées), `fetch_rest.py` et les notes de l'historien.
 
-**Sa règle du 18/11** (mémoire `decided-removals-need-no-validation`) : un ménage qui exécute un retrait déjà décidé ne
-passe pas par lui. **Ce qu'il n'a pas encore jugé devant son écran** : la tombe 3D sans halo ; l'angle de la tombe.
-
-**Pour photographier une page sans toucher à son écran** : le spike `files/spikes/headless-shots/` (`shoot-map.mjs`, la
-carte à un lieu et un zoom ; `shoot-page.mjs`, un banc ou une page) — un Chrome sans fenêtre, son profil jeté à chaque
-fois ; lui envoyer l'image par `SendUserFile`. **Sa règle du 18/11** : ce qui resservira va dans un spike, le reste est
-supprimé — _« faut rien laisser derrière vous »_ (mémoire `clean-up-after-every-trial`). **Ne jamais pousser pendant
-qu'une CI déploie** : le push suivant l'annule (`known-issues/tooling.md`).
+**En Idées, à valider par lui** : ATLAS-473, CMS-474, ATLAS-475. **Ce qu'il n'a pas encore jugé devant son écran** : la
+tombe 3D sans halo ; l'angle de la tombe.
 
 ## Ce qui reste d'avant, toujours vrai
 
-- **En haut d'« À faire »** : ATLAS-448, CMS-454, CMS-441 ; **CMS-459** (les citations en code wiki, critique)
+- **En haut d'« À faire »** : ATLAS-448, CMS-441 ; **CMS-459** (les citations en code wiki, critique)
   est toujours en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
 - **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-136, ATLAS-152, ATLAS-408…) — à trier avec lui.
-  CMS-279 : il reste la garde du seed (une heure). ATLAS-461 : j'attends ses premiers fragments SVG.
-- **1100** : la carte de `main` porte les retouches non commitées du dev et de l'historien.
+  CMS-279 : il reste la garde du seed (une heure).
+- **1100** : la carte de `main` est commitée telle qu'elle est le 19/11 au soir (`1d8be087`), la Finlande comprise.
 - **Ses décisions en attente**, une à la fois : la case « Souverain » qui s'enregistre au clic (pas à « Enregistrer ») ; une
   personne son propre parent (revue QUAL-002) ; une chaîne divergente vérifiée sur sa première lecture souveraine
   (QUAL-003) ; six vassaux à deux suzerains en 1100 (Champagne, Anjou, Bellême, Carcassonne, Naples, Lérida).

@@ -2,6 +2,38 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-17 (nuit) → 18/11 — le codeur : la boîte commune des icônes, l'export en deux fichiers, la tiare du concile
+
+Plages **17/11 21:04 → 21:28**, **18/11 01:40 → 02:10** et **18/11 14:39 → 22:35** (avec l'historien) ; le chantier totalisait **362 h 39 sur 57 plages** à 20 h 21. Tout est commité et poussé, sept commits de `42e4989c` à `77cb1589`, puis les notes.
+
+- **Fermés, validés par lui** : ATLAS-469 (chaque modèle 3D dans une boîte commune, sa taille cuite dans ses sommets, une
+  seule échelle ; les ombres des icônes immobiles dessinées une fois), ATLAS-341 (les villes suivent l'année montrée —
+  relevé par lui en testant : _« on retrouve les villes dans les années 1200 et 1300 »_), ATLAS-373 (plus rien ne lit les
+  frontières GPL ; une année sans carte dit « Cette année n'a pas encore de carte »), CARTO-375 (le bouton « Registre »),
+  CMS-223 (l'export écrit deux fichiers, `atlas.json` 0,4 Mo et `cartographer.json` 14,5 Mo ; l'atlas en lisait 21).
+- **Sa règle du jour** (mémoire `decided-removals-need-no-validation`) : _« je vois pas pourquoi ça doit passer par moi »_
+  — un ménage qui exécute un retrait déjà décidé se commite et se clôt sans attendre son test.
+- **Son point sur les icônes** : elles ne sont pas toutes faites ; la cathédrale illustre un évêché, pas un événement ;
+  les petits modèles 3D iront au statut d'une ville, _« il faut y aller progressivement »_. Et sa demande d'organisation
+  (_« c'est pas juste une question comme ça »_) : **ATLAS-288 devient le ticket parent**, une ligne par type d'événement,
+  huit tickets enfants créés (ATLAS-476 à 483 : le besoin, pourquoi pas encore d'icône, trois pistes).
+- **Le concile** (ATLAS-476), d'après ses mots (_« le chapeau que porte le pape »_) : quatre candidates sur le banc, son
+  choix « B2 », la tiare et la crosse tournée vers l'extérieur (_« simple et clair, le rendu est au rendez-vous »_) ;
+  passée dans la carte et dans la liste du CMS (`f4077218`). Il n'a pas encore jugé son image plate ni sa taille.
+- **CMS-454, à sa demande en fin de session** (_« le droit de suppression à l'historien »_) : la suppression par le MCP
+  ouverte sur cinq collections, tenue par trois refus (ce qui est cité, la suppression par filtre, la case de la clé) ;
+  une migration, prouvée sur une copie (`77cb1589`). À valider par lui.
+- **Les ornements** (ATLAS-461), le soir : ses 568 SVG regardés sur des planches, 32 retenus qui font néoclassique, copiés
+  et nommés par rôle (`files/resources/ui-ornaments/selection-neoclassique/`). Son idée : de tout petits éléments, _« ou
+  peut-être même un morceau »_, composés en rythme sur le bord des fenêtres ; ce qu'il cherche d'abord, des coins. Deux
+  planches : les coins à 16–48 px, trois bords de fenêtre composés. _« Ça m'a donné des idées […] on verra demain. »_
+- **Contrôlés pour l'historien**, en lecture seule : 91 forteresses et abbayes, puis 1 838 villages — conformes.
+- **Le serveur du CMS** coupé trois fois à sa demande le 17 au soir (la session de l'historien le relançait).
+- **Mes fautes** : les coins d'ornement posés à l'envers sur mes deux premières planches, sans m'en rendre compte (_« tu
+  les poses inversés »_) ; deux `cd` dans mes commandes ; un ticket renommé sans son numéro (remis aussitôt) ; je lui ai présenté
+  un ménage de code mort comme une décision à prendre (_« je sais pas ce que c'est 373 »_) ; les territoires annoncés dans
+  le fichier de l'atlas, puis laissés dehors.
+
 ### 2026-11-17 (nuit) → 18/11 — l'historien : la Finlande avant les Suédois, 91 forteresses et abbayes en Allemagne de l'Ouest
 
 Plages journalisées **17/11 21:09 → 21:28** et **18/11 01:40 → 02:10** (les saisies du CMS entre les deux ne sont pas
