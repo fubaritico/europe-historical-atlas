@@ -235,6 +235,7 @@ $S uncheck 9 "étape 1"                      # unticks it — a tick put by mist
 $S unitem 9 "CMS-130"                       # removes the one item containing the text — a ticket archived or out of the epic
 $S show 7                                  # title, column, description, comments
 $S attachments 7 [folder]                  # a card's attachments; with a folder, saves each one there (his screenshots)
+$S attach 7 /path/to/image.png [name]       # uploads a local file to a card (his reference images)
 $S relabel <old> <new>                     # renames a label; every card keeps it under its new name
 $S rename-column <old> <new>               # renames a column; its cards stay in it
 $S setup                                   # creates the missing columns and the two template cards, restores order

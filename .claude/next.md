@@ -21,8 +21,8 @@ ticket parent (six types sur treize ont leur icône). Tout est commité et pouss
 à queue d'aronde sur sa hampe, plate de loin, en 3D de près, qui ondule) et la description de ses quatre images (des
 bannières rouge carmin bordées d'or, pendues à une traverse ou sur hampe). Par `/make-event-icon` : des candidates sur le
 banc, il choisit à l'œil. **À lui dire avant de construire** : une icône qui ondule serait la première icône animée (les
-ombres sont dessinées une fois, ATLAS-469) ; une icône prend la couleur de son type, pas d'un pays. Ses images ne sont
-pas sur le disque : les lui redemander si besoin.
+ombres sont dessinées une fois, ATLAS-469) ; une icône prend la couleur de son type, pas d'un pays. Ses quatre images
+sont jointes au ticket et dans `files/resources/icons-references/conquete-oriflamme/` ; il en a d'autres, à demander.
 
 **CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
 peut-être pas par ça »_) : la Carélie entre Novgorod et personne. Le remède proposé : un pays en « Aucune » qui en

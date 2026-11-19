@@ -424,6 +424,24 @@ const verbs = {
     console.warn(`#${c.idShort} item removed: ${matches[0].name}`)
   },
   /**
+   * attach <number> <path> [name] — uploads a local file to a card (the dev's reference images, 2026-11-19). The name
+   * shown on the card is the file's own unless one is given.
+   */
+  async attach(number, path, name) {
+    if (!path) fail('attach <number> <path> [name]')
+    const c = await card(number)
+    const { readFile } = await import('node:fs/promises')
+    const { basename } = await import('node:path')
+    const shown = name ?? basename(path)
+    const form = new FormData()
+    form.append('name', shown)
+    form.append('file', new Blob([await readFile(path)]), shown)
+    const query = new URLSearchParams({ key: TRELLO_API_KEY, token: TRELLO_TOKEN })
+    const response = await fetch(`https://api.trello.com/1/cards/${c.id}/attachments?${query}`, { method: 'POST', body: form })
+    if (!response.ok) fail(`POST /cards/${c.id}/attachments → ${response.status} ${await response.text()}`)
+    console.warn(`#${c.idShort} attached: ${shown}`)
+  },
+  /**
    * attachments <number> [directory] — lists a card's attachments (the dev's screenshots, 2026-10-29); given a directory,
    * saves each file in it under its own name. Trello serves an upload only with the key and token in an OAuth header.
    */
