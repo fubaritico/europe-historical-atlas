@@ -15,7 +15,7 @@ contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commi
 Levant ; (2) ranger avec l'historien l'index de la mémoire (166 lignes, limite 200) ; (3) la côte libanaise de sa 1100,
 dessinée seldjoukide alors qu'elle était fatimide (`files/plans/sources/1100/levant.md`) ; (4) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 0 h 10 : l'oriflamme de la conquête dans la carte, ATLAS-477
+## ▶ ON REPREND ICI — le 20/11, 0 h 07 : l'oriflamme de la conquête dans la carte, ATLAS-477
 
 **Sa ligne** (19/11) : _« j'aimerais bien qu'on continue sur les icônes 3D, notamment Conquête »_ ; ATLAS-288 reste le
 ticket parent (six types sur treize ont leur icône). Tout est commité et poussé ; **« À valider » est vide**.
@@ -58,16 +58,11 @@ geste dans un vrai navigateur : `files/spikes/headless-shots/measure-page.mjs` �
 **L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
 du 19/11 (la tiare du concile, `096fd115`) — les 51 lieux du Levant n'y sont pas. Je le commite après son export.
 
-**Ses règles récentes** : une correction prête va dans `main` tout de suite, sans lui parler de branches (19/11, mémoire
-`he-tests-on-main-no-branch-talk`) ; un ménage qui exécute un retrait déjà décidé ne passe pas par lui (18/11) ; ce qui
+**Ses règles récentes** : une correction prête va dans `main` tout de suite, sans lui parler de branches (19/11) ; ce qui
 resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser pendant qu'une CI déploie** : le push
 suivant l'annule (`known-issues/tooling.md`) — `gh run list -L 1` avant.
 
-**Sur `main`, pas à moi** : `editor-chrome.css` (dix lignes, les icônes copier/coller du sélecteur, CARTO-465, qu'il n'a
-pas validées) ; les notes de l'historien, elles, sont commitées depuis le 19/11 au soir.
-
-**En Idées, à valider par lui** : ATLAS-473, CMS-474, ATLAS-475. **Ce qu'il n'a pas encore jugé devant son écran** : la
-tombe 3D sans halo ; l'angle de la tombe.
+**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé). **En Idées** : ATLAS-473, CMS-474, ATLAS-475.
 
 ## Ce qui reste d'avant, toujours vrai
 
