@@ -1,30 +1,30 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { pickedColour } from './pickedColour'
+import { colourOrAutomatic } from './colourOrAutomatic'
 
 const RED = { h: 0, s: 80, v: 70, a: 1 }
 
-describe('pickedColour', () => {
+describe('colourOrAutomatic', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
   describe('happy path', () => {
     it('hands back a red picked as it is', () => {
-      expect(pickedColour(RED)).toBe(RED)
+      expect(colourOrAutomatic(RED)).toBe(RED)
     })
   })
 
   describe('variants', () => {
     it('hands back « automatic » as null', () => {
-      expect(pickedColour(null)).toBeNull()
+      expect(colourOrAutomatic(null)).toBeNull()
     })
   })
 
   describe('managed errors', () => {
     it('refuses « no colour », which no picker here offers, and says it in the console', () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-      expect(pickedColour('none')).toBeUndefined()
+      expect(colourOrAutomatic('none')).toBeUndefined()
       expect(error).toHaveBeenCalledOnce()
     })
   })

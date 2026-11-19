@@ -56,10 +56,13 @@ Scenario: a polity with no colour
   Then the palette gives it a colour no neighbour uses
 ```
 
-> **Built in part 2026-11-14 (CARTO-445), not walked yet**: the file, the palette and the painters know « no colour »
-> (`none`); a polity opened with it keeps it through the form and the rail's swatch unless a colour is picked. **Not
-> built**: the « No colour » choice itself and its swatch, which wait on the design system
-> (`files/plans/cartographer/ds-request-no-colour.md`) — until then the first `When` and the last two have no gesture.
+> **Built 2026-11-14 (CARTO-445) and 2026-11-19 (CARTO-484), not walked yet**: the file, the palette and the painters
+> know « no colour » (`none`); **the form's colour field offers the three states** — « Color », « Automatic », « None »
+> (the design system's `allowNone`, 0.10.0) — so every `When` above has its gesture. A polity with no colour keeps the
+> tool's blue outline in the Cartographer, as every outline does; the atlas draws nothing of it but its name and, for a
+> country, its borders. **A tribe with no colour is the « name-only people »** (glossary): no fill, no fade, no edge.
+> **Not built**: the rail's swatch still offers a colour or « Automatic » only — on a polity with no colour,
+> « Automatic » there changes nothing (`recolouring`).
 
 ```gherkin
 # Superseded 2026-11-06 (CARTO-186 archived): identities come from the Cliopatria import, never built.

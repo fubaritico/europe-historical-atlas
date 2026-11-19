@@ -18,7 +18,7 @@ import type { PolityFormField } from '../../PolityForm'
 import type { PolitiesPanelMessageKey } from '../i18n'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
-import type { HsvaColor } from '@fubaritico/behaviors'
+import type { ColorValue } from '@fubaritico/behaviors'
 
 /**
  * Validate the form against the document: create, then aim — or change, keeping the target.
@@ -128,7 +128,7 @@ export function usePolityDraft(
     })
   }
 
-  const onColour = (colour: HsvaColor | null) => {
+  const onColour = (colour: ColorValue) => {
     setDraft((current) => ({ ...current, colour }))
   }
 

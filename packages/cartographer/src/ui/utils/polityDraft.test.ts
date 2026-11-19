@@ -253,10 +253,25 @@ describe('draftOf', () => {
       ])
     })
 
-    // CARTO-445: the picker has no « no colour » yet — the form keeps the state the polity came with.
-    it('reads back an uncoloured polity left on « automatic », uncoloured', () => {
+    // CARTO-484: « no colour » is a state of the form's field, as it is of the file (CARTO-445).
+    it('opens « no colour » for a polity with no colour, and reads it back untouched', () => {
       const original = { ...polity('fr'), colour: 'none' }
-      expect(readDraft(draftOf(original), NONE)).toEqual({ ok: true, polity: original })
+      expect([draftOf(original).colour, readDraft(draftOf(original), NONE)]).toEqual([
+        'none',
+        { ok: true, polity: original },
+      ])
+    })
+
+    it('writes « no colour » chosen over a polity the palette coloured', () => {
+      const chosen = { ...draftOf({ ...polity('fr'), colour: null }), colour: 'none' as const }
+      const reading = readDraft(chosen, NONE)
+      expect(reading.ok && reading.polity.colour).toBe('none')
+    })
+
+    it('writes "automatic" chosen over a polity with no colour: the palette decides again', () => {
+      const chosen = { ...draftOf({ ...polity('fr'), colour: 'none' }), colour: null }
+      const reading = readDraft(chosen, NONE)
+      expect(reading.ok && reading.polity.colour).toBeNull()
     })
 
     it('writes the colour picked over an uncoloured polity', () => {

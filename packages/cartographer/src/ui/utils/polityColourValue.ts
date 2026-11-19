@@ -1,20 +1,22 @@
 import { hexToRgba, hsvaToHex, rgbaToHsva } from '@fubaritico/behaviors'
 
-import { isUncoloured } from '@europe-historical-atlas/core/data/yearFormat'
+import { NO_COLOUR, isUncoloured } from '@europe-historical-atlas/core/data/yearFormat'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
-import type { HsvaColor } from '@fubaritico/behaviors'
+import type { ColorValue, HsvaColor } from '@fubaritico/behaviors'
 
-/**
- * A polity's colour between the file and the picker — `#rrggbb` or `null` on one side, HSVA or `null` on
- * the other, `null` being "automatic", the palette's choice. Shared by the polity form and the rail's
- * swatch (2026-10-13), so the two cannot read or write a colour differently.
+/*
+ * A polity's colour between the file and the pickers — `#rrggbb`, `null` ("automatic", the palette's choice) or `none`
+ * (« no colour », CARTO-445) on one side; HSVA, `null` or « no colour » on the other. Shared by the polity form and
+ * the rail's swatch (2026-10-13), so the two cannot read or write a colour differently: the form holds the three
+ * states (`formColour`, CARTO-484), the swatch a colour or "automatic" (`pickedColour`).
  */
 
 /**
- * A polity's colour as the picker holds it, or `null` for "automatic" — and for a polity with no colour at all
- * (CARTO-445), which the picker cannot show yet: the form and the swatch keep that state themselves.
+ * A polity's colour as the rail's swatch holds it, or `null` for "automatic" — and for a polity with no colour at all
+ * (CARTO-445), which the swatch's picker is not given: it keeps that state itself (`recolouring`). The form shows the
+ * three states ({@link formColour}).
  *
  * **A colour that does not read as hex is said, and opens as automatic.** It cannot come from the
  * readers (the schema takes `#rrggbb` only) nor from the picker; reaching it is a defect. Validating the
@@ -35,17 +37,28 @@ export function pickedColour(polity: YearPolity): HsvaColor | null {
 }
 
 /**
+ * A polity's colour as the form's field holds it (CARTO-484): its colour, `null` for "automatic", or « no colour » —
+ * the people known by its name alone, the country whose history the atlas does not tell.
+ * @param polity - the polity
+ * @returns the picker's value
+ */
+export function formColour(polity: YearPolity): ColorValue {
+  return isUncoloured(polity.colour) ? NO_COLOUR : pickedColour(polity)
+}
+
+/**
  * The file's `#rrggbb` for a picked colour.
  *
  * **The alpha is set to opaque, and that is the format speaking, not a fallback**: a polity's colour has
  * no alpha channel — the atlas lays it over the relief itself — and the file's schema accepts six digits
  * only. The form never offers alpha, so this changes nothing a picker produced; it stops an eight-digit
  * hex, which the reader would refuse at the next open, from ever being written.
- * @param colour - the picked colour, or `null` for "automatic"
- * @returns the lowercase six-digit hex, or `null` — the file's own "the palette decides"
+ * @param colour - the picked colour, `null` for "automatic", or « no colour »
+ * @returns the lowercase six-digit hex, `null` — the file's own "the palette decides" — or the file's « no colour »
  */
-export function toFileColour(colour: HsvaColor | null): string | null {
-  return colour === null ? null : hsvaToHex({ ...colour, a: 1 })
+export function toFileColour(colour: ColorValue): string | null {
+  if (colour === null || colour === NO_COLOUR) return colour
+  return hsvaToHex({ ...colour, a: 1 })
 }
 
 /** A recolouring ready for the document: the polity as it will be, and how the history names the step. */
@@ -62,9 +75,11 @@ export interface Recolouring {
  * **A gesture that ends where it began is no step**: a click in the picker that lands on the same colour,
  * or "automatic" pressed on a polity that already has none, would otherwise put a row in `{History}` that
  * ‹ctrl+Z› takes back to no visible effect.
+ *
+ * **"Automatic" on a polity with no colour changes nothing** (CARTO-445): the swatch's picker is not given « no
+ * colour », so it cannot tell the two apart — the uncoloured polity keeps its state until a colour is picked, or the
+ * form's field changes it (CARTO-484).
  * @param polity - the polity aimed at
- * **"Automatic" on a polity with no colour changes nothing** (CARTO-445): the picker cannot tell the two apart
- * yet, so the uncoloured polity keeps its state until a colour is picked.
  * @param picked - where the gesture ended, or `null` for "automatic"
  * @param label - how the history names the step, in the page's language
  * @returns the recolouring, or `null` when the colour does not change

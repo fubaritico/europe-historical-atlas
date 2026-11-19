@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { pickedColour, recolouring, toFileColour } from './polityColourValue'
+import { formColour, pickedColour, recolouring, toFileColour } from './polityColourValue'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
@@ -68,6 +68,27 @@ describe('polity colour values', () => {
     it('takes the colour picked over it', () => {
       const picked = pickedColour(FRANCE)
       expect(recolouring(CHOLA, picked, 'colour chola')?.polity.colour).toBe('#c0392b')
+    })
+  })
+
+  // CARTO-484: the form's field holds the three states — a colour, automatic, no colour.
+  describe('the form’s colour', () => {
+    const CHOLA: YearPolity = { ...FRANCE, id: 'chola', colour: 'none' }
+
+    it('opens « no colour » for a polity with no colour', () => {
+      expect(formColour(CHOLA)).toBe('none')
+    })
+
+    it('opens "automatic" for a polity the palette colours', () => {
+      expect(formColour({ ...FRANCE, colour: null })).toBeNull()
+    })
+
+    it('opens the colour of a polity that has its own, as the swatch does', () => {
+      expect(formColour(FRANCE)).toEqual(pickedColour(FRANCE))
+    })
+
+    it('writes « no colour » to the file as `none`', () => {
+      expect(toFileColour('none')).toBe('none')
     })
   })
 

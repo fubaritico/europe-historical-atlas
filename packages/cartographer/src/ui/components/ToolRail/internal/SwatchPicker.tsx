@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { useColourPickerWords } from '../../../hooks/useColourPickerWords'
 import { useTranslation } from '../../../hooks/useTranslation'
-import { pickedColour } from '../../../utils/pickedColour'
+import { colourOrAutomatic } from '../../../utils/colourOrAutomatic'
 import { TOOL_RAIL_MESSAGES } from '../i18n'
 
 import type { ColorValue, HsvaColor } from '@fubaritico/behaviors'
@@ -56,12 +56,12 @@ export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProp
     if (open) setDraft(polity.picked)
   }
   const handleChange = (value: ColorValue) => {
-    const picked = pickedColour(value)
+    const picked = colourOrAutomatic(value)
     if (picked !== undefined) setDraft(picked)
   }
   // A gesture's end — a drag let go, a hex typed, a colour pasted (design system 0.10.0, CARTO-465) — reaches the document
   const handleChangeComplete = (value: ColorValue) => {
-    const picked = pickedColour(value)
+    const picked = colourOrAutomatic(value)
     if (picked !== undefined) onColour(picked)
   }
 

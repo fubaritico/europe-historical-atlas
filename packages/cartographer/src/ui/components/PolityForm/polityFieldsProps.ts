@@ -1,13 +1,10 @@
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
 import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../utils/polityDraft'
 import type { WikidataView } from '../../utils/wikidataView'
-import type { HsvaColor } from '@fubaritico/behaviors'
+import type { ColorValue } from '@fubaritico/behaviors'
 
 /** The fields a form event can name: every text field and every list of the draft — the colour and the box their own. */
-export type PolityFormField = Exclude<
-  keyof PolityDraft,
-  'idEdited' | 'colour' | 'forceShortName' | 'uncoloured'
->
+export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour' | 'forceShortName'>
 
 /** What the form's fields show and what they report — the form's own props extend these. */
 export interface PolityFieldsProps {
@@ -32,9 +29,9 @@ export interface PolityFieldsProps {
   /**
    * The colour changed — continuously while a thumb is dragged, which is cheap: the draft is the
    * dialogue's own state, and nothing is written to the document before OK.
-   * @param colour - the picked colour, or `null` for "automatic"
+   * @param colour - the picked colour, `null` for "automatic", or « no colour » (CARTO-484)
    */
-  onColour: (colour: HsvaColor | null) => void
+  onColour: (colour: ColorValue) => void
   /**
    * The box « force the short name » ticked or unticked.
    * @param force - whether the short name is written everywhere
