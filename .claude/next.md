@@ -15,7 +15,7 @@ contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commi
 Levant ; (2) ranger avec l'historien l'index de la mémoire (166 lignes, limite 200) ; (3) la côte libanaise de sa 1100,
 dessinée seldjoukide alors qu'elle était fatimide (`files/plans/sources/1100/levant.md`) ; (4) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 0 h 05 : choisir l'oriflamme de la conquête, ATLAS-477
+## ▶ ON REPREND ICI — le 20/11, 0 h 10 : l'oriflamme de la conquête dans la carte, ATLAS-477
 
 **Sa ligne** (19/11) : _« j'aimerais bien qu'on continue sur les icônes 3D, notamment Conquête »_ ; ATLAS-288 reste le
 ticket parent (six types sur treize ont leur icône). Tout est commité et poussé ; **« À valider » est vide**.
@@ -31,11 +31,15 @@ maintenant »_ ; _« on pourra reprendre par ça demain »_) :
 - **l'image plate**, `/svg-icons.html` (`bench/conquestFlatCandidates.ts`) : huit silhouettes, A à H, dans le cadre
   44 × 44 — les lettres ne se correspondent pas d'un banc à l'autre.
 
-**Il n'a encore nommé aucune lettre.** Dès qu'il choisit (`/make-event-icon`, pas 5) : le modèle dans `meshes/`, le
-dessin dans `flat/`, une clé de palette pour le rouge (celui du banc, `#f0283c`, n'est qu'un essai), le type dans le
-CMS, les tests. **À faire avec le passage dans la carte, pas avant** : l'ombre d'une icône qui bouge se redessine
-(ATLAS-469), la carte se redessine en continu (ATLAS-304) — elle ne flotte que de près, et je mesure le coût avant de
-lui montrer. Ses quatre images de référence : jointes au ticket, et `files/resources/icons-references/conquete-oriflamme/`.
+**Son choix (20/11)** : _« le A avec, pour les icônes SVG, le H »_ — le modèle 3D **A**, l'image plate **H** (l'oriflamme
+qui flotte). **Sa remarque sur les images plates** : _« tes icônes, elles sont coupées en haut et en bas »_ — mes
+dessins vont au bord du cadre 44 × 44 et le liseré (2 unités autour) en sort ; H se redessine **dans** le cadre, liseré
+compris, _« peut-être qu'elle intègre le petit pied au pied du mât »_ (les deux marches du modèle 3D).
+
+**À faire, `/make-event-icon` pas 5** : le modèle A dans `meshes/`, H redessinée dans `flat/`, une clé de palette pour
+le rouge (celui du banc, `#f0283c`, n'est qu'un essai), le type dans le CMS, les tests, les bancs vidés. **Avec le
+passage dans la carte** : l'ombre d'une icône qui bouge se redessine (ATLAS-469), la carte se redessine en continu
+(ATLAS-304) — elle ne flotte que de près, coût mesuré avant de lui montrer. Ses quatre images : jointes au ticket.
 
 **CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
 peut-être pas par ça »_) : la Carélie entre Novgorod et personne. Le remède proposé : un pays en « Aucune » qui en
