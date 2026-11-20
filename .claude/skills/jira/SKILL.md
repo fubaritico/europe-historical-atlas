@@ -136,6 +136,7 @@ API**; their MCP inputs below are read from the tools' own descriptions — chec
 | **change** a title, a description, labels, components, the parent, the assignee | `editJiraIssue` | every field is **set, not appended**: send the whole list of labels |
 | **assign** | `editJiraIssue` | `fields: { "assignee": { "accountId": "…" } }` |
 | **place** a ticket above another | `editJiraIssue` | `rankBeforeIssue: "EHA-12"` — never in À faire unless he asked |
+| **close** (the old `done`) | the closing comment, `transitionJiraIssue` `41`, then `editJiraIssue` | **« Fait » reads newest on top** (the dev, 2026-11-20): place the ticket before the first of `project = EHA AND status = Fait ORDER BY Rank ASC` — a column follows the rank, never a date |
 | **block** | `editJiraIssue` + `createJiraIssueLink` | flag: `customfield_10021: [{ "value": "Impediment" }]` (unflag: `null`); link type `Blocks`, the blocker inward |
 | **an epic's progress** | `searchJiraIssuesUsingJql` | `parent = EHA-363 ORDER BY status` |
 
