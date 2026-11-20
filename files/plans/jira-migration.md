@@ -7,7 +7,7 @@
 
 ## The plan
 
-### Done — the tickets are in Jira (2026-11-20, 18 h)
+### Done — the tickets are in Jira (2026-11-20, 17 h)
 
 **Site** `europehistoricalatlas.atlassian.net` (a site's name takes no hyphen), **project `EHA`**, company-managed
 Kanban, board 3. **492 tickets, `EHA-1` to `EHA-492`, no hole**: each key carries the number of its `[CARTO-67]`;
