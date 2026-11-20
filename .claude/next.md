@@ -31,8 +31,8 @@ tient un ticket (mes commentaires restent signés de son nom : ils commencent pa
 mettre le site sur l'offre gratuite avant la fin de l'essai Premium qu'Atlassian a mis d'office (sans carte, rien
 n'est prélevé ; trois personnes sont gratuites sur l'offre gratuite).
 
-**Ce qui me reste** : les arbres `coder` et `historian` à resynchroniser avec `main`, pour qu'ils aient la skill
-`/jira` (il a supprimé lui-même le projet « Brouillon » et le projet d'exemple : `EHA` est le seul projet du site). « Fait » montre tout
+**De mon côté, plus rien** : les arbres `coder` et `historian` sont à jour de `main` et ont la skill `/jira` (20/11) ;
+il a supprimé lui-même le projet « Brouillon » et le projet d'exemple : `EHA` est le seul projet du site. « Fait » montre tout
 pendant deux semaines, puis seulement les deux dernières semaines. Les onze tickets « En cours » ont leur
 responsable ; les marques `[EPIC]` `[IDEES]` `[BACKLOG]` sont retirées des titres.
 
