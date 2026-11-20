@@ -34,6 +34,11 @@ export interface EventIconPalette {
   wood: string
   /** A trebuchet's stone: a small grey ball (the dev, 2026-10-27). */
   rock: string
+  /**
+   * An oriflamme's cloth: a carmine brighter than a crown's velvet, which the icons' lights leave nearly black on a
+   * flat cloth (ATLAS-477) — the bench's own red, to judge on the map.
+   */
+  cloth: string
 }
 
 /** The default colours — metals and stone that read on the parchment. */
@@ -53,4 +58,5 @@ export const EVENT_ICON_PALETTE: EventIconPalette = {
   slate: '#66748a',
   wood: '#8a6440',
   rock: '#8d8c87',
+  cloth: '#f0283c',
 }

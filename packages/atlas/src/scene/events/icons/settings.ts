@@ -26,6 +26,7 @@ export const ICON_LIFT: Record<EventIconKind, number> = {
   cathedral: 0,
   tomb: 0,
   tiara: 0,
+  oriflamme: 0,
 }
 
 /**
@@ -68,6 +69,9 @@ export const ICON_SIZE: Record<EventIconKind, number> = {
   tomb: 45,
   // The council's tiara and its crozier: taller than the crown, a first size to judge on the map (2026-11-18).
   tiara: 60,
+  // The conquest's oriflamme, a tall thin thing: its staff fills the box, its cloth 60 % of it across. A first size,
+  // to judge on the map (2026-11-20).
+  oriflamme: 100,
 }
 
 /**
@@ -96,6 +100,8 @@ export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
   tomb: false,
   // Stood on the ground, its face to the reader, as the crown and the grave.
   tiara: false,
+  // Planted in the ground, its cloth flying east: turned to the camera, the cloth would swing round its staff.
+  oriflamme: false,
 }
 
 /**
@@ -110,6 +116,8 @@ export const ICON_SWAYS: Record<EventIconKind, boolean> = {
   cathedral: false,
   tomb: false,
   tiara: false,
+  // Its cloth floats; the staff itself stands still.
+  oriflamme: false,
 }
 
 /**
@@ -130,6 +138,7 @@ export const ICON_YAW: Record<EventIconKind, number> = {
   // 2026-11-17: « c'est 3/4 droit, peut-être 3/4 gauche »): a trial on sight.
   tomb: -Math.PI / 8,
   tiara: 0,
+  oriflamme: 0,
 }
 
 /**
@@ -145,6 +154,9 @@ export const ICON_SOIL: Record<EventIconKind, number> = {
   // The same ground as the cathedral's (the dev, 2026-11-17: « avec le même effet au sol que pour la cathédrale »).
   tomb: 1,
   tiara: 0,
+  // Planted in the ground like them (the dev, 2026-11-20: "the ground effect we added for the cathedrals and the
+  // gravestones").
+  oriflamme: 1,
 }
 
 /**
@@ -161,6 +173,7 @@ export const ICON_BUILDING: Record<EventIconKind, boolean> = {
   // A grave is no building: the map's own lights are enough for it.
   tomb: false,
   tiara: false,
+  oriflamme: false,
 }
 
 /**
@@ -176,6 +189,7 @@ export const ICON_HALO: Record<EventIconKind, boolean> = {
   cathedral: false,
   tomb: false,
   tiara: true,
+  oriflamme: true,
 }
 
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */

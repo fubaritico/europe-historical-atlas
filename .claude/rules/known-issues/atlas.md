@@ -432,3 +432,27 @@ target.z)` would be coherent with the navigation that already exists.
   `iconFootprint`): the icon's room is its box's side — 108 % and 116 % of an icon's height, where it was told from the
   model's height before (100 and 105). A pixel or two close up; ATLAS-470 (the room an icon takes) is where it is
   settled. **Severity: cosmétique.**
+- **The oriflamme is 49 pieces where a trebuchet is 7** (2026-11-20, ATLAS-477, review ARCH-001; counted on the model:
+  49 pieces, 48 of them moving, 1,252 triangles against 332): its cloth is 24 strips, each a motion of its own, and a
+  piece is one colour under one motion (`meshes/iconModel.gatherPieces`) — so 49 instanced draws for the kind, whatever
+  the number of conquests, 48 placements a frame for each oriflamme, and its shadow redrawn up to fifteen times a second
+  with four times a trebuchet's triangles (the entry on the icons' shadows, above). Chosen by the dev on sight (« more
+  segments », 24); not measured in a browser. **Remedy if a map of many conquests stutters**: draw the oriflamme's shadow
+  once, at rest; then one piece per colour with the strip's index as an instance attribute. **Severity: à savoir.**
+- **A shadow's frame does not count where a moving part stands** (2026-11-20, review ARCH-002,
+  `shadows/iconShadows.modelExtent`): a moving piece's geometry is kept about its own origin, so the oriflamme's cloth —
+  0.93 build units from its staff — is absent from the radius the shadow's tile is framed by; it fits today under the
+  frame's floor of 0.7 icon height (about 0.58), by the margin's size and not by a rule. The trebuchet has the same
+  blind spot. **Remedy if a longer cloth or a smaller margin cuts a shadow**: the extent read from the pieces as their
+  motion places them, widened by how far they move. **Severity: à savoir.**
+- **From afar the oriflamme's halo is centred on its staff, not on its drawing** (2026-11-20, review ARCH-003): the flat
+  drawing is planted by its staff (`flat/drawing` `standsAt`, the dev's remark of the same day), its square moved
+  aside in `billboards`; the halo behind it is posed on the place (`light/haloSquares.withHalos`), so the cloth runs
+  0.77 of a width to the right of a halo one width in radius. Said to the dev, who validated the icon. **Remedy if it
+  shows**: `withHalos` handed the same shift. **Severity: cosmétique.**
+- **The icons' motions do not follow `prefers-reduced-motion`** (2026-11-20, review A11Y-001): the oriflamme's cloth,
+  the trebuchet's throw and the swords' and crown's sway run on the frame's clock for every reader, while the camera,
+  the splash and the progress bar honour the setting (`app/viewport`, `ui/splash`, `ui/progressOverlay`). WCAG 2.2.2:
+  a movement that starts by itself and lasts. **Remedy**: the setting read once at the composition root and handed to
+  the markers, each motion given a rest pose — a frozen clock would stop the cloth mid-wave and the trebuchet
+  mid-throw — ATLAS-490, in Idées. **Severity: gênant** for the readers who asked for it.

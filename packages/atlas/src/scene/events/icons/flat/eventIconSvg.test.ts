@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { EVENT_ICON_PALETTE } from '../palette'
 
-import { EVENT_ICON_SVG_STYLE, drawingSvg, eventIconSvg } from './eventIconSvg'
+import { EVENT_ICON_SVG_STYLE, drawingSvg, eventIconSvg, flatIconShift } from './eventIconSvg'
 import { PIN_DRAWING } from './pin'
 import { TOWER_DRAWING } from './tower'
 import { TREBUCHET_DRAWING } from './trebuchet'
@@ -10,7 +10,15 @@ import { TREBUCHET_DRAWING } from './trebuchet'
 import type { Drawing } from './drawing'
 import type { EventIconKind } from '../kinds'
 
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral', 'tomb', 'tiara']
+const KINDS: EventIconKind[] = [
+  'swords',
+  'tower',
+  'crown',
+  'cathedral',
+  'tomb',
+  'tiara',
+  'oriflamme',
+]
 
 /**
  * The rim's width a drawing is given: its first stroke, the rim pass coming first.
@@ -20,6 +28,17 @@ const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'cathedral', 'tomb',
 function widthOf(svg: string): number {
   return Number(/stroke-width="([\d.]+)"/.exec(svg)?.[1])
 }
+
+describe('flatIconShift', () => {
+  it('leaves a drawing planted by its middle where it is', () => {
+    expect(flatIconShift('swords')).toBe(0)
+    expect(flatIconShift('crown')).toBe(0)
+  })
+
+  it('moves the oriflamme to the right, so its staff, at 8 of 44, stands over its place', () => {
+    expect(flatIconShift('oriflamme')).toBeCloseTo((22 - 8) / 44, 6)
+  })
+})
 
 describe('eventIconSvg', () => {
   describe('happy path', () => {

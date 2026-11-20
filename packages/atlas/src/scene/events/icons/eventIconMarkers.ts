@@ -19,6 +19,7 @@ import { billboardMaterials } from './billboardMaterials'
 import { createBillboards } from './billboards'
 import { crossFading, flatIconSize, iconCrossFade } from './crossFade'
 import { createIconTurner } from './facing'
+import { flatIconShift } from './flat/eventIconSvg'
 import { placeIcon, standForms } from './forms'
 import { createIconInstances } from './iconInstances'
 import { createHaloSquares, withHalos } from './light/haloSquares'
@@ -97,7 +98,7 @@ function buildForms(
   const flatPull = { value: flatDepthPull(height * ICON_FLAT_SPAN) }
   for (const kind of new Set(kinds)) applyLiveDepthBias(materials.flat(kind), 'built-in', flatPull)
   const flats = withHalos(
-    createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER),
+    createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER, flatIconShift),
     { count: kinds.length, fade: materials.setFlatOpacity, pull: flatPull, span: FLAT_HALO_SPAN }
   )
   // Close up, each 3D icon casts its shadow on the relief, drawn from its own pose (ATLAS-298).

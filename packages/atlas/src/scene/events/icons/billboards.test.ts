@@ -30,6 +30,18 @@ function poseOf(
   return pose
 }
 
+/**
+ * A mesh's square, as its geometry holds it.
+ * @param mesh - the instanced mesh
+ * @returns its least and greatest x, then y
+ */
+function extentOf(mesh: InstancedMesh): [number, number, number, number] {
+  mesh.geometry.computeBoundingBox()
+  const box = mesh.geometry.boundingBox
+  if (box === null) throw new Error('no bounding box')
+  return [box.min.x, box.max.x, box.min.y, box.max.y]
+}
+
 const A = new MeshBasicMaterial()
 const B = new MeshBasicMaterial()
 const materialOf = (key: 'a' | 'b'): MeshBasicMaterial => (key === 'a' ? A : B)
@@ -42,6 +54,13 @@ describe('createBillboards', () => {
         ['a', 2],
         ['b', 1],
       ])
+    })
+
+    it('moves a key’s square aside by its shift, in the square’s own plane, and leaves the others centred', () => {
+      const squares = createBillboards(['a', 'b'], materialOf, 7, (key) => (key === 'b' ? 0.25 : 0))
+      const [a, b] = meshes(squares.object).map(extentOf)
+      expect(a).toEqual([-0.5, 0.5, -0.5, 0.5])
+      expect(b).toEqual([-0.25, 0.75, -0.5, 0.5])
     })
 
     it('places each square at its slot, turned as the camera is, at the size given', () => {

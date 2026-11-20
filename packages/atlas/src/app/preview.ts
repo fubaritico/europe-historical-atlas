@@ -2,7 +2,7 @@
  * The dev's preview (the dev, 2026-11-17, of the cathedral taken off the map once its trial was over: « elle me manque
  * déjà […] je veux pouvoir la voir […] remets le flag, proprement »): `?cathedral` in the address stands a cathedral
  * at Cologne and at Paris, `?tomb` a grave at Cluny and at Canterbury, and `?tiara` the council's tiara at Lyon and at
- * Pisa (ATLAS-476), so a kind that has no event type yet can be judged on the map — how it zooms, how it lives. They
+ * Pisa (ATLAS-476), `?oriflamme` the conquest's oriflamme at Toledo and at Palermo (ATLAS-477), so a kind that has no event type yet can be judged on the map — how it zooms, how it lives. They
  * may be asked together.
  *
  * **On the published site too** (the dev, the same evening: « qu'avec le flag en ligne, je puisse voir la cathédrale,
@@ -33,6 +33,12 @@ const TIARAS: readonly PreviewIcon[] = [
   { lon: 10.4, lat: 43.72, kind: 'tiara' }, // Pisa
 ]
 
+/** Where the preview stands its oriflammes: two cities taken a few years before 1100 (ATLAS-477). */
+const ORIFLAMMES: readonly PreviewIcon[] = [
+  { lon: -4.02, lat: 39.86, kind: 'oriflamme' }, // Toledo
+  { lon: 13.36, lat: 38.12, kind: 'oriflamme' }, // Palermo
+]
+
 /**
  * The icons the address asks the preview for.
  * @param search - the address's query (`window.location.search`)
@@ -44,5 +50,6 @@ export function previewIcons(search: string): readonly PreviewIcon[] {
     ...(asked.has('cathedral') ? CATHEDRALS : []),
     ...(asked.has('tomb') ? TOMBS : []),
     ...(asked.has('tiara') ? TIARAS : []),
+    ...(asked.has('oriflamme') ? ORIFLAMMES : []),
   ]
 }

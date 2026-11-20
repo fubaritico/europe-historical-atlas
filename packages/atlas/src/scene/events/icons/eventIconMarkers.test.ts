@@ -20,6 +20,7 @@ import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from '../markers'
 import { SOIL_OPACITY } from '../shadows/soil'
 
 import { EVENT_BLUR_LAYER, createEventIconMarkers } from './eventIconMarkers'
+import { flatIconShift } from './flat/eventIconSvg'
 import { buildIconModel } from './meshes/iconModel'
 import {
   EVENT_ICON_HEIGHT,
@@ -59,6 +60,25 @@ const TWO: PlacedEventIcon[] = [
  */
 function cameraAt(position: Vector3, turn: Euler) {
   return { position, quaternion: new Quaternion().setFromEuler(turn) }
+}
+
+/**
+ * Where the middle of a kind's flat square sits across, in square sides — nought for a square on its place.
+ * @param object - the markers' group
+ * @param kind - which kind's flat drawing
+ * @returns the middle x of the square its flat drawings are drawn on
+ */
+function flatSquareMiddle(object: Group, kind: EventIconKind): number {
+  let middle = Number.NaN
+  object.traverse((child) => {
+    // A flat drawing's mesh is named after its kind alone; a 3D piece's after its kind and its colour.
+    if (!(child instanceof InstancedMesh) || child.name !== kind) return
+    const geometry = (child as InstancedMesh).geometry
+    geometry.computeBoundingBox()
+    const box = geometry.boundingBox
+    if (box !== null) middle = (box.min.x + box.max.x) / 2
+  })
+  return middle
 }
 
 /** A rasteriser that makes an empty texture, for the flat icons. */
@@ -239,6 +259,26 @@ describe('createEventIconMarkers', () => {
       expect(squareCount(markers.object, 'halo')).toBe(3)
       // From afar every flat drawing keeps its own.
       expect(squareCount(markers.object, 'flat halo')).toBe(5)
+    })
+
+    it('plants the oriflamme’s flat drawing by its staff, and leaves the swords’ on its middle', () => {
+      // The dev, 2026-11-20: the flat drawing's mast stood aside of the place its 3D model marks (ATLAS-477).
+      const markers = createEventIconMarkers(
+        [
+          { ground: [0, 0, 0], kind: 'swords' },
+          { ground: [1, 0, 0], kind: 'oriflamme' },
+        ],
+        STUB,
+        FLAT,
+        TARGETS
+      )
+
+      expect(flatSquareMiddle(markers.object, 'swords')).toBeCloseTo(0, 6)
+      expect(flatSquareMiddle(markers.object, 'oriflamme')).toBeCloseTo(
+        flatIconShift('oriflamme'),
+        6
+      )
+      expect(flatIconShift('oriflamme')).toBeGreaterThan(0.3)
     })
 
     it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {

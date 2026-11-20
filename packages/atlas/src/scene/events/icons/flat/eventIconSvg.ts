@@ -7,6 +7,7 @@ import { EVENT_ICON_PALETTE } from '../palette'
 
 import { CATHEDRAL_DRAWING } from './cathedral'
 import { CROWN_DRAWING } from './crown'
+import { ORIFLAMME_DRAWING } from './oriflamme'
 import { SWORDS_DRAWING } from './swords'
 import { TIARA_DRAWING } from './tiara'
 import { TOMB_DRAWING } from './tomb'
@@ -61,6 +62,7 @@ const DRAWINGS: Record<EventIconKind, Drawing> = {
   cathedral: CATHEDRAL_DRAWING,
   tomb: TOMB_DRAWING,
   tiara: TIARA_DRAWING,
+  oriflamme: ORIFLAMME_DRAWING,
 }
 
 /**
@@ -77,6 +79,18 @@ export function eventIconSvg(
   style: EventIconSvgStyle = EVENT_ICON_SVG_STYLE
 ): string {
   return drawingSvg(DRAWINGS[kind], palette, style)
+}
+
+/**
+ * How far a kind's flat drawing is moved aside so the point it is planted by stands over its place, in drawing
+ * widths: positive to the reader's right. Nought for a drawing planted by its middle.
+ * @param kind - which icon
+ * @returns the shift, as a share of the drawing's width
+ */
+export function flatIconShift(kind: EventIconKind): number {
+  const { viewBox, standsAt } = DRAWINGS[kind]
+  const [x, , width] = viewBox
+  return standsAt === undefined ? 0 : (x + width / 2 - standsAt) / width
 }
 
 /**

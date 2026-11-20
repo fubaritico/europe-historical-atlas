@@ -13,6 +13,7 @@ import { iconBoxSide } from '../settings'
 
 import { cathedralParts } from './cathedral'
 import { crownParts } from './crown'
+import { ORIFLAMME_MOTIONS, oriflammeParts } from './oriflamme'
 import { faceted, fitInBox } from './parts'
 import { swordParts } from './swords'
 import { tiaraParts } from './tiara'
@@ -36,10 +37,14 @@ const PARTS: Record<EventIconKind, () => Part[]> = {
   cathedral: cathedralParts,
   tomb: tombParts,
   tiara: tiaraParts,
+  oriflamme: oriflammeParts,
 }
 
 /** The kinds whose model moves, and how: each motion its parts name. A kind left out stands still. */
-const MOTIONS: Partial<Record<EventIconKind, Motions>> = { tower: TREBUCHET_MOTIONS }
+const MOTIONS: Partial<Record<EventIconKind, Motions>> = {
+  tower: TREBUCHET_MOTIONS,
+  oriflamme: ORIFLAMME_MOTIONS,
+}
 
 /** One colour of a model: every part painted that colour, fused into a single geometry. */
 export interface IconPiece {

@@ -27,6 +27,13 @@ describe('previewIcons', () => {
       expect(icons.map(({ lon }) => lon)).toEqual([4.84, 10.4])
     })
 
+    it('stands the conquest’s oriflamme at Toledo and at Palermo when asked for the oriflamme', () => {
+      const icons = previewIcons('?oriflamme')
+
+      expect(icons.map(({ kind }) => kind)).toEqual(['oriflamme', 'oriflamme'])
+      expect(icons.map(({ lon }) => lon)).toEqual([-4.02, 13.36])
+    })
+
     it('stands both kinds when both are asked', () => {
       expect(previewIcons('?cathedral&tomb').map(({ kind }) => kind)).toEqual([
         'cathedral',

@@ -61,7 +61,8 @@ const recordId = z.string().check(z.minLength(1))
  * `cathedral` a cathedral — first used for a council, kept since for the bishoprics — and `tomb` a death's grave (ATLAS-288, ATLAS-434,
  * the dev, 2026-11-17: « ce que je voudrais, c'est déjà les deux événements, mort et couronnement, qu'on puisse les
  * voir en ligne »), `tiara` the pope's tiara and a crozier — a council's own icon, the cathedral being kept for the
- * bishoprics (ATLAS-476, the dev, 2026-11-18).
+ * bishoprics (ATLAS-476, the dev, 2026-11-18), `oriflamme` a conquest's banner, its cloth forked into two points
+ * (ATLAS-477, the dev, 2026-11-20).
  */
 export const EVENT_ICONS = [
   'pin',
@@ -71,6 +72,7 @@ export const EVENT_ICONS = [
   'cathedral',
   'tomb',
   'tiara',
+  'oriflamme',
 ] as const
 
 /** One of {@link EVENT_ICONS}. */

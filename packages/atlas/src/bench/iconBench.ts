@@ -4,8 +4,9 @@
  * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
  * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27). At
  * `/icons.html?crowns`, the crown's candidates in place of the kinds (ATLAS-287); at `/icons.html?cathedral`, the
- * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288), at `/icons.html?council`, the council's (ATLAS-476), at
- * `/icons.html?conquest`, the conquest's, their cloth floating (ATLAS-477).
+ * cathedral's, at `/icons.html?tomb`, the grave's (ATLAS-288), at `/icons.html?council`, the council's (ATLAS-476).
+ * The conquest's oriflamme, chosen here among five, « A » (the dev, 2026-11-20), stands with the kinds, its cloth
+ * floating (ATLAS-477).
  */
 
 import { Box3, Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
@@ -18,7 +19,6 @@ import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
 import { svgToTexture } from '../scene/svgTexture'
 
 import { CATHEDRAL_CANDIDATES } from './cathedralCandidates'
-import { CONQUEST_CANDIDATES, CONQUEST_CLOTH_RED } from './conquestCandidates'
 import { COUNCIL_CANDIDATES } from './councilCandidates'
 import { CROWN_CANDIDATES } from './crownCandidates'
 import { TOMB_CANDIDATES } from './tombCandidates'
@@ -46,36 +46,29 @@ scene.add(lights)
 const asked = new URLSearchParams(window.location.search)
 const cathedral = asked.has('cathedral')
 const tomb = asked.has('tomb')
-const conquest = asked.has('conquest') ? CONQUEST_CANDIDATES : null
-const candidates =
-  conquest ??
-  (asked.has('crowns')
-    ? CROWN_CANDIDATES
-    : asked.has('council')
-      ? COUNCIL_CANDIDATES
-      : cathedral
-        ? CATHEDRAL_CANDIDATES
-        : tomb
-          ? TOMB_CANDIDATES
-          : null)
-// The crown's, the building's and the grave's candidates are shown at one width; the conquest's at one height — a
-// banner is narrower than a flag, and widening it to match would make it the tallest.
-const crowns = candidates !== null && conquest === null
-/** How much bigger than their box the conquest's candidates are shown, large: tall thin things, seen from afar. */
-const CONQUEST_SCALE = 1.5
+const candidates = asked.has('crowns')
+  ? CROWN_CANDIDATES
+  : asked.has('council')
+    ? COUNCIL_CANDIDATES
+    : cathedral
+      ? CATHEDRAL_CANDIDATES
+      : tomb
+        ? TOMB_CANDIDATES
+        : null
+// The candidates are shown at one width.
+const crowns = candidates !== null
 /** How wide a candidate is shown, large: a crown one unit, the cathedral — alone, and long — more than two. */
 const CANDIDATE_WIDTH = cathedral ? 2.4 : 1
-const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
+const KINDS: EventIconKind[] = ['swords', 'tower', 'crown', 'oriflamme']
 const builders = candidates
   ? candidates.map(
-      (candidate, index) => () =>
+      (candidate) => () =>
         iconOf(
           buildModel(
             `candidate ${candidate.letter}`,
             candidate.parts(),
-            // The conquest's candidates move: each brings the motions of its cloth's strips.
-            conquest?.[index]?.motions,
-            conquest ? { ...EVENT_ICON_PALETTE, velvet: CONQUEST_CLOTH_RED } : EVENT_ICON_PALETTE
+            undefined,
+            EVENT_ICON_PALETTE
           )
         )
     )
@@ -86,7 +79,7 @@ const middle = (builders.length - 1) / 2
 const icons = builders.map((build, index) => {
   const large = build()
   const small = build()
-  const shown = conquest ? CONQUEST_SCALE : candidates ? 1 : KIND_SCALE
+  const shown = candidates ? 1 : KIND_SCALE
   large.object.scale.setScalar(shown)
   small.object.scale.setScalar(0.25 * shown)
   if (crowns) {

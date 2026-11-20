@@ -27,8 +27,40 @@ export interface Billboards {
    * @throws when the positions are not one per square — the caller's lists have fallen out of step, a defect
    */
   poseAll(positions: readonly Vector3[], facing: Quaternion, size: number): void
-  /** Free the shared square and the instance buffers; the materials belong to whoever made them. */
+  /** Free the squares and the instance buffers; the materials belong to whoever made them. */
   dispose(): void
+}
+
+/**
+ * One instanced mesh per key: over one unit square, shared — or, for a key moved aside, over a square of its own,
+ * moved in the square's own plane, so the shift follows the square's size and the camera's turn.
+ * @param counts - how many squares each key holds
+ * @param materialOf - the material a key shows
+ * @param shiftOf - how far a key's squares are moved aside, in square sides
+ * @returns the meshes by key, in the keys' order, and every square built, to be freed with them
+ */
+function meshesByKey<K extends string>(
+  counts: ReadonlyMap<K, number>,
+  materialOf: (key: K) => Material,
+  shiftOf: (key: K) => number
+): { byKey: Map<K, InstancedMesh>; squares: PlaneGeometry[] } {
+  const shared = new PlaneGeometry(1, 1)
+  const squares = [shared]
+  const byKey = new Map<K, InstancedMesh>()
+  for (const [key, count] of counts) {
+    const shift = shiftOf(key)
+    let square = shared
+    if (shift !== 0) {
+      square = new PlaneGeometry(1, 1).translate(shift, 0, 0)
+      squares.push(square)
+    }
+    const mesh = new InstancedMesh(square, materialOf(key), count)
+    mesh.name = key
+    // Re-posed every frame, so a bounding sphere would always be stale; not worth culling.
+    mesh.frustumCulled = false
+    byKey.set(key, mesh)
+  }
+  return { byKey, squares }
 }
 
 /**
@@ -36,29 +68,25 @@ export interface Billboards {
  * @param keys - each square's key — which material it shows — in the squares' order
  * @param materialOf - the material a key shows
  * @param renderOrder - the draw order of the whole set, set on its group (three sorts by the nearest group's order)
+ * @param shiftOf - how far a key's squares are moved aside of their place, in square sides, positive to the reader's
+ *   right — for a drawing planted by another point than its middle (`flat/eventIconSvg.flatIconShift`); none unless
+ *   given
  * @returns the squares, every one at the origin until it is posed
  */
 export function createBillboards<K extends string>(
   keys: readonly K[],
   materialOf: (key: K) => Material,
-  renderOrder: number
+  renderOrder: number,
+  shiftOf: (key: K) => number = () => 0
 ): Billboards {
   // 1. Each item's slot among those of its key, and how many each key holds.
   const { slots, counts } = slotsByKey(keys)
 
-  // 2. One unit square, shared, and an instanced mesh per key over it.
-  const square = new PlaneGeometry(1, 1)
+  // 2. An instanced mesh per key, over the shared unit square or the key's own, moved aside.
+  const { byKey, squares } = meshesByKey(counts, materialOf, shiftOf)
   const object = new Group()
   object.renderOrder = renderOrder
-  const byKey = new Map<K, InstancedMesh>()
-  for (const [key, count] of counts) {
-    const mesh = new InstancedMesh(square, materialOf(key), count)
-    mesh.name = key
-    // Re-posed every frame, so a bounding sphere would always be stale; not worth culling.
-    mesh.frustumCulled = false
-    object.add(mesh)
-    byKey.set(key, mesh)
-  }
+  for (const mesh of byKey.values()) object.add(mesh)
 
   // 3. Each square's mesh, looked up once.
   const meshOf = keys.map((key) => {
@@ -92,7 +120,7 @@ export function createBillboards<K extends string>(
     },
     dispose(): void {
       for (const mesh of byKey.values()) mesh.dispose()
-      square.dispose()
+      for (const square of squares) square.dispose()
     },
   }
 }

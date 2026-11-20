@@ -29,4 +29,11 @@ export interface Drawing {
   outlined: boolean
   /** Its groups of shapes, each with the transform it needs. */
   groups: { transform: string; shapes: FlatShape[] }[]
+  /**
+   * The x of its field that stands over its place, for a drawing that is not planted by its middle — an oriflamme's
+   * staff, which its 3D model plants on the place (the dev, 2026-11-20: *"the mast is offset from the point it is
+   * meant to mark, which does not happen with the 3D one"*). Left out, the drawing stands by its middle, as a
+   * symmetrical one does.
+   */
+  standsAt?: number
 }
