@@ -39,6 +39,14 @@ understand"_).
 look alive. **« Fait » shows all 291 for two weeks**: the board hides what is done for more than two weeks, counted
 from the import; nothing to do.
 
+**Two people invited at the dev's request** (17 h 40), role « Membre »: the coder and the historian, on two
+variants of his own address, so a ticket can name who holds it. They exist once he accepts the two mails; until then
+they cannot be assigned. The MCP still acts under his account: a comment of mine carries his name, so it starts
+with « codeur » or « historien ». The board's navigation is cut to four links (Chronologie, Tableau Kanban, Liste,
+Backlog) — the Backlog view had to be added to it by hand. The site is on a **Premium trial** he did not ask for
+(Atlassian's default); three people are free on the free plan, billed per person on Premium — the plan must be the
+free one before the trial ends.
+
 **Left to do**: the skill `/trello` → `/jira` and the twenty files that name Trello (step 6); delete the project
 « Brouillon » and Atlassian's example project; check the plan is the free one (the sign-up address said
 `edition=premium`); the marks `[EPIC]` `[IDEES]` `[BACKLOG]` in the titles; Trello closed by him (step 7).
