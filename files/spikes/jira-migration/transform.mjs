@@ -76,6 +76,8 @@ function toWiki(text, key) {
       if (/^\s*(?:-{3,}|\*{3,})\s*$/.test(line)) return '----'
       return line
     })
+    // In wiki markup a plain line right after a list item continues that item: a blank line ends the list.
+    .flatMap((line, index, lines) => (index > 0 && /^[*#]+ /.test(lines[index - 1]) && line.trim() !== '' && !/^[*#]+ /.test(line) ? ['', line] : [line]))
     .join('\n')
   // Bold before italic: `**a**` → `*a*`; a lone `*a*` (Markdown italic) → `_a_`. List markers are followed by a space.
   out = out.replaceAll(/\*\*([^*\n]+)\*\*/g, (_, body) => keep(`*${body}*`))
@@ -135,7 +137,7 @@ function workItem(card, key) {
   const names = card.labels.map((l) => l.name)
   const isEpic = column === EPIC_COLUMN
   const types = names.filter((n) => ['défaut', 'fonctionnalité', 'dette', 'doc', 'décision', "retour d'usage"].includes(n))
-  const workType = isEpic ? 'Epic' : names.includes('défaut') ? 'Bug' : names.includes('fonctionnalité') ? 'Story' : 'Task'
+  const workType = isEpic ? 'Epic' : names.includes('défaut') ? 'Bug' : names.includes('fonctionnalité') ? 'Story' : 'Tâche'
   if (!isEpic && types.length > 1) odd.twoTypes.push(`${ref} : ${types.join(', ')} → ${workType}`)
   if (!isEpic && types.length === 0) odd.noType.push(`${ref} ${card.name.slice(ref.length, 80)} → Task`)
 
@@ -176,7 +178,7 @@ function workItem(card, key) {
     summary: card.name.slice(0, 255),
     description,
     status: isEpic ? 'En cours' : column,
-    workType,
+    issueType: workType,
     priority: PRIORITY[card.cover?.color] ?? 'Low',
     ...(column === 'Fait' ? { resolution: 'Done' } : {}),
     created: jiraDate(created),
@@ -192,7 +194,7 @@ function workItem(card, key) {
 
 /** The whole import file for one project. */
 const importFile = (project, cards) => ({
-  projects: [{ name: project.name, key: project.key, components: COMPONENTS, 'work items': cards.map((c) => workItem(c, project.key)) }],
+  projects: [{ name: project.name, key: project.key, components: COMPONENTS, issues: cards.map((c) => workItem(c, project.key)) }],
 })
 
 mkdirSync(resolve(DIR, 'out'), { recursive: true })
@@ -226,7 +228,7 @@ writeFileSync(resolve(DIR, 'out/eht-trial.json'), JSON.stringify(importFile(TRIA
 Object.assign(odd, JSON.parse(keepOdd))
 Object.assign(after, JSON.parse(keepAfter))
 
-const items = whole.projects[0]['work items']
+const items = whole.projects[0].issues
 const count = (field) => items.reduce((acc, item) => ({ ...acc, [item[field]]: (acc[item[field]] ?? 0) + 1 }), {})
 const table = (object) => Object.entries(object).map(([k, v]) => `- ${k} : ${v}`).join('\n')
 const section = (title, lines) => `## ${title} (${lines.length})\n\n${lines.length ? lines.map((l) => `- ${l}`).join('\n') : 'Aucun.'}\n`
@@ -239,7 +241,7 @@ writeFileSync(
     `# La migration vers Jira — ce que le fichier d'import contient`,
     `Copie de Trello prise le ${frDate(snapshot.takenAt)}. Ce rapport est écrit par \`files/spikes/jira-migration/transform.mjs\`.`,
     `## Les comptes\n\n- ${items.length} tickets, numéros de ${Math.min(...numbers)} à ${Math.max(...numbers)}, ${holes.length ? `trous : ${holes.join(', ')}` : 'sans trou'}\n- ${items.reduce((s, i) => s + i.comments.length, 0)} commentaires\n- ${Object.keys(after.parents).length} tickets rattachés à une épique\n- ${after.files.length} fichiers joints, ${after.flags.length} tickets bloqués, ${after.blocks.length} liens « bloqué par », ${after.archived.length} tickets archivés`,
-    `## Par type\n\n${table(count('workType'))}`,
+    `## Par type\n\n${table(count('issueType'))}`,
     `## Par statut\n\n${table(count('status'))}`,
     `## Par priorité\n\n${table(count('priority'))}`,
     section('Tickets avec deux étiquettes de type', odd.twoTypes),

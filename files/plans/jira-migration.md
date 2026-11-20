@@ -7,6 +7,42 @@
 
 ## The plan
 
+### Done — the tickets are in Jira (2026-11-20, 18 h)
+
+**Site** `europehistoricalatlas.atlassian.net` (a site's name takes no hyphen), **project `EHA`**, company-managed
+Kanban, board 3. **492 tickets, `EHA-1` to `EHA-492`, no hole**: each key carries the number of its `[CARTO-67]`;
+checked against the import file ticket by ticket — statuses, types, priorities, components, labels, the 676
+comments and every creation date, to the second. 121 tickets tied to their epic, the ten blocked ones flagged and
+linked « is blocked by », the six files attached, the order of À faire, En cours, Idées and Backlog taken from Trello.
+
+**What the import really asked — none of it in Atlassian's page:**
+
+- **The JSON importer cannot create a project** on this site: it stops at « Retrieving projects » with
+  « Unexpected failure », whatever the file. The project is created first (REST, template
+  `com.pyxis.greenhopper.jira:gh-simplified-kanban-classic`), then the import finds it by its key.
+- **Its field names are the old ones**, `issues` and `issueType` — the page's `work items` and `workType` are a
+  renaming of the documentation only.
+- **A status is found by its real name, and only if it is global**: the statuses of a team-managed project (the
+  « Brouillon » the sign-up creates) are invisible to it, and a translated name (« En cours » shown for
+  `In Progress`) is not a name. The six statuses were created or renamed through `/rest/api/3/workflows/update`.
+- **A type is named as the site names it**: « Tâche », not `Task`.
+- **In wiki markup a plain line after a list item continues the item**: the transform adds a blank line.
+- A second import of the same file skips what exists (matched by `externalId`): four tickets sent first as a probe
+  stayed, the other 488 followed.
+
+**The dev's calls during the move**: the site's name `europehistoricalatlas`; **the backlog is a page, not a column**
+— « Idées » and « Backlog » are two statuses of Jira's backlog page, the board keeps À faire, En cours, À valider par
+le développeur, Fait; small probe imports allowed once the first import had failed (_"ok, if it makes you
+understand"_).
+
+**Mine, said to him**: the 30 archived tickets go to « Fait » with their label `archivé` — in the backlog they would
+look alive. **« Fait » shows all 291 for two weeks**: the board hides what is done for more than two weeks, counted
+from the import; nothing to do.
+
+**Left to do**: the skill `/trello` → `/jira` and the twenty files that name Trello (step 6); delete the project
+« Brouillon » and Atlassian's example project; check the plan is the free one (the sign-up address said
+`edition=premium`); the marks `[EPIC]` `[IDEES]` `[BACKLOG]` in the titles; Trello closed by him (step 7).
+
 ### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
 
 > _"No trial, we do not care; you will work with Atlassian's MCP, and bring your skills and the context engineering
