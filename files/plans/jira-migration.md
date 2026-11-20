@@ -53,7 +53,8 @@ script and its skill are removed from the tree; the instruction files, the two r
 Jira. The marks `[EPIC]` `[IDEES]` `[BACKLOG]` are taken off the 144 titles. The eleven tickets « En cours » have
 their assignee: nine the coder, two the historian (the sources of 1100 and of 1300).
 
-**Left to do**: delete the project « Brouillon » and Atlassian's example project (the dev's go); the trees `coder` and `historian` resynced with
+**Left to do** (the dev deleted « Brouillon » and Atlassian's example project himself — `EHA` is the site's only
+project): the trees `coder` and `historian` resynced with
 `main`; **REPO-493, his**: Trello closed (step 7), and the site on the free plan before the Premium trial ends.
 
 ### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
