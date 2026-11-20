@@ -267,6 +267,31 @@ const verbs = {
     await api('PUT', `/cards/${c.id}`, { name })
     console.warn(`#${c.idShort} ${name}`)
   },
+  /**
+   * stamp [--dry] — writes its column in the title of every card of Épiques, Idées and Backlog: `[CARTO-41] [BACKLOG] …`
+   * (the dev, 2026-11-20, before the move to Jira: so the board can be rebuilt from the titles if the move goes wrong).
+   * A card that left one of the three columns loses its mark; run again just before the move. `--dry` only prints.
+   */
+  async stamp(flag) {
+    const MARKS = { Épiques: 'EPIC', Idées: 'IDEES', Backlog: 'BACKLOG' }
+    const columns = await lists()
+    const cards = await api('GET', `/boards/${BOARD}/cards`, { fields: 'name,idList,idShort,isTemplate' })
+    let changed = 0
+    for (const c of cards) {
+      if (c.isTemplate) continue
+      const mark = MARKS[columns.find((list) => list.id === c.idList)?.name]
+      const t = parseTicket(c.name)
+      // the ticket's own bracket is kept as it is written; only what follows it is marked
+      const head = t ? c.name.slice(0, c.name.length - t.bare.length) : ''
+      const bare = (t ? t.bare : c.name).replace(/^\[(?:EPIC|IDEES|BACKLOG)\]\s*/, '')
+      const name = `${head}${mark ? `[${mark}] ` : ''}${bare}`
+      if (name === c.name) continue
+      changed += 1
+      if (flag !== '--dry') await api('PUT', `/cards/${c.id}`, { name })
+      console.warn(`#${c.idShort} ${name}`)
+    }
+    console.warn(`${changed} title(s) ${flag === '--dry' ? 'to change' : 'changed'}`)
+  },
   /** rename <number> <title> */
   async rename(number, title) {
     if (!title) fail('rename <number> <title>')

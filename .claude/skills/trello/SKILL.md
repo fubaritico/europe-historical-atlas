@@ -217,6 +217,7 @@ $S list                                    # every column and its cards
 $S add "Idées" "[CARTO] Title" "description" fonctionnalité Cartographe   # description = a filled template; labels optional
 $S edit 7 $'**Le problème…** : …\n…'     # replace the description (shape an Idée)
 $S rename 7 "New title"
+$S stamp [--dry]                           # writes [EPIC] / [IDEES] / [BACKLOG] after the ticket in the titles of those three columns (before the move to Jira)
 $S prefix CARTO-41 "atlas · carto"           # change the scope; the number stays
 $S above CARTO-41 ATLAS-12                  # place a card just above another
 $S move 7 "En cours"

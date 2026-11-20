@@ -10,6 +10,11 @@
 - **The reference of a ticket stays `[CARTO-67]`** — the application's prefix and the number — in commits, plans and
   messages (the dev, 2026-11-20: _"a practice we will keep, so that you and the historian are not thrown"_). Jira's
   own key comes second.
+- **The column is written in the title of every ticket of Épiques, Idées and Backlog** — `[CARTO-41] [BACKLOG] …`,
+  `[EPIC]`, `[IDEES]` (the dev, 2026-11-20: _"so that we can restructure them in case there is a problem"_). Done
+  that day on 144 tickets by the board's script (`trello stamp`); a ticket that leaves one of the three columns
+  loses its mark at the next run — **run `stamp` again just before the move**, and decide then whether the marks are
+  taken off in Jira once the epics and the statuses are checked.
 - He does not validate features any more: what is built is tested by me (memory `one-gesture-to-validate`).
 
 ## What I checked at Atlassian, 2026-11-20
