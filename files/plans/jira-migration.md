@@ -59,7 +59,9 @@ project): the trees `coder` and `historian` resynced with
 it closed (_"efface"_, said twice, after being told what goes with it: the fifteen cards without a number and the
 history of each card's moves). The copy of step 1 stays on his machine, in `files/resources/jira-migration/`
 (git-ignored). **The plan of the site**: Jira's own page says the Premium trial ends on **2026-12-20** and that the
-site then goes back to the free plan by itself; nothing is owed in between (no payment method).
+site then goes back to the free plan by itself; nothing is owed in between (no payment method). **He chose « Free »
+himself the same evening**: the top button « Voir les offres » became « Passer à l'offre supérieure ». REPO-493 and
+REPO-492 are closed — **the move is over**.
 
 ### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
 

@@ -28,10 +28,9 @@ Fait) ; quatre onglets seulement sur le tableau ; deux comptes, « Claude Coder 
 tient un ticket (mes commentaires restent signés de son nom : ils commencent par « codeur — » ou « historien — »).
 
 **Trello n'existe plus** : il a supprimé le tableau le 20/11 (_« efface »_), plutôt que de le garder fermé ; la copie
-complète est sur sa machine, `files/resources/jira-migration/snapshot/` (ignorée par git). **L'offre du site** —
-REPO-493, dans « À valider par le développeur » : la page de Jira dit que l'essai Premium, mis d'office par Atlassian,
-finit le **20/12/2026** et que le site repasse seul à l'offre gratuite ; sans carte, rien n'est prélevé. Il reste à
-lui de dire s'il clique « Sélectionner Free » tout de suite ou s'il laisse faire.
+complète est sur sa machine, `files/resources/jira-migration/snapshot/` (ignorée par git). **Le site est sur l'offre gratuite** : il a
+choisi « Free » le 20/11, à la place de l'essai Premium qu'Atlassian avait mis d'office (REPO-493, clos). **La
+migration est finie** : il ne reste rien, ni à lui ni à moi.
 
 **De mon côté, plus rien** : les arbres `coder` et `historian` sont à jour de `main` et ont la skill `/jira` (20/11) ;
 il a supprimé lui-même le projet « Brouillon » et le projet d'exemple : `EHA` est le seul projet du site. « Fait » montre tout
