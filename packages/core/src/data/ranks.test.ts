@@ -77,8 +77,8 @@ describe('rankScore', () => {
         tribe: 1,
         tribe_outlined: 1,
         confederation: 2,
-        march: 2,
         viscounty: 2,
+        march: 3,
         principality: 3,
         county: 3,
         emirate: 3,
@@ -123,6 +123,16 @@ describe('rankScore', () => {
 })
 
 describe('outranks', () => {
+  it('says nothing of a count under a march: the march scores as the county does', () => {
+    // The dev, 2026-11-20: the nine counts under the marches of Tuscany, Verona and Styria are no fault.
+    expect(outranks('county', 'march')).toBe(false)
+    expect(outranks('march', 'county')).toBe(false)
+  })
+
+  it('still says a duchy under a march', () => {
+    expect(outranks('duchy', 'march')).toBe(true)
+  })
+
   it('says a kingdom under a county', () => {
     expect(outranks('kingdom', 'county')).toBe(true)
   })

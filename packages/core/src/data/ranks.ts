@@ -67,7 +67,9 @@ export const RANK_SCORES: Readonly<Record<PolityRank, number | null>> = {
   county: 3,
   emirate: 3,
   lordship: 3,
-  march: 2,
+  // 2 at first, then 3 the same day (the dev, 2026-11-20): a margrave stands above a count and below a duke, and nine
+  // counts under the marches of Tuscany, Verona and Styria were said at fault. Equal to the county: nothing is said.
+  march: 3,
   viscounty: 2,
   [CONFEDERATION_RANK]: 2,
   [TRIBE_RANK]: 1,
