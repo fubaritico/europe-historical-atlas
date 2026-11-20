@@ -19,26 +19,20 @@ fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 **Sa décision** (20/11) : _« une colonne à 261 items […] archiver proprement tout en gardant l'historique »_, et _« une
 hiérarchie claire entre epic, story, task et bugfix »_. À faire dans une session neuve.
 
-**Vérifié chez Atlassian le 20/11** (les liens sont dans la conversation, à relire avant de coder) : l'offre gratuite
-suffit (10 utilisateurs, projets et tickets illimités, 2 Go) ; un tableau masque seul les tickets terminés depuis deux
-semaines (1, 2 ou 4 sur un projet géré par l'entreprise), tous restent cherchables ; **l'importeur Trello d'Atlassian
-n'importe pas les cartes archivées** et les retours sur les commentaires se contredisent — donc **un script à nous**,
-et **ne rien archiver dans Trello avant**. La hiérarchie épique → story / tâche / bug → sous-tâche : le modèle standard
-de Jira, pas revérifié dans la doc.
-
-**Le plan proposé, qu'il n'a pas encore lu écrit** : un seul projet, les tickets créés dans l'ordre pour **garder les
-mêmes numéros** (le compteur de Trello est unique, 1 à 491, archivés compris) ; le préfixe ATLAS / CARTO / CMS / CORE /
-REPO / DESIGN devient un composant ; la colonne « Épiques » et ses listes, de vraies épiques ; fonctionnalité → story,
-défaut → bug, dette et doc → tâche ; critique / gênant / cosmétique → la priorité ; les colonnes, les mêmes états ;
-description, commentaires de clôture et pièces jointes repris. Puis la skill `/trello` réécrite, et la règle de
-commitlint qui exige le ticket dans chaque commit. Une à deux journées ; Trello gardé en lecture seule.
+**Premier geste de la session neuve : écrire le plan de migration** (sa demande, 20/11 : _« tu devras faire un plan de
+migration »_), dans **`files/plans/jira-migration.md`**. Ce fichier tient déjà ce que j'ai vérifié chez Atlassian (avec
+les liens), ce que je lui ai proposé, la conversation avec Gemini qu'il a apportée, et un tableau de ce qui s'accorde
+ou non entre les deux. À retenir : l'offre gratuite suffit ; un tableau Jira masque seul les tickets finis depuis deux
+semaines ; **l'importeur d'Atlassian ignore les cartes archivées — ne rien archiver dans Trello avant** ; un script à
+nous, par l'API, qui crée les tickets **dans l'ordre pour garder les mêmes numéros** (à prouver d'abord sur un projet
+d'essai) ; les épiques en vraies épiques ; puis la skill `/trello` et la règle de commitlint réécrites.
 
 **Sa règle pour la référence** (20/11) : on écrit toujours `[CARTO-67]` — le préfixe d'application et le numéro — dans
 les commits, les plans, les messages, _« pour pas que vous soyez chamboulés avec l'historien »_. La clé propre à Jira
 passe derrière ; à voir si elle peut porter ce préfixe (un projet par application casse le compteur unique).
 
-**Ce qui lui revient** : créer le site Jira avec son compte Atlassian, donner un jeton (dans `.env.local`, comme
-celui de Trello). **Écrire d'abord le plan dans `files/plans/`** : il n'a pas dit « le site ou le plan d'abord ».
+**Ce qui lui revient**, une fois le plan lu : créer le site Jira avec son compte Atlassian et donner un jeton (dans
+`.env.local`, comme celui de Trello).
 
 **ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
 (`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
