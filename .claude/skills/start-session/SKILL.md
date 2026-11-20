@@ -41,7 +41,9 @@ Gather all necessary written context from previous session.
    the board is reached through it alone. The proof is a read that returns: the first JQL search of this step. **Say
    the result in one line of the briefing**, whichever it is — « le MCP d'Atlassian répond », or that it does not, with
    the remedy: `/mcp`, where he signs in again (nobody else can). Never announce the board from `next.md` when the
-   read failed.
+   read failed. **A server « still connecting » at launch is not a failure**: load its tools by `ToolSearch`
+   (`select:mcp__atlassian__searchJiraIssuesUsingJql`), which waits for it; only a search that finds nothing, or a
+   read that errors, is said as a failure.
    **Then read the Jira board** — `/jira` skill: « À valider par le développeur » and the top of « À faire », then its sync check. Tell the dev, in two lines,
    what waits on him in **À valider par le développeur** and what tops **À faire**: the board is the list of tasks, `next.md`
    only the resume point.
