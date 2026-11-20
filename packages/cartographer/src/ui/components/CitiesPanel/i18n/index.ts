@@ -28,6 +28,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `polity` is the polity the map has under it.
  * - `chainEnd` — After the last title of a reading of the chain, how the chain ends; `end` is one of
  *   `chainSovereign`, `chainUnknown`, `chainLoop`.
+ * - `chainRankInversion` — Under a reading, a step where the vassal's rank scores higher than its suzerain's
+ *   (CARTO-491): `vassal` and `suzerain`, the two titles' names.
  * - `chainTitleReadings` — The chain's heading when it has several readings (the dev, 2026-11-17); `count` how many.
  * - `chainReading` — The label of one of those readings; `number` its rank, from 1.
  * - `stateIncomplete` — The state box of the cities whose chain stops short; `count` how many.

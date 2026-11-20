@@ -26,6 +26,8 @@ export interface DocTerritory {
   id: DocId
   /** Its Wikidata id, or nothing for one that has none. */
   wikidata?: string | null
+  /** Its kind, as the register stores it — the rank of the title that holds it (CARTO-491). */
+  kind?: string | null
 }
 
 /** A title as the export reads it, its territory resolved. */
@@ -76,6 +78,10 @@ export function chainRegister(
       name: title.label,
       wikidata: territory.wikidata ?? null,
       territory: territoryNumberOf(territory.id, `${where}, territory`),
+      // The register requires a kind; a territory read without one is written without, and its step is not checked.
+      ...(typeof territory.kind === 'string' && territory.kind !== ''
+        ? { kind: territory.kind }
+        : {}),
     })
   }
   return {

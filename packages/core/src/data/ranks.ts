@@ -100,25 +100,3 @@ export function outranks(vassal: string | null, suzerain: string | null): boolea
   const above = rankScore(suzerain)
   return below !== null && above !== null && below > above
 }
-
-/** A step of a chain where the one below outranks the one above. */
-export interface RankInversion {
-  /** The vassal's place in the chain, counted from its foot. */
-  vassal: number
-  /** Its suzerain's place: the next one up. */
-  suzerain: number
-}
-
-/**
- * Every step of a chain of vassalage where the vassal outranks its suzerain.
- * @param ranks - the chain's ranks from its foot up, as stored, `null` where one is not known
- * @returns the steps at fault, from the foot up; none for a coherent chain
- */
-export function rankInversions(ranks: readonly (string | null)[]): RankInversion[] {
-  const found: RankInversion[] = []
-  for (let index = 0; index + 1 < ranks.length; index++) {
-    if (outranks(ranks[index] ?? null, ranks[index + 1] ?? null))
-      found.push({ vassal: index, suzerain: index + 1 })
-  }
-  return found
-}

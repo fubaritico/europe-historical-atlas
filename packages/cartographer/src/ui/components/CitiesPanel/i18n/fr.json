@@ -64,6 +64,7 @@
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
   "chainLoop": "les maillons se contredisent",
+  "chainRankInversion": "À vérifier : « {vassal} » a un rang plus élevé que son suzerain, « {suzerain} ».",
   "stateIncomplete": "Chaîne incomplète ({count})",
   "misplacedLevel": "Chaîne de vassalité non respectée dans la carte : {city} doit dépendre de {polity}. Pas {onMap}."
 }

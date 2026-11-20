@@ -28,6 +28,21 @@ const LINKS = [
 
 describe('contentChain', () => {
   describe('happy path', () => {
+    it('writes the kind of each title’s territory, the rank the chain is checked by (CARTO-491)', () => {
+      const titles = [
+        { id: 10, label: 'Mathias II', territory: { id: 1, wikidata: 'Q1', kind: 'county' } },
+        { id: 20, label: 'Alain IV', territory: { id: 2, wikidata: null } },
+      ]
+      const register = chainRegister(titles, [])
+      expect(register.titles.get('10')).toEqual({
+        name: 'Mathias II',
+        wikidata: 'Q1',
+        territory: 1,
+        kind: 'county',
+      })
+      expect(register.titles.get('20')).toEqual({ name: 'Alain IV', wikidata: null, territory: 2 })
+    })
+
     it('writes the chain of Nantes in 1100, each title with its territory’s Wikidata id and number', () => {
       expect(contentChain(chainRegister(TITLES, LINKS), 10, 1100, 'city sheet 1')).toEqual([
         {

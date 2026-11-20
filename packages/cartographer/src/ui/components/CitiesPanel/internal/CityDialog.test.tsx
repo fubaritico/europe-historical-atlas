@@ -78,6 +78,50 @@ describe('CityDialog', () => {
 
   describe('variants', () => {
     // The dev's screen of 2026-11-16: the chain one title per line, the last saying how it ends
+    // CARTO-491, the dev, 2026-11-20: a city's chain must agree with the ranks' scores, and say it when it does not
+    it('says, under the chain, a king put under a count — the two titles named', () => {
+      const chain = [
+        {
+          titles: [
+            { name: 'Sulayman — taïfa de Lérida', wikidata: null, kind: 'kingdom' },
+            { name: 'Raimond-Bérenger III — comté de Barcelone', wikidata: 'Q1', kind: 'county' },
+          ],
+          end: 'unknown' as const,
+        },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain }}
+          openedVerdict={{ ...AGREES, chain }}
+          onClose={vi.fn()}
+        />
+      )
+      expect(screen.getByRole('region', { name: 'Metz' }).textContent).toContain(
+        'To check: “Sulayman — taïfa de Lérida” ranks higher than its suzerain, “Raimond-Bérenger III — comté de Barcelone”.'
+      )
+    })
+
+    it('says nothing of a chain that climbs, nor of titles whose rank the export does not carry', () => {
+      const climbing = [
+        {
+          titles: [
+            { name: 'Baudouin III — comté de Hainaut', wikidata: 'Q1', kind: 'county' },
+            { name: 'Henri IV — royaume de Germanie', wikidata: 'Q2', kind: 'kingdom' },
+            { name: 'Henri IV — Saint-Empire', wikidata: 'Q12548' },
+          ],
+          end: 'sovereign' as const,
+        },
+      ]
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, chain: climbing }}
+          openedVerdict={{ ...AGREES, chain: climbing }}
+          onClose={vi.fn()}
+        />
+      )
+      expect(screen.getByRole('region', { name: 'Metz' }).textContent).not.toContain('To check')
+    })
+
     it('writes the chain of vassalage one title per line, the last « sovereign »', () => {
       const chain = [
         {

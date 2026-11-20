@@ -459,3 +459,25 @@ describe('contentFileSchema — a territory’s kind and years', () => {
     expect(acceptsTerritory({ id: 372, name: 'Jablé', wikidata: null, kind: '' })).toBe(false)
   })
 })
+
+/**
+ * Parse a file holding Rome with a chain of one title.
+ * @param title - the title, as an export writes it
+ * @returns whether the schema accepts it
+ */
+function acceptsChainTitle(title: unknown): boolean {
+  return acceptsCity(rome({ chain: [{ titles: [title], end: 'sovereign' }] }))
+}
+
+// CARTO-491: a title of a city's chain carries the kind of the territory it holds — its rank.
+describe('contentFileSchema — the kind of a chain title’s territory', () => {
+  it('reads a chain title with its kind, and still one without', () => {
+    expect(acceptsChainTitle({ name: 'Mathias II', wikidata: null, kind: 'county' })).toBe(true)
+    expect(acceptsChainTitle({ name: 'Mathias II', wikidata: null })).toBe(true)
+  })
+
+  it('refuses an empty kind, and a kind that is no text', () => {
+    expect(acceptsChainTitle({ name: 'Mathias II', wikidata: null, kind: '' })).toBe(false)
+    expect(acceptsChainTitle({ name: 'Mathias II', wikidata: null, kind: 3 })).toBe(false)
+  })
+})

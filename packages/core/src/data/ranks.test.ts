@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { POLITY_RANKS, RANK_SCORES, outranks, rankInversions, rankScore } from './ranks'
+import { POLITY_RANKS, RANK_SCORES, outranks, rankScore } from './ranks'
 import { isTribe, isUnfilled, tribeStyleOf } from './tribes'
 
 describe('POLITY_RANKS', () => {
@@ -140,33 +140,5 @@ describe('outranks', () => {
     expect(outranks('empire', null)).toBe(false)
     expect(outranks(null, 'tribe')).toBe(false)
     expect(outranks('empire', 'abbey')).toBe(false)
-  })
-})
-
-describe('rankInversions', () => {
-  it('finds none in a chain that climbs: a lordship, a county, a duchy, a kingdom', () => {
-    expect(rankInversions(['lordship', 'county', 'duchy', 'kingdom'])).toEqual([])
-  })
-
-  it('names the step where a vassal outranks its suzerain, counted from the foot', () => {
-    expect(rankInversions(['county', 'kingdom', 'duchy', 'empire'])).toEqual([
-      { vassal: 1, suzerain: 2 },
-    ])
-  })
-
-  it('names every such step of a chain', () => {
-    expect(rankInversions(['duchy', 'county', 'tribe'])).toEqual([
-      { vassal: 0, suzerain: 1 },
-      { vassal: 1, suzerain: 2 },
-    ])
-  })
-
-  it('steps over what has no score without joining its neighbours: a kingdom, a city, a county', () => {
-    expect(rankInversions(['kingdom', 'city', 'county'])).toEqual([])
-  })
-
-  it('finds none in a chain of one, or of none', () => {
-    expect(rankInversions(['empire'])).toEqual([])
-    expect(rankInversions([])).toEqual([])
   })
 })

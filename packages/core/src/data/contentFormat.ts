@@ -299,6 +299,11 @@ export interface ContentChainTitle {
   wikidata: string | null
   /** The number of the territory it holds in the CMS; absent from an export written before CARTO-450. */
   territory?: number
+  /**
+   * The kind of the territory it holds, as the CMS stores it — the title's rank, which the chain's coherence is
+   * checked by (CARTO-491, `data/ranks`); absent from an export written before it.
+   */
+  kind?: string
 }
 
 /** A territory number of the CMS: a whole number from one. */
@@ -309,6 +314,7 @@ const chainTitleSchema: z.ZodMiniType<ContentChainTitle> = z.strictObject({
   name: z.string().check(z.minLength(1)),
   wikidata: wikidataId,
   territory: z.exactOptional(territoryNumber),
+  kind: z.exactOptional(z.string().check(z.minLength(1))),
 })
 
 /** A territory of the CMS, as the Cartographer offers it to a polity of the map (CARTO-450). */

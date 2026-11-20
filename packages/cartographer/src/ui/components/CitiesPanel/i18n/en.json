@@ -64,6 +64,7 @@
   "chainSovereign": "sovereign",
   "chainUnknown": "beyond, we do not know",
   "chainLoop": "the links contradict one another",
+  "chainRankInversion": "To check: “{vassal}” ranks higher than its suzerain, “{suzerain}”.",
   "stateIncomplete": "Chain incomplete ({count})",
   "misplacedLevel": "Chain of vassalage not followed on the map: {city} should depend on {polity}. Not {onMap}."
 }
