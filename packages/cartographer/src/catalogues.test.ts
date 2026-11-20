@@ -9,6 +9,7 @@ import type { OpeningStep } from './loaders/opening'
 import type { NoticeTopic } from './persistence/notice'
 import type { LayerId } from './state/layersSlice'
 import type { EditorTool, PenMode } from './state/toolSlice'
+import type { TerritoryProposal, TerritoryProposalField } from './ui/utils/territoryProposals'
 import type {
   Anachronism,
   NotASubject,
@@ -184,6 +185,18 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     suzerain: true,
   }),
   'WIKIDATA_PANEL_MESSAGES.verb.state': all<WikidataSuggestion['state']>({
+    empty: true,
+    differs: true,
+    same: true,
+  }),
+  // What the CMS's territory proposes under « CMS ID » (CARTO-488).
+  'POLITY_FORM_MESSAGES.proposalField.field': all<TerritoryProposalField>({
+    name: true,
+    rank: true,
+    existsFrom: true,
+    existsTo: true,
+  }),
+  'POLITY_FORM_MESSAGES.proposalVerb.state': all<TerritoryProposal['state']>({
     empty: true,
     differs: true,
     same: true,

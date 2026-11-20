@@ -415,3 +415,47 @@ describe('contentFileSchema', () => {
     })
   })
 })
+
+/**
+ * Read a file holding one territory.
+ * @param territory - the territory, as an export writes it
+ * @returns whether the file is accepted
+ */
+function acceptsTerritory(territory: unknown): boolean {
+  return contentFileSchema.safeParse({
+    version: CONTENT_FORMAT_VERSION,
+    events: [],
+    cities: [],
+    territories: [territory],
+  }).success
+}
+
+// CARTO-488: a territory carries its kind and the years it exists between, for the polity's form to propose.
+describe('contentFileSchema — a territory’s kind and years', () => {
+  it('reads a territory with its kind and its years', () => {
+    expect(
+      acceptsTerritory({
+        id: 372,
+        name: 'Jablé',
+        wikidata: null,
+        kind: 'emirate',
+        existsFrom: 1081,
+        existsTo: null,
+      })
+    ).toBe(true)
+  })
+
+  it('still reads a territory of an export written before them', () => {
+    expect(acceptsTerritory({ id: 372, name: 'Jablé', wikidata: null })).toBe(true)
+  })
+
+  it('refuses a year that is no whole number, and an empty kind', () => {
+    expect(acceptsTerritory({ id: 372, name: 'Jablé', wikidata: null, existsFrom: 1081.5 })).toBe(
+      false
+    )
+    expect(acceptsTerritory({ id: 372, name: 'Jablé', wikidata: null, existsFrom: '1081' })).toBe(
+      false
+    )
+    expect(acceptsTerritory({ id: 372, name: 'Jablé', wikidata: null, kind: '' })).toBe(false)
+  })
+})

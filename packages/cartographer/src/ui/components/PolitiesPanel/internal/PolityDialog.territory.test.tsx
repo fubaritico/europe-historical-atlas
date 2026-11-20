@@ -11,6 +11,7 @@ import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { PolityDialog } from './PolityDialog'
 
+import type { ContentTerritory } from '@europe-historical-atlas/core/data/contentFormat'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /** A Wikidata source that knows nothing — the form's panel stays quiet. */
@@ -40,7 +41,10 @@ const THURINGIA: YearPolity = {
  * @param territories - the CMS's territories the export gave
  * @returns the store and the user
  */
-function openDialog(editing: YearPolity | null, territories = [THURINGIA_CMS, MEISSEN_CMS]) {
+function openDialog(
+  editing: YearPolity | null,
+  territories: ContentTerritory[] = [THURINGIA_CMS, MEISSEN_CMS]
+) {
   const store = createCartographerStore({
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: UNFRAMED },
@@ -93,5 +97,86 @@ describe('PolityDialog — the CMS territory', () => {
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[0]?.territory).toBe(99)
     })
+  })
+})
+
+/**
+ * Choose Jablé in « CMS ID ».
+ * @param user - the user
+ * @returns nothing
+ */
+async function chooseJable(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(territoryField(), 'jab')
+  await user.click(await screen.findByRole('option', { name: 'Jablé — CMS ID 372' }))
+}
+
+// CARTO-488, the dev, 2026-11-20: choosing « Jablé — CMS ID 372 » filled nothing — the territory now proposes.
+describe('PolityDialog — what the CMS territory proposes', () => {
+  const JABLE_CMS = {
+    id: 372,
+    name: 'Jablé',
+    wikidata: null,
+    kind: 'emirate',
+    existsFrom: 1081,
+    existsTo: null,
+  }
+
+  it('proposes the name, the rank and the year of the territory chosen, and writes none of them', async () => {
+    const { user } = openDialog(null, [JABLE_CMS])
+    await chooseJable(user)
+    const list = screen.getByRole('list', { name: 'What the CMS proposes' })
+    expect([...list.querySelectorAll('li')].map((line) => line.textContent)).toEqual([
+      'NameJabléUse',
+      'RankemirateUse',
+      'Exists from1081Use',
+    ])
+    expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('')
+  })
+
+  it('takes each value on its « Use », and saves the polity with them', async () => {
+    const { store, user } = openDialog(null, [JABLE_CMS])
+    await chooseJable(user)
+    await user.click(screen.getByRole('button', { name: 'Use “Jablé” for Name' }))
+    await user.click(screen.getByRole('button', { name: 'Use “emirate” for Rank' }))
+    await user.click(screen.getByRole('button', { name: 'Use “1081” for Exists from' }))
+    await user.click(screen.getByRole('button', { name: 'OK' }))
+    expect(store.getState().document.polities[0]).toMatchObject({
+      name: 'Jablé',
+      rank: 'emirate',
+      existsFrom: 1081,
+      territory: 372,
+    })
+  })
+
+  it('offers « Replace » on a name the author wrote otherwise, and « Agrees », inert, once taken', async () => {
+    const { user } = openDialog(null, [JABLE_CMS])
+    await user.type(screen.getByLabelText('Name'), 'Jabala')
+    await chooseJable(user)
+    await user.click(screen.getByRole('button', { name: 'Replace “Jablé” for Name' }))
+    expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('Jablé')
+    expect(
+      screen.getByRole('button', { name: 'Agrees “Jablé” for Name' }).getAttribute('aria-disabled')
+    ).toBe('true')
+  })
+
+  it('proposes the year it exists to when the CMS gives one, and saves it on « Use »', async () => {
+    const { store, user } = openDialog(null, [{ ...JABLE_CMS, existsTo: 1109 }])
+    await user.type(screen.getByLabelText('Name'), 'Jabala')
+    await chooseJable(user)
+    await user.click(screen.getByRole('button', { name: 'Use “1109” for Exists to' }))
+    await user.click(screen.getByRole('button', { name: 'OK' }))
+    expect(store.getState().document.polities[0]?.existsTo).toBe(1109)
+  })
+
+  it('proposes no rank for a territory that is a city: no rank of a polity', async () => {
+    const { user } = openDialog(null, [{ ...JABLE_CMS, kind: 'city' }])
+    await chooseJable(user)
+    const list = screen.getByRole('list', { name: 'What the CMS proposes' })
+    expect(list.textContent).not.toContain('Rank')
+  })
+
+  it('proposes nothing while no territory is chosen', () => {
+    openDialog(null, [JABLE_CMS])
+    expect(screen.queryByRole('list', { name: 'What the CMS proposes' })).toBeNull()
   })
 })

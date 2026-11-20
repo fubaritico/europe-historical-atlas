@@ -319,6 +319,15 @@ export interface ContentTerritory {
   name: string
   /** Its Wikidata id, or `null` when it has none. */
   wikidata: string | null
+  /**
+   * Its kind, as the CMS stores it — a rank (`county`, `emirate`) or what only the register holds (`city`, `office`):
+   * what the Cartographer proposes as a polity's rank (CARTO-488). Absent from an export written before it.
+   */
+  kind?: string
+  /** The year it exists from, `null` when the CMS gives none; absent from an export written before CARTO-488. */
+  existsFrom?: number | null
+  /** The year it exists to, `null` when the CMS gives none; absent from an export written before CARTO-488. */
+  existsTo?: number | null
 }
 
 /** {@link ContentTerritory}. */
@@ -326,6 +335,9 @@ const territorySchema: z.ZodMiniType<ContentTerritory> = z.strictObject({
   id: territoryNumber,
   name: z.string().check(z.minLength(1)),
   wikidata: wikidataId,
+  kind: z.exactOptional(z.string().check(z.minLength(1))),
+  existsFrom: z.exactOptional(z.nullable(z.int())),
+  existsTo: z.exactOptional(z.nullable(z.int())),
 })
 
 /**

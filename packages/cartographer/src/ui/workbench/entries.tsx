@@ -321,6 +321,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         territories={[]}
         ranks={RANKS}
         rankWarnings={[]}
+        territoryProposals={[]}
         {...INERT}
       />
     ),
@@ -351,6 +352,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         territories={[]}
         ranks={RANKS}
         rankWarnings={[]}
+        territoryProposals={[]}
         {...INERT}
       />
     ),
@@ -374,6 +376,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         territories={[]}
         ranks={RANKS}
         rankWarnings={[]}
+        territoryProposals={[]}
         {...INERT}
       />
     ),

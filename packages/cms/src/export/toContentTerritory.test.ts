@@ -7,28 +7,82 @@ describe('toContentTerritories', () => {
     it('gives each territory its number, its French name and its Wikidata id', () => {
       expect(
         toContentTerritories([
-          { id: 12, name: 'Duché de Bretagne', wikidata: 'Q327555' },
-          { id: 42, name: 'Thuringe', wikidata: null },
+          { id: 12, name: 'Duché de Bretagne', wikidata: 'Q327555', kind: 'duchy' },
+          { id: 42, name: 'Thuringe', wikidata: null, kind: 'county' },
         ])
       ).toEqual([
-        { id: 12, name: 'Duché de Bretagne', wikidata: 'Q327555' },
-        { id: 42, name: 'Thuringe', wikidata: null },
+        {
+          id: 12,
+          name: 'Duché de Bretagne',
+          wikidata: 'Q327555',
+          kind: 'duchy',
+          existsFrom: null,
+          existsTo: null,
+        },
+        {
+          id: 42,
+          name: 'Thuringe',
+          wikidata: null,
+          kind: 'county',
+          existsFrom: null,
+          existsTo: null,
+        },
+      ])
+    })
+
+    it('gives its kind and the years it exists between, for the polity’s form to propose (CARTO-488)', () => {
+      const jable = {
+        id: 372,
+        name: 'Jablé',
+        kind: 'emirate',
+        existsFrom: { year: 1081, month: null },
+        existsTo: { year: null },
+      }
+      expect(toContentTerritories([jable])).toEqual([
+        {
+          id: 372,
+          name: 'Jablé',
+          wikidata: null,
+          kind: 'emirate',
+          existsFrom: 1081,
+          existsTo: null,
+        },
       ])
     })
   })
 
   describe('variants', () => {
     it('reads a Wikidata id left out as none', () => {
-      expect(toContentTerritories([{ id: 42, name: 'Thuringe' }])).toEqual([
-        { id: 42, name: 'Thuringe', wikidata: null },
+      expect(toContentTerritories([{ id: 42, name: 'Thuringe', kind: 'county' }])).toEqual([
+        {
+          id: 42,
+          name: 'Thuringe',
+          wikidata: null,
+          kind: 'county',
+          existsFrom: null,
+          existsTo: null,
+        },
       ])
     })
   })
 
   describe('managed errors', () => {
     it('refuses a territory with no French name, naming it', () => {
-      expect(() => toContentTerritories([{ id: 42, name: '' }])).toThrow(
+      expect(() => toContentTerritories([{ id: 42, name: '', kind: 'county' }])).toThrow(
         'territory 42: no French name'
+      )
+    })
+
+    it('refuses a year that is no whole number, naming the territory, rather than exporting « no year »', () => {
+      const bad = { id: 42, name: 'Thuringe', kind: 'county', existsFrom: { year: 1081.5 } }
+      expect(() => toContentTerritories([bad])).toThrow(
+        'territory 42, exists from: its year is not a whole number (1081.5)'
+      )
+    })
+
+    it('refuses a territory with no kind, naming it', () => {
+      expect(() => toContentTerritories([{ id: 42, name: 'Thuringe' }])).toThrow(
+        'territory 42: no kind'
       )
     })
   })

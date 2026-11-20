@@ -13,6 +13,7 @@ import { ShortNameFields } from './ShortNameFields'
 import { StandingFields } from './StandingFields'
 import { SuzerainField } from './SuzerainField'
 import { TerritoryField } from './TerritoryField'
+import { TerritoryProposals } from './TerritoryProposals'
 
 import type { PolityFieldsProps, PolityFormField } from '../polityFieldsProps'
 
@@ -73,6 +74,7 @@ export function PolityFields(props: PolityFieldsProps) {
         value={draft.territory}
         onSelect={choose('territory')}
       />
+      <TerritoryProposals proposals={props.territoryProposals} onUse={onField} />
     </>
   )
 }

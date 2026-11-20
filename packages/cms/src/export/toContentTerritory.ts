@@ -9,6 +9,29 @@ export interface DocTerritoryEntry {
   name?: string | null
   /** Its Wikidata id, or nothing for one that has none. */
   wikidata?: string | null
+  /** Its kind, as the register stores it. */
+  kind?: string | null
+  /** The moment it exists from, as the form holds it: its year at least. */
+  existsFrom?: { year?: number | null } | null
+  /** The moment it exists to. */
+  existsTo?: { year?: number | null } | null
+}
+
+/**
+ * The year of a moment of the register.
+ * @param moment - the moment as the form holds it, or nothing
+ * @param where - what it is, for the error
+ * @returns its year, or `null` when the register gives none
+ * @throws {Error} when the year is there and is no whole number — a base written outside the form, said rather than
+ *   exported as « no year »
+ */
+function yearOf(moment: { year?: unknown } | null | undefined, where: string): number | null {
+  const year = moment?.year
+  if (year === null || year === undefined) return null
+  if (typeof year !== 'number' || !Number.isInteger(year)) {
+    throw new Error(`[CMS] ${where}: its year is not a whole number (${JSON.stringify(year)})`)
+  }
+  return year
 }
 
 /**
@@ -27,10 +50,10 @@ export function territoryNumberOf(id: DocId, where: string): number {
 
 /**
  * Every territory of the CMS, as the Cartographer offers them to a polity of the map (CARTO-450): its number, its name,
- * its Wikidata id.
+ * its Wikidata id — and its kind and the years it exists between, which the polity's form proposes (CARTO-488).
  * @param docs - the territories, in French
  * @returns the territories
- * @throws {Error} when one has no name or no number — a territory the Cartographer could not name
+ * @throws {Error} when one has no name, no number or no kind — the register requires the three
  */
 export function toContentTerritories(docs: readonly DocTerritoryEntry[]): ContentTerritory[] {
   return docs.map((doc) => {
@@ -38,6 +61,16 @@ export function toContentTerritories(docs: readonly DocTerritoryEntry[]): Conten
     if (typeof doc.name !== 'string' || doc.name === '') {
       throw new Error(`[CMS] ${where}: no French name`)
     }
-    return { id: territoryNumberOf(doc.id, where), name: doc.name, wikidata: doc.wikidata ?? null }
+    if (typeof doc.kind !== 'string' || doc.kind === '') {
+      throw new Error(`[CMS] ${where}: no kind`)
+    }
+    return {
+      id: territoryNumberOf(doc.id, where),
+      name: doc.name,
+      wikidata: doc.wikidata ?? null,
+      kind: doc.kind,
+      existsFrom: yearOf(doc.existsFrom, `${where}, exists from`),
+      existsTo: yearOf(doc.existsTo, `${where}, exists to`),
+    }
   })
 }

@@ -30,5 +30,9 @@
   "noTerritoryMatch": "No territory of that name in the CMS.",
   "noTerritories": "No territory read: run the CMS export again (pnpm export:content).",
   "removeTerritory": "Remove {name}",
-  "territoryLabel": "{name} — CMS ID {id}"
+  "territoryLabel": "{name} — CMS ID {id}",
+  "territoryProposals": "What the CMS proposes",
+  "proposalField": "{field, select, name {Name} rank {Rank} existsFrom {Exists from} existsTo {Exists to} other {{field}}}",
+  "proposalVerb": "{state, select, empty {Use} differs {Replace} same {Agrees} other {{state}}}",
+  "proposalLabel": "{verb} “{value}” for {field}"
 }

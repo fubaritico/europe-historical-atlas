@@ -1,6 +1,7 @@
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
 import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../utils/polityDraft'
 import type { RankWarning } from '../../utils/rankWarnings'
+import type { TerritoryProposal } from '../../utils/territoryProposals'
 import type { WikidataView } from '../../utils/wikidataView'
 import type { ColorValue } from '@fubaritico/behaviors'
 
@@ -24,6 +25,8 @@ export interface PolityFieldsProps {
    * suzerain, never refused.
    */
   rankWarnings: readonly RankWarning[]
+  /** What the CMS's territory chosen proposes for the form's fields — taken on the author's click alone (CARTO-488). */
+  territoryProposals: readonly TerritoryProposal[]
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
   idLocked?: boolean
   /**
