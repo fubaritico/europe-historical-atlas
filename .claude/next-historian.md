@@ -9,7 +9,26 @@
 plein de trucs »_) : effacer `files/resources/historien/1100/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `files/plans/sources/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 19/11, 23 h 45 : la Rus', le Levant et la Finlande faits ; l'export et CORE-486 attendent
+## ▶ ON REPREND ICI — 20/11, 15 h 4x : la 1100 vers zéro alerte, avec lui ; puis le Bregel, puis 1200
+
+**Le tableau passe de Trello à Jira** (sa décision, 20/11) : à la prochaine session, la skill `jira` remplace `/trello` ;
+les numéros des tickets changent, leurs titres seront mis à jour.
+
+**La retouche de la 1100** (sa demande, 20/11 : zéro ville mal placée, avant le contrôle de la CI) : mesurer par
+`pnpm cities:alerts --map 1100`, jamais lui demander ; ma liste de travail `files/resources/historien/1100/alertes-1100.md`.
+42 alertes le matin → 34 à 15 h 40 (Levant, Jablé, Kungälv, Vladimir, Cardona en enclave). Suivante : Ancyre aux
+Danichmendides. Mes fiches douteuses encore à relire : Gênes, Lüttgen-Salbke, Schrenz, Altenmarkt, Reisenberg, Velilla de
+Cinca, Città di Castello, Desenzano, Miliana, Tripoli (Libye), Brest. Après chaque correction de la base : l'export, par moi.
+Fait le 20/11 : Ancyre (lecture seldjoukide ajoutée), Jablé (Ibn Sulaiha, territoire 372), 27 sortes de territoire
+corrigées (rangs et scores CARTO-487, CORE-489 ; la marche à 3, sa décision). Reste à lui : le rang des États pontificaux.
+
+**Ensuite** : le PDF *Palgrave Concise Historical Atlas of Central Asia* (`files/resources/other-historical-atlases-pdf/`,
+sous droits : des faits, jamais un tracé) — les tribus de 1100, territoire et couleur non définis. Puis **1200** : les
+mêmes villes, leur détenteur en 1200, et la mesure de ce qui ne change pas d'un siècle à l'autre (une appartenance
+sourcée valable sur un laps de dates ? sa décision à prendre sur cette mesure). Kings and Generals : des pistes par les
+résumés de Gemini, chaque fait relu dans un texte ; les livres cités sous leurs vidéos.
+
+## Avant — 19/11, 23 h 45 : la Rus', le Levant et la Finlande faits ; l'export et CORE-486 attendent
 
 **Fait** (détail : `completed.md`, et les notes de `files/plans/sources/1100/`) :
 
@@ -28,6 +47,11 @@ de `files/plans/sources/1100/` (kosovo, france-empire, lusatia) restent : ce son
    Code est 200 lignes ou 25 Ko (le « 140 » écrit ici avant était une erreur de ma part).
 3. **La côte du Levant sur sa carte** : dessinée seldjoukide, quand Acre, Sidon, Beyrouth étaient fatimides en 1100 et
    Tripoli aux Banu Ammar (non dessiné) — `levant.md`.
+
+**Quand le codeur a fini CARTO-487 et CORE-489** (les rangs et leurs scores, dans le CMS et le Cartographe ; sa
+demande, 20/11) : **je remets la base à jour**. Chaque territoire reçoit sa sorte nouvelle quand elle lui va (les Sames et les
+Kvènes en « peuple », les républiques, les confédérations de tribus) ; Jablé (372) passe en seigneurie ; puis je relis
+les avertissements du score, un vassal plus haut que son suzerain, et je corrige ce qui vient de la base.
 
 **CORE-486, sa demande pour plus tard** : la Carélie en hachures moitié Novgorod, moitié transparentes — le code d'abord
 (le codeur), puis la carte : les Caréliens en « Aucune », Novgorod étendu sur eux, dans l'arbre principal. Elle remplace sa

@@ -2,6 +2,25 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-18 (nuit) → 19/11 — l'historien : la Rus', le Levant et la Mésopotamie en 1100, la Finlande dessinée
+
+Plages journalisées **18/11 23:18 → 00:19** et **19/11 18:24 → 23:45** (avec le codeur dans une autre session ; les
+saisies du CMS ne sont pas journalisées) ; le chantier totalise **371 h 58 sur 58 plages**.
+
+- **La Rus'** (sa commande : _« travaille et saisis les résultats de ton travail »_) : 33 villes de 1100, triées par moi
+  sur les pages russes, sans agents ; Selezivka (région) corrigée et Bryn complétée après le contrôle du codeur ; note
+  `files/plans/sources/1100/rus.md` ; le dossier de travail supprimé à sa demande (_« tout ce dont tu t'es servi »_).
+- **Le Levant, Chypre, la Mésopotamie** (_« il me faudrait des villes dans cette zone-là »_, puis _« une partie de la
+  Mésopotamie »_) : 51 lieux d'Alep à Gaza et de Mossoul à Kerbala ; six détenteurs pris de la phrase retenue, en alerte
+  exprès ; Beït Shéan complétée après le contrôle du codeur ; note `levant.md` (la côte libanaise dessinée seldjoukide).
+- **Sa remarque** (mémoire `enough-cities-not-all`) : _« t'as mis tout le Domesday… la moitié aurait suffi »_ — une
+  région se remplit jusqu'à la densité de ses voisines.
+- **La Finlande** : une proposition puis une maquette en image ; son découpage validé ; dessinée dans l'arbre principal,
+  Novgorod reculé à la Neva et au Ladoga (sa réponse), trois tribus, les Sames et les Kvènes en « Aucune » (CARTO-484 du
+  codeur) ; relue par le codeur, commitée par lui (`1d8be087`) : _« ça me convient tel que c'est »_. Suite : CORE-486.
+- **Mes fautes** : un `cd` dans une commande ; un seuil de 140 lignes pour la mémoire écrit sans source ; trois régions
+  vides non annoncées au Levant ; deux téléchargements lancés ensemble, freinés par Wikipédia.
+
 ### 2026-11-18 — l'historien : 1 871 villages d'Allemagne de l'Ouest avec 8 agents, le rangement du disque, la méthode écrite
 
 Plages journalisées **18/11 12:09 → 12:22** et **14:39 → 19:51** (les saisies du CMS et des agents ne sont pas

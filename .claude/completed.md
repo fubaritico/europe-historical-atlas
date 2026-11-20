@@ -4,6 +4,33 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
+### 2026-11-20 — le codeur : l'oriflamme de la conquête, les rangs et leurs scores, la décision de migrer vers Jira
+
+Plage **20/11 12:31 → 16:00** (3 h 27 au journal, avec l'historien dans une autre session) ; le chantier totalise
+**375 h 49 sur 59 plages**. Tout est commité et poussé.
+
+- **Fermés** : ATLAS-477 (l'oriflamme : le modèle 3D « A », l'image plate « H2 » redessinée dans son cadre, plantée
+  par son mât ; le sol sali à sa demande ; l'icône posée par moi sur le type « Conquest », base copiée avant —
+  _« Le rendu est très très bon »_), CARTO-487 (une seule liste de rangs, lue par le Cartographe et le CMS ; le rang
+  « peuple »), CORE-489 (un score par rang, un vassal mieux classé que son suzerain est dit, jamais bloqué ; **la
+  marche à 3**, sa décision de 15 h 20), CARTO-488 (un CMS ID propose le nom, le rang et les années), CARTO-491 (créé
+  à sa demande : la fenêtre d'une ville dit le maillon incohérent).
+- **Sa règle du jour** (mémoire `one-gesture-to-validate`) : _« je n'ai pas à intervenir dans la validation d'une
+  fonctionnalité, elle DOIT être testée, et s'il y a un truc on le verra quand on s'en sert »_ — je teste et je clos ;
+  ne va à lui que ce qui se juge à l'œil ou se décide, en un seul geste.
+- **Le tableau migre vers Jira** (sa décision) : la colonne « Fait » à 261 tickets, et le besoin d'une hiérarchie
+  claire épique → story → tâche → correctif. La référence d'un ticket reste `[CARTO-67]` : _« une pratique qu'on
+  gardera pour pas que vous soyez chamboulés avec l'historien »_. À faire dans une nouvelle session.
+- **Avec l'historien** : son arbre resynchronisé (52 commits de retard) ; 27 sortes de territoire corrigées par lui
+  (les califats, les taïfas en émirats, cinq républiques, les Coumans) ; quatre exports contrôlés et commités. Il
+  reste trois maillons signalés, voulus : les duchés de Naples et de Gaète.
+- **Trouvé en route** : le contrôle du commit rejouait les tests du Cartographe quand `core` changeait — `test`
+  dépend maintenant de `^test` dans Turbo (`rules/troubleshooting.md`).
+- **ATLAS-448** commencé : l'inventaire des textes de l'atlas et de leur langue (`files/plans/atlas/one-language.md`).
+- **Mes fautes** : un push pendant qu'une CI déployait (son run annulé, le suivant a tout porté) ; quatre tickets
+  « à valider » avec des listes de cas à essayer ; CARTO-488 et CARTO-491 clos sans les avoir regardés dans le
+  navigateur ; « state » annoncé inutilisé par le ticket, vérifié seulement en codant.
+
 ### 2026-11-19 → 20/11 — le codeur : 13 594 villes sans attente, « Aucune » dans le formulaire, la Finlande relue, les oriflammes sur le banc
 
 Plage **19/11 18:24 → 20/11 00:04** (5 h 39, avec l'historien dans une autre session) ; le chantier totalise
@@ -40,22 +67,3 @@ Plage **19/11 18:24 → 20/11 00:04** (5 h 39, avec l'historien dans une autre s
   (corrigé avant de coder) ; des heures écrites de tête dans trois commentaires de ticket (« 0 h 30 », « 1 h » : il
   était minuit) ; la mesure faite dans un Chrome sans fenêtre pendant qu'il testait, contre la consigne du
   spike ; l'écriture de ces notes sans son accord préalable, parce qu'il partait se coucher.
-
-### 2026-11-18 (nuit) → 19/11 — l'historien : la Rus', le Levant et la Mésopotamie en 1100, la Finlande dessinée
-
-Plages journalisées **18/11 23:18 → 00:19** et **19/11 18:24 → 23:45** (avec le codeur dans une autre session ; les
-saisies du CMS ne sont pas journalisées) ; le chantier totalise **371 h 58 sur 58 plages**.
-
-- **La Rus'** (sa commande : _« travaille et saisis les résultats de ton travail »_) : 33 villes de 1100, triées par moi
-  sur les pages russes, sans agents ; Selezivka (région) corrigée et Bryn complétée après le contrôle du codeur ; note
-  `files/plans/sources/1100/rus.md` ; le dossier de travail supprimé à sa demande (_« tout ce dont tu t'es servi »_).
-- **Le Levant, Chypre, la Mésopotamie** (_« il me faudrait des villes dans cette zone-là »_, puis _« une partie de la
-  Mésopotamie »_) : 51 lieux d'Alep à Gaza et de Mossoul à Kerbala ; six détenteurs pris de la phrase retenue, en alerte
-  exprès ; Beït Shéan complétée après le contrôle du codeur ; note `levant.md` (la côte libanaise dessinée seldjoukide).
-- **Sa remarque** (mémoire `enough-cities-not-all`) : _« t'as mis tout le Domesday… la moitié aurait suffi »_ — une
-  région se remplit jusqu'à la densité de ses voisines.
-- **La Finlande** : une proposition puis une maquette en image ; son découpage validé ; dessinée dans l'arbre principal,
-  Novgorod reculé à la Neva et au Ladoga (sa réponse), trois tribus, les Sames et les Kvènes en « Aucune » (CARTO-484 du
-  codeur) ; relue par le codeur, commitée par lui (`1d8be087`) : _« ça me convient tel que c'est »_. Suite : CORE-486.
-- **Mes fautes** : un `cd` dans une commande ; un seuil de 140 lignes pour la mémoire écrit sans source ; trois régions
-  vides non annoncées au Levant ; deux téléchargements lancés ensemble, freinés par Wikipédia.

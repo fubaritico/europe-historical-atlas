@@ -8,69 +8,71 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**L'historien, 19/11 au soir** : 51 lieux du Levant, de Chypre et de Mésopotamie saisis en 1100 (fiches 13627–13677,
-contrôlés par toi), **non exportés** ; la Finlande de 1100 dessinée et commitée (`1d8be087`) ; ses notes `levant.md` et
-`rus.md`, `fetch_rest.py` et son point de reprise commités le 19/11 au soir — son point de reprise, `next-historian.md`.
-**À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) l'export, pour les 51 lieux du
-Levant ; (2) ranger avec l'historien l'index de la mémoire (166 lignes, limite 200) ; (3) la côte libanaise de sa 1100,
-dessinée seldjoukide alors qu'elle était fatimide (`files/plans/sources/1100/levant.md`) ; (4) plus tard, CORE-486.
+**L'historien, 20/11** : 27 sortes de territoire corrigées (les califats, les taïfas en émirats, cinq républiques, les
+Coumans) et quatre exports, tous commités ; son point de reprise, `next-historian.md`.
+**À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
+de la mémoire (170 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
+fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 0 h 07 : l'oriflamme de la conquête dans la carte, ATLAS-477
+## ▶ ON REPREND ICI — le 20/11, 16 h : la migration du tableau de Trello vers Jira
 
-**Sa ligne** (19/11) : _« j'aimerais bien qu'on continue sur les icônes 3D, notamment Conquête »_ ; ATLAS-288 reste le
-ticket parent (six types sur treize ont leur icône). Tout est commité et poussé ; **« À valider » est vide**.
+**Sa décision** (20/11) : _« une colonne à 261 items […] archiver proprement tout en gardant l'historique »_, et _« une
+hiérarchie claire entre epic, story, task et bugfix »_. À faire dans une session neuve.
 
-**ATLAS-477, la conquête — En cours, les candidates sont sur ses bancs** (_« ça donne presque envie de le mettre
-maintenant »_ ; _« on pourra reprendre par ça demain »_) :
+**Vérifié chez Atlassian le 20/11** (les liens sont dans la conversation, à relire avant de coder) : l'offre gratuite
+suffit (10 utilisateurs, projets et tickets illimités, 2 Go) ; un tableau masque seul les tickets terminés depuis deux
+semaines (1, 2 ou 4 sur un projet géré par l'entreprise), tous restent cherchables ; **l'importeur Trello d'Atlassian
+n'importe pas les cartes archivées** et les retours sur les commentaires se contredisent — donc **un script à nous**,
+et **ne rien archiver dans Trello avant**. La hiérarchie épique → story / tâche / bug → sous-tâche : le modèle standard
+de Jira, pas revérifié dans la doc.
 
-- **le modèle 3D**, `/icons.html?conquest` (`bench/conquestCandidates.ts`) : une hampe dorée sur un pied à deux marches,
-  un tissu rouge carmin. A, l'oriflamme à deux pointes, bordée d'or ; B, le drapeau bordé d'or ; C, le fanion en
-  triangle ; D, la bannière pendue à sa traverse, queue d'aronde ; E, la bannière pendue à trois langues. **Le tissu
-  flotte** — sa seule animation, sa décision : 24 bandes pour tous, chacune une pièce mobile le long d'une vague
-  (comme le trébuchet) ; l'ampleur de A, B, C montée à sa demande (0,13), D et E laissées (0,05) ;
-- **l'image plate**, `/svg-icons.html` (`bench/conquestFlatCandidates.ts`) : huit silhouettes, A à H, dans le cadre
-  44 × 44 — les lettres ne se correspondent pas d'un banc à l'autre.
+**Le plan proposé, qu'il n'a pas encore lu écrit** : un seul projet, les tickets créés dans l'ordre pour **garder les
+mêmes numéros** (le compteur de Trello est unique, 1 à 491, archivés compris) ; le préfixe ATLAS / CARTO / CMS / CORE /
+REPO / DESIGN devient un composant ; la colonne « Épiques » et ses listes, de vraies épiques ; fonctionnalité → story,
+défaut → bug, dette et doc → tâche ; critique / gênant / cosmétique → la priorité ; les colonnes, les mêmes états ;
+description, commentaires de clôture et pièces jointes repris. Puis la skill `/trello` réécrite, et la règle de
+commitlint qui exige le ticket dans chaque commit. Une à deux journées ; Trello gardé en lecture seule.
 
-**Son choix (20/11)** : _« le A avec, pour les icônes SVG, le H »_ — le modèle 3D **A**, l'image plate **H** (l'oriflamme
-qui flotte). **Sa remarque sur les images plates** : _« tes icônes, elles sont coupées en haut et en bas »_ — mes
-dessins vont au bord du cadre 44 × 44 et le liseré (2 unités autour) en sort ; H se redessine **dans** le cadre, liseré
-compris, _« peut-être qu'elle intègre le petit pied au pied du mât »_ (les deux marches du modèle 3D).
+**Sa règle pour la référence** (20/11) : on écrit toujours `[CARTO-67]` — le préfixe d'application et le numéro — dans
+les commits, les plans, les messages, _« pour pas que vous soyez chamboulés avec l'historien »_. La clé propre à Jira
+passe derrière ; à voir si elle peut porter ce préfixe (un projet par application casse le compteur unique).
 
-**À faire, `/make-event-icon` pas 5** : le modèle A dans `meshes/`, H redessinée dans `flat/`, une clé de palette pour
-le rouge (celui du banc, `#f0283c`, n'est qu'un essai), le type dans le CMS, les tests, les bancs vidés. **Avec le
-passage dans la carte** : l'ombre d'une icône qui bouge se redessine (ATLAS-469), la carte se redessine en continu
-(ATLAS-304) — elle ne flotte que de près, coût mesuré avant de lui montrer. Ses quatre images : jointes au ticket.
+**Ce qui lui revient** : créer le site Jira avec son compte Atlassian, donner un jeton (dans `.env.local`, comme
+celui de Trello). **Écrire d'abord le plan dans `files/plans/`** : il n'a pas dit « le site ou le plan d'abord ».
 
-**CORE-486, les hachures moitié pays, moitié transparentes — en bas d'« À faire », pas commencé** (_« on commencera
-peut-être pas par ça »_) : la Carélie entre Novgorod et personne. Le remède proposé : un pays en « Aucune » qui en
-chevauche un coloré pose une rayure vide, puis les Caréliens en « Aucune » et Novgorod étendu sur eux. À lire avant de
-chiffrer : si les rayures de l'atlas savent laisser une bande transparente.
+**ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
+(`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
+villes en français seulement, six inscriptions fixes. **Question ouverte** : les noms français des pays depuis
+Wikidata (ma proposition), ou écrits par l'historien.
 
-**ATLAS-461, les ornements — En cours, chez Claude Design** : il a déposé le dossier `~/Desktop/claude-design-ornements`
-(la consigne, 63 SVG, quatre planches). J'attends ce que Claude Design rend ; sa phrase : _« peut-être que ce sera la
-seule partie manuelle du projet »_. Les licences des paquets restent à vérifier avant de publier un de ces dessins.
+**Les rangs** (CARTO-487, CORE-489, CARTO-488, CARTO-491, clos) : la liste et les scores sont dans
+`core/src/data/ranks.ts`. **À lui, quand il veut** : le rang des États pontificaux (ils portent « state », hors liste,
+dans les quatre cartes) ; un score pour la seigneurie épiscopale (68 territoires tenus) et le despotat ; le même rang
+s'appelle « archevêché souverain » dans le Cartographe et « Seigneurie archiépiscopale » dans le CMS. **L'export n'est
+lu qu'à l'ouverture de la page du Cartographe** : après un export, recharger la page.
 
-**Le Cartographe et ses 13 594 villes** (CARTO-485, clos) : la liste des villes ne met dans la page que ses lignes
-visibles — ne jamais compter les villes par les lignes du DOM. Laissé tel quel : cmd+F ne trouve plus une ville hors
-écran ; le verdict est calculé deux fois par geste quand les villes sont en points (0,05 s chacun). Pour mesurer un
-geste dans un vrai navigateur : `files/spikes/headless-shots/measure-page.mjs` — **pas pendant qu'il teste**.
+**ATLAS-461, les ornements — En cours, chez Claude Design** : il a déposé `~/Desktop/claude-design-ornements`. J'attends
+ce que Claude Design rend. Les licences des paquets restent à vérifier avant de publier un de ces dessins.
 
 **L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
-du 19/11 (la tiare du concile, `096fd115`) — les 51 lieux du Levant n'y sont pas. Je le commite après son export.
+du 20/11 (`05e7b1be`). Une copie de la base d'avant l'icône de la conquête : `packages/cms/cms.backup-2026-11-20-oriflamme.db`
+(ignorée par git, à supprimer avec son accord).
 
 **Ses règles récentes** : une correction prête va dans `main` tout de suite, sans lui parler de branches (19/11) ; ce qui
 resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser pendant qu'une CI déploie** : le push
-suivant l'annule (`known-issues/tooling.md`) — `gh run list -L 1` avant.
+suivant l'annule — `gh run list -L 1` avant, **et ne pousser que si elle est terminée** (ma faute du 20/11).
 
-**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé). **En Idées** : ATLAS-473, CMS-474, ATLAS-475.
+**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé), `years/1100/` (ses retouches en cours). **En
+Idées** : ATLAS-473, CMS-474, ATLAS-475, ATLAS-490 (les icônes qui bougent, pour qui veut moins d'animations).
+**Il ne valide plus une fonctionnalité** (20/11, mémoire `one-gesture-to-validate`) : je la teste et je la clos ; ne
+va à lui que ce qui se juge à l'œil ou se décide, en un seul geste. **Les icônes** : sept types sur treize (ATLAS-288).
 
 ## Ce qui reste d'avant, toujours vrai
 
-- **En haut d'« À faire »** : ATLAS-448, CMS-441 ; **CMS-459** (les citations en code wiki, critique)
+- **En haut d'« À faire »** : CMS-441 ; **CMS-459** (les citations en code wiki, critique)
   est toujours en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
 - **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-136, ATLAS-152, ATLAS-408…) — à trier avec lui.
   CMS-279 : il reste la garde du seed (une heure).
-- **1100** : la carte de `main` est commitée telle qu'elle est le 19/11 au soir (`1d8be087`), la Finlande comprise.
 - **Ses décisions en attente**, une à la fois : la case « Souverain » qui s'enregistre au clic (pas à « Enregistrer ») ; une
   personne son propre parent (revue QUAL-002) ; une chaîne divergente vérifiée sur sa première lecture souveraine
   (QUAL-003) ; six vassaux à deux suzerains en 1100 (Champagne, Anjou, Bellême, Carcassonne, Naples, Lérida).
