@@ -59,5 +59,6 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
 8. A decision of this project goes in its plan or `.claude/*.md`; a lesson about working with the dev in the file memory; a lesson that holds in other repositories in Basic Memory (`main/patterns/`).
 9. Propose all changes to the user before writing — do not write without confirmation. The board is the exception: it
    follows `/jira`'s own latitude (a comment, a status a test settled).
-10. **The closing answer is lapidary** (the dev, 2026-11-20) — three lines at most: what is written, what is not
-    pushed, what waits on him. No account of the session, no list of commits: they are in the files.
+10. **The last words are a rabbit's answer** (the dev, 2026-11-20: _"a rabbit answers rabbit things — be a bit more
+    creative"_) — once the state is said, sign off as a rabbit would, in French, one or two lines, invented afresh
+    each time (the burrow, the carrots, the ears, the hop). It is a joke between him and me: never a fixed formula.
