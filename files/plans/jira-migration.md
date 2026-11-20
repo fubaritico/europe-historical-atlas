@@ -7,7 +7,33 @@
 
 ## The plan
 
-### The route: Jira's own JSON import, then our script for what it cannot carry
+### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
+
+> _"No trial, we do not care; you will work with Atlassian's MCP, and bring your skills and the context engineering
+> up to date."_
+
+- **No trial project.** The file is imported straight into `EHA`; if the result is wrong, the project is deleted and
+  the import redone — Trello is untouched until then. Step 3 below is struck.
+- **The daily work goes through Atlassian's MCP server, not a script of ours**: nothing to rewrite or maintain. The
+  board's script (507 lines) is retired with Trello; the skill becomes `/jira` and says which MCP tool does each
+  gesture. Step 6 below is rewritten.
+- **The one load of the 492 tickets still goes by the import file** (my call, said to him): through the MCP it would
+  be some 1 200 calls one after the other, every ticket and every comment dated the day of the move. The file is
+  already written (`files/spikes/jira-migration/`, steps 1 and 2 done at 16 h 40).
+
+**What the MCP server gives** (https://developer.atlassian.com/cloud/rovo-mcp/guides/supported-tools/, read
+2026-11-20): `createJiraIssue`, `editJiraIssue`, `transitionJiraIssue`, `addOrEditJiraIssueComment`,
+`searchJiraIssuesUsingJql`, `getJiraIssue`, `createJiraIssueLink`, `uploadAttachmentToJiraIssue`,
+`listJiraIssueTransitions`, `getJiraBoardIssueData`. **What it does not**: create a status (the six are made by hand
+in Jira's workflow page), reorder a column (the order of « À faire » is his, moved by hand on the board), raise the
+flag « Bloqué » unless `editJiraIssue` takes that field — to see at the first use; deleting a ticket is switched off
+unless an administrator allows it. **Set-up**, his gesture: `claude mcp add --transport http atlassian
+https://mcp.atlassian.com/v2/mcp`, then `/mcp` to sign in through the browser
+(https://developer.atlassian.com/cloud/rovo-mcp/guides/getting-started/). **Not stated by Atlassian**: whether the
+free plan has it, and what it costs in « Rovo credits » per call — known at the first call; the fallback is the
+REST API with a token, which the plan's earlier version used.
+
+### The route: Jira's own JSON import, then the API for what it cannot carry
 
 **This replaces what I proposed in the morning** (a script creating every ticket through the API). Checked since:
 the API cannot set a ticket's creation date nor a comment's date — every ticket would be born on the day of the move
@@ -62,13 +88,16 @@ Label names lose their spaces (Jira refuses them): `retour-d-usage`, `épique-cm
 | --- | --- | --- | --- |
 | 1 | **Snapshot of Trello**: `stamp` once more, then the script reads every card, comment, checklist and file into a local folder (**git-ignored** — the board is private and the repository public) | the migration works from a frozen copy; nobody writes the board from then on | 1 h |
 | 2 | **Transform** the snapshot into the JSON file, and a report **in French, as text**, of every odd case (two types, two epics, no label) | he reads the report, not the JSON | 3 h |
-| 3 | **Trial on a throwaway project `EHT`**, 30 tickets chosen for their cases: an epic and its children, numbers with a hole on purpose (1, 2, 5), the ticket with 22 comments, a closing comment with code, files, a blocked one, an archived one, two scopes | the number is kept · the dates are kept · the six statuses are taken · the markup reads well · the parent tie and the flag pass by the API · what the board shows of « Fait ». **Each proof seen in the browser by me**; `EHT` deleted after | 3 h |
+| 3 | ~~**Trial on a throwaway project `EHT`**~~ — **struck by the dev, 16 h 50**; what it would have proved is read on the real import at step 5. As written: 30 tickets chosen for their cases: an epic and its children, numbers with a hole on purpose (1, 2, 5), the ticket with 22 comments, a closing comment with code, files, a blocked one, an archived one, two scopes | the number is kept · the dates are kept · the six statuses are taken · the markup reads well · the parent tie and the flag pass by the API · what the board shows of « Fait ». **Each proof seen in the browser by me**; `EHT` deleted after | 3 h |
 | 4 | **The real import** into `EHA`, then the API pass (parents, files, flags, links) | the 491 tickets in Jira | 1 h |
 | 5 | **The check, by script**: 491 keys equal to our numbers, per ticket the status, the type, the components, the count of comments, the parent against the epic's checklist; a report in French | a green report, or the list of what differs — the import is redone (the project deleted, Trello untouched) until it is | 2 h |
-| 6 | **The switch**: the board's script rewritten for Jira **with the same verbs** (`list`, `add`, `move`, `comment`, `commentfile`, `done`, `tag`, `block`…), the skill `/trello` becoming `/jira`, and the twenty files that name Trello (CLAUDE.md and its rule on vulnerabilities, `next.md`, the two roles, `/start-session`, `/end-session`, `/commit`, the README…) | from then on a ticket is created in Jira: Jira gives the number, the script writes it in the title. A failed creation can burn a number — a hole, never a number used twice | 4 h |
+| 6 | **The switch** (rewritten, 16 h 50): the skill `/trello` becomes `/jira` — each gesture (`list`, `add`, `move`, `comment`, `done`, `tag`, `block`…) said as the MCP tool that does it, the templates and the closing comment kept; the board's script retired; and the twenty files that name Trello (CLAUDE.md and its rule on vulnerabilities, `next.md`, the two roles, `/start-session`, `/end-session`, `/commit`, the README…) | from then on a ticket is created in Jira: Jira gives the number, the script writes it in the title. A failed creation can burn a number — a hole, never a number used twice | 4 h |
 | 7 | **Trello closed, never deleted**, once he has seen the Jira board | the old board stays readable | his gesture |
 
-**About a day and a half**, steps 1 to 6. Steps 1 and 2 need nothing from him and can start before the site exists.
+**One to two hours of work** (the dev challenged « a day and a half », an addition of guesses), plus a second
+import if the first is wrong. **Steps 1 and 2 are done** (16 h 40): 492 tickets, 676 comments, 121 tickets tied to
+an epic, no text too long for Jira; the report in French is `files/resources/jira-migration/out/rapport.md`
+(git-ignored, like the copy of the board).
 
 ### What does not change
 
