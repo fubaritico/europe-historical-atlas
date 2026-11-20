@@ -32,9 +32,9 @@ mettre le site sur l'offre gratuite avant la fin de l'essai Premium qu'Atlassian
 n'est prélevé ; trois personnes sont gratuites sur l'offre gratuite).
 
 **Ce qui me reste** : supprimer le projet « Brouillon » et le projet d'exemple d'Atlassian (avec son accord) ; les
-marques `[EPIC]` `[IDEES]` `[BACKLOG]` à retirer des titres ; les listes à puces de quatre tickets importés avant
-la correction (EHA-1, 2, 5, 142) ; les arbres `coder` et `historian` à resynchroniser avec `main`. « Fait » montre
-tout pendant deux semaines, puis seulement les deux dernières semaines.
+arbres `coder` et `historian` à resynchroniser avec `main`, pour qu'ils aient la skill `/jira`. « Fait » montre tout
+pendant deux semaines, puis seulement les deux dernières semaines. Les onze tickets « En cours » ont leur
+responsable ; les marques `[EPIC]` `[IDEES]` `[BACKLOG]` sont retirées des titres.
 
 **ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
 (`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
