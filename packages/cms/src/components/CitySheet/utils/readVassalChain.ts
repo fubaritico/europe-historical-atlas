@@ -24,10 +24,20 @@ export interface ChainStep {
   source: number | string | null
 }
 
+/**
+ * A title of the chain: its id and its name, and the kind of the territory it holds — its rank, which the chain's
+ * coherence is checked by (CORE-489). **Absent when the base's answer does not carry it**: nothing is then said of
+ * that title's rank, as of a rank with no score.
+ */
+export interface ChainTitle extends RecordChoice {
+  /** The kind of its territory, as stored (`Territories`' `kind`). */
+  kind?: string
+}
+
 /** One reading of the chain: the titles from the holder's up, named, and why it stops. */
 export interface ChainReading {
   /** The titles, the holder's first, each with its id as the base gives it. */
-  titles: RecordChoice[]
+  titles: ChainTitle[]
   /** The link of each title above the holder's — `steps[i]` brought `titles[i + 1]` — so the sheet can edit it. */
   steps: ChainStep[]
   /** Why it stops where it does: a sovereign, « we do not know », or links that contradict one another. */
@@ -101,7 +111,7 @@ export async function fetchSovereignLinks(
  * @param fetcher - the `fetch` to use
  * @param api - the API's root
  * @param ids - the titles
- * @returns each title, its id and its name, by id as text
+ * @returns each title, its id, its name and its territory's kind, by id as text
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server refuses, or a title is missing or has no name
  */
@@ -109,20 +119,27 @@ export async function fetchTitleNames(
   fetcher: typeof fetch,
   api: string,
   ids: readonly string[]
-): Promise<Map<string, RecordChoice>> {
+): Promise<Map<string, ChainTitle>> {
+  // One level deep, for the territory each title holds: its kind is the title's rank (CORE-489).
   const params = new URLSearchParams({
     'where[id][in]': ids.join(','),
-    depth: '0',
+    depth: '1',
     pagination: 'false',
     'select[label]': 'true',
+    'select[territory]': 'true',
   })
   const response = await fetcher(`${api}/titles?${params.toString()}`, { credentials: 'include' })
   const docs = await readDocs(response, 'the titles of the chain', 'could not be read')
-  const names = new Map<string, RecordChoice>()
+  const names = new Map<string, ChainTitle>()
   for (const doc of docs) {
-    const { id, label } = (doc ?? {}) as { id?: unknown; label?: unknown }
+    const { id, label, territory } = (doc ?? {}) as {
+      id?: unknown
+      label?: unknown
+      territory?: unknown
+    }
     if ((typeof id === 'number' || typeof id === 'string') && typeof label === 'string') {
-      names.set(String(id), { id, name: label })
+      const kind = kindOf(territory)
+      names.set(String(id), kind === null ? { id, name: label } : { id, name: label, kind })
     }
   }
   const missing = ids.filter((id) => !names.has(id))
@@ -227,13 +244,24 @@ export async function fetchLinkSources(
 }
 
 /**
+ * The kind of a title's territory, from the base's answer.
+ * @param territory - the title's `territory` as answered: the territory one level deep, or its bare id
+ * @returns its kind, or `null` when the answer carries none
+ */
+function kindOf(territory: unknown): string | null {
+  if (typeof territory !== 'object' || territory === null) return null
+  const { kind } = territory as { kind?: unknown }
+  return typeof kind === 'string' ? kind : null
+}
+
+/**
  * A title from those read — `fetchTitleNames` refuses an answer missing one, so none is missing here.
  * @param titles - the titles read, by id as text
  * @param id - the title
  * @returns its id as the base gives it, and its name
  * @throws {Error} when it is missing, which `fetchTitleNames` was to refuse
  */
-function titleOf(titles: ReadonlyMap<string, RecordChoice>, id: string): RecordChoice {
+function titleOf(titles: ReadonlyMap<string, ChainTitle>, id: string): ChainTitle {
   const title = titles.get(id)
   if (title === undefined) throw new Error(`[CMS] the title ${id} of the chain was read unnamed`)
   return title

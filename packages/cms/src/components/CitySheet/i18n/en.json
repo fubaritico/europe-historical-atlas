@@ -98,6 +98,7 @@
   "chainReadings": "The sources diverge: {count} readings, all kept.",
   "chainSovereign": "sovereign",
   "chainUnknown": "beyond, we do not know",
+  "chainRankInversion": "To check: “{vassal}” ranks higher than its suzerain, “{suzerain}”.",
   "chainLoop": "the links contradict one another: this title comes back in its own chain",
   "addSuzerainOf": "Add the suzerain of {name}",
   "vassalOf": "Vassal of",

@@ -47,6 +47,11 @@
   color: var(--theme-elevation-600);
 }
 
+.city-sheet__chain-rank {
+  display: block;
+  color: var(--theme-warning-600);
+}
+
 .city-sheet__help--error,
 .city-sheet__status {
   color: var(--theme-error-600);

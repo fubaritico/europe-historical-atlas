@@ -98,6 +98,7 @@
   "chainReadings": "Les sources divergent : {count} lectures, toutes gardées.",
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
+  "chainRankInversion": "À vérifier : « {vassal} » a un rang plus élevé que son suzerain, « {suzerain} ».",
   "chainLoop": "les maillons se contredisent : ce titre revient dans sa propre chaîne",
   "addSuzerainOf": "Ajouter le suzerain de {name}",
   "vassalOf": "Vassal de",

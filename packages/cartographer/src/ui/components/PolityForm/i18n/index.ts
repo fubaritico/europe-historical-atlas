@@ -21,6 +21,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   CMS territory a polity is tied to (CARTO-450): its label, its help, its search and what it says when there is none.
  * - `removeTerritory` — The cross beside the territory held; `name` is its label.
  * - `territoryLabel` — A territory in the list; `name` its name, `id` its number in the CMS.
+ * - `rankWarning` — A vassal ranking higher than its suzerain (CORE-489), under the suzerain: `vassal` and `suzerain`
+ *   their names, `vassalRank` and `suzerainRank` their ranks, named.
  * - `nameMissing`, `idMissing`, `idTaken`, `notAYear` — Why a field is refused — `polityDraft`'s
  *   `DraftError`.
  */

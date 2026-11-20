@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
+
 import { TERRITORY_KINDS, Territories } from './Territories'
 
 import type { Field } from 'payload'
@@ -40,6 +42,39 @@ describe('Territories', () => {
           labels.get(kind)
         )
       ).toEqual(['Califat', 'Sultanat', 'Khanat', 'Émirat', 'Imamat', 'Despotat'])
+    })
+  })
+
+  describe('variants — the ranks shared with the map', () => {
+    it('offers every rank the Cartographer’s form offers, first and in core’s order', () => {
+      expect(
+        kindOptions()
+          .map(({ value }) => value)
+          .slice(0, POLITY_RANKS.length)
+      ).toEqual([...POLITY_RANKS])
+    })
+
+    it('names the five ranks the register lacked until 2026-11-20', () => {
+      const labels = new Map(kindOptions().map(({ value, label }) => [value, label]))
+      expect(
+        ['people', 'republic', 'confederation', 'tribe_outlined', 'distant'].map((kind) =>
+          labels.get(kind)
+        )
+      ).toEqual([
+        'Peuple',
+        'République',
+        'Confédération de tribus',
+        'Tribu à contour',
+        'Pays lointain',
+      ])
+    })
+
+    it('keeps the kinds only the register holds, after the ranks', () => {
+      expect(
+        kindOptions()
+          .map(({ value }) => value)
+          .slice(POLITY_RANKS.length)
+      ).toEqual(['patriarchate', 'episcopal_lordship', 'bishopric', 'abbey', 'city', 'office'])
     })
   })
 

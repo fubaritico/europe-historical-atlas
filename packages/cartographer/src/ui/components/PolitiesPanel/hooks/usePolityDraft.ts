@@ -9,6 +9,7 @@ import {
   suzerainChoices,
   withId,
   withName,
+  withRank,
 } from '../../../utils/polityDraft'
 import { POLITIES_PANEL_MESSAGES } from '../i18n'
 
@@ -124,6 +125,7 @@ export function usePolityDraft(
     setDraft((current) => {
       if (field === 'name') return withName(current, value ?? '', taken)
       if (field === 'id') return withId(current, value ?? '')
+      if (field === 'rank') return withRank(current, value)
       return { ...current, [field]: value }
     })
   }

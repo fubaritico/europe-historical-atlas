@@ -1,10 +1,7 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
-import {
-  CONFEDERATION_RANK,
-  DISTANT_RANK,
-  TRIBE_OUTLINED_RANK,
-  TRIBE_RANK,
-} from '@europe-historical-atlas/core/data/tribes'
+import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
+import { PEOPLE_RANK } from '@europe-historical-atlas/core/data/tribes'
+import { NO_COLOUR } from '@europe-historical-atlas/core/data/yearFormat'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
 import { formColour, toFileColour } from './polityColourValue'
@@ -81,25 +78,23 @@ export interface DraftOption {
 }
 
 /**
- * The ranks the form offers — `design/03`'s list, as stored in the file. The format's `rank` is an open
- * vocabulary (OHM's `border_type`), so a value outside this list read from a file stays valid; the form simply
- * offers these, and names each in the page's language (`PolityForm`'s catalogue).
+ * The ranks the form offers — core's one list, which the CMS's register of territories reads too (CARTO-487), as
+ * stored in the file. The format's `rank` is an open vocabulary (OHM's `border_type`), so a value outside this list
+ * read from a file stays valid; the form simply offers these, and names each in the page's language (`PolityForm`'s
+ * catalogue).
  */
-export const RANKS: readonly string[] = [
-  'empire',
-  'kingdom',
-  'principality',
-  'duchy',
-  'county',
-  // The three peoples, drawn with no fill — core's ranks, never a copy (review ARCH-001): a confederation of tribes, its
-  // band the look every tribe had before; a tribe, its bare margin (CARTO-447).
-  CONFEDERATION_RANK,
-  TRIBE_RANK,
-  // A tribe drawn by its rim, full at its limit and nothing at its heart (CARTO-439).
-  TRIBE_OUTLINED_RANK,
-  // A country whose history is not told, drawn as an outlined tribe, its bands wider (CARTO-447).
-  DISTANT_RANK,
-]
+export const RANKS: readonly string[] = POLITY_RANKS
+
+/**
+ * Take a rank. **A people known by its name alone has no colour** (the dev, 2026-11-20: the Sami and the Kvens, *"a
+ * transparent colour"*): choosing that rank sets the colour to « none »; the author may still change it afterwards.
+ * @param draft - the form as it was
+ * @param rank - the rank chosen, `null` for none
+ * @returns the draft with the rank, and no colour when the rank is the people's
+ */
+export function withRank(draft: PolityDraft, rank: string | null): PolityDraft {
+  return rank === PEOPLE_RANK ? { ...draft, rank, colour: NO_COLOUR } : { ...draft, rank }
+}
 
 /** The standings the form offers — `design/03`'s list, stored as OHM writes its `place` values. */
 export const STATUSES: readonly string[] = ['country', 'personal_union', 'condominium']

@@ -1,3 +1,5 @@
+import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
+
 import { groupAt, momentGroup } from '../fields/historicalDate'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
@@ -16,27 +18,14 @@ import type { CollectionConfig } from 'payload'
  * the historian has reclassed the sheets that carry it.
  */
 export const TERRITORY_KINDS = [
-  'empire',
-  'caliphate',
-  'kingdom',
-  'sultanate',
-  'khanate',
-  'principality',
-  'emirate',
-  'imamate',
-  'despotate',
-  'duchy',
-  'march',
-  'county',
-  'viscounty',
-  'lordship',
+  // The ranks of a polity: core's one list, which the Cartographer's form offers too (CARTO-487, the dev, 2026-11-20).
+  ...POLITY_RANKS,
+  // What only the register holds: a cleric's other powers, a city, an abbey, an office.
   'patriarchate',
-  'archiepiscopal_lordship',
   'episcopal_lordship',
   'bishopric',
   'abbey',
   'city',
-  'tribe',
   'office',
 ] as const
 
@@ -49,23 +38,28 @@ const KIND_LABELS: Record<TerritoryKind, string> = {
   caliphate: 'Califat',
   kingdom: 'Royaume',
   sultanate: 'Sultanat',
-  khanate: 'Khanat',
-  principality: 'Principauté',
-  emirate: 'Émirat',
-  imamate: 'Imamat',
-  despotate: 'Despotat',
   duchy: 'Duché',
-  march: 'Marche',
-  county: 'Comté',
-  viscounty: 'Vicomté',
-  lordship: 'Seigneurie',
-  patriarchate: 'Patriarcat',
+  republic: 'République',
+  imamate: 'Imamat',
   archiepiscopal_lordship: 'Seigneurie archiépiscopale',
+  khanate: 'Khanat',
+  despotate: 'Despotat',
+  principality: 'Principauté',
+  county: 'Comté',
+  emirate: 'Émirat',
+  lordship: 'Seigneurie',
+  march: 'Marche',
+  viscounty: 'Vicomté',
+  confederation: 'Confédération de tribus',
+  tribe: 'Tribu',
+  tribe_outlined: 'Tribu à contour',
+  people: 'Peuple',
+  distant: 'Pays lointain',
+  patriarchate: 'Patriarcat',
   episcopal_lordship: 'Seigneurie épiscopale',
   bishopric: 'Évêché (à reclasser)',
   abbey: 'Abbaye',
   city: 'Cité',
-  tribe: 'Tribu',
   office: 'Charge',
 }
 

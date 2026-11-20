@@ -22,6 +22,7 @@
   "idMissing": "An id is needed — none could be made from this name.",
   "idTaken": "This id is already used in this year.",
   "notAYear": "A year, as a whole number.",
+  "rankWarning": "To check: {vassal} ({vassalRank}) ranks higher than its suzerain, {suzerain} ({suzerainRank}). You may save it as it is.",
   "territory": "CMS ID",
   "territoryHelp": "The CMS sheet (menu Territories) that is this polity: its cities' chains are compared to it when it has no Wikidata id, as the Thuringia of 1100.",
   "territoryPlaceholder": "Type a name to choose…",

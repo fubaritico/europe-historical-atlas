@@ -1,4 +1,4 @@
 {
-  "rankName": "{rank, select, empire {empire} kingdom {kingdom} principality {principality} duchy {duchy} county {county} confederation {confederation of tribes} tribe {tribe} tribe_outlined {outlined tribe} distant {distant country} other {{rank}}}",
+  "rankName": "{rank, select, empire {empire} caliphate {caliphate} kingdom {kingdom} sultanate {sultanate} duchy {duchy} republic {republic} imamate {imamate} archiepiscopal_lordship {sovereign archbishopric} khanate {khanate} despotate {despotate} principality {principality} county {county} emirate {emirate} lordship {lordship} march {march} viscounty {viscounty} confederation {confederation of tribes} tribe {tribe} tribe_outlined {outlined tribe} people {people} distant {distant country} other {{rank}}}",
   "statusName": "{status, select, country {country} personal_union {personal union} condominium {condominium} other {{status}}}"
 }

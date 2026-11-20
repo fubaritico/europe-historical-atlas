@@ -72,3 +72,12 @@ Open issues of `packages/core`: the document model, the history, the derivations
   enclave whose corner lay 40 m outside Croatia — no polity drawn, a message nobody can read. Fixed in the data
   (`3e5d00c`). **Remedy**: the maps' diagnostic in the CI, which names the polity, the ring and the point — CORE-428.
   **Severity: gênant.**
+- **The rank check says nothing of a rank with no score** (2026-11-20, CORE-489, reviews ARCH-002 · QUAL-003;
+  `data/ranks.rankScore`): the despotate (the dev: not decided — it does not appear before 1204, to settle before the
+  map of 1300); the kinds only the CMS's register holds — a city, an abbey, an office, a patriarchate, and the
+  **episcopal lordship**, whose sister the archiepiscopal one scores 4; a rank outside the list, as the `state` the
+  Papal States carry in the four maps (the form offers it only because they use it — theirs to rename, the dev's
+  call); and, on the CMS's city sheet, a title whose territory's kind the answer did not carry. A chain through one
+  of them is not checked at that step, and no line says so. **Remedy**: a score for the episcopal lordship and the
+  despotate, the dev's to give. **Severity: à savoir.**
+

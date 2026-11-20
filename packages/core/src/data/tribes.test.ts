@@ -88,9 +88,14 @@ describe('tribes', () => {
   })
 
   describe('edge cases', () => {
-    // The rank is compared exactly: the night of 2026-10-14 wrote `people`, which is not a tribe until renamed.
-    it('does not read the rank people as a tribe', () => {
-      expect(isTribe({ rank: 'people' })).toBe(false)
+    // The rank is compared exactly: a word near a people's rank is no people.
+    it('does not read the rank peoples as a tribe', () => {
+      expect(isTribe({ rank: 'peoples' })).toBe(false)
+    })
+
+    // `people` was no tribe until 2026-11-20, when it became the rank of a people known by its name alone (CARTO-487).
+    it('reads the rank people as a tribe, since it is one of the ranks', () => {
+      expect(isTribe({ rank: 'people' })).toBe(true)
     })
 
     it('does not read a capitalised Tribe as a tribe', () => {

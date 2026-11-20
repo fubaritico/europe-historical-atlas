@@ -2,6 +2,7 @@ import { Modal } from '@fubaritico/react/Modal'
 
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { rankWarnings } from '../../../utils/rankWarnings'
 import { wikidataViewOf } from '../../../utils/wikidataView'
 import { POLITY_FORM_MESSAGES, PolityForm } from '../../PolityForm'
 import { usePolityDraft } from '../hooks/usePolityDraft'
@@ -63,6 +64,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   const title = editing === null ? action('newPolity') : form('editTitle')
   const { document } = store.getState()
   const others = document.polities.filter((polity) => polity.id !== editing?.id)
+  const warnings = rankWarnings(draft, editing?.id ?? null, document.polities)
   const wikidataView = wikidataViewOf(reading, draft, document.year, others)
   const territoryOptions = territories.map((territory) => ({
     value: String(territory.id),
@@ -85,6 +87,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         suzerains={suzerains}
         territories={territoryOptions}
         ranks={ranks}
+        rankWarnings={warnings}
         idLocked={editing !== null}
         onField={onField}
         onColour={onColour}

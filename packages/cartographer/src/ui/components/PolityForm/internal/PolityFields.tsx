@@ -8,6 +8,7 @@ import { errorOf } from '../utils/errorOf'
 import { textField } from '../utils/textField'
 
 import { ColourField } from './ColourField'
+import { RankWarnings } from './RankWarnings'
 import { ShortNameFields } from './ShortNameFields'
 import { StandingFields } from './StandingFields'
 import { SuzerainField } from './SuzerainField'
@@ -63,6 +64,7 @@ export function PolityFields(props: PolityFieldsProps) {
         {...errorOf(t, errors.existsTo)}
       />
       <SuzerainField options={suzerains} value={draft.suzerain} onSelect={choose('suzerain')} />
+      <RankWarnings warnings={props.rankWarnings} />
       <ColourField value={draft.colour} onChange={onColour} />
       <Input label={t('wikidata')} placeholder="Q…" {...textField('wikidata', props)} />
       <WikidataPanel view={props.wikidata} onUse={props.onUseWikidata} />

@@ -50,6 +50,13 @@ export const TRIBE_OUTLINED_RANK = 'tribe_outlined'
 export const DISTANT_RANK = 'distant'
 
 /**
+ * The rank of a **people known by its name alone** — the Sami, the Kvens (the dev, 2026-11-20, CARTO-487): a tribe in
+ * every respect — no fill, no border against another people — whose colour is « none » (`yearFormat.NO_COLOUR`), so
+ * nothing is drawn of it but its name. The Cartographer's form sets that colour when the rank is chosen.
+ */
+export const PEOPLE_RANK = 'people'
+
+/**
  * How a people's limit is drawn, by its rank: `band` for a confederation, `outlined` for an outlined tribe, `margin` for
  * a tribe, `distant` for a distant country (CARTO-447).
  */
@@ -64,17 +71,21 @@ const STYLE_OF_RANK: Readonly<Record<string, TribeStyle>> = {
   [TRIBE_OUTLINED_RANK]: 'outlined',
   [TRIBE_RANK]: 'margin',
   [DISTANT_RANK]: 'distant',
+  // A tribe's margin, were it given a colour; it has none.
+  [PEOPLE_RANK]: 'margin',
 }
 
 /**
- * Whether a polity is a **people** — a confederation, a tribe or an outlined tribe: no fill, **no border against another
+ * Whether a polity is a **people** — a confederation, a tribe, an outlined tribe or a people known by its name alone:
+ * no fill, **no border against another
  * people**, its name inverted. A distant country is not one: it keeps its borders (the dev, 2026-11-15, CARTO-447).
  * @param polity - the polity, its rank at least
- * @returns `true` when its rank is one of the three
+ * @returns `true` when its rank is one of the four
  */
 export function isTribe(polity: Pick<YearPolity, 'rank'>): boolean {
   const style = tribeStyleOf(polity)
-  // The three peoples by name, never « every style but the distant country's »: a style added later is no people
+  // The peoples' three styles by name — a people known by its name alone wears the tribe's — never « every style but
+  // the distant country's »: a style added later is no people
   // until it is said to be one (review ARCH-002).
   return style === 'band' || style === 'outlined' || style === 'margin'
 }

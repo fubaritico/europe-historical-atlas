@@ -157,6 +157,25 @@ describe('readVassalChain', () => {
       expect(chain[0]?.end).toBe('unknown')
     })
 
+    it('reads the kind of each title’s territory, one level deep, and leaves it out where the answer has none', async () => {
+      // CORE-489: the territory's kind is the title's rank, which the chain's coherence is checked by.
+      const docs = [
+        { id: 10, label: 'Mathias II', territory: { id: 1, kind: 'county' } },
+        { id: 20, label: 'Alain IV', territory: 7 },
+        { id: 30, label: 'Philippe Ier', territory: { id: 3 } },
+      ]
+      const fetcher = vi.fn<typeof fetch>(() =>
+        Promise.resolve(new Response(JSON.stringify({ docs })))
+      )
+      const titles = await fetchTitleNames(fetcher, '/api', ['10', '20', '30'])
+      expect(titles.get('10')).toEqual({ id: 10, name: 'Mathias II', kind: 'county' })
+      expect(titles.get('20')).toEqual({ id: 20, name: 'Alain IV' })
+      expect(titles.get('30')).toEqual({ id: 30, name: 'Philippe Ier' })
+      const url = new URL(fetcher.mock.calls[0]?.[0] as string, 'http://cms.test')
+      expect(url.searchParams.get('depth')).toBe('1')
+      expect(url.searchParams.get('select[territory]')).toBe('true')
+    })
+
     it('asks each title of the chain once, however many readings pass through it', async () => {
       const fetcher = stubFetch()
       await fetchTitleNames(fetcher, '/api', ['10', '20'])

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
+import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
 import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
+import { NO_COLOUR } from '@europe-historical-atlas/core/data/yearFormat'
 import { addPolity, updatePolity } from '@europe-historical-atlas/core/editor/documentEdits'
 
 import {
@@ -13,6 +15,7 @@ import {
   suzerainChoices,
   withId,
   withName,
+  withRank,
 } from './polityDraft'
 
 import type { PolityDraft } from './polityDraft'
@@ -399,33 +402,47 @@ describe('suzerainChoices', () => {
 
 const ranked = (...ranks: (string | null)[]) => ranks.map((rank) => ({ rank }))
 
+describe('withRank', () => {
+  it('takes a rank and leaves the colour as it was', () => {
+    const draft: PolityDraft = { ...EMPTY_DRAFT, colour: null }
+    expect(withRank(draft, 'caliphate')).toEqual({ ...draft, rank: 'caliphate' })
+  })
+
+  it('sets the colour to « none » when the rank is the people’s: the Sami, known by their name alone', () => {
+    const draft: PolityDraft = { ...EMPTY_DRAFT, colour: null }
+    expect(withRank(draft, 'people')).toEqual({ ...draft, rank: 'people', colour: NO_COLOUR })
+  })
+
+  it('leaves « none » in place when a people is given another rank: the author changes the colour himself', () => {
+    const draft: PolityDraft = { ...EMPTY_DRAFT, rank: 'people', colour: NO_COLOUR }
+    expect(withRank(draft, 'tribe').colour).toBe(NO_COLOUR)
+  })
+
+  it('takes no rank at all', () => {
+    expect(withRank({ ...EMPTY_DRAFT, rank: 'duchy' }, null).rank).toBeNull()
+  })
+})
+
 describe('rankChoices', () => {
   describe('happy path', () => {
-    it('offers the usual ranks, the three peoples and the distant country among them', () => {
-      expect(rankChoices([])).toEqual([
-        'empire',
-        'kingdom',
-        'principality',
-        'duchy',
-        'county',
-        'confederation',
-        'tribe',
-        'tribe_outlined',
-        'distant',
-      ])
+    it('offers core’s list of ranks, the one the CMS reads too, in its order', () => {
+      expect(rankChoices([])).toEqual([...POLITY_RANKS])
+      expect(rankChoices([])).toEqual(
+        expect.arrayContaining(['caliphate', 'lordship', 'emirate', 'people', 'tribe_outlined'])
+      )
     })
   })
 
   describe('variants', () => {
     it('adds every other rank the year uses, in alphabetical order', () => {
-      expect(rankChoices(ranked('lordship', 'emirate', 'kingdom')).slice(RANKS.length)).toEqual([
-        'emirate',
-        'lordship',
+      expect(rankChoices(ranked('state', 'barony', 'kingdom')).slice(RANKS.length)).toEqual([
+        'barony',
+        'state',
       ])
     })
 
     it('offers a rank used by two polities once', () => {
-      expect(rankChoices(ranked('march', 'march')).slice(RANKS.length)).toHaveLength(1)
+      expect(rankChoices(ranked('state', 'state')).slice(RANKS.length)).toHaveLength(1)
     })
   })
 

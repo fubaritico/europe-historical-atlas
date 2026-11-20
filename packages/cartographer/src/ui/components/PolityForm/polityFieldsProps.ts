@@ -1,5 +1,6 @@
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
 import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../utils/polityDraft'
+import type { RankWarning } from '../../utils/rankWarnings'
 import type { WikidataView } from '../../utils/wikidataView'
 import type { ColorValue } from '@fubaritico/behaviors'
 
@@ -18,6 +19,11 @@ export interface PolityFieldsProps {
   territories: readonly DraftOption[]
   /** The ranks it may take, as stored — the usual ones and every one the year already uses (`rankChoices`). */
   ranks: readonly string[]
+  /**
+   * The steps of vassalage the ranks contradict — a vassal scoring higher than its suzerain (CORE-489): said under the
+   * suzerain, never refused.
+   */
+  rankWarnings: readonly RankWarning[]
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
   idLocked?: boolean
   /**
