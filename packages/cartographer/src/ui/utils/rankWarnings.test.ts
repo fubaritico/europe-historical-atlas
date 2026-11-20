@@ -37,7 +37,7 @@ describe('rankWarnings', () => {
     it('says its own suzerain first, then its vassals', () => {
       const year = [{ ...FRANCE, rank: 'tribe' }, ANJOU, MAINE]
       const found = rankWarnings(
-        { name: 'Anjou', rank: 'march', suzerain: 'france' },
+        { name: 'Anjou', rank: 'viscounty', suzerain: 'france' },
         'anjou',
         year
       )

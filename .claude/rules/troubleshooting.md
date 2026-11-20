@@ -78,3 +78,14 @@ Cartographer. A rule change could have shipped with every package replaying the 
 `tsconfig.json`, `.prettierrc`), and `lint` depends on `^lint`, so a consumer's lint hash carries the
 plugin's. Both probes re-run: `cache miss`. **Rule**: a package that consumes the plugin declares it as a
 dependency, or its lint never sees a rule change.
+
+### Turbo replayed a green test of a package after its dependency had changed (2026-11-20)
+
+**Symptom**: the march's score changed in `core` (CORE-489); a test of the Cartographer that read it should have
+failed, and the commit hook said `cartographer:test: cache hit, replaying logs` — 3,157 tests "passed", one of them
+red when run directly. The commit went through.
+**Root cause**: the same as the lint's of 2026-10-12, left open for `test`: a task's hash covers its own package's
+files, not a workspace dependency's sources, and `test` declared no `dependsOn`.
+**Solution**: `test` depends on `^test`, so a consumer's test hash carries its dependencies'. Probe re-run: touching
+`core/src/data/ranks.ts` changes the hash of `cartographer#test`, restoring it brings the hash back. **Rule**: a task
+that reads another package's sources declares `^<task>`; `coverage` has the same shape and runs in the CI only.
