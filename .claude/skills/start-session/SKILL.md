@@ -3,7 +3,7 @@ name: start-session
 description: Gather all necessary written context from the previous session. Use at the start of a work session to reload state and relevant rules.
 allowed-tools: Read Bash
 metadata:
-  version: '1.2'
+  version: '1.3'
 ---
 
 # Start Session
@@ -37,7 +37,12 @@ Gather all necessary written context from previous session.
 3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (most rules are
    path-scoped and the prompt hook names the rest; no need to ask the dev which files)
 4. Say in one line which rules are loaded, so the dev can name what is missing
-5. **Read the Jira board** — `/jira` skill: « À valider par le développeur » and the top of « À faire », then its sync check. Tell the dev, in two lines,
+5. **Check that Atlassian's MCP answers, every session, unasked** (the dev, 2026-11-20: _"it should be a reflex"_) —
+   the board is reached through it alone. The proof is a read that returns: the first JQL search of this step. **Say
+   the result in one line of the briefing**, whichever it is — « le MCP d'Atlassian répond », or that it does not, with
+   the remedy: `/mcp`, where he signs in again (nobody else can). Never announce the board from `next.md` when the
+   read failed.
+   **Then read the Jira board** — `/jira` skill: « À valider par le développeur » and the top of « À faire », then its sync check. Tell the dev, in two lines,
    what waits on him in **À valider par le développeur** and what tops **À faire**: the board is the list of tasks, `next.md`
    only the resume point.
 6. **The monthly version check** — read « Dernier contrôle des versions » in `next.md`. Over a month old (or absent):
