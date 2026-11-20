@@ -12,10 +12,13 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **L'historien, 20/11** : 27 sortes de territoire corrigées (les califats, les taïfas en émirats, cinq républiques, les
 Coumans) et quatre exports, tous commités ; son point de reprise, `next-historian.md`.
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
-de la mémoire (170 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
+de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 17 h 40 : le tableau est dans Jira, il reste à le finir
+## ▶ ON REPREND ICI — le 20/11, 18 h 15 : la migration vers Jira est finie, la suite est à lui
+
+**La suite se lit sur le tableau** : « À valider par le développeur » est vide ; le haut d'« À faire » est CMS-441,
+puis CARTO-336. Rien n'est commencé : c'est lui qui choisit.
 
 **Fait le 20/11** (REPO-492, `files/plans/jira-migration.md`) : les 492 tickets sont dans Jira —
 https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3 — avec leurs numéros (`[CARTO-67]`
@@ -32,10 +35,8 @@ complète est sur sa machine, `files/resources/jira-migration/snapshot/` (ignor�
 choisi « Free » le 20/11, à la place de l'essai Premium qu'Atlassian avait mis d'office (REPO-493, clos). **La
 migration est finie** : il ne reste rien, ni à lui ni à moi.
 
-**De mon côté, plus rien** : les arbres `coder` et `historian` sont à jour de `main` et ont la skill `/jira` (20/11) ;
-il a supprimé lui-même le projet « Brouillon » et le projet d'exemple : `EHA` est le seul projet du site. « Fait » montre tout
-pendant deux semaines, puis seulement les deux dernières semaines. Les onze tickets « En cours » ont leur
-responsable ; les marques `[EPIC]` `[IDEES]` `[BACKLOG]` sont retirées des titres.
+**L'état du tableau** : `EHA` est le seul projet du site ; les arbres `coder` et `historian` ont la skill `/jira` ; « Fait »
+montre tout pendant deux semaines, puis les deux dernières seulement, le plus récent en haut.
 
 **ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
 (`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
