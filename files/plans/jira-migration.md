@@ -55,7 +55,11 @@ their assignee: nine the coder, two the historian (the sources of 1100 and of 13
 
 **Left to do** (the dev deleted « Brouillon » and Atlassian's example project himself — `EHA` is the site's only
 project): the trees `coder` and `historian` resynced with
-`main`; **REPO-493, his**: Trello closed (step 7), and the site on the free plan before the Premium trial ends.
+`main` — done. **Step 7, the dev's own call**: he **deleted** the Trello board the same evening rather than keep
+it closed (_"efface"_, said twice, after being told what goes with it: the fifteen cards without a number and the
+history of each card's moves). The copy of step 1 stays on his machine, in `files/resources/jira-migration/`
+(git-ignored). **The plan of the site**: Jira's own page says the Premium trial ends on **2026-12-20** and that the
+site then goes back to the free plan by itself; nothing is owed in between (no payment method).
 
 ### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
 

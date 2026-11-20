@@ -2,7 +2,7 @@
 
 > Loaded at session start (CLAUDE.md `### Next` → `@next.md`). **The list of tasks is the board** — Jira since
 > 2026-11-20, https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3, through the `/jira`
-> skill (Trello from 2026-10-17 until then, kept closed). This
+> skill (Trello from 2026-10-17 until then; the dev deleted that board on 2026-11-20). This
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
@@ -27,9 +27,11 @@ une colonne** (Idées et Backlog y sont deux statuts, le tableau garde À faire,
 Fait) ; quatre onglets seulement sur le tableau ; deux comptes, « Claude Coder » et « Claude Historian », pour dire qui
 tient un ticket (mes commentaires restent signés de son nom : ils commencent par « codeur — » ou « historien — »).
 
-**Ce qui lui revient** — REPO-493, dans « À valider par le développeur » : fermer Trello une fois le tableau vu, et
-mettre le site sur l'offre gratuite avant la fin de l'essai Premium qu'Atlassian a mis d'office (sans carte, rien
-n'est prélevé ; trois personnes sont gratuites sur l'offre gratuite).
+**Trello n'existe plus** : il a supprimé le tableau le 20/11 (_« efface »_), plutôt que de le garder fermé ; la copie
+complète est sur sa machine, `files/resources/jira-migration/snapshot/` (ignorée par git). **L'offre du site** —
+REPO-493, dans « À valider par le développeur » : la page de Jira dit que l'essai Premium, mis d'office par Atlassian,
+finit le **20/12/2026** et que le site repasse seul à l'offre gratuite ; sans carte, rien n'est prélevé. Il reste à
+lui de dire s'il clique « Sélectionner Free » tout de suite ou s'il laisse faire.
 
 **De mon côté, plus rien** : les arbres `coder` et `historian` sont à jour de `main` et ont la skill `/jira` (20/11) ;
 il a supprimé lui-même le projet « Brouillon » et le projet d'exemple : `EHA` est le seul projet du site. « Fait » montre tout

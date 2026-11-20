@@ -213,6 +213,7 @@ may enter Backlog directly; what comes from me goes to Idées. **His dictated fe
 - **An interrupted call may already have acted**: read the ticket before repeating it.
 - **Guiding the dev through Jira's pages**: look at the page first (his screenshot, or my own tab, closed
   afterwards). A narrow window folds the board's tabs into « More ».
-- **The Trello board** (`trello.com/b/UJFwGl6E`) is the history before 2026-11-20, kept closed and readable; every
+- **The Trello board no longer exists**: the dev deleted it on 2026-11-20, once the move was checked. Its copy is
+  `files/resources/jira-migration/snapshot/` on his machine (git-ignored, not backed up elsewhere); every
   ticket's description starts with its Trello number and its dates. The fifteen archived cards from before the
-  counter never had a number and stayed there.
+  counter never had a number: they are in that copy only.
