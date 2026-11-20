@@ -24,6 +24,10 @@ le chantier totalise **378 h 04 sur 59 plages**. Tout est commité et poussé.
 - **Sa leçon** (mémoire `no-unmeasured-durations`) : j'avais annoncé « un jour et demi » ; _« tu vas vite, non ? y en
   a pour une heure max »_, puis _« ben tu vois, ça a mis une heure et quelque »_.
 - **Les arbres** `coder` et `historian` sont à jour de `main` : la prochaine session de l'historien lit `/jira`.
+- **Une courte session ensuite, 18:28 → 18:40** (la plage du journal devient 12:31 → 18:33, 378 h 25 au total) : à sa
+  demande, `/start-session` vérifie à chaque session que le MCP d'Atlassian répond et le dit (_« ça devrait être un
+  réflexe »_) ; il a relancé le codeur et l'historien pour voir qu'ils démarrent bien après la migration. **Ma faute** :
+  j'ai proposé CMS-441 comme suite alors que le sujet en cours était les icônes des événements — `next.md` le dit maintenant.
 - **Mes fautes** : une durée additionnée de tête, fausse d'un facteur dix ; trois heures écrites de tête dans des
   fichiers et un commentaire ; un `cd` ; des accents graves entre guillemets dans le shell ; « Backlog est dans la
   barre » affirmé depuis un écran plus large que le sien ; « fermé et lisible » écrit pour Trello sans l'avoir vu ; un

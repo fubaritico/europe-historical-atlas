@@ -15,10 +15,13 @@ Coumans) et quatre exports, tous commités ; son point de reprise, `next-histori
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 18 h 15 : la migration vers Jira est finie, la suite est à lui
+## ▶ ON REPREND ICI — le 20/11, 18 h 40 : le sujet en cours est les icônes des événements, pas CMS-441
 
-**La suite se lit sur le tableau** : « À valider par le développeur » est vide ; le haut d'« À faire » est CMS-441,
-puis CARTO-336. Rien n'est commencé : c'est lui qui choisit.
+**Il l'a dit le 20/11 au soir** : le sujet en cours est **les icônes des événements** (ATLAS-288, sept types sur
+treize, et son épique ATLAS-132) ; l'oriflamme de la conquête est faite (ATLAS-477). Les six icônes restantes se feront
+quand une carte en aura besoin. **En attente de sa réponse** : fermer ATLAS-288 et l'épique, avec un ticket au Backlog
+qui nomme les six types restants (ma proposition ; sa phrase, dictée, était « passer les [épiques] à Fait »).
+« À valider par le développeur » est vide ; CMS-441 reste en haut d'« À faire », pas commencé.
 
 **Fait le 20/11** (REPO-492, `files/plans/jira-migration.md`) : les 492 tickets sont dans Jira —
 https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3 — avec leurs numéros (`[CARTO-67]`
@@ -30,10 +33,8 @@ une colonne** (Idées et Backlog y sont deux statuts, le tableau garde À faire,
 Fait) ; quatre onglets seulement sur le tableau ; deux comptes, « Claude Coder » et « Claude Historian », pour dire qui
 tient un ticket (mes commentaires restent signés de son nom : ils commencent par « codeur — » ou « historien — »).
 
-**Trello n'existe plus** : il a supprimé le tableau le 20/11 (_« efface »_), plutôt que de le garder fermé ; la copie
-complète est sur sa machine, `files/resources/jira-migration/snapshot/` (ignorée par git). **Le site est sur l'offre gratuite** : il a
-choisi « Free » le 20/11, à la place de l'essai Premium qu'Atlassian avait mis d'office (REPO-493, clos). **La
-migration est finie** : il ne reste rien, ni à lui ni à moi.
+**Trello n'existe plus** : il a supprimé le tableau le 20/11 ; la copie complète est sur sa machine,
+`files/resources/jira-migration/snapshot/` (ignorée par git). **Le site Jira est sur l'offre gratuite** (REPO-493, clos).
 
 **L'état du tableau** : `EHA` est le seul projet du site ; les arbres `coder` et `historian` ont la skill `/jira` ; « Fait »
 montre tout pendant deux semaines, puis les deux dernières seulement, le plus récent en haut.
