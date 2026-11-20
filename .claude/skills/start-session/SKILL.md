@@ -37,7 +37,7 @@ Gather all necessary written context from previous session.
 3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (most rules are
    path-scoped and the prompt hook names the rest; no need to ask the dev which files)
 4. Say in one line which rules are loaded, so the dev can name what is missing
-5. **Read the Trello board** — `/trello` skill, `list`, then its sync check. Tell the dev, in two lines,
+5. **Read the Jira board** — `/jira` skill: « À valider par le développeur » and the top of « À faire », then its sync check. Tell the dev, in two lines,
    what waits on him in **À valider par le développeur** and what tops **À faire**: the board is the list of tasks, `next.md`
    only the resume point.
 6. **The monthly version check** — read « Dernier contrôle des versions » in `next.md`. Over a month old (or absent):

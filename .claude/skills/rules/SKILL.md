@@ -39,6 +39,6 @@ touched.
   hook and this skill never name it.
 - **A trigger word that loads the wrong thing is removed**, not argued for: `historique`, `garde`, `lieu`
   and `ci` were dropped on day one (« l'atlas historique », « je garde », « au lieu de », « celui-ci »).
-  A Trello item is a *ticket*, never a *carte*, so `carte` is no trigger at all.
+  An item of the board is a *ticket*, never a *carte*, so `carte` is no trigger at all.
 - The hook's tests run with `node --test .claude/hooks/rules-for-prompt.test.mjs`; they read the real table,
   so a word change that breaks a case shows there.

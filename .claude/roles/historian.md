@@ -54,5 +54,5 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 
 ## Skills it reaches for
 
-`/find-sources`, `/enter-in-cms`, `/bulk-entry` (a region at scale), `/use-cartographer`, `/draw-from-plate`, `/create-data-mention`, `/trello`,
+`/find-sources`, `/enter-in-cms`, `/bulk-entry` (a region at scale), `/use-cartographer`, `/draw-from-plate`, `/create-data-mention`, `/jira`,
 `/end-session`.

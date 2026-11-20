@@ -2,7 +2,7 @@
 
 > Read **in addition** to `next.md` when a session starts as the historian (`/start-session`, _« en tant
 > qu'historien »_); written by `/end-session` in that role. Not imported by `CLAUDE.md`: the code instance never loads
-> it. The tasks are the board (`/trello`); this file holds where the historian stopped. Its readings are the team's,
+> it. The tasks are the board (`/jira`); this file holds where the historian stopped. Its readings are the team's,
 > never attributed to a person (memory `a-reading-is-never-attributed-to-the-dev`).
 
 **À faire dès qu'il a fini ses retouches de 1100** (sa demande, 13/11 : _« il ne faut pas qu'on se retrouve pollué par
@@ -11,8 +11,9 @@ de `files/plans/sources/1100/` (kosovo, france-empire, lusatia) restent : ce son
 
 ## ▶ ON REPREND ICI — 20/11, 15 h 4x : la 1100 vers zéro alerte, avec lui ; puis le Bregel, puis 1200
 
-**Le tableau passe de Trello à Jira** (sa décision, 20/11) : à la prochaine session, la skill `jira` remplace `/trello` ;
-les numéros des tickets changent, leurs titres seront mis à jour.
+**Le tableau est dans Jira depuis le 20/11** (sa décision) : la skill `/jira` remplace `/trello`. **Les numéros ne changent
+pas** — `[ATLAS-152]` est `EHA-152` dans Jira. L'historien y a son compte, « Claude Historian » : ATLAS-152 et ATLAS-408 (les
+sources de 1100 et de 1300) lui sont attribués.
 
 **La retouche de la 1100** (sa demande, 20/11 : zéro ville mal placée, avant le contrôle de la CI) : mesurer par
 `pnpm cities:alerts --map 1100`, jamais lui demander ; ma liste de travail `files/resources/historien/1100/alertes-1100.md`.

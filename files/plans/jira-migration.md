@@ -47,9 +47,15 @@ Backlog) — the Backlog view had to be added to it by hand. The site is on a **
 (Atlassian's default); three people are free on the free plan, billed per person on Premium — the plan must be the
 free one before the trial ends.
 
-**Left to do**: the skill `/trello` → `/jira` and the twenty files that name Trello (step 6); delete the project
-« Brouillon » and Atlassian's example project; check the plan is the free one (the sign-up address said
-`edition=premium`); the marks `[EPIC]` `[IDEES]` `[BACKLOG]` in the titles; Trello closed by him (step 7).
+**Step 6 done the same evening** (17 h 40): the skill `/jira` replaces `/trello` — every gesture as the MCP tool
+that does it, each tried on the real board (REPO-493 was created, numbered, assigned and moved by it); the board's
+script and its skill are removed from the tree; the instruction files, the two roles, `next.md` and the memory name
+Jira. The marks `[EPIC]` `[IDEES]` `[BACKLOG]` are taken off the 144 titles. The eleven tickets « En cours » have
+their assignee: nine the coder, two the historian (the sources of 1100 and of 1300).
+
+**Left to do**: delete the project « Brouillon » and Atlassian's example project (the dev's go); the lists of four
+tickets imported before the blank-line fix (EHA-1, 2, 5, 142); the trees `coder` and `historian` resynced with
+`main`; **REPO-493, his**: Trello closed (step 7), and the site on the free plan before the Premium trial ends.
 
 ### Changed by the dev the same afternoon (2026-11-20, 16 h 50)
 

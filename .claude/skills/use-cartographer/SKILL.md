@@ -118,7 +118,7 @@ cleaning becomes a measure of `lib/measures.mjs` with its test — a crenellatio
 ## After the session
 
 - A dated section in `references/journal.md`; a gesture walked into its scenario (`files/plans/cartographer/scenarii/`),
-  a surprise into `s99-holes.md`, a failing gesture into a ticket (`/trello`).
+  a surprise into `s99-holes.md`, a failing gesture into a ticket (`/jira`).
 - A map retouched in a worktree comes back to `main` and is committed like code — publishing a year is not blocked
   (the dev, 2026-11-08); never commit its `*.before-*` or `*.autosave.*` copies (`known-issues/data.md`).
 - **A report to the dev after every pass** (the dev, 2026-11-09): what the pass did, and what it showed could be

@@ -3,7 +3,7 @@
 > The dev's call, 2026-11-04: *"you make me test scenarios by hand — maybe it is time to bring in Playwright or
 > Cypress, to make sure at least the bare minimum works."* Then: an epic whose goal is **the most scenarios covered by
 > Playwright**, one setup ticket, and tickets that are **batches of tests to write**. Not for now — the order is his.
-> Trello: the epic **REPO-346** in Chantiers, its tickets in Backlog, each depending on the setup (label `chantier · playwright`).
+> The board (Jira since 2026-11-20): the epic **REPO-346**, its tickets in Backlog under it, each blocked by the setup (label `épique-playwright`).
 
 ## Why, and why Playwright
 

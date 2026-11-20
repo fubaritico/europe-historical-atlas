@@ -1,7 +1,8 @@
 # Next — the resume point
 
-> Loaded at session start (CLAUDE.md `### Next` → `@next.md`). **Since 2026-10-17 the list of tasks is the
-> Trello board** — https://trello.com/b/UJFwGl6E/europe-historical-atlas, through the `/trello` skill. This
+> Loaded at session start (CLAUDE.md `### Next` → `@next.md`). **The list of tasks is the board** — Jira since
+> 2026-11-20, https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3, through the `/jira`
+> skill (Trello from 2026-10-17 until then, kept closed). This
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
@@ -14,25 +15,26 @@ Coumans) et quatre exports, tous commités ; son point de reprise, `next-histori
 de la mémoire (170 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 16 h : la migration du tableau de Trello vers Jira
+## ▶ ON REPREND ICI — le 20/11, 17 h 40 : le tableau est dans Jira, il reste à le finir
 
-**Sa décision** (20/11) : _« une colonne à 261 items […] archiver proprement tout en gardant l'historique »_, et _« une
-hiérarchie claire entre epic, story, task et bugfix »_. À faire dans une session neuve.
+**Fait le 20/11** (REPO-492, `files/plans/jira-migration.md`) : les 492 tickets sont dans Jira —
+https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3 — avec leurs numéros (`[CARTO-67]`
+est `EHA-67`), leurs dates, leurs 676 commentaires, leurs épiques ; contrôlé ticket par ticket. **Tout passe par le MCP
+d'Atlassian** (`/mcp`, connecté sous son compte) et la skill **`/jira`** ; le script de Trello est retiré.
 
-**Premier geste de la session neuve : écrire le plan de migration** (sa demande, 20/11 : _« tu devras faire un plan de
-migration »_), dans **`files/plans/jira-migration.md`**. Ce fichier tient déjà ce que j'ai vérifié chez Atlassian (avec
-les liens), ce que je lui ai proposé, la conversation avec Gemini qu'il a apportée, et un tableau de ce qui s'accorde
-ou non entre les deux. À retenir : l'offre gratuite suffit ; un tableau Jira masque seul les tickets finis depuis deux
-semaines ; **l'importeur d'Atlassian ignore les cartes archivées — ne rien archiver dans Trello avant** ; un script à
-nous, par l'API, qui crée les tickets **dans l'ordre pour garder les mêmes numéros** (à prouver d'abord sur un projet
-d'essai) ; les épiques en vraies épiques ; puis la skill `/trello` et la règle de commitlint réécrites.
+**Ses décisions du 20/11** : pas de projet d'essai ; le MCP plutôt qu'un script à nous ; **le Backlog est une page, pas
+une colonne** (Idées et Backlog y sont deux statuts, le tableau garde À faire, En cours, À valider par le développeur,
+Fait) ; quatre onglets seulement sur le tableau ; deux comptes, « Claude Coder » et « Claude Historian », pour dire qui
+tient un ticket (mes commentaires restent signés de son nom : ils commencent par « codeur — » ou « historien — »).
 
-**Sa règle pour la référence** (20/11) : on écrit toujours `[CARTO-67]` — le préfixe d'application et le numéro — dans
-les commits, les plans, les messages, _« pour pas que vous soyez chamboulés avec l'historien »_. La clé propre à Jira
-passe derrière ; à voir si elle peut porter ce préfixe (un projet par application casse le compteur unique).
+**Ce qui lui revient** — REPO-493, dans « À valider par le développeur » : fermer Trello une fois le tableau vu, et
+mettre le site sur l'offre gratuite avant la fin de l'essai Premium qu'Atlassian a mis d'office (sans carte, rien
+n'est prélevé ; trois personnes sont gratuites sur l'offre gratuite).
 
-**Ce qui lui revient**, une fois le plan lu : créer le site Jira avec son compte Atlassian et donner un jeton (dans
-`.env.local`, comme celui de Trello).
+**Ce qui me reste** : supprimer le projet « Brouillon » et le projet d'exemple d'Atlassian (avec son accord) ; les
+marques `[EPIC]` `[IDEES]` `[BACKLOG]` à retirer des titres ; les listes à puces de quatre tickets importés avant
+la correction (EHA-1, 2, 5, 142) ; les arbres `coder` et `historian` à resynchroniser avec `main`. « Fait » montre
+tout pendant deux semaines, puis seulement les deux dernières semaines.
 
 **ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
 (`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
@@ -95,7 +97,7 @@ geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant
 crans** (_« des scroll top »_), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
 
 **Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
-après, posté par `commentfile` depuis un fichier (skill `/trello`, « The closing comment »).
+après (skill `/jira`, « The closing comment »).
 
 **Pour faire ou régler une icône** : la skill `/make-event-icon` (une image plate se dessine dans un cadre 44 × 44). **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
@@ -113,7 +115,7 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
 **Pour travailler** : mon shell démarre sous Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais
 de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier. Parler avec **ses** mots, un point à la fois.
 
-**Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ». C'est lui qui dit l'état de chaque ticket : il n'est plus recopié ici (01/11).
+**Le tableau** : `/jira`. Un élément du tableau est un **ticket**, jamais une « carte ». C'est lui qui dit l'état de chaque ticket : il n'est plus recopié ici (01/11).
 
 ## Where we are
 

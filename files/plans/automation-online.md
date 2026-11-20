@@ -173,7 +173,7 @@ a note (`sources/1100/adriatic.md`). One home per kind of decision:
 | --- | --- | --- | --- |
 | **a claim to arbitrate** — a holder, a dependence, a city on the wrong side | the **CMS's validation queue** | the dev, or later a trusted contributor | the daily digest; a count on the CMS's home |
 | **code, a published year, an export** | a **pull request** on GitHub | the dev, after testing | GitHub's notification; Projects' _Ready for review_ |
-| **a question of method**, and the state of the work — what ran, what failed, what is next | the **Trello board** — « À valider par le développeur » exists already | the dev moves the ticket | the board; the digest links it |
+| **a question of method**, and the state of the work — what ran, what failed, what is next | the **Jira board** (Trello when this was written) — « À valider par le développeur » exists already | the dev moves the ticket | the board; the digest links it |
 | **a run blocked on a permission** | the run itself (Projects' _Waiting on you_, a task's detail page) | the dev answers there | a desktop or phone notification |
 | **something urgent** — a run that keeps failing, a source refusing access | a **push notification** to the dev's phone | — | the notification itself |
 | **a mail to an outsider** | the CMS's mailbox (CMS-332) | the dev's click | the digest |

@@ -8,7 +8,7 @@ OWASP Top 10 #4 (was #2 in 2021). Exposure of sensitive data through weak or mis
 
 #### OWASP-A04-001: Hardcoded secrets in source code
 - **Where**: all tracked files except `.env*`; in particular `.github/`, `scripts/`, `.claude/skills/*/scripts/`, `packages/*/src/`, `files/plans/`
-- **Check**: No GitHub, Netlify, Sonar or Trello token, no `ghp_` / `npm_` / `_authToken=` string; the repository is public, so anything committed is published
+- **Check**: No GitHub, Netlify, Sonar, Trello or Atlassian token, no `ghp_` / `npm_` / `_authToken=` string; the repository is public, so anything committed is published
 - **Check**: `git log -p` is clean too — a secret removed in a later commit is still public
 
 #### OWASP-A04-002: Nothing secret in a client bundle

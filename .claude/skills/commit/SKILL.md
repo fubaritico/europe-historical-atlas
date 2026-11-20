@@ -9,7 +9,7 @@ metadata:
 # Commit
 
 Write and make a conventional commit for the current changes — **after the dev has tested them** (the Definition of
-Done in `/trello`, step 6). Push only when he asks.
+Done in `/jira`, step 6). Push only when he asks.
 
 ## Steps
 

@@ -20,7 +20,7 @@
 | Answer "how long / since when"                                                                               | `/timeline`                |
 | Fetch the SonarCloud report                                                                                  | `/sonar`                   |
 | Check or bump the dependencies' versions                                                                     | `/repo-version-manager`    |
-| Track a task — a card, its column, its label                                                                 | `/trello`                  |
+| Track a task — a ticket, its status, its epic, who holds it                                                  | `/jira`                    |
 | Log a source used to draw a year, and its mention                                                            | `/create-data-mention`     |
 | Research who held a place at a date, beyond Wikipedia                                                        | `/find-sources`            |
 | Enter the research in the CMS                                                                                | `/enter-in-cms`            |

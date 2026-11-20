@@ -46,7 +46,7 @@ is reported too — reading the code of a version we do not run misleads.
 - `.claude/rules/troubleshooting.md` — the majors that broke peers (ESLint 10, TypeScript 7);
 - `.claude/rules/known-issues/*.md` — tooling, cms (Payload's traps), cartographer (the design system);
 - `.claude/rules/architecture.md`, `.claude/rules/cartographer.md`;
-- the Trello board — `/trello list`, then the tickets naming it (`REPO-127`, ESLint 10, sits in Idées);
+- the Jira board — `/jira`, a search of the tickets naming it (`REPO-127`, ESLint 10, sits in Idées);
 - `package.json` of each package — an **exact** pin (no `^`) is a limit by itself: find why, or say no reason is written.
 
 A limit whose reason no longer holds becomes **« décision à revisiter »**: quote the decision, its date, what changed since.

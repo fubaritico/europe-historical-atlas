@@ -298,7 +298,7 @@ Follow-Up Reminders:
   - 2 weeks: Schedule follow-up call to discuss POC scope
 ```
 
-Capture action items as observations in the source note; this project's tasks live on the Trello board (`/trello`).
+Capture action items as observations in the source note; this project's tasks live on the Jira board (`/jira`).
 
 ## Guidelines
 

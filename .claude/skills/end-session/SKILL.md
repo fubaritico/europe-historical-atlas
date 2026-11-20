@@ -48,14 +48,14 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
    when he has. It reports stale references and
    contradictions and changes nothing; I go through its findings with him, and only what he accepts is applied
    (`.claude/rules/claude-config.md`).
-6. **The Trello board — run the sync check of the `/trello` skill** (its section *Sync*): every card
-   touched this session carries a comment saying where it stands; every card in **En cours** or **À valider par le développeur**
+6. **The Jira board — run the sync check of the `/jira` skill** (its section *Sync*): every ticket
+   touched this session carries a comment saying where it stands; every ticket in **En cours** or **À valider par le développeur**
    is named in `next.md`; every file of `files/plans/`, `.claude/known-issues.md`, `.claude/rules/known-issues/*.md` or `next.md` changed this
-   session has its card, and each ticket it cites (`— CARTO-41`) names a card that exists in a coherent column. What
-   shipped this session is a card in **Fait** (after the dev's test) — `completed.md` cites the ticket and
+   session has its ticket, and each ticket it cites (`— CARTO-41`) exists in a coherent status. What
+   shipped this session is a ticket in **Fait** (tested by me; a look or a decision judged by the dev) — `completed.md` cites the ticket and
    does not re-describe it; `next.md` holds no task list, the board does.
 7. **Scenarios** — if user-facing code shipped this session, run `/scenarii-to-code` §7d (the code → scenario audit)
    and include its table in the proposal.
 8. A decision of this project goes in its plan or `.claude/*.md`; a lesson about working with the dev in the file memory; a lesson that holds in other repositories in Basic Memory (`main/patterns/`).
 9. Propose all changes to the user before writing — do not write without confirmation. The board is the exception: it
-   follows `/trello`'s own latitude (a comment, a column a test settled).
+   follows `/jira`'s own latitude (a comment, a status a test settled).

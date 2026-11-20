@@ -1,6 +1,6 @@
 ---
 name: memory-lifecycle
-description: "Move Basic Memory notes between status folders (archive, reactivate) and update their status frontmatter. Use only for notes in Basic Memory — a ticket marked done is /trello."
+description: "Move Basic Memory notes between status folders (archive, reactivate) and update their status frontmatter. Use only for notes in Basic Memory — a ticket marked done is /jira."
 ---
 
 # Memory Lifecycle
@@ -50,7 +50,7 @@ Pick folder names that match your domain. The pattern matters more than the spec
 
 ## Status Detection
 
-When the user asks to change the status of a named Basic Memory note, map their word to a status (a task or ticket said to be done goes to `/trello`, not here):
+When the user asks to change the status of a named Basic Memory note, map their word to a status (a task or ticket said to be done goes to `/jira`, not here):
 
 | Signal | Status | Action |
 |--------|--------|--------|

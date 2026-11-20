@@ -7,9 +7,9 @@ OWASP Top 10 #2 (was #5 in 2021). Insecure defaults, missing hardening, overly p
 ### Critical
 
 #### OWASP-A02-001: No credential or token in a committed file
-- **Where**: `.npmrc` (exists; routes the `@fubaritico` scope only), `.github/actions/setup/action.yml`, `.github/workflows/*.yml`, `.gitignore` (`.npmrc`, `**/.env*`), `.claude/skills/trello/`
+- **Where**: `.npmrc` (exists; routes the `@fubaritico` scope only), `.github/actions/setup/action.yml`, `.github/workflows/*.yml`, `.gitignore` (`.npmrc`, `**/.env*`), `.claude/skills/jira/` (no script, no token: the MCP server is signed in by the dev)
 - **Check**: The GitHub Packages token lives in `~/.npmrc` locally and `NODE_AUTH_TOKEN: ${{ github.token }}` in CI, never in the repository's `.npmrc`
-- **Check**: Trello keys stay in `.env.local` (git-ignored); the Netlify and Sonar tokens are repository secrets, read through `env:`, never echoed
+- **Check**: the old Trello keys and the Jira organisation key stay in `.env.local` (git-ignored); the Netlify and Sonar tokens are repository secrets, read through `env:`, never echoed
 - **Check**: `git ls-files` lists no `.env*` and no `.npmrc` carrying an `_authToken`
 
 ### High

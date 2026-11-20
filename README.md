@@ -422,7 +422,8 @@ The design of the project, as it was decided — reversals and rejected alternat
 **The tooling and the project**
 
 - [`eslint-plugin-eha` — the order of declarations](files/plans/eslint-plugin-eha/plan.md)
-- [Feeding the Trello board](files/plans/trello/board-feeding.md)
+- [Moving the board from Trello to Jira](files/plans/jira-migration.md)
+- [Feeding the Trello board](files/plans/trello/board-feeding.md) — the board before 2026-11-20
 - [e-Soleau — dating the design corpus](files/plans/e-soleau.md)
 
 [⬆ Back to top](#table-of-contents)

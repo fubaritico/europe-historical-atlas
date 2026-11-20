@@ -1,7 +1,7 @@
 ---
 name: create-data-mention
 description: Cite a map, atlas or text the dev used to draw a year — classify it CALQUE or RÉFÉRENCE from its licence and declared source, log it on the year's provenance ticket (ATLAS-152 for 1100), and give its attribution in French and English. Use when the dev asks for a mention (« crée une mention pour cette carte / ce texte », « à citer »), gives a source's URL or a Commons file while drawing, or names the regions a source helped draw.
-allowed-tools: WebFetch Bash(/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello:*)
+allowed-tools: WebFetch
 metadata:
   author: europe-map
   version: "1.0"
@@ -64,11 +64,12 @@ for word is a **citation**, in quotation marks with its author — never paraphr
      becomes CC BY-SA and allows commercial use of that data (his `LICENSE` reserves the drawn years) — his call.
    - **One witness, not two**: a map redrawn from an atlas counts as that atlas (`evidence-system.md`, principle 3).
      Name both in the line.
-4. **Add the line** to the year's checklist (the verb extends a checklist of the same title, never doubles it):
+4. **Add the line** to the list « Sources de <year> » in the description of the year's provenance ticket, through the
+   `/jira` skill: read the description (`getJiraIssue`), add the line under that heading — never a second heading — and
+   write the whole description back (`editJiraIssue`):
 
-   ```bash
-   S=/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello
-   $S checklist <the year's provenance ticket> "Sources de <year>" "<regions> · <author> (<date>), d'après <declared source> · <licence> · RÉFÉRENCE|CALQUE (<why, in a few words>) · <url>"
+   ```
+   - ⬜ <regions> · <author> (<date>), d'après <declared source> · <licence> · RÉFÉRENCE|CALQUE (<why, in a few words>) · <url>
    ```
 
 5. **Post the mention**, French then English, as a comment on the same ticket — title, author, source, licence

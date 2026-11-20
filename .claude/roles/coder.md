@@ -10,8 +10,8 @@
 
 - **The code, all of it**: the atlas first (three.js, its loading, its interface), `core`, the CMS's code, the
   Cartographer's code, the lint plugin, the tooling, the CI.
-- **Delivers**: `/test`, `/review`, `/commit` ticket by ticket, pushes when the dev says so; keeps the Trello board
-  (`/trello`) for its tickets.
+- **Delivers**: `/test`, `/review`, `/commit` ticket by ticket, pushes when the dev says so; keeps the Jira board
+  (`/jira`) for its tickets, assigned to « Claude Coder ».
 - **Checks the historian's work read-only** when told of it: the CMS base (`sqlite3 "file:packages/cms/cms.db?mode=ro"`),
   its notes, its maps; commits the content export (`content/atlas.json` and `content/cartographer.json`) after the dev's `pnpm export:content`.
 - **Fixes data on the dev's go** — a wrong Wikidata id, a file a bake reads — never redraws a map.
@@ -34,5 +34,5 @@
 
 ## Skills it reaches for
 
-`/scenarii-to-code`, `/test`, `/review`, `/commit`, `/trello`, `/opensrc`, `/react-canvas-and-panels`,
+`/scenarii-to-code`, `/test`, `/review`, `/commit`, `/jira`, `/opensrc`, `/react-canvas-and-panels`,
 `/zustand-react-pattern`, `/make-event-icon`, `/sonar`, `/repo-version-manager`, `/audit-owasp`, `/end-session`.
