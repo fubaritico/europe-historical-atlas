@@ -1,9 +1,91 @@
-# Moving the board from Trello to Jira — what is known before the plan
+# Moving the board from Trello to Jira — the plan
 
 > The dev's decision, 2026-11-20: the board moves from Trello to Jira — the « Fait » column holds 261 tickets with
 > no clean way to archive them while keeping the history, and he needs a clear hierarchy between epic, story, task
-> and bugfix. To be done in a new session. This file gathers what was checked that day and the advice he brought
-> from Gemini; **it is not the plan yet** — the plan is written here first, then read by him.
+> and bugfix. **The plan is the next section** (written 2026-11-20, 16 h 30, to be read by him — ticket REPO-492);
+> under it, what it stands on: his rules, what was checked at Atlassian, the board as measured, Gemini's advice.
+
+## The plan
+
+### The route: Jira's own JSON import, then our script for what it cannot carry
+
+**This replaces what I proposed in the morning** (a script creating every ticket through the API). Checked since:
+the API cannot set a ticket's creation date nor a comment's date — every ticket would be born on the day of the move
+and the 689 comments would all carry that day. Jira's **JSON import** (settings → System → External System Import →
+JSON, on the « old experience » page) takes, per ticket, its **key**, its **creation date**, its **status**, its
+components, and its **comments with their dates**. So:
+
+1. **A script of ours reads all of Trello** (archived tickets included) and writes one JSON file in Jira's format.
+2. **Jira imports that file** — a gesture in Jira's admin page, done by me in the browser or by him.
+3. **Our script then adds through the API** what the file cannot carry: the six uploaded files (Trello's addresses
+   need our token, Jira could not fetch them), the tie of each ticket to its epic, the « Bloqué » flag and its link.
+
+If the trial (step 3 below) shows the JSON import refusing something, the fallback is the morning's route — the API,
+tickets created one at a time in the order of their numbers, the true dates written at the top of each description.
+
+### What the dev decides or does — everything else is mine
+
+| # | what | my call if he says nothing | by |
+| --- | --- | --- | --- |
+| 1 | **Create the Jira site** with his Atlassian account, free plan. **The site's address cannot be changed afterwards on the free plan** — choose it with care (`europe-historical-atlas.atlassian.net` if free) | — his gesture | the dev |
+| 2 | **Give a token**: `JIRA_SITE`, `JIRA_EMAIL`, `JIRA_TOKEN` in `.env.local`, beside Trello's (id.atlassian.com → Security → API tokens) | — his gesture | the dev |
+| 3 | **The project's key**: one project, key `EHA`. Jira's key is `EHA-67`; ours stays `[CARTO-67]`, **same number** | `EHA` | proposed by me |
+| 4 | **Importance and severity are two things on the board today** (the cover's colour: 9 « haute », 19 « moyenne »; the labels `critique` / `gênant` / `cosmétique`: 70 tickets) and Jira has one Priority field | the cover becomes Jira's **Priority** (High / Medium, none = Low); the severity **stays a label**, as today | proposed by me — it changes the morning's proposal, which had not seen the covers |
+| 5 | **The 15 archived tickets that never had a number** (from before 17/10) and the two template cards | **not imported** — they stay in the Trello board, kept closed and readable | proposed by me |
+| 6 | **The marks `[EPIC]` `[IDEES]` `[BACKLOG]` in the titles** | kept through the move, taken off by the script once the check of step 5 is green | his rule (« decide then ») |
+
+### How each thing of the board lands in Jira
+
+| on the Trello board | in Jira | note |
+| --- | --- | --- |
+| a ticket `[CARTO-67] Title` | work item `EHA-67`, summary `[CARTO-67] Title` | the number is forced by the import; 1 to 491, no hole (measured) |
+| the column **Épiques** (10) | type **Epic**, status « En cours » | the column disappears; an epic is a type |
+| label `fonctionnalité` (344) | type **Story** | |
+| label `défaut` (40) | type **Bug** | |
+| labels `dette`, `doc`, `décision`, `retour d'usage`, or none (9) | type **Task**, the label kept | two type labels on one ticket (7): `défaut` wins, then `fonctionnalité` |
+| the scope labels `atlas`, `Cartographe`, `core`, `CMS`, `données`, `outillage`, `design` | **components** — two scopes, two components | the prefix stays in the title as well (a cue seen twice is wanted) |
+| the labels `épique · …` | the ticket's **parent** is the epic; the label is kept too (`épique-icônes`) | a ticket in two epics (icons and landmarks) has one parent in Jira — the first epic whose checklist names it — and both labels |
+| an epic's checklist (131 items) | its children, by the parent tie; an item with no ticket yet stays a line in the epic's description | |
+| another ticket's checklist (23 tickets) | a ticked list at the foot of its description | |
+| the columns Idées → Fait | six statuses of the same names, in the same order | created by hand in the workflow **before** the import: an import cannot create a status |
+| an archived ticket with a number (30) | imported in its status, with the label `archivé` | Jira's free plan has no archive of its own |
+| `Bloqué` (10) + its link | Jira's **flag**, and a link « is blocked by » | |
+| descriptions and comments (689) | the same text, their dates kept, converted from Trello's Markdown to Jira's markup | the conversion of code snippets is what the trial must show |
+| the 6 uploaded files (8.9 MB) and 11 links | attached by the API; a link to a Trello card becomes a link to its Jira ticket | |
+| « Fait », newest on top, 261 | the board hides by itself what is done for more than two weeks; everything stays searchable | the first two weeks may show all 261 if the import dates them all « done today » — to see at the trial |
+
+Label names lose their spaces (Jira refuses them): `retour-d-usage`, `épique-cms`.
+
+### The steps
+
+| # | step | proves or delivers | time |
+| --- | --- | --- | --- |
+| 1 | **Snapshot of Trello**: `stamp` once more, then the script reads every card, comment, checklist and file into a local folder (**git-ignored** — the board is private and the repository public) | the migration works from a frozen copy; nobody writes the board from then on | 1 h |
+| 2 | **Transform** the snapshot into the JSON file, and a report **in French, as text**, of every odd case (two types, two epics, no label) | he reads the report, not the JSON | 3 h |
+| 3 | **Trial on a throwaway project `EHT`**, 30 tickets chosen for their cases: an epic and its children, numbers with a hole on purpose (1, 2, 5), the ticket with 22 comments, a closing comment with code, files, a blocked one, an archived one, two scopes | the number is kept · the dates are kept · the six statuses are taken · the markup reads well · the parent tie and the flag pass by the API · what the board shows of « Fait ». **Each proof seen in the browser by me**; `EHT` deleted after | 3 h |
+| 4 | **The real import** into `EHA`, then the API pass (parents, files, flags, links) | the 491 tickets in Jira | 1 h |
+| 5 | **The check, by script**: 491 keys equal to our numbers, per ticket the status, the type, the components, the count of comments, the parent against the epic's checklist; a report in French | a green report, or the list of what differs — the import is redone (the project deleted, Trello untouched) until it is | 2 h |
+| 6 | **The switch**: the board's script rewritten for Jira **with the same verbs** (`list`, `add`, `move`, `comment`, `commentfile`, `done`, `tag`, `block`…), the skill `/trello` becoming `/jira`, and the twenty files that name Trello (CLAUDE.md and its rule on vulnerabilities, `next.md`, the two roles, `/start-session`, `/end-session`, `/commit`, the README…) | from then on a ticket is created in Jira: Jira gives the number, the script writes it in the title. A failed creation can burn a number — a hole, never a number used twice | 4 h |
+| 7 | **Trello closed, never deleted**, once he has seen the Jira board | the old board stays readable | his gesture |
+
+**About a day and a half**, steps 1 to 6. Steps 1 and 2 need nothing from him and can start before the site exists.
+
+### What does not change
+
+- **`[CARTO-67]` in commits, plans and messages**, his rule. **commitlint's rule needs no change**: its pattern takes
+  any capital prefix and a number (`commitlint.config.js:6`).
+- The six columns, the templates of a ticket (they already live in the skill), the closing comment, who moves what.
+
+### What it costs — worth knowing, none blocking
+
+- **Jira will not link a commit to its ticket by itself**: its GitHub integration reads `EHA-67`, not `[CARTO-67]`.
+  Remedy if he ever wants it: write both in the commit. Not proposed now — his rule is one reference.
+- **The free plan lets no permission be changed**, and everyone invited is an administrator; no public access. For
+  him alone, and for the rule on unpublished vulnerabilities, that is what is wanted.
+- **Atlassian may switch off a free site left unused.** The board is used daily; and the snapshot of step 1 is kept.
+- **Not found in Atlassian's pages, so the trial decides**: whether the JSON import is open on the free plan; whether
+  components exist in a « team-managed » project — hence a **company-managed** Kanban project, where they do and where
+  the two-week window of « Fait » can be set to one, two or four weeks.
 
 ## His rules for it
 
@@ -28,11 +110,42 @@
 - **Atlassian's own Trello importer does not import archived cards**, and the reports about comments contradict one
   another (https://support.atlassian.com/jira-software-cloud/docs/import-data-directly-from-trello-into-jira/) — so
   **nothing is archived in Trello before the move**.
-- Not re-checked in the documentation: the hierarchy epic → story / task / bug → sub-task (Jira's standard model);
-  whether a script creating the tickets in order can keep our numbers (our counter is one for the whole board, 1 to
-  491, archived cards included).
 
-## What I proposed to him (not yet read by him as a written plan)
+Checked the same afternoon, for the plan:
+
+- **The JSON import** sets a work item's `key`, `created`, `updated`, `status`, `components`, its `comments` with
+  `author` and `created`, a `history`, attachments by `uri`; reached by External System Import → JSON, « switch to
+  the old experience » if hidden (https://support.atlassian.com/jira-cloud-administration/docs/import-data-from-json/).
+- **A CSV import with the « Issue Key » column mapped keeps the number**: Atlassian's example imports `XY-22222`
+  into project `ABC` as `ABC-22222`
+  (https://support.atlassian.com/jira/kb/what-is-the-difference-when-you-import-the-csv-file-with-issue-key-field-mapping-and-without-the-issue-key-field-mapping/).
+  Community answers contradict it — one more reason for the trial. An import **cannot create a status**; files are
+  fetched from an address Jira can reach (https://support.atlassian.com/jira-cloud-administration/docs/import-data-from-a-csv-file/).
+- **The API cannot set a creation date** — an open request since years
+  (https://jira.atlassian.com/browse/JRACLOUD-38572).
+- **A number is never used twice**, even after a deletion, and a failed creation can burn one
+  (https://community.atlassian.com/forums/Jira-questions/the-issue-keys-increase-sequentially/qaq-p/2777802,
+  https://jira.atlassian.com/browse/JRACLOUD-77334).
+- **The hierarchy** epic → story / task / bug → sub-task is fixed, the same in both kinds of project; more levels
+  are for the paid plans (https://community.atlassian.com/t5/Jira-articles/Jira-Issue-Type-Hierarchy-Everything-You-Need-to-Know-Jira-Guru/ba-p/2803255).
+- **Limits for a script with a token**: 100 creations a second, and on one ticket 20 writes per 2 seconds, 100 per
+  30 seconds — far above our need (https://developer.atlassian.com/cloud/jira/platform/rate-limiting/).
+- **The free plan**: permissions cannot be changed, everyone invited is an administrator, the site's address cannot
+  be changed after creation, an unused site may be switched off
+  (https://support.atlassian.com/jira-cloud-administration/docs/what-is-the-free-jira-cloud-plan/).
+- **Not read** (the page would not load): the API's page for creating a work item — how the parent is set. From
+  memory: the field `parent`, by key. The trial proves it.
+
+## The board as measured, 2026-11-20 (read-only, by the API)
+
+508 cards: 463 open, 45 archived. **491 numbers, 1 to 491, no hole, none twice.** 17 cards without a number: the two
+templates and 15 archived from before the counter. By prefix: CARTO 203, ATLAS 157, CMS 55, REPO 47, CORE 26,
+DESIGN 2, CONTRIB 1 (retired, read as CMS) — measured before REPO-492, this plan's own ticket, was created: the
+snapshot of step 1 recounts, and the plan's « 491 » means « every number at that moment »; 78 titles carry two scopes. 689 comments on 261 cards (22 at most on
+one). 17 attachments: 6 uploaded files (8.9 MB), 11 links. 45 checklists on 33 cards, 274 items — 131 of them in the
+ten epics. Covers: 9 red, 19 yellow. 9 numbered cards without a type label, 7 with two. One member.
+
+## What I proposed to him in the morning (replaced by the plan above)
 
 One project; a script of ours that reads all of Trello through its API, archived cards included, and creates the
 tickets in Jira **in the order of their numbers, so each keeps its number**; the prefix ATLAS / CARTO / CMS / CORE /
