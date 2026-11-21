@@ -81,17 +81,6 @@
       "wikidata": "Q2166417"
     },
     {
-      "id": "sultanate-of-rum",
-      "name": "Sultanate of Rum",
-      "rank": "sultanate",
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": 1077,
-      "existsTo": 1307,
-      "colour": "#595cc0",
-      "wikidata": "Q975405"
-    },
-    {
       "id": "kingdom-of-alba",
       "name": "Kingdom of Alba",
       "rank": "kingdom",
@@ -126,8 +115,8 @@
     },
     {
       "id": "almoravid-dynasty",
-      "name": "Almoravid Dynasty",
-      "rank": "empire",
+      "name": "Almoravid dynasty",
+      "rank": "caliphate",
       "status": "country",
       "suzerain": null,
       "existsFrom": 1040,
@@ -171,6 +160,53 @@
       "wikidata": "Q3708094"
     },
     {
+      "id": "fatimid-caliphate",
+      "name": "Fatimid Caliphate",
+      "rank": "caliphate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": 909,
+      "existsTo": 1171,
+      "colour": "#1a7904",
+      "wikidata": "Q160307"
+    },
+    {
+      "id": "sultanate-of-rum",
+      "name": "Sultanate of Rum",
+      "rank": "sultanate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": 1077,
+      "existsTo": 1307,
+      "colour": "#595cc0",
+      "wikidata": "Q975405"
+    },
+    {
+      "id": "tripoli-des-banu-ammar",
+      "name": "Tripoli des Banu Ammar",
+      "shortName": "Tripoli",
+      "rank": null,
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 290
+    },
+    {
+      "id": "jable",
+      "name": "Jablé",
+      "rank": null,
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#6aff00",
+      "wikidata": null,
+      "territory": 372
+    },
+    {
       "id": "inalids",
       "name": "Inalids",
       "rank": "county",
@@ -180,17 +216,6 @@
       "existsTo": 1183,
       "colour": null,
       "wikidata": "Q2060041"
-    },
-    {
-      "id": "armenian-kingdom-of-cilicia",
-      "name": "Armenian Kingdom of Cilicia",
-      "rank": "kingdom",
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": 1080,
-      "existsTo": 1375,
-      "colour": "#c09359",
-      "wikidata": "Q335088"
     },
     {
       "id": "republic-of-genoa",
@@ -204,6 +229,17 @@
       "wikidata": "Q174306"
     },
     {
+      "id": "armenian-kingdom-of-cilicia",
+      "name": "Armenian Kingdom of Cilicia",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": 1080,
+      "existsTo": 1375,
+      "colour": "#c09359",
+      "wikidata": "Q335088"
+    },
+    {
       "id": "kingdom-of-hungary",
       "name": "Kingdom of Hungary",
       "rank": "kingdom",
@@ -213,17 +249,6 @@
       "existsTo": 1946,
       "colour": "#7c4424",
       "wikidata": "Q171150"
-    },
-    {
-      "id": "fatimid-caliphate",
-      "name": "Fatimid Caliphate",
-      "rank": null,
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#1a7904",
-      "wikidata": "Q160307"
     },
     {
       "id": "norman-england",
@@ -848,6 +873,7 @@
     {
       "id": "taifa-of-denia",
       "name": "Taifa of Dénia",
+      "shortName": "Dénia",
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
@@ -1700,7 +1726,7 @@
     {
       "id": "sami",
       "name": "Sámi",
-      "rank": "tribe",
+      "rank": "people",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -1711,7 +1737,7 @@
     {
       "id": "kvens",
       "name": "Kvens",
-      "rank": "tribe",
+      "rank": "people",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -1729,6 +1755,78 @@
       "existsTo": null,
       "colour": "#c4634a",
       "wikidata": "Q4446080"
+    },
+    {
+      "id": "abodrites",
+      "name": "Abodrites",
+      "rank": "confederation",
+      "status": null,
+      "suzerain": "duchy-of-saxony",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 373
+    },
+    {
+      "id": "lutices",
+      "name": "Lutices",
+      "rank": "confederation",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 374
+    },
+    {
+      "id": "ranes",
+      "name": "Ranes",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 375
+    },
+    {
+      "id": "brizanes",
+      "name": "Brizanes",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 377
+    },
+    {
+      "id": "hevelles",
+      "name": "Hévelles",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 376
+    },
+    {
+      "id": "ukranes",
+      "name": "Ukranes",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 378
     }
   ]
 }

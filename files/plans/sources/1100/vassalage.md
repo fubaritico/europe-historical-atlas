@@ -269,3 +269,15 @@ both readings.
 | the bishop of Paestum (Q25226731) | Roger Borsa, duke of Apulia (lord of the former principality of Salerno) (Q468687) | unproven | Enciclopedia Italiana (Treccani), s.v. « Salerno », Storia (it-02) | No text read on the bishop's temporal tie to the duke; ecclesiastically under the archbishop of Salerno (not read). |
 
 **Generated** from the lots' reports by `files/resources/historien/1100/chaines/belonging-1100-research/work/register.py` — 255 links: 63 proven, 144 probable, 48 unproven. The full witness, quotation and file of each link are in its lot's report.
+
+## Added by hand — the Slavic lands between Elbe and Oder (lot A, 2026-11-21)
+
+Not yet in the generated table above; detail and quotations in `wends.md` and
+`files/resources/historien/1100/regions/wends-1100-research/quotes.json`.
+
+| vassal (QID) | holds of (QID) | state | witness | doubt |
+| --- | --- | --- | --- | --- |
+| Henry, prince of the Obotrites (Q470177) | Magnus Billung, duke of Saxony (Q503687) | proven for c. 1093, read across 1100 | Helmold, Chronica Slavorum I, 34 (ed. 1868, p. 72): « fecit- que ei iuramentum fidelitatis ac subiectionis » (OCR, image to read) | The oath is told once, after Kruto's death; nothing read says it was renewed |
+| the Lutici (Q14652273) | Henry, prince of the Obotrites (Q470177), by tribute | unproven | Helmold I, 34: all the eastern Slavs under tribute « a die illa » (1093) | Wikipedia (de) « Kessiner »: only after Lothar's campaign of 1121 (Annalista Saxo, not read) |
+| the Rani (Q683900) | no one | probable | Helmold I, 2 and I, 36: their own king, the temple | Tribute to Henry only after their defeat before Lübeck, which Helmold sets after 1106/1110 and Wikipedia in 1100 |
+| the Hevelli at Brandenburg (Q165148) | no one, or Udo III, margrave of the Northern March | unproven | Annales Magdeburgenses a. 1100 (MGH SS XVI, p. 180): Udo « obsedit et honorifice cepit » | Wikipedia (de) « Nordmark »: no margrave ruled east of the Elbe, Udo IV at Brandenburg in 1109 |
