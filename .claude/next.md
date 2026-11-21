@@ -19,8 +19,10 @@ fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
 **Il l'a dit le 20/11 au soir** : le sujet en cours est **les icônes des événements** (ATLAS-288, sept types sur
 treize, et son épique ATLAS-132) ; l'oriflamme de la conquête est faite (ATLAS-477). Les six icônes restantes se feront
-quand une carte en aura besoin. **En attente de sa réponse** : fermer ATLAS-288 et l'épique, avec un ticket au Backlog
-qui nomme les six types restants (ma proposition ; sa phrase, dictée, était « passer les [épiques] à Fait »).
+quand une carte en aura besoin. **Fait le 21/11, sur son accord** : ATLAS-288 est fermé ; les six icônes restantes
+(ATLAS-478 à 483 : invasion, guerre, invention, découverte, révolution, coup d'État) sont passées d'« À faire » au
+Backlog ; l'épique ATLAS-132 reste ouverte, puisqu'elle les porte. **Sa remarque du 21/11** : la liste des événements
+vient de Wikipédia et il en manque sans doute — l'historien a trouvé une prise de ville en 1100, à lui demander.
 « À valider par le développeur » est vide ; CMS-441 reste en haut d'« À faire », pas commencé.
 
 **Fait le 20/11** (REPO-492, `files/plans/jira-migration.md`) : les 492 tickets sont dans Jira —
