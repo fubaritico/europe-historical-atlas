@@ -24,6 +24,7 @@ const OPENED: SheetValues = {
   testimonies: [],
   communities: [],
   holderTitle: 10,
+  periodName: null,
   holderName: '',
   holderQid: '',
   showInAtlas: false,

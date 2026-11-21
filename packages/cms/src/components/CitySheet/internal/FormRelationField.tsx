@@ -3,7 +3,7 @@ import { getIn, useFormikContext } from 'formik'
 import { RelationField } from './RelationField'
 
 import type { SheetValues } from '../utils/sheetValues'
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, Where } from 'payload'
 
 /**
  * A field of the sheet's form that chooses one record with Payload's own relationship field — found in the list, or
@@ -14,6 +14,7 @@ import type { CollectionSlug } from 'payload'
  * @param props.collection - the collection it chooses in
  * @param props.label - its label
  * @param props.description - the sentence under it
+ * @param props.only - the records offered, when not all of the collection — the same object from one render to the next
  * @returns the field
  */
 export function FormRelationField({
@@ -21,11 +22,13 @@ export function FormRelationField({
   collection,
   label,
   description,
+  only,
 }: {
   name: string
   collection: CollectionSlug
   label: string
   description: string
+  only?: Where
 }) {
   const { values, getFieldMeta, setFieldValue, setFieldTouched } = useFormikContext<SheetValues>()
   const meta = getFieldMeta(name)
@@ -47,6 +50,7 @@ export function FormRelationField({
         description={description}
         value={(getIn(values, name) as number | string | null | undefined) ?? null}
         onChange={handleChange}
+        {...(only === undefined ? {} : { only })}
       />
       {error !== undefined && (
         <p className="city-sheet__help city-sheet__help--error" role="alert">

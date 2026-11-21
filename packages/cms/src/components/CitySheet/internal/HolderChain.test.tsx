@@ -53,6 +53,7 @@ function values(year: string, titled = true): SheetValues {
     testimonies: [],
     communities: [],
     holderTitle: titled ? COUNT.id : null,
+    periodName: null,
     holderName: '',
     holderQid: '',
     showInAtlas: false,

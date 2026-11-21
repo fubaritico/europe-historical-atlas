@@ -4,6 +4,7 @@ import { CommunitiesField } from './CommunitiesField'
 import { HolderFields } from './HolderFields'
 import { ImportanceField } from './ImportanceField'
 import { MomentFields } from './MomentFields'
+import { PeriodNameField } from './PeriodNameField'
 import { PlaceSheets } from './PlaceSheets'
 import { ReasonsField } from './ReasonsField'
 import { RecordField } from './RecordField'
@@ -19,7 +20,7 @@ import type { SheetLists } from '../utils/sheetValues'
 
 /**
  * Every field of the sheet, in the order it is entered — **first whether the atlas shows it** (the dev, 2026-11-08:
- * *"it should be at the very top, here it is drowned in the form"*), then the place, the date, the importance, the
+ * *"it should be at the very top, here it is drowned in the form"*), then the place and the name it bore then (CMS-495), the date, the importance, the
  * reasons, who held it and the chain above them, its religious communities (CMS-433), the lines of the sources.
  * @param props - the searches, the chain's reader and the link's writer, the overlap's wiring, the CMS's lists and the translator
  * @param props.searches - the searches of the places and the sources
@@ -50,6 +51,7 @@ export function SheetFields({
       <ShowInAtlasField say={say} />
       <RecordField name="place" texts={placeTexts(say)} search={searches.places} />
       <PlaceSheets read={overlap.read} onSheets={overlap.onSheets} say={say} />
+      <PeriodNameField say={say} />
       <fieldset className="city-sheet__date">
         <legend className="city-sheet__legend">{say('date')}</legend>
         <p className="city-sheet__help">{say('dateHelp')}</p>

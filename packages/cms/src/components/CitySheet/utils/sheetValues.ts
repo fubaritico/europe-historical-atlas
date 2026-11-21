@@ -103,6 +103,11 @@ export interface SheetValues {
    * by Payload's own field, which reads it.
    */
   holderTitle: number | string | null
+  /**
+   * The name of the time's id — the name the place bore at the sheet's date — or `null` before one is chosen
+   * (CMS-495). Its text is shown by Payload's own field, which reads it.
+   */
+  periodName: number | string | null
   /** The polity that held it, by its name, as typed — « tenue par ». */
   holderName: string
   /** That polity's Wikidata id, as typed. */
@@ -167,6 +172,8 @@ export interface SheetBody {
   communities: CommunityBody[]
   /** The holder's title's id, `null` when none is chosen. */
   holderTitle: number | string | null
+  /** The name of the time's id, `null` when none is chosen (CMS-495). */
+  periodName: number | string | null
   /** The holder's name, `null` when none is typed. */
   holderName: string | null
   /** The holder's Wikidata id, `null` when none is typed. */
@@ -314,6 +321,7 @@ export function sheetValues(doc: SheetDocument, placeName: string | null): Sheet
     testimonies: rows.map(testimonyValues),
     communities: communities.map(communityValues),
     holderTitle: relationId(doc.holderTitle),
+    periodName: relationId(doc.periodName),
     holderName: textOf(doc.holderName),
     holderQid: textOf(doc.holderQid),
     // Ticked only when the base says so: a new sheet starts unticked, the collection's default (CMS-391).
@@ -361,6 +369,7 @@ export function sheetBody(values: SheetValues): SheetBody {
     testimonies: values.testimonies.map(testimonyBody),
     communities: values.communities.map(communityBody),
     holderTitle: values.holderTitle,
+    periodName: values.periodName,
     holderName: trimmed(values.holderName),
     holderQid: trimmed(values.holderQid),
     showInAtlas: values.showInAtlas,

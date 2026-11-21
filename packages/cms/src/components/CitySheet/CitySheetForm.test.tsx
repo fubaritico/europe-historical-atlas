@@ -38,6 +38,7 @@ const rome: SheetValues = {
   reasons: [],
   testimonies: [],
   holderTitle: null,
+  periodName: null,
   holderName: '',
   holderQid: '',
   communities: [],
@@ -52,6 +53,7 @@ const empty: SheetValues = {
   reasons: [],
   testimonies: [],
   holderTitle: null,
+  periodName: null,
   holderName: '',
   holderQid: '',
   communities: [],
@@ -229,6 +231,53 @@ describe('CitySheetForm', () => {
         expect(toast.success).toHaveBeenCalled()
       })
       expect(savedBody(fetcher).holderTitle).toBe(12)
+    })
+
+    // CMS-495: the name the place bore at the sheet's date, chosen in Payload's own field, saved by its id.
+    it('saves the name chosen in « Nom d’époque » by its id', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.type(screen.getByLabelText('Nom d’époque'), '7')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).periodName).toBe(7)
+    })
+
+    it('offers the names of the sheet’s place only, and every title to the holder', () => {
+      renderForm(rome, 1)
+      expect(screen.getByLabelText('Nom d’époque').dataset.filter).toBe(
+        JSON.stringify({ 'period-names': { place: { equals: 5 } } })
+      )
+      expect(screen.getByLabelText('Personnage et titre').dataset.filter).toBe('null')
+    })
+
+    it('keeps the name a saved sheet opens with', () => {
+      renderForm({ ...rome, periodName: 7 }, 1)
+      expect(screen.getByLabelText<HTMLInputElement>('Nom d’époque').value).toBe('7')
+    })
+
+    it('asks for the place first on a new sheet, in the name’s stead', () => {
+      renderForm(empty)
+      expect(screen.queryByLabelText('Nom d’époque')).toBeNull()
+      expect(
+        screen.getByText(
+          'Choisissez d’abord le lieu : les noms d’époque proposés sont ceux de ce lieu.'
+        )
+      ).toBeTruthy()
+    })
+
+    it('empties the name once the place is removed: a name is a name of one place', async () => {
+      serverWithRome1100()
+      renderForm({ ...rome, periodName: 7 }, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Retirer Rome' }))
+      expect(screen.queryByLabelText('Nom d’époque')).toBeNull()
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      await user.click(await screen.findByRole('option', { name: 'Rome' }))
+      expect((await screen.findByLabelText<HTMLInputElement>('Nom d’époque')).value).toBe('')
     })
 
     // CMS-422 step 2c: the holder as a title, its chain computed from the links and read under it.

@@ -1,6 +1,7 @@
 import { RelationshipInput } from '@payloadcms/ui'
+import { useMemo } from 'react'
 
-import type { CollectionSlug, ValueWithRelation } from 'payload'
+import type { CollectionSlug, ValueWithRelation, Where } from 'payload'
 
 /**
  * One record of a collection, chosen with Payload's own relationship field (the dev, 2026-11-16, his screenshot of
@@ -19,6 +20,8 @@ import type { CollectionSlug, ValueWithRelation } from 'payload'
  * @param props.onChange - called with the id chosen, or `null` once emptied
  * @param props.readOnly - held as it is: while what it chose is being saved
  * @param props.required - marked required — its star; the form says what is missing
+ * @param props.only - the records offered, when not all of the collection: the names of one place — the same object
+ *   from one render to the next, or the field empties its options at each
  * @returns the field
  */
 export function RelationField({
@@ -30,6 +33,7 @@ export function RelationField({
   onChange,
   readOnly = false,
   required = false,
+  only,
 }: {
   path: string
   collection: CollectionSlug
@@ -39,7 +43,16 @@ export function RelationField({
   onChange: (id: number | string | null) => void
   readOnly?: boolean
   required?: boolean
+  only?: Where
 }) {
+  // Kept the same object from one render to the next: Payload's field empties its list of options each time its
+  // filter changes identity (3.92, `fields/Relationship/Input.js`, the effect on `filterOptions`), which a filter
+  // rebuilt at every keystroke elsewhere in the form would do. `only` must itself be stable: its caller memoises it.
+  const filterOptions = useMemo(
+    () => (only === undefined ? undefined : { [collection]: only }),
+    [collection, only]
+  )
+
   // Handlers — Payload hands `null` once the field is emptied, whatever its type says
   const handleChange = (next: ValueWithRelation | null) => {
     onChange(next === null ? null : next.value)
@@ -59,6 +72,7 @@ export function RelationField({
       description={description}
       value={value === null ? null : { relationTo: collection, value }}
       onChange={handleChange}
+      {...(filterOptions === undefined ? {} : { filterOptions })}
       // One collection: its options flat, as Payload's own field shows them, not under the collection's name
       formatDisplayedOptions={(groups) => groups.flatMap((group) => group.options)}
     />
