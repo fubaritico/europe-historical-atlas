@@ -160,6 +160,16 @@ that exists is reused (its id), never created again.
      page another, and the page's `copyOf` names the book — sources that copy one another are one *témoin*.
 2. **The place** (`places`). Search by `wikidata` (the `Q…`), then by `name`.
    - `name` in French (required; the default locale is `fr`), the English name as a second locale when known.
+   - **The name is the name of the time, and it is entered with great care** (the dev, 2026-11-21: _"the base should
+     hold its present name, today, and the name it had at the time of the sheet"_ — Ankara is « Ancyre » in 1100, «
+     Ancyra » in English; `../../../files/plans/contribution/names.md`). The map writes the name of the time alone; the
+     present name will stand beside it in parentheses in the city's detail. **Until the base has a field for each**:
+     - `name` (fr) is the form French historians give the place **at the map's date**, read in a source — never
+       Wikidata's label taken as it comes, which is the present name. Same name then and now: nothing more to do.
+     - the `en` locale is the English form of the time, **entered whenever a source gives it**, no longer left for later.
+     - `wikidata` is entered whenever the place has an item: it is what carries the present name for now.
+     - a place already in the base under another year keeps its name: **never rename it** (the other year's map reads
+       it) — report it in the message to the coder.
    - `location` = **`{ "longitude": …, "latitude": … }`** — the MCP tools take an object and store Payload's
      `[longitude, latitude]` tuple; never send the tuple. Wikidata P625 gives the latitude first: read both by name.
    - `wikidata` = `Q` followed by digits, or nothing.
@@ -213,7 +223,9 @@ Two batches never write the same sheet at once — an update re-sends all its li
 1. **Tell the dev, in French, in a few lines**: what was entered (names, not ids), what was reused, what was refused
    and why, what diverges.
 2. **Send the code instance one message** (`ListAgents`, then `SendMessage`): the collection and the ids created or
-   changed. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
+   changed, **and every place whose name of the time differs from its present name** — id, name of the time (fr,
+   en), present name, the source the name was read in — and every place left under a name that is not of the map's
+   date. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
    any fault to the dev; the historian then corrects it by `update`.
 3. **The year's file stays the home of the questions** (`files/plans/sources/<year>/questions.md`): the question, the
    answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338).
