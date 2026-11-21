@@ -49,12 +49,12 @@ stop the server, put the copy in place of `cms.db`, start it again.
 ## Connect Claude to it — the MCP server
 
 The CMS is an MCP server (`@payloadcms/plugin-mcp`) at `http://localhost:3100/api/mcp`, so a Claude Code session can
-read and enter places, cities at a date, sources, importance reasons and confessions — **never delete**. What a key may reach is set in
+read and enter places, cities at a date, names of the time, sources, importance reasons and confessions — **never delete**. What a key may reach is set in
 `src/mcp/mcpAccess.ts`.
 
 1. **A key**: in the admin, **MCP › API Keys**, create one. In the sidebar, tick **find, create, update** for `places`,
-   `place-periods`, `sources`, `importance-reasons` and `confessions`. Save, copy the key. The key acts as the account that created
-   it. A key made before 2026-11-13 lacks some of these boxes: tick them.
+   `place-periods`, `period-names`, `sources`, `importance-reasons` and `confessions`. Save, copy the key. The key acts as the account that created
+   it. A key made before 2026-11-22 lacks some of these boxes (`period-names` since that day): tick them.
 2. **Keep it out of the repository**: put it in `.env.local` at the repository root (ignored by git), as `CMS_MCP_KEY=…`.
 3. **Register it once**, in a terminal, from the repository's folder:
 
