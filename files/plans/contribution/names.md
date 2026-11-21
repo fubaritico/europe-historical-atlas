@@ -35,10 +35,24 @@
 | 6b | Is the name of the time a field or a record? | **a record of its own table**, pointed to by one more field of the dated sheet's form, **and created on the fly from that form** — the same process as a vassal that does not exist yet: it is created, its person is created, the person is sourced, the source is added (CMS-422). _"This kind of contribution on the fly […] is fundamental."_ | the dev, 2026-11-21 |
 | 6c | How many languages? | a **table of correspondence per language** for each name — French and English today, Spanish, Italian, German tomorrow — never a fixed pair | the dev, 2026-11-21 |
 | 6d | How far do we go now? | **the whole of it, now**: _"What we do today we will not have to do tomorrow"_ — no debt left to pay once several years are contributed | the dev, 2026-11-21 |
-| 6e | The shape of the record | _proposed_: one record is one name a place bore — the place, the table of its forms (a language, the form), its source lines (source, where, quotation, the name as written) and the years it is attested; the sheets of 1100 and 1200 point to the same record, as two sheets point to one title | the coder, proposed — not decided |
+| 6e | The shape of the record | one record is one name a place bore — the place, the table of its forms (a language, the form; one form a language, another spelling is another record) and its source lines (source, where, quotation, the name as written). **No date on it**: the sheets that point at it say when — the sheets of 1100 and of 1200 point at the same record, as two sheets point at one title. Built so, 2026-11-21 (`cms/src/collections/PeriodNames.ts`) | the coder — to be confirmed by the dev on sight |
 | 7 | What can Wikidata verify? | _proposed_: the present name only — it knows no dated name; a name of the time is verified by its source | the coder, proposed — not decided |
 | 8 | The countries | _proposed_: the same rule — the name is contributed on the CMS territory, per language, and the drawn country reads it through its link (`territoryMatch`) instead of bearing its own | the coder, proposed — not decided |
 | 9 | A name of the time is missing in the page's language | _open_ — an error-handling decision (`rules/error-handling.md`), to bring to the dev with its alternatives | — |
+
+## Where it stands — 2026-11-21, on the coder's tree, not yet in `main`
+
+| step | state |
+| --- | --- |
+| the register « Noms d'époque » (`period-names`), its migration (up and hand-written down proved on a copy of the base: 13 684 places, 13 671 sheets and 17 696 source lines before and after), opened to the MCP | done — `672f64b9` |
+| the field « Nom d'époque » in the dated sheet's form: the names of the sheet's place only, « + » creates one in a drawer, removing the place empties it | done — `d7700d84`; tried through the API of a CMS of the coder's on the copy, **the drawer itself not seen in a browser** |
+| the export, the content format, the atlas | to do — waits on decision 9 |
+| the present name on the place and the sort of the 13 684 names | to do |
+| the countries | to do — decision 8 |
+
+**Two rules the code holds that the dev did not dictate** (said to him, his to strike): a sheet takes only a name of its
+own place; a name sheets cite cannot move to another place. **Known limit**: the drawer « + » opens an empty form — the
+place is chosen again in it (Payload's field hands no initial value to its drawer).
 
 ## What it asks, in order (to become tickets once 6 to 9 are decided)
 
