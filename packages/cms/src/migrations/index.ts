@@ -7,6 +7,7 @@ import * as migration_20261115_215340_unique_wikidata from './20261115_215340_un
 import * as migration_20261115_233056_parents from './20261115_233056_parents';
 import * as migration_20261116_015640_sovereign from './20261116_015640_sovereign';
 import * as migration_20261118_201310_mcp_key_delete from './20261118_201310_mcp_key_delete';
+import * as migration_20261121_220424_period_names from './20261121_220424_period_names';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20261118_201310_mcp_key_delete.up,
     down: migration_20261118_201310_mcp_key_delete.down,
-    name: '20261118_201310_mcp_key_delete'
+    name: '20261118_201310_mcp_key_delete',
+  },
+  {
+    up: migration_20261121_220424_period_names.up,
+    down: migration_20261121_220424_period_names.down,
+    name: '20261121_220424_period_names'
   },
 ];

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { PeriodNames } from '../collections/PeriodNames'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
@@ -37,6 +38,7 @@ describe('mcpAccess', () => {
         'confessions',
         'importance-reasons',
         'people',
+        'period-names',
         'place-periods',
         'places',
         'sources',
@@ -80,7 +82,7 @@ describe('mcpAccess', () => {
     it('opens the deletion only on collections that refuse one by filter over MCP', () => {
       // One call with a wide filter would empty a collection (CMS-454): a collection opened without the refusal
       // fails here.
-      const opened = [Places, PlacePeriods, Sources, Titles, VassalLinks]
+      const opened = [Places, PlacePeriods, PeriodNames, Sources, Titles, VassalLinks]
       const deletable = Object.entries(MCP_COLLECTIONS)
         .filter(([, { enabled }]) => enabled.delete)
         .map(([slug]) => slug)

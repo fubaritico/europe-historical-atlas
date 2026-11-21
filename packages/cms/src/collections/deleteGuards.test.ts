@@ -5,6 +5,7 @@ import { Events } from './Events'
 import { EventTypes } from './EventTypes'
 import { ImportanceReasons } from './ImportanceReasons'
 import { People } from './People'
+import { PeriodNames } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 import { PLACE_CITERS, Places } from './Places'
 import { SiegeEngines } from './SiegeEngines'
@@ -23,6 +24,7 @@ const COLLECTIONS: CollectionConfig[] = [
   SiegeEngines,
   Places,
   PlacePeriods,
+  PeriodNames,
   ImportanceReasons,
   Confessions,
   People,

@@ -3,6 +3,7 @@ import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { Confessions } from '../collections/Confessions'
 import { ImportanceReasons } from '../collections/ImportanceReasons'
 import { People } from '../collections/People'
+import { PeriodNames } from '../collections/PeriodNames'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
@@ -61,13 +62,24 @@ export const MCP_COLLECTIONS = {
   [PlacePeriods.slug]: {
     enabled: ENTER_AND_DELETE,
     description:
-      'A city at a date (« Ville à une date »): its importance; its holder `holderTitle`, an id from titles — the ' +
+      'A city at a date (« Ville à une date »): its importance; `periodName`, an id from period-names — the name ' +
+      'the place bore at that date, a name of that same place, the one the map writes; its holder `holderTitle`, an id from titles — the ' +
       'person, for the territory held, the city answers to at that date; its chain of vassalage is computed from the ' +
       'links of that title, never entered here — and, until 1100 is taken over, the polity holding it as text ' +
       '(holderName, holderQid); its source lines, each with a subject, a source and a quotation; its `communities`, each a confession, a ' +
       '`weight` (dominant or present) and `weightAttested` — true only when a source says that weight — and each named ' +
       'by a line with the subject « community » citing the same confession; `showInAtlas` (false by default) ' +
       'decides whether the published atlas shows it — every city still reaches the Cartographer.',
+  },
+  [PeriodNames.slug]: {
+    // The same guards as a title (CMS-495): the box ticked on the key, a name a sheet cites refused, one at a time.
+    enabled: ENTER_AND_DELETE,
+    description:
+      'A name of the time (« Nom d’époque »): the name a `place` (an id from places) bore — Ankara is « Ancyre » in ' +
+      '1100 — as `forms`, one line a language, each { language, form } with language among fr, en, es, it, de and ' +
+      'never the same language twice (another spelling in one language is another record); with its `lines`, each ' +
+      '{ source, where, quotation, asWritten }. The place itself bears its present name. `label` is written by the ' +
+      'server. Search by `place` before creating — a name is entered once and reused by the sheets of every year.',
   },
   [Sources.slug]: {
     enabled: ENTER_AND_DELETE,

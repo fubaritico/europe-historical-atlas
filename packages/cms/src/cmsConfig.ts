@@ -13,6 +13,7 @@ import { Events } from './collections/Events'
 import { EventTypes } from './collections/EventTypes'
 import { ImportanceReasons } from './collections/ImportanceReasons'
 import { People } from './collections/People'
+import { PeriodNames } from './collections/PeriodNames'
 import { PlacePeriods } from './collections/PlacePeriods'
 import { Places } from './collections/Places'
 import { SiegeEngines } from './collections/SiegeEngines'
@@ -99,6 +100,7 @@ export function cmsConfig(): Config {
       SiegeEngines,
       Places,
       PlacePeriods,
+      PeriodNames,
       ImportanceReasons,
       Confessions,
       People,

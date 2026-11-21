@@ -73,6 +73,7 @@ export interface Config {
     'siege-engines': SiegeEngine;
     places: Place;
     'place-periods': PlacePeriod;
+    'period-names': PeriodName;
     'importance-reasons': ImportanceReason;
     confessions: Confession;
     people: Person;
@@ -94,6 +95,7 @@ export interface Config {
     'siege-engines': SiegeEnginesSelect<false> | SiegeEnginesSelect<true>;
     places: PlacesSelect<false> | PlacesSelect<true>;
     'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>;
+    'period-names': PeriodNamesSelect<false> | PeriodNamesSelect<true>;
     'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>;
     confessions: ConfessionsSelect<false> | ConfessionsSelect<true>;
     people: PeopleSelect<false> | PeopleSelect<true>;
@@ -449,6 +451,10 @@ export interface PlacePeriod {
    */
   place: number | Place;
   /**
+   * Le nom que le lieu portait à cette date — par exemple : Ancyre pour Ankara en 1100. Choisi parmi les noms d’époque de ce lieu ; absent, « + » le crée. C’est lui que la carte écrit.
+   */
+  periodName?: (number | null) | PeriodName;
+  /**
    * Une année suffit : la fiche vaut pour cette année. Remplir la fin en fait une durée. Un même lieu ne peut pas avoir deux fiches pour la même année.
    */
   date: {
@@ -559,6 +565,60 @@ export interface PlacePeriod {
          * Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre.
          */
         quotation?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Le nom qu’un lieu portait à une époque — Ancyre pour Ankara en 1100 — dans chaque langue, avec ses sources. La fiche d’une ville à une date le désigne ; le lieu, lui, porte son nom d’aujourd’hui.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "period-names".
+ */
+export interface PeriodName {
+  id: number;
+  /**
+   * Écrit seul à l’enregistrement : le nom dans chaque langue saisie.
+   */
+  label?: string | null;
+  /**
+   * Le lieu qui portait ce nom, choisi dans « Lieux ».
+   */
+  place: number | Place;
+  /**
+   * Une ligne par langue — par exemple : français « Ancyre », anglais « Ancyra ». Une seule forme par langue.
+   */
+  forms: {
+    language: 'fr' | 'en' | 'es' | 'it' | 'de';
+    /**
+     * Le nom tel que cette langue l’écrit.
+     */
+    form: string;
+    id?: string | null;
+  }[];
+  /**
+   * Facultatif : la source qui donne ce nom au lieu à cette époque.
+   */
+  lines?:
+    | {
+        /**
+         * Choisie parmi celles déjà saisies dans « Sources ».
+         */
+        source: number | Source;
+        /**
+         * Une page, une ligne, une colonne. Facultatif.
+         */
+        where?: string | null;
+        /**
+         * Les mots de la source, recopiés tels quels.
+         */
+        quotation?: string | null;
+        /**
+         * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
+         */
+        asWritten?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -893,6 +953,24 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  periodNames?: {
+    /**
+     * Allow clients to find period-names.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create period-names.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update period-names.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete period-names.
+     */
+    delete?: boolean | null;
+  };
   sources?: {
     /**
      * Allow clients to find sources.
@@ -1054,6 +1132,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'place-periods';
         value: number | PlacePeriod;
+      } | null)
+    | ({
+        relationTo: 'period-names';
+        value: number | PeriodName;
       } | null)
     | ({
         relationTo: 'importance-reasons';
@@ -1279,6 +1361,7 @@ export interface PlacesSelect<T extends boolean = true> {
 export interface PlacePeriodsSelect<T extends boolean = true> {
   title?: T;
   place?: T;
+  periodName?: T;
   date?:
     | T
     | {
@@ -1331,6 +1414,32 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
         confession?: T;
         where?: T;
         quotation?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "period-names_select".
+ */
+export interface PeriodNamesSelect<T extends boolean = true> {
+  label?: T;
+  place?: T;
+  forms?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
+  lines?:
+    | T
+    | {
+        source?: T;
+        where?: T;
+        quotation?: T;
+        asWritten?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1586,6 +1695,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         delete?: T;
       };
   placePeriods?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  periodNames?:
     | T
     | {
         find?: T;

@@ -63,7 +63,13 @@ interface Citers {
    * CMS-454 whatever names a place or a source: an event, a siege engine, another source.
    */
   readonly collection:
-    'titles' | 'vassal-links' | 'place-periods' | 'events' | 'siege-engines' | 'sources'
+    | 'titles'
+    | 'vassal-links'
+    | 'place-periods'
+    | 'period-names'
+    | 'events'
+    | 'siege-engines'
+    | 'sources'
   /** The fields that point at it — a path for a field inside a list: `lines.source`. */
   readonly fields: readonly string[]
   /** The sentence's subject: « Ce titre », « Cette personne », « Ce territoire ». */

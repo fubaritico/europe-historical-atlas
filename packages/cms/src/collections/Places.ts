@@ -17,6 +17,7 @@ import type { CollectionConfig } from 'payload'
  */
 export const PLACE_CITERS = [
   { collection: 'place-periods', field: 'place', what: 'fiche(s) de ville' },
+  { collection: 'period-names', field: 'place', what: 'nom(s) d’époque' },
   { collection: 'events', field: 'place', what: 'événement(s)' },
 ] as const
 

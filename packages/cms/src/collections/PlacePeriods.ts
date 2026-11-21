@@ -15,6 +15,7 @@ import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
 import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { COLLECTION_MESSAGES } from './i18n'
+import { refuseForeignPeriodName } from './refuseForeignPeriodName'
 import { refuseInvalidSheet } from './refuseInvalidSheet'
 import { writeSheetTitle } from './writeSheetTitle'
 
@@ -146,7 +147,7 @@ export const PlacePeriods: CollectionConfig = {
     // Over MCP, one record at a time (CMS-454).
     beforeOperation: [refuseBulkDeleteOverMcp],
     beforeValidate: [refuseOverlap],
-    beforeChange: [refuseInvalidSheet, writeSheetTitle],
+    beforeChange: [refuseInvalidSheet, refuseForeignPeriodName, writeSheetTitle],
   },
   fields: [
     {
@@ -167,6 +168,22 @@ export const PlacePeriods: CollectionConfig = {
       label: 'Lieu',
       required: true,
       admin: { description: 'Choisi parmi les lieux déjà saisis dans « Lieux ».' },
+    },
+    // CMS-495: the name the place bore at this date — a record of its own, an added column, so every sheet already
+    // saved reads with none.
+    {
+      name: 'periodName',
+      type: 'relationship',
+      relationTo: 'period-names',
+      label: 'Nom d’époque',
+      filterOptions: ({ data }) => {
+        const place = relationId((data as { place?: unknown }).place)
+        return place === null ? false : { place: { equals: place } }
+      },
+      admin: {
+        description:
+          'Le nom que le lieu portait à cette date — par exemple : Ancyre pour Ankara en 1100. Choisi parmi les noms d’époque de ce lieu ; absent, « + » le crée. C’est lui que la carte écrit.',
+      },
     },
     historicalDateField({
       name: 'date',
