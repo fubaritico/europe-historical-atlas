@@ -49,11 +49,33 @@
 | the export carries each city's name of the time (content format 10), and one rule names a city for the atlas and the Cartographer: the name of the time in the reader's language, else the place's name | done, 2026-11-22 |
 | the present name on the place and the sort of the 13 684 names | to do |
 | the territories' names in the other languages: the table, its migration (the four English names already entered copied into it; proved up and down on a copy), the export | done on the coder's tree, 2026-11-22 — not in `main` while the historian draws there |
-| the map writes a country by its territory's name in the reader's language (the drawn country read through its link to the territory); the English names filled from the maps' own, by the Wikidata id | to do |
+| the rule that names a drawn country from the contribution, and the control of what is still to tie or to translate (`core/data/polityName`: the territory's name in the reader's language, else its French one, else the map's own — the origin said) | done on the coder's tree, 2026-11-22 |
+| the atlas and the Cartographer writing countries by that rule | to do — see « The countries, measured » |
 
 **Two rules the code holds that the dev did not dictate** (said to him, his to strike): a sheet takes only a name of its
 own place; a name sheets cite cannot move to another place. **Known limit**: the drawer « + » opens an empty form — the
 place is chosen again in it (Payload's field hands no initial value to its drawer).
+
+## The countries, measured — 2026-11-22
+
+The dev, the same night: *"what is available by default, but everything will have to be translated — there can be no
+missing name."* Measured on the three maps of the repository against the CMS's 380 territories:
+
+| map | countries | tied to a territory of the CMS | tied to none |
+| --- | --- | --- | --- |
+| 1100 | 164 | 117 | 47 |
+| 1200 | 112 | 44 | 68 |
+| 1300 | 116 | 30 | 86 |
+| all | 392 | 191 | 201 |
+
+- **Half the drawn countries are tied to no territory**: the distant ones (40), the tribes (19), and most of 1200 and
+  1300, whose territories were never entered — the register was filled from the holders of the cities of 1100. Each
+  needs its territory before the contribution can name it; until then the map writes its own name, as today.
+- **123 territories can be given an English name from the maps themselves** (the drawn country's own name, by the
+  tie); 5 of them bear two different English names from one map to another, to be read.
+- **What the wiring still asks**: the short name's rule knows English titles only (`data/shortName`: « Kingdom of » —
+  not « royaume de »), a short name entered by hand on a map is in one language, the names placed at the build are
+  one file a year (one a language is needed), and the atlas's own file carries no territory yet.
 
 ## What it asks, in order (to become tickets once 6 to 9 are decided)
 
