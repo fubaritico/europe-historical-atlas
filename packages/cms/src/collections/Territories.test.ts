@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
 
+import { validateOtherNames } from '../fields/nameForms'
+
 import { TERRITORY_KINDS, Territories } from './Territories'
 
 import type { Field } from 'payload'
@@ -20,10 +22,67 @@ function kindOptions(): { value: string; label: unknown }[] {
   )
 }
 
+/**
+ * The table's field, as the form offers it.
+ * @returns the field
+ */
+function otherNames() {
+  const field = Territories.fields.find(
+    (candidate: Field) => 'name' in candidate && candidate.name === 'otherNames'
+  )
+  if (field?.type !== 'array') throw new Error('the territory has no table named otherNames')
+  return field
+}
+
 describe('Territories', () => {
   describe('happy path', () => {
     it('offers every kind of the register, in its order', () => {
       expect(kindOptions().map(({ value }) => value)).toEqual([...TERRITORY_KINDS])
+    })
+  })
+
+  // CMS-495: one name a language — the French one is the field « Nom », the others stand in a table under it.
+  describe('the names in the other languages', () => {
+    it('is a table of a language and a form, checked by the rule of the names', () => {
+      const field = otherNames()
+      expect(field.fields.map((inner) => ('name' in inner ? inner.name : ''))).toEqual([
+        'language',
+        'form',
+      ])
+      expect(field.validate).toBe(validateOtherNames)
+    })
+
+    it('offers every language but French', () => {
+      const [language] = otherNames().fields
+      if (language?.type !== 'select') throw new Error('the table has no select for the language')
+      expect(language.options).toEqual([
+        { value: 'en', label: 'Anglais' },
+        { value: 'es', label: 'Espagnol' },
+        { value: 'it', label: 'Italien' },
+        { value: 'de', label: 'Allemand' },
+      ])
+    })
+
+    it('accepts no line, and one line a language', () => {
+      expect(validateOtherNames(undefined)).toBe(true)
+      expect(
+        validateOtherNames([
+          { language: 'en', form: 'County of Champagne' },
+          { language: 'de', form: 'Grafschaft Champagne' },
+        ])
+      ).toBe(true)
+    })
+
+    it('refuses French, which is the field « Nom », and a language written twice', () => {
+      expect(validateOtherNames([{ language: 'fr', form: 'comté de Champagne' }])).toContain(
+        'Le nom français est le champ « Nom »'
+      )
+      expect(
+        validateOtherNames([
+          { language: 'en', form: 'County of Champagne' },
+          { language: 'en', form: 'Champagne' },
+        ])
+      ).toContain('« Anglais » est saisie deux fois')
     })
   })
 

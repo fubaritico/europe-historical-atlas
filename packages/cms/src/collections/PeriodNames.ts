@@ -7,24 +7,14 @@ import {
 } from '@europe-historical-atlas/core/data/periodName'
 
 import { claimLines } from '../fields/claimLines'
-import { nameForms } from '../fields/nameForms'
+import { LANGUAGE_LABELS, nameForms } from '../fields/nameForms'
 import { relationId } from '../fields/relationId'
 import { trimmedText } from '../fields/trimmedText'
 import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { refuseDeletingCited } from './claimDependants'
 
-import type { NameLanguage } from '@europe-historical-atlas/core/data/periodName'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
-
-/** What the form calls each language a name can be written in. */
-export const LANGUAGE_LABELS: Readonly<Record<NameLanguage, string>> = {
-  fr: 'Français',
-  en: 'Anglais',
-  es: 'Espagnol',
-  it: 'Italien',
-  de: 'Allemand',
-}
 
 /**
  * The rule of the table of correspondence: one form a language — a second spelling in the same language is another

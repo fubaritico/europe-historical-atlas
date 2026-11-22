@@ -6,9 +6,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { NAME_LANGUAGES } from '@europe-historical-atlas/core/data/periodName'
 
-import { nameForms } from '../fields/nameForms'
+import { LANGUAGE_LABELS, nameForms } from '../fields/nameForms'
 
-import { LANGUAGE_LABELS, PeriodNames, validateForms } from './PeriodNames'
+import { PeriodNames, validateForms } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 
 import type { Payload } from 'payload'

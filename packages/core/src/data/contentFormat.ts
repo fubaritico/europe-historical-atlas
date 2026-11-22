@@ -57,6 +57,12 @@ const wikidataId = z.nullable(
 /** A record's id, as the contribution tool gave it. */
 const recordId = z.string().check(z.minLength(1))
 
+/** One line of a name's table of correspondence: a language of the list, and the name as it writes it (CMS-495). */
+const nameFormSchema: z.ZodMiniType<NameForm> = z.strictObject({
+  language: z.enum(NAME_LANGUAGES),
+  form: z.string().check(z.minLength(1)),
+})
+
 /**
  * The shapes an event stands on the map as, chosen once per type in the contribution (ATLAS-156): `pin` until a
  * shape is chosen for it, `swords` the crossed swords of a battle, `tower` a siege or a taking, `crown` an accession,
@@ -336,6 +342,11 @@ export interface ContentTerritory {
   existsFrom?: number | null
   /** The year it exists to, `null` when the CMS gives none; absent from an export written before CARTO-488. */
   existsTo?: number | null
+  /**
+   * Its name in the languages other than French, one form a language (CMS-495) — empty while none is contributed;
+   * absent from an export written before it.
+   */
+  names?: NameForm[]
 }
 
 /** {@link ContentTerritory}. */
@@ -346,6 +357,7 @@ const territorySchema: z.ZodMiniType<ContentTerritory> = z.strictObject({
   kind: z.exactOptional(z.string().check(z.minLength(1))),
   existsFrom: z.exactOptional(z.nullable(z.int())),
   existsTo: z.exactOptional(z.nullable(z.int())),
+  names: z.exactOptional(z.array(nameFormSchema)),
 })
 
 /**
@@ -428,13 +440,7 @@ export interface ContentCity {
 const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   id: recordId,
   place: placeSchema,
-  periodName: z.nullable(
-    z
-      .array(
-        z.strictObject({ language: z.enum(NAME_LANGUAGES), form: z.string().check(z.minLength(1)) })
-      )
-      .check(z.minLength(1))
-  ),
+  periodName: z.nullable(z.array(nameFormSchema).check(z.minLength(1))),
   date: historicalDateSchema,
   importance: z.enum(CITY_IMPORTANCES),
   reasons: z.array(localizedText),

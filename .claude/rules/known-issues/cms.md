@@ -106,3 +106,10 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
   non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
   un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**
+- **A territory's English name has two places to be typed, and one is not exported** (2026-11-22, CMS-495, reviews
+  ARCH-001 · QUAL-002): its names in the other languages live in the table `otherNames`, which the export reads, but its
+  field « Nom » is still translatable — an English name typed after switching the page's language is stored and never
+  exported. The field's description says so; the four English names entered that way before the table were copied into
+  it by the migration. **Remedy**: make « Nom » a plain French field — a migration written by hand (it moves a column
+  out of `territories_locales`; the generated one would rebuild the table and cascade), proved on a copy. **Severity:
+  worth knowing.**

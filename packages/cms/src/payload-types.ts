@@ -719,6 +719,9 @@ export interface Title {
  */
 export interface Territory {
   id: number;
+  /**
+   * Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté.
+   */
   name: string;
   /**
    * Une terre tenue — d’un empire à une seigneurie — ou une charge exercée.
@@ -751,6 +754,19 @@ export interface Territory {
     | 'abbey'
     | 'city'
     | 'office';
+  /**
+   * Facultatif. Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
    */
@@ -1525,6 +1541,13 @@ export interface PeopleSelect<T extends boolean = true> {
 export interface TerritoriesSelect<T extends boolean = true> {
   name?: T;
   kind?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   wikidata?: T;
   existsFrom?:
     | T

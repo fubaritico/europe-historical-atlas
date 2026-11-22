@@ -1,6 +1,7 @@
 import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
 
 import { groupAt, momentGroup } from '../fields/historicalDate'
+import { LANGUAGE_LABELS, OTHER_LANGUAGES, validateOtherNames } from '../fields/nameForms'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
@@ -93,6 +94,10 @@ export const Territories: CollectionConfig = {
       required: true,
       localized: true,
       hooks: { beforeValidate: [trimmedText] },
+      admin: {
+        description:
+          'Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté.',
+      },
     },
     {
       name: 'kind',
@@ -103,6 +108,37 @@ export const Territories: CollectionConfig = {
       admin: {
         description: 'Une terre tenue — d’un empire à une seigneurie — ou une charge exercée.',
       },
+    },
+    // CMS-495: one name a language (the dev, 2026-11-22) — the French one is the field above, which the titles and
+    // the chains read; the others stand here, all seen together. An added table: a territory already saved reads
+    // with none.
+    {
+      name: 'otherNames',
+      type: 'array',
+      label: 'Le nom dans les autres langues',
+      labels: { singular: 'Langue', plural: 'Langues' },
+      validate: validateOtherNames,
+      admin: {
+        description:
+          'Facultatif. Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.',
+      },
+      fields: [
+        {
+          name: 'language',
+          type: 'select',
+          label: 'Langue',
+          required: true,
+          options: OTHER_LANGUAGES.map((value) => ({ value, label: LANGUAGE_LABELS[value] })),
+        },
+        {
+          name: 'form',
+          type: 'text',
+          label: 'Nom',
+          required: true,
+          hooks: { beforeValidate: [trimmedText] },
+          admin: { description: 'Le nom tel que cette langue l’écrit.' },
+        },
+      ],
     },
     wikidataField,
     {

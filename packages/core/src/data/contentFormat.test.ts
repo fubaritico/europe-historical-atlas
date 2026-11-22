@@ -103,6 +103,20 @@ function acceptsCity(city: unknown): boolean {
   }).success
 }
 
+/**
+ * An export holding the county of Champagne alone, with its names in the other languages (CMS-495).
+ * @param names - the names, as a file would carry them
+ * @returns the file
+ */
+function champagneFile(names: unknown): unknown {
+  return {
+    version: CONTENT_FORMAT_VERSION,
+    events: [],
+    cities: [],
+    territories: [{ id: 130, name: 'comté de Champagne', wikidata: null, names }],
+  }
+}
+
 describe('contentFileSchema — the cities at a date', () => {
   describe('happy path', () => {
     it('accepts Rome in 1100, its place written in, a reason named, a source’s line', () => {
@@ -464,6 +478,18 @@ describe('contentFileSchema — a territory’s kind and years', () => {
         existsTo: null,
       })
     ).toBe(true)
+  })
+
+  // CMS-495: one name a language, beside the French one.
+  it('reads a territory with its names in the other languages, and refuses a language it does not know', () => {
+    expect(
+      contentFileSchema.safeParse(champagneFile([{ language: 'en', form: 'County of Champagne' }]))
+        .success
+    ).toBe(true)
+    expect(contentFileSchema.safeParse(champagneFile([])).success).toBe(true)
+    expect(
+      contentFileSchema.safeParse(champagneFile([{ language: 'tlh', form: 'x' }])).success
+    ).toBe(false)
   })
 
   it('still reads a territory of an export written before them', () => {

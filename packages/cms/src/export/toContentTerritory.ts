@@ -1,3 +1,5 @@
+import { nameForms } from '../fields/nameForms'
+
 import type { DocId } from './docRecords'
 import type { ContentTerritory } from '@europe-historical-atlas/core/data/contentFormat'
 
@@ -15,6 +17,8 @@ export interface DocTerritoryEntry {
   existsFrom?: { year?: number | null } | null
   /** The moment it exists to. */
   existsTo?: { year?: number | null } | null
+  /** Its names in the other languages, as the register's table holds them (CMS-495). */
+  otherNames?: unknown
 }
 
 /**
@@ -50,7 +54,8 @@ export function territoryNumberOf(id: DocId, where: string): number {
 
 /**
  * Every territory of the CMS, as the Cartographer offers them to a polity of the map (CARTO-450): its number, its name,
- * its Wikidata id — and its kind and the years it exists between, which the polity's form proposes (CARTO-488).
+ * its Wikidata id — and its kind and the years it exists between, which the polity's form proposes (CARTO-488), and
+ * its names in the languages other than French (CMS-495).
  * @param docs - the territories, in French
  * @returns the territories
  * @throws {Error} when one has no name, no number or no kind — the register requires the three
@@ -71,6 +76,7 @@ export function toContentTerritories(docs: readonly DocTerritoryEntry[]): Conten
       kind: doc.kind,
       existsFrom: yearOf(doc.existsFrom, `${where}, exists from`),
       existsTo: yearOf(doc.existsTo, `${where}, exists to`),
+      names: nameForms(doc.otherNames),
     }
   })
 }

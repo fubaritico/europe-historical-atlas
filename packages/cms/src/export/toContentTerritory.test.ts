@@ -18,6 +18,7 @@ describe('toContentTerritories', () => {
           kind: 'duchy',
           existsFrom: null,
           existsTo: null,
+          names: [],
         },
         {
           id: 42,
@@ -26,6 +27,7 @@ describe('toContentTerritories', () => {
           kind: 'county',
           existsFrom: null,
           existsTo: null,
+          names: [],
         },
       ])
     })
@@ -46,12 +48,29 @@ describe('toContentTerritories', () => {
           kind: 'emirate',
           existsFrom: 1081,
           existsTo: null,
+          names: [],
         },
       ])
     })
   })
 
   describe('variants', () => {
+    // CMS-495: one name a language, beside the French one.
+    it('gives a territory its names in the other languages, a row not yet filled left out', () => {
+      const champagne = {
+        id: 130,
+        name: 'comté de Champagne',
+        kind: 'county',
+        otherNames: [
+          { id: 'a', language: 'en', form: ' County of Champagne ' },
+          { id: 'b', language: 'de', form: '' },
+        ],
+      }
+      expect(toContentTerritories([champagne])[0]?.names).toEqual([
+        { language: 'en', form: 'County of Champagne' },
+      ])
+    })
+
     it('reads a Wikidata id left out as none', () => {
       expect(toContentTerritories([{ id: 42, name: 'Thuringe', kind: 'county' }])).toEqual([
         {
@@ -61,6 +80,7 @@ describe('toContentTerritories', () => {
           kind: 'county',
           existsFrom: null,
           existsTo: null,
+          names: [],
         },
       ])
     })
