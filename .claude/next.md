@@ -9,64 +9,65 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**L'historien, 20/11** : 27 sortes de territoire corrigées (les califats, les taïfas en émirats, cinq républiques, les
-Coumans) et quatre exports, tous commités ; son point de reprise, `next-historian.md`.
+**L'historien, nuit du 21 au 22/11** : les Slaves entre Elbe et Oder et l'Anatolie de 1100 (57 lieux nouveaux, 71
+fiches reprises avec leur source, la carte retouchée) ; son point de reprise, `next-historian.md`.
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 20/11, 18 h 40 : le sujet en cours est les icônes des événements, pas CMS-441
+## ▶ ON REPREND ICI — le 22/11, 3 h : les noms (CMS-495, En cours)
 
-**Il l'a dit le 20/11 au soir** : le sujet en cours est **les icônes des événements** (ATLAS-288, sept types sur
-treize, et son épique ATLAS-132) ; l'oriflamme de la conquête est faite (ATLAS-477). Les six icônes restantes se feront
-quand une carte en aura besoin. **Fait le 21/11, sur son accord** : ATLAS-288 est fermé ; les six icônes restantes
-(ATLAS-478 à 483 : invasion, guerre, invention, découverte, révolution, coup d'État) sont passées d'« À faire » au
-Backlog ; l'épique ATLAS-132 reste ouverte, puisqu'elle les porte. **Sa remarque du 21/11** : la liste des événements
-vient de Wikipédia et il en manque sans doute — l'historien a trouvé une prise de ville en 1100, à lui demander.
-« À valider par le développeur » est vide ; CMS-441 reste en haut d'« À faire », pas commencé.
+Le plan : `files/plans/contribution/names.md` (ses décisions, les miennes marquées comme telles, les mesures).
 
-**Fait le 20/11** (REPO-492, `files/plans/jira-migration.md`) : les 492 tickets sont dans Jira —
-https://europehistoricalatlas.atlassian.net/jira/software/c/projects/EHA/boards/3 — avec leurs numéros (`[CARTO-67]`
-est `EHA-67`), leurs dates, leurs 676 commentaires, leurs épiques ; contrôlé ticket par ticket. **Tout passe par le MCP
-d'Atlassian** (`/mcp`, connecté sous son compte) et la skill **`/jira`** ; le script de Trello est retiré.
+**Dans `main`, rien n'est poussé depuis le 20/11 au soir** : les noms d'époque des villes, complets — la table, le
+champ sur la fiche datée, l'export en **version 10**, l'atlas et le Cartographe (une ville s'écrit par son nom d'époque
+dans la langue de la page, sinon par le nom du lieu). La migration a tourné sur sa base ; la clé de l'historien a les
+quatre droits sur `period-names`. Les six exports de l'historien de la nuit sont commités.
 
-**Ses décisions du 20/11** : pas de projet d'essai ; le MCP plutôt qu'un script à nous ; **le Backlog est une page, pas
-une colonne** (Idées et Backlog y sont deux statuts, le tableau garde À faire, En cours, À valider par le développeur,
-Fait) ; quatre onglets seulement sur le tableau ; deux comptes, « Claude Coder » et « Claude Historian », pour dire qui
-tient un ticket (mes commentaires restent signés de son nom : ils commencent par « codeur — » ou « historien — »).
+**Sur l'arbre `coder`, trois commits à passer dans `main`** (pas pendant que l'historien dessine ; **lui dire avant**
+ce que ça fait à ses applis ; il relance le CMS ensuite, une migration tourne) : le tableau « Le nom dans les autres
+langues » d'un territoire, la règle qui nomme un pays depuis le CMS avec le contrôle des noms manquants (**pas passée
+par la revue**), le plan à jour, et le défaut connu « le nom anglais d'un territoire a deux endroits où se saisir ».
 
-**Trello n'existe plus** : il a supprimé le tableau le 20/11 ; la copie complète est sur sa machine,
-`files/resources/jira-migration/snapshot/` (ignorée par git). **Le site Jira est sur l'offre gratuite** (REPO-493, clos).
+**Dans l'ordre, à la reprise** : (1) passer ces commits dans `main` ; (2) regarder dans un navigateur le tiroir du
+« + » du champ « Nom d'époque » — jamais vu ; (3) les quatorze noms d'époque d'Anatolie que l'historien a prêts ;
+(4) le tri des 132 et des 255 noms de villes (`files/plans/contribution/noms-a-trier.md`), puis le renommage (Ancyre →
+Ankara) par un script prouvé sur une copie ; (5) le contrôle des noms en commande du dépôt ; (6) les pays en français :
+les territoires des 201 pays reliés à rien, 123 noms anglais depuis les cartes, les titres français du nom court,
+l'atlas et le Cartographe branchés, un fichier de noms placés par langue ; (7) « Nom » d'un territoire en champ
+français simple.
 
-**L'état du tableau** : `EHA` est le seul projet du site ; les arbres `coder` et `historian` ont la skill `/jira` ; « Fait »
-montre tout pendant deux semaines, puis les deux dernières seulement, le plus récent en haut.
+**Deux règles du code qui sont de moi, à garder ou à lever par lui** : une fiche ne prend qu'un nom d'époque de son
+propre lieu ; un nom que des fiches citent ne change pas de lieu. **En attente de lui** (CARTO-498) : un pays relié au
+CMS garde-t-il un nom et des dates modifiables dans le Cartographe ; les 201 pays par un script en lot.
 
-**ATLAS-448, une seule langue sur la carte — En cours, en attente de lui** : l'inventaire est écrit
-(`files/plans/atlas/one-language.md`) : 481 noms de pays en anglais seulement (477 ont un identifiant Wikidata), 116
-villes en français seulement, six inscriptions fixes. **Question ouverte** : les noms français des pays depuis
-Wikidata (ma proposition), ou écrits par l'historien.
+**En haut d'« À faire »** : CMS-441 ; ses deux demandes de la nuit, **CARTO-498** (« Ajouter au CMS » depuis la fiche
+d'un pays) et **CMS-499** (exporter la base depuis l'écran du CMS). **En Idées** : REPO-496 (trois défauts des outils
+de dessin), CMS-494 (la langue des contributions et des sources). **À dessiner ou non sur 1100** : les émirats de
+Mossoul et de Damas sous l'empire seldjoukide (CARTO-497, fermé). **Un manque** : l'historien n'a pas d'outil pour
+créer un événement — la prise de Brandebourg de 1100 n'est pas dans le CMS.
 
-**Les rangs** (CARTO-487, CORE-489, CARTO-488, CARTO-491, clos) : la liste et les scores sont dans
-`core/src/data/ranks.ts`. **À lui, quand il veut** : le rang des États pontificaux (ils portent « state », hors liste,
-dans les quatre cartes) ; un score pour la seigneurie épiscopale (68 territoires tenus) et le despotat ; le même rang
-s'appelle « archevêché souverain » dans le Cartographe et « Seigneurie archiépiscopale » dans le CMS. **L'export n'est
-lu qu'à l'ouverture de la page du Cartographe** : après un export, recharger la page.
+**Les icônes** : ATLAS-288 fermé le 21/11, sept types sur treize ; les six autres au Backlog (ATLAS-478 à 483), faites
+quand une carte en a besoin. **ATLAS-448** (une seule langue sur la carte) est porté par CMS-495.
+**ATLAS-461, les ornements — En cours, chez Claude Design** : j'attends ce qu'il rend (`~/Desktop/claude-design-ornements`).
 
-**ATLAS-461, les ornements — En cours, chez Claude Design** : il a déposé `~/Desktop/claude-design-ornements`. J'attends
-ce que Claude Design rend. Les licences des paquets restent à vérifier avant de publier un de ces dessins.
+**Pas fait à la clôture** : l'audit des scénarios (du code visible est parti : le champ du formulaire, le nom sur la
+carte) ; l'audit des instructions, dû le 22/11.
+
+**Le tableau** : Jira depuis le 20/11, par le MCP d'Atlassian et `/jira` ; le Backlog est une page, pas une colonne. **Les
+rangs** : `core/src/data/ranks.ts` ; à lui, le rang des États pontificaux, un score pour la seigneurie épiscopale et le despotat.
 
 **L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
-du 20/11 (`05e7b1be`). Une copie de la base d'avant l'icône de la conquête : `packages/cms/cms.backup-2026-11-20-oriflamme.db`
-(ignorée par git, à supprimer avec son accord).
+du 22/11 (`574d2ba8`). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
+migration des noms : `packages/cms/.backups/cms-20261122-000012-…db` ; celle du 20/11, `cms.backup-2026-11-20-oriflamme.db`
+(ignorées par git, à supprimer avec son accord).
 
-**Ses règles récentes** : une correction prête va dans `main` tout de suite, sans lui parler de branches (19/11) ; ce qui
-resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser pendant qu'une CI déploie** : le push
-suivant l'annule — `gh run list -L 1` avant, **et ne pousser que si elle est terminée** (ma faute du 20/11).
+**Ses règles récentes** : une correction prête va dans `main` tout de suite (19/11) — **sauf quand l'historien dessine
+sur l'arbre principal** (22/11) ; ce qui resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser
+pendant qu'une CI déploie** : `gh run list -L 1` avant. **Il ne valide plus une fonctionnalité** (20/11) : je la teste
+et je la clos ; ne va à lui que ce qui se juge à l'œil ou se décide, en un seul geste.
 
-**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé), `years/1100/` (ses retouches en cours). **En
-Idées** : ATLAS-473, CMS-474, ATLAS-475, ATLAS-490 (les icônes qui bougent, pour qui veut moins d'animations).
-**Il ne valide plus une fonctionnalité** (20/11, mémoire `one-gesture-to-validate`) : je la teste et je la clos ; ne
-va à lui que ce qui se juge à l'œil ou se décide, en un seul geste. **Les icônes** : sept types sur treize (ATLAS-288).
+**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé), les fichiers de l'historien.
 
 ## Ce qui reste d'avant, toujours vrai
 
@@ -80,7 +81,7 @@ va à lui que ce qui se juge à l'œil ou se décide, en un seul geste. **Les ic
 
 **Le CMS** : les migrations (`packages/cms/README.md`) ; **relire chaque `down` généré** (il a reconstruit une table pour
 une simple colonne le 15/11) ; jamais de DROP TABLE ; prouver sur une copie (`sqlite3 ".backup"`, `DATABASE_URL=file:…`).
-Le format de l'export est à la **version 9** (la chaîne de chaque ville).
+Le format de l'export est à la **version 10** (le nom d'époque de chaque ville).
 
 **Sa règle, la nuit du 12/11 : la liberté de manipulation** (mémoire `freedom-of-handling`) — un geste n'est jamais bloqué
 par une règle qu'il n'a pas demandée ; **l'outil choisi reste choisi**. Quand un geste échoue : le refaire dans mon
@@ -101,9 +102,6 @@ geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant
 (_« le religieux et la politique, c'est la même chose »_) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
 crans** (_« des scroll top »_), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
 
-**Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
-après (skill `/jira`, « The closing comment »).
-
 **Pour faire ou régler une icône** : la skill `/make-event-icon` (une image plate se dessine dans un cadre 44 × 44). **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
 
@@ -120,7 +118,7 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
 **Pour travailler** : mon shell démarre sous Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais
 de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier. Parler avec **ses** mots, un point à la fois.
 
-**Le tableau** : `/jira`. Un élément du tableau est un **ticket**, jamais une « carte ». C'est lui qui dit l'état de chaque ticket : il n'est plus recopié ici (01/11).
+**Un élément du tableau est un ticket**, jamais une « carte » ; c'est lui qui dit l'état de chaque ticket (01/11).
 
 ## Where we are
 
@@ -141,7 +139,7 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 **Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
 montées, rapport `files/versions/2026-11-06.md`. **Fait le 17/11 (CMS-468)** : Next 16.4.6 et le kit MCP forcé en 1.32.0 ; il reste 3 alertes (zod, minimatch, esbuild).
 **Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **15/11**, ses sept corrections appliquées avec son accord le jour même (rapport `files/prompt-audit-2026-11-15.md` ;
-laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; le suivant dû le 22/11.
+laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; **le suivant est dû depuis le 22/11**.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),
