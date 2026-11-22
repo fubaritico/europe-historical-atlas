@@ -1776,7 +1776,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#c52727",
       "wikidata": null,
       "territory": 374
     },
@@ -1788,7 +1788,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#0573a6",
       "wikidata": null,
       "territory": 375
     },
@@ -1812,7 +1812,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#5dbc7b",
       "wikidata": null,
       "territory": 376
     },
@@ -1824,7 +1824,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#118536",
       "wikidata": null,
       "territory": 378
     }
