@@ -2,6 +2,33 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-21 → 22/11 — l'historien : les Slaves entre Elbe et Oder, l'Anatolie de 1100 ville par ville
+
+Plage **21/11 21:42 → 22/11 02:46** (5 h 03 au journal, le codeur dans une autre session) ; le chantier totalise
+**383 h 34 sur 60 plages**. La carte est commitée (`90863a0f`, `fa91bd54`), les exports l'ont été par le codeur
+(`574d2ba8` le dernier) ; rien n'est poussé par moi. Le détail : `next-historian.md`, `files/plans/sources/1100/wends.md`.
+
+- **Les Slaves entre Elbe et Oder** (sa demande, sur une capture : _« villes, forteresses, tribus, peuples »_) : 26 lieux
+  saisis avec leur fiche de 1100, six entités dessinées — Abodrites (sous la Saxe), Lutices, Ukranes, Ranes, Brizanes,
+  Hévelles ; le pays des Sprévanes laissé sans maître (_« ça me convient comme ça »_).
+- **L'Anatolie** (_« il y a un cruel manque de villes pour la Turquie »_) : 31 lieux nouveaux ; puis **la passe
+  d'appartenance** qu'il a demandée (_« une passe sur l'appartenance de chaque ville dans l'année 1100 précisément »_) —
+  71 fiches dont le détenteur avait été repris de la carte reçoivent leur ligne de source ; douze seigneurs de l'est
+  avec leurs titres et leurs chaînes. La carte retouchée sur le plateau : Roum jusqu'à Dorylée, les Danichmendides
+  jusqu'à Ancyre. **Mesuré dans Cliopatria** : Roum y garde un seul contour de 1099 à 1138 — son impression était fondée.
+- **Ses décisions** : _« applique-toi, tu fais pas des traits grossiers »_ et un tracé peut déborder sur la mer, l'atlas
+  la masque (`use-cartographer/references/decide.md`) ; plusieurs agents permis pour les recherches ; _« je ne comprends
+  pas comment on peut avoir une chaîne incomplète là »_ — dans l'empire seldjoukide un émir relève du sultan, je cherche
+  le témoin ; une carte de période qu'il donne (Armenica, Shah-Armens) est une liste de pistes : elle a fait sortir
+  Malatya, les Mengüjekides et les princes de Sasun.
+- **Avec le codeur** : les noms d'époque (CMS-495) sont arrivés pendant la saisie — le lieu porte son nom actuel, le nom
+  d'époque est une fiche à part ; trois défauts d'outil donnés (REPO-496).
+- **Reste** : le lot an-17 prêt à saisir, mes quatre fiches fausses, le latin d'Albert d'Aix, les noms d'époque.
+- **Mes fautes** : l'heure annoncée de tête, fausse de trois heures (_« il est pas 6 heures du matin, il est 2 h 51 »_) ;
+  un chemin donné au lieu d'ouvrir l'image (_« c'est pas ouvrable, c'est chiant »_) ; les îles laissées hors des contours
+  par le suivi de côte (_« tu as laissé des espaces non revendiqués »_) ; un export lancé avant de lire le message du
+  codeur sur le nouveau format ; des liens laissés vides là où un témoin existait.
+
 ### 2026-11-20 (fin d'après-midi) — le codeur : le tableau passe de Trello à Jira, en deux heures
 
 Plage **20/11 16:12 → 18:12** (2 h, dans la plage 12:31 → 18:12 du journal, après la session du début d'après-midi) ;

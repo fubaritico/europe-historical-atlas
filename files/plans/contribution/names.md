@@ -124,3 +124,18 @@ commit the files: the coder still does.
   others kept — no side path.
 - **Which language's name of the time?** « Ancyre » is the French historians' form of a Greek name; the name its
   inhabitants used is a third thing. The dev's example fixes the rule for now: the form used in the page's language.
+
+## Decided on 2026-11-22, in the afternoon — by the dev
+
+- **A name is found by an id, and several translations answer that id** — a place's or a territory's present name in
+  French, in English, in any language added later (_"what is not clear in that?"_). The storage follows it; it is not a
+  question to bring back to him.
+- **A translation field that exists is never left empty** (_"one must not think of the field being empty, the field
+  must be filled; a catch-up is needed — or one does not create a translation field"_). No fallback, no stand-in label
+  (one was coded and removed before any commit): the missing names are filled, then the name becomes required in every
+  language.
+- **The catch-up**: the English name read from Wikidata by each record's id (`files/spikes/english-names/`); what
+  Wikidata does not name, and the 58 territories with no Wikidata id, go to the historian once his current work is done.
+  Measured that day: 11 places of 13 717 and 8 territories of 396 had an English name.
+- **By me, to be kept or lifted by him**: the same rule extended to the five other collections whose name is translated
+  (people, confessions, event types, importance reasons, siege engines).

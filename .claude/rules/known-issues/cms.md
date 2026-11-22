@@ -113,3 +113,11 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   it by the migration. **Remedy**: make « Nom » a plain French field — a migration written by hand (it moves a column
   out of `territories_locales`; the generated one would rebuild the table and cascade), proved on a copy. **Severity:
   worth knowing.**
+- **Under the content language « English », a record with no English name reads « Sans titre » and cannot be found by
+  typing** (2026-11-22, CMS-495): the admin reads a translated name in the page's language alone, with no fallback
+  (`cmsConfig`), and search runs in that language — seen in the « + » drawer of « Nom d'époque », where no place could
+  be chosen. It holds for places, territories, people, confessions, event types, importance reasons and siege engines.
+  **Remedy, decided by the dev**: no fallback — every translation is filled (the catch-up of `contribution/names.md`),
+  then required. **Until then**: keep the selector on « Français ». **A trap met on the way**: a Local API read handed
+  `req` with another `locale` writes that language into the request — inside a `beforeChange` the save under way then
+  goes on in it (a name typed in English overwrote the French one, caught by a test). **Severity: gênant.**

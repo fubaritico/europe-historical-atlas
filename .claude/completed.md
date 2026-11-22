@@ -33,29 +33,24 @@ va de 22 h 00 à 3 h 00) ; le chantier totalise **383 h 46 sur 60 plages**. **Ri
   `main` pendant qu'il dessinait, sans le dire avant ; un repli écrit avant sa décision, retiré à la revue ; deux
   commits refusés pour une ligne de message trop longue ; le tiroir du « + » jamais vu dans un navigateur.
 
-### 2026-11-21 → 22/11 — l'historien : les Slaves entre Elbe et Oder, l'Anatolie de 1100 ville par ville
+### 2026-11-22 — le codeur : la fusion des noms, un tiroir vu, le rattrapage des noms anglais commencé
 
-Plage **21/11 21:42 → 22/11 02:46** (5 h 03 au journal, le codeur dans une autre session) ; le chantier totalise
-**383 h 34 sur 60 plages**. La carte est commitée (`90863a0f`, `fa91bd54`), les exports l'ont été par le codeur
-(`574d2ba8` le dernier) ; rien n'est poussé par moi. Le détail : `next-historian.md`, `files/plans/sources/1100/wends.md`.
+Plage **22/11 16:01 → 18:26** (2 h 24 au journal, l'historien dans une autre session) ; le chantier totalise
+**386 h 16 sur 61 plages**. **Rien n'est poussé.** Le détail : le commentaire du 22/11 sur CMS-495.
 
-- **Les Slaves entre Elbe et Oder** (sa demande, sur une capture : _« villes, forteresses, tribus, peuples »_) : 26 lieux
-  saisis avec leur fiche de 1100, six entités dessinées — Abodrites (sous la Saxe), Lutices, Ukranes, Ranes, Brizanes,
-  Hévelles ; le pays des Sprévanes laissé sans maître (_« ça me convient comme ça »_).
-- **L'Anatolie** (_« il y a un cruel manque de villes pour la Turquie »_) : 31 lieux nouveaux ; puis **la passe
-  d'appartenance** qu'il a demandée (_« une passe sur l'appartenance de chaque ville dans l'année 1100 précisément »_) —
-  71 fiches dont le détenteur avait été repris de la carte reçoivent leur ligne de source ; douze seigneurs de l'est
-  avec leurs titres et leurs chaînes. La carte retouchée sur le plateau : Roum jusqu'à Dorylée, les Danichmendides
-  jusqu'à Ancyre. **Mesuré dans Cliopatria** : Roum y garde un seul contour de 1099 à 1138 — son impression était fondée.
-- **Ses décisions** : _« applique-toi, tu fais pas des traits grossiers »_ et un tracé peut déborder sur la mer, l'atlas
-  la masque (`use-cartographer/references/decide.md`) ; plusieurs agents permis pour les recherches ; _« je ne comprends
-  pas comment on peut avoir une chaîne incomplète là »_ — dans l'empire seldjoukide un émir relève du sultan, je cherche
-  le témoin ; une carte de période qu'il donne (Armenica, Shah-Armens) est une liste de pistes : elle a fait sortir
-  Malatya, les Mengüjekides et les princes de Sasun.
-- **Avec le codeur** : les noms d'époque (CMS-495) sont arrivés pendant la saisie — le lieu porte son nom actuel, le nom
-  d'époque est une fiche à part ; trois défauts d'outil donnés (REPO-496).
-- **Reste** : le lot an-17 prêt à saisir, mes quatre fiches fausses, le latin d'Albert d'Aix, les noms d'époque.
-- **Mes fautes** : l'heure annoncée de tête, fausse de trois heures (_« il est pas 6 heures du matin, il est 2 h 51 »_) ;
-  un chemin donné au lieu d'ouvrir l'image (_« c'est pas ouvrable, c'est chiant »_) ; les îles laissées hors des contours
-  par le suivi de côte (_« tu as laissé des espaces non revendiqués »_) ; un export lancé avant de lire le message du
-  codeur sur le nouveau format ; des liens laissés vides là où un témoin existait.
+- **Dans `main`** : les quatre commits de la nuit sur les noms, rejoués sur une seule ligne (il avait vu deux lignes
+  dans son journal Git) ; la migration `territory_other_names` prouvée sur une copie puis tournée sur sa base ; la règle
+  qui nomme un pays depuis le CMS passée par la revue, aucun défaut ; l'export de l'historien (`a38abeda`).
+- **Le tiroir du « + » du champ « Nom d'époque », vu dans un navigateur** : il s'ouvre et se referme. Deux défauts :
+  sous la langue de contenu « English » les lieux s'affichent « Sans titre » et ne se trouvent pas (11 lieux sur
+  13 717 ont un nom anglais) ; le lieu de la fiche n'est pas prérempli. Enregistrer, rouvrir, modifier, retirer : pas essayés.
+- **Ses décisions** (`files/plans/contribution/names.md`) : le nom d'un lieu ou d'un territoire se retrouve par un
+  identifiant, auquel répondent plusieurs traductions ; un champ de traduction qui existe ne reste jamais vide, _« il
+  faut procéder à un rattrapage »_ ; ce que Wikidata ne nomme pas revient à l'historien, après son travail en cours.
+- **Le rattrapage, commencé** : `files/spikes/english-names/fetch_labels.py` lit le nom anglais de Wikidata par
+  identifiant ; arrêté à 8 040 réponses sur 14 055 (7 899 nommés, 141 sans nom anglais). Rien d'écrit dans la base.
+- **Avec l'historien** : son lot d'Anatolie orientale contrôlé en lecture seule ; son dessin des vassaux du sultan sur
+  la 1100 refusé par le dev, qui la retouche lui-même ; un défaut possible du contrôle des villes en Idées (REPO-500).
+- **Mes fautes** : trois modèles proposés de suite pour un seul défaut d'affichage ; une suppression de table demandée
+  que sa réponse rendait inutile ; une étiquette de secours codée avant sa décision, retirée avant tout commit ; un
+  préremplissage annoncé « je commence » et pas commencé ; l'audit des scénarios toujours pas fait.

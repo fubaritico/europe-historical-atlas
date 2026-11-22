@@ -9,56 +9,56 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**L'historien, nuit du 21 au 22/11** : les Slaves entre Elbe et Oder et l'Anatolie de 1100 (57 lieux nouveaux, 71
-fiches reprises avec leur source, la carte retouchée) ; son point de reprise, `next-historian.md`.
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 22/11, 3 h : les noms (CMS-495, En cours)
+## ▶ ON REPREND ICI — le 22/11, 18 h 30 : le rattrapage des noms anglais (CMS-495, En cours)
 
-Le plan : `files/plans/contribution/names.md` (ses décisions, les miennes marquées comme telles, les mesures).
+Le plan : `files/plans/contribution/names.md` ; l'état complet, le commentaire du 22/11 sur CMS-495.
 
-**Dans `main`, rien n'est poussé depuis le 20/11 au soir** : les noms d'époque des villes, complets — la table, le
-champ sur la fiche datée, l'export en **version 10**, l'atlas et le Cartographe (une ville s'écrit par son nom d'époque
-dans la langue de la page, sinon par le nom du lieu). La migration a tourné sur sa base ; la clé de l'historien a les
-quatre droits sur `period-names`. Les six exports de l'historien de la nuit sont commités.
+**Dans `main`, rien n'est poussé depuis le 20/11 au soir** : tout CMS-495 de la nuit (les noms d'époque des villes, le
+tableau « Le nom dans les autres langues » d'un territoire, la règle qui nomme un pays depuis le CMS, passée par la
+revue), les deux migrations tournées sur sa base, les exports de l'historien jusqu'à `a38abeda`. L'arbre `coder` est
+au même commit que `main`.
 
-**Sur l'arbre `coder`, trois commits à passer dans `main`** (pas pendant que l'historien dessine ; **lui dire avant**
-ce que ça fait à ses applis ; il relance le CMS ensuite, une migration tourne) : le tableau « Le nom dans les autres
-langues » d'un territoire, la règle qui nomme un pays depuis le CMS avec le contrôle des noms manquants (**pas passée
-par la revue**), le plan à jour, et le défaut connu « le nom anglais d'un territoire a deux endroits où se saisir ».
+**Ses deux décisions du 22/11** : le nom d'un lieu ou d'un territoire se retrouve par un identifiant, auquel
+répondent plusieurs traductions ; **un champ de traduction qui existe ne reste jamais vide** — pas de repli ni
+d'étiquette de secours (codée puis retirée) : un rattrapage. Ce que Wikidata ne nomme pas revient à l'historien.
 
-**Dans l'ordre, à la reprise** : (1) passer ces commits dans `main` ; (2) regarder dans un navigateur le tiroir du
-« + » du champ « Nom d'époque » — jamais vu ; (3) les quatorze noms d'époque d'Anatolie que l'historien a prêts ;
-(4) le tri des 132 et des 255 noms de villes (`files/plans/contribution/noms-a-trier.md`), puis le renommage (Ancyre →
-Ankara) par un script prouvé sur une copie ; (5) le contrôle des noms en commande du dépôt ; (6) les pays en français :
-les territoires des 201 pays reliés à rien, 123 noms anglais depuis les cartes, les titres français du nom court,
-l'atlas et le Cartographe branchés, un fichier de noms placés par langue ; (7) « Nom » d'un territoire en champ
-français simple.
+**Dans l'ordre, à la reprise** : (1) finir la lecture de Wikidata — `python3 -I files/spikes/english-names/fetch_labels.py
+<copie.db> files/spikes/english-names/out/labels.json`, qui reprend à 8 040 réponses sur 14 055 (le fichier `out/` est
+ignoré par git : s'il manque, tout relire, une quarantaine de minutes) ; (2) écrire les noms anglais sur une copie
+puis sur sa base — un lieu dans `name` en langue « en », un territoire dans `otherNames` ; (3) la liste de l'historien
+en `.md` français : les sans-nom anglais, les 58 territoires sans identifiant Wikidata, et les noms de territoires à
+relire ; (4) le nom obligatoire dans chaque langue, et sa skill de saisie mise à jour ; (5) la même règle pour les
+personnes, les confessions, les types d'événement, les raisons d'importance, les engins de siège ; (6) le lieu
+prérempli dans le tiroir du « + » du « Nom d'époque », puis le tiroir essayé sur toute sa vie ; (7) la suite d'avant :
+les quatorze noms d'époque d'Anatolie, le tri des 132 et 255 noms (`noms-a-trier.md`), le renommage (Ancyre → Ankara),
+le contrôle des noms en commande, les pays en français.
+
+**Sa 1100 est à lui** (22/11) : il retouche lui-même l'est de l'Anatolie ; `polities.json` et `registry.json` ne sont
+ni commités ni touchés, et **je lui demande avant toute fusion qui lui ferait recharger le Cartographe**.
 
 **Deux règles du code qui sont de moi, à garder ou à lever par lui** : une fiche ne prend qu'un nom d'époque de son
 propre lieu ; un nom que des fiches citent ne change pas de lieu. **En attente de lui** (CARTO-498) : un pays relié au
 CMS garde-t-il un nom et des dates modifiables dans le Cartographe ; les 201 pays par un script en lot.
 
-**En haut d'« À faire »** : CMS-441 ; ses deux demandes de la nuit, **CARTO-498** (« Ajouter au CMS » depuis la fiche
-d'un pays) et **CMS-499** (exporter la base depuis l'écran du CMS). **En Idées** : REPO-496 (trois défauts des outils
-de dessin), CMS-494 (la langue des contributions et des sources). **À dessiner ou non sur 1100** : les émirats de
-Mossoul et de Damas sous l'empire seldjoukide (CARTO-497, fermé). **Un manque** : l'historien n'a pas d'outil pour
-créer un événement — la prise de Brandebourg de 1100 n'est pas dans le CMS.
+**Sur le tableau** : CMS-441 en tête d'« À faire » ; CARTO-498 et CMS-499 n'y sont pas dans les dix premiers — à
+retrouver. **En Idées** : REPO-496, REPO-500 (le contrôle des villes muet sur un vassal direct non dessiné), CMS-494.
+**Un manque** : l'historien n'a pas d'outil pour créer un événement. Deux personnes pour Danichmend (9 et 179) : à lui.
 
 **Les icônes** : ATLAS-288 fermé le 21/11, sept types sur treize ; les six autres au Backlog (ATLAS-478 à 483), faites
 quand une carte en a besoin. **ATLAS-448** (une seule langue sur la carte) est porté par CMS-495.
 **ATLAS-461, les ornements — En cours, chez Claude Design** : j'attends ce qu'il rend (`~/Desktop/claude-design-ornements`).
 
-**Pas fait à la clôture** : l'audit des scénarios (du code visible est parti : le champ du formulaire, le nom sur la
-carte) ; l'audit des instructions, dû le 22/11.
+**Pas fait à la clôture** : l'audit des scénarios (dû depuis le 21/11) ; l'audit des instructions, dû depuis le 22/11.
 
 **Le tableau** : Jira depuis le 20/11, par le MCP d'Atlassian et `/jira` ; le Backlog est une page, pas une colonne. **Les
 rangs** : `core/src/data/ranks.ts` ; à lui, le rang des États pontificaux, un score pour la seigneurie épiscopale et le despotat.
 
 **L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
-du 22/11 (`574d2ba8`). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
+du 22/11 (`a38abeda`). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
 migration des noms : `packages/cms/.backups/cms-20261122-000012-…db` ; celle du 20/11, `cms.backup-2026-11-20-oriflamme.db`
 (ignorées par git, à supprimer avec son accord).
 
