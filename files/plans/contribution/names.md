@@ -77,6 +77,33 @@ missing name."* Measured on the three maps of the repository against the CMS's 3
   not « royaume de »), a short name entered by hand on a map is in one language, the names placed at the build are
   one file a year (one a language is needed), and the atlas's own file carries no territory yet.
 
+## The Cartographer adds a country to the CMS — the dev, 2026-11-22
+
+> *"If we move that whole feature, careful. […] The advantage is that we have only one source of truth. […] The
+> Cliopatria maps save us a lot of time, they carry all this information. […] The case where we create a new
+> political entity and it is not in the CMS: the search tool stays in the sheet. If a result is found with a Wikidata
+> id, we say « Add to the CMS », and that makes a contribution request to the CMS. And the error cases must be
+> handled: if the CMS is not running, « you must start the CMS »."* And: *"The CMS will be online, the Cartographer
+> will be online — everything will be online. Cross-domain authorisations will be needed; sub-domains, no doubt."*
+
+| # | what | decision | by |
+| --- | --- | --- | --- |
+| A | Where is the Wikidata search? | it **stays** in the Cartographer's country sheet (name, start and end dates, as today) | the dev |
+| B | A country the CMS does not know | a button **« Ajouter au CMS »** on a Wikidata result: a contribution request that creates the territory; the CMS answers its number, written on the country at once — the tie needs no export | the dev; the answer's use proposed by the coder |
+| C | One source of truth | the CMS; the map still carries the information, as an imported Cliopatria map does | the dev |
+| D | Who wins when both hold a name and dates? | _proposed_: once a country is tied to a territory, its sheet shows the CMS's values, not editable, with a link to the CMS; an untied country stays editable; the control of the names lists the gaps between the map's copy and the CMS | the coder, proposed — not decided |
+| E | The errors | _proposed_: the CMS not reached → a dialog « the CMS is not running: start it, then try again », nothing written on the map; the territory exists already (same Wikidata id) → not an error, the country is tied to the one that exists, and it is said; the session or the rights refused → a dialog saying so; the CMS refuses the record → its own sentence | the dev for « the CMS is not running »; the rest proposed by the coder |
+| F | Online | everything will be online, on sub-domains (the Cartographer's, the CMS's). Two sub-domains are two origins: the CMS must list the Cartographer's among its `cors` and `csrf` origins (Payload has both settings — verified in its types, 3.92). So the request is made **as the contributor signed in to the CMS**, never with a key held by the Cartographer's local server: one path for a machine and for the site | the dev for online; the path proposed by the coder |
+| G | The 201 countries tied to no territory | _proposed_: a script making the same request in a batch, its list given in French to be read — a click a country is for the new one | the coder, proposed — not decided |
+
+**An export from the CMS's own screen** (the dev, the same night: *"always this principle of on the fly, a chain of
+gestures […] a fixed footer with the button « export the base », I do not know"*): a button of the admin runs the
+export the script runs. _Proposed place_: the top right of every page of the admin, where Payload lets an application
+put its own buttons (`admin.components.actions`, verified in its types) — seen from every screen, with no footer to
+build. **Online, the export cannot write the atlas's folder** (no disk is shared with the site): there it serves the
+two files, or asks for the site to be built again — to design with the going online (CMS-228). The button does not
+commit the files: the coder still does.
+
 ## What it asks, in order (to become tickets once 6 to 9 are decided)
 
 1. **The CMS's fields** — a present name on the place, a name of the time on the dated sheet, both per language; a
