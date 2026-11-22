@@ -23,12 +23,14 @@ import { historicalDateSchema, historicalMomentSchema } from '../time/historical
 
 import { COMMUNITY_WEIGHTS } from './cityCommunity'
 import { CITY_IMPORTANCES } from './cityImportance'
+import { NAME_LANGUAGES } from './periodName'
 import { SIEGE_ENGINES } from './siegeEngines'
 import { CHAIN_ENDS } from './vassalChain'
 import { WIKIDATA_ID } from './wikidataId'
 
 import type { CommunityWeight } from './cityCommunity'
 import type { CityImportance } from './cityImportance'
+import type { NameForm } from './periodName'
 import type { SiegeEngine } from './siegeEngines'
 import type { ChainEnd } from './vassalChain'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
@@ -393,6 +395,11 @@ export interface ContentCity {
   id: string
   /** The place, written in: its name, its position. */
   place: ContentPlace
+  /**
+   * The name the place bore at the sheet's date (CMS-495) — its form in each language contributed, « Ancyre » for
+   * Ankara in 1100 — or `null` when its sheet names none: the map then writes the place's own name.
+   */
+  periodName: NameForm[] | null
   /** When the sheet holds: a year alone counts for that year, an interval for every year it covers. */
   date: HistoricalDate
   /** Its order on the map: a capital from afar, a large city as the zoom closes in, a city close up. */
@@ -421,6 +428,13 @@ export interface ContentCity {
 const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   id: recordId,
   place: placeSchema,
+  periodName: z.nullable(
+    z
+      .array(
+        z.strictObject({ language: z.enum(NAME_LANGUAGES), form: z.string().check(z.minLength(1)) })
+      )
+      .check(z.minLength(1))
+  ),
   date: historicalDateSchema,
   importance: z.enum(CITY_IMPORTANCES),
   reasons: z.array(localizedText),
@@ -455,9 +469,10 @@ export interface ContentFile {
  * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
  * and a source line its quotation (2026-11-02, CMS-335), 7 since a city says whether the atlas shows it (2026-11-08,
  * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433), 9 since a city carries its chain
- * of vassalage (2026-11-15, CARTO-435) — an export of 8 is refused, and a new export mends it.
+ * of vassalage (2026-11-15, CARTO-435), 10 since a city carries its name of the time (2026-11-22, CMS-495) — an
+ * export of 9 is refused, and a new export mends it.
  */
-export const CONTENT_FORMAT_VERSION = 9
+export const CONTENT_FORMAT_VERSION = 10
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

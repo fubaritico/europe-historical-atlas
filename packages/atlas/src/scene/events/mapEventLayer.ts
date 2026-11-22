@@ -5,6 +5,8 @@
  * handle in the context.
  */
 
+import { cityName } from '@europe-historical-atlas/core/data/cityName'
+
 import { createCityMarkers } from '../cities/cityMarkers'
 import { cityPins } from '../cities/cityPins'
 import { iconOver } from '../cities/iconFootprint'
@@ -69,7 +71,7 @@ function placedCities(
     return {
       ground,
       importance: city.importance,
-      name: city.place.name.fr,
+      name: cityName(city, context.locale),
       u,
       v,
       // Absent, never `undefined`: a city with no icon on it keeps its point.

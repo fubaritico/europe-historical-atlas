@@ -2,6 +2,7 @@ import { checkCitySheet, isSheetRefused } from '@europe-historical-atlas/core/da
 import { yearSpanOf } from '@europe-historical-atlas/core/time/dateOverlap'
 
 import { citySheetCandidate } from '../fields/citySheetCandidate'
+import { nameForms } from '../fields/nameForms'
 
 import { localized, present, resolved, toPlace, toSource } from './docRecords'
 import { contentChain } from './toContentChain'
@@ -81,6 +82,8 @@ export interface DocCitySheet {
   id: DocId
   /** Its place. */
   place: DocPlace | DocId | null | undefined
+  /** The name the place bore at its date, bare or resolved (CMS-495); none on a sheet that names none. */
+  periodName?: { id: DocId; forms?: unknown } | DocId | null
   /** Its date, as the form holds it. */
   date: unknown
   /** Its importance. */
@@ -212,6 +215,23 @@ function toHolder(name: string, qid: string | null | undefined): ContentHolder {
 }
 
 /**
+ * A sheet's name of the time, as the atlas reads it: its forms by language, or `null` for a sheet that names none.
+ * @param value - the relation, resolved
+ * @param where - what it is, for the error
+ * @returns the forms, or `null`
+ * @throws {Error} when the name is not resolved, or holds no form — a name the server would have refused, said loudly
+ */
+function periodNameOf(value: DocCitySheet['periodName'], where: string): ContentCity['periodName'] {
+  if (value === null || value === undefined) return null
+  const name = resolved<{ id: DocId; forms?: unknown }>(value, `${where}, name of the time`)
+  const forms = nameForms(name.forms)
+  if (forms.length === 0) {
+    throw new Error(`[CMS] ${where}: its name of the time ${String(name.id)} has no form`)
+  }
+  return forms
+}
+
+/**
  * One city at a date, everything it points to written in, after the schema's check — and its chain of vassalage at
  * its first year, computed from the register (CARTO-435).
  * @param sheet - the record, relations resolved
@@ -237,6 +257,7 @@ export function toContentCity(sheet: DocCitySheet, register: ChainRegister): Con
   return {
     id: String(sheet.id),
     place: toPlace(resolved<DocPlace>(sheet.place, `${where}, place`)),
+    periodName: periodNameOf(sheet.periodName, where),
     date: read.date,
     importance: read.importance,
     reasons: (sheet.reasons ?? []).map((reason) => reasonName(reason, `${where}, reason`)),

@@ -25,6 +25,7 @@ const SARKEL: ContentCity = {
   holder: null,
   communities: [],
   chain: null,
+  periodName: null,
   showInAtlas: false,
 }
 
@@ -91,6 +92,15 @@ describe('cityLoad', () => {
       await loadCities({ load: () => Promise.resolve(file) }, into)
       expect(into.got.territories).toEqual([])
       expect(warn).toHaveBeenCalledOnce()
+    })
+
+    // CMS-495: one rule with the atlas (`core/data/cityName`).
+    it('names a city by its name of the time in French, when its sheet has one', () => {
+      const periodName: ContentCity['periodName'] = [
+        { language: 'fr', form: 'Bela Vezha' },
+        { language: 'en', form: 'White Tower' },
+      ]
+      expect(toLoadedCity({ ...SARKEL, periodName }).name).toBe('Bela Vezha')
     })
 
     it('keeps the holder and only the lines saying who held it, two sources disagreeing kept both', () => {

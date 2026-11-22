@@ -83,6 +83,7 @@ const ROME_1100: DocCitySheet = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  periodName: null,
   showInAtlas: false,
 }
 

@@ -84,6 +84,7 @@ function rome(overrides: Record<string, unknown> = {}): unknown {
     holder: { name: 'Papal States', wikidata: 'Q170174' },
     chain: null,
     communities: [],
+    periodName: null,
     showInAtlas: true,
     ...overrides,
   }
@@ -123,6 +124,26 @@ describe('contentFileSchema — the cities at a date', () => {
         },
       ]
       expect(acceptsCity(rome({ testimonies: lines }))).toBe(true)
+    })
+
+    // CMS-495: the name the place bore at the sheet's date, a form a language.
+    it('accepts a city with its name of the time, in two languages', () => {
+      const periodName = [
+        { language: 'fr', form: 'Ancyre' },
+        { language: 'en', form: 'Ancyra' },
+      ]
+      expect(acceptsCity(rome({ periodName }))).toBe(true)
+    })
+
+    it('refuses a name of the time with no form, an empty form, or a language it does not know', () => {
+      expect(acceptsCity(rome({ periodName: [] }))).toBe(false)
+      expect(acceptsCity(rome({ periodName: [{ language: 'fr', form: '' }] }))).toBe(false)
+      expect(acceptsCity(rome({ periodName: [{ language: 'tlh', form: 'ʼanqara' }] }))).toBe(false)
+    })
+
+    it('refuses a city written without its name of the time, as a file of version 9 was', () => {
+      const { periodName: _dropped, ...older } = rome() as Record<string, unknown>
+      expect(acceptsCity(older)).toBe(false)
     })
 
     it('accepts a city with no reason, no line and no holder', () => {
@@ -328,7 +349,7 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 4, 5, 6, 7, 8, 10])
+      for (const version of [1, 2, 3, 4, 5, 6, 7, 8, 9, 11])
         expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 

@@ -1,3 +1,5 @@
+import { cityName } from '@europe-historical-atlas/core/data/cityName'
+
 import type {
   ContentCity,
   ContentTerritory,
@@ -16,7 +18,7 @@ import type { ContentSource } from '@europe-historical-atlas/core/data/contentSo
 export interface LoadedCity {
   /** The sheet's id in the contribution — one city at one date. */
   readonly id: string
-  /** Its name, in French — the contribution's language. */
+  /** The name the map writes it by, in French: its name of the time, or its place's name (`core/data/cityName`). */
   readonly name: string
   /** Longitude, WGS84 degrees. */
   readonly lon: number
@@ -61,12 +63,12 @@ export interface CitySink {
 /**
  * A city of the export as the Cartographer holds it.
  * @param city - the export's city
- * @returns its id, its French name, its position, its date, its holder by the sources and the lines saying so
+ * @returns its id, the name the map writes it by, its position, its date, its holder by the sources and the lines saying so
  */
 export function toLoadedCity(city: ContentCity): LoadedCity {
   return {
     id: city.id,
-    name: city.place.name.fr,
+    name: cityName(city, 'fr'),
     lon: city.place.lon,
     lat: city.place.lat,
     date: city.date,

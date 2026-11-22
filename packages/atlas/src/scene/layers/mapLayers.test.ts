@@ -130,8 +130,39 @@ const AUTHORED = {
 } as unknown as RegionSet
 
 /** A city's name drawn at once, 40 × 18 CSS pixels, the point 8 pixels left of it — no face, no canvas to wait for. */
-const NAME_STUB: DrawCityLabel = () =>
+const NAME_STUB = vi.fn<DrawCityLabel>(() =>
   Promise.resolve({ canvas: document.createElement('canvas'), width: 40, height: 18, anchorX: -8 })
+)
+
+/**
+ * Ankara on the map of 1100, with or without the name it bore then (CMS-495).
+ * @param id - the sheet's id
+ * @param periodName - its name of the time, or `null`
+ * @returns the city
+ */
+function ankara(id: string, periodName: ContentCity['periodName']): ContentCity {
+  return {
+    id,
+    place: {
+      id: `p-${id}`,
+      name: { fr: 'Ankara', en: null },
+      lon: 0,
+      lat: 48,
+      wikidata: null,
+      existsFrom: null,
+      existsTo: null,
+    },
+    periodName,
+    date: BATTLE.date,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [],
+    holder: null,
+    communities: [],
+    chain: null,
+    showInAtlas: true,
+  }
+}
 
 /**
  * A scene with layers over a fully loaded set of sources.
@@ -345,6 +376,7 @@ const city = (id: string, year: number): ContentCity => ({
   holder: null,
   communities: [],
   chain: null,
+  periodName: null,
   showInAtlas: true,
 })
 
@@ -385,6 +417,24 @@ describe('createMapLayers', () => {
       expect(found.length).toBeGreaterThan(0)
     })
 
+    // CMS-495: one rule with the Cartographer (`core/data/cityName`) — the layers of these tests read in English.
+    it('writes a city by its name of the time in the reader’s language, and by its place’s name without one', () => {
+      const { sources, layers } = build()
+      sources.cities = [
+        ankara('named', [
+          { language: 'fr', form: 'Ancyre' },
+          { language: 'en', form: 'Ancyra' },
+        ]),
+        ankara('french-only', [{ language: 'fr', form: 'Ancyre' }]),
+        ankara('unnamed', null),
+      ]
+      sources.askedYear = 1100
+      sources.mapDrawn = true
+      NAME_STUB.mockClear()
+      layers.rebuildEvents()
+      expect(NAME_STUB.mock.calls.map(([name]) => name)).toEqual(['Ancyra', 'Ankara', 'Ankara'])
+    })
+
     it('draws the cities of a content that has no event, and frees them on the next build', () => {
       const { scene, sources, layers } = build()
       const paris: ContentCity = {
@@ -405,6 +455,7 @@ describe('createMapLayers', () => {
         holder: null,
         communities: [],
         chain: null,
+        periodName: null,
         showInAtlas: true,
       }
       sources.cities = [paris]
@@ -482,6 +533,7 @@ describe('createMapLayers', () => {
           holder: null,
           communities: [],
           chain: null,
+          periodName: null,
           showInAtlas: true,
         },
       ]

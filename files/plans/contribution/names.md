@@ -37,8 +37,8 @@
 | 6d | How far do we go now? | **the whole of it, now**: _"What we do today we will not have to do tomorrow"_ — no debt left to pay once several years are contributed | the dev, 2026-11-21 |
 | 6e | The shape of the record | one record is one name a place bore — the place, the table of its forms (a language, the form; one form a language, another spelling is another record) and its source lines (source, where, quotation, the name as written). **No date on it**: the sheets that point at it say when — the sheets of 1100 and of 1200 point at the same record, as two sheets point at one title. Built so, 2026-11-21 (`cms/src/collections/PeriodNames.ts`) | the coder — to be confirmed by the dev on sight |
 | 7 | What can Wikidata verify? | _proposed_: the present name only — it knows no dated name; a name of the time is verified by its source | the coder, proposed — not decided |
-| 8 | The countries | _proposed_: the same rule — the name is contributed on the CMS territory, per language, and the drawn country reads it through its link (`territoryMatch`) instead of bearing its own | the coder, proposed — not decided |
-| 9 | A name of the time is missing in the page's language | _open_ — an error-handling decision (`rules/error-handling.md`), to bring to the dev with its alternatives | — |
+| 8 | The countries | **the names of the time and the names by language concern the cities and the territories alike** (the dev, 2026-11-22). How a territory holds them is open: it has no present name once it is gone, and no dated sheet — _proposed_: the same table of forms by language, with its sources, on the territory itself; a name that changes over a territory's life comes after, with years on the name | the dev for the rule; the shape proposed by the coder — not decided |
+| 9 | A sheet has no name of the time | *"We write the place's name as it is today, yes. But it must be possible to control it."* — so the map writes the place's name; a name of the time with no form in the reader's language counts as none for that reader (`core/data/cityName`). The control: the list of the places whose name differs from Wikidata's (`noms-a-trier.md`), run again after each entry | the dev, 2026-11-22; the control's form proposed by the coder |
 
 ## Where it stands — 2026-11-21, on the coder's tree, not yet in `main`
 
@@ -46,7 +46,7 @@
 | --- | --- |
 | the register « Noms d'époque » (`period-names`), its migration (up and hand-written down proved on a copy of the base: 13 684 places, 13 671 sheets and 17 696 source lines before and after), opened to the MCP | done — `672f64b9` |
 | the field « Nom d'époque » in the dated sheet's form: the names of the sheet's place only, « + » creates one in a drawer, removing the place empties it | done — `d7700d84`; tried through the API of a CMS of the coder's on the copy, **the drawer itself not seen in a browser** |
-| the export, the content format, the atlas | to do — waits on decision 9 |
+| the export carries each city's name of the time (content format 10), and one rule names a city for the atlas and the Cartographer: the name of the time in the reader's language, else the place's name | done, 2026-11-22 |
 | the present name on the place and the sort of the 13 684 names | to do |
 | the countries | to do — decision 8 |
 

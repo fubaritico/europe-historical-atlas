@@ -2,19 +2,19 @@ import { APIError } from 'payload'
 
 import {
   NAME_LANGUAGES,
-  isNameLanguage,
   periodNameLabel,
   repeatedLanguage,
 } from '@europe-historical-atlas/core/data/periodName'
 
 import { claimLines } from '../fields/claimLines'
+import { nameForms } from '../fields/nameForms'
 import { relationId } from '../fields/relationId'
 import { trimmedText } from '../fields/trimmedText'
 import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
 
 import { refuseDeletingCited } from './claimDependants'
 
-import type { NameForm, NameLanguage } from '@europe-historical-atlas/core/data/periodName'
+import type { NameLanguage } from '@europe-historical-atlas/core/data/periodName'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 /** What the form calls each language a name can be written in. */
@@ -24,21 +24,6 @@ export const LANGUAGE_LABELS: Readonly<Record<NameLanguage, string>> = {
   es: 'Espagnol',
   it: 'Italien',
   de: 'Allemand',
-}
-
-/**
- * The table of correspondence as `core` reads it, from the rows Payload holds — a row whose language or form is not
- * yet there is left out: the fields' own rules refuse it.
- * @param value - the `forms` field
- * @returns its complete lines
- */
-export function nameForms(value: unknown): NameForm[] {
-  if (!Array.isArray(value)) return []
-  return (value as { language?: unknown; form?: unknown }[]).flatMap(({ language, form }) =>
-    isNameLanguage(language) && typeof form === 'string' && form.trim() !== ''
-      ? [{ language, form: form.trim() }]
-      : []
-  )
 }
 
 /**

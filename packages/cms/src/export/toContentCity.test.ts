@@ -55,6 +55,7 @@ function rome(overrides: Partial<DocCitySheet> = {}): DocCitySheet {
         where: 'p. 12',
       },
     ],
+    periodName: null,
     showInAtlas: true,
     ...overrides,
   }
@@ -92,6 +93,7 @@ describe('toContentCity', () => {
         holder: null,
         chain: null,
         communities: [],
+        periodName: null,
         showInAtlas: true,
       })
     })
@@ -183,6 +185,25 @@ describe('toContentCity', () => {
     })
 
     // CMS-391, the dev, 2026-11-08: unticked by default, the atlas shows only the cities ticked.
+    // CMS-495: the sheet's name of the time, written in as its forms by language.
+    it('writes the name of the time the sheet points at, a form a language', () => {
+      const ancyre = {
+        id: 1,
+        forms: [
+          { id: 'a', language: 'fr', form: 'Ancyre' },
+          { id: 'b', language: 'en', form: 'Ancyra' },
+        ],
+      }
+      expect(toContentCity(rome({ periodName: ancyre }), NO_CHAIN).periodName).toEqual([
+        { language: 'fr', form: 'Ancyre' },
+        { language: 'en', form: 'Ancyra' },
+      ])
+    })
+
+    it('writes no name of the time for a sheet that names none', () => {
+      expect(toContentCity(rome(), NO_CHAIN).periodName).toBeNull()
+    })
+
     it('writes Rome unticked when its box is not ticked', () => {
       expect(toContentCity(rome({ showInAtlas: false }), NO_CHAIN).showInAtlas).toBe(false)
     })
@@ -266,6 +287,15 @@ describe('toContentCity', () => {
     it('stops on a place the query did not resolve — the atlas never joins', () => {
       expect(() => toContentCity(rome({ place: 5 }), NO_CHAIN)).toThrow(
         'city sheet 1, place: not resolved (5)'
+      )
+    })
+
+    it('stops on a name of the time the query did not resolve, and on one with no form', () => {
+      expect(() => toContentCity(rome({ periodName: 7 }), NO_CHAIN)).toThrow(
+        '[CMS] city sheet 1, name of the time: not resolved (7)'
+      )
+      expect(() => toContentCity(rome({ periodName: { id: 7, forms: [] } }), NO_CHAIN)).toThrow(
+        '[CMS] city sheet 1: its name of the time 7 has no form'
       )
     })
 
