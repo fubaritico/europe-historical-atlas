@@ -13,7 +13,8 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 ## Never
 
-- Never ask the dev to guide the research: his axes, names, dates and resources are a bonus when he gives them.
+- Never ask the dev to guide the research beyond the form of the setup: what he gives there is help, never proof,
+  and the context is mine to build.
 - Never a fact from memory. Never a quotation not found word for word in the text read.
 - Never a holder from Wikipedia alone, nor from the polity drawn on our map. The map is not an input, not a check.
 - Never start a reading from a city: cross the works; the cities come out of them.
@@ -27,8 +28,12 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 1. Create the region's note `files/plans/sources/<year>/<region>.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
    Cities met in the sources, Existence to read, Attempts).
-2. Write what he gave, in his words: axes, names, resources, points of context. He gave none: start without. The
-   form (`AskUserQuestion`, one question per call) is used only when he asks to be asked.
+2. **The form** (`AskUserQuestion`, one question per call, in French): « Donne-moi un axe de recherche », again
+   until « Je n'ai pas d'autre axe »; then « Donne-moi une référence — un livre, une carte, un PDF, un lien »,
+   again until « Je n'ai pas d'autre référence ». What he already gave in his message is not asked again. Write
+   each answer in the note at once, in his words. **What he gives are mostly references of books** (from the
+   videos he watches, which give him no summary): **they prove nothing** — they help: sources to read, context,
+   words, vocabulary, names, dates **to verify**. He gives nothing: start without.
 3. `log.py say` the research; give him once: `tail -f files/resources/historien/journal.log`.
 4. `prepare.py <year> <region>`: what is at hand, the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
