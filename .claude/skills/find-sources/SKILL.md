@@ -170,7 +170,10 @@ Not found / dropped: <quotation not checked, lead that led nowhere>
 
 ## Agents
 
-None without his number. Research on Opus (`subagent_type: "source-researcher"`, lots of 10–15 places), entry on
+None without his number. **Before such a work starts, he chooses from a scale** (the dev, 2026-11-23): one form
+(`AskUserQuestion`) whose options are 5 · 10 · 15 · 20 agents, each with its estimate from the measured cost (a lot,
+research and entry together, ≈ 0.3 % of his week: 5 ≈ 1.5 %, 10 ≈ 3 %, 15 ≈ 4.5 %, 20 ≈ 6 %) and the number of lots
+the work needs; he may write another number, or none. Research on Opus (`subagent_type: "source-researcher"`, lots of 10–15 places), entry on
 Sonnet. I re-check every quotation an agent brings. An agent saves the texts it reads in its lot's folder
 (`<year>/<zone>/travail/<lot>/sources/`); at the lot's end I file each work in `ouvrages/` (`archive.py work`).
 Detail and costs: `references/rules-in-full.md`, « Agents ».
