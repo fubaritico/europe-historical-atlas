@@ -104,18 +104,21 @@ export const MCP_COLLECTIONS = {
     description:
       'Why a city matters at a date (archbishopric, university, fortress, patriarchate, great mosque…): its id is ' +
       'what a city’s source line with the subject « reason » cites. Search before creating — a reason that exists ' +
-      'is reused, never created twice; a reason tied to a faith names it, the sign depends on it.',
+      'is reused, never created twice; a reason tied to a faith names it, the sign depends on it. ' +
+      `Its \`name\` is French, ${OTHER_NAMES_RULE}.`,
   },
   [Confessions.slug]: {
     enabled: ENTER_NEVER_DELETE,
     description:
       'A confession a city’s community belongs to (catholic, orthodox, Sunni Muslim, Jewish…): its id is what a ' +
-      'community and its « community » line cite. Search before creating — one that exists is reused, never created twice.',
+      'community and its « community » line cite. Search before creating — one that exists is reused, never created twice. ' +
+      `Its \`name\` is French, ${OTHER_NAMES_RULE}.`,
   },
   [People.slug]: {
     enabled: ENTER_NEVER_DELETE,
     description:
-      'The register of people: who someone is, nothing more — `name`, `kind` (`person` or `house`, a dynasty), ' +
+      `The register of people: who someone is, nothing more — \`name\` (French), ${OTHER_NAMES_RULE}, ` +
+      '`kind` (`person` or `house`, a dynasty), ' +
       '`wikidata`; for a person `born` and `died`, each { year, month, day, circa, margin, calendar }, and `house` ' +
       '(the id of a record of kind house); for a house `founded`, `ended` and `founder`. No rank, role or ' +
       'confession here. Search by `wikidata` before creating — a person is entered once.',

@@ -155,3 +155,8 @@ commit the files: the coder still does.
   cascades, their English rows already in the tables of other names; proved on a copy, up and down.
 - **By me, to be kept or lifted by him**: the same rule extended to the five other collections whose name is translated
   (people, confessions, event types, importance reasons, siege engines).
+- **The people and the four registers, the same evening** (the dev: _"finish it"_): their name French alone, their
+  other languages in the shared table, English required — the migration `plain_french_register_names`, written by
+  hand over the generator's output, proved on a copy up and down, the export identical. 391 people of 519 have an
+  English line; the 128 others are in `noms-anglais-a-faire.md`. **Left**: the events' title and description, still
+  translated; the seed (`known-issues/cms.md`).

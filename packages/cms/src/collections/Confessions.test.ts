@@ -30,8 +30,10 @@ describe('Confessions', () => {
     ])
   })
 
-  it('has a required name in every locale', () => {
+  it('has a required French name, its other languages in its table', () => {
     const [name] = Confessions.fields
-    expect(name).toMatchObject({ name: 'name', type: 'text', required: true, localized: true })
+    // French alone since 2026-11-23 (CMS-495): the other languages are the table `otherNames`
+    expect(name).toMatchObject({ name: 'name', type: 'text', required: true })
+    expect(name).not.toHaveProperty('localized')
   })
 })

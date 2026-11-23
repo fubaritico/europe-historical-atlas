@@ -5,10 +5,18 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 
 import { describeDateRefusalFr, toHistoricalDate } from '../fields/historicalDate'
 
-import { localized, optionalLocalized, present, resolved, toPlace, toSource } from './docRecords'
+import {
+  localized,
+  namesOf,
+  optionalLocalized,
+  present,
+  resolved,
+  toPlace,
+  toSource,
+} from './docRecords'
 import { toContentCity } from './toContentCity'
 
-import type { DocEventType, DocId, DocLocalized, DocPlace, DocSource } from './docRecords'
+import type { DocEventType, DocId, DocLocalized, DocNamed, DocPlace, DocSource } from './docRecords'
 import type { ChainRegister } from './toContentChain'
 import type { DocCitySheet } from './toContentCity'
 import type { EventDateFields } from '../fields/historicalDate'
@@ -29,11 +37,9 @@ import type { HistoricalDate } from '@europe-historical-atlas/core/time/historic
  */
 
 /** An actor. */
-export interface DocActor {
+export interface DocActor extends DocNamed {
   /** Its id. */
   id: DocId
-  /** Its name, every locale. */
-  name: DocLocalized
   /** Person or house. */
   kind: 'person' | 'house'
   /** Its Wikidata id. */
@@ -102,7 +108,7 @@ function toContentType(type: DocEventType, where: string): ContentEventType {
   }
   return {
     id: String(type.id),
-    name: localized(type.name, `${where}, type`),
+    name: namesOf(type, `${where}, type`),
     icon: type.icon,
     colour: type.colour,
   }
@@ -125,7 +131,7 @@ export function toContentEvent(event: DocEvent, context: ExportContext): Content
     const actor = resolved<DocActor>(value, `${where}, actor`)
     return {
       id: String(actor.id),
-      name: localized(actor.name, `actor ${String(actor.id)}`),
+      name: namesOf(actor, `actor ${String(actor.id)}`),
       kind: actor.kind,
       wikidata: present(actor.wikidata),
     }

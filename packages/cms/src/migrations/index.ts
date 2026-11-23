@@ -11,6 +11,7 @@ import * as migration_20261121_220424_period_names from './20261121_220424_perio
 import * as migration_20261122_004948_territory_other_names from './20261122_004948_territory_other_names';
 import * as migration_20261123_164622_place_other_names from './20261123_164622_place_other_names';
 import * as migration_20261123_173436_plain_french_names from './20261123_173436_plain_french_names';
+import * as migration_20261123_175001_plain_french_register_names from './20261123_175001_plain_french_register_names';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261123_173436_plain_french_names.up,
     down: migration_20261123_173436_plain_french_names.down,
-    name: '20261123_173436_plain_french_names'
+    name: '20261123_173436_plain_french_names',
+  },
+  {
+    up: migration_20261123_175001_plain_french_register_names.up,
+    down: migration_20261123_175001_plain_french_register_names.down,
+    name: '20261123_175001_plain_french_register_names'
   },
 ];

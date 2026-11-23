@@ -65,7 +65,7 @@ async function title(
 ): Promise<{ title: number; territory: number }> {
   const holder = await payload.create({
     collection: 'people',
-    data: { name: person, kind: 'person' },
+    data: { name: person, kind: 'person', otherNames: ENGLISH },
   })
   const land = await payload.create({
     collection: 'territories',
@@ -263,15 +263,21 @@ describe('titles and links', () => {
     })
 
     it('lets any number of records go without a Wikidata id, empty or absent', async () => {
-      await payload.create({ collection: 'people', data: { name: 'Gerbert', kind: 'person' } })
-      await payload.create({ collection: 'people', data: { name: 'Gerberge', kind: 'person' } })
       await payload.create({
         collection: 'people',
-        data: { name: 'Gerold', kind: 'person', wikidata: '' },
+        data: { name: 'Gerbert', kind: 'person', otherNames: ENGLISH },
+      })
+      await payload.create({
+        collection: 'people',
+        data: { name: 'Gerberge', kind: 'person', otherNames: ENGLISH },
+      })
+      await payload.create({
+        collection: 'people',
+        data: { name: 'Gerold', kind: 'person', otherNames: ENGLISH, wikidata: '' },
       })
       const saved = await payload.create({
         collection: 'people',
-        data: { name: 'Gerlinde', kind: 'person', wikidata: '' },
+        data: { name: 'Gerlinde', kind: 'person', otherNames: ENGLISH, wikidata: '' },
       })
       expect(saved.wikidata ?? null).toBeNull()
     })
@@ -335,17 +341,22 @@ describe('titles and links', () => {
     it('refuses a second person with a Wikidata id another holds, at a creation and at a correction', async () => {
       await payload.create({
         collection: 'people',
-        data: { name: 'Humbert II de Savoie', kind: 'person', wikidata: 'Q553289' },
+        data: {
+          name: 'Humbert II de Savoie',
+          kind: 'person',
+          otherNames: ENGLISH,
+          wikidata: 'Q553289',
+        },
       })
       await expect(
         payload.create({
           collection: 'people',
-          data: { name: 'Humbert II', kind: 'person', wikidata: 'Q553289' },
+          data: { name: 'Humbert II', kind: 'person', otherNames: ENGLISH, wikidata: 'Q553289' },
         })
       ).rejects.toThrow('wikidata')
       const other = await payload.create({
         collection: 'people',
-        data: { name: 'Humbert de Maurienne', kind: 'person' },
+        data: { name: 'Humbert de Maurienne', kind: 'person', otherNames: ENGLISH },
       })
       await expect(
         payload.update({ collection: 'people', id: other.id, data: { wikidata: 'Q553289' } })
@@ -412,7 +423,7 @@ describe('titles and links', () => {
     it('counts two titles with no end as the same years, which an index would not', async () => {
       const holder = await payload.create({
         collection: 'people',
-        data: { name: 'Hoël II', kind: 'person' },
+        data: { name: 'Hoël II', kind: 'person', otherNames: ENGLISH },
       })
       const land = await payload.create({
         collection: 'territories',
@@ -448,7 +459,7 @@ describe('titles and links', () => {
     it('refuses a correction that makes a title the twin of another, and lets a link be saved again', async () => {
       const holder = await payload.create({
         collection: 'people',
-        data: { name: 'Budic', kind: 'person' },
+        data: { name: 'Budic', kind: 'person', otherNames: ENGLISH },
       })
       const land = await payload.create({
         collection: 'territories',

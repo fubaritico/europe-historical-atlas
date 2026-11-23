@@ -4,10 +4,10 @@ import { yearSpanOf } from '@europe-historical-atlas/core/time/dateOverlap'
 import { citySheetCandidate } from '../fields/citySheetCandidate'
 import { nameForms } from '../fields/nameForms'
 
-import { localized, present, resolved, toPlace, toSource } from './docRecords'
+import { namesOf, present, resolved, toPlace, toSource } from './docRecords'
 import { contentChain } from './toContentChain'
 
-import type { DocId, DocLocalized, DocPlace, DocSource } from './docRecords'
+import type { DocId, DocNamed, DocPlace, DocSource } from './docRecords'
 import type { ChainRegister } from './toContentChain'
 import type { CommunityWeight } from '@europe-historical-atlas/core/data/cityCommunity'
 import type {
@@ -23,19 +23,15 @@ import type {
 } from '@europe-historical-atlas/core/data/contentFormat'
 
 /** A reason of importance. */
-export interface DocReason {
+export interface DocReason extends DocNamed {
   /** Its id. */
   id: DocId
-  /** Its name, every locale. */
-  name: DocLocalized
 }
 
 /** A confession of a city's community (CMS-433). */
-export interface DocConfession {
+export interface DocConfession extends DocNamed {
   /** Its id. */
   id: DocId
-  /** Its name, every locale. */
-  name: DocLocalized
 }
 
 /** A religious community of a city at a date, its confession resolved (CMS-433). */
@@ -132,7 +128,7 @@ function reasonName(value: DocReason | DocId | null | undefined, where: string) 
   // Unreachable while the schema refuses a reason line without its reason first: a null here is a defect, said.
   if (value === null || value === undefined) throw new Error(`[CMS] ${where}: no reason`)
   const reason = resolved<DocReason>(value, where)
-  return localized(reason.name, `reason ${String(reason.id)}`)
+  return namesOf(reason, `reason ${String(reason.id)}`)
 }
 
 /**
@@ -145,7 +141,7 @@ function confessionName(value: DocConfession | DocId | null | undefined, where: 
   // Unreachable while the schema refuses a community or its line without a confession first: a defect, said.
   if (value === null || value === undefined) throw new Error(`[CMS] ${where}: no confession`)
   const confession = resolved<DocConfession>(value, where)
-  return localized(confession.name, `confession ${String(confession.id)}`)
+  return namesOf(confession, `confession ${String(confession.id)}`)
 }
 
 /**

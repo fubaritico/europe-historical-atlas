@@ -214,7 +214,23 @@ export interface Event {
  */
 export interface EventType {
   id: number;
+  /**
+   * Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour « Bataille » : anglais « Battle ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   icon: 'pin' | 'swords' | 'tower' | 'crown' | 'cathedral' | 'tomb' | 'tiara' | 'oriflamme';
   colour: '#e3170a' | '#ff7a00' | '#ffc300' | '#1fa33a' | '#1565e8' | '#8a2be2' | '#d4148a';
   updatedAt: string;
@@ -303,7 +319,23 @@ export interface Place {
  */
 export interface Person {
   id: number;
+  /**
+   * Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour Bohémond de Tarente : anglais « Bohemond I of Antioch ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   kind: 'person' | 'house';
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem. Unique : une seconde fiche avec le même identifiant est refusée.
@@ -410,7 +442,23 @@ export interface Source {
  */
 export interface SiegeEngine {
   id: number;
+  /**
+   * Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour « Trébuchet à contrepoids » : anglais « Counterweight trebuchet ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   engine: 'traction-trebuchet' | 'counterweight-trebuchet' | 'cannon';
   /**
    * Ce que disent les sources. Sans fin, l’engin est encore en usage. Quand deux périodes se chevauchent, la carte montre le plus récent.
@@ -649,7 +697,23 @@ export interface PeriodName {
  */
 export interface ImportanceReason {
   id: number;
+  /**
+   * Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour « siège épiscopal » : anglais « episcopal see ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -826,7 +890,23 @@ export interface Territory {
  */
 export interface Confession {
   id: number;
+  /**
+   * Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour « juive » : anglais « Jewish ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1302,6 +1382,13 @@ export interface EventsSelect<T extends boolean = true> {
  */
 export interface EventTypesSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   icon?: T;
   colour?: T;
   updatedAt?: T;
@@ -1313,6 +1400,13 @@ export interface EventTypesSelect<T extends boolean = true> {
  */
 export interface SiegeEnginesSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   engine?: T;
   inUse?:
     | T
@@ -1490,6 +1584,13 @@ export interface PeriodNamesSelect<T extends boolean = true> {
  */
 export interface ImportanceReasonsSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1499,6 +1600,13 @@ export interface ImportanceReasonsSelect<T extends boolean = true> {
  */
 export interface ConfessionsSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1508,6 +1616,13 @@ export interface ConfessionsSelect<T extends boolean = true> {
  */
 export interface PeopleSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   kind?: T;
   wikidata?: T;
   born?:

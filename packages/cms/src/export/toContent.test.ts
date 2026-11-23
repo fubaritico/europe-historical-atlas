@@ -14,7 +14,8 @@ import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFor
 
 const SIEGE = {
   id: 1,
-  name: { fr: 'Siège', en: 'Siege' },
+  name: 'Siège',
+  otherNames: [{ language: 'en', form: 'Siege' }],
   icon: 'tower' as const,
   colour: '#ff7a00',
 }
@@ -25,7 +26,12 @@ const JERUSALEM = {
   location: [35.2137, 31.7683] as [number, number],
   wikidata: 'Q1218',
 }
-const GODFREY = { id: 3, name: { fr: 'Godefroy de Bouillon', en: null }, kind: 'person' as const }
+const GODFREY = {
+  id: 3,
+  name: 'Godefroy de Bouillon',
+  otherNames: [],
+  kind: 'person' as const,
+}
 const GESTA = { id: 4, title: 'Gesta Francorum', author: null, url: '' }
 
 /** No title, no link: every city's chain reads `null`. */
@@ -176,16 +182,14 @@ describe('toContent', () => {
 
     it('refuses an event whose type has no icon, rather than drawing it as a pin', () => {
       expect(() =>
-        exportEvent(
-          capture({ type: { id: 1, name: { fr: 'Siège', en: null }, colour: '#ff7a00' } })
-        )
+        exportEvent(capture({ type: { id: 1, name: 'Siège', colour: '#ff7a00' } }))
       ).toThrow('event 10, type: no icon')
     })
 
     it('refuses an event whose type has no colour, rather than giving it one', () => {
-      expect(() =>
-        exportEvent(capture({ type: { id: 1, name: { fr: 'Siège', en: null }, icon: 'tower' } }))
-      ).toThrow('event 10, type: no colour')
+      expect(() => exportEvent(capture({ type: { id: 1, name: 'Siège', icon: 'tower' } }))).toThrow(
+        'event 10, type: no colour'
+      )
     })
 
     it('refuses an event with no French title', () => {
@@ -265,7 +269,7 @@ describe('toContent', () => {
     it('gives a battle no engin, and says nothing, even with no period at all', () => {
       const context = { periods: [], warn: vi.fn(), register: NO_CHAIN }
       const battle = capture({
-        type: { id: 7, name: { fr: 'Bataille', en: null }, icon: 'swords', colour: '#e3170a' },
+        type: { id: 7, name: 'Bataille', icon: 'swords', colour: '#e3170a' },
       })
       expect(toContentEvent(battle, context).engine).toBeNull()
       expect(context.warn).not.toHaveBeenCalled()

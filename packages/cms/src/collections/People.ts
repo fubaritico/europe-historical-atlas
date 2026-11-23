@@ -1,4 +1,5 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
+import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
@@ -65,9 +66,17 @@ export const People: CollectionConfig = {
       type: 'text',
       label: 'Nom',
       required: true,
-      localized: true,
+      // The column's default, which SQLite needs to add a required column to a filled table (migration
+      // `plain_french_register_names`); never saved — the field is required, and an empty name is refused.
+      defaultValue: '',
       hooks: { beforeValidate: [trimmedText] },
+      admin: {
+        description:
+          'Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.',
+      },
     },
+    // CMS-495: the name in the other languages, the same table as a place's and a territory's (the dev, 2026-11-23).
+    otherNamesField('pour Bohémond de Tarente : anglais « Bohemond I of Antioch »'),
     {
       name: 'kind',
       type: 'select',

@@ -9,7 +9,6 @@ import { chainRegister } from './toContentChain'
 import { toContentTerritories } from './toContentTerritory'
 
 import type { DocEvent } from './toContent'
-import type { DocCitySheet } from './toContentCity'
 import type { ContentFile } from '@europe-historical-atlas/core/data/contentFormat'
 import type { SanitizedConfig } from 'payload'
 
@@ -67,7 +66,7 @@ export async function readContent(
   })
   return contentFileSchema.parse({
     ...toContent(
-      { events: docs as unknown as DocEvent[], cities: cities.docs as unknown as DocCitySheet[] },
+      { events: docs as unknown as DocEvent[], cities: cities.docs },
       { periods, warn, register }
     ),
     territories: toContentTerritories(territories.docs),

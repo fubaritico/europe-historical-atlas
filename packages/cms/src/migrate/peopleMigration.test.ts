@@ -55,6 +55,10 @@ beforeAll(async () => {
     sql`INSERT INTO actors_locales (_locale, _parent_id, name) VALUES ('fr', 7, 'Tancrède de Hauteville'), ('en', 7, 'Tancred'), ('fr', 14, 'Almoravides')`
   )
   await db.run(sql`INSERT INTO event_types (id) VALUES (1)`)
+  // A type has a French name: `plain_french_register_names` refuses one without
+  await db.run(
+    sql`INSERT INTO event_types_locales (_locale, _parent_id, name) VALUES ('fr', 1, 'Bataille')`
+  )
   await db.run(sql`INSERT INTO events (id, type_id, date_start_year) VALUES (3, 1, 1100)`)
   await db.run(sql`INSERT INTO events_rels (parent_id, path, actors_id) VALUES (3, 'actors', 7)`)
   await migrate(onDisk)
@@ -73,16 +77,17 @@ describe('the people migration over a base with rows', () => {
     ])
   })
 
-  it('keeps every name, in every locale', async () => {
+  it('keeps every name, in every language', async () => {
+    // French in the column and the other languages in the table since `plain_french_register_names` (CMS-495)
+    expect(await db.all(sql`SELECT id, name FROM people ORDER BY id`)).toEqual([
+      { id: 7, name: 'Tancrède de Hauteville' },
+      { id: 14, name: 'Almoravides' },
+    ])
     expect(
       await db.all(
-        sql`SELECT _parent_id, _locale, name FROM people_locales ORDER BY _parent_id, _locale`
+        sql`SELECT _parent_id, language, form FROM people_other_names ORDER BY _parent_id`
       )
-    ).toEqual([
-      { _parent_id: 7, _locale: 'en', name: 'Tancred' },
-      { _parent_id: 7, _locale: 'fr', name: 'Tancrède de Hauteville' },
-      { _parent_id: 14, _locale: 'fr', name: 'Almoravides' },
-    ])
+    ).toEqual([{ _parent_id: 7, language: 'en', form: 'Tancred' }])
   })
 
   it('keeps the event’s link to the person, now in the people column', async () => {

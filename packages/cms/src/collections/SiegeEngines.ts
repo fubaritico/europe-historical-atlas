@@ -1,6 +1,7 @@
 import { SIEGE_ENGINES } from '@europe-historical-atlas/core/data/siegeEngines'
 
 import { historicalDateField } from '../fields/historicalDate'
+import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
@@ -29,9 +30,17 @@ export const SiegeEngines: CollectionConfig = {
       type: 'text',
       label: 'Nom',
       required: true,
-      localized: true,
+      // The column's default, which SQLite needs to add a required column to a filled table (migration
+      // `plain_french_register_names`); never saved — the field is required, and an empty name is refused.
+      defaultValue: '',
       hooks: { beforeValidate: [trimmedText] },
+      admin: {
+        description:
+          'Le nom français. Les autres langues se saisissent dans le tableau ci-dessous.',
+      },
     },
+    // CMS-495: the name in the other languages, the same table as a place's and a territory's (the dev, 2026-11-23).
+    otherNamesField('pour « Trébuchet à contrepoids » : anglais « Counterweight trebuchet »'),
     {
       name: 'engine',
       type: 'select',

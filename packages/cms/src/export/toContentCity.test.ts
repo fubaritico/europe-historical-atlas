@@ -26,10 +26,10 @@ const ROME_PLACE = {
 const BURINGH = { id: 4, title: 'Buringh 2021', author: 'Eltjo Buringh', url: null }
 
 /** A reason, with every locale. */
-const BISHOPRIC = { id: 3, name: { fr: 'Évêché', en: null } }
+const BISHOPRIC = { id: 3, name: 'Évêché', otherNames: [] }
 
 /** A confession, with every locale (CMS-433). */
-const JEWISH = { id: 9, name: { fr: 'juive', en: 'Jewish' } }
+const JEWISH = { id: 9, name: 'juive', otherNames: [{ language: 'en', form: 'Jewish' }] }
 
 /**
  * Rome in 1100, as the export reads it: every relation resolved, every locale.

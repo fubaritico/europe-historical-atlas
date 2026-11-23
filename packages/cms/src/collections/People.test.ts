@@ -43,10 +43,13 @@ const fields = byName(People.fields)
 
 describe('People', () => {
   describe('happy path', () => {
-    it('is the register « Personnes », slug people, a required name in every locale', () => {
+    it('is the register « Personnes », slug people, a required French name, its other languages in its table', () => {
       expect(People.slug).toBe('people')
       expect(People.labels).toEqual({ singular: 'Personne', plural: 'Personnes' })
-      expect(fields.get('name')).toMatchObject({ type: 'text', required: true, localized: true })
+      // French alone since 2026-11-23 (CMS-495): the other languages are the table `otherNames`
+      expect(fields.get('name')).toMatchObject({ type: 'text', required: true })
+      expect(fields.get('name')).not.toHaveProperty('localized')
+      expect(fields.get('otherNames')).toMatchObject({ type: 'array' })
     })
 
     it('is the collection an event’s actors point at', () => {

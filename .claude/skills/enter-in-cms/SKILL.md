@@ -213,7 +213,8 @@ that exists is reused (its id), never created again.
 4. **A person or a house** (`people`, « Personnes », CMS-422 step 1). Search by `wikidata`, then by `name`: **two
    records for one person is the error this register exists to avoid** — in doubt between two homonyms, create
    nothing and ask. Any person the sources name, lord or not.
-   - `name` (localized, French first), `kind` — `person` or `house` (a dynasty, a noble family: Wikidata P31 Q13417114,
+   - `name` (French alone since 2026-11-23) and **`otherNames` with an English line, required** — Wikidata's
+     English label, as for a place (step 2); `kind` — `person` or `house` (a dynasty, a noble family: Wikidata P31 Q13417114,
      Q8436, Q164950), `wikidata`.
    - A person: `born`, `died` — each `{ year, month, day, circa, margin, calendar }`, **the calendar as Wikidata gives
      it** (Q1985786 = `julian`), never converted; `house` = the id of the house's record, entered first.

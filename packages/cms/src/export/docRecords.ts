@@ -20,15 +20,21 @@ import type { HistoricalMoment } from '@europe-historical-atlas/core/time/histor
 /** A localized field with every locale: `{ fr, en }`, either possibly missing. */
 export type DocLocalized = Partial<Record<'fr' | 'en', string | null>> | null | undefined
 
+/** A record named in French, its other languages in its table (CMS-495): a place, a person, a register's entry. */
+export interface DocNamed {
+  /** Its French name — its only one since 2026-11-23; the others are its `otherNames` (CMS-495). */
+  name: string | null | undefined
+  /** Its names in the other languages, as the register's table holds them (CMS-495). */
+  otherNames?: unknown
+}
+
 /** A record's id: a number in SQLite. */
 export type DocId = number | string
 
 /** An event type. */
-export interface DocEventType {
+export interface DocEventType extends DocNamed {
   /** Its id. */
   id: DocId
-  /** Its name, every locale. */
-  name: DocLocalized
   /** The shape its events stand on the map as. */
   icon?: EventIcon | null
   /** The colour its pins wear. */
@@ -36,13 +42,9 @@ export interface DocEventType {
 }
 
 /** A place; Payload stores a point as `[longitude, latitude]`. */
-export interface DocPlace {
+export interface DocPlace extends DocNamed {
   /** Its id. */
   id: DocId
-  /** Its French name — its only one since 2026-11-23; the others are its `otherNames` (CMS-495). */
-  name: string | null | undefined
-  /** Its names in the other languages, as the register's table holds them (CMS-495). */
-  otherNames?: unknown
   /** `[lon, lat]`. */
   location: [number, number] | null | undefined
   /** Its Wikidata id. */
@@ -72,6 +74,18 @@ export interface DocSource {
  */
 export function present(text: string | null | undefined): string | null {
   return text === null || text === undefined || text.trim() === '' ? null : text
+}
+
+/**
+ * A record's name in both languages the format carries (CMS-495): its French name, and the English line of its table.
+ * @param record - the record
+ * @param where - what it is, for the error
+ * @returns its name in French and in English
+ * @throws {Error} when it has no French name — the register requires one
+ */
+export function namesOf(record: DocNamed, where: string): LocalizedText {
+  const english = nameForms(record.otherNames).find(({ language }) => language === 'en')
+  return localized({ fr: record.name ?? null, en: english?.form ?? null }, where)
 }
 
 /**
@@ -139,11 +153,9 @@ export function toPlace(place: DocPlace): ContentPlace {
   const [lon, lat] = place.location
   const reversed = orderRefusal(place.existsFrom, place.existsTo)
   if (reversed !== null) throw new Error(`[CMS] ${where}: ${describeDateRefusalFr(reversed)}`)
-  // The English name is the table's line: its home since 2026-11-23 (CMS-495).
-  const english = nameForms(place.otherNames).find(({ language }) => language === 'en')
   return {
     id: String(place.id),
-    name: localized({ fr: place.name ?? null, en: english?.form ?? null }, where),
+    name: namesOf(place, where),
     lon,
     lat,
     wikidata: present(place.wikidata),
