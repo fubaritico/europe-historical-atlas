@@ -1,7 +1,14 @@
 # Les noms de lieux à trier — nom d'époque ou nom actuel ?
 
 > Écrit par le codeur le 22/11/2026, depuis une copie de la base du 21/11 au soir (13 684 lieux), pour CMS-495.
-> Chaque nom de la base a été comparé au nom français que Wikidata donne au même lieu. Rien n'est changé dans la base.
+> Chaque nom de la base a été comparé au nom français que Wikidata donne au même lieu.
+>
+> **Trié par le codeur le 23/11 au soir.** Première liste : **30 noms d'époque**, renommés dans la base — le lieu prend
+> son nom d'aujourd'hui (Ancyre → Ankara), l'ancien nom devient son « Nom d'époque », posé sur sa fiche de 1100, avec une
+> forme anglaise donnée de mémoire, à sourcer (`packages/cms/src/seed/presentNames.ts`, la liste des trente) ; les
+> **102 autres sont des variantes d'écriture**, laissées telles quelles (« Gunthorpe (Nottinghamshire) », « Carrare »,
+> « château d'Eger » : Wikidata précise ou francise, le nom de la base est le bon). Seconde liste : **rien à renommer** —
+> le nom de la base est le nom local d'aujourd'hui (« Castillo de Onda »), l'anglais de Wikidata en est la traduction.
 
 ## Le compte
 
