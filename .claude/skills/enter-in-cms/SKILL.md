@@ -165,10 +165,9 @@ that exists is reused (its id), never created again.
    - **The work at the end of the chain is the source**: a Wikipedia page that cites a book → the book is a source, the
      page another, and the page's `copyOf` names the book — sources that copy one another are one *témoin*.
 2. **The place** (`places`). Search by `wikidata` (the `Q…`), then by `name`.
-   - `name` in French (required; the default locale `fr`, never another), and **`otherNames` with an English line,
+   - `name` in French (required; French alone since 2026-11-23, no locale to choose), and **`otherNames` with an English line,
      required since 2026-11-23** (CMS-495) — the same table as a territory's (step 5): `[{ "language": "en", "form":
-     "Ankara" }]`, Wikidata's English label of today's name; none there, the form a source gives. Never the `en`
-     locale: what is written there is not exported. **A translation is never left empty** (the dev, 2026-11-22): a
+     "Ankara" }]`, Wikidata's English label of today's name; none there, the form a source gives. **A translation is never left empty** (the dev, 2026-11-22): a
      place saved without its English line is refused, an update too — the 159 places Wikidata does not name are in
      `../../../files/plans/contribution/noms-anglais-a-faire.md`, each given its line in the same update.
    - **The place bears its present name; the name it bore at the date is a record of its own** (the dev, 2026-11-21:
@@ -231,7 +230,7 @@ that exists is reused (its id), never created again.
    Enter titles and links **in series, never in parallel** (two creates sent together can both pass). A person holding
    several titles is given the one under which the place lies; a family named as holder is the person at its head in
    1100, the family being his `house`. Our own register (`vassalage.md`) is never a source.
-   - **A territory** (`territories`, « Territoires »): `name` — its French name, the default locale, never another —
+   - **A territory** (`territories`, « Territoires »): `name` — its French name, French alone —
      `kind`, `wikidata`, and **`otherNames` with an English line, required since 2026-11-23** (CMS-495):
      `[{ "language": "en", "form": "County of Champagne" }]`, other languages (`es`, `it`, `de`) optional, French
      never. A territory saved without it is refused (« Le nom en anglais est obligatoire ») — **an update too**, so a

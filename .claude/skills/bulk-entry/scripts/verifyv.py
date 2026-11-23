@@ -16,7 +16,7 @@ BOOKS = ('primary', 'scholarly', 'historian-atlas')
 ok, bad, missing, bad_list = 0, 0, 0, []
 for f in sorted(glob.glob(D + '/enter-v*.json')):
     for r in json.load(open(f)):
-        rows = db.execute('select p.id, (select name from places_locales l where l._parent_id=p.id and l._locale="fr"), p.region_name, '
+        rows = db.execute('select p.id, p.name, p.region_name, '
                           'pp.id, pp.holder_title_id, pp.importance from places p left join place_periods pp on pp.place_id=p.id '
                           'and pp.date_start_year=' + str(YEAR) + ' where p.wikidata=?', (r['q'],)).fetchall()
         if not rows or rows[0][3] is None:

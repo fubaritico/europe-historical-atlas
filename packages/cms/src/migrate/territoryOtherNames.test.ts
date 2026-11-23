@@ -6,6 +6,7 @@ import { sql } from '@payloadcms/db-sqlite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { down, up } from '../migrations/20261122_004948_territory_other_names'
+import { down as plainDown, up as plainUp } from '../migrations/20261123_173436_plain_french_names'
 
 import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-sqlite'
 import type { Payload } from 'payload'
@@ -37,30 +38,26 @@ function rows(query: ReturnType<typeof sql>): Promise<Record<string, unknown>[]>
  * Run one way of the migration inside a transaction, as Payload does.
  * @param way - `up` or `down`
  */
-async function migrate(way: typeof up | typeof down): Promise<void> {
+async function migrate(
+  way: typeof up | typeof down | typeof plainUp | typeof plainDown
+): Promise<void> {
   await payload.db.drizzle.transaction(async (tx) => {
     await way({ db: tx } as unknown as MigrateUpArgs & MigrateDownArgs)
   })
 }
 
 /**
- * Enter a territory in French, then its English name as the language switch stores it.
+ * Enter a territory, as the base holds one today.
  * @param name - its French name
- * @param english - what is typed in English, or `null` for nothing
  * @returns its id
  */
-async function territory(name: string, english: string | null): Promise<number> {
+async function territory(name: string): Promise<number> {
   const created = await payload.create({
     collection: 'territories',
     // English is required since 2026-11-23: the line lets the save pass, and the `down` below drops it with its table.
     data: { name, kind: 'county', otherNames: [{ language: 'en', form: 'Dropped by the down' }] },
     locale: 'fr',
   })
-  if (english !== null) {
-    await payload.db.drizzle.run(
-      sql`INSERT INTO territories_locales (name, _locale, _parent_id) VALUES (${english}, 'en', ${created.id})`
-    )
-  }
   return created.id
 }
 
@@ -72,11 +69,21 @@ beforeAll(async () => {
   const { migrateBase } = await import('./migrateBase')
   payload = await getPayload({ config })
   await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
-  ponthieu = await territory('comté de Ponthieu', ' County of Ponthieu ')
-  blank = await territory('comté de Blois', '   ')
-  frenchOnly = await territory('comté de Nantes', null)
+  ponthieu = await territory('comté de Ponthieu')
+  blank = await territory('comté de Blois')
+  frenchOnly = await territory('comté de Nantes')
   // The base as it was before this migration: the table gone, the names where the language switch put them
+  // The names now French alone (`plain_french_names`) are undone first, then this migration; the English rows the
+  // undoing copied back from the table are replaced by the ones the test is about
+  await migrate(plainDown)
   await migrate(down)
+  await payload.db.drizzle.run(sql`DELETE FROM territories_locales WHERE _locale = 'en'`)
+  await payload.db.drizzle.run(
+    sql`INSERT INTO territories_locales (name, _locale, _parent_id) VALUES (' County of Ponthieu ', 'en', ${ponthieu})`
+  )
+  await payload.db.drizzle.run(
+    sql`INSERT INTO territories_locales (name, _locale, _parent_id) VALUES ('   ', 'en', ${blank})`
+  )
 }, 60_000)
 
 afterAll(async () => {
@@ -94,6 +101,8 @@ describe('territory_other_names', () => {
         await rows(sql`SELECT _order, _parent_id, language, form FROM territories_other_names`)
       ).toEqual([{ _order: 1, _parent_id: ponthieu, language: 'en', form: 'County of Ponthieu' }])
       expect(await rows(sql`SELECT count(*) AS n FROM territories_locales`)).toEqual(before)
+      // The base back to today's schema, for Payload to read it
+      await migrate(plainUp)
     })
 
     it('hands the copied name to Payload as a line of the territory', async () => {
@@ -117,6 +126,7 @@ describe('territory_other_names', () => {
   // L3–L4: N/A — static statements on one schema; what they must not do, lose a name or a territory, is the case below.
   describe('edge cases', () => {
     it('goes down by dropping its own table alone: every territory and every name stays', async () => {
+      await migrate(plainDown)
       await migrate(down)
       expect(
         await rows(
@@ -128,7 +138,8 @@ describe('territory_other_names', () => {
         await rows(
           sql`SELECT name FROM territories_locales WHERE _parent_id = ${ponthieu} AND _locale = 'en'`
         )
-      ).toEqual([{ name: ' County of Ponthieu ' }])
+        // the localized row is the table's line again, trimmed, once `plain_french_names` has run and been undone
+      ).toEqual([{ name: 'County of Ponthieu' }])
     })
   })
 })

@@ -11,7 +11,9 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   colonne fait poser sa question à `migrate:create` (drizzle-kit) — une telle migration s'écrit à la main, prouvée par
   `src/migrate/migrateBase.test.ts` et sur une copie de sa base ; (2) **jamais de DROP TABLE** dans une migration : les
   clés étrangères de sa base sont actives (`PRAGMA foreign_keys` = 1, mesuré), et `PRAGMA foreign_keys=OFF` ne fait rien
-  dans la transaction de Payload — une reconstruction de table efface en cascade (noms, liens d'événements). **La
+  dans la transaction de Payload — une reconstruction de table efface en cascade (noms, liens d'événements). **Le cas
+  sûr** : supprimer une table **enfant** que rien ne référence, comme une table de traductions (`*_locales`) une fois
+  ses lignes recopiées — la suppression ne remonte jamais vers le parent (`plain_french_names`, 23/11). **La
   descente générée en écrit une même pour une simple colonne ajoutée** (`holder_title`, 15/11 : `place_periods`
   reconstruite, ses lignes de source effacées en cascade) — relire chaque `down`, l'écrire à la main en `DROP INDEX`
   puis `DROP COLUMN`, et la prouver sur la copie (`payload migrate:down`) ; (3)
@@ -106,24 +108,15 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
   non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
   un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**
-- **A place's and a territory's English name have two places to be typed, and one is not exported** (2026-11-22,
-  CMS-495, reviews ARCH-001 · QUAL-002; places since 2026-11-23): their names in the other languages live in the table
-  `otherNames`, which the export reads and which requires English, but their field « Nom » is still translatable — an
-  English name typed after switching the page's language is stored and never exported. The fields' descriptions say
-  so; the English rows written before the table were copied into it by the migrations (`territory_other_names`,
-  `place_other_names`), and stay where they were. **Remedy**: make « Nom » a plain French field — not by Drizzle's
-  generated migration, which rebuilds `places` and would cascade onto the sheets (`migrateBase.test.ts` refuses a base
-  that differs from the collections, so the localized table cannot simply be left behind): a hand-written migration
-  that adds the column and keeps the base equal to the collections, proved on a copy. **Severity: worth knowing.**
 - **Under the content language « English », a record with no English row reads « Sans titre » and cannot be found by
   typing** (2026-11-22, CMS-495): the admin reads a translated name in the page's language alone, with no fallback
-  (`cmsConfig`), and search runs in that language. For the places and the territories the English rows were filled on
-  2026-11-23 (13 558 places, 319 territories), but their English now lives in the table `otherNames`, so a record entered
-  since reads « Sans titre » under English; for people, confessions, event types, importance reasons and siege engines
-  nothing is filled yet. **Until the remedy above**: keep the selector on « Français ». **A trap met on the way**: a
-  Local API read handed `req` with another `locale` writes that language into the request — inside a `beforeChange`
-  the save under way then goes on in it (a name typed in English overwrote the French one, caught by a test).
-  **Severity: gênant.**
+  (`cmsConfig`), and search runs in that language. **No longer the places and the territories** — their « Nom » is
+  French alone since 2026-11-23 (`plain_french_names`). Still the people, confessions, event types, importance reasons
+  and siege engines, whose English rows were filled on 2026-11-23 (391 people of 519, every register) but are not
+  required. **Remedy**: the same table, if the dev says yes. **Until then**: keep the selector on « Français ». **A trap
+  met on the way**: a Local API read handed `req` with another `locale` writes that language into the request — inside
+  a `beforeChange` the save under way then goes on in it (a name typed in English overwrote the French one, caught by
+  a test). **Severity: gênant.**
 - **A CMS command run from the `coder` tree reads the base's relative path and makes a new base there** (2026-11-23):
   `DATABASE_URL` in `packages/cms/.env` is relative, so `pnpm migrate` run with `--dir` on the tree built an empty
   base in `.claude/worktrees/coder/packages/cms/` and migrated it, leaving the dev's base as it was — caught by the

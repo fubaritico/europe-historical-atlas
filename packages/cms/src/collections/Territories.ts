@@ -92,11 +92,13 @@ export const Territories: CollectionConfig = {
       type: 'text',
       label: 'Nom',
       required: true,
-      localized: true,
+      // The column's default, which SQLite needs to add a required column to a filled table (migration
+      // `plain_french_names`); never saved — the field is required, and an empty name is refused.
+      defaultValue: '',
       hooks: { beforeValidate: [trimmedText] },
       admin: {
         description:
-          'Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté.',
+          'Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous.',
       },
     },
     {

@@ -26,16 +26,16 @@ personnes) et mes traductions des types d'événement, des raisons d'importance 
 `.backups/`) ; la liste de l'historien, `files/plans/contribution/noms-anglais-a-faire.md`. **Rien n'est poussé
 depuis le 20/11.**
 
-**Ce qui reste, dans l'ordre** : (1) **à lui** : l'anglais obligatoire aussi pour les personnes et les trois petits
-registres, par le même tableau — ma proposition, quatre migrations ; et les fautes de ses libellés de types
+**Ce qui reste, dans l'ordre** : (1) **à lui** : l'anglais obligatoire pour les personnes et les trois petits registres, par
+le même tableau — il a dit « finis », c'est à faire ensuite ; et les fautes de ses libellés de types
 d'événement (« Polithique », « trone », « Conquest » en français) ; (2) le lieu prérempli dans le tiroir du « + » du
 « Nom d'époque », puis le tiroir essayé sur toute sa vie ; (3) la suite d'avant : les quatorze noms d'époque
-d'Anatolie, le tri des 132 et 255 noms (`noms-a-trier.md`), le renommage (Ancyre → Ankara), le contrôle des noms en
-commande, les pays en français. Puis CMS-499 et CARTO-498, en tête d'« À faire ».
+d'Anatolie (de l'historien), le contrôle des noms en commande, les pays en français ; (4) les 364 noms anglais que
+Wikidata ne donne pas, à l'historien (`noms-anglais-a-faire.md`). Puis CMS-499 et CARTO-498, en tête d'« À faire ».
 
-**Le défaut qui reste** (`known-issues/cms.md`) : « Nom » d'un lieu ou d'un territoire est encore traduisible, donc un
-anglais tapé en changeant la langue de la page n'est pas exporté — le rendre français seul demanderait une migration
-écrite à la main sans reconstruire `places`. **Un piège payé le 23/11** : une commande du CMS lancée depuis l'arbre `coder` crée une base neuve
+**« Nom » d'un lieu et d'un territoire est le nom français seul** depuis le 23/11 au soir (migration
+`plain_french_names`) : l'anglais n'existe plus que dans le tableau. **Les 30 noms d'époque** sont posés (Ancyre →
+Ankara, `noms-a-trier.md` trié). **Un piège payé le 23/11** : une commande du CMS lancée depuis l'arbre `coder` crée une base neuve
 (`known-issues/cms.md`).
 
 **Sa 1100 est à lui** (22/11) : il retouche lui-même l'est de l'Anatolie ; `polities.json` et `registry.json` ne sont

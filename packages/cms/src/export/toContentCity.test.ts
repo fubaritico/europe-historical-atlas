@@ -16,7 +16,7 @@ const NO_CHAIN = chainRegister([], [])
 /** Rome, as Payload answers it with every locale. */
 const ROME_PLACE = {
   id: 5,
-  name: { fr: 'Rome', en: 'Rome' },
+  name: 'Rome',
   otherNames: [{ language: 'en', form: 'Rome' }],
   location: [12.48, 41.89] as [number, number],
   wikidata: 'Q220',
@@ -319,15 +319,15 @@ describe('toContentCity', () => {
 
   describe('edge cases', () => {
     it('stops on a place with no French name', () => {
-      const place = { ...ROME_PLACE, name: { fr: '', en: 'Rome' } }
+      const place = { ...ROME_PLACE, name: '' }
       expect(() => toContentCity(rome({ place }), NO_CHAIN)).toThrow('place 5: no French text')
     })
 
     // CMS-495: the table is the English name's home since 2026-11-23; a row typed through the language switch is not.
-    it('writes the English name of the table, never the localized English row', () => {
+    it('writes the French name of the place and the English name of its table', () => {
       const place = {
         ...ROME_PLACE,
-        name: { fr: 'Ankara', en: 'Ancyra' },
+        name: 'Ankara',
         otherNames: [{ language: 'en', form: 'Ankara' }],
       }
       expect(toContentCity(rome({ place }), NO_CHAIN).place.name).toEqual({

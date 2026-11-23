@@ -414,3 +414,15 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   model is brought to 0.44 of the icon's unit (`meshes/iconModel`, `MODEL_TALL`), while its halo, its flat drawing's
   middle and its place before a city's name are still told from `ICON_SIZE`. Judged as it is on the map. **Remedy**:
   ATLAS-469, every model fitted in one box. **Severity: cosmétique.**
+
+- **A place's and a territory's English name have two places to be typed, and one is not exported** (2026-11-22,
+  CMS-495, reviews ARCH-001 · QUAL-002; places since 2026-11-23): their names in the other languages live in the table
+  `otherNames`, which the export reads and which requires English, but their field « Nom » is still translatable — an
+  English name typed after switching the page's language is stored and never exported. The fields' descriptions say
+  so; the English rows written before the table were copied into it by the migrations (`territory_other_names`,
+  `place_other_names`), and stay where they were. **Remedy**: make « Nom » a plain French field — not by Drizzle's
+  generated migration, which rebuilds `places` and would cascade onto the sheets (`migrateBase.test.ts` refuses a base
+  that differs from the collections, so the localized table cannot simply be left behind): a hand-written migration
+  that adds the column and keeps the base equal to the collections, proved on a copy. **Severity: worth knowing.**
+  **Closed 2026-11-23**: « Nom » is French alone, the two tables of translations dropped by the migration
+  `plain_french_names` (hand-written: column added, names copied, then the tables dropped; proved on a copy).

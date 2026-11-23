@@ -20,7 +20,7 @@ const SIEGE = {
 }
 const JERUSALEM = {
   id: 2,
-  name: { fr: 'Jérusalem', en: 'Jerusalem' },
+  name: 'Jérusalem',
   otherNames: [{ language: 'en', form: 'Jerusalem' }],
   location: [35.2137, 31.7683] as [number, number],
   wikidata: 'Q1218',
@@ -79,7 +79,7 @@ const ROME_1100: DocCitySheet = {
   id: 1,
   place: {
     id: 5,
-    name: { fr: 'Rome', en: 'Rome' },
+    name: 'Rome',
     otherNames: [{ language: 'en', form: 'Rome' }],
     location: [12.48, 41.89],
     wikidata: 'Q220',

@@ -7,20 +7,18 @@
  * A city at a date, with the holder its sources name.
  * @typedef {object} City
  * @property {number} id - the place-period's id in the CMS
- * @property {string} name - its French name, or its English one, or `#<id>`
+ * @property {string} name - its French name — a place's only one since 2026-11-23 (CMS-495)
  * @property {import('./geo.mjs').LonLat} at - longitude and latitude
  * @property {string | null} holderName - the holder as entered, or `null` when none was entered
  * @property {string | null} holderQid - the holder's Wikidata id, or `null`
  */
 
-/** The query: every place-period whose dates cover the year, with its place's position and names. */
+/** The query: every place-period whose dates cover the year, with its place's position and French name. */
 export const CITIES_OF_A_YEAR = `
   select pp.id as id, p.location as location, pp.holder_name as holderName, pp.holder_qid as holderQid,
-         fr.name as nameFr, en.name as nameEn
+         p.name as name
   from place_periods pp
   join places p on p.id = pp.place_id
-  left join places_locales fr on fr._parent_id = p.id and fr._locale = 'fr'
-  left join places_locales en on en._parent_id = p.id and en._locale = 'en'
   where pp.date_start_year <= :year and (pp.date_end_year is null or pp.date_end_year >= :year)`
 
 /**
@@ -36,7 +34,7 @@ export function citiesFromRows(rows) {
         throw new Error(`place-period ${row.id}: its place has no point`)
       return {
         id: Number(row.id),
-        name: String(row.nameFr ?? row.nameEn ?? `#${row.id}`),
+        name: String(row.name),
         at: /** @type {const} */ ([location.coordinates[0], location.coordinates[1]]),
         holderName: row.holderName === null ? null : String(row.holderName),
         holderQid: row.holderQid === null ? null : String(row.holderQid),

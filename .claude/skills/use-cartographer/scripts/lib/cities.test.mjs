@@ -6,21 +6,18 @@ import { CITIES_OF_A_YEAR, citiesFromRows, inBox, readCities } from './cities.mj
 import { findCmsDb, openReadOnly, REPO_ROOT } from './system.mjs'
 
 /**
- * A base with the four tables the query reads, as Payload names them, and three periods: one covering 1100, one open
+ * A base with the tables the query reads, as Payload names them, and three periods: one covering 1100, one open
  * since 1094, one ended in 1099.
  * @returns {DatabaseSync} the base, in memory
  */
 function memoryBase() {
   const db = new DatabaseSync(':memory:')
   db.exec(`
-    create table places (id integer primary key, location text not null);
-    create table places_locales (id integer primary key, name text not null, _locale text not null, _parent_id integer not null);
+    create table places (id integer primary key, name text not null, location text not null);
     create table place_periods (id integer primary key, place_id integer not null, date_start_year numeric not null,
       date_end_year numeric, holder_name text, holder_qid text);
-    insert into places values (1, '{"type":"Point","coordinates":[-0.376,39.47]}'),
-      (2, '{"type":"Point","coordinates":[-0.435,39.15]}'), (3, '{"type":"Point","coordinates":[0,40]}');
-    insert into places_locales values (1, 'Valence', 'fr', 1), (2, 'Valencia', 'en', 1), (3, 'Alzira', 'fr', 2),
-      (4, 'Gone', 'fr', 3);
+    insert into places values (1, 'Valence', '{"type":"Point","coordinates":[-0.376,39.47]}'),
+      (2, 'Alzira', '{"type":"Point","coordinates":[-0.435,39.15]}'), (3, 'Gone', '{"type":"Point","coordinates":[0,40]}');
     insert into place_periods values (10, 1, 1094, null, 'Seigneurie de Valence', 'Q15714699'),
       (11, 2, 1090, 1110, 'Empire almoravide', 'Q75613'), (12, 3, 1050, 1099, null, null);
   `)
@@ -58,13 +55,11 @@ describe('citiesFromRows', () => {
     location: '{"type":"Point","coordinates":[-0.376,39.47]}',
     holderName: 'Seigneurie',
     holderQid: 'Q15714699',
-    nameFr: 'Valence',
-    nameEn: 'Valencia',
+    name: 'Valence',
   }
 
-  it('falls to the English name, then to the id', () => {
-    assert.equal(citiesFromRows([{ ...row, nameFr: null }])[0].name, 'Valencia')
-    assert.equal(citiesFromRows([{ ...row, nameFr: null, nameEn: null }])[0].name, '#7')
+  it('names a city by its place’s French name', () => {
+    assert.equal(citiesFromRows([row])[0].name, 'Valence')
   })
 
   it('refuses a place with no point', () => {

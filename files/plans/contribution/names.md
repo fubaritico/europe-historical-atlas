@@ -150,7 +150,8 @@ commit the files: the coder still does.
   required English localized row would have broken the creation of a place, his and the historian's (the MCP's tools
   take one locale a call — plugin-mcp 3.92, `tools/resource/create.js`). One shared field (`fields/otherNames.ts`); the
   migration `place_other_names` copies the 13 558 English rows into it (proved on a copy, up and down, the export
-  identical name for name); the export reads a place's English name from the table. « Nom » stays translatable: making
-  it plain French would rebuild `places` and cascade — `known-issues/cms.md`.
+  identical name for name); the export reads a place's English name from the table. « Nom » is French alone since the same evening (the dev: _"finish it"_): the migration `plain_french_names` adds the
+  column, copies each French name, then drops the two tables of translations — nothing points at them, nothing
+  cascades, their English rows already in the tables of other names; proved on a copy, up and down.
 - **By me, to be kept or lifted by him**: the same rule extended to the five other collections whose name is translated
   (people, confessions, event types, importance reasons, siege engines).

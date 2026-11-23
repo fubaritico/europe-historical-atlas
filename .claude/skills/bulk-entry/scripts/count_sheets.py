@@ -36,7 +36,7 @@ WEST, SOUTH, EAST, NORTH = (float(a) for a in args[1:])
 db = sqlite3.connect('file:%s?mode=ro' % (ROOT / 'packages/cms/cms.db'), uri=True)
 names = {}
 try:
-    for parent, name in db.execute("select _parent_id, name from places_locales where _locale = 'fr'"):
+    for parent, name in db.execute("select id, name from places"):
         names[parent] = name
 except sqlite3.Error as error:  # the names are a comfort of --list; the counts do not need them
     print('noms des lieux illisibles (%s) : la liste donnera les identifiants' % error)

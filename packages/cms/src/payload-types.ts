@@ -227,7 +227,7 @@ export interface EventType {
 export interface Place {
   id: number;
   /**
-   * Le nom français d’aujourd’hui. Le nom dans les autres langues se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté. Le nom porté à une date est un « Nom d’époque ».
+   * Le nom français d’aujourd’hui. Le nom dans les autres langues se saisit dans le tableau ci-dessous. Le nom porté à une date est un « Nom d’époque ».
    */
   name: string;
   /**
@@ -736,7 +736,7 @@ export interface Title {
 export interface Territory {
   id: number;
   /**
-   * Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté.
+   * Le nom français du territoire. Son nom dans les autres langues, l’anglais compris, se saisit dans le tableau ci-dessous.
    */
   name: string;
   /**
