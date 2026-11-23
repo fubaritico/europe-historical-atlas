@@ -101,6 +101,9 @@ atlas-historien/
 │   ├── index.md              every work: author, title, what it covers (regions, centuries), the researches it served
 │   └── <work>/               fiche.md · texte.txt · livre.pdf · pages/p-<n>.png — fetched straight here
 ├── lieux/                    REUSABLE — per place, the dated sentences read before 2026-11-23 (primings, never proofs)
+├── bibliotheque.md           the works on the project's disk and his paper atlases: what each covers, its licence
+├── outils/                   py (runs a script with the libraries) · python/ (pypdf, pillow… — pip --target, exFAT has no venv)
+├── cartes/<year>/            my copies of a map before I draw on it, kept until his word
 └── <year>/<zone>/            ONE RESEARCH
     ├── fiche.md              what was asked, when, where it stands, what is left
     ├── donne/                what the dev gave, numbered

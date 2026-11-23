@@ -1,3 +1,5 @@
+> **Since the evening of 2026-11-23 every path of a research is on the archive disk** (`/Volumes/Acer/atlas-historien/`, `SKILL.md`, « The archive »): an older path below to `files/resources/historien/`, `files/plans/sources/` or the scratchpad is read as its place there.
+>
 > The rules of `/find-sources` in full, as they stood on 2026-11-23 before the skill was cut down to its orders: every rule with its reason and the dev's words. `SKILL.md` gives the orders; this file is read by section when a step is unclear. Where the two differ, `SKILL.md` wins.
 
 
@@ -68,7 +70,7 @@ entry point of a reading.
      precisely means the context is not finished. `prepare.py` asks for
      the section while the note has no dated lines in it. A research is never
      started on the year alone.
-   3. Give him the journal's command: `tail -f files/resources/historien/journal.log`.
+   3. Give him the journal's command: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
    4. **Check the constraints against the task**: reread « The obligation » and « The frame »; a constraint that
       contradicts the request, another constraint or `/enter-in-cms` is said to him **before** starting, never
       settled alone.
@@ -88,7 +90,7 @@ entry point of a reading.
     that kept the register and the dated extracts). **What stays is the result only**: the base, and the region's
     note in git (holders, chain, contrary readings, index references, cities met, the attempts counted, each work
     with its pages). **Everything else goes**: the downloaded pages, texts and PDFs, the pages cut out of an atlas,
-    the lot folders and entry files, the register and extracts of the region, the Python environment, the scratchpad.
+    the lot folders and entry files, the register and extracts of the region, the Python environment — all on the archive since 2026-11-23.
     Before deleting: the note holds every count and reference (read it back), `weak.json` and `pending.json` are empty
     or decided, the blocked cases are on their page. The list of what goes, with its size, is shown to him and **the
     deletion is asked of him each time** — a `rm -rf` is never mine to decide. Nothing of his is touched: his PDFs,
@@ -123,7 +125,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   him again): a place whose existence no work read attests is still entered on its dated Wikipedia sentence, listed
   in the region's note as _existence to read_ with its attempts counted — it is not refused, unlike a holder.
 - **Every attempt is written down, the empty ones too**: one line per try in
-  `files/resources/historien/registre/attempts.jsonl` — the date, the place or district, the hypothesis, the library or
+  `/Volumes/Acer/atlas-historien/registre/attempts.jsonl` — the date, the place or district, the hypothesis, the library or
   the book (title, index entry, pages), its `degree` (0, 1 or 2 — step 7), the words searched, the result (`found`,
   `nothing`, `refused`, `not available`, `not relevant` with its `reason`). The fields are `region_gate.py`'s.
 - **A holder with a single witness is accepted only with its attempts beside it**: the works the Wikipedia pages cite,
@@ -131,7 +133,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   tried and logged. Their count goes in the report and in the region's note. Which count is enough is not decided: the
   log is shown, he judges.
 - **Everything is said in the journal as it happens** (the dev, 2026-11-23: _"I want logs — I am checking, I found
-  this, I do that, the date"_): `files/resources/historien/journal.log`, which he follows with `tail -f`. One dated
+  this, I do that, the date"_): `/Volumes/Acer/atlas-historien/journal.log`, which he follows with `tail -f`. One dated
   French line before each source opened, after each thing found, at each decision —
   `python3 -I .claude/skills/bulk-entry/scripts/log.py say "…"`; an attempt is recorded **only** by
   `log.py attempt '<json>'`, which writes the register and the journal together. A script that fetches or reads logs
@@ -176,7 +178,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   fallback on Wikipedia or on the map. He suggests a book, a map, a lead; the case starts again from it.
   **The work is by cases, so the valid cases go on** (the dev, same day: _"you have valid cases — bring me back
   something readable, for pity's sake readable, with simple questions, so that I can answer"_). The blocked cases come
-  back together in one French page, `files/resources/historien/<year>/<region>/besoin-de-toi.md`, opened for him
+  back together in one French page, `/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/besoin-de-toi.md`, opened for him
   (never a JSON, never a path alone): **one block per case, four lines at most** — the place and the date; what is
   not known, in one sentence; what was tried, in one line with the count; **one simple question**, answerable by a
   word, a choice between named readings, or a title to give. No table, no jargon, no second question in a block.
@@ -215,8 +217,8 @@ Every step is said in the journal as it happens. The detail of each is below.
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
    list the works its footnotes cite; those works are what the next steps look for.
 3. **The atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
-   one's status and licence: `/Volumes/Acer/atlas-historien/bibliotheque.md`). Extract their text into the scratchpad once per
-   session (`pypdf` in a scratchpad venv; Read cannot render single pages without poppler, so split a scan into
+   one's status and licence: `/Volumes/Acer/atlas-historien/bibliotheque.md`). Extract their text into the research's `travail/` on the archive
+   (`pypdf`, run by `/Volumes/Acer/atlas-historien/outils/py`; Read cannot render single pages without poppler, so split a scan into
    four-page PDFs and read each whole), search it for every name of the place, read the map's legend and date on the
    page image. Kind `historian-atlas`. **An atlas in copyright is a reference**: its facts are cited, its plates never
    traced (Shepherd 1911 and the 1909 _Atlas of European History_ are public domain). Forgotten on 07/11 until the dev
@@ -244,7 +246,7 @@ Every step is said in the journal as it happens. The detail of each is below.
    The region chooses the first stop: Spain → Dialnet, IFC, RACO; France → Persée, Gallica; the Empire → dMGH,
    Regesta Imperii (regesta-imperii.de, in the browser).
 
-5. **Read the passage, not the abstract.** Download the text into its own folder of the scratchpad (`<theme>/<lot>/`),
+5. **Read the passage, not the abstract.** Download the text into the work's folder of the archive (`ouvrages/<work>/`),
    search it for every name of the place, read the paragraphs around each hit, copy the sentence. A book read by OCR:
    look at the page image before keeping a quotation whose letters are doubtful.
 6. **Climb from the books too, not only from Wikipedia** (the dev, 2026-11-08: _"there is always an index at the end of
@@ -297,7 +299,7 @@ copy is deleted at the end of the run: the disk is lent (`.claude/roles/historia
 
 ## What comes back, per place
 
-One block per place, in the lot's report (`scratchpad/<theme>/reports/<lot>.md`), in English:
+One block per place, in the lot's report (`<year>/<zone>/travail/<lot>/report.md` on the archive), in English:
 
 ```
 ## <place> — <date>

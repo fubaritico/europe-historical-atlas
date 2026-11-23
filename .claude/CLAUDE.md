@@ -109,7 +109,9 @@ When the dev proposes something:
 - **Always ask** the dev to run `pnpm dev` (Vite server) after changing the 3D rendering.
 - **Knowledge base — one home per kind of fact** (the dev's call, 2026-10-17). This project's decisions go in
   its plans and `.claude/*.md`; the tasks on the Jira board (`/jira`, since 2026-11-20; Trello before); how to work with the dev in the file
-  memory. **Basic Memory is the knowledge graph that crosses projects**: a tooling trap, a code pattern, a
+  memory; **the historian's research — readings, works, notes, journal, its tools — on the external disk
+  `/Volumes/Acer/atlas-historien/`, its only home** (the dev, 2026-11-23: allocated, not given; nothing of it on the
+  Mac, nothing in the repository; `/find-sources`, « The archive »). **Basic Memory is the knowledge graph that crosses projects**: a tooling trap, a code pattern, a
   method that would serve in another repository — feed it as such a lesson is learned, in the `main` project's
   `patterns/` folder, linked from `Cross-project engineering patterns — index`. Use the CLI when the MCP is not
   loaded: `basic-memory tool search-notes|write-note|edit-note … --project main`; search before writing.

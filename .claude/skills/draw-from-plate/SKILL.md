@@ -33,8 +33,9 @@ not traced here: it is read, and the polity drawn by hand. `years/1100/` is trac
 ## Setup (once per session)
 
 ```bash
-S=<scratchpad>; python3 -m venv $S/venv && $S/venv/bin/pip install -q pillow numpy scipy scikit-image shapely
-K=.claude/skills/draw-from-plate/scripts   # every script below is run with $S/venv/bin/python
+# the historian's tools live on the archive disk, never on the Mac (/find-sources, « The archive »)
+O=/Volumes/Acer/atlas-historien/outils; python3 -m pip install -q --target $O/python numpy scipy scikit-image shapely
+K=.claude/skills/draw-from-plate/scripts   # every script below is run with $O/py <script> (pillow is there already)
 ```
 
 - **Plates**: `files/resources/euratlas/plates/plates.json` (gitignored), one entry per screenshot — image,

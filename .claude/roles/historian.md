@@ -65,10 +65,13 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   allocated, it stays tidy and readable by a person, every folder with its `fiche.md`; nothing of his on it is touched
   (`ATLAS-BOOKS/`, the PDFs at its root); nothing is deleted without his word; it is never filled for nothing — Wikipedia
   pages are not kept. **Absent → DISQUE ABSENT**, and the research stops.
-- **The internal disk holds no research** (the dev, 2026-11-18: _"the hard disk does not belong to you […] it must stay
-  tidy, never cluttered or saturated"_ — lived that day: 22 folders flat, 7.7 GB, his disk 95 % full). Only
-  `files/resources/historien/outils/` (local launchers) stays there; the method's scripts are versioned in the skill
-  `/bulk-entry`. Nothing of the dev's (atlases, design, fonts) is moved by me.
+- **Nothing of mine stays on the Mac's disk** (the dev, 2026-11-23: _"you keep nothing on the Mac's disk"_; and
+  2026-11-18: _"the hard disk does not belong to you"_ — lived that day: 22 folders flat, 7.7 GB, his disk 95 % full).
+  No research, no download, no working file, no Python library, no copy of a map before I draw: all on Acer — the
+  libraries in `outils/python/`, run by `outils/py <script>` (the disk is exFAT: no venv); my map copies in
+  `cartes/<year>/`. **Not even the session's scratchpad**: a research works in its `travail/`. What stays in the
+  repository is only what is versioned: the method's scripts (the skill `/bulk-entry`), the skills, this page.
+  Nothing of the dev's (atlases, design, fonts) is moved by me.
 - **Its tree is `historian`** (`.claude/worktrees/historian`), synced with `main` whenever `main` moves.
 - **Its resume point is `.claude/next-historian.md`**, read in addition to `next.md`, written by `/end-session` in this
   role.

@@ -66,7 +66,8 @@ the journal and `registre/attempts.jsonl` at its root, and a run's lots under it
     — the time of the run only: what serves again is filed by archive.py, the rest emptied on the dev's word
 ```
 
-The internal disk keeps only `files/resources/historien/outils/` (local launchers); nothing of the dev's is moved.
+Nothing of a run is on the Mac's disk, not even the session's scratchpad; the Python libraries are on the archive
+(`outils/py <script>`, `/find-sources`, « The archive »); nothing of the dev's is moved.
 
 ## The ten steps
 

@@ -15,8 +15,11 @@ de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) resten
 pas à moi — et leur unique source de vérité. Le journal se suit par `tail -f /Volumes/Acer/atlas-historien/journal.log`.
 Fait : l'ancien matériel de 1100 y est copié et vérifié (13 409 fichiers), le journal, les essais et mes deux listes de
 1100 y sont déplacés, tous les scripts y pointent (`archive.py`, `count_sheets.py`, `find_book.py` nouveaux).
-**Reste sur le disque interne, en attente de sa commande** (la suppression m'est refusée) : `files/resources/historien/`
-`1100/`, `extraits/`, `registre/reads.jsonl` — 744 Mo, tous copiés sur Acer. **L'Anatolie** : contexte 1071–1101 écrit
+**Sa décision suivante, le même soir : rien de moi sur le disque du Mac** — ni recherche, ni dossier temporaire de
+session, ni bibliothèque Python (`outils/py` sur Acer), ni copie de carte (`cartes/1100/` sur Acer) ; les notes ont
+quitté le dépôt (`c6704ad7`). **Reste sur le Mac, copié et vérifié sur Acer, la mise à la Corbeille m'étant refusée**
+(par le contrôleur, pas par lui) : `files/resources/historien/` (744 Mo) et `packages/atlas/public/years/1100.before-claude-*`
+(trois copies de sa carte). **L'Anatolie** : contexte 1071–1101 écrit
 (`/Volumes/Acer/atlas-historien/1100/anatolie/resultats/note-de-region.md`, non commitée), 138 fiches comptées ; la suite est la confrontation fiche par fiche.
 
 ## ▶ ON REPREND ICI — 23/11, 14 h 18 : la méthode de recherche refaite et commitée ; aucune recherche lancée
@@ -72,7 +75,7 @@ Castille. **Sans toucher la carte.**
 **Non commité, exprès** : `packages/atlas/public/years/1100/polities.json` et `registry.json` — mon dessin de l'est de
 l'Anatolie, **qu'il a refusé** (_« c'est juste calamiteux comment c'est dessiné »_, _« je t'avais dit de t'appliquer »_).
 **Sa 1100 est à lui** : il la retouche lui-même, peut-être depuis la carte d'Armenica ; je ne la commite pas, je n'y
-dessine plus, je ne la restaure pas non plus sans son mot. Le retour arrière : `years/1100.before-claude-2026-11-22`
+dessine plus, je ne la restaure pas non plus sans son mot. Le retour arrière : `years/1100.before-claude-2026-11-22`, copié le 23/11 dans `/Volumes/Acer/atlas-historien/cartes/1100/`
 (ignorée par git, gardée jusqu'à son mot). **Non commités aussi, à moi** : ce fichier et
 `.claude/skills/use-cartographer/references/decide.md` — à commiter quand il le dit.
 
@@ -191,7 +194,7 @@ _« comment on peut faire une zone partiellement assurée »_.
   datée sur leur page) ; les titres de Ridwan d'Alep, Duqaq de Damas, des Munqidhites de Shaizar à créer.
 
 **Dessiner dans le Cartographe** : dans l'arbre principal (sa décision, 19/11), sur son serveur une fois qu'il a fermé la
-carte, accordé avec le codeur (un seul auteur par carte) ; copier la carte avant (`years/<carte>.before-claude-<date>`),
+carte, accordé avec le codeur (un seul auteur par carte) ; copier la carte avant, **sur Acer** (`/Volumes/Acer/atlas-historien/cartes/<année>/<carte>.before-claude-<date>/`, sa règle du 23/11 : rien de moi sur le Mac),
 la supprimer après sa validation.
 
 ## Les cartes — l'épique CARTO-400 (les vingt cartes de base)
@@ -213,7 +216,8 @@ jamais commité.
 `convert.ts`), puis les six passes de `/use-cartographer` (« The order of work »). **Le chef d'orchestre des passes**
 est `files/maps/pipeline/plan.mjs` + `plan.sh` dans le worktree (git-ignorés) — **une dette** : à faire entrer dans la
 skill, avec ses tests. Les plans et registres de chaque année : `files/maps/<année>/` du worktree. Il faut recréer à
-chaque session : un venv Python avec `shapely`, `pypdf`, `pillow` dans le scratchpad, et la base de Cliopatria
+chaque session : les bibliothèques Python `shapely`, `pypdf`, `pillow` dans `/Volumes/Acer/atlas-historien/outils/python/`
+(une fois, `pip install --target`, lancées par `outils/py`), et la base de Cliopatria
 dézippée depuis `opensrc/repos/github.com/Seshat-Global-History-Databank/cliopatria/cliopatria.geojson.zip`.
 
 **1700 et après** : OpenHistoricalMap (CC0), `files/spikes/fetch-ohm/fetch-ohm.mjs` — pas encore au format d'une année

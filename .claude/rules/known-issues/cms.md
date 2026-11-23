@@ -40,7 +40,7 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
 - **Lancer le CMS depuis une session Claude** (17/11, l'historien) : le contrôleur de permissions refuse `pnpm dev:cms`
   tant que l'ordre du dev n'est pas écrit en toutes lettres dans la conversation (deux refus ; une note de reprise ne
   suffit pas) ; une fois accepté, une tâche de fond est tuée (SIGTERM, code 143) à la fin de l'appel, le serveur déjà prêt.
-  Seul un lancement **détaché** tient (`setsid` par perl, `nohup`, `files/resources/historien/outils/start-cms.sh`, journal dans le dossier
+  Seul un lancement **détaché** tient (`setsid` par perl, `nohup`, `/Volumes/Acer/atlas-historien/outils/start-cms.sh` depuis le 23/11, journal dans le dossier
   temporaire). Le même soir, le codeur note que le dev a coupé trois fois son serveur parce que la session de
   l'historien le relançait : deux sessions ne lancent jamais le CMS chacune de leur côté. **Remède** : il le lance
   lui-même, ou il en donne l'ordre en toutes lettres ; je dis au premier refus d'où il vient. **Sévérité : à savoir.**
@@ -80,7 +80,7 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
     Toulouse|comtes de Toulouse]] », « {{s-|XI|e}} » — les agents de l'historien ont copié le texte source de Wikipédia.
     Un lecteur ne retrouve pas la phrase, et le passage surligné (CMS-441) ne peut pas la trouver. **Le dev : bloquant, à
     corriger maintenant.** Remède en cours : la phrase de la page, produite par l'analyseur de Wikipédia et vérifiée sur la
-    page (`files/resources/historien/1100/chaines/chains-1100-verify/render_quotes.py`), appliquée d'un coup par le codeur sur une copie de la base ;
+    page (`/Volumes/Acer/atlas-historien/1100/toutes-zones/recherches/avant-2026-11-23/chaines/chains-1100-verify/render_quotes.py`), appliquée d'un coup par le codeur sur une copie de la base ;
     et les agents citent désormais la page lue, jamais son code. **Sévérité : bloquant.**
 - **Une mise à jour groupée (`where`) est faite en parallèle par Payload** (3.92, `operations/update.js:324`) : si la
   liste tient les deux bouts d'un même maillon, le crochet qui rafraîchit les maillons dépendants le réécrit deux fois à la

@@ -28,7 +28,8 @@ The figure at the bottom of VueScan (« 19.6 MB ») is the raw image while scann
 
 ## After — by me
 
-1. Count the pages and the text per page (`pypdf` in a scratchpad venv); a page with no text is looked at.
+1. Count the pages and the text per page (`pypdf`, run by `/Volumes/Acer/atlas-historien/outils/py`); a page with
+   no text is looked at. Every file of the work goes to the archive, `ouvrages/<work>/`, never the Mac's disk.
 2. Find the index pages, and the legend; note the atlas in `/Volumes/Acer/atlas-historien/bibliotheque.md` (title, edition,
    translator, year, licence: public domain → calque, in copyright → reference).
 3. Its index is then read as any other (`SKILL.md`, step 7); its plates, as verification layers
