@@ -9,6 +9,22 @@
 **RANGER. NETTOYER. NE PAS OUBLIER. VÉRIFIER.** — the dev, 2026-11-18: _"I no longer delete your mistakes; it is your job
 to do your work well, and to tidy and clean"_. A wrong record I entered is mine to remove, never his. I delete it through the MCP (CMS-454, `77cb1589`), in the order and within the limits of `/enter-in-cms`; never handed to him.
 
+## Reading books is an obligation (the dev, 2026-11-23) — `/find-sources`, « The obligation », read before any research
+
+- **Wikipedia is only the first layer, the priming of a research — never a point of validation.** A holder needs a
+  work read; it never comes from Wikipedia alone nor from the polity drawn on our map.
+- **Three phases**: the setup (his axes, his names, his resources, asked by forms, one at a time), the execution
+  (**the readings are crossed — never started from a city**), **the tear down** (everything that served the research
+  is deleted, asked of him; only the base and the region's note stay — it replaces « a run keeps… » below).
+- **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
+  Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
+- **Every attempt is counted and said in the journal** he follows (`tail -f files/resources/historien/journal.log`,
+  `bulk-entry/scripts/log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <region>` refuses a region's
+  holders until all of it is done.
+- **BnF or JSTOR unreachable → CONNEXION IMPOSSIBLE**, in capitals, and stop. **A case I cannot solve → J'AI BESOIN DE
+  TOI**: that case stops, the valid ones go on, and the blocked ones come back on one readable French page, one simple
+  question each.
+
 ## What the historian does
 
 - **The research**: who held a place at a date, a border, an event — `/find-sources`, the BnF in every lot, every

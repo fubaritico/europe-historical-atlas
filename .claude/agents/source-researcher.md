@@ -37,12 +37,31 @@ Read `REGION` once, then `ROOT/lots/<LOT>.json` once. Nothing else is needed to 
   earlier and not ended before. A single event at another date is not a reading of `YEAR`; it goes in `note`, unless it
   corroborates the holding (then it is kept, and `note` says why).
 - **A divergence is kept**: name the most probable reading, keep the other in `divergence` with its witness.
-- **Witnesses, not pages**: a Wikipedia page and the book it cites are one witness. A claim on Wikipedia alone is
-  `fragile: true`.
+- **Witnesses, not pages**: a Wikipedia page and the book it cites are one witness. A holder on Wikipedia alone is no
+  holder: `holder: null`, `fragile: true`, its works to read listed (below).
 - **The lead is a machine's guess** (`firstMentionLead`): anniversaries, population counts, page numbers and charter
   numbers are often taken for years. Check it; `leadWasRight` says whether it named a real attestation.
 - **Check each name against its QID** on Wikidata (`https://www.wikidata.org/wiki/Special:EntityData/<QID>.json`): an
   input name can be wrong or empty.
+
+## Reading books is an obligation — and every attempt is counted (the dev, 2026-11-23)
+
+- **Wikipedia is only the first layer, the priming of a research — never a point of validation.**
+- **The map is never a base to verify against**: `mapHolder1100` is copied into `mapPolity` and compared at the very
+  end, nothing more — never a hypothesis favoured, never a holder by default, never a reason to stop reading.
+- **Climb one to two degrees from the first works**, when they can be had: a work cited by Wikipedia is degree 0, a
+  work its notes or index point to is degree 1, the next is degree 2. Each attempt carries its `degree`.
+- **A holder is never kept on Wikipedia alone.** Wikipedia gives the works to read: list what its pages cite for the
+  district, fetch those works, read their passage, then their notes, bibliography and index for the next works.
+- **Log every attempt, the empty ones too**, in `ROOT/work/<LOT>/attempts.jsonl`: district or place, hypothesis, library
+  or book (title, index entry, pages), words searched, result (`found`, `nothing`, `refused`, `not available`).
+- **A holder with one witness** is reported with the count of its attempts; a holder with no work read is
+  `holder: null`, `fragile: true`, and its works to read are listed — never a guess, never the map's polity.
+- **What you cannot find** — no work read for a district after every channel open to you — is never filled: the
+  `.md` opens with a section « J'AI BESOIN DE TOI » listing each such question, what was tried and what is missing; the
+  historian stops on it and asks the dev.
+- **What you cannot open** (the BnF, Gallica, JSTOR, HathiTrust) is listed by exact title and page in the `.md`, under
+  « to read in the browser »: the historian reads it there. It is an attempt `not available`, not a skipped step.
 
 ## Few round trips — every turn re-sends all you have read
 
@@ -54,8 +73,9 @@ The cost of a lot is the number of turns times what is in your context. So:
   passages that matter (the place's names in every language, the county, the years) with a few lines around each, and
   writes them to `ROOT/work/<LOT>/passages.txt`. Read that, not the source. Cap every printed output (`head -c`).
 - **The district before the places**: most places of a county share a holder. Look first in the earlier reports —
-  `grep` `ROOT/reports/*.json` for the county's name — and reuse their witnesses: copy the source file into your
-  folder and their quotation as it stands. Search anew only what no earlier lot established.
+  `grep` `ROOT/reports/*.json` for the county's name — and reuse their witnesses **of kind `primary`, `scholarly` or
+  `historian-atlas` only** (a report written before 2026-11-23 often rests on Wikipedia: never carry that on): copy
+  the source file into your folder and their quotation as it stands. Search anew only what no earlier lot established.
 - **One build script writes the report**: `ROOT/work/<LOT>/build.py` holds the data, checks every `quote` as a
   substring of its file (whitespace normalised) and **stops** if one is missing, then writes the `.json` and the `.md`.
   Fix and re-run it; never write the report by hand.
@@ -103,8 +123,8 @@ file, no browser, no other agent. **Whatever blocks, carry on** with the rest of
 
 (`existed1100` keeps its name whatever `YEAR` is. `mapPolity` is **copied from the input's `mapHolder1100`**, never your
 reading — `agreesWithMap` compares the two; the ks-01 test of 2026-11-13 wrote its own holder there.) **Add a county seat** not in your lot and attested by `YEAR` as an
-extra place, its QID read on Wikidata. Say when the sources **disagree with the map** (`mapHolder1100` in the input):
-it is the most useful thing you bring.
+extra place, its QID read on Wikidata. `agreesWithMap` is filled last, from `mapHolder1100`, once the reading is
+written — it never changes a reading.
 
 The `.md` gives one short block per place, then: hypotheses searched and how far, what could not be read (to read in the
 browser), the places that contradict the map.

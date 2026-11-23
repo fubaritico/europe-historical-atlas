@@ -1,12 +1,34 @@
-"""Lot V: names (fr, de), country, region (the CMS rule) by QLever, and the polity drawn under each point with its 1100
-holder title (titlemap rule). -> meta.json {q: {...}}"""
+"""Lot V: names (fr, de), country, region (the CMS rule) by QLever -> meta.json {q: {...}}.
+
+The holder is never the polity drawn under the point (the dev, 2026-11-23: the map is not a base to verify against).
+It comes only from <lot>/holders.json, written from the region's note once its books are read:
+  {q: {"holderTitle": <id in titles>, "sourceUrl" or "sourceTitle": ..., "where": ..., "quote": ...}}
+When that file exists the region is named (third argument) and region_gate.py must open it; a place absent from the
+file is entered without a holder. Usage: python3 -I meta.py <lot folder> <year> [<region>]"""
 import json, os, sys, subprocess, time, urllib.parse, urllib.request, collections, sqlite3
 ROOT = '/Users/stephanecottereau/Desktop/WebstormProjects/europe-map'
 NODE = '/Users/stephanecottereau/.nvm/versions/node/v24.22.1/bin'
 G = os.path.abspath(sys.argv[1])  # the lot folder
 YEAR = sys.argv[2]  # the map's year
+def say(message):
+    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    import datetime
+    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    print(line, flush=True)
+    with open('/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien/journal.log', 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
 HERE = os.path.dirname(os.path.abspath(__file__))
 cand = json.load(open(G + '/cand.json'))
+holders = {}
+if os.path.exists(G + '/holders.json'):
+    if len(sys.argv) < 4: raise SystemExit('holders.json is there: name the region (third argument) so that its gate is run')
+    gate = subprocess.run(['python3', '-I', HERE + '/region_gate.py', YEAR, sys.argv[3]], capture_output=True, text=True)
+    print(gate.stdout, flush=True)
+    if gate.returncode:
+        say("Saisie refusée pour %s %s : le contrôle de la région n'est pas ouvert, aucun détenteur n'est préparé." % (sys.argv[3], YEAR))
+        raise SystemExit('region_gate refused: no holder is prepared')
+    holders = json.load(open(G + '/holders.json'))
+say('Préparation de %d lieux (%s) : noms, pays et régions lus sur Wikidata ; %d ont un détenteur lu dans un livre.' % (len(cand), os.path.basename(G), len(holders)))
 P = """PREFIX wd: <http://www.wikidata.org/entity/> PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX p: <http://www.wikidata.org/prop/> PREFIX ps: <http://www.wikidata.org/prop/statement/>
 PREFIX pq: <http://www.wikidata.org/prop/qualifier/> PREFIX wikibase: <http://wikiba.se/ontology#>
@@ -32,25 +54,12 @@ for k in range(0, len(qs), 300):
       FILTER NOT EXISTS { ?x wdt:P576 ?d } OPTIONAL { ?x rdfs:label ?l FILTER(LANG(?l) = "fr") } }""" % vals):
         reg[b['item']['value'].rsplit('/', 1)[1]].append([b['x']['value'].rsplit('/', 1)[1], b.get('l', {}).get('value')])
     print('qlever', k, flush=True); time.sleep(1)
-json.dump([{'id': c['q'], 'lon': c['lon'], 'lat': c['lat']} for c in cand], open(G + '/pts.json', 'w'))
-env = dict(os.environ, PATH=NODE + ':' + os.environ['PATH'])
-out = subprocess.run(['pnpm', '-C', ROOT + '/packages/cartographer', 'exec', 'tsx', HERE + '/under.mts', YEAR, G + '/pts.json'],
-    capture_output=True, text=True, env=env, timeout=1200)
-if out.returncode: print(out.stderr[-1500:]); raise SystemExit('under failed')
-under = json.loads(out.stdout[out.stdout.index('{'):])
-subprocess.run(['python3', '-I', HERE + '/titlemap.py', G + '/titlemap.json', YEAR], check=True)
-tm = json.load(open(G + '/titlemap.json'))
-db = sqlite3.connect('file:' + ROOT + '/packages/cms/cms.db?mode=ro', uri=True)
-use = collections.Counter(dict(db.execute('select holder_title_id,count(*) from place_periods where date_start_year=' + YEAR + ' group by 1')))
-meta, why = {}, collections.Counter()
+meta = {}
 for c in cand:
-    q = c['q']; u = under.get(q)
-    if not u: why['no polity drawn'] += 1; continue
-    ts = tm.get(str(('w', u.get('wikidata'))), []) + (tm.get(str(('t', u.get('territory'))), []) if u.get('territory') else [])
-    if not ts: why['no title for ' + u['name']] += 1; continue
-    title = max(ts, key=lambda t: (use.get(t['title'], 0), t['jan'], -t['sy']))['title']
+    q = c['q']; h = holders.get(q)
     meta[q] = {'name': lab[q].get('fr') or lab[q].get('de'), 'country': (ctry[q] or [[None, None]])[0], 'region': (reg[q] or [[None, None]])[0],
-               'polity': u['name'], 'holderTitle': title}
+               'holderTitle': h['holderTitle'] if h else None, 'holder': h or None}
 json.dump(meta, open(G + '/meta.json', 'w'), ensure_ascii=False)
-print(len(meta), 'with a title;', dict(why)); print(collections.Counter(m['holderTitle'] for m in meta.values()).most_common(12))
-print('no name:', sum(1 for m in meta.values() if not m['name']), '; no region:', sum(1 for m in meta.values() if not m['region'][0]))
+without = sum(1 for m in meta.values() if not m['holder'])
+say('%d lieux préparés ; %d sans détenteur (« détenteur à lire ») ; %d sans nom ; %d sans région.' % (
+    len(meta), without, sum(1 for m in meta.values() if not m['name']), sum(1 for m in meta.values() if not m['region'][0])))

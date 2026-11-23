@@ -7,6 +7,13 @@ G = os.path.abspath(sys.argv[1])  # the lot folder
 UA = {'User-Agent': 'historical-atlas-research/0.1 (non-commercial)'}
 OUT = sys.argv[4] if len(sys.argv) > 4 and sys.argv[3] == '--test' else G + '/rend'
 os.makedirs(OUT, exist_ok=True)
+def say(message):
+    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    import datetime
+    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    print(line, flush=True)
+    with open('/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien/journal.log', 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
 only = set(json.load(open(sys.argv[2])))
 cand = [c for c in json.load(open(G + '/cand.json')) if c['q'] in only]
 
@@ -24,6 +31,19 @@ def to_text(h):
     return '\n'.join(out)
 
 
+def cited(h):
+    """The works a page cites — its notes and its bibliography — as the page writes them: the priming of the research.
+    Only what names a work is kept: a note or a citation with a year or a page in it; styles and sound notes are dropped."""
+    h = re.sub(r'<(style|script|math)\b.*?</\1>', ' ', h, flags=re.S)
+    out = []
+    for m in re.finditer(r'<cite\b[^>]*class="[^"]*citation[^"]*"[^>]*>(.*?)</cite>|<li\b[^>]*id="cite_note[^"]*"[^>]*>(.*?)</li>', h, flags=re.S):
+        t = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', m.group(1) or m.group(2) or ''))).strip()
+        t = re.sub(r'^(?:[↑^]\s*)?(?:(?:\d+|[a-z])\s+)*', '', t).strip()
+        if len(t) >= 15 and re.search(r'\b1[5-9]\d\d\b|\b20[0-2]\d\b|\bpp?\.\s*\d', t) and t not in out:
+            out.append(t)
+    return out
+
+
 def one(x):
     fn = OUT + '/' + x['q'] + '.json'
     if os.path.exists(fn): return 'skip'
@@ -32,7 +52,7 @@ def one(x):
     for a in range(6):
         try:
             h = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read().decode('utf-8')
-            json.dump({'q': x['q'], 'title': title.replace('_', ' '), 'url': x['url'], 'text': to_text(h), 'via': 'rest'},
+            json.dump({'q': x['q'], 'title': title.replace('_', ' '), 'url': x['url'], 'text': to_text(h), 'cited': cited(h), 'via': 'rest'},
                       open(fn, 'w'), ensure_ascii=False)
             return 'ok'
         except urllib.error.HTTPError as e:
@@ -41,6 +61,8 @@ def one(x):
             time.sleep(4 * (a + 1))
     return 'FAIL ' + x['q']
 
+say('Wikipédia, amorce seulement : je télécharge %d pages (%s) et je relève les ouvrages que chacune cite.' % (len(cand), os.path.basename(G)))
 with ThreadPoolExecutor(4) as ex:
     res = list(ex.map(one, cand))
-print('done', sum(r == 'ok' for r in res), 'new;', [r for r in res if r.startswith('FAIL')][:20], flush=True)
+say('Pages lues : %d nouvelles, %d déjà là, %d en échec.' % (sum(r == 'ok' for r in res), sum(r == 'skip' for r in res), sum(r.startswith('FAIL') for r in res)))
+print([r for r in res if r.startswith('FAIL')][:20], flush=True)

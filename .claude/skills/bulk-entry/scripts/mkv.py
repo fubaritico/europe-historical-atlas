@@ -69,7 +69,7 @@ for q, v in verd.items():
         weak.append({'q': q, 'ratio': round(ratio, 2), 'chosen': chosen['s'], 'best': best}); continue
     m = meta[q]
     recs.append({'q': q, 'name': m['name'] or r['title'], 'lon': round(cand[q]['lon'], 6), 'lat': round(cand[q]['lat'], 6),
-                 'holderTitle': m['holderTitle'], 'polity': m['polity'], 'country': m['country'], 'region': m['region'],
+                 'holderTitle': m.get('holderTitle'), 'holder': m.get('holder'), 'country': m['country'], 'region': m['region'],
                  'sourceTitle': '« %s » (Wikipedia)' % r['title'], 'sourceUrl': cand[q]['url'], 'quote': best, 'year': year})
 recs.sort(key=lambda x: x['q'])
 for k, L in enumerate('abcdefgh'):

@@ -1,6 +1,6 @@
 ---
 name: find-sources
-description: The historian's deep research — for a claim about the past (who held a place at a date, a border, an event), search the open full-text libraries in a fixed order beyond Wikipedia, climb from every page to the work it cites, keep every reading even contradictory, quote each one verified in the text read, and hand the result to /enter-in-cms. Use when the dev gives a theme, a map, a list of towns or a question of holder (« qui tenait », « à qui appartenait », « vérifie », « recherche », « sources », « preuves », « croise »), and whenever a sheet rests only on Wikipedia or has no holder.
+description: Compulsory before ANY historical research, reading or check of a holder, a city, a region or a border — load it first, before opening a single page, Wikipedia included. The historian's research in a fixed order — a preparation (the dev's axes of research, what is at hand, the order), then Wikipedia as priming only, the PDFs on disk, archive.org, Gallica, the BnF, JSTOR, each book's index and bibliography over one to two degrees; every attempt counted and said in a journal; a gate that refuses a region whose books were not read. Use when the dev gives a theme, a map, a region, a list of towns or a question of holder (« qui tenait », « à qui appartenait », « vérifie », « recherche », « cherche », « sources », « preuves », « croise », « refais », « reprends », « ça correspond pas »), before /bulk-entry and /enter-in-cms, and whenever a sheet rests on Wikipedia or has no holder.
 metadata:
   author: europe-map
   version: '1.0'
@@ -9,14 +9,157 @@ metadata:
 # Find sources — the historian's deep research
 
 **Outcome**: for each claim, every source found that speaks to it — agreeing or not — each with the work, the place
-in it (page, chapter), the source's own words, and how reliable it is; the most probable answer named; the claims that
-rest on Wikipedia alone flagged as fragile. Written 2026-11-06 at the dev's request: _"a machine that goes and finds
+in it (page, chapter), the source's own words, and how reliable it is; the most probable answer named; a claim that
+rests on Wikipedia alone is not an answer — it is listed as _to read_ (« The obligation », below). Written 2026-11-06 at the dev's request: _"a machine that goes and finds
 sources online other than Wikipedia to support a fact — which polity a place belonged to at a date — so it must reach
 texts"_, _"evidence, even contradictory, and bring back the sources."_ What it finds is entered by `/enter-in-cms`;
 the reasoning goes in the year's file (`files/plans/sources/1100/questions.md`). Concepts: `files/plans/evidence-system.md`.
 
 Where this research sits in the making of a year: the cities it sources settle the borders where the base layer and the
 verification layers disagree — `/use-cartographer`, `references/layers.md`.
+
+## The run, in order — nothing is read before step 0 is done (the dev, 2026-11-23)
+
+> _"You are asked a task: you respect the constraints listed in the skill and you check that nothing contradicts
+> itself. So before you even start on Wikipedia, there is the preparation. What do you have? What will you use, in
+> which order? Then you start the task."_ — and: _"I want nothing in the memory. It does not work."_ **This skill is the
+> only home of these rules**: never the auto-memory, never a resume point alone.
+
+**Three phases, always** (the dev, 2026-11-23): **the setup** (step 0), **the execution** (steps 1 to 12), **the tear
+down** (step 13). **The execution crosses the readings — it never starts from a city** (_"You do not start from the
+city to do readings, you must cross your readings"_): the research goes from his axes to the works, and from a work
+to the next; what one work says of a holder, a border or a date is set against what the others say of it, each
+reading with its work and page. A city is what the crossed readings give — met in them, placed by them — never the
+entry point of a reading.
+
+0. **The setup — before any page is opened, Wikipedia included.**
+   1. **The form — his axes, then his resources, one at a time** (the dev, 2026-11-23: _"It must really appear as a
+      form in the terminal. Give me a resource, I give it. Give me an axis, I give it. Is there another axis? Until I
+      tell you: that's it, I have no other axis."_). With the `AskUserQuestion` tool, never a question lost in a
+      paragraph, one question per call, in French:
+      - « Donne-moi un axe de recherche pour <la région, la date>. » — he writes it in the free field; the two
+        options are « Je l'écris » and « Je n'ai pas d'autre axe ». **Asked again after each answer** (« Y a-t-il un
+        autre axe ? ») **until he chooses « Je n'ai pas d'autre axe »** — never stopped by me, never two at once.
+      - **after each axis, what I lack to follow it** (_"You can even ask me for names when I give you an axis: give
+        me names of cities, names of things. Give me things, if you lack things."_): « Donne-moi des noms pour cet
+        axe — des villes, des personnes, des lieux, des livres. », the same loop until « Je n'en ai pas d'autre ».
+      - then, the same loop: « Donne-moi une ressource — un livre, une carte, un PDF, un lien. » until « Je n'ai pas
+        d'autre ressource ».
+      Each answer is written at once in the region's note (« Axes given », « Resources given »), in his words, and
+      said in the journal. A resource given is opened first, before the six channels.
+   2. Run `python3 -I .claude/skills/bulk-entry/scripts/prepare.py <year> <region>`: it says in the journal what is
+      at hand (the note, his axes, every PDF on disk, the attempts already made) and the order below.
+   3. Give him the journal's command: `tail -f files/resources/historien/journal.log`.
+   4. **Check the constraints against the task**: reread « The obligation » and « The frame »; a constraint that
+      contradicts the request, another constraint or `/enter-in-cms` is said to him **before** starting, never
+      settled alone.
+   5. Tell him, in a few lines: what I have, what I will use, in which order. Then start.
+1. The names and the hypotheses — « The order », step 1.
+2. Wikipedia, **priming only**, and the works its pages cite.
+3. The PDFs on disk — each opened, or ruled out with its reason.
+4. archive.org. 5. Gallica. 6. The BnF. 7. JSTOR — the last two in his Chrome; unreachable → **CONNEXION IMPOSSIBLE**.
+8. In every work found: its index, the passage, its notes and bibliography — one to two degrees.
+9. The region's note: holders by district, the chain, contrary readings, index references, attempts counted.
+10. The blocked cases → **J'AI BESOIN DE TOI**, one readable French page; the valid cases go on.
+11. `region_gate.py <year> <region>` — while it refuses, no holder is entered.
+12. `/enter-in-cms`, then the message to the coder.
+13. **The tear down — the last step, never skipped** (the dev, 2026-11-23: _"You remove everything that served the
+    research. Too bad if you must redo a research that gives you the same elements. You must empty the disk, we
+    cannot keep your research material. We do not have enough hard disks."_ — it replaces the rule of 2026-11-18
+    that kept the register and the dated extracts). **What stays is the result only**: the base, and the region's
+    note in git (holders, chain, contrary readings, index references, cities met, the attempts counted, each work
+    with its pages). **Everything else goes**: the downloaded pages, texts and PDFs, the pages cut out of an atlas,
+    the lot folders and entry files, the register and extracts of the region, the Python environment, the scratchpad.
+    Before deleting: the note holds every count and reference (read it back), `weak.json` and `pending.json` are empty
+    or decided, the blocked cases are on their page. The list of what goes, with its size, is shown to him and **the
+    deletion is asked of him each time** — a `rm -rf` is never mine to decide. Nothing of his is touched: his PDFs,
+    his atlases, his maps. The journal says the tear down and what the disk gained.
+
+Every step is said in the journal as it happens. The detail of each is below.
+
+## The obligation — a holder is read in a book, and the attempts are counted (the dev, 2026-11-23)
+
+> _"You must read. It is an obligation."_ — _"If there really is only one source, fine, but other things must have been
+> tried. So the attempts may even have to be counted."_ Found that day: 3 529 of the 3 534 reads of the register were
+> Wikipedia pages; the bibliographies were never climbed; Anatolia in 1100 contradicted every map he had seen.
+
+- **Wikipedia is only the first layer, the one that primes a research — never a point of validation** (the dev,
+  2026-11-23: _"It is only the first layer. It is not a point of validation. It is the priming of a research."_). It
+  gives names, dates to check and works to read; nothing is validated by it, whatever the number of its pages that agree.
+- **Our map is never a base to verify against** (the dev, 2026-11-23: _"We do not care whether the city is in the
+  country drawn. What do you verify, on what base — on what we did, or on what the whole world did?"_). The reference
+  is what the world wrote: the works read. The polity drawn under a place is neither an input of the research, nor a
+  holder by default, nor a test of its result. The map is measured against the base afterwards
+  (`pnpm cities:alerts`), never the base against the map.
+- **Steps 2 to 9 of « The order » are all done, for every question of holder.** Stopping at Wikipedia is not a
+  shorter research, it is no research.
+- **A holder is never kept on Wikipedia alone, and never taken from the polity drawn on our map.** It needs a line from
+  a work read in this session or found in the register — `primary`, `scholarly` or `historian-atlas` — the passage read,
+  not a footnote copied from a page. Until then the place has no holder line; it is listed as _holder to read_.
+- **Every attempt is written down, the empty ones too**: one line per try in
+  `files/resources/historien/registre/attempts.jsonl` — the date, the place or district, the hypothesis, the library or
+  the book (title, index entry, pages), its `degree` (0, 1 or 2 — step 7), the words searched, the result (`found`,
+  `nothing`, `refused`, `not available`, `not relevant` with its `reason`). The fields are `region_gate.py`'s.
+- **A holder with a single witness is accepted only with its attempts beside it**: the works the Wikipedia pages cite,
+  the atlases on disk, the open libraries of the region, the BnF, and the notes and index of every book read — each
+  tried and logged. Their count goes in the report and in the region's note. Which count is enough is not decided: the
+  log is shown, he judges.
+- **Everything is said in the journal as it happens** (the dev, 2026-11-23: _"I want logs — I am checking, I found
+  this, I do that, the date"_): `files/resources/historien/journal.log`, which he follows with `tail -f`. One dated
+  French line before each source opened, after each thing found, at each decision —
+  `python3 -I .claude/skills/bulk-entry/scripts/log.py say "…"`; an attempt is recorded **only** by
+  `log.py attempt '<json>'`, which writes the register and the journal together. A script that fetches or reads logs
+  the same way. Give him the `tail -f` command at the start of every research.
+- **Ask him for his axes of research before starting** (the dev, 2026-11-23: _"I can give you a list of axes of
+  research, which can change your way of searching. You can ask for it when I ask you to research something. You leave
+  with a baggage, a list of clues."_). When he asks for a research, the first message back asks one thing: his axes —
+  a campaign, a reign, a book, a map, a name, a doubt. They open the region's note, under « Axes given », as he said
+  them; each becomes a hypothesis of step 1 and is searched through the six channels, its attempts logged with the
+  axis named. An axis is a lead given, never a reading attributed to him; one that brings nothing is said. He has none:
+  the research starts from step 1 alone.
+- **A city named in a source read is a city to add** (the dev, 2026-11-23: _"In a source, reading, you will meet a
+  reference to a city. See whether it exists today and what it is called, to be able to add it; then add it at the
+  date asked in the research. It will also serve as a landmark."_). The cities of a year come from the reading, not
+  only from a survey of today's towns by population. For each one met: (1) note the name as the source writes it,
+  the work and the page; (2) find the place today — Wikidata, its present name, its point; a name not identified
+  goes to the blocked cases, never guessed; (3) enter it at the research's date (`/enter-in-cms`: the place under
+  today's name, the name of the time as a `period-names` record read in that source, the sheet with the book's line);
+  (4) list it in the region's note under « Cities met in the sources » — a landmark for the borders.
+- **The works on disk are known, all of them, and used** (the dev, same day: _"You must have the exhaustive list of
+  the PDFs on disk. You must know them. They must be used."_): `prepare.py` lists the folder anew at every research —
+  a file he added is in it — and `files/plans/sources/bibliotheque.md` says what each is. A file on disk missing from
+  that table is added to it before the research starts; a file never opened is opened once, its contents and its
+  index of maps noted in the table (region, period), so that the next research knows what it covers.
+- **Six channels, all compulsory, for every region** (the dev, 2026-11-23: _"Nothing must make these steps jump"_):
+  Wikipedia **and the works its pages cite** (notes, « Sources », « Bibliography »), the PDFs on disk, archive.org,
+  Gallica, the BnF, JSTOR. A library is always searched — it may answer `nothing`, it is never « not relevant ».
+- **The BnF or JSTOR cannot be reached — stop, in capitals** (the dev, 2026-11-23: _"You stop and you write in block
+  capitals, connection impossible. You leave the flow, you tell me, we start again."_). At the first search of a
+  research there — in **his** Chrome, never while he tests an application in it, and after reminding him to check he
+  is logged in (`references/reading-accounts.md`; I never click « Me connecter ») — check the session is logged in; if
+  it is not, or the site refuses: write **CONNEXION IMPOSSIBLE**
+  with the library's name — in the journal (`log.py say`) and as the first words of the message to him — and **stop the
+  research there**. No other channel is carried on meanwhile, nothing is entered, the attempt is not counted
+  (`region_gate.py` accepts only a search that really ran, `found` or `nothing`, for these two). He logs in; the
+  research starts again at that channel.
+- **I cannot find it — stop, in capitals, and ask him** (the dev, 2026-11-23: _"When you cannot find something, the
+  same: you stop, in block capitals, I need you. I need suggestions."_). When the six channels have given no work read
+  for a question, when a work every source cites cannot be obtained, or when the readings cannot be told apart: write
+  **J'AI BESOIN DE TOI** — in the journal and as the first words of the message — then, in a few lines, the question,
+  what was tried (the attempts and their count) and what is missing. **That case stops there**: no holder guessed, no
+  fallback on Wikipedia or on the map. He suggests a book, a map, a lead; the case starts again from it.
+  **The work is by cases, so the valid cases go on** (the dev, same day: _"you have valid cases — bring me back
+  something readable, for pity's sake readable, with simple questions, so that I can answer"_). The blocked cases come
+  back together in one French page, `files/resources/historien/<year>/<region>/besoin-de-toi.md`, opened for him
+  (never a JSON, never a path alone): **one block per case, four lines at most** — the place and the date; what is
+  not known, in one sentence; what was tried, in one line with the count; **one simple question**, answerable by a
+  word, a choice between named readings, or a title to give. No table, no jargon, no second question in a block.
+- **Only a single work is ruled out as not relevant, and by these tests alone — proposed by Claude, to be confirmed**:
+  (1) its title, table of contents or list of maps does not cover the region; (2) nor the period, the date and the
+  fifty years before it; (3) once opened, its index has none of the names of step 1 — place, district, each candidate
+  holder. One test met is enough; it is written as the attempt's `reason`. In doubt, the work is opened.
+- **The district before the place**: the holder of a region is read once, in the works on the region and its period (a
+  reconquest, a campaign, a reign), written in the region's note with its index references, then given to the places.
 
 ## The frame — never crossed
 
@@ -101,8 +244,10 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
    5. **Read every page it gives** — step 5: the passage, the sentence copied, verified on the text or the image.
    6. **Index after index** (the dev: _"index (+ index)"_): an entry pointing to a source — a charter, a chronicle, a
       study — is a new book, whose own index is read the same way, and so on; Wikipedia starts the same chain, its
-      footnotes giving the first books (step 2). **The chain stops** for a lot when a round brings no new reference to
-      its places, or when its question has two independent witnesses (Claude's rule, 2026-11-09, to confirm).
+      footnotes giving the first books (step 2). **The depth is one to two degrees, when the books can be had** (the
+      dev, 2026-11-23 — it replaces Claude's stopping rule of 2026-11-09): degree 0 is a work Wikipedia cites or a
+      channel gives; degree 1, a work its notes, bibliography or index point to; degree 2, a work those point to.
+      Each attempt carries its degree; a degree not reached is said, with why.
 8. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
    that ended before the date → who replaced it → who held the place; a neighbouring town of the same district.
 9. **Behind an account — the BnF in every lot** (the dev, 2026-11-08: _"I pay for that subscription. We have to use it,
@@ -112,7 +257,10 @@ verification layers disagree — `/use-cartographer`, `references/layers.md`.
    (`get_page_text`, or the page image); the quotation and its page noted as for any other text. Never while he tests
    the Cartographer in the same browser.
 
-## Keep what was read — for every year (the dev, 2026-11-18)
+## Keep what was read — for every year (the dev, 2026-11-18) — **replaced on 2026-11-23 by the tear down (step 13)**
+
+**Since 2026-11-23 nothing of the research material is kept**: what follows describes the register and the extracts
+as they were, and holds only until the tear down of the research in progress.
 
 A source read for one year is read once. Before reading, look in `files/resources/historien/extraits/<q>.json` and
 `registre/reads.jsonl` (what was already read for the place). After reading: append the read to `registre/reads.jsonl`
@@ -177,6 +325,10 @@ dev's explicit opt-in). Their quotations are re-checked by me against their down
 entered — an agent's confident line is not a verified one.
 
 ## Gotchas
+
+- **A tool's noise is removed, never read** (the dev, 2026-11-23: _"if the warnings drown the output, you remove them,
+  you stay on your research"_): `pypdf` prints a font warning per page on some PDFs (the Palgrave atlas: 9 000
+  characters of them before the first useful line) — run every PDF read with `2>/dev/null`, and cap the output.
 
 - **Several libraries answer 403 to a script** (Gallica, HathiTrust, RACO, Regesta Imperii, the BDH, Cairn — measured
   06/11): read them in the browser or through WebFetch, never by forcing a script past them.

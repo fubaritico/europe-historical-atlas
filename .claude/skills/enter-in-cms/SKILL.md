@@ -55,6 +55,12 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 
 ## The frame — never crossed
 
+- **Since 2026-11-23, `/find-sources` « The obligation » comes first** (the dev): a holder is entered only from a work
+  read — never from Wikipedia alone, never from the polity drawn on the map; a case the research cannot solve goes to
+  him (**J'AI BESOIN DE TOI**) instead of being decided. Where a rule below says otherwise — « Then decide », « the
+  map's vassal », a point valid by the duchy drawn under it — the obligation wins. A place whose holder is not read yet
+  is entered with its line of existence and no holder, and listed in the region's note as _holder to read_: a debt
+  to pay, since every place still has a belonging to find.
 - **Through the MCP only.** Never the seed (`pnpm seed:cms` once ran on his base), never SQL that writes, never the
   REST API by `curl`, never a script. If the `cms` tools are absent or refused, **stop and tell the dev** — no other way in.
 - **I undo my own errors — never the dev** (the dev, 2026-11-18: _"I no longer delete your mistakes"_; CMS-454,

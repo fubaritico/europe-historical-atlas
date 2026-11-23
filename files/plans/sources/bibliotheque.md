@@ -96,6 +96,14 @@ The two marked *public domain* are the ones that may be traced — to confirm ag
 | `epdf.pub_poland-a-historical-atlas.pdf` | *Poland: A Historical Atlas* | in copyright → reference |
 | `epdf.pub_the-palgrave-atlas-of-byzantine-history-historical-atlas.pdf` | *The Palgrave Atlas of Byzantine History* | in copyright → reference |
 | `Beidler J. The Family Tree Historical Atlas of Germany (2019), OCR.pdf` | J. Beidler, *The Family Tree Historical Atlas of Germany*, 2019 | in copyright → reference (its paper copy was cancelled above) |
+| `epdf.pub_historical-atlas-of-christianity.djvu` (added 2026-11-23) | *Historical Atlas of Christianity* — a DjVu file, not a PDF | in copyright → reference; not opened yet |
+| `epdf.pub_the-penguin-atlas-of-ancient-historycbe93fa….pdf` (added 2026-11-23) | *The Penguin Atlas of Ancient History* | in copyright → reference; not opened yet |
+| `epdf.pub_a-history-of-medieval-islamf033878….pdf` (added 2026-11-23) | *A History of Medieval Islam* — a book, not an atlas | in copyright → reference; not opened yet |
+| `epdf.pub_atlas-of-medieval-jewish-history.pdf` (added 2026-11-23) | *Atlas of Medieval Jewish History* | in copyright → reference; not opened yet |
+| `epdf.pub_the-oxford-illustrated-history-of-medieval-europe.pdf` (added 2026-11-23) | *The Oxford Illustrated History of Medieval Europe* — a book, not an atlas | in copyright → reference; not opened yet |
+| `epdf.pub_castles-and-fortified-cities-of-medieval-europe-an-illustrated-history.pdf` (added 2026-11-23) | *Castles and Fortified Cities of Medieval Europe: An Illustrated History* — a book, not an atlas | in copyright → reference; not opened yet |
+| `epdf.pub_the-penguin-historical-atlas-of-ancient-rome-1.pdf` (added 2026-11-23) | a second copy of *The Penguin Historical Atlas of Ancient Rome*, identical byte for byte (`cmp`) | the copy is his to keep or remove |
+| `17594-Artikeltext-42296-1-10-20141212.pdf` (on disk since 2026-11-14) | an article, title not read yet | ? — to open |
 | two `.webloc` links | Brion de La Tour and Desnos, 1743–1805, David Rumsey Historical Map Collection | 18th-century plates; Rumsey's own terms to read before use |
 
 ## Candidates for the gaps — Italy and Scandinavia (searched 2026-10-22)
