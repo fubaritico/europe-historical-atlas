@@ -94,8 +94,6 @@ Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me m
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `packages/atlas/public/content/atlas.json` et `cartographer.json`**.
-
 **À lui, en attente** : son icône `error.svg` à la place de la mienne ; plus tard : CARTO-365 ; **à arbitrer** : le suzerain du royaume d'Arles
 et les lectures divergentes de l'historien (`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/questions.md`).
 
@@ -153,7 +151,8 @@ paquet **réimporte** la racine et ESLint résout **une** config depuis le **ré
 production n'a jamais · la **couverture est fusionnée** par `scripts/merge-coverage.mjs`, parce que chaque
 paquet écrit `SF:src/…` et que Sonar résout depuis la racine (sinon **0 % sans erreur**).
 
-**Les serveurs** : ses serveurs (atlas, Cartographe, CMS) sont les siens, jamais lancés, coupés ni relancés par moi ; le mien
+**Les serveurs** : l'atlas et le Cartographe sont les siens, jamais lancés, coupés ni relancés par moi ; le CMS est à
+l'historien et à moi (« Trois règles du CMS », plus haut) ; le mien
 seulement depuis un worktree, après avoir lu le titre des pages sur les ports ouverts — les ports bougent (REPO-383).
 
 ## ▶ P4, LE CARTOGRAPHE — les cinq étapes
