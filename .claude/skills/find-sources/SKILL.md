@@ -19,13 +19,16 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 - Never a holder from Wikipedia alone, nor from the polity drawn on our map. The map is not an input, not a check.
 - Never start a reading from a city: cross the works; the cities come out of them.
 - Never skip a channel. Never enter a holder while the gate refuses. Never delete without his word.
+- Never end a research without filing it in the archive; never fetch again what the archive already holds.
 - Never settle a divergence: two readings are two lines, each with its work and page.
 
 ## The run
 
 **Setup — before any page is opened, Wikipedia included**
 
-0. The base already has sheets for this region at this date: « A region already researched », step 1, first.
+0. Check the archive disk is mounted (`ls /Volumes/Acer/atlas-historien`). Absent: write **DISQUE ABSENT**, stop.
+   Read `ouvrages/index.md` and, when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again.
+   The base already has sheets for this region at this date: « A region already researched », step 1, first.
 1. Create the region's note `files/plans/sources/<year>/<region>.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
    Cities met in the sources, Existence to read, Attempts).
@@ -35,6 +38,11 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    each answer in the note at once, in his words. **What he gives are mostly references of books** (from the
    videos he watches, which give him no summary): **they prove nothing** — they help: sources to read, context,
    words, vocabulary, names, dates **to verify**. He gives nothing: start without.
+   **Every item given goes to `<year>/<zone>/donne/`, numbered in the order given** (`01-…`, `02-…`): a file
+   (screenshot, map, PDF) is copied there — never moved, his original stays where it is; a list or a text is
+   written there as a `.md`. Each has its line in the note's « Resources given »: what it is, where it comes
+   from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
+   every image myself; a name I cannot read is written « illegible », never guessed.
 3. `log.py say` the research; give him once: `tail -f files/resources/historien/journal.log`.
 4. `prepare.py <year> <region>`: what is at hand, the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
@@ -68,10 +76,39 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 21. `region_gate.py <year> <region>`. Refused: back to the missing channel.
 22. `/enter-in-cms`, then the message to the coder.
 
-**Tear down — never skipped**
+**Archive and tear down — never skipped**
 
-23. Check the note holds every count, reference and page. List what goes, with sizes (`inventory.py`). Show it,
-    ask him, delete on his word: downloads, lot folders, the environment, the scratchpad. The base and the note stay.
+23. File everything in the archive (« The archive »): each work in `ouvrages/`, its `fiche.md` and the index
+    updated; the research under `<year>/<zone>/`. Read each `.md` back.
+24. Then empty the internal disk: list what goes, with sizes (`inventory.py`), show it, ask him, delete on his
+    word — downloads, lot folders, the environment, the scratchpad. Wikipedia pages are not archived.
+    The base, the note in git and the archive stay.
+
+## The archive — `/Volumes/Acer/atlas-historien/`
+
+The external disk the dev lends so that a research serves the next ones. **What can serve again is at the root;
+what belongs to one year and one zone is under that year.** French names; what a person reads is a `.md`.
+
+```
+atlas-historien/
+├── LISEZ-MOI.md              how it is filed, one page
+├── ouvrages/                 REUSABLE — one folder per work, once: <author>-<year>-<short-title>/
+│   ├── index.md              every work: author, title, what it covers (regions, centuries), the researches it served
+│   └── <work>/               fiche.md · texte.txt · livre.pdf · pages/p-<n>.png
+└── <year>/<zone>/            ONE RESEARCH
+    ├── fiche.md              what was asked, when, where it stands, what is left
+    ├── donne/                what the dev gave, numbered
+    ├── recherches/           lectures.md · essais.md · journal.log
+    └── resultats/            extraits.md · note-de-region.md (a copy; the original is in git)
+```
+
+- `<work>/fiche.md`: author, title, publisher, year, kind, in copyright or not, where found and when, its
+  contents and index, the pages read and for which research.
+- `recherches/lectures.md`: one line per reading — work (its folder), pages, question, result. It never copies a
+  work, it points to it; the work's `fiche.md` lists the research in return.
+- `recherches/essais.md`: every attempt — channel, words, found or nothing.
+- `resultats/extraits.md`: every sentence kept — work, page, quotation, what it bears on.
+- A work in copyright is marked so: its facts are read, its plates and images never reused in the atlas.
 
 ## A region already researched
 

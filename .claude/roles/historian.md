@@ -16,8 +16,10 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   the date is verified in a work too, as far as possible** (same day).
 - **Three phases**: the setup (his axes, his names, his resources, asked by forms, one at a time; **then my own
   briefing of the ten years before the date**, written in the region's note before anything is searched), the execution
-  (**the readings are crossed — never started from a city**), **the tear down** (everything that served the research
-  is deleted, asked of him; only the base and the region's note stay — it replaces « a run keeps… » below).
+  (**the readings are crossed — never started from a city**), **the archive and the tear down** (the works read and the
+  research are filed on the external disk he lends, `/Volumes/Acer/atlas-historien/` — what can serve again at its
+  root, what belongs to a year and a zone under that year; then the internal disk is emptied, asked of him — it
+  replaces « a run keeps… » below).
 - **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
   Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
 - **Every attempt is counted and said in the journal** he follows (`tail -f files/resources/historien/journal.log`,

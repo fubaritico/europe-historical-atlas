@@ -81,11 +81,10 @@ Nothing of mine lies flat in `files/resources/`; nothing of the dev's is moved.
 | 6   | **Entry files**: the quotation is the exact rendered sentence, found by script (exact, else difflib ≥ 0.85 and carrying the year); the weak ones I judge myself                                                                | `wave*/enter-*.json`, `weak.json` | `mkv.py`                  |
 | 7   | **Entry**: agents (Sonnet), one file each, through the MCP only, in series, a result file each                                                                                                                                 | the base                          | the entry prompt below    |
 | 8   | **Check**: the base against the files (quotation, title, line, name, region); fix by `update`; `pnpm cities:alerts --map <year>`; one message to the coder (ids, form, counts)                                                 | `bad.json` empty                  | `verifyv.py`, `fixcut.py` |
-| 9   | **Tear down** (the dev, 2026-11-23 — `/find-sources`, « Tear down », step 23): **everything that served the run is deleted** — `rend/`, every downloaded copy, the lot folder with its verdicts, entry and result files, the register and extracts of the region; only the base and the region's note stay — the list and its size shown, the deletion asked of the dev each time | the disk as before the run        | `inventory.py`            |
+| 9   | **Archive and tear down** (`/find-sources`, steps 23–24 and « The archive »): the works read and the run's lists, verdicts and results are filed on the external disk (`/Volumes/Acer/atlas-historien/`, the works at its root, the run under `<year>/<zone>/`); **then the internal disk is emptied** — `rend/`, every downloaded copy, the lot folder — the list and its size shown, the deletion asked of the dev each time. Wikipedia pages are not archived | the internal disk as before the run | `inventory.py`            |
 
-**Nothing is kept from one run to the next** (the dev, 2026-11-23: _"too bad if you must redo a research that gives
-you the same elements"_): the rule of 2026-11-18 that read `extraits/` first for a later year is over; a later year
-starts from the region's note and the base.
+**Since the evening of 2026-11-23 a run serves the next ones through the archive** (the dev lends an external
+disk for it): a later year starts from the region's note, the base and what the archive holds of the works read.
 
 ## The prompts
 
