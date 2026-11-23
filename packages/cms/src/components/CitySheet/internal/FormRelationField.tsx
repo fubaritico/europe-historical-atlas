@@ -2,6 +2,7 @@ import { getIn, useFormikContext } from 'formik'
 
 import { RelationField } from './RelationField'
 
+import type { PrefilledCreate } from '../utils/addNewProps'
 import type { SheetValues } from '../utils/sheetValues'
 import type { CollectionSlug, Where } from 'payload'
 
@@ -15,6 +16,7 @@ import type { CollectionSlug, Where } from 'payload'
  * @param props.label - its label
  * @param props.description - the sentence under it
  * @param props.only - the records offered, when not all of the collection — the same object from one render to the next
+ * @param props.prefilled - its « + » opening a drawer with part of the new record filled, when given
  * @returns the field
  */
 export function FormRelationField({
@@ -23,12 +25,14 @@ export function FormRelationField({
   label,
   description,
   only,
+  prefilled,
 }: {
   name: string
   collection: CollectionSlug
   label: string
   description: string
   only?: Where
+  prefilled?: PrefilledCreate
 }) {
   const { values, getFieldMeta, setFieldValue, setFieldTouched } = useFormikContext<SheetValues>()
   const meta = getFieldMeta(name)
@@ -51,6 +55,7 @@ export function FormRelationField({
         value={(getIn(values, name) as number | string | null | undefined) ?? null}
         onChange={handleChange}
         {...(only === undefined ? {} : { only })}
+        {...(prefilled === undefined ? {} : { prefilled })}
       />
       {error !== undefined && (
         <p className="city-sheet__help city-sheet__help--error" role="alert">

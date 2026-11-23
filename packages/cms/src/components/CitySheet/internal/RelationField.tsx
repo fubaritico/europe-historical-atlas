@@ -1,6 +1,9 @@
 import { RelationshipInput } from '@payloadcms/ui'
 import { useMemo } from 'react'
 
+import { addNewProps } from '../utils/addNewProps'
+
+import type { PrefilledCreate } from '../utils/addNewProps'
 import type { CollectionSlug, ValueWithRelation, Where } from 'payload'
 
 /**
@@ -22,6 +25,8 @@ import type { CollectionSlug, ValueWithRelation, Where } from 'payload'
  * @param props.required - marked required — its star; the form says what is missing
  * @param props.only - the records offered, when not all of the collection: the names of one place — the same object
  *   from one render to the next, or the field empties its options at each
+ * @param props.prefilled - when given, the « + » is ours, its drawer opening with this data (`PrefilledAddNew`);
+ *   Payload's own « + » cannot be handed any
  * @returns the field
  */
 export function RelationField({
@@ -34,6 +39,7 @@ export function RelationField({
   readOnly = false,
   required = false,
   only,
+  prefilled,
 }: {
   path: string
   collection: CollectionSlug
@@ -44,6 +50,7 @@ export function RelationField({
   readOnly?: boolean
   required?: boolean
   only?: Where
+  prefilled?: PrefilledCreate
 }) {
   // Kept the same object from one render to the next: Payload's field empties its list of options each time its
   // filter changes identity (3.92, `fields/Relationship/Input.js`, the effect on `filterOptions`), which a filter
@@ -64,8 +71,8 @@ export function RelationField({
       path={path}
       relationTo={[collection]}
       hasMany={false}
-      allowCreate
       allowEdit
+      {...addNewProps({ collection, prefilled, readOnly, onCreate: onChange })}
       readOnly={readOnly}
       required={required}
       label={label}

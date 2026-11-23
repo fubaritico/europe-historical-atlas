@@ -217,3 +217,22 @@
   grid-row: 2;
   grid-column: 1;
 }
+
+/* A relationship field whose « + » is ours (`PrefilledAddNew`, CMS-495): Payload lays its own « + » inside the list's
+   row, ours comes after it (`AfterInput`) — set back on the list's row, the rest of the field on rows of their own */
+.city-sheet__relation--prefilled > .field-type__wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.city-sheet__relation--prefilled > .field-type__wrap > * {
+  grid-column: 1 / -1;
+}
+
+.city-sheet__relation--prefilled > .field-type__wrap > .relationship__wrap {
+  grid-column: 1;
+}
+
+.city-sheet__relation--prefilled > .field-type__wrap > .relationship-add-new {
+  grid-column: 2;
+}

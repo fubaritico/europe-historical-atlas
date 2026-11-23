@@ -6,6 +6,7 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { CREATED_IN_DRAWER, useDocumentDrawerStandIn } from '../../testing/documentDrawerStandIn'
 import { RelationshipInputStandIn } from '../../testing/relationshipInputStandIn'
 
 import { CitySheetForm } from './CitySheetForm'
@@ -16,7 +17,13 @@ import type { SheetValues } from './utils/sheetValues'
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }))
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 vi.mock('next/navigation', () => ({ useRouter: () => router }))
-vi.mock('@payloadcms/ui', () => ({ toast, RelationshipInput: RelationshipInputStandIn }))
+vi.mock('@payloadcms/ui', () => ({
+  toast,
+  RelationshipInput: RelationshipInputStandIn,
+  useDocumentDrawer: useDocumentDrawerStandIn,
+  PlusIcon: () => null,
+  Tooltip: () => null,
+}))
 
 /** The CMS's reasons, as the server reads them. */
 const REASONS = [
@@ -252,6 +259,57 @@ describe('CitySheetForm', () => {
         JSON.stringify({ 'period-names': { place: { equals: 5 } } })
       )
       expect(screen.getByLabelText('Personnage et titre').dataset.filter).toBe('null')
+    })
+
+    // CMS-495, 2026-11-23: the « + » of « Nom d’époque » is ours, its drawer opening on the sheet's place.
+    it('opens the drawer of « + » on the sheet’s place, in Payload’s « + » stead', async () => {
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Créer un nom d’époque pour ce lieu' }))
+      expect(screen.getByRole('dialog', { name: 'Tiroir' }).dataset.initial).toBe(
+        JSON.stringify({ place: 5 })
+      )
+      // One « + » on the sheet left to Payload: the holder's
+      expect(screen.getAllByRole('button', { name: 'Créer (Payload)' })).toHaveLength(1)
+    })
+
+    it('chooses the name created in the drawer, and saves it by its id', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Créer un nom d’époque pour ce lieu' }))
+      await user.click(screen.getByRole('button', { name: 'Créer' }))
+      expect(screen.getByLabelText<HTMLInputElement>('Nom d’époque').value).toBe(
+        String(CREATED_IN_DRAWER)
+      )
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).periodName).toBe(CREATED_IN_DRAWER)
+    })
+
+    it('leaves the name chosen as it is when a name is only updated in the drawer', async () => {
+      renderForm({ ...rome, periodName: 7 }, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Créer un nom d’époque pour ce lieu' }))
+      await user.click(screen.getByRole('button', { name: 'Mettre à jour' }))
+      expect(screen.getByLabelText<HTMLInputElement>('Nom d’époque').value).toBe('7')
+    })
+
+    it('opens the drawer on the new place once the sheet’s place is changed', async () => {
+      serverWithRome1100()
+      renderForm({ ...rome, place: { id: 9, name: 'Ostie' } }, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Retirer Ostie' }))
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      await user.click(await screen.findByRole('option', { name: 'Rome' }))
+      await user.click(
+        await screen.findByRole('button', { name: 'Créer un nom d’époque pour ce lieu' })
+      )
+      expect(screen.getByRole('dialog', { name: 'Tiroir' }).dataset.initial).toBe(
+        JSON.stringify({ place: 5 })
+      )
     })
 
     it('keeps the name a saved sheet opens with', () => {

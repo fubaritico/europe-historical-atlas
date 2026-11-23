@@ -134,3 +134,11 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   says the change before the next one starts — a new session reads the new tools. A session already open cannot reconnect itself (`/mcp` is the dev's), and the dev no longer does it (2026-11-23): the
   historian works around it until his next session — the CMS restarted by the coder, a record the stale tool cannot
   carry is kept aside. **Severity: gênant.**
+- **The « + » of « Nom d'époque » is ours, a copy of Payload's** (2026-11-23, CMS-495): Payload's own « + »
+  (`elements/AddNewRelation`, 3.92) hands its drawer no initial data, so `CitySheet/internal/PrefilledAddNew.tsx` stands in
+  its place to open the drawer on the sheet's place. It copies Payload's classes (`relationship-add-new*`,
+  `relationship--allow-create`) and `citySheet.css` lays it out by Payload's structure (`.field-type__wrap`,
+  `.relationship__wrap`): a Payload upgrade that renames them breaks the layout without an error. It also skips Payload's
+  check of the right to create (`permissions.collections[slug].create`) — no effect while the CMS is local, with one
+  contributor. **Remedy**: look at the field after each Payload bump; with accounts (CMS-228), read `useAuth()` and hide
+  the button without that right. **Severity: worth knowing.**
