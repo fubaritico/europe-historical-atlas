@@ -3,212 +3,184 @@ import { getPayload, readMigrationFiles } from 'payload'
 import { assertMigrated } from '../migrate/migrateBase'
 import config from '../payload.config'
 
-/**
- * One territory whose « Nom » — the register's French name — was entered in another language (CMS-495, the countries
- * in French, the dev's go of 2026-11-23: _"rename what you must rename"_). Its English line, in the table of other
- * names, is left as it is.
- */
-interface FrenchName {
-  /** The territory's id. */
-  territory: number
-  /** Its name in the base, which must still be its name for anything to change. */
-  was: string
-  /** Its French name — the coder's translation, for the historian to reread. */
-  fr: string
-}
+import { renameRecords } from './renameRecords'
+
+import type { Rename } from './renameRecords'
 
 /**
- * The territories named in English, German, Italian or Czech on 2026-11-23, read in the base. Kept as they are: the
+ * The territories whose « Nom » — the register's French name — was entered in another language (CMS-495, the dev's
+ * go of 2026-11-23: _"rename what you must rename"_), read in the base that day: English, German, Italian, Czech.
+ * Their English line is left as it is; the translations are the coder's, for the historian to reread. Kept as they are: the
  * names French also uses (the Gaue, Huysburg, Rab, Labourd, Ostmark), and the capitals of « Royaume d'Aragon » and
  * the like — a matter of typography, not of language.
  */
-const FRENCH_NAMES: readonly FrenchName[] = [
-  { territory: 10, was: 'Lordship of Valencia', fr: 'seigneurie de Valence' },
-  { territory: 51, was: 'County of Conversano', fr: 'comté de Conversano' },
-  { territory: 73, was: 'County of Bojano', fr: 'comté de Bojano' },
-  { territory: 85, was: 'comte de Corbeil', fr: 'comté de Corbeil' },
-  { territory: 86, was: 'County of Périgord', fr: 'comté de Périgord' },
-  { territory: 100, was: 'Duchy of Poland', fr: 'duché de Pologne' },
-  { territory: 117, was: 'Diocese of Meissen', fr: 'diocèse de Misnie' },
-  { territory: 144, was: 'Conti di Biandrate', fr: 'comtes de Biandrate' },
-  { territory: 150, was: 'Duchy (Kingdom of Hungary)', fr: 'duché (royaume de Hongrie)' },
-  { territory: 159, was: 'Sharifate of Medina', fr: 'chérifat de Médine' },
-  { territory: 167, was: 'countship of Formbach', fr: 'comté de Formbach' },
-  { territory: 170, was: 'Szekszárd Abbey', fr: 'abbaye de Szekszárd' },
-  { territory: 171, was: 'abbaye de St Bavon', fr: 'abbaye Saint-Bavon de Gand' },
+const FRENCH_NAMES: readonly Rename[] = [
+  { id: 10, was: 'Lordship of Valencia', now: 'seigneurie de Valence' },
+  { id: 51, was: 'County of Conversano', now: 'comté de Conversano' },
+  { id: 73, was: 'County of Bojano', now: 'comté de Bojano' },
+  { id: 85, was: 'comte de Corbeil', now: 'comté de Corbeil' },
+  { id: 86, was: 'County of Périgord', now: 'comté de Périgord' },
+  { id: 100, was: 'Duchy of Poland', now: 'duché de Pologne' },
+  { id: 117, was: 'Diocese of Meissen', now: 'diocèse de Misnie' },
+  { id: 144, was: 'Conti di Biandrate', now: 'comtes de Biandrate' },
+  { id: 150, was: 'Duchy (Kingdom of Hungary)', now: 'duché (royaume de Hongrie)' },
+  { id: 159, was: 'Sharifate of Medina', now: 'chérifat de Médine' },
+  { id: 167, was: 'countship of Formbach', now: 'comté de Formbach' },
+  { id: 170, was: 'Szekszárd Abbey', now: 'abbaye de Szekszárd' },
+  { id: 171, was: 'abbaye de St Bavon', now: 'abbaye Saint-Bavon de Gand' },
   {
-    territory: 174,
+    id: 174,
     was: 'Republic of Ragusa (the later polity of the city)',
-    fr: "république de Raguse (l'État ultérieur de la ville)",
+    now: "république de Raguse (l'État ultérieur de la ville)",
   },
-  { territory: 177, was: 'Bursfelde Abbey', fr: 'abbaye de Bursfelde' },
-  { territory: 181, was: 'Inalids', fr: 'Inalides' },
-  { territory: 185, was: 'Bosnia (early medieval)', fr: 'Bosnie (haut Moyen Âge)' },
-  { territory: 190, was: 'County of Clermont-en-Argonne', fr: 'comté de Clermont-en-Argonne' },
-  { territory: 199, was: 'Marchese di Milano', fr: 'marche de Milan' },
-  { territory: 200, was: 'Repubblica Astese', fr: "république d'Asti" },
-  { territory: 201, was: 'viscountcy of Osona', fr: "vicomté d'Osona" },
-  { territory: 208, was: 'Principality of Terebovlia', fr: 'principauté de Terebovl' },
-  { territory: 217, was: 'County of Weimar-Orlamünde', fr: 'comté de Weimar-Orlamünde' },
-  { territory: 225, was: 'Roman Catholic Diocese of Pesto', fr: 'diocèse de Paestum' },
-  { territory: 230, was: 'Almoravid dynasty', fr: 'Almoravides' },
-  { territory: 231, was: 'Duchy of Bavaria', fr: 'duché de Bavière' },
-  { territory: 232, was: 'County of Nantes', fr: 'comté de Nantes' },
-  { territory: 233, was: 'Land Budissin', fr: 'pays de Budissin' },
-  { territory: 234, was: 'Duchy of Brittany', fr: 'duché de Bretagne' },
+  { id: 177, was: 'Bursfelde Abbey', now: 'abbaye de Bursfelde' },
+  { id: 181, was: 'Inalids', now: 'Inalides' },
+  { id: 185, was: 'Bosnia (early medieval)', now: 'Bosnie (haut Moyen Âge)' },
+  { id: 190, was: 'County of Clermont-en-Argonne', now: 'comté de Clermont-en-Argonne' },
+  { id: 199, was: 'Marchese di Milano', now: 'marche de Milan' },
+  { id: 200, was: 'Repubblica Astese', now: "république d'Asti" },
+  { id: 201, was: 'viscountcy of Osona', now: "vicomté d'Osona" },
+  { id: 208, was: 'Principality of Terebovlia', now: 'principauté de Terebovl' },
+  { id: 217, was: 'County of Weimar-Orlamünde', now: 'comté de Weimar-Orlamünde' },
+  { id: 225, was: 'Roman Catholic Diocese of Pesto', now: 'diocèse de Paestum' },
+  { id: 230, was: 'Almoravid dynasty', now: 'Almoravides' },
+  { id: 231, was: 'Duchy of Bavaria', now: 'duché de Bavière' },
+  { id: 232, was: 'County of Nantes', now: 'comté de Nantes' },
+  { id: 233, was: 'Land Budissin', now: 'pays de Budissin' },
+  { id: 234, was: 'Duchy of Brittany', now: 'duché de Bretagne' },
   {
-    territory: 235,
+    id: 235,
     was: 'Greater Poland with Kuyavia and Łęczyca-Sieradz',
-    fr: 'Grande-Pologne avec la Cujavie et Łęczyca-Sieradz',
+    now: 'Grande-Pologne avec la Cujavie et Łęczyca-Sieradz',
   },
-  { territory: 236, was: 'Viscounty of Marseille', fr: 'vicomté de Marseille' },
-  { territory: 238, was: 'Viscounty of Carcassonne', fr: 'vicomté de Carcassonne' },
+  { id: 236, was: 'Viscounty of Marseille', now: 'vicomté de Marseille' },
+  { id: 238, was: 'Viscounty of Carcassonne', now: 'vicomté de Carcassonne' },
   {
-    territory: 239,
+    id: 239,
     was: 'Principality of Novgorod-Seversky',
-    fr: 'principauté de Novgorod-Severski',
+    now: 'principauté de Novgorod-Severski',
   },
-  { territory: 240, was: 'Silesia', fr: 'Silésie' },
-  { territory: 241, was: 'Marca di Savona', fr: 'marche de Savone' },
-  { territory: 242, was: 'County of Verona', fr: 'comté de Vérone' },
+  { id: 240, was: 'Silesia', now: 'Silésie' },
+  { id: 241, was: 'Marca di Savona', now: 'marche de Savone' },
+  { id: 242, was: 'County of Verona', now: 'comté de Vérone' },
   {
-    territory: 244,
+    id: 244,
     was: 'Archbishopric and county of Vienne',
-    fr: 'archevêché et comté de Vienne',
+    now: 'archevêché et comté de Vienne',
   },
-  { territory: 245, was: 'County of Geneva', fr: 'comté de Genève' },
-  { territory: 246, was: 'County of Blois', fr: 'comté de Blois' },
+  { id: 245, was: 'County of Geneva', now: 'comté de Genève' },
+  { id: 246, was: 'County of Blois', now: 'comté de Blois' },
   {
-    territory: 247,
+    id: 247,
     was: 'County of Clermont-en-Beauvaisis',
-    fr: 'comté de Clermont-en-Beauvaisis',
+    now: 'comté de Clermont-en-Beauvaisis',
   },
-  { territory: 248, was: 'Danishmendids', fr: 'Danichmendides' },
-  { territory: 252, was: 'Duchy of Saxony', fr: 'duché de Saxe' },
-  { territory: 253, was: 'Lordship of Sangerhausen', fr: 'seigneurie de Sangerhausen' },
-  { territory: 254, was: 'County of Auvergne', fr: "comté d'Auvergne" },
-  { territory: 255, was: 'Duchy of Swabia', fr: 'duché de Souabe' },
+  { id: 248, was: 'Danishmendids', now: 'Danichmendides' },
+  { id: 252, was: 'Duchy of Saxony', now: 'duché de Saxe' },
+  { id: 253, was: 'Lordship of Sangerhausen', now: 'seigneurie de Sangerhausen' },
+  { id: 254, was: 'County of Auvergne', now: "comté d'Auvergne" },
+  { id: 255, was: 'Duchy of Swabia', now: 'duché de Souabe' },
   {
-    territory: 256,
+    id: 256,
     was: 'Duchy of Haute-Lotharingie (Lorraine)',
-    fr: 'duché de Haute-Lotharingie (Lorraine)',
+    now: 'duché de Haute-Lotharingie (Lorraine)',
   },
-  { territory: 257, was: 'County of Boulogne', fr: 'comté de Boulogne' },
-  { territory: 258, was: 'County of Maine', fr: 'comté du Maine' },
-  { territory: 259, was: 'Viscounty of Nice', fr: 'vicomté de Nice' },
-  { territory: 261, was: 'Principality of Novgorod', fr: 'principauté de Novgorod' },
-  { territory: 262, was: 'Diocese of Paris', fr: 'diocèse de Paris' },
-  { territory: 263, was: 'Archdiocese of Lyon', fr: 'archidiocèse de Lyon' },
-  { territory: 264, was: 'County of Rethel', fr: 'comté de Rethel' },
-  { territory: 265, was: 'Lordship of Bâgé', fr: 'seigneurie de Bâgé' },
-  { territory: 266, was: 'Lordship of Avesnes', fr: "seigneurie d'Avesnes" },
-  { territory: 267, was: 'Northern March', fr: 'marche du Nord' },
-  { territory: 268, was: 'County of Beichlingen', fr: 'comté de Beichlingen' },
-  { territory: 292, was: 'county of Sabbioneta', fr: 'comté de Sabbioneta' },
-  { territory: 294, was: 'county of Bolzano', fr: 'comté de Bolzano' },
-  { territory: 295, was: 'county of Rota', fr: 'comté de Rota' },
-  { territory: 296, was: 'county of the Alberti at Prato', fr: 'comté des Alberti à Prato' },
-  { territory: 297, was: 'county of the Aldobrandeschi', fr: 'comté des Aldobrandeschi' },
-  { territory: 298, was: 'county of the Guidi', fr: 'comté des Guidi' },
+  { id: 257, was: 'County of Boulogne', now: 'comté de Boulogne' },
+  { id: 258, was: 'County of Maine', now: 'comté du Maine' },
+  { id: 259, was: 'Viscounty of Nice', now: 'vicomté de Nice' },
+  { id: 261, was: 'Principality of Novgorod', now: 'principauté de Novgorod' },
+  { id: 262, was: 'Diocese of Paris', now: 'diocèse de Paris' },
+  { id: 263, was: 'Archdiocese of Lyon', now: 'archidiocèse de Lyon' },
+  { id: 264, was: 'County of Rethel', now: 'comté de Rethel' },
+  { id: 265, was: 'Lordship of Bâgé', now: 'seigneurie de Bâgé' },
+  { id: 266, was: 'Lordship of Avesnes', now: "seigneurie d'Avesnes" },
+  { id: 267, was: 'Northern March', now: 'marche du Nord' },
+  { id: 268, was: 'County of Beichlingen', now: 'comté de Beichlingen' },
+  { id: 292, was: 'county of Sabbioneta', now: 'comté de Sabbioneta' },
+  { id: 294, was: 'county of Bolzano', now: 'comté de Bolzano' },
+  { id: 295, was: 'county of Rota', now: 'comté de Rota' },
+  { id: 296, was: 'county of the Alberti at Prato', now: 'comté des Alberti à Prato' },
+  { id: 297, was: 'county of the Aldobrandeschi', now: 'comté des Aldobrandeschi' },
+  { id: 298, was: 'county of the Guidi', now: 'comté des Guidi' },
   {
-    territory: 300,
+    id: 300,
     was: 'county of the Cadolingi at Fucecchio',
-    fr: 'comté des Cadolingi à Fucecchio',
+    now: 'comté des Cadolingi à Fucecchio',
   },
-  { territory: 301, was: 'Principality of Peremyshl', fr: 'principauté de Peremychl' },
-  { territory: 302, was: 'Grafschaft Dießen', fr: 'comté de Dießen' },
+  { id: 301, was: 'Principality of Peremyshl', now: 'principauté de Peremychl' },
+  { id: 302, was: 'Grafschaft Dießen', now: 'comté de Dießen' },
   {
-    territory: 303,
+    id: 303,
     was: 'the Goseck inheritance at Zscheiplitz',
-    fr: "l'héritage de Goseck à Zscheiplitz",
+    now: "l'héritage de Goseck à Zscheiplitz",
   },
-  { territory: 304, was: 'County Palatine of Saxony', fr: 'comté palatin de Saxe' },
-  { territory: 305, was: 'Olomoucký úděl', fr: "apanage d'Olomouc" },
-  { territory: 306, was: 'county of Wettin', fr: 'comté de Wettin' },
-  { territory: 307, was: 'burgraviate of Magdeburg', fr: 'burgraviat de Magdebourg' },
+  { id: 304, was: 'County Palatine of Saxony', now: 'comté palatin de Saxe' },
+  { id: 305, was: 'Olomoucký úděl', now: "apanage d'Olomouc" },
+  { id: 306, was: 'county of Wettin', now: 'comté de Wettin' },
+  { id: 307, was: 'burgraviate of Magdeburg', now: 'burgraviat de Magdebourg' },
   {
-    territory: 309,
+    id: 309,
     was: 'Tunis, the Khurasanid principality',
-    fr: 'Tunis, la principauté khorassanide',
+    now: 'Tunis, la principauté khorassanide',
   },
-  { territory: 310, was: 'Zirid emirate of Ifriqiya', fr: "émirat ziride d'Ifriqiya" },
-  { territory: 311, was: 'Hronský Beňadik monastery', fr: 'monastère de Hronský Beňadik' },
+  { id: 310, was: 'Zirid emirate of Ifriqiya', now: "émirat ziride d'Ifriqiya" },
+  { id: 311, was: 'Hronský Beňadik monastery', now: 'monastère de Hronský Beňadik' },
   {
-    territory: 312,
+    id: 312,
     was: 'Pannonhalma Archabbey and its lands',
-    fr: 'archiabbaye de Pannonhalma et ses terres',
+    now: 'archiabbaye de Pannonhalma et ses terres',
   },
-  { territory: 313, was: 'Százd abbey', fr: 'abbaye de Százd' },
-  { territory: 314, was: 'Bakonybél Abbey and its lands', fr: 'abbaye de Bakonybél et ses terres' },
-  { territory: 315, was: 'Pécsvárad Abbey and its lands', fr: 'abbaye de Pécsvárad et ses terres' },
+  { id: 313, was: 'Százd abbey', now: 'abbaye de Százd' },
+  { id: 314, was: 'Bakonybél Abbey and its lands', now: 'abbaye de Bakonybél et ses terres' },
+  { id: 315, was: 'Pécsvárad Abbey and its lands', now: 'abbaye de Pécsvárad et ses terres' },
   {
-    territory: 316,
+    id: 316,
     was: 'Michaelsberg Abbey, Bamberg and its lands',
-    fr: 'abbaye du Michaelsberg de Bamberg et ses terres',
+    now: 'abbaye du Michaelsberg de Bamberg et ses terres',
   },
-  { territory: 317, was: 'Nienburg Abbey and its lands', fr: 'abbaye de Nienburg et ses terres' },
-  { territory: 319, was: 'diocese of Knin', fr: 'diocèse de Knin' },
-  { territory: 320, was: 'principality', fr: 'principauté de Zaslavl' },
-  { territory: 325, was: 'Ostrov Abbey', fr: "abbaye d'Ostrov" },
-  { territory: 327, was: 'Kingdom of Galicia', fr: 'royaume de Galice' },
-  { territory: 328, was: 'see of Eger', fr: "évêché d'Eger" },
-  { territory: 329, was: 'see of Transylvania', fr: 'évêché de Transylvanie' },
-  { territory: 330, was: 'see of Vác', fr: 'évêché de Vác' },
+  { id: 317, was: 'Nienburg Abbey and its lands', now: 'abbaye de Nienburg et ses terres' },
+  { id: 319, was: 'diocese of Knin', now: 'diocèse de Knin' },
+  { id: 320, was: 'principality', now: 'principauté de Zaslavl' },
+  { id: 325, was: 'Ostrov Abbey', now: "abbaye d'Ostrov" },
+  { id: 327, was: 'Kingdom of Galicia', now: 'royaume de Galice' },
+  { id: 328, was: 'see of Eger', now: "évêché d'Eger" },
+  { id: 329, was: 'see of Transylvania', now: 'évêché de Transylvanie' },
+  { id: 330, was: 'see of Vác', now: 'évêché de Vác' },
   {
-    territory: 331,
+    id: 331,
     was: "St Peter's Abbey on the Altenburg, Merseburg",
-    fr: "abbaye Saint-Pierre de l'Altenburg, à Mersebourg",
+    now: "abbaye Saint-Pierre de l'Altenburg, à Mersebourg",
   },
-  { territory: 332, was: 'County of Penthièvre', fr: 'comté de Penthièvre' },
-  { territory: 333, was: 'Benedictine abbey of Tihany', fr: 'abbaye bénédictine de Tihany' },
-  { territory: 336, was: 'Abbasid Caliphate', fr: 'califat abbasside' },
+  { id: 332, was: 'County of Penthièvre', now: 'comté de Penthièvre' },
+  { id: 333, was: 'Benedictine abbey of Tihany', now: 'abbaye bénédictine de Tihany' },
+  { id: 336, was: 'Abbasid Caliphate', now: 'califat abbasside' },
   {
-    territory: 337,
+    id: 337,
     was: 'abbey of Sahagún, lord of the town',
-    fr: 'abbaye de Sahagún, seigneur de la ville',
+    now: 'abbaye de Sahagún, seigneur de la ville',
   },
   {
-    territory: 338,
+    id: 338,
     was: 'see of Palencia, lord of the city',
-    fr: 'évêché de Palencia, seigneur de la ville',
+    now: 'évêché de Palencia, seigneur de la ville',
   },
   {
-    territory: 340,
+    id: 340,
     was: 'lordship and advocacy of Béthune',
-    fr: 'seigneurie et avouerie de Béthune',
+    now: 'seigneurie et avouerie de Béthune',
   },
-  { territory: 341, was: 'viscounty of Marsan', fr: 'vicomté de Marsan' },
-  { territory: 343, was: 'Elsass', fr: 'Alsace' },
+  { id: 341, was: 'viscounty of Marsan', now: 'vicomté de Marsan' },
+  { id: 343, was: 'Elsass', now: 'Alsace' },
 ]
 
 /**
  * Give the territories their French name (`payload run src/seed/frenchTerritoryNames.ts`, from `packages/cms`,
- * `DATABASE_URL` absolute) — once. Through Payload's Local API, so the titles and the links that cite a territory are
- * renamed by its hook and the record passes the same rules as the form. A territory that no longer bears its old name
- * is left as it is and said. A refusal of Payload, or a territory deleted since, stops the run with Payload's own
- * error, which does not name the territory: the renames before it stay done, and a second run skips them by their
- * old name.
+ * `DATABASE_URL` absolute) — once; the titles and the links that cite a territory are renamed by its hook. Run on
+ * 2026-11-23; a second run renames nothing and says so for each.
  */
 const payload = await getPayload({ config })
 await assertMigrated(payload, await readMigrationFiles({ payload }))
-let done = 0
-for (const entry of FRENCH_NAMES) {
-  const territory = await payload.findByID({
-    collection: 'territories',
-    id: entry.territory,
-    depth: 0,
-  })
-  if (territory.name !== entry.was) {
-    console.warn(`[CMS] territory ${String(entry.territory)} « ${territory.name} »: left as it is`)
-    continue
-  }
-  await payload.update({
-    collection: 'territories',
-    id: entry.territory,
-    data: { name: entry.fr },
-  })
-  done += 1
-}
+const done = await renameRecords(payload, 'territories', FRENCH_NAMES)
 console.warn(
   `[CMS] territories given their French name: ${String(done)} of ${String(FRENCH_NAMES.length)}`
 )
