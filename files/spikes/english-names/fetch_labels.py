@@ -1,4 +1,4 @@
-"""The English label Wikidata gives each place and each territory of a COPY of the CMS's base (CMS-495).
+"""The English label Wikidata gives each place, territory and person of a COPY of the CMS's base (CMS-495).
 
     python3 -I fetch_labels.py <copy.db> <out.json>
 
@@ -18,6 +18,7 @@ labels = json.load(open(out))["labels"] if os.path.exists(out) else {}
 con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
 ids = {q for (q,) in con.execute("select wikidata from places where wikidata is not null and wikidata <> ''")}
 ids |= {q for (q,) in con.execute("select wikidata from territories where wikidata is not null and wikidata <> ''")}
+ids |= {q for (q,) in con.execute("select wikidata from people where wikidata is not null and wikidata <> ''")}
 missing = sorted(ids - labels.keys())
 print("identifiants:", len(ids), "| à demander:", len(missing), flush=True)
 lost = 0

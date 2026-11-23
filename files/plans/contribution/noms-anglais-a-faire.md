@@ -2,14 +2,16 @@
 
 > Écrit par le codeur le 23/11/2026, après le rattrapage des noms anglais. Le nom anglais de chaque lieu et de chaque
 > territoire a été lu dans Wikidata, par son identifiant, et écrit dans la base. Ce qui suit est ce que Wikidata ne
-> nomme pas, ou nomme mal : à compléter ou à corriger dans le CMS, quand ton travail en cours le permet. Un lieu se
-> corrige dans sa fiche, la langue de la page sur « English » ; un territoire, dans son tableau « Le nom dans les
-> autres langues ».
+> nomme pas, ou nomme mal : à compléter ou à corriger dans le CMS, quand ton travail en cours le permet. Un lieu et
+> un territoire se corrigent dans leur tableau « Le nom dans les autres langues » — l'anglais y est obligatoire depuis
+> le 23/11 au soir : un lieu ou un territoire sans ligne anglaise est refusé à son prochain enregistrement, donc on la
+> lui donne dans la même mise à jour.
 
 - **159 lieux** : Wikidata ne leur donne aucun nom anglais.
 - **56 territoires** n'ont pas d'identifiant Wikidata, et **21** en ont un sans nom anglais.
 - **60 lieux** ont reçu un nom anglais qui porte une précision (« Jesenice, Omiš ») ou qui n'est pas de l'anglais : à relire.
 - **311 territoires** ont reçu leur nom anglais de Wikidata : à relire tous, car Wikidata nomme parfois autre chose que l'État (« Roman Catholic Archdiocese of Cologne », « Church of St Philibert »).
+- **113 personnes** n'ont pas d'identifiant Wikidata, et **15** en ont un sans nom anglais (ajouté le 23/11 au soir : les 391 autres ont reçu le nom anglais de Wikidata). Une personne se corrige dans sa fiche, la langue de la page sur « English ».
 
 ## Les lieux sans nom anglais dans Wikidata
 
@@ -642,3 +644,141 @@
 | 375 | Ranes | Rani | Q683900 |
 | 376 | Hévelles | Hevelli | Q165148 |
 | 378 | Ukranes | Ukrani | Q163353 |
+
+## Les personnes sans identifiant Wikidata
+
+| n° de la personne | nom français |
+| --- | --- |
+| 317 | Mubashshir |
+| 321 | Walcher (Gaucher) |
+| 322 | Manassès, évêque pontifical |
+| 323 | Pierre Ier, abbé de Tournus |
+| 324 | Guillaume II le Jeune de Forez |
+| 328 | Sulayman |
+| 330 | Arnau Guillem, vicomte de Fenouillèdes |
+| 331 | Ibn Galbun |
+| 332 | Wibert, évêque de Turin |
+| 333 | Anselme, évêque de Novare |
+| 334 | Oddon III, évêque d'Asti |
+| 336 | Adalberto, évêque d'Albenga |
+| 337 | Wido, évêque de Tortone |
+| 339 | Landolfo da Carcano |
+| 341 | Rainaldo, évêque de Lodi |
+| 342 | Geoffroi II de Lecce |
+| 343 | Petrus Cizarella |
+| 345 | Giacomo I, évêque d'Adria |
+| 346 | Reginald, évêque de Belluno |
+| 347 | Arpone, évêque de Feltre |
+| 348 | Gumpold, évêque de Trévise |
+| 349 | Aimone, évêque-comte de Ceneda |
+| 350 | Regimpoto, évêque de Concordia |
+| 351 | Riwinus, évêque de Concordia |
+| 352 | Herbert d'Ariano |
+| 354 | Tebald, évêque de Città di Castello |
+| 355 | Rusticus, évêque de Gubbio |
+| 356 | Pierre V, évêque de Volterra |
+| 357 | Wido, évêque de Parme |
+| 359 | Bonseniore, évêque de Reggio |
+| 361 | Albéric, évêque d'Ascoli |
+| 362 | Azzon, évêque de Fermo |
+| 364 | Hugues Ier de Molise |
+| 365 | Poppon III d'Istrie |
+| 369 | Enguerrand de Coucy, évêque de Laon |
+| 370 | Bouchard II de Corbeil |
+| 374 | Jean Comnène, duc de Dyrrachium |
+| 376 | Anto de Brixen |
+| 383 | Raoul V de Déols |
+| 384 | Grégoire III de Tusculum |
+| 389 | Goscelin de Lezay |
+| 390 | Wezelin |
+| 391 | Fabien |
+| 393 | Isoard |
+| 395 | Mansur ibn Umara |
+| 397 | Alfried |
+| 400 | Otton d'Ilsenburg |
+| 401 | Cú Caisil Ua Cerbaill |
+| 402 | Ibrahim ibn Inal |
+| 406 | Pierre II de Césières |
+| 409 | Beccemanus |
+| 411 | Gaitelgrima de Sarno |
+| 416 | Reina Toda |
+| 418 | Giacomo Ier |
+| 419 | Ottone d'Imola |
+| 421 | Ezzelino |
+| 425 | Grégoire II de Verruca |
+| 426 | Philippe de Luni |
+| 427 | Serge Ier de Sorrente |
+| 428 | Alfanus |
+| 429 | Sigefroi d'Arezzo |
+| 430 | Wolftrigel |
+| 431 | Ellenhard |
+| 433 | Hugo de Brixen |
+| 434 | Günther II de Hersfeld |
+| 437 | Torbeno d'Arborée |
+| 439 | Sigebald de Lambach |
+| 440 | Richard de Sarno |
+| 441 | Sanche Garcia d'Arberoue |
+| 444 | Serge II de Sorrente |
+| 447 | Günther Ier de Käfernburg |
+| 448 | Alberto di Sambonifacio |
+| 449 | Raimbaud de Grasse |
+| 452 | Henri de Valence |
+| 455 | Friedrich de Bozen |
+| 456 | Ulrich Ier de Bozen |
+| 457 | Alberto II degli Alberti |
+| 458 | Ranieri Malabranca |
+| 461 | Ranieri III del Monte Santa Maria |
+| 462 | Ugo des Cadolingi |
+| 463 | Otto II de Dießen |
+| 467 | 'Abd al-'Aziz ibn 'Abd al-Haqq ibn Khurasan |
+| 472 | Landolfo di Vergiate |
+| 475 | Eble II de Châtelaillon |
+| 476 | Geoffroy II de Vierzon |
+| 482 | Raymond Ier de Palencia |
+| 483 | Robert III de Béthune |
+| 484 | Robert IV de Béthune |
+| 489 | al-Mu'tazz ibn al-Rand |
+| 490 | Alexandre de Novigrad |
+| 493 | Crescenzio Berardi |
+| 494 | Makki ibn Kamil ibn Jami' |
+| 495 | Frédéric Ier de Halberstadt |
+| 496 | Abd Allah ibn Muhammad Nizam al-Dawla |
+| 497 | Pedro II de Lugo |
+| 498 | Diego de Sahagún |
+| 500 | Émirs de la Bulgarie de la Volga |
+| 501 | Rois d'Alanie |
+| 502 | Khans coumans |
+| 503 | Chefs norrois du Groenland |
+| 504 | Ibn Sulaiha |
+| 505 | Consuls de la compagna de Gênes |
+| 507 | Chefs des Lutices |
+| 508 | Rois des Ranes |
+| 509 | Princes des Hévelles |
+| 510 | Chefs des Brizanes |
+| 511 | Chefs des Ukranes |
+| 518 | Musa al-Turkmani |
+| 519 | Saltukides |
+| 524 | Émirs de Kars |
+| 526 | Chordvanel de Sassoun |
+| 527 | Mehmed bey Çubukoğlu |
+| 528 | Mengüjek Gazi |
+
+## Les personnes sans nom anglais dans Wikidata
+
+| n° de la personne | nom français | Wikidata |
+| --- | --- | --- |
+| 22 | Q114958763 | Q114958763 |
+| 23 | Q115309234 | Q115309234 |
+| 24 | Maison de Baugé | Q136540431 |
+| 27 | Eppan | Q16064214 |
+| 28 | Herren von Perg und Machland | Q1613989 |
+| 29 | Goseck | Q17127527 |
+| 33 | maison de Vienne | Q22683444 |
+| 55 | Maison de Grasse (Seigneurs d'Antibes) | Q97366211 |
+| 61 | Q135011412 | Q135011412 |
+| 62 | Première maison comtale de Provence | Q135401561 |
+| 145 | Alberto di Biandrate | Q131832530 |
+| 211 | Adémar III de Limoges | Q30887573 |
+| 386 | Friedrich de Goseck | Q131702525 |
+| 403 | Abd al-Malik ibn Hudayl | Q124611442 |
+| 424 | Guy de Thiern | Q131305392 |
