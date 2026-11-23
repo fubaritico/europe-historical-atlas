@@ -57,16 +57,16 @@ journal too; `under.mts` and `titlemap.py` (no longer called) and `extract_backf
 
 ## The layout — always the same
 
+The research's workspace is the archive disk, `/Volumes/Acer/atlas-historien/` (`/find-sources`, « The archive »):
+the journal and `registre/attempts.jsonl` at its root, and a run's lots under its zone's `travail/`:
+
 ```
-files/resources/historien/
-├── outils/                 local launchers only (start-cms.sh); the method's scripts are this skill's scripts/
-├── journal.log             what is being done, one dated French line each — the dev follows it with tail -f
-├── registre/               attempts.jsonl — one line per attempt (log.py attempt); the gate counts them
-└── <year>/<region>/<lot>/  cand.json, meta.json, tri-*.json, verdict-*.json, wave*/enter-*.json, result-*.json
-                            — the time of the run only: the tear down deletes it
+/Volumes/Acer/atlas-historien/<year>/<zone>/travail/<lot>/
+    cand.json, meta.json, tri-*.json, verdict-*.json, wave*/enter-*.json, result-*.json, rend/
+    — the time of the run only: what serves again is filed by archive.py, the rest emptied on the dev's word
 ```
 
-Nothing of mine lies flat in `files/resources/`; nothing of the dev's is moved.
+The internal disk keeps only `files/resources/historien/outils/` (local launchers); nothing of the dev's is moved.
 
 ## The ten steps
 

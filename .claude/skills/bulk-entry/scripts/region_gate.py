@@ -1,6 +1,6 @@
 """The gate of a region: no place of a region is entered with a holder before its books were read.
 
-Reads the attempts register (files/resources/historien/registre/attempts.jsonl) and the region's note
+Reads the attempts register (/Volumes/Acer/atlas-historien/registre/attempts.jsonl) and the region's note
 (files/plans/sources/<year>/<region>.md), and refuses (exit 1) while one of these is missing:
   1. the region's note, with its sections « Index references » and « Attempts »;
   2. one attempt per atlas on disk (files/resources/other-historical-atlases-pdf/*.pdf) for this region —
@@ -27,7 +27,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 YEAR, REGION = int(sys.argv[1]), sys.argv[2]
 NOTE = ROOT / 'files/plans/sources' / str(YEAR) / (REGION + '.md')
-ATTEMPTS = ROOT / 'files/resources/historien/registre/attempts.jsonl'
+ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 ATLASES = ROOT / 'files/resources/other-historical-atlases-pdf'
 # The channels the dev made compulsory on 2026-11-23: none is skipped, a search there may only come back empty.
 CHANNELS = ('wikipedia-bibliography', 'jstor', 'gallica', 'bnf', 'archive-org')

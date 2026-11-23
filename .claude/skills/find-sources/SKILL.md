@@ -43,7 +43,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    written there as a `.md`. Each has its line in the note's « Resources given »: what it is, where it comes
    from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
    every image myself; a name I cannot read is written « illegible », never guessed.
-3. `log.py say` the research; give him once: `tail -f files/resources/historien/journal.log`.
+3. `log.py say` the research; give him once: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
 4. `prepare.py <year> <region> <zone>`: what is at hand (the archive included), the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
    year, in the note. Every line names **the date, the place, the actors, the work and page**. No generality.
@@ -71,35 +71,42 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 19. Write the note: holders by district with work, page, quotation; contrary readings; attempts counted.
 20. A question the six channels did not answer, a work that cannot be had, readings that cannot be told apart:
     **J'AI BESOIN DE TOI** — that case stops, the others go on. All blocked cases on one French page,
-    `files/resources/historien/<year>/<region>/besoin-de-toi.md`, opened for him: per case, four lines at most
+    `<year>/<zone>/resultats/besoin-de-toi.md` in the archive, opened for him: per case, four lines at most
     and one simple question.
 21. `region_gate.py <year> <region>`. Refused: back to the missing channel.
 22. `/enter-in-cms`, then the message to the coder.
 
 **Archive and tear down — never skipped**
 
-23. File everything in the archive (« The archive ») with `archive.py`: `work` for each work read, `read` for each
-    reading, `given` for what he gave, `note`, then `close`. Read each `.md` back.
-24. Then empty the internal disk: list what goes, with sizes (`inventory.py`), show it, ask him, delete on his
-    word — downloads, lot folders, the environment, the scratchpad. Wikipedia pages are not archived.
-    The base, the note in git and the archive stay.
+23. File everything with `archive.py`: `work` for each work read, `read` for each reading, `given` for what he
+    gave, `note`, then `close`. Read each `.md` back.
+24. Clean: `inventory.py` lists, with sizes, what `travail/` still holds (Wikipedia pages, lots, copies) and
+    anything left on the internal disk; show it, ask him, delete on his word. The base, the note and the archive stay.
 
-## The archive — `/Volumes/Acer/atlas-historien/`
+## The archive — `/Volumes/Acer/atlas-historien/` — the research's workspace
 
-The external disk the dev lends so that a research serves the next ones. **What can serve again is at the root;
-what belongs to one year and one zone is under that year.** French names; what a person reads is a `.md`.
+The external disk the dev allocates — **not given, not mine** — and **the single source of truth of the research**:
+everything a research reads, downloads, tries and finds lives there, nothing on the internal disk, nothing in the
+scratchpad. **What can serve again is at the root; what belongs to one year and one zone is under that year.**
+Being allocated: tidy and readable by a person, every folder with its `fiche.md`; nothing of his touched
+(`ATLAS-BOOKS/`, the PDFs at its root); nothing deleted without his word; never filled for nothing. French names;
+what a person reads is a `.md`.
 
 ```
 atlas-historien/
 ├── LISEZ-MOI.md              how it is filed, one page
+├── journal.log               the journal he follows: tail -f /Volumes/Acer/atlas-historien/journal.log
+├── registre/attempts.jsonl   every attempt of every research (log.py attempt); the gate reads it
 ├── ouvrages/                 REUSABLE — one folder per work, once: <author>-<year>-<short-title>/
 │   ├── index.md              every work: author, title, what it covers (regions, centuries), the researches it served
-│   └── <work>/               fiche.md · texte.txt · livre.pdf · pages/p-<n>.png
+│   └── <work>/               fiche.md · texte.txt · livre.pdf · pages/p-<n>.png — fetched straight here
+├── lieux/                    REUSABLE — per place, the dated sentences read before 2026-11-23 (primings, never proofs)
 └── <year>/<zone>/            ONE RESEARCH
     ├── fiche.md              what was asked, when, where it stands, what is left
     ├── donne/                what the dev gave, numbered
-    ├── recherches/           lectures.md · essais.md · journal.log
-    └── resultats/            extraits.md · note-de-region.md (a copy; the original is in git)
+    ├── recherches/           lectures.md · essais.md · journal.log (its part) · avant-2026-11-23/ (quality not assured)
+    ├── resultats/            extraits.md · note-de-region.md · besoin-de-toi.md
+    └── travail/              the work in progress: Wikipedia pages, lots, copies — emptied at the end, on his word
 ```
 
 - `<work>/fiche.md`: author, title, publisher, year, kind, in copyright or not, where found and when, its

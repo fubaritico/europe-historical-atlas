@@ -16,7 +16,7 @@ import sqlite3
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = ROOT / 'files/resources/historien/journal.log'
+JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
 WORKS = ('primary', 'scholarly', 'historian-atlas')
 
 

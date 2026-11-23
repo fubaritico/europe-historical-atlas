@@ -1,6 +1,6 @@
 """The research journal the dev follows in his terminal (the dev, 2026-11-23: "I want logs — I am checking, I found
 this, I do that, the date"). One line per thing done, in French, dated to the second, printed and appended to
-files/resources/historien/journal.log. He follows it with:  tail -f files/resources/historien/journal.log
+/Volumes/Acer/atlas-historien/journal.log. He follows it with:  tail -f /Volumes/Acer/atlas-historien/journal.log
 
   python3 -I log.py say "<what I am doing or what I found>"
   python3 -I log.py attempt '<one attempt as JSON — the fields are region_gate.py's>'
@@ -15,15 +15,17 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = ROOT / 'files/resources/historien/journal.log'
-ATTEMPTS = ROOT / 'files/resources/historien/registre/attempts.jsonl'
+JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
+ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 WORDS = {'found': 'TROUVÉ', 'nothing': 'RIEN', 'refused': 'REFUSÉ', 'not available': 'INACCESSIBLE',
          'not relevant': 'HORS SUJET'}
 NEEDED = ('year', 'region', 'kind', 'where', 'words', 'result')
 
 
 def say(message):
-    """Print one dated line and append it to the journal."""
+    """Print one dated line and append it to the journal; stop when the archive's disk is absent."""
+    if not JOURNAL.parent.is_dir():
+        sys.exit('DISQUE ABSENT — %s introuvable : branche le disque Acer, la recherche reprend ensuite.' % JOURNAL.parent)
     line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
     print(line, flush=True)
     with JOURNAL.open('a', encoding='utf-8') as out:

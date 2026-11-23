@@ -6,8 +6,18 @@
 > never attributed to a person (memory `a-reading-is-never-attributed-to-the-dev`).
 
 **À faire dès qu'il a fini ses retouches de 1100** (sa demande, 13/11 : _« il ne faut pas qu'on se retrouve pollué par
-plein de trucs »_) : effacer `files/resources/historien/1100/1100-retouches.md`, son document de lecture des sept retouches. Les notes
+plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `files/plans/sources/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
+
+## ▶ Le 23/11 au soir : le disque Acer est l'espace de travail des recherches
+
+**Sa décision** : `/Volumes/Acer/atlas-historien/` est l'espace de travail alloué aux recherches — alloué, pas donné,
+pas à moi — et leur unique source de vérité. Le journal se suit par `tail -f /Volumes/Acer/atlas-historien/journal.log`.
+Fait : l'ancien matériel de 1100 y est copié et vérifié (13 409 fichiers), le journal, les essais et mes deux listes de
+1100 y sont déplacés, tous les scripts y pointent (`archive.py`, `count_sheets.py`, `find_book.py` nouveaux).
+**Reste sur le disque interne, en attente de sa commande** (la suppression m'est refusée) : `files/resources/historien/`
+`1100/`, `extraits/`, `registre/reads.jsonl` — 744 Mo, tous copiés sur Acer. **L'Anatolie** : contexte 1071–1101 écrit
+(`files/plans/sources/1100/anatolia.md`, non commitée), 138 fiches comptées ; la suite est la confrontation fiche par fiche.
 
 ## ▶ ON REPREND ICI — 23/11, 14 h 18 : la méthode de recherche refaite et commitée ; aucune recherche lancée
 
@@ -123,7 +133,7 @@ pas** — `[ATLAS-152]` est `EHA-152` dans Jira. L'historien y a son compte, « 
 sources de 1100 et de 1300) lui sont attribués.
 
 **La retouche de la 1100** (sa demande, 20/11 : zéro ville mal placée, avant le contrôle de la CI) : mesurer par
-`pnpm cities:alerts --map 1100`, jamais lui demander ; ma liste de travail `files/resources/historien/1100/alertes-1100.md`.
+`pnpm cities:alerts --map 1100`, jamais lui demander ; ma liste de travail `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/alertes-1100.md`.
 42 alertes le matin → 34 à 15 h 40 (Levant, Jablé, Kungälv, Vladimir, Cardona en enclave). Suivante : Ancyre aux
 Danichmendides. Mes fiches douteuses encore à relire : Gênes, Lüttgen-Salbke, Schrenz, Altenmarkt, Reisenberg, Velilla de
 Cinca, Città di Castello, Desenzano, Miliana, Tripoli (Libye), Brest. Après chaque correction de la base : l'export, par moi.

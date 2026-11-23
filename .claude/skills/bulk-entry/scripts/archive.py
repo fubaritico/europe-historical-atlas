@@ -11,14 +11,16 @@ did in the journal. It never deletes and never overwrites a file it did not writ
   python3 -I archive.py close <year> <zone> <journal.log> <attempts.jsonl> <region key of the attempts>
 
 check — the disk is mounted, or DISQUE ABSENT and exit 1.
-open  — creates <year>/<zone>/ with donne/, recherches/, resultats/ and its fiche.md.
-work  — creates ouvrages/<folder>/ (fiche.md, texte.txt copied) and its line in ouvrages/index.md; an existing
-        work is left as it is. <folder> is <author>-<year>-<short-title>, lowercase, no accents.
+open  — creates <year>/<zone>/ with donne/, recherches/, resultats/, travail/ and its fiche.md. travail/ is
+        where the research downloads and works (pages, lots, copies); it is emptied at the end, on his word.
+work  — creates ouvrages/<folder>/ (fiche.md, texte.txt copied — or `-` when the text is already there, fetched
+        straight into it by find_book.py) and its line in ouvrages/index.md; an existing work is left as it is.
+        <folder> is <author>-<year>-<short-title>, lowercase, no accents.
 read  — one line in <year>/<zone>/recherches/lectures.md, and the research in the work's fiche.md.
 given — copies what the dev gave to donne/, numbered after the last one (his original stays where it is).
 note  — copies the region's note to resultats/note-de-region.md.
 close — writes recherches/essais.md from the attempts and recherches/journal.log from the research's start;
-        then compares every file of the zone and of the works with what was written (sizes), and says it.
+        says the files of the zone, those left empty, and what travail/ still holds (to empty on his word).
 """
 import datetime
 import json
@@ -29,9 +31,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = ROOT / 'files/resources/historien/journal.log'
 # the disk the dev lends; ARCHIVE_HISTORIEN points elsewhere only to try the script on a copy
 ARCHIVE = pathlib.Path(os.environ.get('ARCHIVE_HISTORIEN', '/Volumes/Acer/atlas-historien'))
+JOURNAL = ARCHIVE / 'journal.log'
 TODAY = datetime.date.today().strftime('%d/%m/%Y')
 
 
@@ -85,7 +87,7 @@ if command == 'check' and len(args) == 1:
 elif command == 'open' and len(args) == 4:
     year, zone, asked = args[1:]
     path = ARCHIVE / year / zone
-    for sub in ('donne', 'recherches', 'resultats'):
+    for sub in ('donne', 'recherches', 'resultats', 'travail'):
         (path / sub).mkdir(parents=True, exist_ok=True)
     fiche = path / 'fiche.md'
     block = '\n## La recherche du %s\n\n**Demandée** : %s\n\n**Où elle en est** : ouverte.\n' % (TODAY, asked)
@@ -121,7 +123,8 @@ elif command == 'work' and len(args) == 10:
 | recherche | date | pages | pour quoi |
 | --- | --- | --- | --- |
 """ % (author, title, author, title, publisher, year, kind, where, TODAY,
-       '`texte.txt` — le texte entier' if text != '-' else 'rien encore (pas de texte téléchargé)', covers),
+       '`texte.txt` — le texte entier' if (path / 'texte.txt').exists() else 'rien encore (pas de texte téléchargé)',
+       covers),
         encoding='utf-8')
     append(ARCHIVE / 'ouvrages/index.md',
            '# Les ouvrages de l\'archive\n\n| dossier | auteur | titre | éditeur, année | ce qu\'il couvre | recherches où il a servi |\n| --- | --- | --- | --- | --- | --- |\n',
@@ -181,6 +184,10 @@ elif command == 'close' and len(args) == 6:
     clean(path)
     empty = [p for p in path.rglob('*') if p.is_file() and not p.name.startswith('._') and p.stat().st_size == 0]
     count = sum(1 for p in path.rglob('*') if p.is_file() and not p.name.startswith('._'))
+    work = [p for p in (path / 'travail').rglob('*') if p.is_file()] if (path / 'travail').is_dir() else []
+    if work:
+        say('archive : travail/ garde %d fichiers, %.0f Mo — à vider sur son accord (pages Wikipédia, lots, copies)'
+            % (len(work), sum(p.stat().st_size for p in work) / 1e6))
     say('archive : %s/%s fermée — %d essais, %d lignes de journal, %d fichiers%s'
         % (year, zone, len(rows) - 4, len(kept), count, ', %d VIDES' % len(empty) if empty else ', aucun vide'))
 

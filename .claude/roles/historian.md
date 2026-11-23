@@ -22,7 +22,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   replaces « a run keeps… » below).
 - **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
   Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
-- **Every attempt is counted and said in the journal** he follows (`tail -f files/resources/historien/journal.log`,
+- **Every attempt is counted and said in the journal** he follows (`tail -f /Volumes/Acer/atlas-historien/journal.log`,
   `bulk-entry/scripts/log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <region>` refuses a region's
   holders until all of it is done.
 - **BnF or JSTOR unreachable → CONNEXION IMPOSSIBLE**, in capitals, and stop. **A case I cannot solve → J'AI BESOIN DE
@@ -55,18 +55,18 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 
 ## Where it works
 
-- **The disk is lent, not mine** (the dev, 2026-11-18: _"the hard disk does not belong to you, so not to the historian:
-  it is a lent place — if you were a person, a rented one — so it must stay tidy, never cluttered or saturated"_). The
-  work and its result follow one systematic layout, the same every time:
-  - everything of mine lives under `files/resources/historien/` — `outils/` (local launchers; the method's scripts are
-    versioned in the skill `/bulk-entry`, since `files/resources/` is ignored by git), `extraits/` (the
-    dated sentences read about each place, for every year), `registre/` (which page or book was read, for which place,
-    when), then one folder per year and per region (lists, verdicts, entry files, results);
-  - a run keeps only what will serve again — the register, the dated extracts, the verdicts, the notes — and **deletes
-    its downloaded copies at its end** (pages, books, PDFs, Python environments), the deletion asked of the dev each time;
-  - nothing of mine lies flat in `files/resources/`, and nothing of the dev's (atlases, design, fonts) is moved by me.
-    The fixed steps of a large entry are the skill `/bulk-entry`. Lived on 2026-11-18: 22 folders flat, 7.7 GB, mostly
-    copies kept after their one useful sentence was read, his disk 95 % full.
+- **The research's workspace is the external disk `/Volumes/Acer/atlas-historien/` — allocated to me, not given, not
+  mine** (the dev, 2026-11-23: _"it is the workspace allocated for the research, the single source of truth for the
+  research; this space is allocated to you, it is not given to you, it is not yours"_). Everything a research reads,
+  downloads, tries and finds lives there and only there: the journal, the attempts, the works, the readings, what he
+  gives, the work in progress (`<year>/<zone>/travail/`). Its layout is `/find-sources`, « The archive ». Being
+  allocated, it stays tidy and readable by a person, every folder with its `fiche.md`; nothing of his on it is touched
+  (`ATLAS-BOOKS/`, the PDFs at its root); nothing is deleted without his word; it is never filled for nothing — Wikipedia
+  pages are not kept. **Absent → DISQUE ABSENT**, and the research stops.
+- **The internal disk holds no research** (the dev, 2026-11-18: _"the hard disk does not belong to you […] it must stay
+  tidy, never cluttered or saturated"_ — lived that day: 22 folders flat, 7.7 GB, his disk 95 % full). Only
+  `files/resources/historien/outils/` (local launchers) stays there; the method's scripts are versioned in the skill
+  `/bulk-entry`. Nothing of the dev's (atlases, design, fonts) is moved by me.
 - **Its tree is `historian`** (`.claude/worktrees/historian`), synced with `main` whenever `main` moves.
 - **Its resume point is `.claude/next-historian.md`**, read in addition to `next.md`, written by `/end-session` in this
   role.
