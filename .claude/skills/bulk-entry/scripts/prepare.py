@@ -19,7 +19,7 @@ JOURNAL = ROOT / 'files/resources/historien/journal.log'
 NOTE = ROOT / 'files/plans/sources' / str(YEAR) / (REGION + '.md')
 ATTEMPTS = ROOT / 'files/resources/historien/registre/attempts.jsonl'
 ATLASES = ROOT / 'files/resources/other-historical-atlases-pdf'
-ORDER = ("ses axes de recherche", "les noms et les hypothèses", "Wikipédia — amorce seulement, et les ouvrages que ses pages citent",
+ORDER = ("ses axes de recherche", "le contexte des dix années d'avant", "les noms et les hypothèses", "Wikipédia — amorce seulement, et les ouvrages que ses pages citent",
          "les PDF du disque", "archive.org", "Gallica", "la BnF (son Chrome, connexion vérifiée)",
          "JSTOR (son Chrome, connexion vérifiée)", "dans chaque livre : l'index, le passage, les notes et la bibliographie — un à deux degrés",
          "la note de région", "les cas bloqués sur une page lisible", "le contrôle region_gate.py", "la saisie")
@@ -43,7 +43,14 @@ if NOTE.exists():
         say('Ses axes de recherche y sont notés.')
     else:
         todo.append("lui demander ses axes de recherche et les noter dans la note (« Axes given »)")
+    if '## Context' in text:
+        say('Le contexte des dix années d\'avant (%d–%d) y est écrit.' % (YEAR - 10, YEAR))
+    else:
+        todo.append("écrire le contexte des dix années d'avant (%d–%d) dans la note (« Context — the ten years "
+                    "before ») avant toute recherche" % (YEAR - 10, YEAR))
 else:
+    todo.append("écrire dans la note le contexte des dix années d'avant (%d–%d), « Context — the ten years before »"
+                % (YEAR - 10, YEAR))
     todo.append("créer la note de région %s, avec ses axes de recherche demandés d'abord" % NOTE.relative_to(ROOT))
 
 pdfs = sorted(p for p in ATLASES.iterdir() if p.suffix.lower() in ('.pdf', '.djvu'))

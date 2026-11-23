@@ -46,8 +46,9 @@ l'ancien matériel (740 Mo) a été refusée par les permissions** : la commande
 garde `alertes-1100.md`, `1100-retouches.md`, `registre/attempts.jsonl` et `REGION-anatolia.md`.
 **Pas encore fait, à faire d'abord** : (1) `holders.json` s'écrit à la main ;
 (2) mes trois tests de pertinence d'un ouvrage (région, époque et cinquante ans avant, index) attendent son mot ;
-ma lecture d'« autant que possible » (une ville sans livre reste saisie, listée « existence à lire ») est à
-confirmer ; lui demander ses axes de recherche
+ma lecture d'« autant que possible » (une ville sans livre reste saisie, listée « existence à lire ») **ne lui est
+plus redemandée** (il s'est fâché de la question) ; **sa règle de 14 h 50** : à la mise en place, j'écris d'abord le
+contexte des dix années d'avant dans la note de région (`/find-sources`, étape 0) ; lui demander ses axes de recherche
 avant chaque recherche ; demander au codeur ce que le Cartographe et `cities:alerts` font d'une fiche sans détenteur ;
 (3) Ancyre : archive.org n'a rendu ni Albert d'Aix ni le Setton, rien n'est lu ; (4) puis l'Anatolie de 1100 refaite
 depuis le Palgrave de Byzance, l'Arménie et le Caucase, la Castille — il n'a pas dit ce qui ne correspond pas en

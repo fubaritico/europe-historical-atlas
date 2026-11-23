@@ -48,7 +48,19 @@ entry point of a reading.
       Each answer is written at once in the region's note (« Axes given », « Resources given »), in his words, and
       said in the journal. A resource given is opened first, before the six channels.
    2. Run `python3 -I .claude/skills/bulk-entry/scripts/prepare.py <year> <region>`: it says in the journal what is
-      at hand (the note, his axes, every PDF on disk, the attempts already made) and the order below.
+      at hand (the note, his axes, the context, every PDF on disk, the attempts already made) and the order below.
+   - **The context — what happened in the ten years before the date** (the dev, 2026-11-23: _"In the preparation
+     of the research, the setup step, you must make yourself a briefing, a context of what happened the four or
+     five years before, or even the ten years before."_). Before any question of holder or of existence is
+     searched, I write for myself, in the region's note under « Context — the ten years before », the course of
+     the region from the date minus ten to the date, year by year: the reigns and their changes, the campaigns and
+     sieges, the conquests and losses, the treaties, the deaths and successions, who entered and who left. It is
+     made after his axes are given, from what is at hand — Wikipedia as priming, the works on disk — each line
+     with where it was read and nothing from memory; it validates nothing. It is what the research is read
+     against: every event of it becomes a hypothesis of step 1 (a place taken in 1097 and lost in 1101 has two
+     holders to tell apart), and a holder that the context makes impossible is a reading to re-read, not to
+     enter. `prepare.py` refuses to call the setup done while the note has no such section. A research is never
+     started on the year alone.
    3. Give him the journal's command: `tail -f files/resources/historien/journal.log`.
    4. **Check the constraints against the task**: reread « The obligation » and « The frame »; a constraint that
       contradicts the request, another constraint or `/enter-in-cms` is said to him **before** starting, never
@@ -100,8 +112,8 @@ Every step is said in the journal as it happens. The detail of each is below.
   whether the existence needs a book as the holder does: _"yes, it must be verified as much as possible"_). For every
   place of a research, its existence at the date is looked for in the works read — the index, the passage, a map's
   legend — through the same channels as the holder, each attempt logged with the hypothesis « existence ». The
-  sentence of a Wikipedia page is the priming here too. **Claude's reading of « as far as possible », to be
-  confirmed**: a place whose existence no work read attests is still entered on its dated Wikipedia sentence, listed
+  sentence of a Wikipedia page is the priming here too. **Claude's reading of « as far as possible »** (not asked of
+  him again): a place whose existence no work read attests is still entered on its dated Wikipedia sentence, listed
   in the region's note as _existence to read_ with its attempts counted — it is not refused, unlike a holder.
 - **Every attempt is written down, the empty ones too**: one line per try in
   `files/resources/historien/registre/attempts.jsonl` — the date, the place or district, the hypothesis, the library or
