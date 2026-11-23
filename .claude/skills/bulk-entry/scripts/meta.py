@@ -4,7 +4,7 @@ The holder is never the polity drawn under the point (the dev, 2026-11-23: the m
 It comes only from <lot>/holders.json, written from the region's note once its books are read:
   {q: {"holderTitle": <id in titles>, "sourceUrl" or "sourceTitle": ..., "where": ..., "quote": ...}}
 When that file exists the region is named (third argument) and region_gate.py must open it; a place absent from the
-file is entered without a holder. Usage: python3 -I meta.py <lot folder> <year> [<region>]"""
+file is entered without a holder. Usage: python3 -I meta.py <lot folder> <year> [<zone>]"""
 import json, os, sys, subprocess, time, urllib.parse, urllib.request, collections, sqlite3
 ROOT = '/Users/stephanecottereau/Desktop/WebstormProjects/europe-map'
 NODE = '/Users/stephanecottereau/.nvm/versions/node/v24.22.1/bin'

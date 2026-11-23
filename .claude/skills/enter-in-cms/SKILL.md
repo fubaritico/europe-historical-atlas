@@ -150,7 +150,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   to leave a place out: climb one level, not to nothing. Only the Empire itself, when no vassal is between, is the holder.
 - **No sheet without a line** (the coder's remark, 2026-11-14, taken by the historian): a sheet with no line asserts the
   place at the date with no source — so the climb above always brings its line. A place is left out only when it did not
-  exist at the date (`not-yet`) or its existence is unknown; it is listed in the region's note (`/Volumes/Acer/atlas-historien/<year>/`).
+  exist at the date (`not-yet`) or its existence is unknown; it is listed in the region's note (`/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md`).
 
 ## The order — sources first, then the place, then the city at a date
 

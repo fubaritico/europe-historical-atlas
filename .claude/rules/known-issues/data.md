@@ -25,8 +25,9 @@ Open issues of the data on disk: `years/`, the relief, the spikes that write the
 - **`years/1200/` is published since 2026-11-08** (Cliopatria, built by `files/spikes/cliopatria-import/`; the dev:
   *« il n'y a rien de bloquant dans le fait d'ajouter des années, des cartes »* — what is online has not been announced).
   A year is published by its exception line in `.gitignore` and its entry in `years/index.json`; a map retouched in a
-  worktree comes back to `main` and is committed like code, then pushed. The `*.autosave.*` and `*.before-claude-*`
-  folders beside them stay the Cartographer's copies, ignored. **Severity: à savoir.**
+  worktree comes back to `main` and is committed like code, then pushed. The `*.autosave.*` folders beside them stay
+  the Cartographer's copies, ignored; the historian's copy of a map before drawing goes to the archive disk
+  (`/Volumes/Acer/atlas-historien/cartes/<year>/`), never beside it. **Severity: à savoir.**
 - **`years/1200/` superposes polities of several years** (seen by the dev on 2026-11-08 in the Cartographer: Kingdom of
   Mann, Kingdom of Alba, Old Kingdom of Norway over one another), though he believed it cleaned to one date. Published
   as it is the same evening. **Remedy**: the script that keeps only the polities of a year — ask the main instance where it

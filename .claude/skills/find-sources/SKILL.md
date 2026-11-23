@@ -44,7 +44,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
    every image myself; a name I cannot read is written « illegible », never guessed.
 3. `log.py say` the research; give him once: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
-4. `prepare.py <year> <region> <zone>`: what is at hand (the archive included), the order, what is still to do.
+4. `prepare.py <year> <zone>`: what is at hand (the archive included), the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
    year, in the note. Every line names **the date, the place, the actors, the work and page**. No generality.
    His points are checked in it; a point that a work contradicts is said with the work's reading.
@@ -73,7 +73,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
     **J'AI BESOIN DE TOI** — that case stops, the others go on. All blocked cases on one French page,
     `<year>/<zone>/resultats/besoin-de-toi.md` in the archive, opened for him: per case, four lines at most
     and one simple question.
-21. `region_gate.py <year> <region>`. Refused: back to the missing channel.
+21. `region_gate.py <year> <zone>`. Refused: back to the missing channel.
 22. `/enter-in-cms`, then the message to the coder.
 
 **Archive and tear down — never skipped**
@@ -171,7 +171,9 @@ Not found / dropped: <quotation not checked, lead that led nowhere>
 ## Agents
 
 None without his number. Research on Opus (`subagent_type: "source-researcher"`, lots of 10–15 places), entry on
-Sonnet. I re-check every quotation an agent brings. Detail and costs: `references/rules-in-full.md`, « Agents ».
+Sonnet. I re-check every quotation an agent brings. An agent saves the texts it reads in its lot's folder
+(`<year>/<zone>/travail/<lot>/sources/`); at the lot's end I file each work in `ouvrages/` (`archive.py work`).
+Detail and costs: `references/rules-in-full.md`, « Agents ».
 
 ## References
 

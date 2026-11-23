@@ -1250,3 +1250,73 @@ phrase de sa page, détenteur = titre 1100 du pays dessiné. Raison « abbaye ou
 dessinées « Taifa of Dénia » (Mahón en alerte) — à lui ; le pipeline de la nuit (QLever, wikitext par 50, texte rendu
 par l'API REST, agents de tri puis de saisie, contrôle par script) est copié dans
 `files/resources/historien/1100/passes/cities-1100-night-1117/` (scripts, verdicts, lots ; les pages téléchargées non gardées).
+
+## Moved out of `next-historian.md` on 2026-11-23, evening (the file past 200 lines) — verbatim
+
+## Avant — 20/11, 15 h 4x : la 1100 vers zéro alerte, avec lui ; puis le Bregel, puis 1200
+
+**Le tableau est dans Jira depuis le 20/11** (sa décision) : la skill `/jira` remplace `/trello`. **Les numéros ne changent
+pas** — `[ATLAS-152]` est `EHA-152` dans Jira. L'historien y a son compte, « Claude Historian » : ATLAS-152 et ATLAS-408 (les
+sources de 1100 et de 1300) lui sont attribués.
+
+**La retouche de la 1100** (sa demande, 20/11 : zéro ville mal placée, avant le contrôle de la CI) : mesurer par
+`pnpm cities:alerts --map 1100`, jamais lui demander ; ma liste de travail `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/alertes-1100.md`.
+42 alertes le matin → 34 à 15 h 40 (Levant, Jablé, Kungälv, Vladimir, Cardona en enclave). Suivante : Ancyre aux
+Danichmendides. Mes fiches douteuses encore à relire : Gênes, Lüttgen-Salbke, Schrenz, Altenmarkt, Reisenberg, Velilla de
+Cinca, Città di Castello, Desenzano, Miliana, Tripoli (Libye), Brest. Après chaque correction de la base : l'export, par moi.
+Fait le 20/11 : Ancyre (lecture seldjoukide ajoutée), Jablé (Ibn Sulaiha, territoire 372), 27 sortes de territoire
+corrigées (rangs et scores CARTO-487, CORE-489 ; la marche à 3, sa décision). Reste à lui : le rang des États pontificaux.
+
+**Mesuré le 20/11 à 18 h 34** (une session de cinq minutes, un essai de démarrage après la migration vers Jira : rien
+saisi, rien dessiné) : toujours 34 alertes sur 13 645 villes, 15 jaunes et 19 rouges. **Ancyre est encore jaune** malgré
+la lecture seldjoukide ajoutée l'après-midi : à regarder en premier. L'arbre `historian` (branche `historian-1109`) a
+deux commits de retard sur `main` : à resynchroniser avant d'y travailler. **Un reste à moi, pas encore rangé** :
+`.claude/skills/bulk-entry/scripts/__pycache__/` dans l'arbre principal, non suivi — il a accordé sa suppression le
+20/11, la commande a été refusée par les permissions ; à refaire en début de session.
+
+**Ensuite** : le PDF *Palgrave Concise Historical Atlas of Central Asia* (`files/resources/other-historical-atlases-pdf/`,
+sous droits : des faits, jamais un tracé) — les tribus de 1100, territoire et couleur non définis. Puis **1200** : les
+mêmes villes, leur détenteur en 1200, et la mesure de ce qui ne change pas d'un siècle à l'autre (une appartenance
+sourcée valable sur un laps de dates ? sa décision à prendre sur cette mesure). Kings and Generals : des pistes par les
+résumés de Gemini, chaque fait relu dans un texte ; les livres cités sous leurs vidéos.
+
+## Avant — 19/11, 23 h 45 : la Rus', le Levant et la Finlande faits ; l'export et CORE-486 attendent
+
+**Fait** (détail : `completed.md`, et les notes de `/Volumes/Acer/atlas-historien/1100/`) :
+
+- **La Rus' en 1100** : 33 lieux (lieux 13576–13608, fiches 13594–13626, sources 5377–5409) — `rus.md`.
+- **Le Levant, Chypre, la Mésopotamie en 1100** : 51 lieux (lieux 13609–13659, fiches 13627–13677, sources 5410–5460),
+  six en alerte exprès — `levant.md`.
+- **La Finlande de 1100** dessinée dans l'arbre principal, commitée par le codeur (`1d8be087`), validée par lui.
+- Les deux lots contrôlés par script et par le codeur ; extraits et registre à jour (3 414 lectures) ; dossiers de travail
+  vidés à sa demande (reste `levant-1100-research/` sans ses pages, 2,6 Mo : listes, verdicts, fichier de saisie).
+- Le script de lecture de `/bulk-entry` (`fetch_rest.py`) lit le Wikipédia de l'adresse, russe et anglais compris.
+
+**Ce qui l'attend, lui** (une question à la fois) :
+
+1. **L'export** : les 51 lieux du Levant ne sont pas dans `content/` — c'est lui qui le lance.
+2. **L'index de la mémoire** : à ranger avec lui (_« on verra ça demain »_) — 166 lignes, 20,5 Ko ; la limite de Claude
+   Code est 200 lignes ou 25 Ko (le « 140 » écrit ici avant était une erreur de ma part).
+3. **La côte du Levant sur sa carte** : dessinée seldjoukide, quand Acre, Sidon, Beyrouth étaient fatimides en 1100 et
+   Tripoli aux Banu Ammar (non dessiné) — `levant.md`.
+
+**Quand le codeur a fini CARTO-487 et CORE-489** (les rangs et leurs scores, dans le CMS et le Cartographe ; sa
+demande, 20/11) : **je remets la base à jour**. Chaque territoire reçoit sa sorte nouvelle quand elle lui va (les Sames et les
+Kvènes en « peuple », les républiques, les confédérations de tribus) ; Jablé (372) passe en seigneurie ; puis je relis
+les avertissements du score, un vassal plus haut que son suzerain, et je corrige ce qui vient de la base.
+
+**CORE-486, sa demande pour plus tard** : la Carélie en hachures moitié Novgorod, moitié transparentes — le code d'abord
+(le codeur), puis la carte : les Caréliens en « Aucune », Novgorod étendu sur eux, dans l'arbre principal. Elle remplace sa
+décision du 18/11 « pas de hachures » : **la barrer dans `finland-topo.md` quand CORE-486 est fait.** Et, avec lui :
+_« comment on peut faire une zone partiellement assurée »_.
+
+**Ensuite, de mon côté** :
+
+- **La Rus', seconde passe** sur la Chronique elle-même : Dorogobouj (1084), Snovsk (1068), Sosnytsia ; et Bouzhsk, que le
+  congrès d'Ouvetitchi (1100) aurait donné à Davyd Igorevitch — un souvenir, à lire avant toute ligne.
+- **Le Levant, seconde passe** pour la densité : Beyrouth, Sidon, Ascalon, Nicosie, Paphos, Samarra, Wasit… (aucune phrase
+  datée sur leur page) ; les titres de Ridwan d'Alep, Duqaq de Damas, des Munqidhites de Shaizar à créer.
+
+**Dessiner dans le Cartographe** : dans l'arbre principal (sa décision, 19/11), sur son serveur une fois qu'il a fermé la
+carte, accordé avec le codeur (un seul auteur par carte) ; copier la carte avant, **sur Acer** (`/Volumes/Acer/atlas-historien/cartes/<année>/<carte>.before-claude-<date>/`, sa règle du 23/11 : rien de moi sur le Mac),
+la supprimer après sa validation.

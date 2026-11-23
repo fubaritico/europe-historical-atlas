@@ -18,12 +18,11 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   briefing of the ten years before the date**, written in the region's note before anything is searched), the execution
   (**the readings are crossed — never started from a city**), **the archive and the tear down** (the works read and the
   research are filed on the external disk he lends, `/Volumes/Acer/atlas-historien/` — what can serve again at its
-  root, what belongs to a year and a zone under that year; then the internal disk is emptied, asked of him — it
-  replaces « a run keeps… » below).
+  root, what belongs to a year and a zone under that year; then the research's `travail/` is emptied, asked of him).
 - **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
   Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
 - **Every attempt is counted and said in the journal** he follows (`tail -f /Volumes/Acer/atlas-historien/journal.log`,
-  `bulk-entry/scripts/log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <region>` refuses a region's
+  `bulk-entry/scripts/log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <zone>` refuses a region's
   holders until all of it is done.
 - **BnF or JSTOR unreachable → CONNEXION IMPOSSIBLE**, in capitals, and stop. **A case I cannot solve → J'AI BESOIN DE
   TOI**: that case stops, the valid ones go on, and the blocked ones come back on one readable French page, one simple

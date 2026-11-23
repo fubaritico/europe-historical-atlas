@@ -22,7 +22,7 @@ year the lot names (`YEAR`), three facts **with sources**:
    every rank and lets a town agree with a map that draws a higher rank. Asked once per lord in the `districts`, never
    per town; a link in doubt keeps both readings.
 
-Your prompt gives three paths: `ROOT` (the research folder), `LOT` (its name), `REGION` (a short note: the region, the
+Your prompt gives three paths: `ROOT` (the run's folder on the archive disk, `/Volumes/Acer/atlas-historien/<year>/<zone>/travail/`), `LOT` (its name), `REGION` (a short note: the region, the
 hypotheses to search, the map's polities and their QIDs, the witnesses earlier lots found useful, the known forgeries).
 Read `REGION` once, then `ROOT/lots/<LOT>.json` once. Nothing else is needed to start.
 

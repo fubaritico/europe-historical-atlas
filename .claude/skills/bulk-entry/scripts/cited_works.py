@@ -2,7 +2,7 @@
 recorded as the attempt « wikipedia-bibliography » of the region. Wikipedia is the priming of the research: this list is
 what the next channels look for (the PDFs on disk, archive.org, Gallica, the BnF, JSTOR), nothing in it is a witness.
 A work is keyed by its author's name and its year when the note gives them (« Cahen 1968 »), else by its first words.
-Usage: python3 -I cited_works.py <lot folder> <year> <region>"""
+Usage: python3 -I cited_works.py <lot folder> <year> <zone>"""
 import collections
 import datetime
 import glob

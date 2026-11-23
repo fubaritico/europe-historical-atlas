@@ -44,7 +44,8 @@ derive the public map — read and compared, never traced); the **cities** settl
 
 ## The measures — `scripts/`
 
-Each prints plain lines; `--help` gives its usage. `--map` is a folder of `years/` (`1100`, `1100.before-claude-…`).
+Each prints plain lines; `--help` gives its usage. `--map` is a folder of `years/` (`1100`) or a path to one — my copy of a map before drawing is on the archive disk
+(`/Volumes/Acer/atlas-historien/cartes/1100/1100.before-claude-…`).
 
 | script | answers |
 | --- | --- |

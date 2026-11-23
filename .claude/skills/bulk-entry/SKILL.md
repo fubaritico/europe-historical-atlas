@@ -37,23 +37,18 @@ map and could never contradict it. Now (`/find-sources`, « Never » and « The 
 3. **A district the note does not cover**: its places are entered without a holder and listed as _holder to read_.
 4. **Step 8 refuses** a holder line whose source is an encyclopaedia alone, or a work absent from the register.
 
-**The gate — run it before step 1, and again before step 7**: `python3 -I scripts/region_gate.py <year> <region>`.
+**The gate — run it before step 1, and again before step 7**: `python3 -I scripts/region_gate.py <year> <zone>`.
 It refuses (exit 1) while the region's note is missing, while **one atlas on disk** (`other-historical-atlases-pdf/`,
 the Palgrave atlas of Byzantine history among them — on disk since 23/10 and never opened until 23/11) has no attempt
 for the region, while the works cited by the Wikipedia pages (their « Sources », « Bibliography », footnotes) were not
 listed, or while no work was read. It prints the attempts by kind and result — the count he judges. A refused region
 gets no holder; never go round it.
 
-**In the scripts since 2026-11-23** (tried that day on a two-page lot and on a copy of `wave1`): `meta.py` no longer
-reads the map — a holder comes only from `<lot>/holders.json`, written from the region's note, and with that file
-present it runs the gate and stops when refused; `mkv.py` carries that holder into the entry files; `verifyv.py`
-refuses « HOLDER NOT FROM THE NOTE », « HOLDER ON AN ENCYCLOPAEDIA ALONE », « HOLDER LINE MISSING » (run on an old
-wave: 70 refused of 70); `fetch_rest.py` keeps the works each page cites (`cited`) and `cited_works.py <lot> <year>
-<region>` ranks them and records the attempt « wikipedia-bibliography »; `meta.py` and `fetch_rest.py` speak in the
-journal. **Since the afternoon of 2026-11-23**: `cand.py`, `sentences.py`, `fixcut.py` and `inventory.py` speak in the
-journal too; `under.mts` and `titlemap.py` (no longer called) and `extract_backfill.py` (it wrote `extraits/` and
-`reads.jsonl`, which the tear down no longer keeps) are removed; `inventory.py` lists what the tear down deletes.
-**Not done**: no script builds `holders.json` from the note — it is written by hand, each line from a book read.
+**What the scripts enforce**: a holder comes only from `<lot>/holders.json`, written by hand from the region's note,
+each line from a book read; with that file present `meta.py` runs the gate and stops when refused; `mkv.py` carries
+the holder into the entry files; `verifyv.py` refuses « HOLDER NOT FROM THE NOTE », « HOLDER ON AN ENCYCLOPAEDIA
+ALONE », « HOLDER LINE MISSING »; `fetch_rest.py` keeps the works each page cites and `cited_works.py` ranks them and
+records the attempt « wikipedia-bibliography ». Every script speaks in the journal.
 
 ## The layout — always the same
 
@@ -77,15 +72,15 @@ Nothing of a run is on the Mac's disk, not even the session's scratchpad; the Py
 | 1   | **Candidates**: a list from Wikidata (QLever) or a pool; drop a QID already in the base and a point within 1.5 km of a sheet of the year (one sign per place)                                                                  | `cand.json`                       | `cand.py`                 |
 | 2   | **Place data**: name (fr, else de/en label — **Wikidata's label is the present name, which the place bears; a name of the time that differs is a record of `period-names`, read in the sources at step 3**, `/enter-in-cms` « The place »), country, region (the CMS rule: P17, first-level division of P131*), **its district and the holder title the region's note gives that district — none when the note has none; never the polity drawn under the point** | `meta.json`                       | `meta.py`                 |
 | 3   | **Reading**: the **rendered** page, once, through the REST API (`/api/rest_v1/page/html/`, 4 threads), said in the journal                                                                                                     | `rend/` (temporary)               | `fetch_rest.py`           |
-| 4   | **Left the run on 2026-11-23** (it kept every dated sentence in `extraits/` for the later years; the tear down keeps nothing from one run to the next) — the number stays so that the others do not move                       | —                                 | —                         |
+| 4   | *(no step: the number stays so that the others do not move)*                                                                                                                                                                  | —                                 | —                         |
 | 5   | **Sorting**: agents (Sonnet) read up to 5 dated sentences per place and return **the index** of the one proving the place at the year, never a copied sentence; I read 25 random yes and 8 no per lot before going on          | `verdict-*.json`                  | the sorting prompt below  |
 | 6   | **Entry files**: the quotation is the exact rendered sentence, found by script (exact, else difflib ≥ 0.85 and carrying the year); the weak ones I judge myself                                                                | `wave*/enter-*.json`, `weak.json` | `mkv.py`                  |
 | 7   | **Entry**: agents (Sonnet), one file each, through the MCP only, in series, a result file each                                                                                                                                 | the base                          | the entry prompt below    |
 | 8   | **Check**: the base against the files (quotation, title, line, name, region); fix by `update`; `pnpm cities:alerts --map <year>`; one message to the coder (ids, form, counts)                                                 | `bad.json` empty                  | `verifyv.py`, `fixcut.py` |
-| 9   | **Archive and tear down** (`/find-sources`, steps 23–24 and « The archive »): the works read and the run's lists, verdicts and results are filed on the external disk (`/Volumes/Acer/atlas-historien/`, the works at its root, the run under `<year>/<zone>/`); **then the internal disk is emptied** — `rend/`, every downloaded copy, the lot folder — the list and its size shown, the deletion asked of the dev each time. Wikipedia pages are not archived | the internal disk as before the run | `inventory.py`            |
+| 9   | **Archive and tear down** (`/find-sources`, steps 23–24 and « The archive »): the works read and the run's lists, verdicts and results are filed on the external disk (`/Volumes/Acer/atlas-historien/`, the works at its root, the run under `<year>/<zone>/`); **then the run's `travail/` is emptied** — `rend/`, every downloaded copy, the lot folder — the list and its size shown, the deletion asked of the dev each time. Wikipedia pages are not archived | `travail/` empty, nothing on the Mac | `inventory.py`            |
 
-**Since the evening of 2026-11-23 a run serves the next ones through the archive** (the dev lends an external
-disk for it): a later year starts from the region's note, the base and what the archive holds of the works read.
+**A run serves the next ones through the archive**: a later year starts from the region's note, the base and what
+the archive holds of the works read.
 
 ## The prompts
 
@@ -131,16 +126,16 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
 | step | command                                                               | reads → writes                                                                                                                                   |
 | ---- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | `cand.py <lot> <pool.json> <year>`                                    | a pool (list of `{q, lon, lat, url}`) → `cand.json`                                                                                              |
-| 0    | `prepare.py <year> <region> <zone>`, `log.py say|attempt`, `region_gate.py <year> <region>` | the journal, `registre/attempts.jsonl`, the archive; the gate reads the attempts and the region's note                     |
+| 0    | `prepare.py <year> <zone>`, `log.py say|attempt`, `region_gate.py <year> <zone>` — the zone as the archive names it (`anatolie`) | the journal, `registre/attempts.jsonl`, the archive; the gate reads the attempts and the region's note                     |
 | 0    | `count_sheets.py <year> <west> <south> <east> <north> [--list]`       | the base (read-only) → the zone's sheets counted by what carries their holder and their existence                                               |
 | 0, 9 | `archive.py check|open|work|read|given|note|close …`                  | the archive on the external disk (`/Volumes/Acer/atlas-historien/`): its checks, the works at its root, the research under `<year>/<zone>/`     |
 | 3    | `find_book.py search "<words>"`, `find_book.py get <id> <folder>`     | archive.org → the items found; a work's text → `<folder>/texte.txt`                                                                              |
-| 2    | `meta.py <lot> <year> [<region>]` (the region when `holders.json` is there: it runs the gate) | `cand.json` (+ `holders.json`) → `meta.json`                                                                             |
-| 3    | `fetch_rest.py <lot> <list.json>`, then `cited_works.py <lot> <year> <region>` | QIDs → `rend/<q>.json` with the works cited (resumes) → `cited.json`, the attempt « wikipedia-bibliography »                            |
+| 2    | `meta.py <lot> <year> [<zone>]` (the zone when `holders.json` is there: it runs the gate) | `cand.json` (+ `holders.json`) → `meta.json`                                                                             |
+| 3    | `fetch_rest.py <lot> <list.json>`, then `cited_works.py <lot> <year> <zone>` | QIDs → `rend/<q>.json` with the works cited (resumes) → `cited.json`, the attempt « wikipedia-bibliography »                            |
 | 5    | `sentences.py <lot> <year>`                                           | `meta.json` + pages → `tri-a..h.json`                                                                                                            |
 | 6    | `mkv.py <lot> <year>`                                                 | verdicts + `rend/` → `enter-va..vh.json`, `pending.json`, `weak.json` — move them to `wave<N>/` at once                                          |
 | 8    | `verifyv.py <lot>/wave<N> <year>`, then `fixcut.py <lot> <year>`      | the base (read-only) vs the files → `bad.json`, `fixcut.json`                                                                                    |
-| 9    | `inventory.py`                                                        | the internal disk → `historien/LISEZ-MOI.md` and the journal: what is still to file in the archive and then delete, measured; shown to the dev before he grants the deletion |
+| 9    | `inventory.py`                                                        | every `travail/` of the archive and anything of mine left on the Mac → `atlas-historien/a-nettoyer.md` and the journal, measured; shown to the dev before he grants the deletion |
 
 Tried on 18/11 against the run they came from (the German lot of 1100, deleted with the rest of the old research
 material on 2026-11-23).
