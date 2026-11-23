@@ -116,6 +116,10 @@ atlas-historien/
 - `recherches/essais.md`: every attempt — channel, words, found or nothing.
 - `resultats/extraits.md`: every sentence kept — work, page, quotation, what it bears on.
 - A work in copyright is marked so: its facts are read, its plates and images never reused in the atlas.
+- **The RAG — REPO-501, top of the Backlog.** A local index of the works, on this disk (code, index, model), to find
+  the passages already read under every name of a place. Not a source: a passage it returns is its work's witness,
+  re-read in the text. **I tell the dev when it is time to build it** — `prepare.py` says « LE MOMENT DU RAG » from
+  30 works filed. Until then every text is filed page by page, its page numbers kept.
 
 ## A region already researched
 

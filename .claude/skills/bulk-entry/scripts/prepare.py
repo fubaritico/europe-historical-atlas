@@ -46,6 +46,10 @@ if not ARCHIVE.is_dir():
 index = ARCHIVE / 'ouvrages/index.md'
 works = [l for l in index.read_text(encoding='utf-8').splitlines() if l.startswith('| `')] if index.exists() else []
 say("L'archive est branchée : %d ouvrages déjà rangés (ouvrages/index.md), à relire avant d'en chercher d'autres." % len(works))
+# REPO-501: the historian tells the dev when the archive is large enough for the RAG to be worth building
+RAG_AT = 30
+if len(works) >= RAG_AT and not (ARCHIVE / 'rag').is_dir():
+    say('LE MOMENT DU RAG : %d ouvrages rangés (seuil %d) — le dire au dev, ticket REPO-501.' % (len(works), RAG_AT))
 if ZONE:
     fiche = ARCHIVE / str(YEAR) / ZONE / 'fiche.md'
     if fiche.exists():
