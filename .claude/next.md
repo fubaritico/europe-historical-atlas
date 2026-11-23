@@ -32,11 +32,10 @@ Le plan : `files/plans/contribution/names.md` ; l'état, les commentaires du 23/
 registres ; l'anglais **obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire et d'un lieu ; le
 nom de tout le registre est le français seul (migrations `plain_french_names`, `plain_french_register_names`) ; les 30
 noms d'époque posés ; **le « + » du « Nom d'époque » ouvre son tiroir sur le lieu de la fiche** (`708377f7`, essayé dans
-un navigateur sur une copie de la base).
+un navigateur sur une copie de la base) ; **`pnpm names:check`** (`49d160db`, 3 min 40 : 0 nom à trier le 23/11 au soir).
 
-**Ce qui reste, dans l'ordre** : (1) le contrôle des noms en commande ; (2) les pays en français ; (3) à l'historien, les
-quatorze noms d'époque d'Anatolie et la relecture de mes traductions (`noms-anglais-a-faire.md`). Puis CMS-499 et
-CARTO-498, en tête d'« À faire ».
+**Ce qui reste, dans l'ordre** : (1) les pays en français ; (2) à l'historien, les quatorze noms d'époque d'Anatolie et
+la relecture de mes traductions (`noms-anglais-a-faire.md`). Puis CMS-499 et CARTO-498, en tête d'« À faire ».
 
 **Deux pièges du 23/11** (`known-issues/cms.md`) : le seed ne bâtit plus une base neuve (avec CMS-279) ; une commande du
 CMS lancée depuis l'arbre `coder` crée une base neuve. **Essayer le CMS dans un navigateur** : mon serveur depuis l'arbre
