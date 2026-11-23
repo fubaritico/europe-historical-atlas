@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
 
-import { validateOtherNames } from '../fields/nameForms'
+import { REQUIRED_OTHER_LANGUAGES, validateOtherNames } from '../fields/nameForms'
 
 import { TERRITORY_KINDS, Territories } from './Territories'
 
@@ -63,14 +63,39 @@ describe('Territories', () => {
       ])
     })
 
-    it('accepts no line, and one line a language', () => {
-      expect(validateOtherNames(undefined)).toBe(true)
+    it('accepts one line a language, English among them', () => {
+      expect(validateOtherNames([{ language: 'en', form: 'County of Champagne' }])).toBe(true)
       expect(
         validateOtherNames([
           { language: 'en', form: 'County of Champagne' },
           { language: 'de', form: 'Grafschaft Champagne' },
         ])
       ).toBe(true)
+    })
+
+    it('requires every language the site is read in but French, and those alone', () => {
+      expect(REQUIRED_OTHER_LANGUAGES).toEqual(['en'])
+      // A required language the table could not offer would make every save impossible.
+      const [language] = otherNames().fields
+      if (language?.type !== 'select') throw new Error('the table has no select for the language')
+      const offered = language.options.map((option) =>
+        typeof option === 'string' ? option : option.value
+      )
+      expect(REQUIRED_OTHER_LANGUAGES.every((required) => offered.includes(required))).toBe(true)
+    })
+
+    it('refuses a table with no English line, and says which line to add', () => {
+      const sentence =
+        'Le nom en anglais est obligatoire : ajoutez une ligne « Anglais » à ce tableau.'
+      expect(validateOtherNames([{ language: 'de', form: 'Grafschaft Champagne' }])).toBe(sentence)
+    })
+
+    it('refuses an empty table, and an English line whose form is blank', () => {
+      expect(validateOtherNames(undefined)).toContain('Le nom en anglais est obligatoire')
+      expect(validateOtherNames([])).toContain('Le nom en anglais est obligatoire')
+      expect(validateOtherNames([{ language: 'en', form: '   ' }])).toContain(
+        'Le nom en anglais est obligatoire'
+      )
     })
 
     it('refuses French, which is the field « Nom », and a language written twice', () => {

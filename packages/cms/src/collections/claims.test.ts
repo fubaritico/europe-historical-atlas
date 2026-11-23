@@ -27,6 +27,9 @@ let duke: number
 let king: number
 let nantes: number
 
+/** The English line every territory needs since 2026-11-23 (CMS-495) — its form is not what these tests are about. */
+const ENGLISH = [{ language: 'en' as const, form: 'An English name' }]
+
 /**
  * A date group from one year to another, both included.
  * @param from - the first year
@@ -64,7 +67,10 @@ async function title(
     collection: 'people',
     data: { name: person, kind: 'person' },
   })
-  const land = await payload.create({ collection: 'territories', data: territory })
+  const land = await payload.create({
+    collection: 'territories',
+    data: { ...territory, otherNames: ENGLISH },
+  })
   const created = await payload.create({
     collection: 'titles',
     data: { person: holder.id, territory: land.id, date: years(from, to), lines: [{ source }] },
@@ -358,12 +364,17 @@ describe('titles and links', () => {
     it('refuses a second territory with a Wikidata id another holds', async () => {
       await payload.create({
         collection: 'territories',
-        data: { name: 'duché d’Apulie et de Calabre', kind: 'duchy', wikidata: 'Q3715874' },
+        data: {
+          name: 'duché d’Apulie et de Calabre',
+          kind: 'duchy',
+          wikidata: 'Q3715874',
+          otherNames: ENGLISH,
+        },
       })
       await expect(
         payload.create({
           collection: 'territories',
-          data: { name: 'Apulie', kind: 'duchy', wikidata: 'Q3715874' },
+          data: { name: 'Apulie', kind: 'duchy', wikidata: 'Q3715874', otherNames: ENGLISH },
         })
       ).rejects.toThrow('wikidata')
     })
@@ -391,7 +402,7 @@ describe('titles and links', () => {
       })
       const land = await payload.create({
         collection: 'territories',
-        data: { name: 'comté de Cornouaille (bis)', kind: 'county' },
+        data: { name: 'comté de Cornouaille (bis)', kind: 'county', otherNames: ENGLISH },
       })
       const data = {
         person: holder.id,
@@ -427,7 +438,7 @@ describe('titles and links', () => {
       })
       const land = await payload.create({
         collection: 'territories',
-        data: { name: 'comté de Vannes', kind: 'county' },
+        data: { name: 'comté de Vannes', kind: 'county', otherNames: ENGLISH },
       })
       const one = { person: holder.id, territory: land.id, lines: [{ source }] }
       const kept = await payload.create({

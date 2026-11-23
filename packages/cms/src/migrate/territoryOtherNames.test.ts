@@ -52,7 +52,8 @@ async function migrate(way: typeof up | typeof down): Promise<void> {
 async function territory(name: string, english: string | null): Promise<number> {
   const created = await payload.create({
     collection: 'territories',
-    data: { name, kind: 'county' },
+    // English is required since 2026-11-23: the line lets the save pass, and the `down` below drops it with its table.
+    data: { name, kind: 'county', otherNames: [{ language: 'en', form: 'Dropped by the down' }] },
     locale: 'fr',
   })
   if (english !== null) {

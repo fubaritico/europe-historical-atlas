@@ -1,7 +1,12 @@
 import { POLITY_RANKS } from '@europe-historical-atlas/core/data/ranks'
 
 import { groupAt, momentGroup } from '../fields/historicalDate'
-import { LANGUAGE_LABELS, OTHER_LANGUAGES, validateOtherNames } from '../fields/nameForms'
+import {
+  LANGUAGE_LABELS,
+  OTHER_LANGUAGES,
+  REQUIRED_OTHER_LANGUAGES,
+  validateOtherNames,
+} from '../fields/nameForms'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
@@ -110,8 +115,9 @@ export const Territories: CollectionConfig = {
       },
     },
     // CMS-495: one name a language (the dev, 2026-11-22) — the French one is the field above, which the titles and
-    // the chains read; the others stand here, all seen together. An added table: a territory already saved reads
-    // with none.
+    // the chains read; the others stand here, all seen together. Every language the site is read in is required
+    // since 2026-11-23, once the catch-up filled English from Wikidata: a territory still without it is refused at
+    // its next save until it is given.
     {
       name: 'otherNames',
       type: 'array',
@@ -120,7 +126,9 @@ export const Territories: CollectionConfig = {
       validate: validateOtherNames,
       admin: {
         description:
-          'Facultatif. Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.',
+          'Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». ' +
+          `Obligatoire en ${REQUIRED_OTHER_LANGUAGES.map((language) => LANGUAGE_LABELS[language].toLowerCase()).join(', ')} ; ` +
+          'les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.',
       },
       fields: [
         {

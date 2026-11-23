@@ -10,6 +10,7 @@ import { Sources } from '../collections/Sources'
 import { TERRITORY_KINDS, Territories } from '../collections/Territories'
 import { Titles } from '../collections/Titles'
 import { VassalLinks } from '../collections/VassalLinks'
+import { OTHER_LANGUAGES, REQUIRED_OTHER_LANGUAGES } from '../fields/nameForms'
 
 import type { Plugin } from 'payload'
 
@@ -113,7 +114,9 @@ export const MCP_COLLECTIONS = {
     description:
       `The register of territories: what is held — a land (\`kind\` ${LAND_KINDS}) or an office (\`office\`) — ` +
       'with `name` (its French name), `otherNames` — its name in the other languages, one line a language, each ' +
-      '{ language, form } with language among en, es, it, de, never French and never twice the same — `wikidata`, ' +
+      `{ language, form } with language among ${OTHER_LANGUAGES.join(', ')}, never French and never twice the ` +
+      `same; a line in ${REQUIRED_OTHER_LANGUAGES.join(', ')} is required on every create and every update — ` +
+      '`wikidata`, ' +
       '`existsFrom`, `existsTo`. Never a point on the map, never its suzerain. Search by `wikidata` before creating. ' +
       'An update that carries `otherNames` replaces every line: send the existing ones back with the new one.',
   },

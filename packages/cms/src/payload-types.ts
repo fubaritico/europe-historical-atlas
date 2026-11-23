@@ -755,7 +755,7 @@ export interface Territory {
     | 'city'
     | 'office';
   /**
-   * Facultatif. Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   * Une ligne par langue — par exemple, pour le comté de Champagne : anglais « County of Champagne ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
    */
   otherNames?:
     | {

@@ -3,6 +3,7 @@ import {
   isNameLanguage,
   repeatedLanguage,
 } from '@europe-historical-atlas/core/data/periodName'
+import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 
 import type { NameForm, NameLanguage } from '@europe-historical-atlas/core/data/periodName'
 
@@ -40,9 +41,18 @@ export function nameForms(value: unknown): NameForm[] {
 }
 
 /**
- * The rule of a territory's names in the other languages (CMS-495): one form a language, and never French — the
- * French name is the territory's own field, and a second French name here would be a second home for one fact.
- * Facultative: a territory with no other name is valid.
+ * The languages a territory must be named in, beside French: every language the site is read in (CMS-495, the dev,
+ * 2026-11-22: _"a translation field that exists is never left empty"_). The others of the table stay facultative
+ * until the site speaks them.
+ */
+export const REQUIRED_OTHER_LANGUAGES: readonly NameLanguage[] = LOCALES.filter(
+  (locale) => locale !== 'fr'
+)
+
+/**
+ * The rule of a territory's names in the other languages (CMS-495): one form a language, never French — the
+ * French name is the territory's own field, and a second French name here would be a second home for one fact —
+ * and a form in every language the site is read in.
  * @param value - the `otherNames` field
  * @returns `true`, or the sentence said under the table
  */
@@ -52,7 +62,13 @@ export function validateOtherNames(value: unknown): string | true {
     return 'Le nom français est le champ « Nom », au-dessus : ce tableau tient les autres langues.'
   }
   const twice = repeatedLanguage(forms)
-  return twice === null
+  if (twice !== null) {
+    return `La langue « ${LANGUAGE_LABELS[twice]} » est saisie deux fois : une seule forme par langue.`
+  }
+  const missing = REQUIRED_OTHER_LANGUAGES.find(
+    (required) => !forms.some(({ language }) => language === required)
+  )
+  return missing === undefined
     ? true
-    : `La langue « ${LANGUAGE_LABELS[twice]} » est saisie deux fois : une seule forme par langue.`
+    : `Le nom en ${LANGUAGE_LABELS[missing].toLowerCase()} est obligatoire : ajoutez une ligne « ${LANGUAGE_LABELS[missing]} » à ce tableau.`
 }

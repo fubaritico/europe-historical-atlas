@@ -165,7 +165,10 @@ that exists is reused (its id), never created again.
    - **The work at the end of the chain is the source**: a Wikipedia page that cites a book → the book is a source, the
      page another, and the page's `copyOf` names the book — sources that copy one another are one *témoin*.
 2. **The place** (`places`). Search by `wikidata` (the `Q…`), then by `name`.
-   - `name` in French (required; the default locale is `fr`), the English name as a second locale when known.
+   - `name` in French (required; the default locale is `fr`), and **always** the English name as the `en` locale —
+     Wikidata's English label of today's name; none there, the form a source gives. **A translation is never left
+     empty** (the dev, 2026-11-22): every place was given its English name on 2026-11-23, the 159 Wikidata does not
+     name are in `../../../files/plans/contribution/noms-anglais-a-faire.md`.
    - **The place bears its present name; the name it bore at the date is a record of its own** (the dev, 2026-11-21:
      _"the base should hold its present name, today, and the name it had at the time of the sheet"_ — Ankara is «
      Ancyre » in 1100; `../../../files/plans/contribution/names.md`, CMS-495). The map writes the name of the time
@@ -226,6 +229,12 @@ that exists is reused (its id), never created again.
    Enter titles and links **in series, never in parallel** (two creates sent together can both pass). A person holding
    several titles is given the one under which the place lies; a family named as holder is the person at its head in
    1100, the family being his `house`. Our own register (`vassalage.md`) is never a source.
+   - **A territory** (`territories`, « Territoires »): `name` — its French name, the default locale, never another —
+     `kind`, `wikidata`, and **`otherNames` with an English line, required since 2026-11-23** (CMS-495):
+     `[{ "language": "en", "form": "County of Champagne" }]`, other languages (`es`, `it`, `de`) optional, French
+     never. A territory saved without it is refused (« Le nom en anglais est obligatoire ») — **an update too**, so a
+     territory still without one (the list in `noms-anglais-a-faire.md`) is given its English line in the same update.
+     An update that carries `otherNames` replaces the whole table: send back the lines it holds.
 
 ## Entry by agents — the dev sets how many
 
