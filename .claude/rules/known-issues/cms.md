@@ -124,3 +124,11 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   base in `.claude/worktrees/coder/packages/cms/` and migrated it, leaving the dev's base as it was — caught by the
   counts, the stray file removed. **Remedy**: always pass `DATABASE_URL=file:<absolute path>` to a command of the CMS
   run outside `main`'s tree. **Severity: worth knowing.**
+- **A Claude session keeps the CMS's MCP tools as it read them at its start** (2026-11-23): Claude Code refreshes a
+  server's tools only when the server sends `list_changed` (code.claude.com/docs/en/mcp, « Dynamic tool updates »), and
+  Payload's MCP never does — it is built per request by `mcp-handler` (`plugin-mcp/dist/mcp/getMcpHandler.js`) and holds
+  no stream. A field added to a collection is therefore unknown to a session already open: the historian's
+  `createPeople` refused every person for lack of `otherNames`, which its tool did not offer. **The rule** (the dev:
+  _"why do I have to deal with this"_): **the coder changes a collection's fields while no historian session runs**, or
+  says the change before the next one starts — a new session reads the new tools. Otherwise: `/mcp` → « cms » →
+  « Reconnect » in that session. **Severity: gênant** (a gesture of the dev's, for a change of the coder's).
