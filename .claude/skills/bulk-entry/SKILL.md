@@ -130,13 +130,16 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
 | step | command                                                               | reads → writes                                                                                                                                   |
 | ---- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | `cand.py <lot> <pool.json> <year>`                                    | a pool (list of `{q, lon, lat, url}`) → `cand.json`                                                                                              |
-| 0    | `prepare.py <year> <region>`, `log.py say|attempt`, `region_gate.py <year> <region>` | the journal, `registre/attempts.jsonl`; the gate reads them and the region's note                                                 |
+| 0    | `prepare.py <year> <region> <zone>`, `log.py say|attempt`, `region_gate.py <year> <region>` | the journal, `registre/attempts.jsonl`, the archive; the gate reads the attempts and the region's note                     |
+| 0    | `count_sheets.py <year> <west> <south> <east> <north> [--list]`       | the base (read-only) → the zone's sheets counted by what carries their holder and their existence                                               |
+| 0, 9 | `archive.py check|open|work|read|given|note|close …`                  | the archive on the external disk (`/Volumes/Acer/atlas-historien/`): its checks, the works at its root, the research under `<year>/<zone>/`     |
+| 3    | `find_book.py search "<words>"`, `find_book.py get <id> <folder>`     | archive.org → the items found; a work's text → `<folder>/texte.txt`                                                                              |
 | 2    | `meta.py <lot> <year> [<region>]` (the region when `holders.json` is there: it runs the gate) | `cand.json` (+ `holders.json`) → `meta.json`                                                                             |
 | 3    | `fetch_rest.py <lot> <list.json>`, then `cited_works.py <lot> <year> <region>` | QIDs → `rend/<q>.json` with the works cited (resumes) → `cited.json`, the attempt « wikipedia-bibliography »                            |
 | 5    | `sentences.py <lot> <year>`                                           | `meta.json` + pages → `tri-a..h.json`                                                                                                            |
 | 6    | `mkv.py <lot> <year>`                                                 | verdicts + `rend/` → `enter-va..vh.json`, `pending.json`, `weak.json` — move them to `wave<N>/` at once                                          |
 | 8    | `verifyv.py <lot>/wave<N> <year>`, then `fixcut.py <lot> <year>`      | the base (read-only) vs the files → `bad.json`, `fixcut.json`                                                                                    |
-| 9    | `inventory.py`                                                        | the disk → `historien/LISEZ-MOI.md` and the journal: everything the tear down deletes, measured; shown to the dev before he grants the deletion  |
+| 9    | `inventory.py`                                                        | the internal disk → `historien/LISEZ-MOI.md` and the journal: what is still to file in the archive and then delete, measured; shown to the dev before he grants the deletion |
 
 Tried on 18/11 against the run they came from (the German lot of 1100, deleted with the rest of the old research
 material on 2026-11-23).

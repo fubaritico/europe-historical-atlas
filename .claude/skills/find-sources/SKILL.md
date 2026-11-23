@@ -26,8 +26,8 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 **Setup — before any page is opened, Wikipedia included**
 
-0. Check the archive disk is mounted (`ls /Volumes/Acer/atlas-historien`). Absent: write **DISQUE ABSENT**, stop.
-   Read `ouvrages/index.md` and, when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again.
+0. `archive.py check` — the archive disk is mounted, or **DISQUE ABSENT** and stop. Read `ouvrages/index.md` and,
+   when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again. `archive.py open` the research.
    The base already has sheets for this region at this date: « A region already researched », step 1, first.
 1. Create the region's note `files/plans/sources/<year>/<region>.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
@@ -44,7 +44,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
    every image myself; a name I cannot read is written « illegible », never guessed.
 3. `log.py say` the research; give him once: `tail -f files/resources/historien/journal.log`.
-4. `prepare.py <year> <region>`: what is at hand, the order, what is still to do.
+4. `prepare.py <year> <region> <zone>`: what is at hand (the archive included), the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
    year, in the note. Every line names **the date, the place, the actors, the work and page**. No generality.
    His points are checked in it; a point that a work contradicts is said with the work's reading.
@@ -58,7 +58,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 10. Wikipedia, every language: priming only. List the works its pages cite (`cited_works.py`).
 11. The PDFs on disk (`files/resources/other-historical-atlases-pdf/`): each opened, or ruled out with its reason
     (title, period, index — one test is enough). Text and map legends. `pypdf` with `2>/dev/null`.
-12. archive.org: find by title or author, read `_djvu.txt`.
+12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`.
 13. Gallica.
 14. The BnF, then JSTOR — in his Chrome, never while he tests an app there. Not logged in or refused:
     write **CONNEXION IMPOSSIBLE**, stop everything, nothing counted.
@@ -78,8 +78,8 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 **Archive and tear down — never skipped**
 
-23. File everything in the archive (« The archive »): each work in `ouvrages/`, its `fiche.md` and the index
-    updated; the research under `<year>/<zone>/`. Read each `.md` back.
+23. File everything in the archive (« The archive ») with `archive.py`: `work` for each work read, `read` for each
+    reading, `given` for what he gave, `note`, then `close`. Read each `.md` back.
 24. Then empty the internal disk: list what goes, with sizes (`inventory.py`), show it, ask him, delete on his
     word — downloads, lot folders, the environment, the scratchpad. Wikipedia pages are not archived.
     The base, the note in git and the archive stay.
@@ -115,9 +115,9 @@ atlas-historien/
 The base already holds sheets for the region at the date: their quality is not assured. The research is done as
 new; the old sheets are judged by it, never the reverse.
 
-1. **Before the setup, count** (the base, read-only): the region's sheets by what carries their holder —
-   `none` (the polity drawn under the city, copied at entry) · `wikipedia-only` · `work-cited-unread` (a book
-   quoted through an agent's report) · `work-read`. Write the four counts in the note and say them to him.
+1. **Before the setup, count**: `count_sheets.py <year> <west> <south> <east> <north>` (the base, read-only) — the
+   region's sheets by what carries their holder (none · a holder with no line, copied from the map · Wikipedia
+   alone · a work cited, to re-read) and their existence. Write the counts in the note and say them to him.
 2. **Run the research whole** (« The run »). The old holders enter step 8 as hypotheses among the others,
    with no more weight.
 3. **Confront, sheet by sheet**, once the note has its holders by district:

@@ -1,12 +1,13 @@
-"""The list of the tear down (`/find-sources`, step 13; the dev, 2026-11-23: nothing of the research material is
-kept): everything under files/resources/historien/ with its size measured on disk, written in French to
-historien/LISEZ-MOI.md and said in the journal. Only `outils/` and the journal stay. It deletes nothing: the list is
-shown to the dev, who grants the deletion. Usage: python3 -I inventory.py"""
+"""The list of the tear down (`/find-sources`, steps 23–24): everything still under files/resources/historien/ on
+the internal disk, with its size measured, written in French to historien/LISEZ-MOI.md and said in the journal. Each
+item is to be filed in the archive on the external disk (archive.py) and then deleted on the dev's word. What stays
+is the working set: `outils/`, the journal he follows, `registre/` (the attempts the gate reads). It deletes nothing.
+Usage: python3 -I inventory.py"""
 import datetime
 import os
 
 H = '/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien'
-STAYS = {'outils', 'journal.log', 'LISEZ-MOI.md'}
+STAYS = {'outils', 'journal.log', 'LISEZ-MOI.md', 'registre'}
 
 
 def say(message):
@@ -47,13 +48,15 @@ def entries():
 mb = lambda b: '%.0f Mo' % (b / 1e6) if b >= 1e6 else '%.0f Ko' % (b / 1e3)
 rows = [(name, size(path)) for name, path in entries()]
 total = sum(s for _, s in rows)
-out = ['# historien/ — ce que le démontage supprime', '',
-       '> Écrit par `.claude/skills/bulk-entry/scripts/inventory.py` le %s, mesuré sur le disque. Le disque est prêté : '
-       'rien du matériel de recherche n\'est gardé (`/find-sources`, étape 13).' % datetime.date.today().isoformat(), '',
-       '**Reste** : `outils/` et `journal.log`. Le résultat est dans la base et dans la note de la région '
-       '(`files/plans/sources/`).', '',
-       '**À supprimer**, sur l\'accord du dev :', '', '| élément | taille |', '| --- | --- |']
+out = ['# historien/ — ce qui reste sur le disque interne', '',
+       '> Écrit par `.claude/skills/bulk-entry/scripts/inventory.py` le %s, mesuré sur le disque. Le disque interne '
+       'est prêté : le matériel de recherche va dans l\'archive du disque Acer (`/Volumes/Acer/atlas-historien/`, '
+       '`archive.py`), puis il est supprimé ici (`/find-sources`, étapes 23–24).' % datetime.date.today().isoformat(), '',
+       '**Reste ici** : `outils/`, `journal.log` (le journal suivi par `tail -f`), `registre/` (les essais que le '
+       'contrôle de région lit). Le résultat est dans la base et dans la note de la région (`files/plans/sources/`).', '',
+       '**À ranger dans l\'archive, puis à supprimer** sur l\'accord du dev :', '', '| élément | taille |', '| --- | --- |']
 out += ['| `%s` | %s |' % (n, mb(s)) for n, s in rows]
 out += ['| **total** | **%s** |' % mb(total), '']
 open(H + '/LISEZ-MOI.md', 'w', encoding='utf-8').write('\n'.join(out))
-say('démontage : %d éléments à supprimer, %s en tout — la liste est dans historien/LISEZ-MOI.md' % (len(rows), mb(total)))
+say('démontage : %d éléments à ranger dans l\'archive puis à supprimer, %s en tout — la liste est dans '
+    'historien/LISEZ-MOI.md' % (len(rows), mb(total)))

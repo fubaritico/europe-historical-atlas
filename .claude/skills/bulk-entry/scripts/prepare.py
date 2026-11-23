@@ -2,10 +2,11 @@
 even start on Wikipedia, there is the preparation: what do you have, what will you use, in which order; then you start").
 
 It says in the journal (files/resources/historien/journal.log, followed by the dev with tail -f) what the research of a
-region at a year has at hand — his axes, the region's note, the PDFs on disk, the attempts already made — and the order
-of the channels. It reads only; it writes nothing but the journal. It ends on what is still to do before the first read.
+region at a year has at hand — the archive on the external disk, his axes, the region's note, the PDFs on disk, the
+attempts already made — and the order of the channels. It stops when the archive's disk is absent. It reads only; it
+writes nothing but the journal. It ends on what is still to do before the first read.
 
-Usage: python3 -I prepare.py <year> <region>
+Usage: python3 -I prepare.py <year> <region> [<zone>]   — region: the note's name (anatolia); zone: the archive's (anatolie)
 """
 import collections
 import datetime
@@ -15,6 +16,8 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 YEAR, REGION = int(sys.argv[1]), sys.argv[2]
+ZONE = sys.argv[3] if len(sys.argv) > 3 else None  # the zone's French name in the archive (anatolie)
+ARCHIVE = pathlib.Path('/Volumes/Acer/atlas-historien')
 JOURNAL = ROOT / 'files/resources/historien/journal.log'
 NOTE = ROOT / 'files/plans/sources' / str(YEAR) / (REGION + '.md')
 ATTEMPTS = ROOT / 'files/resources/historien/registre/attempts.jsonl'
@@ -35,6 +38,20 @@ def say(message):
 
 todo = []
 say('PRÉPARATION — %s, %d' % (REGION, YEAR))
+
+# the archive on the external disk (`/find-sources`, « The archive »): what is already read is not fetched again
+if not ARCHIVE.is_dir():
+    say('DISQUE ABSENT — %s introuvable : la recherche ne commence pas sans lui.' % ARCHIVE)
+    sys.exit(1)
+index = ARCHIVE / 'ouvrages/index.md'
+works = [l for l in index.read_text(encoding='utf-8').splitlines() if l.startswith('| `')] if index.exists() else []
+say("L'archive est branchée : %d ouvrages déjà rangés (ouvrages/index.md), à relire avant d'en chercher d'autres." % len(works))
+if ZONE:
+    fiche = ARCHIVE / str(YEAR) / ZONE / 'fiche.md'
+    if fiche.exists():
+        say("La recherche %d/%s existe dans l'archive : lire sa fiche.md avant tout (%s)." % (YEAR, ZONE, fiche))
+    else:
+        todo.append("ouvrir la recherche dans l'archive : archive.py open %d %s \"<ce qu'il a demandé>\"" % (YEAR, ZONE))
 
 if NOTE.exists():
     text = NOTE.read_text(encoding='utf-8')
