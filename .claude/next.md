@@ -18,35 +18,30 @@ fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md
 
 ## ▶ La règle du soir du 23/11 — à tenir dès l'ouverture
 
-**Il ne s'occupe plus des outils, seulement de son atlas** (mémoire `we-run-ourselves`). On lui dit trois choses, et
-seulement celles-là : **quand on commence un ticket, quand on a fini, quand le contexte atteint 60 %** (il relance depuis
-son téléphone). Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents` pour retrouver
-l'historien, et lui dire que je suis la nouvelle session du codeur. **Ce qu'il attend de moi** : rien. Le CMS a été relancé à
-19 h 50 ; son outil ancien a suffi, le serveur acceptant `otherNames` : Ridwan, Thoros Ier, Chonai, Palu et
-Çemişgezek sont créés, l'export de 20 h commité (`963f9f34`). Restent à lui les fusions de lieux et trois suppressions. **Ce que j'attends de lui** : rien. Rien n'est poussé
-depuis `5b12959a`, mais la CI est verte et le site est à jour jusque-là.
+**Il ne s'occupe plus des outils, seulement de son atlas** (mémoire `we-run-ourselves`) : on lui dit quand un ticket
+commence, quand il est fini, quand le contexte atteint 60 % — **par notification quand il est à distance** (23/11, 20 h 10).
+Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents`, et dire à l'historien que je suis la
+nouvelle session du codeur. **Sa prochaine session** dira « je saisis » avant la saisie du tour 3 (une trentaine de fiches
+d'Anatolie), puis « CMS libre » : pas de relance du CMS entre les deux. Son dernier export est commité (`f697be4f`). Rien
+n'est poussé depuis `5b12959a` ; la CI est verte jusque-là.
 
-## ▶ ON REPREND ICI — le 23/11, 18 h : les noms anglais rattrapés (CMS-495, En cours)
+## ▶ ON REPREND ICI — le 23/11, 20 h 30 : les noms (CMS-495, En cours)
 
-Le plan : `files/plans/contribution/names.md` ; l'état, le commentaire du 23/11 sur CMS-495. **Fait le 23/11 au soir**,
-tout dans `main` : les noms anglais lus dans Wikidata et écrits dans sa base (13 558 lieux, 319 territoires, 391
-personnes) et mes traductions des types d'événement, des raisons d'importance et des engins de siège ; l'anglais
-**obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire **et d'un lieu** (sa décision du
-23/11 : le lieu prend le tableau du territoire ; la migration `place_other_names` a tourné sur sa base, copie dans
-`.backups/`) ; la liste de l'historien, `files/plans/contribution/noms-anglais-a-faire.md`. **Rien n'est poussé
-depuis le 20/11.**
+Le plan : `files/plans/contribution/names.md` ; l'état, les commentaires du 23/11 sur CMS-495. **Fait le 23/11**, dans
+`main` : les noms anglais lus dans Wikidata (13 558 lieux, 319 territoires, 391 personnes) et mes traductions des
+registres ; l'anglais **obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire et d'un lieu ; le
+nom de tout le registre est le français seul (migrations `plain_french_names`, `plain_french_register_names`) ; les 30
+noms d'époque posés ; **le « + » du « Nom d'époque » ouvre son tiroir sur le lieu de la fiche** (`708377f7`, essayé dans
+un navigateur sur une copie de la base).
 
-**Ce qui reste, dans l'ordre** : (1) (2) le lieu prérempli dans le tiroir du « + » du
-« Nom d'époque », puis le tiroir essayé sur toute sa vie ; (3) la suite d'avant : les quatorze noms d'époque
-d'Anatolie (de l'historien), le contrôle des noms en commande, les pays en français ; (4) à l'historien, relire les traductions du codeur
-(`noms-anglais-a-faire.md`) — aucun nom anglais n'est plus vide depuis le 23/11 au soir, événements compris. Puis CMS-499 et CARTO-498, en tête d'« À faire ».
+**Ce qui reste, dans l'ordre** : (1) le contrôle des noms en commande ; (2) les pays en français ; (3) à l'historien, les
+quatorze noms d'époque d'Anatolie et la relecture de mes traductions (`noms-anglais-a-faire.md`). Puis CMS-499 et
+CARTO-498, en tête d'« À faire ».
 
-**Le nom de tout le registre est le français seul** depuis le 23/11 au soir — lieux, territoires,
-personnes, confessions, types d'événement, raisons, engins (migrations `plain_french_names` et
-`plain_french_register_names`) ; le seed ne bâtit plus
-une base neuve (`known-issues/cms.md`, avec CMS-279) : l'anglais n'existe plus que dans le tableau. **Les 30 noms d'époque** sont posés (Ancyre →
-Ankara, `noms-a-trier.md` trié). **Un piège payé le 23/11** : une commande du CMS lancée depuis l'arbre `coder` crée une base neuve
-(`known-issues/cms.md`).
+**Deux pièges du 23/11** (`known-issues/cms.md`) : le seed ne bâtit plus une base neuve (avec CMS-279) ; une commande du
+CMS lancée depuis l'arbre `coder` crée une base neuve. **Essayer le CMS dans un navigateur** : mon serveur depuis l'arbre
+`coder` sur une copie (`sqlite3 ".backup"`, `DATABASE_URL=file:<chemin absolu>`, port 3101), un utilisateur d'essai
+créé dans la copie seule (`payload run`) ; tout supprimé après.
 
 **Sa 1100 est à lui** (22/11) : il retouche lui-même l'est de l'Anatolie ; `polities.json` et `registry.json` ne sont
 ni commités ni touchés, et **je lui demande avant toute fusion qui lui ferait recharger le Cartographe**.
@@ -66,8 +61,8 @@ quand une carte en a besoin. **ATLAS-448** (une seule langue sur la carte) est p
 **Le tableau** : Jira depuis le 20/11, par le MCP d'Atlassian et `/jira` ; le Backlog est une page, pas une colonne. **Les
 rangs** : `core/src/data/ranks.ts` ; à lui, le rang des États pontificaux, un score pour la seigneurie épiscopale et le despotat.
 
-**L'export** : `pnpm export:content` écrit `atlas.json` et `cartographer.json` dans `packages/atlas/public/content/` ; le dernier commité est
-du 22/11 (`a38abeda`). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
+**L'export** : `pnpm export:content` écrit `atlas.json` et `cartographer.json` dans `packages/atlas/public/content/` ; le dernier commité,
+`f697be4f` (23/11). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
 migration des noms : `packages/cms/.backups/cms-20261122-000012-…db` ; celle du 20/11, `cms.backup-2026-11-20-oriflamme.db`
 (ignorées par git, à supprimer avec son accord).
 
@@ -134,8 +129,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**7 144 tests** sur `main` le 09/11 (2 062 `core` · 1 696 atlas · 2 838 Cartographe · 379 CMS · 169 plugin), gate
-verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
+Gate verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`) ; le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
 `git log origin/main..main` lit une référence de suivi **qui peut être périmée** : pour la vraie réponse,
@@ -152,12 +146,6 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 montées, rapport `files/versions/2026-11-06.md`. **Fait le 17/11 (CMS-468)** : Next 16.4.6 et le kit MCP forcé en 1.32.0 ; il reste 3 alertes (zod, minimatch, esbuild).
 **Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **23/11**, ses six corrections appliquées avec son accord le jour même (rapport `files/prompt-audit-2026-11-23.md` ;
 laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; **le suivant est dû le 30/11**.
-
-**Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
-`core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),
-`atlas` (three.js vanille, `jsdom`), `cartographer` (React 19 + Vite, **sa propre config ESLint** qui
-réimporte la racine, son `publicDir` est celui de l'atlas), `cms` (Payload 3 + Next, son serveur est celui du dev,
-tests sous `node`), `eslint-plugin-eha` (nos règles de lint).
 
 **Trois faits de structure à ne pas re-découvrir** : _flat config n'a aucune cascade_, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
