@@ -137,5 +137,12 @@ commit the files: the coder still does.
 - **The catch-up**: the English name read from Wikidata by each record's id (`files/spikes/english-names/`); what
   Wikidata does not name, and the 58 territories with no Wikidata id, go to the historian once his current work is done.
   Measured that day: 11 places of 13 717 and 8 territories of 396 had an English name.
+- **Done on 2026-11-23** (`files/spikes/english-names/write_names.py`, proved on a copy, then on the dev's base after a
+  copy in `packages/cms/.backups/`, one transaction, additions only): 14 050 ids read, 13 547 places and 311
+  territories given Wikidata's English label — 13 558 places of 13 717 and 319 territories of 396 now have one. Left to
+  the historian, in French, `noms-anglais-a-faire.md`: 159 places and 21 territories Wikidata names in no English, 56
+  territories with no Wikidata id, 60 English place names carrying a qualifier (« Jesenice, Omiš ») or not in English,
+  and the 311 territory names to read — Wikidata sometimes names something else than the polity (« Roman Catholic
+  Archdiocese of Cologne »).
 - **By me, to be kept or lifted by him**: the same rule extended to the five other collections whose name is translated
   (people, confessions, event types, importance reasons, siege engines).
