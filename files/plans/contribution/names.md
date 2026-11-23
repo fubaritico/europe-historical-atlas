@@ -57,6 +57,21 @@ own place; a name sheets cite cannot move to another place. **The drawer « + »
 2026-11-23 — our own « + » in Payload's stead, which hands its drawer no initial value (`rules/known-issues/cms.md`);
 tried over its whole life in a browser on a copy of the base: created, chosen, saved, reopened, emptied.
 
+### The control of the names, as a command — the coder's form, 2026-11-23 (row 9)
+
+The two throwaway scripts of `files/spikes/place-names-vs-wikidata/` become **`pnpm names:check`**, run by the historian
+after each entry as `pnpm cities:alerts` is:
+
+- **What it reads**: the content the CMS prints (`export:print`, piped in) — each place's name and Wikidata id — never
+  the base itself. **What it asks**: Wikidata's French and English labels and French aliases, fifty items a request, one
+  request at a time, through `wikidata/placeEndpoints.fetchWikidata`.
+- **What it says**: the places whose name differs from Wikidata's — French label, else English when Wikidata has no
+  French — written over `noms-a-trier.md`, in French, with its counts. **What it leaves out**: the names already sorted —
+  the thirty renamed (`seed/presentNames.ts`) and the variants kept as they are, a list in the code beside it; a kept name
+  that changes comes back.
+- **When Wikidata does not answer**: asked again, slower, a few times; then the command stops with its reason and writes
+  nothing — a list missing a lot would read as « nothing to sort » (`rules/error-handling.md`: surfaced, not substituted).
+
 ## The countries, measured — 2026-11-22
 
 The dev, the same night: _"what is available by default, but everything will have to be translated — there can be no

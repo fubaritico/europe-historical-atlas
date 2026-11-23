@@ -11,6 +11,7 @@
     "migrate:status": "NODE_OPTIONS=--no-deprecation payload migrate:status",
     "export": "NODE_OPTIONS=--no-deprecation payload run src/export/run.ts",
     "export:print": "NODE_OPTIONS=--no-deprecation payload run src/export/print.ts",
+    "names:check": "NODE_OPTIONS=--no-deprecation payload run src/names/run.ts",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
     "seed": "pnpm migrate && NODE_OPTIONS=--no-deprecation payload run src/seed/run.ts",
