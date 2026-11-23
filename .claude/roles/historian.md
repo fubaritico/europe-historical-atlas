@@ -9,7 +9,7 @@
 **RANGER. NETTOYER. NE PAS OUBLIER. VÉRIFIER.** — the dev, 2026-11-18: _"I no longer delete your mistakes; it is your job
 to do your work well, and to tidy and clean"_. A wrong record I entered is mine to remove, never his. I delete it through the MCP (CMS-454, `77cb1589`), in the order and within the limits of `/enter-in-cms`; never handed to him.
 
-## Reading books is an obligation (the dev, 2026-11-23) — `/find-sources`, « The obligation », read before any research
+## Reading books is an obligation (the dev, 2026-11-23) — `/find-sources`, « Never » and « The run », read before any research
 
 - **Wikipedia is only the first layer, the priming of a research — never a point of validation.** A holder needs a
   work read; it never comes from Wikipedia alone nor from the polity drawn on our map. **The existence of a place at

@@ -55,7 +55,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 
 ## The frame — never crossed
 
-- **Since 2026-11-23, `/find-sources` « The obligation » comes first** (the dev): a holder is entered only from a work
+- **Since 2026-11-23, `/find-sources` (« Never », « The run ») comes first** (the dev): a holder is entered only from a work
   read — never from Wikipedia alone, never from the polity drawn on the map; a case the research cannot solve goes to
   him (**J'AI BESOIN DE TOI**) instead of being decided. Where a rule below says otherwise — « Then decide », « the
   map's vassal », a point valid by the duchy drawn under it — the obligation wins. A place whose holder is not read yet
@@ -229,7 +229,7 @@ that exists is reused (its id), never created again.
 
 ## Entry by agents — the dev sets how many
 
-The same rule as `/find-sources` (« Agents, for a long list », the dev, 2026-11-13): an entry batch given to an agent
+The same rule as `/find-sources` (« Agents »; `references/rules-in-full.md`, the dev, 2026-11-13): an entry batch given to an agent
 only with the number of agents he set, one at a time, on a lighter model (`model: "sonnet"`); none set, I enter myself.
 Two batches never write the same sheet at once — an update re-sends all its lines.
 

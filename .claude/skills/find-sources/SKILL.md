@@ -25,6 +25,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 **Setup — before any page is opened, Wikipedia included**
 
+0. The base already has sheets for this region at this date: « A region already researched », step 1, first.
 1. Create the region's note `files/plans/sources/<year>/<region>.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
    Cities met in the sources, Existence to read, Attempts).
@@ -71,6 +72,32 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 23. Check the note holds every count, reference and page. List what goes, with sizes (`inventory.py`). Show it,
     ask him, delete on his word: downloads, lot folders, the environment, the scratchpad. The base and the note stay.
+
+## A region already researched
+
+The base already holds sheets for the region at the date: their quality is not assured. The research is done as
+new; the old sheets are judged by it, never the reverse.
+
+1. **Before the setup, count** (the base, read-only): the region's sheets by what carries their holder —
+   `none` (the polity drawn under the city, copied at entry) · `wikipedia-only` · `work-cited-unread` (a book
+   quoted through an agent's report) · `work-read`. Write the four counts in the note and say them to him.
+2. **Run the research whole** (« The run »). The old holders enter step 8 as hypotheses among the others,
+   with no more weight.
+3. **Confront, sheet by sheet**, once the note has its holders by district:
+
+   | the works read say | do |
+   | --- | --- |
+   | the same holder | add the work's line; keep the sheet |
+   | another holder | the holder becomes the work's; the old reading stays as a contrary line when it had a source, goes when it had none |
+   | nothing | remove a holder that had no line; keep a Wikipedia line but no holder on it; list the place « holder to read » |
+   | the place did not exist, or is a duplicate | delete it myself (sheet, then place, then source — `/enter-in-cms`) |
+
+4. **Re-read every old quotation of a work** in its text. Not found word for word: remove the line.
+5. **Report in the note**: sheets confirmed, corrected, emptied of their holder, deleted. Then the export,
+   `pnpm cities:alerts --map <year>`, the message to the coder.
+
+Region by region, when each is redone — never the whole base at once. Before the first region: ask the coder
+what the Cartographer and `cities:alerts` do with a sheet that has no holder.
 
 ## A reading is kept only if
 

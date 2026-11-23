@@ -23,7 +23,7 @@ The rules of entry are `/enter-in-cms`'s and the rules of reading `/find-sources
 
 The ten steps below prove one thing only: **that a place existed at the year**, by its page's sentence. **They never
 give a holder.** Until 2026-11-23 step 2 gave each place the title of the polity drawn under it: the base repeated the
-map and could never contradict it. Now (`/find-sources`, « The obligation »):
+map and could never contradict it. Now (`/find-sources`, « Never » and « The run »):
 
 1. **Before any place of a region**: the region's holders at the year are read in books — the works its Wikipedia
    pages cite (listed from the pages, the most cited first), their notes, bibliography and index, the atlases on disk,
@@ -81,7 +81,7 @@ Nothing of mine lies flat in `files/resources/`; nothing of the dev's is moved.
 | 6   | **Entry files**: the quotation is the exact rendered sentence, found by script (exact, else difflib ≥ 0.85 and carrying the year); the weak ones I judge myself                                                                | `wave*/enter-*.json`, `weak.json` | `mkv.py`                  |
 | 7   | **Entry**: agents (Sonnet), one file each, through the MCP only, in series, a result file each                                                                                                                                 | the base                          | the entry prompt below    |
 | 8   | **Check**: the base against the files (quotation, title, line, name, region); fix by `update`; `pnpm cities:alerts --map <year>`; one message to the coder (ids, form, counts)                                                 | `bad.json` empty                  | `verifyv.py`, `fixcut.py` |
-| 9   | **Tear down** (the dev, 2026-11-23 — `/find-sources`, step 13): **everything that served the run is deleted** — `rend/`, every downloaded copy, the lot folder with its verdicts, entry and result files, the register and extracts of the region; only the base and the region's note stay — the list and its size shown, the deletion asked of the dev each time | the disk as before the run        | `inventory.py`            |
+| 9   | **Tear down** (the dev, 2026-11-23 — `/find-sources`, « Tear down », step 23): **everything that served the run is deleted** — `rend/`, every downloaded copy, the lot folder with its verdicts, entry and result files, the register and extracts of the region; only the base and the region's note stay — the list and its size shown, the deletion asked of the dev each time | the disk as before the run        | `inventory.py`            |
 
 **Nothing is kept from one run to the next** (the dev, 2026-11-23: _"too bad if you must redo a research that gives
 you the same elements"_): the rule of 2026-11-18 that read `extraits/` first for a later year is over; a later year
