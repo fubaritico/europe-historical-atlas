@@ -16,6 +16,16 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ; (3) plus tard, CORE-486.
 
+## ▶ La règle du soir du 23/11 — à tenir dès l'ouverture
+
+**Il ne s'occupe plus des outils, seulement de son atlas** (mémoire `we-run-ourselves`). On lui dit trois choses, et
+seulement celles-là : **quand on commence un ticket, quand on a fini, quand le contexte atteint 60 %** (il relance depuis
+son téléphone). Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents` pour retrouver
+l'historien, et lui dire que je suis la nouvelle session du codeur. **Ce qu'il attend de moi** : rien. Le CMS a été relancé à
+19 h 50 avec les champs `otherNames` des personnes ; ses créations en attente (Ridwan, Thoros Ier, Chonai, Palu,
+Çemişgezek, et les fusions de lieux) sont pour sa prochaine session. **Ce que j'attends de lui** : rien. Rien n'est poussé
+depuis `5b12959a`, mais la CI est verte et le site est à jour jusque-là.
+
 ## ▶ ON REPREND ICI — le 23/11, 18 h : les noms anglais rattrapés (CMS-495, En cours)
 
 Le plan : `files/plans/contribution/names.md` ; l'état, le commentaire du 23/11 sur CMS-495. **Fait le 23/11 au soir**,
