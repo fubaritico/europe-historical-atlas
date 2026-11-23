@@ -21,9 +21,9 @@ fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md
 **Il ne s'occupe plus des outils, seulement de son atlas** (mémoire `we-run-ourselves`) : on lui dit quand un ticket
 commence, quand il est fini, quand le contexte atteint 60 % — **par notification quand il est à distance** (23/11, 20 h 10).
 Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents`, et dire à l'historien que je suis la
-nouvelle session du codeur. **Sa prochaine session** dira « je saisis » avant la saisie du tour 3 (une trentaine de fiches
-d'Anatolie), puis « CMS libre » : pas de relance du CMS entre les deux. Son dernier export est commité (`f697be4f`). Rien
-n'est poussé depuis `5b12959a` ; la CI est verte jusque-là.
+nouvelle session du codeur. **Sa saisie de l'Espagne du nord-ouest (1100) est à moitié faite** (23/11, 22 h 30) : 26
+fiches gardent le titre 6 (Castille), Ferrol et Pontevedra n'ont plus de fiche 1100 — **pas d'export à commiter** avant
+son « CMS libre » final. Rien n'est poussé depuis `5b12959a` ; la CI est verte jusque-là.
 
 ## ▶ ON REPREND ICI — le 23/11, 20 h 30 : les noms (CMS-495, En cours)
 
