@@ -21,7 +21,7 @@ paths:
    (*« il vaut mieux pas faire ça, il est préconisé de faire comme ça »*), unasked.
 3. **A new rule file or known-issues slice gets its topic in `.claude/skills/rules/topics.json`.**
 
-## What the documentation says that we rely on (verified 2026-10-21, Claude Code 2.1.306)
+## What the documentation says that we rely on (verified 2026-10-21, re-read 2026-11-23 on Claude Code 2.1.330)
 
 - A rule **without `paths:` loads at every session**; with `paths:`, when a matching file is read or written.
   Invalid frontmatter YAML loads the rule unconditionally, silently.
@@ -29,7 +29,8 @@ paths:
 - **Target under 200 lines per instruction file**; Claude Code warns at startup past it, and past a combined limit.
 - `MEMORY.md`: the first 200 lines or 25 KB load; topic files are read on demand.
 - A `UserPromptSubmit` hook's `additionalContext` is capped at **10 000 characters**.
-- `.claude/CLAUDE.md` exists, so the root `AGENTS.md` (written by Turbo) is **not read** — import it if it ever matters.
+- `.claude/CLAUDE.md` exists, so the root `AGENTS.md` (written by Turbo) is **not read** — import it if it ever matters
+  (or the « Project instructions » setting of `/config`, which can load both).
 - **`/doctor prompt-audit`** audits CLAUDE.md, rules, skills, agents for stale or conflicting content and proposes
   edits without applying them (needs ≥ 2.1.283) — **once a week** (the dev, 2026-11-02): `/end-session` asks him to run
   it when the last audit, dated in `next.md`, is more than seven days old.

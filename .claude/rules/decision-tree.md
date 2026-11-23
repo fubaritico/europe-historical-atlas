@@ -14,7 +14,7 @@
 | Propose a commit message only                                                                                | `/message-commit`          |
 | Create a new skill                                                                                           | `/create-skill`            |
 | Fetch a dependency's source                                                                                  | `/opensrc`                 |
-| Feed / query the knowledge base                                                                              | `memory-*` skills          |
+| Feed / query the knowledge base                                                                              | `basic-memory tool …`      |
 | Start a work session                                                                                         | `/start-session`           |
 | End a work session                                                                                           | `/end-session`             |
 | Answer "how long / since when"                                                                               | `/timeline`                |

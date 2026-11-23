@@ -99,7 +99,7 @@ blocking one — and an unexpected throw after the relief keeps the splash with 
   only, a plain sentence in production** (the dev, 2026-10-23: _« un message beaucoup plus human-friendly en prod »_,
   and in development _« quelque chose de beaucoup plus informatif pour le développeur »_; CARTO-274). **One per zone of the
   application** (the dev, 2026-10-21): every panel through the shared `Panel` shell, the status bar, the tool
-  rail and its menus, every contextual menu, the top bar and the future menu bar (CARTO-239), the canvas
+  rail and its menus, every contextual menu, the top bar and the menu bar (CARTO-239), the canvas
   zone, and one at the root. **The canvas zone's fallback offers « Retry »** (the dev, same evening): the drawn
   image goes with the unmounted canvas, but the document lives in the store, so remounting reloads and re-bakes
   the backdrop (a couple of seconds) and redraws the map as it was — nothing drawn is lost. Without its own

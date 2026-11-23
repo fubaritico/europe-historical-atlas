@@ -107,9 +107,9 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   without a gap to the duchy drawn under it and to that duchy's suzerain.** Climbing it is also the check: each link —
   this vassal really held of that suzerain at the date — is proven by its own witness, so a wrong holder shows up as a
   link no source carries. **Each link is established once for a given date**, then reused by every place under that
-  lord: more work once, more reliability everywhere (the dev, same day). Until the base carries the links (CMS-422), they
-  live in the year's register `files/plans/sources/<year>/vassalage.md` — one line per link: the vassal, its suzerain,
-  the witness, the doubt if any — which every research lot reads first and extends.
+  lord: more work once, more reliability everywhere (the dev, same day). They are entered in the base as titles and links of vassalage
+  (CMS-422, step 5 below); the year's register `files/plans/sources/<year>/vassalage.md` — one line per link: the vassal,
+  its suzerain, the witness, the doubt if any — stays the working list every research lot reads first and extends.
 - **The map is the dev's.** A fact that changes a border or a suzerain is entered as a source line *and* sent to the
   code instance; nobody touches `years/` — he decides in the Cartographer.
 - **His server is his.** If `localhost:3100` does not answer, tell him; never start, stop or restart it.

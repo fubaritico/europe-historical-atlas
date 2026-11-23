@@ -13,7 +13,8 @@
 - **Delivers**: `/test`, `/review`, `/commit` ticket by ticket, pushes when the dev says so; keeps the Jira board
   (`/jira`) for its tickets, assigned to « Claude Coder ».
 - **Checks the historian's work read-only** when told of it: the CMS base (`sqlite3 "file:packages/cms/cms.db?mode=ro"`),
-  its notes, its maps; commits the content export (`content/atlas.json` and `content/cartographer.json`) after the dev's `pnpm export:content`.
+  its notes, its maps; commits the content export (`atlas.json` and `cartographer.json` in `packages/atlas/public/content/`) after a
+  `pnpm export:content` — the historian's, the dev's, or its own right after a correction of the base.
 - **Fixes data on the dev's go** — a wrong Wikidata id, a file a bake reads — never redraws a map.
 
 ## What the coder does not do

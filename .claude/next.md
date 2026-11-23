@@ -13,9 +13,11 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 22/11, 18 h 30 : le rattrapage des noms anglais (CMS-495, En cours)
+## ▶ ON REPREND ICI — le 23/11, 14 h 30 : le rattrapage des noms anglais (CMS-495, En cours)
 
-Le plan : `files/plans/contribution/names.md` ; l'état complet, le commentaire du 22/11 sur CMS-495.
+Le plan : `files/plans/contribution/names.md` ; l'état complet, le commentaire du 22/11 sur CMS-495. **Le 23/11 n'a été
+qu'un audit des instructions** : rien de fait sur CMS-495. **Première question à lui poser** : la lecture de Wikidata,
+ou d'abord CMS-499 et CARTO-498 qu'il a mis en tête d'« À faire » ? L'audit des scénarios est dû depuis le 21/11.
 
 **Dans `main`, rien n'est poussé depuis le 20/11 au soir** : tout CMS-495 de la nuit (les noms d'époque des villes, le
 tableau « Le nom dans les autres langues » d'un territoire, la règle qui nomme un pays depuis le CMS, passée par la
@@ -44,20 +46,18 @@ ni commités ni touchés, et **je lui demande avant toute fusion qui lui ferait 
 propre lieu ; un nom que des fiches citent ne change pas de lieu. **En attente de lui** (CARTO-498) : un pays relié au
 CMS garde-t-il un nom et des dates modifiables dans le Cartographe ; les 201 pays par un script en lot.
 
-**Sur le tableau** : CMS-441 en tête d'« À faire » ; CARTO-498 et CMS-499 n'y sont pas dans les dix premiers — à
-retrouver. **En Idées** : REPO-496, REPO-500 (le contrôle des villes muet sur un vassal direct non dessiné), CMS-494.
+**Sur le tableau** : CMS-499 puis CARTO-498 en tête d'« À faire » (son geste, vu le 23/11), puis CORE-486 et
+CMS-441. **En Idées** : REPO-496, REPO-500 (le contrôle des villes muet sur un vassal direct non dessiné), CMS-494.
 **Un manque** : l'historien n'a pas d'outil pour créer un événement. Deux personnes pour Danichmend (9 et 179) : à lui.
 
 **Les icônes** : ATLAS-288 fermé le 21/11, sept types sur treize ; les six autres au Backlog (ATLAS-478 à 483), faites
 quand une carte en a besoin. **ATLAS-448** (une seule langue sur la carte) est porté par CMS-495.
 **ATLAS-461, les ornements — En cours, chez Claude Design** : j'attends ce qu'il rend (`~/Desktop/claude-design-ornements`).
 
-**Pas fait à la clôture** : l'audit des scénarios (dû depuis le 21/11) ; l'audit des instructions, dû depuis le 22/11.
-
 **Le tableau** : Jira depuis le 20/11, par le MCP d'Atlassian et `/jira` ; le Backlog est une page, pas une colonne. **Les
 rangs** : `core/src/data/ranks.ts` ; à lui, le rang des États pontificaux, un score pour la seigneurie épiscopale et le despotat.
 
-**L'export** : `pnpm export:content` écrit `content/atlas.json` et `content/cartographer.json` ; le dernier commité est
+**L'export** : `pnpm export:content` écrit `atlas.json` et `cartographer.json` dans `packages/atlas/public/content/` ; le dernier commité est
 du 22/11 (`a38abeda`). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
 migration des noms : `packages/cms/.backups/cms-20261122-000012-…db` ; celle du 20/11, `cms.backup-2026-11-20-oriflamme.db`
 (ignorées par git, à supprimer avec son accord).
@@ -71,7 +71,7 @@ et je la clos ; ne va à lui que ce qui se juge à l'œil ou se décide, en un s
 
 ## Ce qui reste d'avant, toujours vrai
 
-- **En haut d'« À faire »** : CMS-441 ; **CMS-459** (les citations en code wiki, critique)
+- **En haut d'« À faire »** : CMS-499, CARTO-498 ; **CMS-459** (les citations en code wiki, critique)
   est toujours en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
 - **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-136, ATLAS-152, ATLAS-408…) — à trier avec lui.
   CMS-279 : il reste la garde du seed (une heure).
@@ -90,7 +90,7 @@ Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me m
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `content/atlas.json` et `content/cartographer.json`**.
+**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `packages/atlas/public/content/atlas.json` et `cartographer.json`**.
 
 **À lui, en attente** : son icône `error.svg` à la place de la mienne ; plus tard : CARTO-365 ; **à arbitrer** : le suzerain du royaume d'Arles
 et les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
@@ -108,8 +108,8 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
 **Trois règles du CMS, toujours** :
 
 - **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais.
-- **Aucun changement de champ qui retire ou renomme sans migration** (CMS-276) : en mode push, Payload pose une question
-  dans le terminal et tout attend derrière. Un champ **ajouté** passe sans question (vérifié le 26/10, `withDefault`).
+- **Aucun changement de champ sans migration, même un champ ajouté** (CMS-276) : depuis le 15/11 le schéma ne change
+  plus par le push (`push: false`, `f49efbb6`) ; `pnpm dev:cms` lance `migrate` avant le serveur.
 - **Un `rm -rf` ne se glisse jamais dans une commande.**
 
 **Une source qu'il donne** → `/create-data-mention`, toujours ; la liste vit sur ATLAS-152. Ses atlas :
@@ -138,8 +138,8 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 
 **Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
 montées, rapport `files/versions/2026-11-06.md`. **Fait le 17/11 (CMS-468)** : Next 16.4.6 et le kit MCP forcé en 1.32.0 ; il reste 3 alertes (zod, minimatch, esbuild).
-**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **15/11**, ses sept corrections appliquées avec son accord le jour même (rapport `files/prompt-audit-2026-11-15.md` ;
-laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; **le suivant est dû depuis le 22/11**.
+**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **23/11**, ses six corrections appliquées avec son accord le jour même (rapport `files/prompt-audit-2026-11-23.md` ;
+laissé ouvert : les `allowed-tools` de `/repo-version-manager`, et les signalements de fin de rapport) ; **le suivant est dû le 30/11**.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),

@@ -4,53 +4,47 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-21 → 22/11 — le codeur : les noms d'époque, de la décision à la carte
+### 2026-11-23 — le codeur : l'audit des instructions, rien de fait sur le code
 
-Plage **21/11 21:42 → 22/11 02:58** (5 h 15 au journal, partagée avec l'historien dans une autre session ; ma session
-va de 22 h 00 à 3 h 00) ; le chantier totalise **383 h 46 sur 60 plages**. **Rien n'est poussé.** Le détail :
-`files/plans/contribution/names.md` et les commentaires de CMS-495.
+Plage **23/11 13:20 → 14:30** (1 h 06 au journal, l'historien dans une autre session au début) ; le chantier totalise
+**387 h 29 sur 62 plages**. Rien n'est poussé. Le rapport : `files/prompt-audit-2026-11-23.md`.
 
-- **Fermés** : ATLAS-288 (les icônes : sept types sur treize, les six restantes au Backlog, ATLAS-478 à 483, l'épique
-  ATLAS-132 reste ouverte) ; CARTO-497 (ouvert puis fermé : l'alerte de Cizre était juste).
-- **CMS-495, en cours** — parti d'ATLAS-448 et de son documentaire sur les Comnènes (_« on a un problème plus profond
-  avec les noms »_). **Dans `main`** : la table « Noms d'époque » et sa migration (tournée sur sa base, rien de perdu),
-  le champ sur la fiche datée avec son « + », l'export en version 10, une règle du cœur qui nomme une ville pour
-  l'atlas et le Cartographe, la skill de saisie de l'historien, la liste des 132 et 255 noms à trier. **Sur l'arbre
-  `coder` seulement** : le tableau des noms d'un territoire dans les autres langues et sa migration, la règle qui
-  nomme un pays depuis le CMS et le contrôle des noms manquants.
-- **Ses décisions** : les noms se contribuent dans le CMS ; le lieu porte son nom actuel, la fiche datée désigne le nom
-  d'époque, _« Ancire devient donc Ankara »_ ; la carte écrit le nom d'époque seul, le nom actuel entre parenthèses
-  au clic ; une table à part, contribuée à la volée (_« ce type de contribution à la volée […] est fondamental »_) ;
-  tout maintenant (_« ce que l'on fait aujourd'hui, on n'aura pas à le faire demain »_) ; sans nom d'époque, le nom
-  du lieu, mais contrôlé ; pour un territoire un seul nom par langue ; _« il ne peut pas y avoir de nom manquant »_ ;
-  la recherche Wikidata reste dans le Cartographe, avec « Ajouter au CMS » (CARTO-498) ; un bouton d'export dans le
-  CMS (CMS-499) ; _« tout sera en ligne »_, sur des sous-domaines.
-- **Mesuré** : 13 297 lieux sur 13 684 portent déjà leur nom actuel ; 191 pays dessinés sur 392 sont reliés à un
-  territoire du CMS ; Wikidata donne un nom français à 271 des 290 pays, plusieurs faux pour une carte.
-- **Avec l'historien** : six exports commités ; la prise de Brandebourg de 1100, absente du CMS ; ses défauts d'outil
-  (REPO-496) ; la langue des contributions (CMS-494).
-- **Mes fautes** : un `cd` ; un message à l'historien annonçant une fusion qui venait d'être refusée ; une fusion dans
-  `main` pendant qu'il dessinait, sans le dire avant ; un repli écrit avant sa décision, retiré à la revue ; deux
-  commits refusés pour une ligne de message trop longue ; le tiroir du « + » jamais vu dans un navigateur.
+- **L'ouverture** : le MCP d'Atlassian répond ; rien en « À valider par le développeur » ; il a mis CMS-499 puis
+  CARTO-498 en tête d'« À faire ».
+- **L'audit (`/doctor prompt audit`), appliqué avec son accord** : six passages périmés corrigés — la règle du CMS de
+  `next.md` qui laissait passer un champ ajouté sans migration (`push: false` depuis le 15/11), le chemin de l'export
+  (`packages/atlas/public/content/`) dans `roles/coder.md` et `next.md`, la barre de menus « future » de
+  `error-handling.md`, les liens de vassalité « pas encore dans la base » de `/enter-in-cms`, l'ordre du tableau, la
+  version relue de `claude-config.md` (2.1.330).
+- **Ses réglages** : le mode automatique par défaut et le plugin `frontend-design` éteint (`~/.claude/settings.json`) ;
+  les six skills `memory-*` éteintes pour ce projet (`settings.local.json`), la ligne de l'arbre de décision renvoie à
+  la commande `basic-memory` ; `context7` désactivé par lui. Les copies d'avant : `~/.claude/*.bak-2026-11-23`.
+- **Laissé à lui ou à l'historien** : l'index de la mémoire à 22 Ko sur 25 ; la section « remplacée » de
+  `/find-sources` et les deux scripts morts de `/bulk-entry` ; le modèle `opus` fixé de l'agent de recherche.
+- **Pas fait** : rien sur CMS-495 ; l'audit des scénarios ; la zone de rattrapage d'erreur de la barre de menus pas
+  vérifiée. Ma question « Wikidata, ou d'abord CMS-499 et CARTO-498 ? » est restée sans réponse : il relance la console.
 
-### 2026-11-22 — le codeur : la fusion des noms, un tiroir vu, le rattrapage des noms anglais commencé
+### 2026-11-23 — l'historien : la méthode de recherche refaite, aucune recherche lancée
 
-Plage **22/11 16:01 → 18:26** (2 h 24 au journal, l'historien dans une autre session) ; le chantier totalise
-**386 h 16 sur 61 plages**. **Rien n'est poussé.** Le détail : le commentaire du 22/11 sur CMS-495.
+Plage **23/11 13:20 → 14:18** (57 min au journal) ; le chantier totalise **387 h 20 sur 62 plages**. Rien n'est poussé.
+Commit `add0fb1d`. Le détail : `next-historian.md` et `/find-sources`, « The run, in order » et « The obligation ».
 
-- **Dans `main`** : les quatre commits de la nuit sur les noms, rejoués sur une seule ligne (il avait vu deux lignes
-  dans son journal Git) ; la migration `territory_other_names` prouvée sur une copie puis tournée sur sa base ; la règle
-  qui nomme un pays depuis le CMS passée par la revue, aucun défaut ; l'export de l'historien (`a38abeda`).
-- **Le tiroir du « + » du champ « Nom d'époque », vu dans un navigateur** : il s'ouvre et se referme. Deux défauts :
-  sous la langue de contenu « English » les lieux s'affichent « Sans titre » et ne se trouvent pas (11 lieux sur
-  13 717 ont un nom anglais) ; le lieu de la fiche n'est pas prérempli. Enregistrer, rouvrir, modifier, retirer : pas essayés.
-- **Ses décisions** (`files/plans/contribution/names.md`) : le nom d'un lieu ou d'un territoire se retrouve par un
-  identifiant, auquel répondent plusieurs traductions ; un champ de traduction qui existe ne reste jamais vide, _« il
-  faut procéder à un rattrapage »_ ; ce que Wikidata ne nomme pas revient à l'historien, après son travail en cours.
-- **Le rattrapage, commencé** : `files/spikes/english-names/fetch_labels.py` lit le nom anglais de Wikidata par
-  identifiant ; arrêté à 8 040 réponses sur 14 055 (7 899 nommés, 141 sans nom anglais). Rien d'écrit dans la base.
-- **Avec l'historien** : son lot d'Anatolie orientale contrôlé en lecture seule ; son dessin des vassaux du sultan sur
-  la 1100 refusé par le dev, qui la retouche lui-même ; un défaut possible du contrôle des villes en Idées (REPO-500).
-- **Mes fautes** : trois modèles proposés de suite pour un seul défaut d'affichage ; une suppression de table demandée
-  que sa réponse rendait inutile ; une étiquette de secours codée avant sa décision, retirée avant tout commit ; un
-  préremplissage annoncé « je commence » et pas commencé ; l'audit des scénarios toujours pas fait.
+- **Son constat** : la carte ne ressemble pas à ce que les autres dessinent — l'Anatolie de la reconquête d'Alexis Iᵉʳ,
+  Ancyre aux Danichmendides, la Castille, aucune ville dans le Caucase ni l'ancienne Arménie.
+- **Mesuré** : 3 529 lectures du registre sur 3 534 étaient des pages Wikipédia ; aucun ouvrage du disque ouvert ; sur
+  13 705 fiches de 1100, 11 949 ont un détenteur sans aucune ligne (le pays dessiné sous la ville), 412 sur Wikipédia
+  seule ; un seul lieu en Arménie, Géorgie et Azerbaïdjan.
+- **Ses règles, écrites dans les skills** (`find-sources`, `bulk-entry`, `enter-in-cms`, l'agent `source-researcher`,
+  `roles/historian.md`, `rules/decision-tree.md`) : Wikipédia n'est qu'une amorce ; un détenteur exige un livre lu ;
+  notre carte n'est jamais une base de vérification ; six canaux obligatoires et l'index des livres sur un à deux
+  degrés ; trois phases — la mise en place par formulaires (ses axes, ses noms, ses ressources), l'exécution qui croise
+  les lectures, le démontage qui vide le disque ; chaque essai compté et dit dans un journal ; CONNEXION IMPOSSIBLE ;
+  J'AI BESOIN DE TOI, les cas bloqués sur une page lisible ; une ville lue dans une source est une ville à ajouter.
+- **Dans les scripts de `/bulk-entry`** : `log.py`, `prepare.py`, `region_gate.py`, `cited_works.py` (nouveaux) ;
+  `meta.py` ne lit plus la carte, `verifyv.py` refuse un détenteur sans livre — essayés sur un lot de deux pages et sur
+  une copie d'une ancienne vague (70 fiches refusées sur 70).
+- **Sept ouvrages ajoutés par lui sur le disque**, inscrits dans `bibliotheque.md` ; le Palgrave de Byzance ouvert, un
+  essai au registre (son texte donne aux Danichmendides le plateau central), ses cartes pas regardées.
+- **Mes fautes** : je m'arrêtais à Wikipédia depuis des semaines et la saisie en masse recopiait la carte ; des
+  réponses trop longues pour une seule question ; le cas d'Ancyre repris alors qu'il parlait du déroulé ; une recherche
+  lancée par formulaire qu'il n'avait pas demandée ; une suppression de 740 Mo donnée à décider.
