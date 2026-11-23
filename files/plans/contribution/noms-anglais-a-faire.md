@@ -9,8 +9,9 @@
 
 
 > **Complété par le codeur le 23/11 au soir, à la demande du développeur** (« je veux que ça finisse ») : plus aucun nom
-> anglais n'est vide. Les lieux sans nom anglais dans Wikidata ont gardé leur propre nom (un village ne se traduit
-> pas), les abbayes et châteaux traduits ; les territoires et les personnes traduits par le codeur ; les trois maisons
+> anglais n'est vide. Un lieu prend la forme que l'anglais emploie (France → Frankreich en allemand, London → Londres en français) : pour
+> ceux que Wikidata ne nomme pas en anglais, c'est leur propre nom, sans accents (Stíri → Stiri), les abbayes et
+> châteaux traduits ; les territoires et les personnes traduits par le codeur ; les trois maisons
 > saisies sous leur identifiant ont reçu leur nom français (Capitanei, Romagnano, Maison de Groitzsch). Les traductions
 > sont dans `files/spikes/english-names/translations.json`. **Ce qui reste à l'historien n'est plus que de la
 > relecture** : ces traductions, les listes ci-dessous, et les 30 noms d'époque anglais donnés de mémoire.

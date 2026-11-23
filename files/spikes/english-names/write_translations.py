@@ -2,8 +2,9 @@
 
     python3 -I write_translations.py <base.db> <translations.json> [--apply]
 
-A place Wikidata names in no English keeps its own name in English — a village's name is not translated — unless
-`placesOverride` gives a form (an abbey, a castle); a territory and a person take the coder's translation. Three
+A place takes the form English uses (the dev, 2026-11-23: France is Frankreich in German, London Londres in
+French): for one Wikidata names in no English, that form is its own name, unaccented, unless `placesOverride` gives
+another (an abbey, a castle, a Greek place); a territory and a person take the coder's translation. Three
 houses entered under their Wikidata id get their French name. Without --apply nothing is written; with it, one
 transaction, additions only: a record that has an English line already is left as it is. A record of the lists with
 no translation stops the run before anything is written. Run on a copy first, then on the base.

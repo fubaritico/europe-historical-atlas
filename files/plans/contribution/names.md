@@ -161,6 +161,7 @@ commit the files: the coder still does.
   English line; the 128 others are in `noms-anglais-a-faire.md`. **Left**: the events' title and description, still
   translated; the seed (`known-issues/cms.md`).
 - **Every name filled, the same evening** (the dev: _"I want it to end"_): the 364 names Wikidata does not give — a
-  place keeps its own name, territories and people translated by the coder (`files/spikes/english-names/`
+  place takes the form English uses — its own name, unaccented, where English has none of its own (the dev:
+  _"France → Frankreich, London → Londres"_) — territories and people translated by the coder (`files/spikes/english-names/`
   `translations.json`) — and the eleven events' English title and description; three event types' French labels
   corrected. No English name is empty. The historian rereads.

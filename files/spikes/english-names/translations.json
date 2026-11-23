@@ -1,5 +1,5 @@
 {
- "note": "The coder's translations of 2026-11-23 (CMS-495): a place Wikidata names in no English keeps its own name unless overridden; territories and people translated by the coder; three houses entered under their Wikidata id given their French name.",
+ "note": "The coder's translations of 2026-11-23 (CMS-495): a place takes the form English uses — its own name, unaccented, where English has none of its own, else the override; territories and people translated by the coder; three houses entered under their Wikidata id given their French name.",
  "placesOverride": {
   "1981": "Monastery of San Martín (Cercito)",
   "2040": "Saint-Rigaud Abbey",
@@ -11,7 +11,13 @@
   "11696": "Bassum Abbey",
   "13586": "Zvenyhorod (Kyiv)",
   "13590": "Voin",
-  "13607": "Zdvyzhen"
+  "13607": "Zdvyzhen",
+  "4548": "Avlonari",
+  "4682": "Stiri",
+  "4691": "Agios Thomas",
+  "4713": "Klinovos",
+  "4822": "Nea Epidavros",
+  "4983": "Antikyra"
  },
  "territories": {
   "19": "County of Forez",
