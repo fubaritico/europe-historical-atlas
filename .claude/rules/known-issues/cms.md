@@ -124,3 +124,8 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   Local API read handed `req` with another `locale` writes that language into the request — inside a `beforeChange`
   the save under way then goes on in it (a name typed in English overwrote the French one, caught by a test).
   **Severity: gênant.**
+- **A CMS command run from the `coder` tree reads the base's relative path and makes a new base there** (2026-11-23):
+  `DATABASE_URL` in `packages/cms/.env` is relative, so `pnpm migrate` run with `--dir` on the tree built an empty
+  base in `.claude/worktrees/coder/packages/cms/` and migrated it, leaving the dev's base as it was — caught by the
+  counts, the stray file removed. **Remedy**: always pass `DATABASE_URL=file:<absolute path>` to a command of the CMS
+  run outside `main`'s tree. **Severity: worth knowing.**

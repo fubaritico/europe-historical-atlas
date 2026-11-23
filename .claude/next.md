@@ -16,31 +16,27 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
 fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ; (3) plus tard, CORE-486.
 
-## ▶ ON REPREND ICI — le 23/11, 14 h 30 : le rattrapage des noms anglais (CMS-495, En cours)
+## ▶ ON REPREND ICI — le 23/11, 18 h : les noms anglais rattrapés (CMS-495, En cours)
 
-Le plan : `files/plans/contribution/names.md` ; l'état complet, le commentaire du 22/11 sur CMS-495. **Le 23/11 n'a été
-qu'un audit des instructions** : rien de fait sur CMS-495. **Première question à lui poser** : la lecture de Wikidata,
-ou d'abord CMS-499 et CARTO-498 qu'il a mis en tête d'« À faire » ? L'audit des scénarios est dû depuis le 21/11.
+Le plan : `files/plans/contribution/names.md` ; l'état, le commentaire du 23/11 sur CMS-495. **Fait le 23/11 au soir**,
+tout dans `main` : les noms anglais lus dans Wikidata et écrits dans sa base (13 558 lieux, 319 territoires, 391
+personnes) et mes traductions des types d'événement, des raisons d'importance et des engins de siège ; l'anglais
+**obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire **et d'un lieu** (sa décision du
+23/11 : le lieu prend le tableau du territoire ; la migration `place_other_names` a tourné sur sa base, copie dans
+`.backups/`) ; la liste de l'historien, `files/plans/contribution/noms-anglais-a-faire.md`. **Rien n'est poussé
+depuis le 20/11.**
 
-**Dans `main`, rien n'est poussé depuis le 20/11 au soir** : tout CMS-495 de la nuit (les noms d'époque des villes, le
-tableau « Le nom dans les autres langues » d'un territoire, la règle qui nomme un pays depuis le CMS, passée par la
-revue), les deux migrations tournées sur sa base, les exports de l'historien jusqu'à `a38abeda`. L'arbre `coder` est
-au même commit que `main`.
+**Ce qui reste, dans l'ordre** : (1) **à lui** : l'anglais obligatoire aussi pour les personnes et les trois petits
+registres, par le même tableau — ma proposition, quatre migrations ; et les fautes de ses libellés de types
+d'événement (« Polithique », « trone », « Conquest » en français) ; (2) le lieu prérempli dans le tiroir du « + » du
+« Nom d'époque », puis le tiroir essayé sur toute sa vie ; (3) la suite d'avant : les quatorze noms d'époque
+d'Anatolie, le tri des 132 et 255 noms (`noms-a-trier.md`), le renommage (Ancyre → Ankara), le contrôle des noms en
+commande, les pays en français. Puis CMS-499 et CARTO-498, en tête d'« À faire ».
 
-**Ses deux décisions du 22/11** : le nom d'un lieu ou d'un territoire se retrouve par un identifiant, auquel
-répondent plusieurs traductions ; **un champ de traduction qui existe ne reste jamais vide** — pas de repli ni
-d'étiquette de secours (codée puis retirée) : un rattrapage. Ce que Wikidata ne nomme pas revient à l'historien.
-
-**Dans l'ordre, à la reprise** : (1) finir la lecture de Wikidata — `python3 -I files/spikes/english-names/fetch_labels.py
-<copie.db> files/spikes/english-names/out/labels.json`, qui reprend à 8 040 réponses sur 14 055 (le fichier `out/` est
-ignoré par git : s'il manque, tout relire, une quarantaine de minutes) ; (2) écrire les noms anglais sur une copie
-puis sur sa base — un lieu dans `name` en langue « en », un territoire dans `otherNames` ; (3) la liste de l'historien
-en `.md` français : les sans-nom anglais, les 58 territoires sans identifiant Wikidata, et les noms de territoires à
-relire ; (4) le nom obligatoire dans chaque langue, et sa skill de saisie mise à jour ; (5) la même règle pour les
-personnes, les confessions, les types d'événement, les raisons d'importance, les engins de siège ; (6) le lieu
-prérempli dans le tiroir du « + » du « Nom d'époque », puis le tiroir essayé sur toute sa vie ; (7) la suite d'avant :
-les quatorze noms d'époque d'Anatolie, le tri des 132 et 255 noms (`noms-a-trier.md`), le renommage (Ancyre → Ankara),
-le contrôle des noms en commande, les pays en français.
+**Le défaut qui reste** (`known-issues/cms.md`) : « Nom » d'un lieu ou d'un territoire est encore traduisible, donc un
+anglais tapé en changeant la langue de la page n'est pas exporté — le rendre français seul demanderait une migration
+écrite à la main sans reconstruire `places`. **Un piège payé le 23/11** : une commande du CMS lancée depuis l'arbre `coder` crée une base neuve
+(`known-issues/cms.md`).
 
 **Sa 1100 est à lui** (22/11) : il retouche lui-même l'est de l'Anatolie ; `polities.json` et `registry.json` ne sont
 ni commités ni touchés, et **je lui demande avant toute fusion qui lui ferait recharger le Cartographe**.
