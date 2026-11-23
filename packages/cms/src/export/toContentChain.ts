@@ -17,6 +17,7 @@ import type { StoredLink } from '../fields/vassalLinkOf'
 import type {
   ContentChainReading,
   ContentChainTitle,
+  ContentHolder,
 } from '@europe-historical-atlas/core/data/contentFormat'
 import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
 
@@ -24,6 +25,8 @@ import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
 export interface DocTerritory {
   /** Its id. */
   id: DocId
+  /** Its name, French: what a city it holds is said to be held by. */
+  name?: string | null
   /** Its Wikidata id, or nothing for one that has none. */
   wikidata?: string | null
   /** Its kind, as the register stores it — the rank of the title that holds it (CARTO-491). */
@@ -48,8 +51,28 @@ export interface DocTitle {
 export interface ChainRegister {
   /** Each title as the map compares it, by its id as text. */
   readonly titles: ReadonlyMap<string, ContentChainTitle>
+  /** The territory each title holds, as a city held by that title is said to be held: by its title's id as text. */
+  readonly holders: ReadonlyMap<string, ContentHolder>
   /** Every link the base holds, as `core`'s chain reads them. */
   readonly links: readonly VassalLink[]
+}
+
+/**
+ * The territory a title holds, resolved and named.
+ * @param title - the title
+ * @param where - which title, for the error
+ * @returns the territory, its name sure
+ * @throws {Error} when the title has no territory, or its territory is not resolved or has no name
+ */
+function namedTerritory(title: DocTitle, where: string): DocTerritory & { name: string } {
+  if (title.territory === null || title.territory === undefined) {
+    throw new Error(`[CMS] ${where}: no territory`)
+  }
+  const territory = resolved<DocTerritory>(title.territory, `${where}, territory`)
+  if (typeof territory.name !== 'string' || territory.name === '') {
+    throw new Error(`[CMS] ${where}: its territory has no name`)
+  }
+  return { ...territory, name: territory.name }
 }
 
 /**
@@ -58,22 +81,21 @@ export interface ChainRegister {
  * @param titles - every title, its territory resolved
  * @param links - every link of vassalage
  * @returns the register
- * @throws {Error} when a title has no name or its territory is not resolved
+ * @throws {Error} when a title has no name, or its territory is not resolved or has no name
  */
 export function chainRegister(
   titles: readonly DocTitle[],
   links: readonly StoredLink[]
 ): ChainRegister {
   const named = new Map<string, ContentChainTitle>()
+  const holders = new Map<string, ContentHolder>()
   for (const title of titles) {
     const where = `title ${String(title.id)}`
     if (typeof title.label !== 'string' || title.label === '') {
       throw new Error(`[CMS] ${where}: no name — save it once so the server writes it`)
     }
-    if (title.territory === null || title.territory === undefined) {
-      throw new Error(`[CMS] ${where}: no territory`)
-    }
-    const territory = resolved<DocTerritory>(title.territory, `${where}, territory`)
+    const territory = namedTerritory(title, where)
+    holders.set(String(title.id), { name: territory.name, wikidata: territory.wikidata ?? null })
     named.set(String(title.id), {
       name: title.label,
       wikidata: territory.wikidata ?? null,
@@ -86,10 +108,38 @@ export function chainRegister(
   }
   return {
     titles: named,
+    holders,
     links: [...links.map(vassalLinkOf), ...titles.map(sovereignLinkOf)].filter(
       (link): link is VassalLink => link !== null
     ),
   }
+}
+
+/**
+ * The holder of a city whose sheet names a title: the territory that title holds (2026-11-23, the dev's « plein de
+ * villes sans détenteur »). Since CMS-422 a sheet's holder is a title; the holder typed as text (CMS-335) is older, often
+ * a person rather than a country, and the mass entries of 17–19/11 left it empty — so the title's territory is the
+ * city's holder, the one a map's polity is compared by.
+ * @param register - the titles and the territories they hold
+ * @param title - the title the sheet names as its holder, bare or resolved
+ * @param where - which sheet, for the error
+ * @returns the holder, or `null` when the sheet names no title
+ * @throws {Error} when the sheet names a title the register lacks
+ */
+export function titleHolder(
+  register: ChainRegister,
+  title: unknown,
+  where: string
+): ContentHolder | null {
+  const id = relationId(title)
+  if (id === null) return null
+  const holder = register.holders.get(String(id))
+  if (holder === undefined) {
+    throw new Error(
+      `[CMS] ${where}: its holder is title ${String(id)}, which the export did not read`
+    )
+  }
+  return holder
 }
 
 /**

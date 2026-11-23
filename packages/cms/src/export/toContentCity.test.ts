@@ -185,6 +185,46 @@ describe('toContentCity', () => {
       expect(toContentCity(rome({ holderName: '', holderQid: '' }), NO_CHAIN).holder).toBeNull()
     })
 
+    // 2026-11-23, the dev's « plein de villes sans détenteur »: 11 932 sheets of 1100 had a title and no typed holder.
+    it('writes the territory of the sheet’s title as its holder when no holder is typed', () => {
+      const register = chainRegister(
+        [
+          {
+            id: 1,
+            label: 'Pascal II — États pontificaux',
+            territory: { id: 9, name: 'États pontificaux', wikidata: 'Q170174' },
+          },
+        ],
+        []
+      )
+      expect(toContentCity(rome({ holderTitle: 1 }), register).holder).toEqual({
+        name: 'États pontificaux',
+        wikidata: 'Q170174',
+      })
+    })
+
+    it('writes the title’s territory over a typed holder that names a person', () => {
+      const register = chainRegister(
+        [
+          {
+            id: 2,
+            label: 'Roger Borsa — duché d’Apulie',
+            territory: { id: 8, name: 'duché d’Apulie et de Calabre', wikidata: 'Q3715874' },
+          },
+        ],
+        []
+      )
+      const sheet = rome({
+        holderTitle: 2,
+        holderName: 'Roger Borsa, duc de Pouille',
+        holderQid: 'Q468687',
+      })
+      expect(toContentCity(sheet, register).holder).toEqual({
+        name: 'duché d’Apulie et de Calabre',
+        wikidata: 'Q3715874',
+      })
+    })
+
     // CMS-391, the dev, 2026-11-08: unticked by default, the atlas shows only the cities ticked.
     // CMS-495: the sheet's name of the time, written in as its forms by language.
     it('writes the name of the time the sheet points at, a form a language', () => {

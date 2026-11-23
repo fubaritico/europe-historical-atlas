@@ -5,7 +5,7 @@ import { citySheetCandidate } from '../fields/citySheetCandidate'
 import { nameForms } from '../fields/nameForms'
 
 import { namesOf, present, resolved, toPlace, toSource } from './docRecords'
-import { contentChain } from './toContentChain'
+import { contentChain, titleHolder } from './toContentChain'
 
 import type { DocId, DocNamed, DocPlace, DocSource } from './docRecords'
 import type { ChainRegister } from './toContentChain'
@@ -262,10 +262,12 @@ export function toContentCity(sheet: DocCitySheet, register: ChainRegister): Con
       if (row === undefined) throw new Error(`[CMS] ${where}: line ${String(index + 1)} vanished`)
       return toTestimony(row, line, `${where}, line ${String(index + 1)}`)
     }),
+    // The title's territory first (`titleHolder`); the holder typed as text only for a sheet that names no title
     holder:
-      read.holderName === null || read.holderName === undefined
+      titleHolder(register, sheet.holderTitle, where) ??
+      (read.holderName === null || read.holderName === undefined
         ? null
-        : toHolder(read.holderName, read.holderQid),
+        : toHolder(read.holderName, read.holderQid)),
     chain: contentChain(register, sheet.holderTitle, yearSpanOf(read.date).from, where),
     communities: read.communities.map((community, index) => {
       const row = communityRows[index]

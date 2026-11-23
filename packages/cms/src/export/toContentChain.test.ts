@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { chainRegister, contentChain } from './toContentChain'
+import { chainRegister, contentChain, titleHolder } from './toContentChain'
 
 import type { DocTitle } from './toContentChain'
 
@@ -16,9 +16,21 @@ function span(from: number, to: number) {
 
 /** Nantes in 1100: the count, the duke, the king — each title with its territory resolved. */
 const TITLES: DocTitle[] = [
-  { id: 10, label: 'Mathias II — comté de Nantes', territory: { id: 1, wikidata: 'Q1' } },
-  { id: 20, label: 'Alain IV — duché de Bretagne', territory: { id: 2, wikidata: 'Q2' } },
-  { id: 30, label: 'Philippe Ier — royaume de France', territory: { id: 3, wikidata: null } },
+  {
+    id: 10,
+    label: 'Mathias II — comté de Nantes',
+    territory: { id: 1, name: 'comté de Nantes', wikidata: 'Q1' },
+  },
+  {
+    id: 20,
+    label: 'Alain IV — duché de Bretagne',
+    territory: { id: 2, name: 'duché de Bretagne', wikidata: 'Q2' },
+  },
+  {
+    id: 30,
+    label: 'Philippe Ier — royaume de France',
+    territory: { id: 3, name: 'royaume de France', wikidata: null },
+  },
 ]
 
 const LINKS = [
@@ -30,8 +42,16 @@ describe('contentChain', () => {
   describe('happy path', () => {
     it('writes the kind of each title’s territory, the rank the chain is checked by (CARTO-491)', () => {
       const titles = [
-        { id: 10, label: 'Mathias II', territory: { id: 1, wikidata: 'Q1', kind: 'county' } },
-        { id: 20, label: 'Alain IV', territory: { id: 2, wikidata: null } },
+        {
+          id: 10,
+          label: 'Mathias II',
+          territory: { id: 1, name: 'comté de Nantes', wikidata: 'Q1', kind: 'county' },
+        },
+        {
+          id: 20,
+          label: 'Alain IV',
+          territory: { id: 2, name: 'duché de Bretagne', wikidata: null },
+        },
       ]
       const register = chainRegister(titles, [])
       expect(register.titles.get('10')).toEqual({
@@ -96,6 +116,51 @@ describe('contentChain', () => {
 
     it('stops the export at a title whose territory is missing', () => {
       expect(() => chainRegister([{ id: 40, label: 'X' }], [])).toThrow('title 40: no territory')
+    })
+
+    it('stops the export at a title whose territory has no name, the holder a city would be written with', () => {
+      expect(() => chainRegister([{ id: 40, label: 'X', territory: { id: 4 } }], [])).toThrow(
+        'title 40: its territory has no name'
+      )
+    })
+  })
+})
+
+// 2026-11-23, the dev's « plein de villes sans détenteur »: a sheet's holder is its title's territory.
+describe('titleHolder', () => {
+  const register = chainRegister(TITLES, LINKS)
+
+  describe('happy path', () => {
+    it('gives the territory the sheet’s title holds, by its name and its Wikidata id', () => {
+      expect(titleHolder(register, 10, 'city sheet 1')).toEqual({
+        name: 'comté de Nantes',
+        wikidata: 'Q1',
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('reads a resolved title as a bare one, and a territory with no Wikidata id', () => {
+      expect(titleHolder(register, { id: 30 }, 'city sheet 1')).toEqual({
+        name: 'royaume de France',
+        wikidata: null,
+      })
+    })
+  })
+
+  describe('managed errors', () => {
+    it('stops the export at a sheet whose title the export did not read, naming both', () => {
+      expect(() => titleHolder(register, 99, 'city sheet 7')).toThrow(
+        'city sheet 7: its holder is title 99, which the export did not read'
+      )
+    })
+  })
+
+  // L4: N/A — pure, its input checked by the export's register.
+
+  describe('edge cases', () => {
+    it('gives no holder for a sheet that names no title', () => {
+      expect(titleHolder(register, null, 'city sheet 1')).toBeNull()
     })
   })
 
