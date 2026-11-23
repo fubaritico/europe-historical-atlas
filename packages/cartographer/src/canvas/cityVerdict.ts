@@ -18,7 +18,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocume
  * **Compared by Wikidata id first, by the CMS's territory number where one side has none** (CARTO-450, the dev's rule of
  * 2026-11-16, `data/territoryMatch`): a map's polity has its `wikidata` and may carry its `territory`, a title of the
  * chain both. A wrong id in the map's registry therefore reads as a misplaced city — which is how such an id is found
- * (`files/plans/sources/1100/wikidata.md`).
+ * (the historian's note `1100/toutes-zones/resultats/wikidata.md`, on the research disk).
  */
 
 /** The polity the map has under a city: its registry id, its name, and what it is recognised by. */
