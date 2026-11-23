@@ -106,7 +106,10 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
 
 **Trois règles du CMS, toujours** :
 
-- **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais.
+- **Le serveur du CMS est à nous deux, l'historien et moi, depuis le 23/11 au soir** (sa décision : _« c'est pas à moi,
+  c'est à vous, vous vous démerdez entre vous deux »_) : je le relance moi-même quand un changement le demande, après
+  avoir demandé à l'historien qu'aucun agent n'écrive, détaché (`/Volumes/Acer/atlas-historien/outils/start-cms.sh`), et
+  je vérifie `/admin`. Il ne relance plus qu'une session dont le contexte est plein, depuis son téléphone : on le lui dit.
 - **Aucun changement de champ sans migration, même un champ ajouté** (CMS-276) : depuis le 15/11 le schéma ne change
   plus par le push (`push: false`, `f49efbb6`) ; `pnpm dev:cms` lance `migrate` avant le serveur.
 - **Un `rm -rf` ne se glisse jamais dans une commande.**

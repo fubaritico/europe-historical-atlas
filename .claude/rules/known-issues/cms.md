@@ -36,9 +36,10 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   appelant qui ne peut pas lire le titre trouvé. Sans effet tant que le CMS est local, à un seul
   contributeur, sans lecture restreinte. **Déclencheur** : la mise en ligne et ses comptes (CMS-228) — `overrideAccess:
 false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
-- **Le serveur du CMS est le sien** (25/10) : je ne le lance, ne le coupe ni ne le relance jamais. Mes relances pendant
-  qu'il remplissait un lieu ont donné un « Failed to fetch » qu'il a pris pour un défaut du bouton. Je vérifie par des
-  tests et des scripts sur une base à moi (CMS-279). **Sévérité : à savoir.**
+- **Le serveur du CMS est au codeur et à l'historien depuis le 23/11 au soir** (le dev : _« c'est pas à moi, c'est à
+  vous »_ ; il était le sien depuis le 25/10, quand mes relances coupaient ses saisies). Avant de le couper : demander à
+  l'historien qu'aucun de ses agents n'écrive — une relance coupe leurs écritures. Le relancer détaché
+  (`/Volumes/Acer/atlas-historien/outils/start-cms.sh`), vérifier `/admin`, le dire à l'historien. **Sévérité : à savoir.**
 - **Lancer le CMS depuis une session Claude** (17/11, l'historien) : le contrôleur de permissions refuse `pnpm dev:cms`
   tant que l'ordre du dev n'est pas écrit en toutes lettres dans la conversation (deux refus ; une note de reprise ne
   suffit pas) ; une fois accepté, une tâche de fond est tuée (SIGTERM, code 143) à la fin de l'appel, le serveur déjà prêt.
@@ -130,5 +131,6 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   no stream. A field added to a collection is therefore unknown to a session already open: the historian's
   `createPeople` refused every person for lack of `otherNames`, which its tool did not offer. **The rule** (the dev:
   _"why do I have to deal with this"_): **the coder changes a collection's fields while no historian session runs**, or
-  says the change before the next one starts — a new session reads the new tools. Otherwise: `/mcp` → « cms » →
-  « Reconnect » in that session. **Severity: gênant** (a gesture of the dev's, for a change of the coder's).
+  says the change before the next one starts — a new session reads the new tools. A session already open cannot reconnect itself (`/mcp` is the dev's), and the dev no longer does it (2026-11-23): the
+  historian works around it until his next session — the CMS restarted by the coder, a record the stale tool cannot
+  carry is kept aside. **Severity: gênant.**
