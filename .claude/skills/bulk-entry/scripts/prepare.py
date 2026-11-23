@@ -43,7 +43,9 @@ if NOTE.exists():
         say('Ses axes de recherche y sont notés.')
     else:
         todo.append("lui demander ses axes de recherche et les noter dans la note (« Axes given »)")
-    if '## Context' in text:
+    # the section counts once it holds dated lines (« - **1097** … »), not as an empty heading
+    # (« ## Context — … » is mine; « ## Context points given » holds his leads and does not count)
+    if '\n## Context — ' in text and text.split('\n## Context — ', 1)[1].split('\n## ', 1)[0].count('\n- **') >= 5:
         say('Le contexte des dix années d\'avant (%d–%d) y est écrit.' % (YEAR - 10, YEAR))
     else:
         todo.append("écrire le contexte des dix années d'avant (%d–%d) dans la note (« Context — the ten years "
