@@ -4,25 +4,28 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-23 — le codeur : l'audit des instructions, rien de fait sur le code
+### 2026-11-23 — l'historien : la recherche déménage sur le disque Acer, l'Anatolie mise en place
 
-Plage **23/11 13:20 → 14:30** (1 h 06 au journal, l'historien dans une autre session au début) ; le chantier totalise
-**387 h 29 sur 62 plages**. Rien n'est poussé. Le rapport : `files/prompt-audit-2026-11-23.md`.
+Session **23/11 14:33 → 16:36** (≈ 2 h ; la plage du journal, 13:20 → 16:30, est partagée avec celle du matin) ; le
+chantier totalise **389 h 32**. Rien n'est poussé ; douze commits, `7942469f` → `dfff9703`. Le détail : `next-historian.md`.
 
-- **L'ouverture** : le MCP d'Atlassian répond ; rien en « À valider par le développeur » ; il a mis CMS-499 puis
-  CARTO-498 en tête d'« À faire ».
-- **L'audit (`/doctor prompt audit`), appliqué avec son accord** : six passages périmés corrigés — la règle du CMS de
-  `next.md` qui laissait passer un champ ajouté sans migration (`push: false` depuis le 15/11), le chemin de l'export
-  (`packages/atlas/public/content/`) dans `roles/coder.md` et `next.md`, la barre de menus « future » de
-  `error-handling.md`, les liens de vassalité « pas encore dans la base » de `/enter-in-cms`, l'ordre du tableau, la
-  version relue de `claude-config.md` (2.1.330).
-- **Ses réglages** : le mode automatique par défaut et le plugin `frontend-design` éteint (`~/.claude/settings.json`) ;
-  les six skills `memory-*` éteintes pour ce projet (`settings.local.json`), la ligne de l'arbre de décision renvoie à
-  la commande `basic-memory` ; `context7` désactivé par lui. Les copies d'avant : `~/.claude/*.bak-2026-11-23`.
-- **Laissé à lui ou à l'historien** : l'index de la mémoire à 22 Ko sur 25 ; la section « remplacée » de
-  `/find-sources` et les deux scripts morts de `/bulk-entry` ; le modèle `opus` fixé de l'agent de recherche.
-- **Pas fait** : rien sur CMS-495 ; l'audit des scénarios ; la zone de rattrapage d'erreur de la barre de menus pas
-  vérifiée. Ma question « Wikidata, ou d'abord CMS-499 et CARTO-498 ? » est restée sans réponse : il relance la console.
+- **Ses règles, écrites dans `/find-sources`** : l'existence d'une ville se vérifie aussi dans un livre, autant que
+  possible ; **le contexte des années d'avant, c'est moi qui le construis**, précis à la date, au lieu et aux acteurs, et
+  les questions ville par ville en sortent ; le formulaire de mise en place revient, ce qu'il donne aide et ne prouve
+  rien ; une région déjà faite est refaite à neuf puis confrontée fiche par fiche.
+- **`/find-sources` réécrite selon les bonnes pratiques** : 375 lignes de règles et d'historique → 168 lignes d'ordres ;
+  l'ancien texte entier dans `references/rules-in-full.md`.
+- **Le disque Acer** (`/Volumes/Acer/atlas-historien/`) devient, par sa décision, l'espace de travail alloué des
+  recherches, leur seule source de vérité : rien de l'historien sur le Mac ni dans le dépôt. Ce qui resservira à la
+  racine (`ouvrages/`, `lieux/`, `outils/`), ce qui vaut pour une année et une zone sous l'année. L'ancien matériel de
+  1100 (13 409 fichiers), les 21 notes de `files/plans/sources/` et mes copies de carte y sont copiés et vérifiés ; il a
+  effacé les originaux. Trois scripts nouveaux (`archive.py`, `count_sheets.py`, `find_book.py`), les autres repointés.
+- **REPO-501** (un RAG sur l'archive, sur le disque) en tête du Backlog ; je lui dirai quand le construire (30 livres).
+- **L'audit des instructions du soir** : treize renvois laissés en retard par mes changements, corrigés (`dfff9703`).
+- **L'Anatolie de 1100** : ses six axes et ses cinq livres notés ; quatre trouvés et lus (Kaldellis, Angold, Setton I,
+  l'Alexiade) ; le contexte de 1071 à 1101 écrit ; 138 fiches comptées. Rien saisi.
+- **Mes fautes** : des questions qu'il n'avait pas à trancher ; deux commandes de suppression données à taper, contre
+  ma mémoire ; des renvois laissés en retard, trouvés par l'audit.
 
 ### 2026-11-23 — l'historien : la méthode de recherche refaite, aucune recherche lancée
 

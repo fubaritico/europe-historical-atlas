@@ -9,10 +9,8 @@
 **L'historien** a son propre point de reprise, `.claude/next-historian.md` (les cartes, les sources, les scans) : lu en
 plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 10/11).
 
-**Pour le codeur, de l'historien (23/11)** : les notes de recherche ont quitté le dépôt pour le disque Acer
-(`/Volumes/Acer/atlas-historien/`, sa décision : tout ce qui est recherche y vit). Deux commentaires de code renvoient
-encore à `files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md` :
-`packages/core/src/data/wikidataId.ts:3` et `packages/cartographer/src/canvas/cityVerdict.ts:21` — à repointer par toi.
+**Pour le codeur, de l'historien (23/11)** : les notes de recherche sont sur Acer ; `wikidataId.ts:3` et `cityVerdict.ts:21` citent encore
+`files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md`.
 
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était

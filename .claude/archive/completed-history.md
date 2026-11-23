@@ -2,6 +2,26 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-23 — le codeur : l'audit des instructions, rien de fait sur le code
+
+Plage **23/11 13:20 → 14:30** (1 h 06 au journal, l'historien dans une autre session au début) ; le chantier totalise
+**387 h 29 sur 62 plages**. Rien n'est poussé. Le rapport : `files/prompt-audit-2026-11-23.md`.
+
+- **L'ouverture** : le MCP d'Atlassian répond ; rien en « À valider par le développeur » ; il a mis CMS-499 puis
+  CARTO-498 en tête d'« À faire ».
+- **L'audit (`/doctor prompt audit`), appliqué avec son accord** : six passages périmés corrigés — la règle du CMS de
+  `next.md` qui laissait passer un champ ajouté sans migration (`push: false` depuis le 15/11), le chemin de l'export
+  (`packages/atlas/public/content/`) dans `roles/coder.md` et `next.md`, la barre de menus « future » de
+  `error-handling.md`, les liens de vassalité « pas encore dans la base » de `/enter-in-cms`, l'ordre du tableau, la
+  version relue de `claude-config.md` (2.1.330).
+- **Ses réglages** : le mode automatique par défaut et le plugin `frontend-design` éteint (`~/.claude/settings.json`) ;
+  les six skills `memory-*` éteintes pour ce projet (`settings.local.json`), la ligne de l'arbre de décision renvoie à
+  la commande `basic-memory` ; `context7` désactivé par lui. Les copies d'avant : `~/.claude/*.bak-2026-11-23`.
+- **Laissé à lui ou à l'historien** : l'index de la mémoire à 22 Ko sur 25 ; la section « remplacée » de
+  `/find-sources` et les deux scripts morts de `/bulk-entry` ; le modèle `opus` fixé de l'agent de recherche.
+- **Pas fait** : rien sur CMS-495 ; l'audit des scénarios ; la zone de rattrapage d'erreur de la barre de menus pas
+  vérifiée. Ma question « Wikidata, ou d'abord CMS-499 et CARTO-498 ? » est restée sans réponse : il relance la console.
+
 ### 2026-11-22 — l'historien : le lot de l'est saisi, sept entités dessinées sur la 1100 et refusées
 
 Plage **22/11 16:01 → 18:29** (2 h 28 au journal, le codeur dans une autre session) ; le chantier totalise

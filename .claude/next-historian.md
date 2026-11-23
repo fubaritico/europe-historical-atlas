@@ -9,63 +9,29 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ Le 23/11 au soir : le disque Acer est l'espace de travail des recherches
+## ▶ ON REPREND ICI — 23/11, 16 h 36 : l'Anatolie de 1100, la confrontation fiche par fiche
 
-**Sa décision** : `/Volumes/Acer/atlas-historien/` est l'espace de travail alloué aux recherches — alloué, pas donné,
-pas à moi — et leur unique source de vérité. Le journal se suit par `tail -f /Volumes/Acer/atlas-historien/journal.log`.
-Fait : l'ancien matériel de 1100 y est copié et vérifié (13 409 fichiers), le journal, les essais et mes deux listes de
-1100 y sont déplacés, tous les scripts y pointent (`archive.py`, `count_sheets.py`, `find_book.py` nouveaux).
-**Sa décision suivante, le même soir : rien de moi sur le disque du Mac** — ni recherche, ni dossier temporaire de
-session, ni bibliothèque Python (`outils/py` sur Acer), ni copie de carte (`cartes/1100/` sur Acer) ; les notes ont
-quitté le dépôt (`c6704ad7`). **Reste sur le Mac, copié et vérifié sur Acer, la mise à la Corbeille m'étant refusée**
-(par le contrôleur, pas par lui) : `files/resources/historien/` (744 Mo) et `packages/atlas/public/years/1100.before-claude-*`
-(trois copies de sa carte). **L'Anatolie** : contexte 1071–1101 écrit
-(`/Volumes/Acer/atlas-historien/1100/anatolie/resultats/note-de-region.md`, non commitée), 138 fiches comptées ; la suite est la confrontation fiche par fiche.
+**Arrêt à 16 h 36** (lu avec `date`). Il ferme le terminal et le relance. **Au démarrage** : `/find-sources` en
+entier (168 lignes d'ordres, lues avant toute recherche) ; `archive.py check` ; le journal se suit par
+`tail -f /Volumes/Acer/atlas-historien/journal.log`. **Rien de moi sur le Mac**, pas même le dossier temporaire de
+session : tout est sur Acer (`/find-sources`, « The archive »). Ne lui poser aucune question qu'il n'a pas à trancher.
 
-## ▶ ON REPREND ICI — 23/11, 14 h 18 : la méthode de recherche refaite et commitée ; aucune recherche lancée
+**L'Anatolie** (`/Volumes/Acer/atlas-historien/1100/anatolie/`) : ses six axes et ses vingt-six points de contexte dans
+la note (`resultats/note-de-region.md`) ; le contexte de 1071 à 1101 écrit à partir de quatre livres rangés dans
+`ouvrages/` (Kaldellis, Angold, Setton I avec Cahen, l'Alexiade de Sewter) ; ses points comparés aux livres (Larissa
+1083, Plaisance 1095, Nicée 18/06/1097, Smyrne rendue sans siège). **La suite, dans l'ordre** : (1) les 138 fiches de
+1100 de la zone (`count_sheets.py 1100 26 36 45 42.2` : 106 citent un ouvrage à relire, 16 recopiées de la carte, 16 sur
+Wikipédia seule) confrontées aux livres, « A region already researched » ; (2) relire les 106 citations dans leur texte ;
+(3) le Palgrave de Byzance et ses cartes de 1100 ; (4) Gallica, puis la BnF et JSTOR — **vérifier avec lui qu'il y est
+connecté avant d'y arriver** ; (5) l'index et la bibliographie de chaque livre.
+**En retard** : les numéros de page de l'Angold (texte sans pages) ; *A Short History of Byzantium* de Norwich trouvé
+sur archive.org, pas encore ouvert ; le Birkenmeier introuvable ; **`archive.py` ne range pas encore un texte page par
+page** — à faire avant le prochain livre (REPO-501 en dépend).
 
-**Arrêt à 14 h 18** (lu avec `date` ; plage 13:20 → 14:18, 57 min). La méthode est dans `add0fb1d`, sur `main`, non
-poussé. **Il ferme le terminal et le rouvre pour voir si une session neuve applique la méthode** : au démarrage, lire
-`/find-sources` en entier (« The run, in order », « The obligation ») avant toute recherche, et **ne lancer aucune
-recherche qu'il n'a pas demandée** — le 23/11 il a refusé le formulaire des axes lancé de moi-même (« on le fait pas
-maintenant »). Répondre court : une question, une réponse.
-
-**Son constat du 23/11** : la carte ne ressemble pas à ce que les autres dessinent (l'Anatolie de la reconquête
-d'Alexis Iᵉʳ, Ancyre donnée aux Danichmendides, la Castille, aucune ville dans le Caucase ni l'ancienne Arménie).
-**Mesuré** : 3 529 lectures du registre sur 3 534 étaient des pages Wikipédia ; aucun atlas du disque ouvert (le
-Palgrave de Byzance y est depuis le 23/10) ; la saisie en masse donnait à chaque ville le pays dessiné sous elle ; un
-seul lieu en Arménie, Géorgie et Azerbaïdjan ; Castille-et-León, 13 villes dont 6 sur Wikipédia seule.
-
-**Ses règles du 23/11, écrites** (`roles/historian.md`, `/find-sources` « The obligation », `/bulk-entry`,
-`agents/source-researcher.md`) : Wikipédia n'est qu'une amorce ; un détenteur exige un livre lu ; six canaux
-obligatoires ; les essais comptés ; tout dit dans le journal (`log.py`, il le suit par `tail -f`) ; CONNEXION
-IMPOSSIBLE ; J'AI BESOIN DE TOI, les cas bloqués sur une page lisible. Le contrôle `region_gate.py` refuse une région.
-**Non commité** : ce fichier, `completed.md` et son archive, `use-cartographer/references/decide.md` (du 22/11) — à
-commiter quand il le dit. **Le démontage** (sa règle du 23/11 : rien du matériel de recherche n'est gardé) : 740 Mo
-d'avant dans `files/resources/historien/` (603 Mo de régions, 111 Mo de chaînes, 20 Mo d'extraits) — il ne veut pas
-avoir à en décider ; à supprimer par moi quand il accorde la suppression, sans lui en refaire une question de fond.
-**Dû** : ce fichier dépasse 200 lignes, à ranger (l'audit des instructions est fait, le 23/11, par le codeur).
-
-**Fait le 23/11 dans les scripts** (`/bulk-entry`, « In the scripts since 2026-11-23 ») : `meta.py` ne lit plus la
-carte et lance le contrôle, `verifyv.py` refuse un détenteur sans livre, `fetch_rest.py` et `cited_works.py` relèvent
-les ouvrages cités, `prepare.py`, `log.py`, `region_gate.py` existent. **Le déroulé n'a jamais tourné de bout en bout**
-(le formulaire des axes, la page des cas bloqués, un vrai lot). Le Palgrave de Byzance est ouvert (un essai au
-registre, ses sept cartes de 1100 pas regardées) ; les 22 autres ouvrages du disque ne sont pas ouverts.
-**Fait le 23/11 après 14 h 33** (une session neuve, sur son « exécute ») : les quatre anciens scripts écrivent au
-journal (`cand.py`, `sentences.py`, `fixcut.py`, `inventory.py`, qui dresse la liste du démontage) ; `under.mts`,
-`titlemap.py` et `extract_backfill.py` sont retirés ; **sa réponse** : l'existence d'une ville à la date se vérifie
-aussi dans un livre, autant que possible (écrit dans `/find-sources`, « The obligation »). **La suppression de
-l'ancien matériel (740 Mo) a été refusée par les permissions** : la commande lui est donnée, à lancer par lui ; je
-garde `alertes-1100.md`, `1100-retouches.md`, `registre/attempts.jsonl` et `REGION-anatolia.md`.
-**Pas encore fait, à faire d'abord** : (1) `holders.json` s'écrit à la main ;
-(2) mes trois tests de pertinence d'un ouvrage (région, époque et cinquante ans avant, index) attendent son mot ;
-ma lecture d'« autant que possible » (une ville sans livre reste saisie, listée « existence à lire ») **ne lui est
-plus redemandée** (il s'est fâché de la question) ; **sa règle de 14 h 50** : à la mise en place, j'écris d'abord le
-contexte des dix années d'avant dans la note de région (`/find-sources`, étape 0) ; lui demander ses axes de recherche
-avant chaque recherche ; demander au codeur ce que le Cartographe et `cities:alerts` font d'une fiche sans détenteur ;
-(3) Ancyre : archive.org n'a rendu ni Albert d'Aix ni le Setton, rien n'est lu ; (4) puis l'Anatolie de 1100 refaite
-depuis le Palgrave de Byzance, l'Arménie et le Caucase, la Castille — il n'a pas dit ce qui ne correspond pas en
-Castille. **Sans toucher la carte.**
+**Ouvert** : mes trois tests de pertinence d'un ouvrage attendent son mot ; Danichmend deux fois dans les personnes
+(9 et 179) ; quatre fiches de moi à retirer (palais de Rhodes 5123, Karlóvasi 4987, Kattavia 4755, Samosate = Samsat) ;
+les citations latines d'Albert d'Aix à lire sur l'image. **Sa 1100 est à lui** : `polities.json` et `registry.json`
+non commités, jamais touchés par moi ; ma copie d'avant mon dessin est dans `cartes/1100/` sur Acer.
 
 ## Avant — 22/11, 18 h 30 : la 1100 est à lui ; l'essai de lecture d'une carte, s'il le veut
 
