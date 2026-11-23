@@ -108,20 +108,12 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
   non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
   un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**
-- **Under the content language « English », an event reads « Sans titre » and cannot be found by typing** (2026-11-22,
-  CMS-495): its title and description are still translated, and none of the eleven has an English title. Every name
-  is French alone since 2026-11-23 — the places, the territories (`plain_french_names`), the people and the four
-  registers (`plain_french_register_names`), their other languages in their table. **Remedy**: the events' English
-  title and description, to write. **Until then**: keep the selector on « Français ». **A trap met on the way**: a
-  Local API read handed `req` with another `locale` writes that language into the request — inside a `beforeChange`
-  the save under way then goes on in it (a name typed in English overwrote the French one, caught by a test).
-  **Severity: gênant.**
 - **A record without its English line is refused at its next save** (2026-11-23, CMS-495): English is required on
-  places, territories, people and the four registers, and Wikidata did not name them all — 159 places, 77 territories
-  and 128 people have none (`files/plans/contribution/noms-anglais-a-faire.md`). Any save of one — the admin, an MCP
-  update setting a house or a holder — is refused with « Le nom en anglais est obligatoire » until its English line is
-  given in the same save. Wanted (the dev, 2026-11-22: _"a translation field is never left empty"_), never loosened.
-  **Remedy**: the historian fills the list. **Severity: à savoir.**
+  places, territories, people and the four registers — wanted (the dev, 2026-11-22: _"a translation field is never
+  left empty"_), never loosened. Since the same evening no record lacks it; a new one is given its English line in the
+  same save. **A trap met on the way**: a Local API read handed `req` with another `locale` writes that language into
+  the request — inside a `beforeChange` the save under way then goes on in it (a name typed in English overwrote the
+  French one, caught by a test). **Severity: à savoir.**
 - **The seed cannot build a new base any more** (2026-11-23, CMS-495, CMS-279): every place, person, event type,
   importance reason and siege engine now requires an English line, and the seed's data gives French names only — its
   Wikidata reading takes the French label alone (`wikidata/wikidataPlace.ts`). `pnpm seed:cms` on an empty base is

@@ -26,15 +26,14 @@ personnes) et mes traductions des types d'événement, des raisons d'importance 
 `.backups/`) ; la liste de l'historien, `files/plans/contribution/noms-anglais-a-faire.md`. **Rien n'est poussé
 depuis le 20/11.**
 
-**Ce qui reste, dans l'ordre** : (1) **à lui** : les fautes de ses libellés de types
-d'événement (« Polithique », « trone », « Conquest » en français) ; (2) le lieu prérempli dans le tiroir du « + » du
+**Ce qui reste, dans l'ordre** : (1) (2) le lieu prérempli dans le tiroir du « + » du
 « Nom d'époque », puis le tiroir essayé sur toute sa vie ; (3) la suite d'avant : les quatorze noms d'époque
-d'Anatolie (de l'historien), le contrôle des noms en commande, les pays en français ; (4) les 364 noms anglais que
-Wikidata ne donne pas, à l'historien (`noms-anglais-a-faire.md`). Puis CMS-499 et CARTO-498, en tête d'« À faire ».
+d'Anatolie (de l'historien), le contrôle des noms en commande, les pays en français ; (4) à l'historien, relire les traductions du codeur
+(`noms-anglais-a-faire.md`) — aucun nom anglais n'est plus vide depuis le 23/11 au soir, événements compris. Puis CMS-499 et CARTO-498, en tête d'« À faire ».
 
 **Le nom de tout le registre est le français seul** depuis le 23/11 au soir — lieux, territoires,
 personnes, confessions, types d'événement, raisons, engins (migrations `plain_french_names` et
-`plain_french_register_names`) ; restent traduits le titre et la description des événements ; le seed ne bâtit plus
+`plain_french_register_names`) ; le seed ne bâtit plus
 une base neuve (`known-issues/cms.md`, avec CMS-279) : l'anglais n'existe plus que dans le tableau. **Les 30 noms d'époque** sont posés (Ancyre →
 Ankara, `noms-a-trier.md` trié). **Un piège payé le 23/11** : une commande du CMS lancée depuis l'arbre `coder` crée une base neuve
 (`known-issues/cms.md`).
