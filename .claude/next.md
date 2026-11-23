@@ -22,8 +22,8 @@ fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md
 seulement celles-là : **quand on commence un ticket, quand on a fini, quand le contexte atteint 60 %** (il relance depuis
 son téléphone). Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents` pour retrouver
 l'historien, et lui dire que je suis la nouvelle session du codeur. **Ce qu'il attend de moi** : rien. Le CMS a été relancé à
-19 h 50 avec les champs `otherNames` des personnes ; ses créations en attente (Ridwan, Thoros Ier, Chonai, Palu,
-Çemişgezek, et les fusions de lieux) sont pour sa prochaine session. **Ce que j'attends de lui** : rien. Rien n'est poussé
+19 h 50 ; son outil ancien a suffi, le serveur acceptant `otherNames` : Ridwan, Thoros Ier, Chonai, Palu et
+Çemişgezek sont créés, l'export de 20 h commité (`963f9f34`). Restent à lui les fusions de lieux et trois suppressions. **Ce que j'attends de lui** : rien. Rien n'est poussé
 depuis `5b12959a`, mais la CI est verte et le site est à jour jusque-là.
 
 ## ▶ ON REPREND ICI — le 23/11, 18 h : les noms anglais rattrapés (CMS-495, En cours)
