@@ -7,8 +7,7 @@ did in the journal. It never deletes and never overwrites a file it did not writ
   python3 -I archive.py work <folder> <text file or -> "<author>" "<title>" "<publisher>" "<year>" "<kind>" "<where found>" "<what it covers>"
   python3 -I archive.py read <year> <zone> <folder> "<pages>" "<question>" "<result>"
   python3 -I archive.py given <year> <zone> <file> "<name>"
-  python3 -I archive.py note <year> <zone> <note.md>
-  python3 -I archive.py close <year> <zone> <journal.log> <attempts.jsonl> <region key of the attempts>
+  python3 -I archive.py close <year> <zone>
 
 check — the disk is mounted, or DISQUE ABSENT and exit 1.
 open  — creates <year>/<zone>/ with donne/, recherches/, resultats/, travail/ and its fiche.md. travail/ is
@@ -18,8 +17,9 @@ work  — creates ouvrages/<folder>/ (fiche.md, texte.txt copied — or `-` when
         <folder> is <author>-<year>-<short-title>, lowercase, no accents.
 read  — one line in <year>/<zone>/recherches/lectures.md, and the research in the work's fiche.md.
 given — copies what the dev gave to donne/, numbered after the last one (his original stays where it is).
-note  — copies the region's note to resultats/note-de-region.md.
-close — writes recherches/essais.md from the attempts and recherches/journal.log from the research's start;
+The zone's note is written straight in <year>/<zone>/resultats/note-de-region.md: the archive is its only home.
+close — writes recherches/essais.md from the archive's attempts (their region is the zone) and recherches/journal.log
+        from the research's start in the archive's journal;
         says the files of the zone, those left empty, and what travail/ still holds (to empty on his word).
 """
 import datetime
@@ -155,15 +155,15 @@ elif command == 'given' and len(args) == 5:
     clean(path)
     say('archive : ce qu\'il a donné est rangé → %s' % target.relative_to(ARCHIVE))
 
-elif command == 'note' and len(args) == 4:
-    year, zone, note = args[1:]
+elif command == 'close' and len(args) == 3:
+    year, zone = args[1:]
+    region = zone  # the attempts carry the zone as their region since 2026-11-23
+    journal, attempts = JOURNAL, ARCHIVE / 'registre/attempts.jsonl'
     path = zone_dir(year, zone)
-    shutil.copyfile(note, path / 'resultats/note-de-region.md')
-    say('archive : note de région copiée dans %s/%s/resultats/' % (year, zone))
-
-elif command == 'close' and len(args) == 6:
-    year, zone, journal, attempts, region = args[1:]
-    path = zone_dir(year, zone)
+    for needed in (journal, attempts):
+        if not needed.exists():
+            say('archive : %s introuvable — la recherche %s/%s n\'est pas fermée' % (needed, year, zone))
+            sys.exit(1)
     rows = ['# %s, %s — où l\'on a cherché' % (year, zone), '',
             '| date | canal | où | mots cherchés | résultat | remarque |', '| --- | --- | --- | --- | --- | --- |']
     for line in pathlib.Path(attempts).read_text(encoding='utf-8').splitlines():

@@ -48,5 +48,5 @@ OWASP Top 10 #8. Code and data whose integrity is assumed rather than checked. H
 - **Check**: A CSP without `'unsafe-inline'` / `'unsafe-eval'` for scripts (none today — see A02-002)
 
 #### OWASP-A08-010: Provenance of the published data
-- **Where**: `packages/atlas/public/years/*/polities.json` (`sources`, `yearProvenanceSchema` in `yearFormat.ts`, cross-checked in `yearConsistency.ts`), `files/plans/sources/`
+- **Where**: `packages/atlas/public/years/*/polities.json` (`sources`, `yearProvenanceSchema` in `yearFormat.ts`, cross-checked in `yearConsistency.ts`), `/Volumes/Acer/atlas-historien/`
 - **Check**: Each published year declares its provenance; a source traced under a licence that forbids it never reaches `public/` (licence integrity, not only security)

@@ -41,7 +41,9 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 - **The maps are the dev's** (2026-11-13: _"the map, I prefer to retouch it myself"_): the historian reports where the
   sources contradict a map — the place, the reading, the witness — in the year's note, and never retouches unasked.
   When he asks, `/use-cartographer` and `/draw-from-plate`. The sources of a year are logged with `/create-data-mention`.
-- **Writes its notes** in `files/plans/sources/` (committed) and its working files in `files/resources/` (ignored).
+- **Writes its notes, its working files and everything of a research** in `/Volumes/Acer/atlas-historien/` — its
+  library and its own database, allocated, not given (the dev, 2026-11-23: _"everything must be on Acer"_); nothing
+  of a research is in the repository.
 - **Tells the coder** what it entered or changed, so the coder checks it read-only.
 
 ## What the historian does not do
@@ -50,7 +52,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   the file tools: `.claude/hooks/historian-guard.mjs` denies every Edit, Write or NotebookEdit there, whenever the
   session's role is the historian. **A write through Bash is not caught** — it holds by this page alone. A change the code needs goes to
   the coder, said in a message or a ticket.
-- **Never pushes**; commits its notes and its maps when the dev says so, files named one by one.
+- **Never pushes**; commits its skills and its maps when the dev says so, files named one by one.
 - **A reading is never attributed to the dev**: the sources are the team's — « given or deduced ».
 
 ## Where it works

@@ -11,7 +11,7 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
 de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
-fatimide (`files/plans/sources/1100/levant.md`) ; (3) plus tard, CORE-486.
+fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ; (3) plus tard, CORE-486.
 
 ## ▶ ON REPREND ICI — le 23/11, 14 h 30 : le rattrapage des noms anglais (CMS-495, En cours)
 
@@ -93,7 +93,7 @@ Cartographe (port 5199, une copie de la carte), **à l'endroit exact où il me m
 **L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `packages/atlas/public/content/atlas.json` et `cartographer.json`**.
 
 **À lui, en attente** : son icône `error.svg` à la place de la mienne ; plus tard : CARTO-365 ; **à arbitrer** : le suzerain du royaume d'Arles
-et les lectures divergentes de l'historien (`files/plans/sources/1100/questions.md`).
+et les lectures divergentes de l'historien (`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/questions.md`).
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
@@ -113,7 +113,7 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
 - **Un `rm -rf` ne se glisse jamais dans une commande.**
 
 **Une source qu'il donne** → `/create-data-mention`, toujours ; la liste vit sur ATLAS-152. Ses atlas :
-`files/plans/sources/bibliotheque.md` (l'Italie et la Scandinavie manquent ; piste : Spruner-Menke 1880, domaine public).
+`/Volumes/Acer/atlas-historien/bibliotheque.md` (l'Italie et la Scandinavie manquent ; piste : Spruner-Menke 1880, domaine public).
 
 **Pour travailler** : mon shell démarre sous Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais
 de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier. Parler avec **ses** mots, un point à la fois.

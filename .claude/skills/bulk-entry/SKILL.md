@@ -28,7 +28,7 @@ map and could never contradict it. Now (`/find-sources`, « Never » and « The 
 1. **Before any place of a region**: the region's holders at the year are read in books — the works its Wikipedia
    pages cite (listed from the pages, the most cited first), their notes, bibliography and index, the atlases on disk,
    the BnF — district by district, every attempt logged in `registre/attempts.jsonl`, the result in the region's note
-   (`files/plans/sources/<year>/<region>.md`: holders, chain, index references, attempts counted).
+   (`/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md`: holders, chain, index references, attempts counted).
 2. **A place takes the holder of its district from that note**, with the book's line and quotation. **The polity
    drawn under the point is not used at all** — not as a holder, not as a check (the dev, 2026-11-23: _"we do not care
    whether the city is in the country drawn"_): `under.mts` and the holder title of step 2 leave the run. What step 8

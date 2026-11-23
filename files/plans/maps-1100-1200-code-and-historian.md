@@ -22,7 +22,7 @@ otherwise in his first message, which always wins.
 | | **the code** (first instance) | **the historian** (second instance) |
 | --- | --- | --- |
 | **its work** | the Cartographer and the atlas: *Save as…* first (CARTO-340; *Open…* is CARTO-339, waiting on his test), then speed (ATLAS-333); then the cities' pivots in the Cartographer (CARTO-193), the panels (CARTO-336), the vote (CORE-337) | the dev's questions about a country at a date (1100, 1200), researched on Wikipedia, Wikidata and beyond; the sources by question and by year; who is vassal of whom in 1100 and 1200; then the CMS: each source linked to a year and to the question it proves (CMS-338), and « tenue par » (CMS-335) |
-| **where it works** | the repository's own folder, `~/Desktop/WebstormProjects/europe-map/` — the one the dev's servers serve, so he tests what it builds | **at first, only `files/plans/sources/`** — Markdown, no code: `1100/questions.md`, `1200/questions.md` (the questions), `vassals-1100.md`, `vassals-1200.md`. **For the CMS's code**, a separate copy of the repository, a git worktree on a branch (below), never the main folder |
+| **where it works** | the repository's own folder, `~/Desktop/WebstormProjects/europe-map/` — the one the dev's servers serve, so he tests what it builds | **at first, only `/Volumes/Acer/atlas-historien/`** — Markdown, no code: `1100/questions.md`, `1200/questions.md` (the questions), `vassals-1100.md`, `vassals-1200.md`. **For the CMS's code**, a separate copy of the repository, a git worktree on a branch (below), never the main folder |
 | **its servers** | the dev's — it never starts one (`memory: one-dev-server`) | **none, ever**. It reads the dev's CMS base read-only when needed (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) |
 | **its tickets** | the ones it works on, moved to *En cours* | the same — one or two *En cours*, never the code's |
 
@@ -42,7 +42,7 @@ tickets it holds, and starts its own work.
 ## What the historian does at the start of its session
 
 1. `/start-session` like any session, then this file.
-2. `ListAgents` — it must see the code instance; it sends it one message: *I am the historian, I hold `files/plans/sources/`
+2. `ListAgents` — it must see the code instance; it sends it one message: *I am the historian, I hold `/Volumes/Acer/atlas-historien/`
    and the tickets …*.
 3. It tells the dev, in French, in two lines: who it is, and that it waits for his questions on a country at a date.
 
@@ -56,7 +56,7 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
    page; a page written from a book → cite **the book**: *"you climb the thread of the reference."* Wikipedia in fr, en
    and the country's own language; Wikidata; the declared source of a map. Never a fact from memory left ungraded.
 2. **It answers first**, short: the answer, and how sure — *lu sur la page*, *vérifié*, *de mémoire*.
-3. **It files it**, in the same breath, in the year's file (`files/plans/sources/1100/questions.md`):
+3. **It files it**, in the same breath, in the year's file (`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/questions.md`):
 
    ```markdown
    ## Mourom-Riazan — de qui dépend-il en 1100 ?
@@ -120,7 +120,7 @@ by the code instance or the dev, once the gate is green on both.
 ## The rules that keep the two apart
 
 - **Each commits only its own files, named one by one** — never `git add` of a computed list (`memory:
-  name-each-file-when-staging`). In the main folder, the historian commits only `files/plans/sources/**`.
+  name-each-file-when-staging`). In the main folder, the historian commits only `/Volumes/Acer/atlas-historien/**`.
 - **Neither touches `years/`** — the dev's maps, on his disk, cleaned by him. The code instance writes there only when
   he asks, and tells him to reload without saving.
 - **`next.md` is written by the code instance** at the end of the day; the historian sends it a message with what it

@@ -29,7 +29,7 @@ The figure at the bottom of VueScan (« 19.6 MB ») is the raw image while scann
 ## After — by me
 
 1. Count the pages and the text per page (`pypdf` in a scratchpad venv); a page with no text is looked at.
-2. Find the index pages, and the legend; note the atlas in `files/plans/sources/bibliotheque.md` (title, edition,
+2. Find the index pages, and the legend; note the atlas in `/Volumes/Acer/atlas-historien/bibliotheque.md` (title, edition,
    translator, year, licence: public domain → calque, in copyright → reference).
 3. Its index is then read as any other (`SKILL.md`, step 7); its plates, as verification layers
    (`/use-cartographer`, `references/layers.md`).

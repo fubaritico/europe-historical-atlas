@@ -32,7 +32,7 @@ the whole span, from the 1st or 2nd century BC to 1900:
 
 1. **Cliopatria** — its borders imported as the base (CC BY 4.0), coasts set on our land mask (CARTO-334).
 2. **The atlases** — the borders corrected from the dev's library: some twenty printed atlases he bought and some
-   twenty in PDF (`files/plans/sources/bibliotheque.md`). Each is a source entered in the CMS, and **cited** wherever one
+   twenty in PDF (`/Volumes/Acer/atlas-historien/bibliotheque.md`). Each is a source entered in the CMS, and **cited** wherever one
    of its maps is used — a plate in copyright is read as a reference, never traced.
 3. **The cities** — corrected again from who holds which city at that date, as the historian enters them, each with its
    source: a city's holder gives the topography (the cities epic, CARTO-363).

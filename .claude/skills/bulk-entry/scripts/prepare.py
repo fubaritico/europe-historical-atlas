@@ -6,7 +6,7 @@ region at a year has at hand — the archive on the external disk, his axes, the
 attempts already made — and the order of the channels. It stops when the archive's disk is absent. It reads only; it
 writes nothing but the journal. It ends on what is still to do before the first read.
 
-Usage: python3 -I prepare.py <year> <region> [<zone>]   — region: the note's name (anatolia); zone: the archive's (anatolie)
+Usage: python3 -I prepare.py <year> <zone>   — the zone as the archive names it (anatolie)
 """
 import collections
 import datetime
@@ -16,10 +16,10 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 YEAR, REGION = int(sys.argv[1]), sys.argv[2]
-ZONE = sys.argv[3] if len(sys.argv) > 3 else None  # the zone's French name in the archive (anatolie)
+ZONE = REGION  # one key since 2026-11-23: the zone as the archive names it (anatolie)
 ARCHIVE = pathlib.Path('/Volumes/Acer/atlas-historien')
 JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
-NOTE = ROOT / 'files/plans/sources' / str(YEAR) / (REGION + '.md')
+NOTE = pathlib.Path('/Volumes/Acer/atlas-historien') / str(YEAR) / REGION / 'resultats/note-de-region.md'  # the zone's note, on the archive
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 ATLASES = ROOT / 'files/resources/other-historical-atlases-pdf'
 ORDER = ("ses axes de recherche", "le contexte des dix années d'avant", "les noms et les hypothèses", "Wikipédia — amorce seulement, et les ouvrages que ses pages citent",
@@ -59,7 +59,7 @@ if ZONE:
 
 if NOTE.exists():
     text = NOTE.read_text(encoding='utf-8')
-    say('La note de région existe : %s' % NOTE.relative_to(ROOT))
+    say('La note de région existe : %s' % NOTE)
     if '## Axes given' in text:
         say('Ses axes de recherche y sont notés.')
     else:

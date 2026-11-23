@@ -7,7 +7,7 @@
 
 **À faire dès qu'il a fini ses retouches de 1100** (sa demande, 13/11 : _« il ne faut pas qu'on se retrouve pollué par
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
-de `files/plans/sources/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
+de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
 ## ▶ Le 23/11 au soir : le disque Acer est l'espace de travail des recherches
 
@@ -17,7 +17,7 @@ Fait : l'ancien matériel de 1100 y est copié et vérifié (13 409 fichiers), l
 1100 y sont déplacés, tous les scripts y pointent (`archive.py`, `count_sheets.py`, `find_book.py` nouveaux).
 **Reste sur le disque interne, en attente de sa commande** (la suppression m'est refusée) : `files/resources/historien/`
 `1100/`, `extraits/`, `registre/reads.jsonl` — 744 Mo, tous copiés sur Acer. **L'Anatolie** : contexte 1071–1101 écrit
-(`files/plans/sources/1100/anatolia.md`, non commitée), 138 fiches comptées ; la suite est la confrontation fiche par fiche.
+(`/Volumes/Acer/atlas-historien/1100/anatolie/resultats/note-de-region.md`, non commitée), 138 fiches comptées ; la suite est la confrontation fiche par fiche.
 
 ## ▶ ON REPREND ICI — 23/11, 14 h 18 : la méthode de recherche refaite et commitée ; aucune recherche lancée
 
@@ -155,7 +155,7 @@ résumés de Gemini, chaque fait relu dans un texte ; les livres cités sous leu
 
 ## Avant — 19/11, 23 h 45 : la Rus', le Levant et la Finlande faits ; l'export et CORE-486 attendent
 
-**Fait** (détail : `completed.md`, et les notes de `files/plans/sources/1100/`) :
+**Fait** (détail : `completed.md`, et les notes de `/Volumes/Acer/atlas-historien/1100/`) :
 
 - **La Rus' en 1100** : 33 lieux (lieux 13576–13608, fiches 13594–13626, sources 5377–5409) — `rus.md`.
 - **Le Levant, Chypre, la Mésopotamie en 1100** : 51 lieux (lieux 13609–13659, fiches 13627–13677, sources 5410–5460),

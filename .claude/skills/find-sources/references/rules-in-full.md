@@ -8,7 +8,7 @@ in it (page, chapter), the source's own words, and how reliable it is; the most 
 rests on Wikipedia alone is not an answer — it is listed as _to read_ (« The obligation », below). Written 2026-11-06 at the dev's request: _"a machine that goes and finds
 sources online other than Wikipedia to support a fact — which polity a place belonged to at a date — so it must reach
 texts"_, _"evidence, even contradictory, and bring back the sources."_ What it finds is entered by `/enter-in-cms`;
-the reasoning goes in the year's file (`files/plans/sources/1100/questions.md`). Concepts: `files/plans/evidence-system.md`.
+the reasoning goes in the year's file (`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/questions.md`). Concepts: `files/plans/evidence-system.md`.
 
 Where this research sits in the making of a year: the cities it sources settle the borders where the base layer and the
 verification layers disagree — `/use-cartographer`, `references/layers.md`.
@@ -153,7 +153,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   (4) list it in the region's note under « Cities met in the sources » — a landmark for the borders.
 - **The works on disk are known, all of them, and used** (the dev, same day: _"You must have the exhaustive list of
   the PDFs on disk. You must know them. They must be used."_): `prepare.py` lists the folder anew at every research —
-  a file he added is in it — and `files/plans/sources/bibliotheque.md` says what each is. A file on disk missing from
+  a file he added is in it — and `/Volumes/Acer/atlas-historien/bibliotheque.md` says what each is. A file on disk missing from
   that table is added to it before the research starts; a file never opened is opened once, its contents and its
   index of maps noted in the table (region, period), so that the next research knows what it covers.
 - **Six channels, all compulsory, for every region** (the dev, 2026-11-23: _"Nothing must make these steps jump"_):
@@ -215,7 +215,7 @@ Every step is said in the journal as it happens. The detail of each is below.
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
    list the works its footnotes cite; those works are what the next steps look for.
 3. **The atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
-   one's status and licence: `files/plans/sources/bibliotheque.md`). Extract their text into the scratchpad once per
+   one's status and licence: `/Volumes/Acer/atlas-historien/bibliotheque.md`). Extract their text into the scratchpad once per
    session (`pypdf` in a scratchpad venv; Read cannot render single pages without poppler, so split a scan into
    four-page PDFs and read each whole), search it for every name of the place, read the map's legend and date on the
    page image. Kind `historian-atlas`. **An atlas in copyright is a reference**: its facts are cited, its plates never
@@ -264,7 +264,7 @@ Every step is said in the journal as it happens. The detail of each is below.
    3. **Search it for every name of step 1, for every hypothesis** — the place in each language, the polity, **each**
       candidate holder, the neighbouring places of the lot. Each entry found is an **index reference**: book, entry,
       pages, and the hypothesis it bears on.
-   4. **Write each reference down before reading it**, in the region's note (`files/plans/sources/<year>/`, a table
+   4. **Write each reference down before reading it**, in the region's note (`/Volumes/Acer/atlas-historien/<year>/`, a table
       _Index references_: book, entry, pages, hypothesis, given or deduced, read or not). Nothing is read twice, nothing
       found is forgotten; a reference never read is said in the report.
    5. **Read every page it gives** — step 5: the passage, the sentence copied, verified on the text or the image.
@@ -313,7 +313,7 @@ witness, a link in doubt with both readings (Pitten → Margrave Ottokar II → 
 Going down it draws the borders at every rank; going up it lets a town agree with a map that draws a higher rank
 (CARTO-435); the base will carry each link once, on the lord (CMS-422). **Climbing is also the check**: each link
 proven by its own witness, a wrong holder shows as a link no source carries. **Each link is established once per date**
-and reused: read the year's register `files/plans/sources/<year>/vassalage.md` before a lot, extend it after.
+and reused: read the year's register `/Volumes/Acer/atlas-historien/<year>/toutes-zones/resultats/vassalage.md` before a lot, extend it after.
 
 `kind` is the CMS's: `primary`, `historian-atlas`, `scholarly`, `encyclopaedia`, `crowd-database`. Then
 `/enter-in-cms`, and the divergences and the reasoning in the year's file.

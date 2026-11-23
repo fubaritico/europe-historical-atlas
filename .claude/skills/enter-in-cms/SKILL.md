@@ -108,7 +108,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   this vassal really held of that suzerain at the date — is proven by its own witness, so a wrong holder shows up as a
   link no source carries. **Each link is established once for a given date**, then reused by every place under that
   lord: more work once, more reliability everywhere (the dev, same day). They are entered in the base as titles and links of vassalage
-  (CMS-422, step 5 below); the year's register `files/plans/sources/<year>/vassalage.md` — one line per link: the vassal,
+  (CMS-422, step 5 below); the year's register `/Volumes/Acer/atlas-historien/<year>/toutes-zones/resultats/vassalage.md` — one line per link: the vassal,
   its suzerain, the witness, the doubt if any — stays the working list every research lot reads first and extends.
 - **The map is the dev's.** A fact that changes a border or a suzerain is entered as a source line *and* sent to the
   code instance; nobody touches `years/` — he decides in the Cartographer.
@@ -131,7 +131,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 - **Then decide.** When the search ends with no source naming the holder at the date, the most probable one is entered
   anyway, with its QID. **The line names the source it stands on** — the one that names the predecessor's or the
   neighbour's holder — with its quotation. The line does not announce a deduction; the reasoning is written in the
-  year's file (`files/plans/sources/1100/questions.md`), the home of the questions.
+  year's file (`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/questions.md`), the home of the questions.
 - **A source created is cited by a line of the same batch.** A source attached to nothing is a fault (06/11, « Sos,
   castillo », created and never cited).
 - **A QID written in an entry brief is read on Wikidata first, never from memory** (2026-11-14: three Czech regions given
@@ -150,7 +150,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   to leave a place out: climb one level, not to nothing. Only the Empire itself, when no vassal is between, is the holder.
 - **No sheet without a line** (the coder's remark, 2026-11-14, taken by the historian): a sheet with no line asserts the
   place at the date with no source — so the climb above always brings its line. A place is left out only when it did not
-  exist at the date (`not-yet`) or its existence is unknown; it is listed in the region's note (`files/plans/sources/<year>/`).
+  exist at the date (`not-yet`) or its existence is unknown; it is listed in the region's note (`/Volumes/Acer/atlas-historien/<year>/`).
 
 ## The order — sources first, then the place, then the city at a date
 
@@ -241,7 +241,7 @@ Two batches never write the same sheet at once — an update re-sends all its li
    changed, **every name of the time created** (its id, its place, its forms) and every place met that still bears a
    name of the time as its name. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
    any fault to the dev; the historian then corrects it by `update`.
-3. **The year's file stays the home of the questions** (`files/plans/sources/<year>/questions.md`): the question, the
+3. **The year's file stays the home of the questions** (`/Volumes/Acer/atlas-historien/<year>/toutes-zones/resultats/questions.md`): the question, the
    answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338).
 
 ## Gotchas

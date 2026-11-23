@@ -29,7 +29,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 0. `archive.py check` — the archive disk is mounted, or **DISQUE ABSENT** and stop. Read `ouvrages/index.md` and,
    when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again. `archive.py open` the research.
    The base already has sheets for this region at this date: « A region already researched », step 1, first.
-1. Create the region's note `files/plans/sources/<year>/<region>.md` (sections: Axes given, Resources given,
+1. Create the region's note `/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
    Cities met in the sources, Existence to read, Attempts).
 2. **The form** (`AskUserQuestion`, one question per call, in French): « Donne-moi un axe de recherche », again
@@ -67,7 +67,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 16. A city named in a work: identify it today (Wikidata), list it under « Cities met in the sources », enter it.
 17. The existence of each place at the date: looked for in the works too, as far as possible. None found: the
     place stays on its Wikipedia sentence, listed « Existence to read ».
-18. The chain above each holder, each link with its own witness (`files/plans/sources/<year>/vassalage.md`).
+18. The chain above each holder, each link with its own witness (`/Volumes/Acer/atlas-historien/<year>/toutes-zones/resultats/vassalage.md`).
 19. Write the note: holders by district with work, page, quotation; contrary readings; attempts counted.
 20. A question the six channels did not answer, a work that cannot be had, readings that cannot be told apart:
     **J'AI BESOIN DE TOI** — that case stops, the others go on. All blocked cases on one French page,
@@ -79,7 +79,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 **Archive and tear down — never skipped**
 
 23. File everything with `archive.py`: `work` for each work read, `read` for each reading, `given` for what he
-    gave, `note`, then `close`. Read each `.md` back.
+    gave, then `close`. Read each `.md` back.
 24. Clean: `inventory.py` lists, with sizes, what `travail/` still holds (Wikipedia pages, lots, copies) and
     anything left on the internal disk; show it, ask him, delete on his word. The base, the note and the archive stay.
 

@@ -25,7 +25,7 @@ in rounds, islands from the ledger, lakes. The geometry of the published year is
 | --- | --- | --- |
 | **Shepherd**, *Historical Atlas* (1911, 1923) | public domain | **calque**: may be traced, georeferenced under the canvas (`/draw-from-plate`) — a second base where Cliopatria is coarse |
 | **Wikimedia Commons maps** (Wikipedia's historical maps), CC BY-SA | CC BY-SA — share-alike | **calque**: may be traced, **and the year then goes CC BY-SA** (`/create-data-mention`); read as a reference instead to keep it CC BY. Each one's link is kept, for its mention |
-| **digitized atlases, PDF** (`files/resources/other-historical-atlases-pdf/`, git-ignored; each one's status in `files/plans/sources/bibliotheque.md`) | per atlas | public domain → calque; in copyright → reference |
+| **digitized atlases, PDF** (`files/resources/other-historical-atlases-pdf/`, git-ignored; each one's status in `/Volumes/Acer/atlas-historien/bibliotheque.md`) | per atlas | public domain → calque; in copyright → reference |
 | **atlases bought, scanned** (git-ignored, beside the PDFs) | in copyright | **reference** only — read and compared, never traced, never published |
 | other atlases, not free (Euratlas, Duby, …) | not free | **reference**: they help derive the public map — read, compared, the gaps found and corrected **on our own geometry**, never traced (`/create-data-mention`, RÉFÉRENCE) |
 

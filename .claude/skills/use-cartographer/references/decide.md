@@ -18,7 +18,7 @@ and who changed them. A row filed by Claude is an argument until the dev confirm
 | A city of the CMS is on the wrong side | `sides.mjs` | **move the border first**; `simulate.mjs` proves no other sourced city flips | dev | 2026-11-07 |
 | No border move sets it right | `enclaves.mjs` | opposing witness (any city with another holder, on the map or not) **≥ 5 km** → **enclave**, radius ≤ half that gap and ≤ 8 km | dev | 2026-11-08 |
 | …the opposing witness is **< 5 km**, or the city's own sources diverge | `enclaves.mjs`, the sources file | **disputed zone**: the two polities overlap there (the hatching); the measure is written beside it, CORE-337 will compute it | dev | 2026-11-08 |
-| …the city rests on one weak witness (« Weak » in `files/plans/sources/<year>.md`) | the sources file | **nothing drawn**; listed to the dev | dev | 2026-11-08 |
+| …the city rests on one weak witness (« Weak » in `/Volumes/Acer/atlas-historien/<year>.md`) | the sources file | **nothing drawn**; listed to the dev | dev | 2026-11-08 |
 | A zone has no witness at all | `sides.mjs` | it is **not disputed, it is unknown** — blur, not hatching; keep Cliopatria's course | Claude, agreed | 2026-11-08 |
 | A border runs near a river | `rivers.mjs` (sampled every 5 km; pieces of one name are one river, two unnamed ones never) | on the river when **within 8 km along ≥ 30 km** and no witness flips; show the first candidates of a zone to the dev | dev | 2026-11-08 |
 | A border is a straight cut (land borders only: a coast or an edge on unclaimed ground is not listed) | `shape.mjs --stiff` | where a witness or a source places it: draw it, an anchor every 10–15 km on the relief; **no straight run over 25 km** | dev | 2026-11-08 |
