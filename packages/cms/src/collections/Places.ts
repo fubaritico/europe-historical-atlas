@@ -1,5 +1,6 @@
 import { groupAt, momentGroup } from '../fields/historicalDate'
 import { countryField, regionField } from '../fields/lot'
+import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
@@ -55,7 +56,11 @@ export const Places: CollectionConfig = {
           required: true,
           localized: true,
           hooks: { beforeValidate: [trimmedText] },
-          admin: { width: '50%' },
+          admin: {
+            width: '50%',
+            description:
+              'Le nom français d’aujourd’hui. Le nom dans les autres langues se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté. Le nom porté à une date est un « Nom d’époque ».',
+          },
         },
         {
           name: 'wikidataLookup',
@@ -66,6 +71,8 @@ export const Places: CollectionConfig = {
         },
       ],
     },
+    // CMS-495: the place's name in the other languages, in the same table as a territory's (the dev, 2026-11-23).
+    otherNamesField('pour Ankara : anglais « Ankara », allemand « Ankara »'),
     {
       name: 'location',
       type: 'point',

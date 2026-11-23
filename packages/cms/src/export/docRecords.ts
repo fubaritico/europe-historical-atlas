@@ -1,5 +1,6 @@
 import { isMomentRefusal, orderRefusal, toHistoricalMoment } from '../fields/dateReading'
 import { describeDateRefusalFr } from '../fields/historicalDate'
+import { nameForms } from '../fields/nameForms'
 
 import type { MomentFields } from '../fields/dateReading'
 import type {
@@ -38,8 +39,10 @@ export interface DocEventType {
 export interface DocPlace {
   /** Its id. */
   id: DocId
-  /** Its name, every locale. */
+  /** Its name, every locale — the French one is read; the others come from `otherNames` (CMS-495). */
   name: DocLocalized
+  /** Its names in the other languages, as the register's table holds them (CMS-495). */
+  otherNames?: unknown
   /** `[lon, lat]`. */
   location: [number, number] | null | undefined
   /** Its Wikidata id. */
@@ -136,9 +139,12 @@ export function toPlace(place: DocPlace): ContentPlace {
   const [lon, lat] = place.location
   const reversed = orderRefusal(place.existsFrom, place.existsTo)
   if (reversed !== null) throw new Error(`[CMS] ${where}: ${describeDateRefusalFr(reversed)}`)
+  // The English name is the table's line, never the localized field's English row: the table is its home since
+  // 2026-11-23 (CMS-495), and a name typed through the admin's language switch is not exported.
+  const english = nameForms(place.otherNames).find(({ language }) => language === 'en')
   return {
     id: String(place.id),
-    name: localized(place.name, where),
+    name: localized({ fr: place.name?.fr ?? null, en: english?.form ?? null }, where),
     lon,
     lat,
     wikidata: present(place.wikidata),

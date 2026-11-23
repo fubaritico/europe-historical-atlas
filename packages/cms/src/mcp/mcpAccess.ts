@@ -12,6 +12,16 @@ import { Titles } from '../collections/Titles'
 import { VassalLinks } from '../collections/VassalLinks'
 import { OTHER_LANGUAGES, REQUIRED_OTHER_LANGUAGES } from '../fields/nameForms'
 
+/**
+ * The rule of a record's names in the other languages, as the MCP's descriptions say it (CMS-495): built from the
+ * lists the validation reads, so the agents read the rule the server holds.
+ */
+const OTHER_NAMES_RULE =
+  '`otherNames` — its name in the other languages, one line a language, each { language, form } with language ' +
+  `among ${OTHER_LANGUAGES.join(', ')}, never French and never twice the same; a line in ` +
+  `${REQUIRED_OTHER_LANGUAGES.join(', ')} is required on every create and every update, and an update that ` +
+  'carries `otherNames` replaces every line: send the existing ones back with the new one'
+
 import type { Plugin } from 'payload'
 
 /**
@@ -56,7 +66,8 @@ export const MCP_COLLECTIONS = {
     description:
       // The plugin takes a point as an object and stores it as Payload's [longitude, latitude] tuple (3.92.0,
       // `utils/schemaConversion/transformPointFields.js`, `utils/transformPointDataToPayload.js`).
-      'A place on the map: a city with its name, its position `location` as { longitude, latitude } — Wikidata ' +
+      `A place on the map: a city with its \`name\` (today's French name), ${OTHER_NAMES_RULE}, ` +
+      'its position `location` as { longitude, latitude } — Wikidata ' +
       'gives the latitude first — its Wikidata id `wikidata`, and its geographic lot today, `country` and ' +
       '`region`, each `{ name, wikidata }` — the country (P17) and the first-level division Wikidata gives.',
   },
@@ -113,12 +124,8 @@ export const MCP_COLLECTIONS = {
     enabled: ENTER_NEVER_DELETE,
     description:
       `The register of territories: what is held — a land (\`kind\` ${LAND_KINDS}) or an office (\`office\`) — ` +
-      'with `name` (its French name), `otherNames` — its name in the other languages, one line a language, each ' +
-      `{ language, form } with language among ${OTHER_LANGUAGES.join(', ')}, never French and never twice the ` +
-      `same; a line in ${REQUIRED_OTHER_LANGUAGES.join(', ')} is required on every create and every update — ` +
-      '`wikidata`, ' +
-      '`existsFrom`, `existsTo`. Never a point on the map, never its suzerain. Search by `wikidata` before creating. ' +
-      'An update that carries `otherNames` replaces every line: send the existing ones back with the new one.',
+      `with \`name\` (its French name), ${OTHER_NAMES_RULE} — \`wikidata\`, ` +
+      '`existsFrom`, `existsTo`. Never a point on the map, never its suzerain. Search by `wikidata` before creating.',
   },
   [Titles.slug]: {
     enabled: ENTER_AND_DELETE,

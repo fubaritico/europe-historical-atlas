@@ -226,7 +226,23 @@ export interface EventType {
  */
 export interface Place {
   id: number;
+  /**
+   * Le nom français d’aujourd’hui. Le nom dans les autres langues se saisit dans le tableau ci-dessous — pas en changeant la langue de la page : ce qui y serait saisi ne serait pas exporté. Le nom porté à une date est un « Nom d’époque ».
+   */
   name: string;
+  /**
+   * Une ligne par langue — par exemple, pour Ankara : anglais « Ankara », allemand « Ankara ». Obligatoire en anglais ; les autres langues sont facultatives. Le nom français est le champ « Nom », au-dessus. Une seule forme par langue.
+   */
+  otherNames?:
+    | {
+        language: 'en' | 'es' | 'it' | 'de';
+        /**
+         * Le nom tel que cette langue l’écrit.
+         */
+        form: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -1333,6 +1349,13 @@ export interface SiegeEnginesSelect<T extends boolean = true> {
  */
 export interface PlacesSelect<T extends boolean = true> {
   name?: T;
+  otherNames?:
+    | T
+    | {
+        language?: T;
+        form?: T;
+        id?: T;
+      };
   location?: T;
   wikidata?: T;
   country?:

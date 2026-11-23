@@ -9,6 +9,7 @@ import * as migration_20261116_015640_sovereign from './20261116_015640_sovereig
 import * as migration_20261118_201310_mcp_key_delete from './20261118_201310_mcp_key_delete';
 import * as migration_20261121_220424_period_names from './20261121_220424_period_names';
 import * as migration_20261122_004948_territory_other_names from './20261122_004948_territory_other_names';
+import * as migration_20261123_164622_place_other_names from './20261123_164622_place_other_names';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20261122_004948_territory_other_names.up,
     down: migration_20261122_004948_territory_other_names.down,
-    name: '20261122_004948_territory_other_names'
+    name: '20261122_004948_territory_other_names',
+  },
+  {
+    up: migration_20261123_164622_place_other_names.up,
+    down: migration_20261123_164622_place_other_names.down,
+    name: '20261123_164622_place_other_names'
   },
 ];

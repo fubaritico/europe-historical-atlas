@@ -21,6 +21,7 @@ const SIEGE = {
 const JERUSALEM = {
   id: 2,
   name: { fr: 'Jérusalem', en: 'Jerusalem' },
+  otherNames: [{ language: 'en', form: 'Jerusalem' }],
   location: [35.2137, 31.7683] as [number, number],
   wikidata: 'Q1218',
 }
@@ -76,7 +77,13 @@ function capture(overrides: Partial<DocEvent> = {}): DocEvent {
 /** Rome in 1100, as the export reads it — its place resolved, no reason, no line. */
 const ROME_1100: DocCitySheet = {
   id: 1,
-  place: { id: 5, name: { fr: 'Rome', en: 'Rome' }, location: [12.48, 41.89], wikidata: 'Q220' },
+  place: {
+    id: 5,
+    name: { fr: 'Rome', en: 'Rome' },
+    otherNames: [{ language: 'en', form: 'Rome' }],
+    location: [12.48, 41.89],
+    wikidata: 'Q220',
+  },
   date: {
     start: { year: 1100, month: null, day: null, circa: true, margin: null, calendar: 'julian' },
   },

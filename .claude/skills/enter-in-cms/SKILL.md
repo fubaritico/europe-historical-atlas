@@ -165,16 +165,18 @@ that exists is reused (its id), never created again.
    - **The work at the end of the chain is the source**: a Wikipedia page that cites a book → the book is a source, the
      page another, and the page's `copyOf` names the book — sources that copy one another are one *témoin*.
 2. **The place** (`places`). Search by `wikidata` (the `Q…`), then by `name`.
-   - `name` in French (required; the default locale is `fr`), and **always** the English name as the `en` locale —
-     Wikidata's English label of today's name; none there, the form a source gives. **A translation is never left
-     empty** (the dev, 2026-11-22): every place was given its English name on 2026-11-23, the 159 Wikidata does not
-     name are in `../../../files/plans/contribution/noms-anglais-a-faire.md`.
+   - `name` in French (required; the default locale `fr`, never another), and **`otherNames` with an English line,
+     required since 2026-11-23** (CMS-495) — the same table as a territory's (step 5): `[{ "language": "en", "form":
+     "Ankara" }]`, Wikidata's English label of today's name; none there, the form a source gives. Never the `en`
+     locale: what is written there is not exported. **A translation is never left empty** (the dev, 2026-11-22): a
+     place saved without its English line is refused, an update too — the 159 places Wikidata does not name are in
+     `../../../files/plans/contribution/noms-anglais-a-faire.md`, each given its line in the same update.
    - **The place bears its present name; the name it bore at the date is a record of its own** (the dev, 2026-11-21:
      _"the base should hold its present name, today, and the name it had at the time of the sheet"_ — Ankara is «
      Ancyre » in 1100; `../../../files/plans/contribution/names.md`, CMS-495). The map writes the name of the time
      alone; with none on the sheet, it writes the place's name.
-     - `name` (fr) is **today's name**, as Wikidata's French label gives it (« Ankara »); the `en` locale today's
-       English name. `wikidata` whenever the place has an item.
+     - `name` (fr) is **today's name**, as Wikidata's French label gives it (« Ankara »); the English line of
+       `otherNames` today's English name. `wikidata` whenever the place has an item.
      - **Only when the name of the time differs from today's**: a record of `period-names` (« Noms d'époque »),
        searched by `place` before creating — `place` (the place's id), `forms`, one line a language, each
        `{ language, form }` with the language among `fr`, `en`, `es`, `it`, `de` and never twice the same (another

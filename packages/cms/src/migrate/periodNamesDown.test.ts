@@ -44,7 +44,11 @@ beforeAll(async () => {
   })
   const place = await payload.create({
     collection: 'places',
-    data: { name: 'Ankara', location: [32.85, 39.93] },
+    data: {
+      name: 'Ankara',
+      otherNames: [{ language: 'en', form: 'Ankara' }],
+      location: [32.85, 39.93],
+    },
   })
   const name = await payload.create({
     collection: 'period-names',

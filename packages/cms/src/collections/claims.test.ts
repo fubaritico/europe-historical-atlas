@@ -137,7 +137,7 @@ afterAll(async () => {
 async function entered(name: string): Promise<{ place: number; own: number; sheet: number }> {
   const place = await payload.create({
     collection: 'places',
-    data: { name, location: [7.0, 51.2] },
+    data: { name, otherNames: [{ language: 'en', form: name }], location: [7.0, 51.2] },
   })
   const own = await payload.create({
     collection: 'sources',
@@ -310,7 +310,11 @@ describe('titles and links', () => {
       ).title
       const place = await payload.create({
         collection: 'places',
-        data: { name: 'Quimper', location: [-4.1, 48.0] },
+        data: {
+          name: 'Quimper',
+          otherNames: [{ language: 'en', form: 'Quimper' }],
+          location: [-4.1, 48.0],
+        },
       })
       await payload.create({
         collection: 'place-periods',
@@ -351,12 +355,22 @@ describe('titles and links', () => {
     it('refuses a second place with a Wikidata id another holds', async () => {
       await payload.create({
         collection: 'places',
-        data: { name: 'Erfurt', location: [11.03, 50.98], wikidata: 'Q1729' },
+        data: {
+          name: 'Erfurt',
+          otherNames: [{ language: 'en', form: 'Erfurt' }],
+          location: [11.03, 50.98],
+          wikidata: 'Q1729',
+        },
       })
       await expect(
         payload.create({
           collection: 'places',
-          data: { name: 'Erfurt (bis)', location: [11.03, 50.98], wikidata: 'Q1729' },
+          data: {
+            name: 'Erfurt (bis)',
+            otherNames: [{ language: 'en', form: 'Erfurt (bis)' }],
+            location: [11.03, 50.98],
+            wikidata: 'Q1729',
+          },
         })
       ).rejects.toThrow('wikidata')
     })
@@ -530,7 +544,11 @@ describe('titles and links', () => {
       const first = await entered('Wald')
       const second = await payload.create({
         collection: 'places',
-        data: { name: 'Gräfrath', location: [7.07, 51.21] },
+        data: {
+          name: 'Gräfrath',
+          otherNames: [{ language: 'en', form: 'Gräfrath' }],
+          location: [7.07, 51.21],
+        },
       })
       await payload.create({
         collection: 'place-periods',

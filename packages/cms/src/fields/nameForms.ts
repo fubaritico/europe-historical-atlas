@@ -17,8 +17,8 @@ export const LANGUAGE_LABELS: Readonly<Record<NameLanguage, string>> = {
 }
 
 /**
- * The languages a territory's other names are written in: every language but French, which is the territory's own
- * name in the register (CMS-495).
+ * The languages a place's or a territory's other names are written in: every language but French, which is the
+ * record's own name in the register (CMS-495).
  */
 export const OTHER_LANGUAGES = NAME_LANGUAGES.filter((language) => language !== 'fr')
 
@@ -28,7 +28,7 @@ export const OTHER_LANGUAGES = NAME_LANGUAGES.filter((language) => language !== 
  * filled is left out — the fields' own rules refuse it at the save.
  *
  * Its own module, free of Payload's server code, because the collection and the export both read it.
- * @param value - the `forms` field
+ * @param value - a table of forms: a name of the time's `forms`, a place's or a territory's `otherNames`
  * @returns its complete lines
  */
 export function nameForms(value: unknown): NameForm[] {
@@ -41,19 +41,19 @@ export function nameForms(value: unknown): NameForm[] {
 }
 
 /**
- * The languages a territory must be named in, beside French: every language the site is read in (CMS-495, the dev,
- * 2026-11-22: _"a translation field that exists is never left empty"_). The others of the table stay facultative
- * until the site speaks them.
+ * The languages a place or a territory must be named in, beside French: every language the site is read in
+ * (CMS-495, the dev, 2026-11-22: _"a translation field that exists is never left empty"_). The others of the table
+ * stay facultative until the site speaks them.
  */
 export const REQUIRED_OTHER_LANGUAGES: readonly NameLanguage[] = LOCALES.filter(
   (locale) => locale !== 'fr'
 )
 
 /**
- * The rule of a territory's names in the other languages (CMS-495): one form a language, never French — the
- * French name is the territory's own field, and a second French name here would be a second home for one fact —
+ * The rule of a place's or a territory's names in the other languages (CMS-495): one form a language, never French
+ * — the French name is the record's own field, and a second French name here would be a second home for one fact —
  * and a form in every language the site is read in.
- * @param value - the `otherNames` field
+ * @param value - the `otherNames` table of a place or a territory
  * @returns `true`, or the sentence said under the table
  */
 export function validateOtherNames(value: unknown): string | true {

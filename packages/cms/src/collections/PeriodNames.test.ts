@@ -65,13 +65,21 @@ beforeAll(async () => {
   ankara = (
     await payload.create({
       collection: 'places',
-      data: { name: 'Ankara', location: [32.85, 39.93] },
+      data: {
+        name: 'Ankara',
+        otherNames: [{ language: 'en', form: 'Ankara' }],
+        location: [32.85, 39.93],
+      },
     })
   ).id
   smyrna = (
     await payload.create({
       collection: 'places',
-      data: { name: 'Izmir', location: [27.14, 38.42] },
+      data: {
+        name: 'Izmir',
+        otherNames: [{ language: 'en', form: 'Izmir' }],
+        location: [27.14, 38.42],
+      },
     })
   ).id
   ancyre = (

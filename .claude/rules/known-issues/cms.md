@@ -106,18 +106,21 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
   non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
   un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**
-- **A territory's English name has two places to be typed, and one is not exported** (2026-11-22, CMS-495, reviews
-  ARCH-001 · QUAL-002): its names in the other languages live in the table `otherNames`, which the export reads, but its
-  field « Nom » is still translatable — an English name typed after switching the page's language is stored and never
-  exported. The field's description says so; the four English names entered that way before the table were copied into
-  it by the migration. **Remedy**: make « Nom » a plain French field — a migration written by hand (it moves a column
-  out of `territories_locales`; the generated one would rebuild the table and cascade), proved on a copy. **Severity:
-  worth knowing.**
-- **Under the content language « English », a record with no English name reads « Sans titre » and cannot be found by
+- **A place's and a territory's English name have two places to be typed, and one is not exported** (2026-11-22,
+  CMS-495, reviews ARCH-001 · QUAL-002; places since 2026-11-23): their names in the other languages live in the table
+  `otherNames`, which the export reads and which requires English, but their field « Nom » is still translatable — an
+  English name typed after switching the page's language is stored and never exported. The fields' descriptions say
+  so; the English rows written before the table were copied into it by the migrations (`territory_other_names`,
+  `place_other_names`), and stay where they were. **Remedy**: make « Nom » a plain French field — not by Drizzle's
+  generated migration, which rebuilds `places` and would cascade onto the sheets (`migrateBase.test.ts` refuses a base
+  that differs from the collections, so the localized table cannot simply be left behind): a hand-written migration
+  that adds the column and keeps the base equal to the collections, proved on a copy. **Severity: worth knowing.**
+- **Under the content language « English », a record with no English row reads « Sans titre » and cannot be found by
   typing** (2026-11-22, CMS-495): the admin reads a translated name in the page's language alone, with no fallback
-  (`cmsConfig`), and search runs in that language — seen in the « + » drawer of « Nom d'époque », where no place could
-  be chosen. It holds for places, territories, people, confessions, event types, importance reasons and siege engines.
-  **Remedy, decided by the dev**: no fallback — every translation is filled (the catch-up of `contribution/names.md`),
-  then required. **Until then**: keep the selector on « Français ». **A trap met on the way**: a Local API read handed
-  `req` with another `locale` writes that language into the request — inside a `beforeChange` the save under way then
-  goes on in it (a name typed in English overwrote the French one, caught by a test). **Severity: gênant.**
+  (`cmsConfig`), and search runs in that language. For the places and the territories the English rows were filled on
+  2026-11-23 (13 558 places, 319 territories), but their English now lives in the table `otherNames`, so a record entered
+  since reads « Sans titre » under English; for people, confessions, event types, importance reasons and siege engines
+  nothing is filled yet. **Until the remedy above**: keep the selector on « Français ». **A trap met on the way**: a
+  Local API read handed `req` with another `locale` writes that language into the request — inside a `beforeChange`
+  the save under way then goes on in it (a name typed in English overwrote the French one, caught by a test).
+  **Severity: gênant.**

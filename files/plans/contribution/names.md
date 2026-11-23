@@ -144,5 +144,13 @@ commit the files: the coder still does.
   territories with no Wikidata id, 60 English place names carrying a qualifier (« Jesenice, Omiš ») or not in English,
   and the 311 territory names to read — Wikidata sometimes names something else than the polity (« Roman Catholic
   Archdiocese of Cologne »).
+- **Required, 2026-11-23**: a territory's table requires a line in every language the site is read in but French
+  (`validateOtherNames`, core's `LOCALES`: English today), the others optional (`8f89e26f`). **A place gets the same
+  table** — the dev's choice that day, against a control without refusal: the admin shows one language at a time, so a
+  required English localized row would have broken the creation of a place, his and the historian's (the MCP's tools
+  take one locale a call — plugin-mcp 3.92, `tools/resource/create.js`). One shared field (`fields/otherNames.ts`); the
+  migration `place_other_names` copies the 13 558 English rows into it (proved on a copy, up and down, the export
+  identical name for name); the export reads a place's English name from the table. « Nom » stays translatable: making
+  it plain French would rebuild `places` and cascade — `known-issues/cms.md`.
 - **By me, to be kept or lifted by him**: the same rule extended to the five other collections whose name is translated
   (people, confessions, event types, importance reasons, siege engines).
