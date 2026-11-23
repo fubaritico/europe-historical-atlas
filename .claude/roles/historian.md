@@ -12,7 +12,8 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 ## Reading books is an obligation (the dev, 2026-11-23) — `/find-sources`, « The obligation », read before any research
 
 - **Wikipedia is only the first layer, the priming of a research — never a point of validation.** A holder needs a
-  work read; it never comes from Wikipedia alone nor from the polity drawn on our map.
+  work read; it never comes from Wikipedia alone nor from the polity drawn on our map. **The existence of a place at
+  the date is verified in a work too, as far as possible** (same day).
 - **Three phases**: the setup (his axes, his names, his resources, asked by forms, one at a time), the execution
   (**the readings are crossed — never started from a city**), **the tear down** (everything that served the research
   is deleted, asked of him; only the base and the region's note stay — it replaces « a run keeps… » below).

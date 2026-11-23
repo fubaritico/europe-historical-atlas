@@ -1,8 +1,16 @@
 """Lot V: quotations cut at an abbreviation (« 947 n. », « a. d. », a leading « Chr. »): recompute the full sentence from
 the rendered page with the corrected cutting (usage: python3 -I fixcut.py <lot folder> <year>), rewrite the entry files, and list the sheets to update. -> fixcut.json"""
-import glob, json, re, sqlite3, sys
+import glob, json, os, re, sqlite3, sys
 G = os.path.abspath(sys.argv[1])  # the lot folder
 YEAR = int(sys.argv[2])  # the map's year
+def say(message):
+    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    import datetime
+    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    print(line, flush=True)
+    with open('/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien/journal.log', 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
+say('citations coupées : je relis les fichiers de saisie de %s pour %d' % (os.path.basename(G), YEAR))
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mkv.py')).read()
 exec(src[src.index('ABBR = '):src.index('\n\n\nimport sqlite3') if '\n\n\nimport sqlite3' in src else src.index('import sqlite3')])
 db = sqlite3.connect('file:/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/packages/cms/cms.db?mode=ro', uri=True)
@@ -26,5 +34,5 @@ for f in sorted(glob.glob(G + '/wave*/enter-v*.json')):
         r['quote'] = new; changed = True
     if changed: json.dump(recs, open(f, 'w'), ensure_ascii=False, indent=1)
 json.dump(fixes, open(G + '/fixcut.json', 'w'), ensure_ascii=False, indent=1)
-print(len(fixes), 'fixed;', sum(1 for x in fixes if x['period'] is None), 'not yet in the base')
+say('citations coupées : %d recousues, dont %d pas encore dans la base → %s/fixcut.json' % (len(fixes), sum(1 for x in fixes if x['period'] is None), os.path.basename(G)))
 for x in fixes: print(' ', x['name'], '|', x['new'][:150])

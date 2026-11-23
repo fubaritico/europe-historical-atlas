@@ -10,6 +10,18 @@ import urllib.parse
 
 G = os.path.abspath(sys.argv[1])  # the lot folder
 YEAR = int(sys.argv[2])  # the map's year
+
+
+def say(message):
+    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    import datetime
+    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    print(line, flush=True)
+    with open('/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien/journal.log', 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
+
+
+say('tri : je relève les phrases datées des pages de %s, jusqu\'à %d' % (os.path.basename(G), YEAR + 5))
 W = G.rsplit('/', 1)[0] + '/wiki/'
 meta = json.load(open(G + '/meta.json'))
 cand = {c['q']: c for c in json.load(open(G + '/cand.json'))}
@@ -85,4 +97,4 @@ for q in meta:
 keys = sorted(pages, key=lambda q: (cand[q]['land'], q))
 for k, L in enumerate('abcdefgh'):
     json.dump([pages[q] for q in keys[k::8]], open(G + '/tri-' + L + '.json', 'w'), ensure_ascii=False, indent=0)
-print(len(pages), 'pages with a dated sentence, of', len(meta), '; per lot ~', len(pages) // 8)
+say('tri : %d pages avec une phrase datée sur %d, environ %d par lot → tri-a..h.json' % (len(pages), len(meta), len(pages) // 8))

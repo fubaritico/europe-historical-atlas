@@ -50,18 +50,20 @@ present it runs the gate and stops when refused; `mkv.py` carries that holder in
 refuses « HOLDER NOT FROM THE NOTE », « HOLDER ON AN ENCYCLOPAEDIA ALONE », « HOLDER LINE MISSING » (run on an old
 wave: 70 refused of 70); `fetch_rest.py` keeps the works each page cites (`cited`) and `cited_works.py <lot> <year>
 <region>` ranks them and records the attempt « wikipedia-bibliography »; `meta.py` and `fetch_rest.py` speak in the
-journal. **Not done**: `under.mts` and `titlemap.py` are still in `scripts/`, no longer called; `cand.py`,
-`sentences.py`, `extract_backfill.py`, `fixcut.py`, `inventory.py` do not write to the journal yet; no script builds
-`holders.json` from the note — it is written by hand, each line from a book read.
+journal. **Since the afternoon of 2026-11-23**: `cand.py`, `sentences.py`, `fixcut.py` and `inventory.py` speak in the
+journal too; `under.mts` and `titlemap.py` (no longer called) and `extract_backfill.py` (it wrote `extraits/` and
+`reads.jsonl`, which the tear down no longer keeps) are removed; `inventory.py` lists what the tear down deletes.
+**Not done**: no script builds `holders.json` from the note — it is written by hand, each line from a book read.
 
 ## The layout — always the same
 
 ```
 files/resources/historien/
 ├── outils/                 local launchers only (start-cms.sh); the method's scripts are this skill's scripts/
-├── registre/               reads.jsonl — one line per page or book read: url, q (place), year asked, date read
-├── extraits/               <q>.json — every dated sentence read about the place, any year, with its url
+├── journal.log             what is being done, one dated French line each — the dev follows it with tail -f
+├── registre/               attempts.jsonl — one line per attempt (log.py attempt); the gate counts them
 └── <year>/<region>/<lot>/  cand.json, meta.json, tri-*.json, verdict-*.json, wave*/enter-*.json, result-*.json
+                            — the time of the run only: the tear down deletes it
 ```
 
 Nothing of mine lies flat in `files/resources/`; nothing of the dev's is moved.
@@ -72,9 +74,9 @@ Nothing of mine lies flat in `files/resources/`; nothing of the dev's is moved.
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- | ------------------------- |
 | 0   | **Before**: give him the journal's `tail -f` command; run `region_gate.py` (refused → the books first, « The holder is read in books first »); write the resume point in `next-historian.md`; ask the dev **the number of agents** (and give the cost: ~150–250 k tokens per agent, ~1 % of his week per million); check the CMS answers (his server)             | a resumable run                   | —                         |
 | 1   | **Candidates**: a list from Wikidata (QLever) or a pool; drop a QID already in the base and a point within 1.5 km of a sheet of the year (one sign per place)                                                                  | `cand.json`                       | `cand.py`                 |
-| 2   | **Place data**: name (fr, else de/en label — **Wikidata's label is the present name, which the place bears; a name of the time that differs is a record of `period-names`, read in the sources at step 3**, `/enter-in-cms` « The place »), country, region (the CMS rule: P17, first-level division of P131*), **its district and the holder title the region's note gives that district — none when the note has none; never the polity drawn under the point** (`meta.py` still calls `under.mts`: due) | `meta.json`                       | `meta.py`                 |
-| 3   | **Reading**: the **rendered** page, once, through the REST API (`/api/rest_v1/page/html/`, 4 threads); each read appended to `registre/reads.jsonl`                                                                            | `rend/` (temporary)               | `fetch_rest.py`           |
-| 4   | **Dated extracts**: every sentence of the page carrying a year about the place, **whatever the year**, into `extraits/<q>.json` — the memory shared by all years                                                               | `extraits/`                       | `extract_backfill.py`     |
+| 2   | **Place data**: name (fr, else de/en label — **Wikidata's label is the present name, which the place bears; a name of the time that differs is a record of `period-names`, read in the sources at step 3**, `/enter-in-cms` « The place »), country, region (the CMS rule: P17, first-level division of P131*), **its district and the holder title the region's note gives that district — none when the note has none; never the polity drawn under the point** | `meta.json`                       | `meta.py`                 |
+| 3   | **Reading**: the **rendered** page, once, through the REST API (`/api/rest_v1/page/html/`, 4 threads), said in the journal                                                                                                     | `rend/` (temporary)               | `fetch_rest.py`           |
+| 4   | **Left the run on 2026-11-23** (it kept every dated sentence in `extraits/` for the later years; the tear down keeps nothing from one run to the next) — the number stays so that the others do not move                       | —                                 | —                         |
 | 5   | **Sorting**: agents (Sonnet) read up to 5 dated sentences per place and return **the index** of the one proving the place at the year, never a copied sentence; I read 25 random yes and 8 no per lot before going on          | `verdict-*.json`                  | the sorting prompt below  |
 | 6   | **Entry files**: the quotation is the exact rendered sentence, found by script (exact, else difflib ≥ 0.85 and carrying the year); the weak ones I judge myself                                                                | `wave*/enter-*.json`, `weak.json` | `mkv.py`                  |
 | 7   | **Entry**: agents (Sonnet), one file each, through the MCP only, in series, a result file each                                                                                                                                 | the base                          | the entry prompt below    |
@@ -114,9 +116,9 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
   (19/11: Selezivka entered under « oblast de Kiev », its page and its point say Zhytomyr; Bryn under « oblast de
   Moscou », Kaluga by its page). Read each region against the page's first sentence before entry; a place Wikidata ties
   to no division keeps an empty region, never a guessed one.
-- **`extract_backfill.py` splits sentences for German and English only**: on a Russian page it kept one paragraph and lost
-  the dated sentence (Vytatchiv, 19/11). For another script, split with that language's rules and write `extraits/` from
-  that split, the quotation checked inside each file.
+- **The sentence cutting (`sentences.py`, `mkv.py`) knows German and English only**: on a Russian page a whole paragraph
+  was kept as one sentence and the dated one lost (Vytatchiv, 19/11). For another script, cut with that language's
+  rules, the quotation checked inside each file.
 - **Two downloads at once are throttled** by Wikipedia (42 pages in a quarter of an hour, 19/11): one at a time, the
   best-documented candidates first (sitelinks), and stop at the density asked (memory `enough-cities-not-all`).
 - **Local wikitext is not a quotation**: it may serve the sorting, never the line — the line is the rendered sentence.
@@ -132,12 +134,10 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
 | 0    | `prepare.py <year> <region>`, `log.py say|attempt`, `region_gate.py <year> <region>` | the journal, `registre/attempts.jsonl`; the gate reads them and the region's note                                                 |
 | 2    | `meta.py <lot> <year> [<region>]` (the region when `holders.json` is there: it runs the gate) | `cand.json` (+ `holders.json`) → `meta.json`                                                                             |
 | 3    | `fetch_rest.py <lot> <list.json>`, then `cited_works.py <lot> <year> <region>` | QIDs → `rend/<q>.json` with the works cited (resumes) → `cited.json`, the attempt « wikipedia-bibliography »                            |
-| 4    | `extract_backfill.py`                                                 | every `rend/` and `wiki/` under `historien/` → `extraits/`, `registre/reads.jsonl`                                                               |
 | 5    | `sentences.py <lot> <year>`                                           | `meta.json` + pages → `tri-a..h.json`                                                                                                            |
 | 6    | `mkv.py <lot> <year>`                                                 | verdicts + `rend/` → `enter-va..vh.json`, `pending.json`, `weak.json` — move them to `wave<N>/` at once                                          |
 | 8    | `verifyv.py <lot>/wave<N> <year>`, then `fixcut.py <lot> <year>`      | the base (read-only) vs the files → `bad.json`, `fixcut.json`                                                                                    |
-| 9    | `inventory.py`                                                        | the disk → `historien/LISEZ-MOI.md`: per folder, what is kept and what is waste, measured; shown to the dev before he agrees to delete the waste |
+| 9    | `inventory.py`                                                        | the disk → `historien/LISEZ-MOI.md` and the journal: everything the tear down deletes, measured; shown to the dev before he grants the deletion  |
 
-Tried on 18/11 against the run they come from (`historien/1100/regions/germany-west-1100-research/lot-v/`, its folders
-`wave1..3/` and verdicts kept as the worked example). `extract_backfill.py` rebuilds the register and the extracts from every page on disk: run it at the end of each run,
-after the entry and **before** the clean-up.
+Tried on 18/11 against the run they came from (the German lot of 1100, deleted with the rest of the old research
+material on 2026-11-23).

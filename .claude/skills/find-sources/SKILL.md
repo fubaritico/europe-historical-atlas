@@ -94,8 +94,15 @@ Every step is said in the journal as it happens. The detail of each is below.
 - **Steps 2 to 9 of « The order » are all done, for every question of holder.** Stopping at Wikipedia is not a
   shorter research, it is no research.
 - **A holder is never kept on Wikipedia alone, and never taken from the polity drawn on our map.** It needs a line from
-  a work read in this session or found in the register — `primary`, `scholarly` or `historian-atlas` — the passage read,
+  a work read in this session — `primary`, `scholarly` or `historian-atlas` — the passage read,
   not a footnote copied from a page. Until then the place has no holder line; it is listed as _holder to read_.
+- **The existence of a place at the date is verified in a work too, as far as possible** (the dev, 2026-11-23, asked
+  whether the existence needs a book as the holder does: _"yes, it must be verified as much as possible"_). For every
+  place of a research, its existence at the date is looked for in the works read — the index, the passage, a map's
+  legend — through the same channels as the holder, each attempt logged with the hypothesis « existence ». The
+  sentence of a Wikipedia page is the priming here too. **Claude's reading of « as far as possible », to be
+  confirmed**: a place whose existence no work read attests is still entered on its dated Wikipedia sentence, listed
+  in the region's note as _existence to read_ with its attempts counted — it is not refused, unlike a holder.
 - **Every attempt is written down, the empty ones too**: one line per try in
   `files/resources/historien/registre/attempts.jsonl` — the date, the place or district, the hypothesis, the library or
   the book (title, index entry, pages), its `degree` (0, 1 or 2 — step 7), the words searched, the result (`found`,

@@ -1,60 +1,59 @@
-"""Write files/resources/historien/LISEZ-MOI.md: what each folder holds, what is kept, what is waste (downloaded copies,
-re-downloadable from the register), with sizes measured on disk. Changes nothing else. Usage: python3 -I inventory.py"""
+"""The list of the tear down (`/find-sources`, step 13; the dev, 2026-11-23: nothing of the research material is
+kept): everything under files/resources/historien/ with its size measured on disk, written in French to
+historien/LISEZ-MOI.md and said in the journal. Only `outils/` and the journal stay. It deletes nothing: the list is
+shown to the dev, who grants the deletion. Usage: python3 -I inventory.py"""
+import datetime
 import os
-from datetime import date
 
 H = '/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/files/resources/historien'
-WASTE_DIRS = {'wiki', 'rend', 'venv', '.venv', 'texts'}
-WASTE_EXT_IN_SOURCES = ('.txt', '.pdf', '.html', '.htm', '.wiki', '.djvu')
+STAYS = {'outils', 'journal.log', 'LISEZ-MOI.md'}
 
 
-def classify(path):
-    parts = set(os.path.relpath(path, H).split(os.sep))
-    if parts & {'extraits', 'registre', 'outils'}:
-        return 'keep'
-    if parts & WASTE_DIRS:
-        return 'waste'
-    if 'sources' in parts and path.endswith(WASTE_EXT_IN_SOURCES):
-        return 'waste'
-    return 'keep'
+def say(message):
+    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    print(line, flush=True)
+    with open(H + '/journal.log', 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
 
 
-rows, tot = [], {'keep': 0, 'waste': 0}
-for top in ('outils', 'extraits', 'registre'):
-    p = os.path.join(H, top)
-    size = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(p) for f in fs) if os.path.isdir(p) else 0
-    tot['keep'] += size
-    rows.append((top + '/', size, 0))
-for year in sorted(d for d in os.listdir(H) if d.isdigit()):
-    for group in sorted(os.listdir(os.path.join(H, year))):
-        gp = os.path.join(H, year, group)
-        if not os.path.isdir(gp):
+def size(path):
+    """The bytes of a file, or of every file under a folder."""
+    if os.path.isfile(path):
+        return os.path.getsize(path)
+    return sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(path) for f in fs
+               if os.path.isfile(os.path.join(r, f)))
+
+
+def entries():
+    """The items of the list: a year's folders two levels down (group, lot), anything else at the top."""
+    for top in sorted(os.listdir(H)):
+        p = os.path.join(H, top)
+        if top in STAYS:
             continue
-        for lot in sorted(os.listdir(gp)):
-            lp = os.path.join(gp, lot)
-            if not os.path.isdir(lp):
+        if not (top.isdigit() and os.path.isdir(p)):
+            yield top + ('/' if os.path.isdir(p) else ''), p
+            continue
+        for group in sorted(os.listdir(p)):
+            gp = os.path.join(p, group)
+            if not os.path.isdir(gp):
+                yield '%s/%s' % (top, group), gp
                 continue
-            k = w = 0
-            for r, _, fs in os.walk(lp):
-                for f in fs:
-                    fp = os.path.join(r, f); s = os.path.getsize(fp)
-                    if classify(fp) == 'waste': w += s
-                    else: k += s
-            tot['keep'] += k; tot['waste'] += w
-            rows.append(('%s/%s/%s/' % (year, group, lot), k, w))
+            for lot in sorted(os.listdir(gp)):
+                lp = os.path.join(gp, lot)
+                yield '%s/%s/%s%s' % (top, group, lot, '/' if os.path.isdir(lp) else ''), lp
+
 
 mb = lambda b: '%.0f Mo' % (b / 1e6) if b >= 1e6 else '%.0f Ko' % (b / 1e3)
-out = ['# historien/ — ce qui est gardé, ce qui est déchet', '',
+rows = [(name, size(path)) for name, path in entries()]
+total = sum(s for _, s in rows)
+out = ['# historien/ — ce que le démontage supprime', '',
        '> Écrit par `.claude/skills/bulk-entry/scripts/inventory.py` le %s, mesuré sur le disque. Le disque est prêté : '
-       'il reste rangé (`.claude/roles/historian.md`).' % date.today().isoformat(), '',
-       '**Gardé** — ce qui resservira : `extraits/` (les phrases datées lues sur chaque lieu, toutes années), `registre/` '
-       '(chaque page lue : adresse, lieu, date), et dans chaque recherche ses listes, verdicts, fichiers de saisie, résultats, '
-       'rapports et scripts.', '',
-       '**Déchet** — copies téléchargées, retéléchargeables depuis le registre ou les listes : les dossiers `wiki/`, '
-       '`rend/`, `texts/`, `venv/`, et dans `sources/` les fichiers `.txt .pdf .html .wiki`. Supprimés à la fin de chaque '
-       'recherche, sur l\'accord du dev.', '',
-       '| dossier | gardé | déchet |', '| --- | --- | --- |']
-out += ['| `%s` | %s | %s |' % (n, mb(k), mb(w) if w else '—') for n, k, w in rows]
-out += ['| **total** | **%s** | **%s** |' % (mb(tot['keep']), mb(tot['waste'])), '']
-open(H + '/LISEZ-MOI.md', 'w').write('\n'.join(out))
-print('kept', mb(tot['keep']), '; waste', mb(tot['waste']))
+       'rien du matériel de recherche n\'est gardé (`/find-sources`, étape 13).' % datetime.date.today().isoformat(), '',
+       '**Reste** : `outils/` et `journal.log`. Le résultat est dans la base et dans la note de la région '
+       '(`files/plans/sources/`).', '',
+       '**À supprimer**, sur l\'accord du dev :', '', '| élément | taille |', '| --- | --- |']
+out += ['| `%s` | %s |' % (n, mb(s)) for n, s in rows]
+out += ['| **total** | **%s** |' % mb(total), '']
+open(H + '/LISEZ-MOI.md', 'w', encoding='utf-8').write('\n'.join(out))
+say('démontage : %d éléments à supprimer, %s en tout — la liste est dans historien/LISEZ-MOI.md' % (len(rows), mb(total)))
