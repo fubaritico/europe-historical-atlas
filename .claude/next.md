@@ -32,7 +32,8 @@ Le plan : `files/plans/contribution/names.md` ; l'état, les commentaires du 23/
 registres ; l'anglais **obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire et d'un lieu ; le
 nom de tout le registre est le français seul (migrations `plain_french_names`, `plain_french_register_names`) ; les 30
 noms d'époque posés ; **le « + » du « Nom d'époque » ouvre son tiroir sur le lieu de la fiche** (`708377f7`, essayé dans
-un navigateur sur une copie de la base) ; **`pnpm names:check`** (`49d160db`, 3 min 40 : 0 nom à trier le 23/11 au soir).
+un navigateur sur une copie de la base) ; **`pnpm names:check`** (`49d160db`, 3 min 40 : 0 nom à trier le 23/11 au soir) ;
+**le détenteur d'une ville est le pays de son titre** dans l'export (`fbad3a1c`, 3 villes sans détenteur sur 13 698).
 
 **Ce qui reste, dans l'ordre** : (1) les pays en français ; (2) à l'historien, les quatorze noms d'époque d'Anatolie et
 la relecture de mes traductions (`noms-anglais-a-faire.md`). Puis CMS-499 et CARTO-498, en tête d'« À faire ».
