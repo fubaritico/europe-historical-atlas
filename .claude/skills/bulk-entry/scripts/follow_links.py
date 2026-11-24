@@ -114,5 +114,31 @@ out += ['', '## Every link, most cited first', '']
 out += ['- %s (%d)' % (l, n) for l, n in sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))]
 out += ['', '## Works cited', ''] + ['- %s' % c for c in dict.fromkeys(cites)]
 (folder / 'links.md').write_text('\n'.join(out), encoding='utf-8')
-say('follow_links : « %s » — %d cartes et images, %d liens, %d « voir aussi », %d ouvrages cités → %s'
-    % (TITLE, len(files), len(count), len(seealso), len(cites), folder))
+
+# The page's own warnings and its annotated claims (the dev, 2026-11-24: Wikipedia is popularisation, a professional's
+# work weighs more; an annotated claim is climbed to the work and the passage it cites; a claim the page itself flags
+# as unsourced is worth nothing). Maintenance templates, every language we read:
+FLAGS = (r'citation needed|cn|fact|unreferenced|unsourced|more citations needed|refimprove|one source|primary sources|'
+         r'dubious|disputed|failed verification|verify source|better source needed|page needed|'
+         r'référence nécessaire|refnec|réf nec|à sourcer|sources à lier|sans source|section à sourcer|pas de source|'
+         r'référence insuffisante|à vérifier|douteux|cita requerida|sin referencias|fuentes primarias|'
+         r'belege fehlen|quelle fehlt|citazione necessaria|senza fonti|kaynak belirt|kaynaksız|kaynak eksik')
+flags = []
+for m in re.finditer(r'\{\{\s*(' + FLAGS + r')\s*(\|[^{}]*)?\}\}', raw, re.I):
+    before = strip(raw[max(0, m.start() - 300):m.start()]).split('\n')[-1]
+    flags.append('- `{{%s}}` — « …%s »' % (m.group(1), before[-200:]))
+# An annotated claim: a sentence followed by a reference (<ref>…</ref>, <ref name=…/>, {{sfn}}, {{harvnb}}).
+REF = r'(?:<ref[^>]*/>|<ref[^>]*>.*?</ref>|\{\{\s*(?:sfn|sfnp|harvnb|harv|rp)[^}]*\}\})'
+claims = []
+for m in re.finditer(r'([^.\n]{20,400}\.)\s*((?:' + REF + r'\s*)+)', raw, re.S):
+    refs = [strip(re.sub(r'</?ref[^>]*>', '', r)) or r for r in re.findall(REF, m.group(2), re.S)]
+    claims.append('- « %s » — %s' % (strip(m.group(1))[-300:], ' ; '.join(r[:200] for r in refs)))
+flagged = ['# Ce que la page dit d\'elle-même — « %s » (%s)' % (TITLE, LANG), '',
+           'Wikipedia is popularisation: a work read weighs more. A claim flagged here is worth nothing as it stands; an',
+           'annotated claim is climbed to the cited work, and kept only if that work says it, at that page.', '',
+           '## Bandeaux et mentions de sources manquantes (%d)' % len(flags), ''] + (flags or ['(aucun)'])
+flagged += ['', '## Affirmations annotées, avec leur référence (%d)' % len(claims), ''] + (claims or ['(aucune)'])
+(folder / 'flags.md').write_text('\n'.join(flagged), encoding='utf-8')
+say('follow_links : « %s » — %d cartes et images, %d liens, %d « voir aussi », %d ouvrages cités, %d bandeaux de '
+    'sources manquantes, %d affirmations annotées → %s'
+    % (TITLE, len(files), len(count), len(seealso), len(cites), len(flags), len(claims), folder))

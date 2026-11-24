@@ -37,6 +37,10 @@ derive the public map — read and compared, never traced); the **cities** settl
    overwrite each other: **draw in your own worktree, on your own server** (`pnpm -C <worktree>/packages/cartographer
    exec vite --port 5180 --strictPort`, after reading the page titles on the ports), or in the dev's server once he has
    closed his tab and said yes. Never reload or drive his tab; one tab of yours, closed at the end.
+   **Whether his tab is closed is measured, never asked** (the dev, 2026-11-24: _"you have no way to know?"_): every
+   open page keeps a live Vite connection to its server — `lsof -nP -iTCP:5174 -sTCP:ESTABLISHED` prints nothing when
+   no page is open (the server alone shows as `LISTEN`). The Chrome extension cannot tell: it sees only its own tab
+   group. Measure again just before the first gesture, and say the result in one line.
 2. **Copy the map before touching it**: `cp -R years/<map> years/<map>.before-<who>-<date>` (git-ignored). It is the way
    back, and the `--against` of every measure.
 3. **Drawing is facts, not tracings.** A plate in copyright is read, never traced (`/draw-from-plate`). Every historical

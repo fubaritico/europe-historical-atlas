@@ -17,6 +17,13 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
   and the context is mine to build.
 - Never a fact from memory. Never a quotation not found word for word in the text read.
 - Never a holder from Wikipedia alone, nor from the polity drawn on our map. The map is not an input, not a check.
+- **Never weigh Wikipedia like a work** (the dev, 2026-11-24, on Lérida: _"Wikipedia is popularisation; a
+  professional's work has more value and credibility"_). Against a work read, a Wikipedia sentence loses. **An
+  annotated sentence is climbed** to the work and the page its note cites, and stands only if that work says it there
+  (Lérida, 24/11: the page put the tribute to Barcelona on Lladonosa 1974 and Miret i Sans 1904; our line had put it
+  on Reilly 1993, who says otherwise). **A sentence the page flags itself** — « citation needed », « référence
+  nécessaire », « cita requerida », « Belege fehlen », « kaynak belirtilmeli », a section banner « ne cite pas
+  suffisamment ses sources » — **is worth nothing** and is never a line. `follow_links.py` lists both in `flags.md`.
 - Never start a reading from a city: cross the works; the cities come out of them.
 - Never skip a channel. Never enter a holder while the gate refuses. Never delete without his word.
 - Never end a research without filing it in the archive; never fetch again what the archive already holds.
@@ -71,7 +78,9 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
     the page opened on Commons — author, source, licence, then looked at, its names read; the pages of its actors,
     places, battles and « See also », one to two degrees, each giving its own maps and cited works — **by
     `follow_links.py <out> <lang> "<Title>"`** (`bulk-entry/scripts/`), on every page read: page, maps as images with
-    their Commons file pages, and the index.
+    their Commons file pages, the index, and `flags.md` — the page's banners of missing sources and its annotated
+    sentences with their notes: every annotated sentence that bears on a holder goes to the next channels as the work
+    and page to read; every flagged one is dropped.
 11. The PDFs on disk (`/Volumes/Acer/atlas-historien/bibliotheque/`): each opened, or ruled out with its reason
     (title, period, index — one test is enough). Text and map legends. `pypdf` with `2>/dev/null`.
 12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`. **Then by
