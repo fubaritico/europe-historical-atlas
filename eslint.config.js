@@ -317,27 +317,28 @@ const CORE_IS_PURE = [
  *   apply to, the layers it may not reach, why, and any whole-package bans to compose in
  * @returns {object} an ESLint flat-config entry
  */
-export const layerBoundary = ({ files, forbid = [], why = '', paths }) => ({
-  files,
-  rules: {
-    'no-restricted-imports': [
-      'error',
-      {
-        ...(paths === undefined ? {} : { paths }),
-        ...(forbid.length === 0
-          ? {}
-          : {
-              patterns: [
-                {
-                  group: forbid.flatMap((name) => LAYER[name]),
-                  message: `Architecture boundary: ${why}`,
-                },
-              ],
-            }),
-      },
-    ],
-  },
-})
+export const layerBoundary = ({ files, forbid = [], why = '', paths }) => {
+  // A banned package is banned with its subpaths: `paths` matches a module's exact name only, so `three/webgpu` went
+  // through a ban on `three` (review ARCH-001 of ATLAS-519, measured). Same options object — one rule, one entry.
+  const subpaths = (paths ?? []).map(({ name, message }) => ({ group: [`${name}/*`], message }))
+  const layers =
+    forbid.length === 0
+      ? []
+      : [{ group: forbid.flatMap((name) => LAYER[name]), message: `Architecture boundary: ${why}` }]
+  const patterns = [...layers, ...subpaths]
+  return {
+    files,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          ...(paths === undefined ? {} : { paths }),
+          ...(patterns.length === 0 ? {} : { patterns }),
+        },
+      ],
+    },
+  }
+}
 
 /**
  * Turn one row of this file's own table into a flat-config object.

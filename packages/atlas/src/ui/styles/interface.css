@@ -1,0 +1,73 @@
+/*
+ * The interface's layer over the map (ATLAS-519). It covers the window and **lets the pointer through** where it holds
+ * nothing, so the canvas under it keeps every gesture; each element of the interface takes the pointer back.
+ */
+.atlas-interface {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  font-family: var(--atlas-font-body);
+  color: var(--atlas-ink);
+}
+
+/*
+ * The temporary year switch (ATLAS-333, in React since ATLAS-519, replaced by the century's selector with ATLAS-522):
+ * top centre, below the 24 px band where the map scrolls toward the edge (`app/viewport.ts`) — at 12 px, reaching a
+ * button sent the map up (the dev, 2026-11-08). Lot B's language: a parchment capsule ruled in ink, the year shown on
+ * the ink with cream capitals.
+ */
+.atlas-year-switch {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1.5px solid var(--atlas-ink);
+  border-radius: 999px;
+  background: linear-gradient(var(--atlas-panel-light), var(--atlas-panel-dark));
+  pointer-events: auto;
+}
+
+.atlas-year-switch:empty {
+  display: none;
+}
+
+.atlas-year-switch__year {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--atlas-ink);
+  font: 600 13px/1 var(--atlas-font-caps);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.atlas-year-switch__year[aria-pressed='true'] {
+  background: linear-gradient(
+    var(--atlas-button-top),
+    var(--atlas-button-middle),
+    var(--atlas-button-bottom)
+  );
+  color: var(--atlas-cream);
+}
+
+.atlas-year-switch[aria-busy='true'] .atlas-year-switch__year {
+  cursor: wait;
+}
+
+.atlas-year-switch[aria-busy='true'] .atlas-year-switch__year[aria-pressed='false'] {
+  opacity: 0.5;
+}
+
+/*
+ * The focus ring in the ink: the gold reads at 2.68:1 on the parchment capsule, under WCAG 1.4.11's 3:1 (review A11Y-001,
+ * recomputed); the ink is 12.9:1 at its darkest. The offset keeps it apart from the pressed button's ink.
+ */
+.atlas-year-switch__year:focus-visible {
+  outline: 2px solid var(--atlas-ink);
+  outline-offset: 2px;
+}

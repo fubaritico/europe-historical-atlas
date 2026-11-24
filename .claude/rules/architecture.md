@@ -77,7 +77,8 @@ packages/
 │       ├── camera/     # camera + CameraStateStore (independent of everything else)
 │       ├── controls/   # navigation; depends on camera/ only
 │       ├── picking/    # raycasting: answers WHERE, never WHAT
-│       ├── ui/         # plain DOM over the canvas
+│       ├── ui/         # the React interface over the canvas (ATLAS-519); splash, notices still plain DOM
+│       ├── state/      # the atlas's store, shared by the map and the interface (ATLAS-392)
 │       └── bench/      # the benches: /icons.html, /svg-icons.html, /names.html, /cities.html
 ├── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
 │   ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
@@ -204,7 +205,7 @@ packages at one version. Read from its `INTEGRATION.md`, not assumed:
 
 **What this repository installs** (checked in each `package.json`, 2026-11-01), four of the five, at the one version of
 `pnpm-workspace.yaml`'s catalogue: the **Cartographer** — `tokens`, `styles`, `behaviors`, `react`; the **CMS** — `tokens`,
-`styles`, `react`; the **atlas** — none yet; `core` and the lint plugin — none. `@fubaritico/variants` is installed and
+`styles`, `react`; the **atlas** — `tokens` (ATLAS-519, its other packages with their first component); `core` and the lint plugin — none. `@fubaritico/variants` is installed and
 imported nowhere.
 
 The Stencil variant recorded here on 2026-09-24 is not published; it stays the design system's
@@ -214,7 +215,8 @@ the packages are public — see `rules/known-issues/tooling.md`.
 **The atlas and the design system — what is decided and what is not** (the dev, 2026-11-01):
 
 - **Decided**: the atlas will have a flat interface over the canvas — panels, buttons, menus, in HTML —
-  built with the design system. **Nothing is wired yet**: the atlas installs none of its packages. Its
+  built with the design system. **Wired since ATLAS-519** (2026-11-24): the React root and the lot B theme over the
+  design system's tokens; its components arrive with ATLAS-520. Its
   interface elements _inside_ the map, in 3D, are drawn by three.js, not by the design system.
 - **Decided**: the canvas is never a React component, unlike the Cartographer's.
 - **Decided, 2026-11-08: React** (the dev: _"the interface will be in React — the elements laid over the

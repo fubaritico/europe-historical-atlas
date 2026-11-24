@@ -36,17 +36,16 @@ import { canvasSeaLabelDrawer } from './scene/decor/seas/seaLabel'
 import { createMapLayers } from './scene/layers/mapLayers'
 import { NAME_FACE_URL } from './scene/political/names/nameFace'
 import { createMapSources } from './sources/mapSources'
-import { createAtlasStore } from './state/atlasStore'
+import { createAtlasStore, interfaceSideOf } from './state/atlasStore'
 import { createDevState } from './tunables/devState'
-import { mountYearSwitch } from './ui/yearSwitch'
+import { mountInterface } from './ui/mountInterface'
+import './ui/styles/sheets'
 
 import type { QuietMap, QuietTime } from './app/quietTime'
 import type { DevTools } from './devPanel/devTools'
-import type { AtlasMessageKey } from './i18n'
 import type { MapBuffer } from './loading/mapBuffer'
 import type { MapSources } from './sources/mapSources'
 import type { AtlasStore } from './state/atlasStore'
-import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
 /**
@@ -118,40 +117,6 @@ function bufferOver(
 }
 
 /**
- * The temporary year switch over the atlas's store: it asks there, and repaints as the year shown or asked changes.
- * @param store - the atlas's store
- * @param years - the years having a map
- * @param label - the row's accessible name
- * @returns its teardown
- */
-function yearSwitchOver(store: AtlasStore, years: readonly number[], label: string): () => void {
-  const yearSwitch = mountYearSwitch({
-    host: document.body,
-    years,
-    current: () => store.getState().shownYear,
-    busy: () => store.getState().requested !== null,
-    pick: (year) => {
-      store.getState().requestYear(year)
-    },
-    label,
-  })
-  const stop = store.subscribe(
-    (state) => [state.shownYear, state.requested] as const,
-    () => {
-      yearSwitch.refresh()
-    },
-    {
-      equalityFn: ([shownA, requestA], [shownB, requestB]) =>
-        shownA === shownB && requestA === requestB,
-    }
-  )
-  return () => {
-    stop()
-    yearSwitch.dispose()
-  }
-}
-
-/**
  * The maps kept ready, following the year shown in the atlas's store.
  * @param store - the atlas's store
  * @param buffer - the maps kept ready
@@ -197,30 +162,28 @@ function bridgeOver(deps: {
 }
 
 /**
- * Start the map, then mount the temporary year switch (ATLAS-333) once the first year is on it, so the switch's buttons
- * never overtake the startup. The year goes through the atlas's store (ATLAS-392): the switch and the dev panel's slider
- * request it there, the bridge has the map draw it, the maps kept ready follow the year shown. The bridge listens from
+ * Start the map, then tell the atlas's store the years it has and the year it laid first — the interface's year switch
+ * shows its buttons from then on, so they never overtake the startup. The year goes through the store (ATLAS-392): the
+ * switch and the dev panel's slider request it there, the bridge has the map draw it, the maps kept ready follow the year shown. The bridge listens from
  * the first moment, so the dev panel's slider — mounted before — may request a year during the startup, as it always
  * could: once the relief is loaded the map's political gate lets the newest drawing win; before, the drawing does
  * nothing and the request settles on the year drawn at that moment, which the startup then replaces (review QUAL-002,
  * second pass). A failure of either is not caught here: it reaches the error net like any unexpected one.
- * @param deps - the store, the tunables, the pipeline, the panel's redraw, the translator and the teardown flag
+ * @param deps - the store, the tunables, the pipeline, the panel's redraw and the teardown flag
  * @param deps.store - the atlas's store, where the year is asked and shown
  * @param deps.dev - the live tunables, whose political year the map's drawing reads
  * @param deps.pipeline - what starts the map and redraws a year
  * @param deps.tools - the developer's tools, whose panel is redrawn so its year slider follows
- * @param deps.translate - the reader's language
  * @param deps.isDisposed - whether the map was torn down meanwhile
  * @param deps.sources - the map's sources, whose year drawn the store is told
  * @param deps.map - the map's canvas, where a press holds the maps' laying off (ATLAS-396)
- * @returns the switch's teardown, safe before it is mounted
+ * @returns its teardown, safe before the map has started
  */
-function startYearSwitch(deps: {
+function startMap(deps: {
   store: AtlasStore
   dev: ReturnType<typeof createDevState>
   pipeline: ReturnType<typeof createMapPipeline>
   tools: Pick<DevTools, 'refresh'>
-  translate: Translate<AtlasMessageKey>
   isDisposed: () => boolean
   sources: Pick<MapSources, 'askedYear'>
   map: QuietMap
@@ -238,7 +201,6 @@ function startYearSwitch(deps: {
       buffer = ready
       stops.push(bufferFollows(store, ready))
       store.getState().started(years, deps.sources.askedYear)
-      stops.push(yearSwitchOver(store, years, deps.translate('yearSwitchLabel')))
     })
   return {
     dispose(): void {
@@ -329,17 +291,12 @@ function bootstrap(): () => void {
   }
   window.addEventListener('resize', onResize)
 
-  // Temporary (ATLAS-333), to be removed with the atlas's own timeline (ATLAS-134).
-  const yearSwitch = startYearSwitch({
-    store,
-    dev,
-    pipeline,
-    tools,
-    translate,
-    isDisposed,
-    sources,
-    map: canvas,
+  // The interface over the map (ATLAS-519), in React beside the canvas; the map started under it.
+  const face = mountInterface(document.body, {
+    side: interfaceSideOf(store),
+    yearSwitchLabel: translate('yearSwitchLabel'),
   })
+  const map = startMap({ store, dev, pipeline, tools, isDisposed, sources, map: canvas })
   const stopLoop = startFrameLoop(view, layers, tools.stats)
 
   return (): void => {
@@ -351,7 +308,8 @@ function bootstrap(): () => void {
     pipeline.dispose()
     interaction.dispose()
     tools.dispose()
-    yearSwitch.dispose()
+    map.dispose()
+    face.dispose()
     ui.dispose()
     layers.dispose()
     view.dispose() // persists the viewpoint before it takes the camera apart

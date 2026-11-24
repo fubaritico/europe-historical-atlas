@@ -36,6 +36,10 @@ catalog:
   # Fonts — the atlas's build reads the names' face to place them ahead of the visit (ATLAS-333); never shipped
   fontkit: ^2.0.4
   '@types/fontkit': ^2.0.9
+  # The atlas's interface, lot B (ATLAS-519): self-hosted, all three under the OFL-1.1 (read from the registry, 24/11)
+  '@fontsource/cinzel': ^5.3.0
+  '@fontsource/eb-garamond': ^5.3.0
+  '@fontsource/im-fell-english': ^5.3.0
 
   # Design system — fubaritico-ds, from GitHub Packages; the Cartographer and the CMS on one version
   '@fubaritico/behaviors': ^0.10.0

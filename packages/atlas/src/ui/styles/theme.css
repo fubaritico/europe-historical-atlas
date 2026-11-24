@@ -1,0 +1,53 @@
+/*
+ * The atlas's theme — Claude Design's lot B (2026-11-08, `files/resources/claude-design/atlas-html/README.md`,
+ * « Lot B — contraste »): the deep brown as the ink, the brown buttons, the cream on the dark bands, the parchment
+ * surfaces. ATLAS-519.
+ *
+ * **The plates are indicative** (the dev, 2026-11-24): these are their values, the ground the pieces stand on; the
+ * graphic pieces themselves — frames, cartouches — are the dev's to retouch (ATLAS-520).
+ *
+ * Loaded after `@fubaritico/tokens/css` (`sheets.ts`): both declare on `:root`, unlayered, so the later wins. The
+ * palette first, then the design system's roles pointing at it — a role left unset keeps the design system's value.
+ */
+:root {
+  /* — the palette, lot B — */
+  --atlas-ink: #24130a; /* text, rules, strokes */
+  --atlas-ink-secondary: #5a3e2b;
+  --atlas-ink-disabled: #8a6b4f;
+  --atlas-cream: #f3e9d2; /* text and signs on a dark band or button */
+  --atlas-cream-rule: #cdb88c; /* the cream rule inside a button */
+  --atlas-button-top: #4a2e1c; /* a button's gradient, top to bottom */
+  --atlas-button-middle: #24130a;
+  --atlas-button-bottom: #140a04;
+  --atlas-button-pressed-top: #24130a;
+  --atlas-button-pressed-bottom: #0a0502;
+  --atlas-plate-light: #eadfc4; /* the plates' surface, light to dark */
+  --atlas-plate-dark: #d3c4a0;
+  --atlas-panel-light: #f3ead6; /* a light panel's surface, light to dark */
+  --atlas-panel-dark: #e6dabc;
+  --atlas-gold-light: #b08a3e; /* the contextual gold, light to dark */
+  --atlas-gold-dark: #4a3410;
+
+  /* — the three faces — */
+  --atlas-font-caps: 'Cinzel', 'Times New Roman', serif; /* capitals, spaced */
+  --atlas-font-title: 'IM Fell English', 'Times New Roman', serif; /* titles, italics */
+  --atlas-font-body: 'EB Garamond', 'Times New Roman', serif; /* the body */
+
+  /* — the design system's roles, on the palette — */
+  --font-inter: var(--atlas-font-body);
+  --font-roboto: var(--atlas-font-body);
+  --color-text: var(--atlas-ink);
+  --color-text-secondary: var(--atlas-ink-secondary);
+  --color-text-disabled: var(--atlas-ink-disabled);
+  --color-text-on-primary: var(--atlas-cream);
+  --color-text-on-inverse: var(--atlas-cream);
+  --color-surface: var(--atlas-panel-light);
+  --color-surface-raised: var(--atlas-panel-light);
+  --color-surface-sunken: var(--atlas-plate-dark);
+  --color-surface-inverse: var(--atlas-ink);
+  --color-primary: var(--atlas-ink);
+  --color-primary-hover: var(--atlas-button-top);
+  --color-border: var(--atlas-ink);
+  --color-border-strong: var(--atlas-ink);
+  --color-focus: var(--atlas-gold-light);
+}

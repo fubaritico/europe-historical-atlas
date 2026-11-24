@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createAtlasStore } from './atlasStore'
+import { createAtlasStore, interfaceSideOf } from './atlasStore'
 
 /**
  * The number of the request in flight.
@@ -107,6 +107,13 @@ describe('createAtlasStore', () => {
       store.getState().started(years, 1100)
       years.push(1200)
       expect(store.getState().years).toEqual([1100])
+    })
+
+    it('gives the interface the facts and its one action: a year requested through it reaches the store', () => {
+      const store = createAtlasStore()
+      const side = interfaceSideOf(store)
+      side.requestYear(1200)
+      expect(side.facts.getState().requested?.year).toBe(1200)
     })
 
     it('shares nothing between two stores', () => {

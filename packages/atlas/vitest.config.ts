@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
  * Vitest config for the atlas — jsdom, and here the DOM is genuinely the subject.
  *
  * `CameraStateStore` persists through `sessionStorage`, `devPanel` builds a real lil-gui against the document,
- * and `ui/` is plain DOM over the canvas. Those suites are testing browser behaviour, so they need a browser's
+ * and `ui/` is the interface over the canvas — React since ATLAS-519, the splash and the notices still plain DOM. Those suites are testing browser behaviour, so they need a browser's
  * objects. WebGL is not among them: the renderer is injected, so it is a mock in tests. The React plugin is declared here
  * as well as in `vite.config.ts`, which this file replaces rather than extends: without it a `.tsx` suite fails to parse
  * at its first tag (the Cartographer's lesson).

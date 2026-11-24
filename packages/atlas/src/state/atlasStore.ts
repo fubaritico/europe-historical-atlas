@@ -1,6 +1,8 @@
 import { subscribeWithSelector } from 'zustand/middleware'
 import { createStore } from 'zustand/vanilla'
 
+import type { StoreApi } from 'zustand/vanilla'
+
 /**
  * The atlas's store (ATLAS-392, the dev, 2026-11-24) — the state the map and the interface share, outside React: the
  * map's modules subscribe to it, the React interface reads it by `useStore(store, selector)`
@@ -96,3 +98,36 @@ export function createAtlasStore() {
 
 /** The store a {@link createAtlasStore} call returns, for whoever has to name it. */
 export type AtlasStore = ReturnType<typeof createAtlasStore>
+
+/**
+ * The facts of the store, **typed** read-only — what `useStore(store, selector)` needs (`getState`, `getInitialState`,
+ * `subscribe`), without the actions or `setState`, so a reader's code cannot write a fact that is not its own (review
+ * ARCH-004). The type is the guard: at runtime it is the store itself, actions included (review QUAL-001 of ATLAS-519)
+ * — a facade would have to wrap `getState` too, and one losing `getInitialState` breaks `useStore` silently.
+ */
+export type AtlasFacts = Pick<StoreApi<AtlasState>, 'getState' | 'getInitialState' | 'subscribe'>
+
+/** The interface's side of the store (ATLAS-519): it reads every fact, and writes only what the reader chose. */
+export interface InterfaceSide {
+  /** The facts, typed read-only. */
+  readonly facts: AtlasFacts
+  /**
+   * Request a year — the reader's choice.
+   * @param year - the year
+   */
+  requestYear: (year: number) => void
+}
+
+/**
+ * The interface's side of a store: the facts, typed read-only, and the one action the interface owns.
+ * @param store - the atlas's store
+ * @returns its interface side
+ */
+export function interfaceSideOf(store: AtlasStore): InterfaceSide {
+  return {
+    facts: store,
+    requestYear: (year): void => {
+      store.getState().requestYear(year)
+    },
+  }
+}

@@ -18,8 +18,9 @@
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
-    "@fubaritico/react": "catalog:",
-    "@fubaritico/styles": "catalog:",
+    "@fontsource/cinzel": "catalog:",
+    "@fontsource/eb-garamond": "catalog:",
+    "@fontsource/im-fell-english": "catalog:",
     "@fubaritico/tokens": "catalog:",
     "lil-gui": "catalog:",
     "react": "catalog:",

@@ -50,7 +50,7 @@ export default tseslint.config(
   {
     files: ['src/ui/**/*.{ts,tsx}'],
     rules: {
-      'eha/component-body-order': ['error', { stores: ['store'], hooks: {} }],
+      'eha/component-body-order': ['error', { stores: ['store'], hooks: { useStore: 'store' } }],
       'eha/no-inline-event-handlers': 'error',
     },
   },
