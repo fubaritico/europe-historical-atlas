@@ -319,6 +319,24 @@
 | **collapse** / repli                 | Replier un groupe sur sa seule barre d'onglets. **Pas un second mécanisme** : c'est la borne basse du redimensionnement, le même nombre.                                                                                                                                                                                                                                                                                                                                                           |
 | **`{History}`**                      | Le panneau qui liste la **ligne d'historique** : un rang par geste, icône et nom, le rang courant surligné, les **jalons** au-dessus. Cliquer un rang y va directement, au lieu de dix ‹ctrl+z›. Ni case à cocher, ni poubelle — [s14](cartographer/scenarii/s14-history-panel.md).                                                                                                                                                                                                                |
 
+## L'interface de l'atlas
+
+> Les mots des maquettes du lot B de Claude Design (08/11) et du plan d'intégration
+> (`atlas/interface-integration.md`, 24/11, brouillon).
+
+| terme | ce que c'est |
+| --- | --- |
+| **rangée du haut** | La ligne en haut de l'écran de l'atlas : la **barre du site** à gauche, le sélecteur du siècle au centre tant qu'il a la place. |
+| **barre du site** | La marque (le Λ), les liens des pages du site et les réseaux. Trois états selon la largeur : **dépliée**, **courte** (sans les réseaux), **pliée** (le Λ seul, qui ouvre le menu). |
+| **barre des boutons** | La **capsule** en bas de l'écran qui porte les boutons ronds de l'atlas (pavé, instantané, langue, aide ; la frise au tactile). Au tactile, centrée. |
+| **capsule** | Un cadre aux bouts arrondis à double filet, avec un ornement à chaque bout : la barre des boutons, le sélecteur du siècle, la barre de chargement. |
+| **bandeau sombre** | L'en-tête d'une fenêtre ou d'un panneau dans l'encre `#24130A`, ses textes et ses signes en crème ; 72 px au moins sur les panneaux. Le langage du lot B. |
+| **panneau de détail** | Le panneau qui montre ce qu'on a cliqué — un événement, plus tard un pays ou une ville : à droite au bureau et sur l'iPad en paysage, un **tiroir** ailleurs. |
+| **tiroir** / sheet | Un panneau qui monte du bas de l'écran, avec une poignée, au téléphone et sur l'iPad debout : le détail, la frise, le siècle. |
+| **pavé** / navigation pad | Les neuf touches à l'écran qui déplacent et zooment la carte, ouvertes par le bouton N ; absent au tactile, où le doigt déplace la carte (s13). |
+| **magasin de l'atlas** / atlas store | L'état partagé entre la carte et l'interface React, hors de React : des faits établis (l'année montrée, ce qui est sélectionné, le chargement), chacun écrit par un seul propriétaire. Jamais la caméra ni le survol. Proposé le 24/11 (ATLAS-392). |
+| **commandes de la carte** / map commands | Ce que l'interface demande à la carte de **faire** — déplacer, zoomer d'un cran, voler vers un lieu, prendre l'instantané : un appel de fonction, jamais une valeur posée dans le magasin. Proposé le 24/11 (ATLAS-392). |
+
 ## Les outils et la méthode
 
 | terme                                                | ce que c'est                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
