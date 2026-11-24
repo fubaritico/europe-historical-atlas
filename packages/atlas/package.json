@@ -19,7 +19,8 @@
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
     "lil-gui": "catalog:",
-    "three": "catalog:"
+    "three": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@types/fontkit": "catalog:",

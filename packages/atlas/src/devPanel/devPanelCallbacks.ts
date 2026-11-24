@@ -27,6 +27,12 @@ export interface PanelCallbackDeps {
   pipeline: MapPipeline
   /** The camera and its debug overlays. */
   view: Viewport
+  /**
+   * Request a year in the atlas's store (ATLAS-392) — the only door to a political redraw, so every drawing is a numbered
+   * request the store can settle (review ARCH-001, second pass).
+   * @param year - the year
+   */
+  requestYear: (year: number) => void
 }
 
 /**
@@ -102,8 +108,11 @@ function rebuildCallbacks(
     rebuildRivers: (): void => {
       layers.rebuildRivers()
     },
+    // Through the store, never straight to the pipeline: a redraw the store did not ask would overtake its request and
+    // leave it settled on the year before (review ARCH-001, second pass). A control fires on release, so one request
+    // a gesture; the year is the panel's, whichever political tunable moved.
     rebuildPolitical: (): void => {
-      void pipeline.rebuildPolitical()
+      deps.requestYear(deps.dev.political.year)
     },
     rebuildBorders: (): void => {
       layers.rebuildBorders()

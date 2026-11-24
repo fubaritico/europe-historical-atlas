@@ -12,6 +12,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
+import { createAtlasStore } from './app/atlasStore'
 import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
@@ -19,6 +20,7 @@ import { pageAfterPaint } from './app/pageAfterPaint'
 import { previewIcons } from './app/preview'
 import { createQuietTime } from './app/quietTime'
 import { createViewport } from './app/viewport'
+import { bridgeYear } from './app/yearBridge'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
 import { ATLAS_MESSAGES } from './i18n'
@@ -38,12 +40,12 @@ import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
 import { mountYearSwitch } from './ui/yearSwitch'
 
+import type { AtlasStore } from './app/atlasStore'
 import type { QuietMap, QuietTime } from './app/quietTime'
 import type { DevTools } from './devPanel/devTools'
 import type { AtlasMessageKey } from './i18n'
 import type { MapBuffer } from './loading/mapBuffer'
 import type { MapSources } from './sources/mapSources'
-import type { YearSwitch } from './ui/yearSwitch'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
@@ -116,19 +118,105 @@ function bufferOver(
 }
 
 /**
- * Start the map, then mount the temporary year switch (ATLAS-333) once the first year is on it, so a pick never
- * overtakes the startup. A failure of either is not caught here: it reaches the error net like any unexpected one.
- * @param deps - the tunables, the pipeline, the panel's redraw, the translator and the teardown flag
- * @param deps.dev - the live tunables, whose political year a pick sets
+ * The temporary year switch over the atlas's store: it asks there, and repaints as the year shown or asked changes.
+ * @param store - the atlas's store
+ * @param years - the years having a map
+ * @param label - the row's accessible name
+ * @returns its teardown
+ */
+function yearSwitchOver(store: AtlasStore, years: readonly number[], label: string): () => void {
+  const yearSwitch = mountYearSwitch({
+    host: document.body,
+    years,
+    current: () => store.getState().shownYear,
+    busy: () => store.getState().requested !== null,
+    pick: (year) => {
+      store.getState().requestYear(year)
+    },
+    label,
+  })
+  const stop = store.subscribe(
+    (state) => [state.shownYear, state.requested] as const,
+    () => {
+      yearSwitch.refresh()
+    },
+    {
+      equalityFn: ([shownA, requestA], [shownB, requestB]) =>
+        shownA === shownB && requestA === requestB,
+    }
+  )
+  return () => {
+    stop()
+    yearSwitch.dispose()
+  }
+}
+
+/**
+ * The maps kept ready, following the year shown in the atlas's store.
+ * @param store - the atlas's store
+ * @param buffer - the maps kept ready
+ * @returns the unsubscription
+ */
+function bufferFollows(store: AtlasStore, buffer: MapBuffer): () => void {
+  return store.subscribe(
+    (state) => state.shownYear,
+    (shown) => {
+      if (shown !== null) buffer.shown(shown)
+    },
+    { fireImmediately: true }
+  )
+}
+
+/**
+ * The map's side of the year: a year asked in the store set in the tunables and the dev panel, then drawn.
+ * @param deps - the store, the tunables, the panel, the pipeline and the sources
+ * @param deps.store - the atlas's store
+ * @param deps.dev - the live tunables, whose political year the drawing reads
+ * @param deps.tools - the developer's tools, whose year slider follows
+ * @param deps.pipeline - what draws the year
+ * @param deps.sources - the map's sources, whose year drawn settles the request
+ * @returns the unsubscription
+ */
+function bridgeOver(deps: {
+  store: AtlasStore
+  dev: ReturnType<typeof createDevState>
+  tools: Pick<DevTools, 'refresh'>
+  pipeline: Pick<ReturnType<typeof createMapPipeline>, 'rebuildPolitical'>
+  sources: Pick<MapSources, 'askedYear'>
+}): () => void {
+  return bridgeYear({
+    store: deps.store,
+    setYear: (year) => {
+      deps.dev.political.year = year
+      deps.tools.refresh()
+    },
+    draw: () => deps.pipeline.rebuildPolitical(),
+    // The year drawn, not the one asked: a change overtaken or failing leaves the map where it is (review ARCH-007).
+    drawnYear: () => deps.sources.askedYear,
+  })
+}
+
+/**
+ * Start the map, then mount the temporary year switch (ATLAS-333) once the first year is on it, so the switch's buttons
+ * never overtake the startup. The year goes through the atlas's store (ATLAS-392): the switch and the dev panel's slider
+ * request it there, the bridge has the map draw it, the maps kept ready follow the year shown. The bridge listens from
+ * the first moment, so the dev panel's slider — mounted before — may request a year during the startup, as it always
+ * could: once the relief is loaded the map's political gate lets the newest drawing win; before, the drawing does
+ * nothing and the request settles on the year drawn at that moment, which the startup then replaces (review QUAL-002,
+ * second pass). A failure of either is not caught here: it reaches the error net like any unexpected one.
+ * @param deps - the store, the tunables, the pipeline, the panel's redraw, the translator and the teardown flag
+ * @param deps.store - the atlas's store, where the year is asked and shown
+ * @param deps.dev - the live tunables, whose political year the map's drawing reads
  * @param deps.pipeline - what starts the map and redraws a year
  * @param deps.tools - the developer's tools, whose panel is redrawn so its year slider follows
  * @param deps.translate - the reader's language
  * @param deps.isDisposed - whether the map was torn down meanwhile
- * @param deps.sources - the map's sources, whose year drawn the maps kept ready follow
+ * @param deps.sources - the map's sources, whose year drawn the store is told
  * @param deps.map - the map's canvas, where a press holds the maps' laying off (ATLAS-396)
  * @returns the switch's teardown, safe before it is mounted
  */
 function startYearSwitch(deps: {
+  store: AtlasStore
   dev: ReturnType<typeof createDevState>
   pipeline: ReturnType<typeof createMapPipeline>
   tools: Pick<DevTools, 'refresh'>
@@ -137,7 +225,8 @@ function startYearSwitch(deps: {
   sources: Pick<MapSources, 'askedYear'>
   map: QuietMap
 }): { dispose: () => void } {
-  let mounted: YearSwitch | null = null
+  const { store } = deps
+  const stops: (() => void)[] = [bridgeOver(deps)]
   let buffer: MapBuffer | null = null
   const quiet = createQuietTime(window, deps.map, () => performance.now())
   void deps.pipeline
@@ -147,31 +236,15 @@ function startYearSwitch(deps: {
       if (deps.isDisposed()) return
       const ready = bufferOver(deps.pipeline, quiet, years)
       buffer = ready
-      // The year drawn, not the one asked: a change overtaken or failing leaves the map — and its window — where it is
-      // (review ARCH-007).
-      const follow = (): void => {
-        const drawn = deps.sources.askedYear
-        if (drawn !== null) ready.shown(drawn)
-      }
-      follow()
-      mounted = mountYearSwitch({
-        host: document.body,
-        years,
-        current: () => deps.dev.political.year,
-        pick: async (year) => {
-          deps.dev.political.year = year
-          deps.tools.refresh()
-          await deps.pipeline.rebuildPolitical()
-          follow()
-        },
-        label: deps.translate('yearSwitchLabel'),
-      })
+      stops.push(bufferFollows(store, ready))
+      store.getState().started(years, deps.sources.askedYear)
+      stops.push(yearSwitchOver(store, years, deps.translate('yearSwitchLabel')))
     })
   return {
     dispose(): void {
+      for (const stop of stops) stop()
       buffer?.dispose()
       quiet.dispose()
-      mounted?.dispose()
     },
   }
 }
@@ -194,6 +267,30 @@ function pagePipeline(
 }
 
 /**
+ * The settings' panel and the frame counter, under `pnpm dev` only (ATLAS-317). Written as the condition itself, so the
+ * build turns it to `false` and leaves the panel, lil-gui and the counter out of the deployed bundle.
+ * @param deps - what the panel drives, and the atlas's store its year slider asks in
+ * @returns the tools, or none on the built site
+ */
+function devToolsFor(
+  deps: Omit<Parameters<typeof panelDepsFor>[0], 'requestYear'> & { store: AtlasStore }
+): DevTools {
+  const { store, ...drives } = deps
+  return import.meta.env.DEV
+    ? mountDevTools(
+        panelDepsFor({
+          ...drives,
+          requestYear: (year) => {
+            store.getState().requestYear(year)
+          },
+        }),
+        document.body,
+        window
+      )
+    : NO_DEV_TOOLS
+}
+
+/**
  * Assemble the map and start it.
  * @returns the teardown, which frees every GPU resource and stops the worker
  */
@@ -207,6 +304,8 @@ function bootstrap(): () => void {
   const isDisposed = (): boolean => disposed
 
   const dev = createDevState()
+  // The state the map and the interface share (ATLAS-392), made here and handed to both.
+  const store = createAtlasStore()
   const sources = createMapSources()
   const view = createViewport(canvas, dev)
   // The browser's language when it is French, English otherwise (the dev, 2026-10-21); the page says
@@ -222,11 +321,7 @@ function bootstrap(): () => void {
     picker: createSurfacePicker({ camera: view.camera, target: layers.pickTarget }),
     controls: view.controls,
   })
-  // The settings' panel and the frame counter, under `pnpm dev` only (ATLAS-317). Written as the condition itself, so
-  // the build turns it to `false` and leaves the panel, lil-gui and the counter out of the deployed bundle.
-  const tools = import.meta.env.DEV
-    ? mountDevTools(panelDepsFor({ dev, layers, pipeline, view }), document.body, window)
-    : NO_DEV_TOOLS
+  const tools = devToolsFor({ dev, layers, pipeline, view, store })
 
   const onResize = (): void => {
     view.resize()
@@ -236,6 +331,7 @@ function bootstrap(): () => void {
 
   // Temporary (ATLAS-333), to be removed with the atlas's own timeline (ATLAS-134).
   const yearSwitch = startYearSwitch({
+    store,
     dev,
     pipeline,
     tools,

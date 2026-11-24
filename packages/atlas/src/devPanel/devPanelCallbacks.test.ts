@@ -9,9 +9,13 @@ import type { MapLayers } from '../scene/layers/mapLayers'
 
 /**
  * Callbacks over stand-in layers that record the order of their rebuilds.
- * @returns the callbacks and the record
+ * @returns the callbacks, the record, and the live tunables they read
  */
-function wired(): { callbacks: ReturnType<typeof createPanelCallbacks>; calls: string[] } {
+function wired(): {
+  callbacks: ReturnType<typeof createPanelCallbacks>
+  calls: string[]
+  dev: PanelCallbackDeps['dev']
+} {
   const calls: string[] = []
   const record = (name: string) => vi.fn(() => calls.push(name))
   const layers = {
@@ -27,8 +31,11 @@ function wired(): { callbacks: ReturnType<typeof createPanelCallbacks>; calls: s
     layers,
     pipeline: {} as PanelCallbackDeps['pipeline'],
     view: {} as PanelCallbackDeps['view'],
+    requestYear: (year: number): void => {
+      calls.push(`request ${String(year)}`)
+    },
   }
-  return { callbacks: createPanelCallbacks(deps), calls }
+  return { callbacks: createPanelCallbacks(deps), calls, dev: deps.dev }
 }
 
 describe('createPanelCallbacks', () => {
@@ -45,6 +52,13 @@ describe('createPanelCallbacks', () => {
       const { callbacks, calls } = wired()
       callbacks.rebuildCoastline()
       expect(calls).toEqual(['coastline'])
+    })
+
+    it('redraws the political layer by requesting the panel’s year in the store, read when asked (ATLAS-392)', () => {
+      const { callbacks, calls, dev } = wired()
+      dev.political.year = 1200
+      callbacks.rebuildPolitical()
+      expect(calls).toEqual(['request 1200'])
     })
   })
 

@@ -4,9 +4,11 @@
  * the settings' panel while the speed of a change of year is measured; **to be removed when the atlas's own
  * timeline lands (ATLAS-134)**.
  *
- * Like every module in `ui/`, it knows nothing of how a year is loaded: it is handed the years, the year shown, and
- * what a pick does. While a pick runs, every button refuses its click (`aria-disabled`), so two changes of year never
- * overlap — refused rather than disabled, so the button the keyboard pressed keeps the focus (review A11Y-001).
+ * Like every module in `ui/`, it knows nothing of how a year is loaded: it is handed the years, the year shown, whether a
+ * year is being drawn, and how to ask for one — read from the atlas's store since ATLAS-392, so it agrees with the dev
+ * panel's slider, which asks through the same store. While a year is drawn, every button refuses its click
+ * (`aria-disabled`), so two changes of year never overlap — refused rather than disabled, so the button the keyboard
+ * pressed keeps the focus (review A11Y-001).
  */
 
 /** What the switch needs. */
@@ -19,13 +21,15 @@ export interface YearSwitchDeps {
    * ARCH-001). The manifest holds 1100 and 1200 today.
    */
   years: readonly number[]
-  /** The year the map shows now, read at each refresh. */
-  current: () => number
+  /** The year the map shows now, read at each refresh; `null` when none is drawn, no button pressed. */
+  current: () => number | null
+  /** Whether a year is being drawn, read at each refresh and at each click. */
+  busy: () => boolean
   /**
-   * Show a year. Its promise settles when the map is drawn; a rejection is not caught here, so it reaches the
-   * atlas's error net like any unexpected error.
+   * Ask for a year. The switch repaints when told ({@link YearSwitch.refresh}), as the year asked and drawn change.
+   * @param year - the year
    */
-  pick: (year: number) => Promise<void>
+  pick: (year: number) => void
   /** The accessible name of the row, in the reader's language. */
   label: string
 }
@@ -34,6 +38,8 @@ export interface YearSwitchDeps {
 export interface YearSwitch {
   /** The row element, for tests. */
   readonly element: HTMLElement
+  /** Repaint every button from the year shown and whether one is being drawn. */
+  refresh(): void
   /** Unmount it. */
   dispose(): void
 }
@@ -47,7 +53,7 @@ const PAPER = 'rgba(243, 231, 205, 0.92)'
  * Style one button for its state.
  * @param button - the button
  * @param shown - whether its year is the one on the map
- * @param busy - whether a pick is running, every click refused
+ * @param busy - whether a year is being drawn, every click refused
  */
 function paint(button: HTMLButtonElement, shown: boolean, busy: boolean): void {
   button.style.background = shown ? INK : PAPER
@@ -98,16 +104,15 @@ function buildButton(year: number): HTMLButtonElement {
 
 /**
  * Mount the year switch.
- * @param deps - the years, the year shown, what a pick does, and the row's name
+ * @param deps - the years, the year shown, whether one is drawn, how to ask, and the row's name
  * @returns the switch
  */
 export function mountYearSwitch(deps: YearSwitchDeps): YearSwitch {
   const element = buildRow(deps.label)
   const buttons = deps.years.map(buildButton)
 
-  let busy = false
-  const refresh = (running: boolean): void => {
-    busy = running
+  const refresh = (): void => {
+    const running = deps.busy()
     element.setAttribute('aria-busy', String(running))
     const shown = deps.current()
     for (const button of buttons) paint(button, Number(button.dataset.year) === shown, running)
@@ -117,25 +122,23 @@ export function mountYearSwitch(deps: YearSwitchDeps): YearSwitch {
     const target = event.target
     // A click in the gap between two buttons is no pick.
     if (!(target instanceof HTMLButtonElement)) return
-    if (busy) {
+    if (deps.busy()) {
       console.warn(
         `[atlas] a year is loading: the click on ${target.dataset.year ?? ''} is refused`
       )
       return
     }
-    refresh(true)
-    void deps.pick(Number(target.dataset.year)).finally(() => {
-      refresh(false)
-    })
+    deps.pick(Number(target.dataset.year))
   }
 
   element.append(...buttons)
   element.addEventListener('click', onClick)
-  refresh(false)
+  refresh()
   deps.host.appendChild(element)
 
   return {
     element,
+    refresh,
     dispose(): void {
       element.removeEventListener('click', onClick)
       element.remove()
