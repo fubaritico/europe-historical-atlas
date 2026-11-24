@@ -33,7 +33,9 @@ everything you read, download, try and find lives there, never on the Mac's disk
   copy of the base taken before (`sqlite3 ".backup"`, `verify_entry`). A defect found is repaired before you finish.
 - **Scripts before models**: every measure is a script (`count_sheets`, `cities:alerts`, `region_gate`); a gesture you
   repeat becomes a script — TypeScript unless a Python library does better.
-- **The journal**: every step and every attempt through `research_log.py`, so the dev can follow the loops.
+- **The journal**: every step and every attempt through `research_log.py`, so the dev can follow the loops. **Every
+  line names its writer**: run every script with `ATLAS_WHO="<story key> · lead"` yourself, and give each agent you
+  spawn its own — `ATLAS_WHO="<story key> · <lot or book>"` — to put before every script it runs.
 - **At most 9 research agents at once** (two teams share the session's limit of 20).
 - **Nothing reaches the dev.** A case you cannot settle after three rounds is closed by the stopping rule, not asked.
 - **Deletions**: yours to decide, one record at a time through the MCP, only for a record the stopping rule removes;

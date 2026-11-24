@@ -18,7 +18,7 @@ MAX_ROUNDS = 3
 
 def say(message):
     """Print one dated line and append it to the research journal (copied from research_log.py)."""
-    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    line = '%s  [%s]  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), __import__('os').environ.get('ATLAS_WHO', 'historien'), message)
     print(line, flush=True)
     with open('/Volumes/Acer/atlas-historien/journal.log', 'a', encoding='utf-8') as out:
         out.write(line + '\n')

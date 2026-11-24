@@ -28,7 +28,7 @@ failures = []
 
 def say(message):
     """Print one dated line and append it to the research journal when the disk is there (copied from research_log.py)."""
-    line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
+    line = '%s  [%s]  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), __import__('os').environ.get('ATLAS_WHO', 'historien'), message)
     print(line, flush=True)
     if JOURNAL.parent.is_dir():
         with JOURNAL.open('a', encoding='utf-8') as out:
