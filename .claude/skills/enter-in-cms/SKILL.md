@@ -64,14 +64,16 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
 - **Through the MCP only.** Never the seed (`pnpm seed:cms` once ran on his base), never SQL that writes, never the
   REST API by `curl`, never a script. If the `cms` tools are absent or refused, **stop and tell the dev** — no other way in.
 - **I undo my own errors — never the dev** (the dev, 2026-11-18: _"I no longer delete your mistakes"_; CMS-454,
-  `77cb1589`). A wrong value is corrected by `update`. A record that should not exist **and that I entered** is deleted
-  by me through the MCP — on `place-periods`, `places`, `sources`, `titles`, `vassal-links` only, once the « delete »
-  boxes are ticked on my key. Never a record of the dev's, nor one I did not create; never `people`, `territories`,
-  `confessions`, `importance-reasons`. Three refusals to expect: one record at a time, by `id` (a `where` is refused);
-  a place a sheet or an event cites, a source a line cites, is refused and the message names what cites it — so undo
-  **in order: the sheet, then its place, then its source**; nothing until the box is ticked. **There is no bin**: a
-  deletion comes back only from a copy of the base, so read the record (find by id) before deleting it, and check after
-  that it is gone. Each deletion is said to the code instance with the others of the batch.
+  `77cb1589`). A wrong value is corrected by `update`. A record that should not exist **and that I entered** is **put
+  in the bin**, never deleted (CMS-508, the dev's go of 2026-11-24 — 39 sheets deleted that morning had to be put back
+  by hand): `update` it by its `id` with `deletedAt` set to the current date and time (ISO 8601). It leaves every
+  search and the export; the dev restores it, or empties the bin, in the admin — my key deletes nothing. On
+  `place-periods`, `places`, `period-names`, `sources`, `titles`, `vassal-links` only; never a record of the dev's, nor
+  one I did not create; never `people`, `territories`, `confessions`, `importance-reasons`. Two refusals to expect: one
+  record at a time, by `id` (a `where` writing `deletedAt` is refused); a place a sheet or an event cites, a source a
+  line cites, a title a link or a sheet cites, is refused and the message names what cites it — so undo **in order:
+  the sheet, then its place, then its source**. Read the record (find by id) before, check after that a plain find no
+  longer returns it. Each record put in the bin is said to the code instance with the others of the batch.
 - **A quotation is pasted, never retyped** (2026-11-23: eight quotations altered in one evening — maître for maitre,
   uğrattı for uğratıp — by entry agents and by me, each retyping a text it had read). The content of every call is
   printed by a script from the checked report, JSON-escaped, and pasted as it stands; after a wave, a script compares

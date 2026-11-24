@@ -161,6 +161,11 @@ async function entered(name: string): Promise<{ place: number; own: number; shee
   return { place: place.id, own: own.id, sheet: sheet.id }
 }
 
+const now = (): string => new Date().toISOString()
+
+const restore = (collection: 'places' | 'place-periods', id: number) =>
+  payload.update({ collection, id, data: { deletedAt: null }, trash: true })
+
 describe('titles and links', () => {
   describe('happy path', () => {
     it('writes a title’s name from its holder, its territory and its years', async () => {
@@ -580,6 +585,124 @@ describe('titles and links', () => {
       await expect(payload.delete({ collection: 'sources', id: first.own })).rejects.toThrow(
         '« Gräfrath — 1100 »'
       )
+    }, 60_000)
+  })
+
+  // CMS-508: an error is undone into the bin, an update writing `deletedAt`, and comes back from it whole.
+  describe('the bin: a sheet, its place, its source', () => {
+    it('puts a sheet in the bin, out of every search, and gives it back with its source lines', async () => {
+      const { sheet } = await entered('Haan')
+      await payload.update({ collection: 'place-periods', id: sheet, data: { deletedAt: now() } })
+      const plain = await payload.find({
+        collection: 'place-periods',
+        where: { id: { equals: sheet } },
+      })
+      const binned = await payload.find({
+        collection: 'place-periods',
+        where: { id: { equals: sheet } },
+        trash: true,
+      })
+      expect([plain.totalDocs, binned.totalDocs]).toEqual([0, 1])
+
+      const back = await payload.update({
+        collection: 'place-periods',
+        id: sheet,
+        data: { deletedAt: null },
+        trash: true,
+      })
+      expect([back.deletedAt, back.testimonies?.length]).toEqual([null, 1])
+    }, 60_000)
+
+    it('refuses to put in the bin a place a city sheet stands on, naming the sheet', async () => {
+      const { place } = await entered('Hilden')
+      await expect(
+        payload.update({ collection: 'places', id: place, data: { deletedAt: now() } })
+      ).rejects.toThrow('Ce lieu est cité par 1 fiche(s) de ville : « Hilden — 1100 »')
+      expect((await payload.findByID({ collection: 'places', id: place })).deletedAt).toBeFalsy()
+    }, 60_000)
+
+    it('undoes an entry into the bin from the sheet down: the sheet, then its place, then its source', async () => {
+      const { place, own, sheet } = await entered('Erkrath')
+      await payload.update({ collection: 'place-periods', id: sheet, data: { deletedAt: now() } })
+      await payload.update({ collection: 'places', id: place, data: { deletedAt: now() } })
+      await payload.update({ collection: 'sources', id: own, data: { deletedAt: now() } })
+      const left = await Promise.all([
+        payload.count({ collection: 'place-periods', where: { id: { equals: sheet } } }),
+        payload.count({ collection: 'places', where: { id: { equals: place } } }),
+        payload.count({ collection: 'sources', where: { id: { equals: own } } }),
+      ])
+      expect(left.map(({ totalDocs }) => totalDocs)).toEqual([0, 0, 0])
+    }, 60_000)
+
+    // A sheet in the bin still names its place: erased from under it, it would come back from the bin nowhere.
+    it('refuses to erase for good a place a sheet in the bin still stands on', async () => {
+      const { place, sheet } = await entered('Mettmann')
+      await payload.update({ collection: 'place-periods', id: sheet, data: { deletedAt: now() } })
+      await payload.update({ collection: 'places', id: place, data: { deletedAt: now() } })
+      await expect(
+        payload.delete({ collection: 'places', id: place, trash: true })
+      ).rejects.toThrow('Ce lieu est cité par 1 fiche(s) de ville : « Mettmann — 1100 »')
+    }, 60_000)
+
+    // Review SEC-001 · ARCH-001 · QUAL-001: out of the bin in the reverse order — the place, then the sheet.
+    it('refuses to restore a sheet while its place is in the bin, naming the place, and restores it after the place', async () => {
+      const { place, sheet } = await entered('Ratingen')
+      await payload.update({ collection: 'place-periods', id: sheet, data: { deletedAt: now() } })
+      await payload.update({ collection: 'places', id: place, data: { deletedAt: now() } })
+      await expect(restore('place-periods', sheet)).rejects.toThrow(
+        'Cette fiche cite ce qui est encore dans la corbeille : « Ratingen » (places)'
+      )
+      await restore('places', place)
+      expect((await restore('place-periods', sheet)).deletedAt).toBeNull()
+    }, 60_000)
+
+    it('refuses to restore a sheet whose source line cites a source in the bin, read in its list of lines', async () => {
+      const { own, sheet } = await entered('Velbert')
+      await payload.update({ collection: 'place-periods', id: sheet, data: { deletedAt: now() } })
+      await payload.update({ collection: 'sources', id: own, data: { deletedAt: now() } })
+      await expect(
+        payload.update({
+          collection: 'place-periods',
+          id: sheet,
+          data: { deletedAt: null },
+          trash: true,
+        })
+      ).rejects.toThrow('« Page de Velbert » (sources)')
+    }, 60_000)
+
+    // Review QUAL-002: the other citers — a source under a title's line, a title under a link.
+    it('refuses to put in the bin a source a title’s line cites, and a title a link names', async () => {
+      await expect(
+        payload.update({ collection: 'sources', id: source, data: { deletedAt: now() } })
+      ).rejects.toThrow('Cette source est citée par')
+      await expect(
+        payload.update({ collection: 'titles', id: duke, data: { deletedAt: now() } })
+      ).rejects.toThrow('Ce titre est cité par')
+    }, 60_000)
+
+    // Review ARCH-002: the Wikidata id is unique in the base, the bin included.
+    it('refuses to enter again a place whose twin, its Wikidata id, is in the bin, and names it', async () => {
+      const first = await payload.create({
+        collection: 'places',
+        data: {
+          name: 'Neuss',
+          otherNames: [{ language: 'en', form: 'Neuss' }],
+          location: [6.69, 51.2],
+          wikidata: 'Q3920',
+        },
+      })
+      await payload.update({ collection: 'places', id: first.id, data: { deletedAt: now() } })
+      await expect(
+        payload.create({
+          collection: 'places',
+          data: {
+            name: 'Neuss',
+            otherNames: [{ language: 'en', form: 'Neuss' }],
+            location: [6.69, 51.2],
+            wikidata: 'Q3920',
+          },
+        })
+      ).rejects.toThrow('Le lieu Q3920 est dans la corbeille : « Neuss »')
     }, 60_000)
   })
 

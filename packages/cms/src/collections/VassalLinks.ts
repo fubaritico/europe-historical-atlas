@@ -1,9 +1,10 @@
 import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 
 import { refuseDuplicateClaim } from './refuseDuplicateClaim'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { writeLinkLabel } from './writeClaimTitles'
 
 import type { CollectionConfig, Validate } from 'payload'
@@ -52,12 +53,15 @@ export const validateSuzerain: Validate = (value, { siblingData }) => {
 export const VassalLinks: CollectionConfig = {
   slug: 'vassal-links',
   labels: { singular: 'Maillon', plural: 'Maillons' },
+  // CMS-508: a link removed goes to the bin, and comes back from it with « Restaurer »
+  trash: true,
   admin: { useAsTitle: 'label', defaultColumns: ['label'] },
   hooks: {
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeOperation: [refuseBulkRemovalOverMcp],
     // The label's hook first: it empties the suzerain of a « no one » link, so the twin is looked for as stored
     beforeChange: [
+      refuseRestoringOverBin,
       writeLinkLabel,
       refuseDuplicateClaim({
         collection: 'vassal-links',

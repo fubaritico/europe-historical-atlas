@@ -1,7 +1,8 @@
 import { trimmedText } from '../fields/trimmedText'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 
-import { refuseDeletingCited } from './claimDependants'
+import { refuseDeletingCited, refuseTrashingCited } from './claimDependants'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 
 import type { CollectionConfig } from 'payload'
 
@@ -28,12 +29,14 @@ export const SOURCE_CITERS = [
 export const Sources: CollectionConfig = {
   slug: 'sources',
   labels: { singular: 'Source', plural: 'Sources' },
+  // CMS-508: a source removed goes to the bin, and comes back from it with « Restaurer »
+  trash: true,
   admin: { useAsTitle: 'title', defaultColumns: ['title', 'author', 'kind'] },
   hooks: {
     // A source something still cites is never deleted from under it (CMS-454): a line would keep its quotation and
     // lose where it comes from. What cites it is changed or deleted first.
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeOperation: [refuseBulkRemovalOverMcp],
     beforeDelete: SOURCE_CITERS.map(({ collection, field, what }) =>
       refuseDeletingCited({
         collection,
@@ -43,6 +46,19 @@ export const Sources: CollectionConfig = {
         what,
       })
     ),
+    // Nor put in the bin from under it (CMS-508)
+    beforeChange: [
+      refuseRestoringOverBin,
+      ...SOURCE_CITERS.map(({ collection, field, what }) =>
+        refuseTrashingCited({
+          collection,
+          fields: [field],
+          subject: 'Cette source',
+          cited: 'citée',
+          what,
+        })
+      ),
+    ],
   },
   fields: [
     {

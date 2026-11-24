@@ -13,6 +13,7 @@ import * as migration_20261123_164622_place_other_names from './20261123_164622_
 import * as migration_20261123_173436_plain_french_names from './20261123_173436_plain_french_names';
 import * as migration_20261123_175001_plain_french_register_names from './20261123_175001_plain_french_register_names';
 import * as migration_20261124_111246_by_district from './20261124_111246_by_district';
+import * as migration_20261124_155239_bin from './20261124_155239_bin';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20261124_111246_by_district.up,
     down: migration_20261124_111246_by_district.down,
-    name: '20261124_111246_by_district'
+    name: '20261124_111246_by_district',
+  },
+  {
+    up: migration_20261124_155239_bin.up,
+    down: migration_20261124_155239_bin.down,
+    name: '20261124_155239_bin'
   },
 ];

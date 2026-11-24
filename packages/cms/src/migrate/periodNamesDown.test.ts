@@ -6,6 +6,7 @@ import { sql } from '@payloadcms/db-sqlite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { down } from '../migrations/20261121_220424_period_names'
+import { down as downBin } from '../migrations/20261124_155239_bin'
 
 import type { MigrateDownArgs } from '@payloadcms/db-sqlite'
 import type { Payload } from 'payload'
@@ -91,6 +92,9 @@ describe('period_names, down', () => {
       // Inside a transaction, as Payload runs a migration: there `PRAGMA foreign_keys=OFF` does nothing, which is why
       // the generator's rebuild cascades in the dev's base and would not here outside one
       await payload.db.drizzle.transaction(async (tx) => {
+        // The bin's migration (CMS-508), later, already drops the key's « delete » box of the period names this down
+        // drops too: undone first, the base is as this down expects it
+        await downBin({ db: tx } as unknown as MigrateDownArgs)
         await down({ db: tx } as unknown as MigrateDownArgs)
       })
       expect([

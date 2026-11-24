@@ -8,7 +8,7 @@ import { Titles } from '../collections/Titles'
 import { VassalLinks } from '../collections/VassalLinks'
 
 import { MCP_COLLECTIONS, mcpAccess } from './mcpAccess'
-import { refuseBulkDeleteOverMcp } from './refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from './refuseBulkRemoval'
 
 import type { Config } from 'payload'
 
@@ -60,17 +60,19 @@ describe('mcpAccess', () => {
   })
 
   describe('boundaries', () => {
-    it.each(['places', 'placePeriods', 'sources', 'titles', 'vassalLinks'])(
-      'gives a key a box to delete for %s, what the historian enters and must undo itself',
-      async (group) => {
-        // CMS-454, the dev, 2026-11-18: « je n'efface plus tes erreurs ».
-        const config = await applied()
-
-        expect(operationBoxes(config, group)).toEqual(['find', 'create', 'update', 'delete'])
-      }
-    )
-
-    it.each(['importanceReasons', 'confessions', 'people', 'territories'])(
+    // CMS-508: the plugin's delete erases for good, bin or not — a key deletes nowhere, it puts in the bin.
+    it.each([
+      'places',
+      'placePeriods',
+      'periodNames',
+      'sources',
+      'titles',
+      'vassalLinks',
+      'importanceReasons',
+      'confessions',
+      'people',
+      'territories',
+    ])(
       'gives a key the boxes find, create and update for %s, and no box to delete',
       async (group) => {
         const config = await applied()
@@ -79,16 +81,17 @@ describe('mcpAccess', () => {
       }
     )
 
-    it('opens the deletion only on collections that refuse one by filter over MCP', () => {
-      // One call with a wide filter would empty a collection (CMS-454): a collection opened without the refusal
-      // fails here.
-      const opened = [Places, PlacePeriods, PeriodNames, Sources, Titles, VassalLinks]
-      const deletable = Object.entries(MCP_COLLECTIONS)
-        .filter(([, { enabled }]) => enabled.delete)
-        .map(([slug]) => slug)
-      expect(deletable.sort()).toEqual(opened.map(({ slug }) => slug).sort())
-      for (const collection of opened)
-        expect(collection.hooks?.beforeOperation).toContain(refuseBulkDeleteOverMcp)
+    it('gives a bin to every collection the historian undoes its errors in, each refusing it by filter over MCP', () => {
+      // One call with a wide filter would empty a collection into the bin (CMS-454, CMS-508): a collection with a bin
+      // but without the refusal fails here, and so does one whose description does not say how to use the bin.
+      const binned = [Places, PlacePeriods, PeriodNames, Sources, Titles, VassalLinks]
+      for (const collection of binned) {
+        expect(collection.trash).toBe(true)
+        expect(collection.hooks?.beforeOperation).toContain(refuseBulkRemovalOverMcp)
+        expect(
+          MCP_COLLECTIONS[collection.slug as keyof typeof MCP_COLLECTIONS]?.description
+        ).toContain('put the record in the bin — never delete it')
+      }
     })
 
     it('describes a place’s position as the object the plugin’s tools take, not the stored tuple', () => {

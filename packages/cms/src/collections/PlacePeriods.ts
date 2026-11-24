@@ -12,11 +12,12 @@ import { formatHistoricalDate } from '@europe-historical-atlas/core/time/formatH
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
 import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 
 import { COLLECTION_MESSAGES } from './i18n'
 import { refuseForeignPeriodName } from './refuseForeignPeriodName'
 import { refuseInvalidSheet } from './refuseInvalidSheet'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { writeSheetTitle } from './writeSheetTitle'
 
 import type { EventDateFields } from '../fields/historicalDate'
@@ -129,6 +130,8 @@ async function placeName(req: PayloadRequest, id: number | string): Promise<stri
 export const PlacePeriods: CollectionConfig = {
   slug: 'place-periods',
   labels: { singular: 'Ville à une date', plural: 'Villes à une date' },
+  // CMS-508: a sheet removed goes to the bin with its source lines, and comes back from it with « Restaurer »
+  trash: true,
   admin: {
     // « Paris — 1100 »: the place alone would read as a duplicate of its other sheets (the dev, 2026-10-31).
     useAsTitle: 'title',
@@ -145,9 +148,14 @@ export const PlacePeriods: CollectionConfig = {
   },
   hooks: {
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeOperation: [refuseBulkRemovalOverMcp],
     beforeValidate: [refuseOverlap],
-    beforeChange: [refuseInvalidSheet, refuseForeignPeriodName, writeSheetTitle],
+    beforeChange: [
+      refuseRestoringOverBin,
+      refuseInvalidSheet,
+      refuseForeignPeriodName,
+      writeSheetTitle,
+    ],
   },
   fields: [
     {

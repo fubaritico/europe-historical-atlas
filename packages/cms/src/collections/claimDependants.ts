@@ -2,6 +2,7 @@ import { APIError } from 'payload'
 
 import type {
   CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
   CollectionBeforeDeleteHook,
   PayloadRequest,
   Where,
@@ -56,8 +57,8 @@ export const refreshLinksOfTitle: CollectionAfterChangeHook = async ({ doc, oper
   return saved
 }
 
-/** Where a record is cited, for the refusal of its deletion: the collection that cites it, by which fields. */
-interface Citers {
+/** Where a record is cited, for the refusal of its deletion or of its putting in the bin: the collection that cites it, by which fields. */
+export interface Citers {
   /**
    * The collection whose records cite it — a claim, a city's sheet naming its holder (CMS-422 step 2c), and since
    * CMS-454 whatever names a place or a source: an event, a siege engine, another source.
@@ -89,25 +90,79 @@ interface Citers {
  */
 export function refuseDeletingCited(citers: Citers): CollectionBeforeDeleteHook {
   return async ({ id, req }) => {
-    const { docs } = await req.payload.find({
-      collection: citers.collection,
-      where: { or: citers.fields.map((field) => ({ [field]: { equals: id } })) },
-      depth: 0,
-      pagination: false,
-      req,
-    })
-    if (docs.length === 0) return
-    const names = docs.map((cited) => `« ${nameOf(cited)} »`).join(', ')
-    console.warn(
-      `[CMS] deleting ${String(id)} refused: ${String(docs.length)} record(s) of ${citers.collection} cite it`
-    )
-    throw new APIError(
-      `${citers.subject} est ${citers.cited} par ${String(docs.length)} ${citers.what} : ${names}. Modifiez-les ou supprimez-les d’abord.`,
-      409,
-      undefined,
-      true
-    )
+    // A record in the bin that cites it counts too (CMS-508): erased from under it, that record would come back from
+    // the bin with an empty field.
+    await refuseIfCited(citers, id, req, { includeBin: true, gesture: 'deleting' })
   }
+}
+
+/**
+ * Refuse to put in the bin a record another record still cites (CMS-508) — the same rule as its deletion, for the
+ * same reason: the claim citing it would point at a record nobody sees any more. Putting in the bin is an update
+ * writing `deletedAt` (Payload 3.92, `ui/elements/DeleteDocument`), in the admin as over MCP. A record already in the
+ * bin that cites it does not count: the sheet goes to the bin first, then its place.
+ * @param citers - where the record is cited, and how the refusal says it
+ * @returns the hook — it throws when a record cites it
+ */
+export function refuseTrashingCited(citers: Citers): CollectionBeforeChangeHook {
+  return async ({ data, operation, originalDoc, req }) => {
+    const before = originalDoc as { id: number | string; deletedAt?: string | null } | undefined
+    const trashing =
+      operation === 'update' &&
+      before !== undefined &&
+      isSet((data as { deletedAt?: unknown }).deletedAt) &&
+      !isSet(before.deletedAt)
+    if (trashing)
+      await refuseIfCited(citers, before.id, req, { includeBin: false, gesture: 'trashing' })
+    return data
+  }
+}
+
+/**
+ * Whether a date field holds a date — `deletedAt` is absent, `null` or a date.
+ * @param value - the field's value
+ * @returns `true` when it holds one
+ */
+export function isSet(value: unknown): boolean {
+  return value !== undefined && value !== null
+}
+
+/**
+ * Throw when a record cites the one being removed — deleted or put in the bin.
+ * @param citers - where the record is cited, and how the refusal says it
+ * @param id - the record removed
+ * @param req - the request, so the search runs in its transaction
+ * @param how - whether the records in the bin count, and which gesture is refused
+ * @param how.includeBin - whether the records in the bin count as citing it
+ * @param how.gesture - the gesture refused, for the console and the sentence
+ * @throws {APIError} 409, naming what cites it
+ */
+async function refuseIfCited(
+  citers: Citers,
+  id: number | string,
+  req: PayloadRequest,
+  how: { readonly includeBin: boolean; readonly gesture: 'deleting' | 'trashing' }
+): Promise<void> {
+  const { docs } = await req.payload.find({
+    collection: citers.collection,
+    where: { or: citers.fields.map((field) => ({ [field]: { equals: id } })) },
+    depth: 0,
+    pagination: false,
+    trash: how.includeBin,
+    req,
+  })
+  if (docs.length === 0) return
+  const names = docs.map((cited) => `« ${nameOf(cited)} »`).join(', ')
+  console.warn(
+    `[CMS] ${how.gesture} ${String(id)} refused: ${String(docs.length)} record(s) of ${citers.collection} cite it`
+  )
+  const first = how.gesture === 'deleting' ? 'supprimez-les' : 'mettez-les à la corbeille'
+  throw new APIError(
+    `${citers.subject} est ${citers.cited} par ${String(docs.length)} ${citers.what} : ${names}. Modifiez-les ou ${first} d’abord.`,
+    409,
+    undefined,
+    true
+  )
 }
 
 /**

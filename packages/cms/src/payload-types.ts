@@ -312,6 +312,7 @@ export interface Place {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -435,6 +436,7 @@ export interface Source {
   copyOf?: (number | Source)[] | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -638,6 +640,7 @@ export interface PlacePeriod {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Le nom qu’un lieu portait à une époque — Ancyre pour Ankara en 1100 — dans chaque langue, avec ses sources. La fiche d’une ville à une date le désigne ; le lieu, lui, porte son nom d’aujourd’hui.
@@ -692,6 +695,7 @@ export interface PeriodName {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Les raisons qu’on peut cocher sur une fiche « Ville à une date » : pouvoir, religion, commerce, population… Ajoutez-en autant qu’il faut.
@@ -796,6 +800,7 @@ export interface Title {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -986,6 +991,7 @@ export interface VassalLink {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1046,10 +1052,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update places.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete places.
-     */
-    delete?: boolean | null;
   };
   placePeriods?: {
     /**
@@ -1064,10 +1066,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update place-periods.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete place-periods.
-     */
-    delete?: boolean | null;
   };
   periodNames?: {
     /**
@@ -1082,10 +1080,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update period-names.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete period-names.
-     */
-    delete?: boolean | null;
   };
   sources?: {
     /**
@@ -1100,10 +1094,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update sources.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete sources.
-     */
-    delete?: boolean | null;
   };
   importanceReasons?: {
     /**
@@ -1174,10 +1164,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update titles.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete titles.
-     */
-    delete?: boolean | null;
   };
   vassalLinks?: {
     /**
@@ -1192,10 +1178,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update vassal-links.
      */
     update?: boolean | null;
-    /**
-     * Allow clients to delete vassal-links.
-     */
-    delete?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1490,6 +1472,7 @@ export interface PlacesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1556,6 +1539,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1582,6 +1566,7 @@ export interface PeriodNamesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1759,6 +1744,7 @@ export interface TitlesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1804,6 +1790,7 @@ export interface VassalLinksSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1820,6 +1807,7 @@ export interface SourcesSelect<T extends boolean = true> {
   copyOf?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1858,7 +1846,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   placePeriods?:
     | T
@@ -1866,7 +1853,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   periodNames?:
     | T
@@ -1874,7 +1860,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   sources?:
     | T
@@ -1882,7 +1867,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   importanceReasons?:
     | T
@@ -1918,7 +1902,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   vassalLinks?:
     | T
@@ -1926,7 +1909,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
-        delete?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -3,10 +3,12 @@ import { countryField, regionField } from '../fields/lot'
 import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 import { placeEndpoints } from '../wikidata/placeEndpoints'
 
-import { refuseDeletingCited } from './claimDependants'
+import { refuseDeletingCited, refuseTrashingCited } from './claimDependants'
+import { refuseBinnedTwin } from './refuseBinnedTwin'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { retitlePlaceSheets } from './retitleSheets'
 
 import type { CollectionConfig } from 'payload'
@@ -32,6 +34,8 @@ export const PLACE_CITERS = [
 export const Places: CollectionConfig = {
   slug: 'places',
   labels: { singular: 'Lieu', plural: 'Lieux' },
+  // CMS-508: a place removed goes to the bin, and comes back from it with « Restaurer »
+  trash: true,
   admin: { useAsTitle: 'name' },
   endpoints: placeEndpoints,
   hooks: {
@@ -40,10 +44,25 @@ export const Places: CollectionConfig = {
     // A place a sheet or an event stands on is never deleted from under it (CMS-454): the base would empty their
     // field, and a city at a date would be a city nowhere. The sheet goes first, then the place.
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeOperation: [refuseBulkRemovalOverMcp],
     beforeDelete: PLACE_CITERS.map(({ collection, field, what }) =>
       refuseDeletingCited({ collection, fields: [field], subject: 'Ce lieu', cited: 'cité', what })
     ),
+    // Nor put in the bin from under it (CMS-508)
+    beforeChange: [
+      refuseRestoringOverBin,
+      // A place in the bin keeps its Wikidata id, unique in the base: entering it again is sent to « Restaurer »
+      refuseBinnedTwin,
+      ...PLACE_CITERS.map(({ collection, field, what }) =>
+        refuseTrashingCited({
+          collection,
+          fields: [field],
+          subject: 'Ce lieu',
+          cited: 'cité',
+          what,
+        })
+      ),
+    ],
   },
   fields: [
     {

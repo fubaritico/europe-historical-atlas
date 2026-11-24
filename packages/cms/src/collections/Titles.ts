@@ -1,13 +1,33 @@
 import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 import { titleEndpoints } from '../titles/attachEndpoint'
 
-import { refreshLinksOfTitle, refuseDeletingCited } from './claimDependants'
+import { refreshLinksOfTitle, refuseDeletingCited, refuseTrashingCited } from './claimDependants'
 import { refuseDuplicateClaim } from './refuseDuplicateClaim'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { writeTitleLabel } from './writeClaimTitles'
 
+import type { Citers } from './claimDependants'
 import type { CollectionConfig } from 'payload'
+
+/** What cites a title, so neither deleted nor put in the bin from under them: the links, and the cities' sheets. */
+const TITLE_CITERS: readonly Citers[] = [
+  {
+    collection: 'vassal-links',
+    fields: ['vassal', 'suzerain'],
+    subject: 'Ce titre',
+    cited: 'cité',
+    what: 'maillon(s)',
+  },
+  {
+    collection: 'place-periods',
+    fields: ['holderTitle'],
+    subject: 'Ce titre',
+    cited: 'cité',
+    what: 'fiche(s) de ville',
+  },
+]
 
 /**
  * A title (CMS-422 step 2) — **what a person holds or exercises, over a period, as the sources say**: Mathias II,
@@ -18,37 +38,27 @@ import type { CollectionConfig } from 'payload'
 export const Titles: CollectionConfig = {
   slug: 'titles',
   labels: { singular: 'Titre', plural: 'Titres' },
+  // CMS-508: a title removed goes to the bin, and comes back from it with « Restaurer »
+  trash: true,
   admin: { useAsTitle: 'label', defaultColumns: ['label', 'person', 'territory'] },
   // CMS-507: the cities under its authority, attached at a year — the page's block and the historian's script.
   endpoints: titleEndpoints,
   hooks: {
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
+    beforeOperation: [refuseBulkRemovalOverMcp],
     beforeChange: [
+      refuseRestoringOverBin,
       writeTitleLabel,
       refuseDuplicateClaim({
         collection: 'titles',
         relations: ['person', 'territory'],
         subject: 'Ce titre',
       }),
+      // Nor put in the bin from under what cites it (CMS-508)
+      ...TITLE_CITERS.map((citers) => refuseTrashingCited(citers)),
     ],
     afterChange: [refreshLinksOfTitle],
-    beforeDelete: [
-      refuseDeletingCited({
-        collection: 'vassal-links',
-        fields: ['vassal', 'suzerain'],
-        subject: 'Ce titre',
-        cited: 'cité',
-        what: 'maillon(s)',
-      }),
-      refuseDeletingCited({
-        collection: 'place-periods',
-        fields: ['holderTitle'],
-        subject: 'Ce titre',
-        cited: 'cité',
-        what: 'fiche(s) de ville',
-      }),
-    ],
+    beforeDelete: TITLE_CITERS.map((citers) => refuseDeletingCited(citers)),
   },
   fields: [
     {

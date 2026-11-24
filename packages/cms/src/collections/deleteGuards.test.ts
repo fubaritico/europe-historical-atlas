@@ -8,6 +8,7 @@ import { People } from './People'
 import { PeriodNames } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 import { PLACE_CITERS, Places } from './Places'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { SiegeEngines } from './SiegeEngines'
 import { SOURCE_CITERS, Sources } from './Sources'
 import { Territories } from './Territories'
@@ -100,6 +101,14 @@ describe('what a deletion is refused for', () => {
     it('hangs one refusal per citer on the place and on the source', () => {
       expect(Places.hooks?.beforeDelete).toHaveLength(PLACE_CITERS.length)
       expect(Sources.hooks?.beforeDelete).toHaveLength(SOURCE_CITERS.length)
+    })
+
+    // CMS-508, review QUAL-002: the bin's refusals, one per citer, beside the restore's (and the place's twin)
+    it('hangs one refusal of the bin per citer on the place and on the source, after the restore’s', () => {
+      expect(Places.hooks?.beforeChange).toHaveLength(PLACE_CITERS.length + 2)
+      expect(Sources.hooks?.beforeChange).toHaveLength(SOURCE_CITERS.length + 1)
+      for (const collection of [Places, Sources, Titles, PeriodNames, PlacePeriods, VassalLinks])
+        expect(collection.hooks?.beforeChange?.[0]).toBe(refuseRestoringOverBin)
     })
   })
 

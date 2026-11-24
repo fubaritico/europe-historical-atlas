@@ -105,13 +105,28 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   travers dans la base ; (2) la région annoncée aux lecteurs d'écran de la chaîne est plus large que ses messages, et l'aide
   de la case « Souverain » n'est pas reliée à elle (outil local, courtoisie) ; (3) `refusalOf` est rangé dans
   `saveVassalLink.ts` alors qu'il lit tout refus de Payload. **Sévérité : cosmétique.**
-- **L'historien supprime par le MCP, et rien ne dit quelles fiches sa clé a créées** (18/11, CMS-454, `mcp/mcpAccess.ts`) :
-  la suppression est ouverte sur les fiches de ville, les lieux, les sources, les titres et les maillons, case par case sur
-  la clé. Trois refus la tiennent : ce qu'une autre fiche cite (`claimDependants.refuseDeletingCited`, la liste tenue
-  contre le schéma par `deleteGuards.test.ts`), une suppression par filtre (`mcp/refuseBulkDelete.ts` : une fiche à la
-  fois, par son identifiant), et la case non cochée. **Pas tenu** : un modèle peut supprimer une fiche de ville, un titre
-  non cité ou un maillon saisis par le dev — pas de corbeille, le retour est la copie de la base. **Remède si ça mord** :
-  un champ « créé par » sur chaque fiche (une migration), le refus au-delà. **Sévérité : à savoir.**
+- **L'historien met à la corbeille par le MCP, et rien ne dit quelles fiches sa clé a créées** (CMS-454 le 18/11, la
+  corbeille CMS-508 le 24/11, `mcp/mcpAccess.ts`) : sa clé ne supprime plus rien ; sur les fiches de ville, les lieux,
+  les noms d'époque, les sources, les titres et les maillons (`trash: true`), il écrit `deletedAt` par l'outil de mise à
+  jour, comme l'admin. **Pourquoi pas la suppression du MCP** : son outil appelle `payload.delete`, qui efface pour de bon
+  même dans une collection à corbeille (Payload 3.92, `operations/deleteByID.ts` ; la corbeille est une mise à jour,
+  `ui/elements/DeleteDocument`). Deux refus la tiennent : ce qu'une autre fiche cite (`claimDependants.refuseTrashingCited`,
+  et pour la suppression définitive `refuseDeletingCited`, qui compte aussi les fiches déjà à la corbeille), et une mise à
+  la corbeille par filtre (`mcp/refuseBulkRemoval.ts`). La sortie se fait dans l'ordre inverse : une fiche ne revient pas
+  tant que ce qu'elle cite est encore à la corbeille (`refuseRestoringOverBin`, lu dans les champs mêmes) — Payload
+  peuple une relation vers la corbeille comme une fiche vivante (`collections/dataloader.ts`), l'export la porterait ; et
+  un lieu dont le double au même Wikidata est à la corbeille est renvoyé à « Restaurer » (`refuseBinnedTwin` : l'index
+  unique de la base compte la corbeille). **Pas tenu** : un modèle peut mettre à la corbeille une fiche
+  saisie par le dev — il la restaure dans l'admin. **Remède si ça mord** : un champ « créé par » (une migration).
+  **Sévérité : à savoir.**
+- **La fiche d'une ville n'a pas de bouton « Supprimer »** (24/11, CMS-508) : sa vue d'édition est la nôtre
+  (`CitySheetView`), sans les actions de Payload. La corbeille passe par la liste (cocher, « Supprimer » qui déplace à la
+  corbeille), puis l'onglet « Corbeille » et « Restaurer » — essayé sur une copie. **Sévérité : cosmétique.**
+- **Un test de descente monte la base jusqu'à la dernière migration, puis défait la sienne comme si elle était la
+  dernière** (24/11, CMS-508 : `periodNamesDown.test.ts` est tombé quand la migration de la corbeille a retiré une colonne
+  que sa descente retire aussi). Les autres (`holderTitleDown`, `uniqueWikidata`…) ont la même forme. **Remède appliqué
+  là** : défaire d'abord la migration plus récente qui touche les mêmes colonnes. **Sévérité : à savoir** — le prochain qui
+  tombe se lit ainsi.
 - **A record without its English line is refused at its next save** (2026-11-23, CMS-495): English is required on
   places, territories, people and the four registers — wanted (the dev, 2026-11-22: _"a translation field is never
   left empty"_), never loosened. Since the same evening no record lacks it; a new one is given its English line in the

@@ -10,10 +10,12 @@ import { claimLines } from '../fields/claimLines'
 import { LANGUAGE_LABELS, nameForms } from '../fields/nameForms'
 import { relationId } from '../fields/relationId'
 import { trimmedText } from '../fields/trimmedText'
-import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { refuseBulkRemovalOverMcp } from '../mcp/refuseBulkRemoval'
 
-import { refuseDeletingCited } from './claimDependants'
+import { refuseDeletingCited, refuseTrashingCited } from './claimDependants'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 
+import type { Citers } from './claimDependants'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 /**
@@ -83,6 +85,15 @@ export const refuseMovingCitedName: CollectionBeforeChangeHook = async ({
   throw new APIError(message, CONFLICT, { errors: [{ path: 'place', message }] }, true)
 }
 
+/** What cites a name of the time: the cities' sheets that name it. */
+const PERIOD_NAME_CITERS: Citers = {
+  collection: 'place-periods',
+  fields: ['periodName'],
+  subject: 'Ce nom d’époque',
+  cited: 'cité',
+  what: 'fiche(s) de ville',
+}
+
 /**
  * A name of the time (« Nom d'époque », CMS-495; the dev, 2026-11-21) — **the name a place bore, as the sources of
  * the time or its historians write it**: Ankara is « Ancyre » in 1100. A record of its own, never a field of the
@@ -99,19 +110,19 @@ export const PeriodNames: CollectionConfig = {
     description:
       'Le nom qu’un lieu portait à une époque — Ancyre pour Ankara en 1100 — dans chaque langue, avec ses sources. La fiche d’une ville à une date le désigne ; le lieu, lui, porte son nom d’aujourd’hui.',
   },
+  // CMS-508: a name removed goes to the bin, and comes back from it with « Restaurer »
+  trash: true,
   hooks: {
     // Over MCP, one record at a time (CMS-454).
-    beforeOperation: [refuseBulkDeleteOverMcp],
-    beforeChange: [refuseMovingCitedName, writePeriodNameLabel],
-    beforeDelete: [
-      refuseDeletingCited({
-        collection: 'place-periods',
-        fields: ['periodName'],
-        subject: 'Ce nom d’époque',
-        cited: 'cité',
-        what: 'fiche(s) de ville',
-      }),
+    beforeOperation: [refuseBulkRemovalOverMcp],
+    // Neither deleted nor put in the bin from under a sheet that names it (CMS-508)
+    beforeChange: [
+      refuseRestoringOverBin,
+      refuseMovingCitedName,
+      writePeriodNameLabel,
+      refuseTrashingCited(PERIOD_NAME_CITERS),
     ],
+    beforeDelete: [refuseDeletingCited(PERIOD_NAME_CITERS)],
   },
   fields: [
     {
