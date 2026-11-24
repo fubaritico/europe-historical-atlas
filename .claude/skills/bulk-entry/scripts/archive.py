@@ -33,7 +33,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 # the disk the dev lends; ARCHIVE_HISTORIEN points elsewhere only to try the script on a copy
 ARCHIVE = pathlib.Path(os.environ.get('ARCHIVE_HISTORIEN', '/Volumes/Acer/atlas-historien'))
-JOURNAL = ARCHIVE / 'journal.log'
+JOURNAL = ARCHIVE / 'journal' / ('%s.log' % __import__('datetime').date.today().isoformat())
 TODAY = datetime.date.today().strftime('%d/%m/%Y')
 
 
@@ -158,7 +158,7 @@ elif command == 'given' and len(args) == 5:
 elif command == 'close' and len(args) == 3:
     year, zone = args[1:]
     region = zone  # the attempts carry the zone as their region since 2026-11-23
-    journal, attempts = JOURNAL, ARCHIVE / 'registre/attempts.jsonl'
+    journal, attempts = JOURNAL.parent, ARCHIVE / 'registre/attempts.jsonl'  # the journal: one file a day
     path = zone_dir(year, zone)
     for needed in (journal, attempts):
         if not needed.exists():
@@ -173,7 +173,8 @@ elif command == 'close' and len(args) == 3:
                 rows.append('| %s | %s | %s | %s | %s | %s |' % tuple(
                     str(row.get(k) or '').replace('|', '/') for k in ('date', 'kind', 'where', 'words', 'result', 'note')))
     (path / 'recherches/essais.md').write_text('\n'.join(rows) + '\n', encoding='utf-8')
-    lines = pathlib.Path(journal).read_text(encoding='utf-8').splitlines()
+    lines = [l for day in sorted(journal.glob('[0-9]*.log'))  # every day in order, a research may span several
+             for l in day.read_text(encoding='utf-8').splitlines()]
     starts = [i for i, l in enumerate(lines) if 'RECHERCHE DEMANDÉE' in l
               and (region.lower() in l.lower() or zone.lower() in l.lower())]
     kept = lines[starts[-1]:] if starts else []

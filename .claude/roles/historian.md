@@ -21,7 +21,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   root, what belongs to a year and a zone under that year; then the research's `travail/` is emptied, asked of him).
 - **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
   Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
-- **Every attempt is counted and said in the journal** he follows (`tail -f /Volumes/Acer/atlas-historien/journal.log`,
+- **Every attempt is counted and said in the journal** he follows (`pnpm research-log`, one file a day in `/Volumes/Acer/atlas-historien/journal/`,
   `bulk-entry/scripts/research_log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <zone>` refuses a region's
   holders until all of it is done.
 - **BnF or JSTOR unreachable → CONNEXION IMPOSSIBLE**, in capitals, and stop. **A case I cannot solve → J'AI BESOIN DE

@@ -1,7 +1,7 @@
 """The preparation of a research, run before anything is read — Wikipedia included (the dev, 2026-11-23: "before you
 even start on Wikipedia, there is the preparation: what do you have, what will you use, in which order; then you start").
 
-It says in the journal (/Volumes/Acer/atlas-historien/journal.log, followed by the dev with tail -f) what the research of a
+It says in the journal (/Volumes/Acer/atlas-historien/journal/, one file a day, followed by the dev with pnpm research-log) what the research of a
 region at a year has at hand — the archive on the external disk, his axes, the region's note, the PDFs on disk, the
 attempts already made — and the order of the channels. It stops when the archive's disk is absent. It reads only; it
 writes nothing but the journal. It ends on what is still to do before the first read.
@@ -18,7 +18,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[4]
 YEAR, REGION = int(sys.argv[1]), sys.argv[2]
 ZONE = REGION  # one key since 2026-11-23: the zone as the archive names it (anatolie)
 ARCHIVE = pathlib.Path('/Volumes/Acer/atlas-historien')
-JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
+JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()))
 NOTE = pathlib.Path('/Volumes/Acer/atlas-historien') / str(YEAR) / REGION / 'resultats/note-de-region.md'  # the zone's note, on the archive
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 ATLASES = pathlib.Path('/Volumes/Acer/atlas-historien/bibliotheque')

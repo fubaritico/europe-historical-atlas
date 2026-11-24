@@ -1,6 +1,7 @@
 """The research journal the dev follows in his terminal (the dev, 2026-11-23: "I want logs — I am checking, I found
-this, I do that, the date"). One line per thing done, in French, dated to the second, printed and appended to
-/Volumes/Acer/atlas-historien/journal.log. He follows it with:  tail -f /Volumes/Acer/atlas-historien/journal.log
+this, I do that, the date"). One line per thing done, in French, dated to the second, printed and appended to the
+day's file, /Volumes/Acer/atlas-historien/journal/<YYYY-MM-DD>.log — one file a day since 2026-11-24, never emptied;
+the single journal before it is filed as journal/ancien/journal.log. He follows it with:  pnpm research-log
 
   python3 -I research_log.py say "<what I am doing or what I found>"
   python3 -I research_log.py attempt '<one attempt as JSON — the fields are region_gate.py's>'
@@ -22,7 +23,7 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
+JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()))
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 WORDS = {'found': 'TROUVÉ', 'nothing': 'RIEN', 'refused': 'REFUSÉ', 'not available': 'INACCESSIBLE',
          'not relevant': 'HORS SUJET'}
@@ -77,15 +78,30 @@ def follow(lines=40):
         colour = seen.setdefault(team, COLOURS[len(seen) % len(COLOURS)])
         return colour + line + RESET
 
-    with JOURNAL.open(encoding='utf-8') as journal:
+    def today():
+        return JOURNAL.parent / ('%s.log' % datetime.date.today().isoformat())
+
+    current = today()
+    current.touch()
+    with current.open(encoding='utf-8') as journal:
         for line in journal.readlines()[-lines:] if lines else journal.readlines():
             print(paint(line.rstrip('\n')), flush=True)
-        while True:
-            line = journal.readline()
-            if line:
-                print(paint(line.rstrip('\n')), flush=True)
-            else:
-                time.sleep(0.5)
+    first = True
+    while True:  # one file a day: at midnight the next day's file is followed from its first line
+        with current.open(encoding='utf-8') as journal:
+            if first:  # its lines are already printed above
+                journal.seek(0, 2)
+                first = False
+            while True:
+                line = journal.readline()
+                if line:
+                    print(paint(line.rstrip('\n')), flush=True)
+                elif today() != current:
+                    current = today()
+                    current.touch()
+                    break
+                else:
+                    time.sleep(0.5)
 
 
 if sys.argv[1:2] == ['follow'] and len(sys.argv) <= 3:

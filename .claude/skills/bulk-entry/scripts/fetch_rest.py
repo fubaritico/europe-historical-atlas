@@ -12,7 +12,7 @@ def say(message):
     import datetime
     line = '%s  [%s]  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), __import__('os').environ.get('ATLAS_WHO', 'historien'), message)
     print(line, flush=True)
-    with open('/Volumes/Acer/atlas-historien/journal.log', 'a', encoding='utf-8') as out:
+    with open(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()), 'a', encoding='utf-8') as out:
         out.write(line + '\n')
 only = set(json.load(open(sys.argv[2])))
 cand = [c for c in json.load(open(G + '/cand.json')) if c['q'] in only]

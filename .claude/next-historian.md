@@ -9,7 +9,29 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 24/11, 2 h 40 : le plan est écrit, il le lit ; l'Ibérie de 1200 préparée
+## ▶ ON REPREND ICI — 24/11, 11 h 40 : l'essai du chef de zone est rentré ; ses verdicts à appliquer
+
+**Décidé ce matin avec lui** (le plan, `files/plans/historian/autonomy-and-1200.md`, commité `5dfafd21`, poussé) : la
+ville fait foi, le seigneur est le chemin ; la règle d'arrêt ; une enclave seulement prouvée par un ouvrage, sinon
+litige ou retrait ; tout par script (TypeScript sauf si Python fait mieux) ; **toute la chaîne est à moi, push compris** ;
+une carte = une épique (CARTO-503 pour 1100, CARTO-504 pour 1200), une zone = une story (CARTO-505 en cours, CARTO-506
+l'Ibérie) ; un chef de zone par story (`.claude/agents/zone-lead.md`, `entry-runner.md`), deux au plus ; le journal
+préfixé `[story · agent]`, suivi en couleur (`research_log.py follow`, `0d887b43`). Tickets du codeur : CMS-507 (les
+villes d'un titre à la volée, À faire), CMS-508 (corbeille), CMS-509 (fusion) ; à moi REPO-510 (catalogue des livres,
+verrou de saisie). **En attente de lui** : le contrôle allégé du commit d'export ; supprimer pays et personnes.
+
+**L'essai de CARTO-505 sur les 40 villes** (25 min, 16 agents) : 34 gardées, 4 en litige (Miliana, Velilla, Città di
+Castello, Armagh), 2 à retirer (Bingöl, Korkuteli) ; 12 sources et 22 fiches complétées, 0 défaut ; détail
+`/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/rattrapage-39.md`. **À faire, dans l'ordre** : (1) les
+détenteurs contredits : Altenmarkt → archevêché de Salzbourg, Lüttgen-Salbke → couvent du Münzenberg, les deux fiches
+en litige qui portent encore un seul détenteur ; (2) dans sa carte (5174, son onglet fermé, sur main) : Zaidín rendu
+à l'Aragon seul (retirer mon anneau), les 4 litiges dessinés en zone disputée, Bingöl et Korkuteli retirées de 1100 ;
+(3) export, `cities:alerts` à 0, commit de l'export et de la carte, push, CARTO-505 en Fait ; (4) REPO-510 ; (5) la
+nuit : CARTO-506 l'Ibérie par un chef de zone. **Le chef de zone signale** : l'Encyclopaedia of Islam classée
+« encyclopédie » (un tour perdu), les fichiers « ._ » d'exFAT, deux agents de saisie qui altèrent « ſ » et « ﬁ », ~25
+sources Schwartz 1913 en double (à fusionner avec CMS-509).
+
+## Avant — 24/11, 2 h 40 : le plan est écrit, il le lit ; l'Ibérie de 1200 préparée
 
 **Écrit cette nuit** : `files/plans/historian/autonomy-and-1200.md` (le bilan, le flux nouveau — le seigneur comme
 unité, la règle d'arrêt, les scripts seuls écrivent le CMS —, les 13 zones de 1200 dans l'ordre, la part du codeur

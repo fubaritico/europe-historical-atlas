@@ -70,7 +70,7 @@ entry point of a reading.
      precisely means the context is not finished. `prepare.py` asks for
      the section while the note has no dated lines in it. A research is never
      started on the year alone.
-   3. Give him the journal's command: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
+   3. Give him the journal's command: `pnpm research-log`, one file a day in `/Volumes/Acer/atlas-historien/journal/`.
    4. **Check the constraints against the task**: reread « The obligation » and « The frame »; a constraint that
       contradicts the request, another constraint or `/enter-in-cms` is said to him **before** starting, never
       settled alone.
@@ -133,7 +133,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   tried and logged. Their count goes in the report and in the region's note. Which count is enough is not decided: the
   log is shown, he judges.
 - **Everything is said in the journal as it happens** (the dev, 2026-11-23: _"I want logs — I am checking, I found
-  this, I do that, the date"_): `/Volumes/Acer/atlas-historien/journal.log`, which he follows with `tail -f`. One dated
+  this, I do that, the date"_): `/Volumes/Acer/atlas-historien/journal/<YYYY-MM-DD>.log`, which he follows with `pnpm research-log`. One dated
   French line before each source opened, after each thing found, at each decision —
   `python3 -I .claude/skills/bulk-entry/scripts/research_log.py say "…"`; an attempt is recorded **only** by
   `research_log.py attempt '<json>'`, which writes the register and the journal together. A script that fetches or reads logs

@@ -54,7 +54,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    written there as a `.md`. Each has its line in the note's « Resources given »: what it is, where it comes
    from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
    every image myself; a name I cannot read is written « illegible », never guessed.
-3. `research_log.py say` the research; give him once: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
+3. `research_log.py say` the research; give him once: `pnpm research-log`, one file a day in `/Volumes/Acer/atlas-historien/journal/`.
 4. `prepare.py <year> <zone>`: what is at hand (the archive included), the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
    year, in the note. Every line names **the date, the place, the actors, the work and page**. No generality.
@@ -116,7 +116,7 @@ what a person reads is a `.md`.
 ```
 atlas-historien/
 ├── LISEZ-MOI.md              how it is filed, one page
-├── journal.log               the journal he follows: tail -f /Volumes/Acer/atlas-historien/journal.log
+├── journal/                  the journal he follows (pnpm research-log): one file a day, YYYY-MM-DD.log; ancien/ the single file before 24/11
 ├── registre/attempts.jsonl   every attempt of every research (research_log.py attempt); the gate reads it
 ├── ouvrages/                 REUSABLE — one folder per work, once: <author>-<year>-<short-title>/
 │   ├── index.md              every work: author, title, what it covers (regions, centuries), the researches it served
