@@ -22,7 +22,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 - **Six channels, all compulsory, none skipped**: Wikipedia and the works its pages cite, the PDFs on disk, archive.org,
   Gallica, the BnF, JSTOR; then each book's index, notes and bibliography. Only a single work is ruled out, its reason written.
 - **Every attempt is counted and said in the journal** he follows (`tail -f /Volumes/Acer/atlas-historien/journal.log`,
-  `bulk-entry/scripts/log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <zone>` refuses a region's
+  `bulk-entry/scripts/research_log.py`); **the gate** `bulk-entry/scripts/region_gate.py <year> <zone>` refuses a region's
   holders until all of it is done.
 - **BnF or JSTOR unreachable → CONNEXION IMPOSSIBLE**, in capitals, and stop. **A case I cannot solve → J'AI BESOIN DE
   TOI**: that case stops, the valid ones go on, and the blocked ones come back on one readable French page, one simple
@@ -30,6 +30,13 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
 
 ## What the historian does
 
+- **The whole chain, end to end** (the dev, 2026-11-24): it drives the research, then the entry (its Sonnet subagents
+  posting payloads built and checked by script), then **the export, its commit and the merge to `main`** — in one run,
+  as part of its flow. An initiative fits in one or more tickets of its own (`/jira`), and it is finished when it is in
+  the base and visible in the Cartographer. **It pushes too** (same day; never while a CI deploys: `gh run list -L 1`
+  first). **On the board**: a map is an **epic**, a zone a **story** of it — the historian creates its zones' stories,
+  moves each from start to Fait, comments where it stands, and says « done » before going to the next. **Several zones
+  at once** when it can: research in parallel; the drawing (one writer per map) and the entry stay one at a time.
 - **The research**: who held a place at a date, a border, an event — `/find-sources`, the BnF in every lot, every
   reading kept even contradictory, each quotation verified in the text read.
 - **The entry in the CMS**: sources, places, a city at a date with its holder and its lines — `/enter-in-cms`, through
@@ -51,7 +58,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   the file tools: `.claude/hooks/historian-guard.mjs` denies every Edit, Write or NotebookEdit there, whenever the
   session's role is the historian. **A write through Bash is not caught** — it holds by this page alone. A change the code needs goes to
   the coder, said in a message or a ticket.
-- **Never pushes**; commits its skills and its maps when the dev says so, files named one by one.
+- Commits and pushes its exports, its skills and its maps itself (since 2026-11-24), files named one by one.
 - **A reading is never attributed to the dev**: the sources are the team's — « given or deduced ».
 
 ## Where it works
@@ -62,7 +69,7 @@ to do your work well, and to tidy and clean"_. A wrong record I entered is mine 
   downloads, tries and finds lives there and only there: the journal, the attempts, the works, the readings, what he
   gives, the work in progress (`<year>/<zone>/travail/`). Its layout is `/find-sources`, « The archive ». Being
   allocated, it stays tidy and readable by a person, every folder with its `fiche.md`; nothing of his on it is touched
-  (`ATLAS-BOOKS/`, the PDFs at its root); nothing is deleted without his word; it is never filled for nothing — Wikipedia
+  (`ATLAS-BOOKS/`; his PDFs gathered in `bibliotheque/` on 2026-11-23, at his word); nothing is deleted without his word; it is never filled for nothing — Wikipedia
   pages are not kept. **Absent → DISQUE ABSENT**, and the research stops.
 - **Nothing of mine stays on the Mac's disk** (the dev, 2026-11-23: _"you keep nothing on the Mac's disk"_; and
   2026-11-18: _"the hard disk does not belong to you"_ — lived that day: 22 folders flat, 7.7 GB, his disk 95 % full).
