@@ -51,7 +51,7 @@ this plan names them, never copies them.
 
 No plate exists for s16 (the share link) nor s17 (the map as a list, ATLAS-140).
 
-## 2b. The layout — the dev, 2026-11-24, late evening (thinking aloud, taken as the direction)
+## 2b. The layout — the dev, 2026-11-24, late evening (the direction; to be handed to Claude Design)
 
 > _« Tout doit être centré horizontalement. Parce qu'en fait, quand tu feras apparaître la frise synchronoptique, ça
 > poussera. Et je pense même que les dates doivent être centrées horizontalement en bas. Et que la barre de boutons, elle
@@ -69,6 +69,22 @@ No plate exists for s16 (the share link) nor s17 (the map as a list, ATLAS-140).
   centred on the map's visible width**, so the detail panel opening on the right (440 px) re-centres it instead of eating
   its right edge.
 - The phone's plates already centre their buttons at the bottom (`.pbar`): the desktop and the phone follow one logic.
+
+**Refined the same evening** — _« la barre de navigation que tu as dans le site et dans l'atlas en haut, centrée … En
+opposition, la navigation par siècle, en bas, poussable verticalement par la frise synchronoptique, et les contrôles
+qu'on avait en bas à gauche, plutôt placés dans une barre de boutons verticale à droite. Donc ce sera transmis à Claude
+Design, mais je pense qu'on va vraiment vers ça … il faudra qu'il me fasse une version iPad et mobile aussi, même si ces
+versions iPad et mobile fonctionnent très bien comme ça. »_
+
+| where | what |
+| --- | --- |
+| **top, centred** | the site's navigation bar — the same on the site's pages and over the atlas |
+| **bottom, centred** | the century's navigation, pushed up by the frieze when it appears |
+| **right, vertical** | the controls (the pad, the snapshot, the language, help, the frieze) in a vertical button bar |
+
+**To Claude Design** (the dev hands it over): the desktop in this layout, then an iPad and a phone version — the
+current iPad and phone plates work well and stay the reference until then. One point to draw there, said for the
+brief, not decided: the detail panel also opens on the right (440 px) — where the vertical bar sits while it is open.
 
 ## 3. React and the map — how they share the state (ATLAS-392)
 
@@ -156,7 +172,7 @@ For the dev, each in its ticket, never all at once:
 
 | point | plates | in the ticket |
 | --- | --- | --- |
-| ~~The button bar: bottom left on every plate, bottom right in A-15 and s13~~ — **either, it is small** (the dev, 24/11, § 2b) | 2, 8, 16 | the shell |
+| ~~The button bar: bottom left on every plate, bottom right in A-15 and s13~~ — **a vertical bar on the right** (the dev, 24/11, § 2b) | 2, 8, 16 | the shell |
 | The frieze's button `T`: on the touch bars, absent from the desktop's at rest | 2, 15, 21 | the frieze |
 | A drawer covers the touch bar (detail), the frieze pushes it up — which? | 24, 25, 30 | the touch layouts |
 | The close button: « Fermer » + its key on the detail and help, a round cream button in the band per the README | 4, 14, 15 | the kit |
@@ -173,7 +189,7 @@ Each builds a screen whole, at every breakpoint it has, with its scenario's asse
    the atlas, the lot B tokens and fonts, React's weight before the first paint measured before and after.
 3. **The kit**: round button and its key, capsule, framed window, dark band, drawer — structure and behaviour, dressed
    with the dev's retouched pieces as they arrive, on the workbench page.
-4. **The shell**: the site bar in its three states, the bottom column (§ 2b) and the button bar — **the frieze's place kept**
+4. **The shell**: the site bar, centred at the top, in its three states; the bottom column (§ 2b); the vertical button bar on the right — **the frieze's place kept**
    (the bar moves up when the frieze opens, plate 15). Buttons wired to their commands as each screen lands.
 5. **The century** (s15): at the bottom centre (§ 2b); replaces the temporary year switch.
 6. ATLAS-358 — **the frieze, in the MVP** · ATLAS-266 — the language (s11) · ATLAS-135 — help and the tour (s12) ·
@@ -192,5 +208,5 @@ Each builds a screen whole, at every breakpoint it has, with its scenario's asse
 | D3 | what is React | **everything but the canvas and its gestures**, the loading screen included — my proposal to keep it out was wrong | **the dev, 24/11** |
 | D3b | the frieze | in the MVP, its place kept from the shell on | **the dev, 24/11** |
 | D4 | « one overlay open at a time » in the store or in React alone | the store: Escape closes an overlay **or** leaves the focus, and the map must know which | me — **to decide** |
-| D5 | the layout | everything centred, the dates at the bottom, the frieze pushing them up, nothing folds; the button bar left or right (§ 2b) | **the dev, 24/11** |
+| D5 | the layout | the site's bar at the top, centred; the century at the bottom, centred, pushed up by the frieze; the controls in a vertical bar on the right; nothing folds (§ 2b) | **the dev, 24/11** — to Claude Design |
 | D6 | the map shrinks under the bottom column; the column centred on the map's visible width | yes (§ 2b) | me — **proposed** |

@@ -326,10 +326,10 @@
 
 | terme | ce que c'est |
 | --- | --- |
-| **rangée du haut** | La ligne en haut de l'écran de l'atlas : la **barre du site**. Le sélecteur du siècle, en haut sur les maquettes, descend dans la **colonne du bas** (le dev, 24/11). |
+| **rangée du haut** | Le haut de l'écran de l'atlas : la **barre du site**, centrée, la même sur les pages du site (le dev, 24/11). Le sélecteur du siècle, en haut sur les maquettes, descend dans la **colonne du bas**. |
 | **colonne du bas** | Ce qui s'empile en bas de l'écran de l'atlas, centré : le sélecteur de la date, et la frise quand elle apparaît, qui pousse la date vers le haut. Rien ne s'y replie : un élément est là ou n'y est pas (le dev, 24/11). |
-| **barre du site** | La marque (le Λ), les liens des pages du site et les réseaux. Trois états selon la largeur : **dépliée**, **courte** (sans les réseaux), **pliée** (le Λ seul, qui ouvre le menu). |
-| **barre des boutons** | La **capsule** en bas de l'écran qui porte les boutons ronds de l'atlas (pavé, instantané, langue, aide ; la frise au tactile). Petite, à gauche ou à droite (le dev, 24/11) ; au tactile, centrée. |
+| **barre du site** | La marque (le Λ), les liens des pages du site et les réseaux ; en haut, centrée (le dev, 24/11). Trois états selon la largeur : **dépliée**, **courte** (sans les réseaux), **pliée** (le Λ seul, qui ouvre le menu). |
+| **barre des boutons** | La **capsule** en bas de l'écran qui porte les boutons ronds de l'atlas (pavé, instantané, langue, aide ; la frise au tactile). **Verticale, à droite** (le dev, 24/11) ; au tactile, centrée en bas sur les maquettes, en attendant les versions iPad et téléphone de Claude Design. |
 | **capsule** | Un cadre aux bouts arrondis à double filet, avec un ornement à chaque bout : la barre des boutons, le sélecteur du siècle, la barre de chargement. |
 | **bandeau sombre** | L'en-tête d'une fenêtre ou d'un panneau dans l'encre `#24130A`, ses textes et ses signes en crème ; 72 px au moins sur les panneaux. Le langage du lot B. |
 | **panneau de détail** | Le panneau qui montre ce qu'on a cliqué — un événement, plus tard un pays ou une ville : à droite au bureau et sur l'iPad en paysage, un **tiroir** ailleurs. |
