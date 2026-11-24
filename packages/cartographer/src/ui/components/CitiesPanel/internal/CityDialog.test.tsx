@@ -31,6 +31,7 @@ const AGREES: CityVerdict = {
   chain: null,
   expected: null,
   expectedOnMap: null,
+  disputedWith: null,
 }
 
 /**
@@ -194,6 +195,33 @@ describe('CityDialog', () => {
       expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
         'Chain of vassalage: Godefroy — Basse-Lotharingie, 1087–1100; → Henri IV — Saint-Empire · sovereign'
       )
+    })
+
+    // CARTO-511, review QUAL-006: both polities named, in an information — neither a warning nor an error.
+    it('says a city in a disputed zone, the polity holding it and the one drawn over it, in an information', () => {
+      renderInEnglish(
+        <CityDialog
+          openedCity={METZ}
+          openedVerdict={{
+            ...AGREES,
+            kind: 'disputed',
+            disputedWith: { id: 'fr', name: 'Reaume de France', wikidata: 'Q70972' },
+          }}
+          onClose={vi.fn()}
+        />
+      )
+      const region = screen.getByRole('region', { name: 'Metz' })
+      expect(cityDetailText(region).at(-1)).toBe(
+        'In a disputed zone: Sacrum Imperium, which holds it by the sources, shares the ground with Reaume de France, drawn over it.'
+      )
+      // The design system's information is its plain alert, with no modifier of its own
+      const verdict = region.querySelector('.city-detail__verdict')
+      expect([
+        verdict?.classList.contains('ui-alert'),
+        ['success', 'warning', 'error'].some((kind) =>
+          verdict?.classList.contains(`ui-alert--${kind}`)
+        ),
+      ]).toEqual([true, false])
     })
 
     it('closes on « Close »', async () => {

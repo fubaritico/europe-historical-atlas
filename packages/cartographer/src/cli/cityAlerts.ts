@@ -10,7 +10,7 @@ import {
 import { cityAlert, cityVerdicts } from '../canvas/cityVerdict'
 import { citiesOfYear } from '../state/citiesSlice'
 
-import type { CityVerdict, CityVerdictKind } from '../canvas/cityVerdict'
+import type { CityVerdict, CityVerdictKind, PolityOnMap } from '../canvas/cityVerdict'
 import type { CityAlert } from '../canvas/paint/cityPainter'
 import type { CityMark } from '../state/citiesSlice'
 import type { ChainEnd } from '@europe-historical-atlas/core/data/vassalChain'
@@ -49,10 +49,23 @@ export interface CityAlertReport {
   readonly judged: number
   /** The cities on alert, sorted by their alert, then by name. */
   readonly alerted: readonly AlertedCity[]
+  /**
+   * The cities in a disputed zone, by name — not on alert, but listed apart (CARTO-511): a polity spilling over its
+   * neighbour by a slip of the hand reads the same, so the historian sees them.
+   */
+  readonly disputed: readonly DisputedCity[]
+}
+
+/** A city in a disputed zone, with its verdict. */
+export interface DisputedCity {
+  /** The city, as the Cartographer holds it. */
+  readonly city: CityMark
+  /** Its verdict, `disputed`. */
+  readonly verdict: CityVerdict
 }
 
 /** A verdict that puts a city on alert. */
-export type AlertKind = Exclude<CityVerdictKind, 'agrees'>
+export type AlertKind = Exclude<CityVerdictKind, 'agrees' | 'disputed'>
 
 /** A city on alert, with what it was judged by. */
 export interface AlertedCity {
@@ -77,7 +90,10 @@ const SAID: Readonly<Record<AlertKind, string>> = {
  * The colour of the alert ring, named — read from the canvas's own rule (`cityAlert`), never restated per kind, so the
  * text cannot say yellow for a dot the canvas paints red (review ARCH-001).
  */
-const COLOUR: Readonly<Record<CityAlert, string>> = { toCorrect: 'jaune', missing: 'rouge' }
+const COLOUR: Readonly<Record<Exclude<CityAlert, 'disputed'>, string>> = {
+  toCorrect: 'jaune',
+  missing: 'rouge',
+}
 
 /**
  * A verdict on alert, said: its colour, then why.
@@ -87,9 +103,12 @@ const COLOUR: Readonly<Record<CityAlert, string>> = { toCorrect: 'jaune', missin
  */
 function said(kind: AlertKind, reason: string): string {
   const alert = cityAlert(kind)
-  // A kind kept by `isAlert` always has one: reaching this means the canvas's rule changed under the command
-  if (alert === null)
-    throw new Error(`[Cartographer] « ${kind} » kept as an alert, but cityAlert gives none`)
+  // A kind kept by `isAlert` always has a yellow or red one: reaching this means the canvas's rule changed under the
+  // command
+  if (alert === null || alert === 'disputed')
+    throw new Error(
+      `[Cartographer] « ${kind} » kept as an alert, but cityAlert gives « ${String(alert)} »`
+    )
   return `${COLOUR[alert]} — ${reason}`
 }
 
@@ -111,12 +130,14 @@ const ALERT_ORDER: readonly AlertKind[] = (Object.keys(ALERT_RANK) as AlertKind[
 )
 
 /**
- * Whether a verdict puts its city on alert — by the canvas's own rule, `cityAlert`.
+ * Whether a verdict puts its city on alert — by the canvas's own rule, `cityAlert`: a yellow or a red ring. A
+ * disputed zone's ring is no alert (CARTO-511).
  * @param kind - the verdict's kind
  * @returns whether the dot wears an alert
  */
 function isAlert(kind: CityVerdictKind): kind is AlertKind {
-  return cityAlert(kind) !== null
+  const alert = cityAlert(kind)
+  return alert !== null && alert !== 'disputed'
 }
 
 /**
@@ -207,12 +228,12 @@ function parseBox(text: string): LonLatBox {
 }
 
 /**
- * The cities of a map on alert — every one whose dot is not plain — inside the box if one is given, sorted by their
- * alert, then by name.
+ * The cities of a map on alert — every one whose dot is yellow or red — inside the box if one is given, sorted by
+ * their alert, then by name; and apart, the cities in a disputed zone, by name (CARTO-511).
  * @param document - the map
  * @param cities - every city of the content
  * @param box - the rectangle to keep, or `null`
- * @returns how many were judged, and the cities on alert, each with its verdict
+ * @returns how many were judged, the cities on alert and those in a disputed zone, each with its verdict
  */
 export function cityAlertReport(
   document: YearDocument,
@@ -235,26 +256,59 @@ export function cityAlertReport(
       (a, b) =>
         ALERT_RANK[a.kind] - ALERT_RANK[b.kind] || a.city.name.localeCompare(b.city.name, 'fr')
     )
-  return { judged: kept.length, alerted }
+  const disputed = kept
+    .flatMap((city) => {
+      const verdict = verdicts.get(city.id)
+      return verdict?.kind === 'disputed' ? [{ city, verdict }] : []
+    })
+    .sort((a, b) => a.city.name.localeCompare(b.city.name, 'fr'))
+  return { judged: kept.length, alerted, disputed }
 }
 
 /**
  * The cities on alert, as text: a count by alert, then each city — its sheet, its alert, the country drawn under it,
  * the title checked and the name the map gives it, and each reading of its chain from the holder up, every title
- * with its Wikidata id.
- * @param report - how many cities were judged, and those on alert
+ * with its Wikidata id. Then, apart, the cities in a disputed zone, one line each (CARTO-511).
+ * @param report - how many cities were judged, those on alert and those in a disputed zone
  * @param report.judged - how many cities were judged
  * @param report.alerted - the cities on alert
+ * @param report.disputed - the cities in a disputed zone
  * @param map - the map's name
  * @returns the text
  */
-export function formatCityAlerts({ judged, alerted }: CityAlertReport, map: string): string {
+export function formatCityAlerts(
+  { judged, alerted, disputed }: CityAlertReport,
+  map: string
+): string {
   const counts = ALERT_ORDER.flatMap((kind) => {
     const count = alerted.filter((city) => city.kind === kind).length
     return count === 0 ? [] : [`  ${String(count)} ${kind} — ${said(kind, SAID[kind])}`]
   })
   const head = `Carte ${map} : ${String(alerted.length)} ville(s) en alerte sur ${String(judged)}.`
-  return [head, ...counts, '', ...alerted.map(formatCity)].join('\n')
+  const apart =
+    disputed.length === 0
+      ? []
+      : [
+          `En zone disputée, pas en alerte — à revoir si la hachure n’est pas voulue : ${String(disputed.length)}`,
+          ...disputed.map(formatDisputed),
+          '',
+        ]
+  return [head, ...counts, '', ...alerted.map(formatCity), ...apart].join('\n')
+}
+
+const polity = (on: PolityOnMap | null): string =>
+  on === null ? 'aucun pays' : `${on.name} (${idText(on)})`
+
+/**
+ * One city in a disputed zone, as a line: its sheet, the polity under it holding it by the sources, and the one on top it shares
+ * the ground with.
+ * @param disputed - the city and its verdict
+ * @param disputed.city - the city
+ * @param disputed.verdict - its verdict, `disputed`
+ * @returns the line
+ */
+function formatDisputed({ city, verdict }: DisputedCity): string {
+  return `  ${city.name} — fiche ${city.id} — ${polity(verdict.onMap)}, sous ${polity(verdict.disputedWith)}`
 }
 
 /**

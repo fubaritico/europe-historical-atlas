@@ -52,6 +52,8 @@
   "stateToDeclare": "Détenteur pas encore sur la carte ({count})",
   "stateCannotCompare": "Comparaison impossible ({count})",
   "stateAgrees": "Au bon endroit ({count})",
+  "stateDisputed": "En zone disputée ({count})",
+  "disputed": "En zone disputée : {onMap}, qui la tient selon les sources, partage le terrain avec {polity}, dessiné par-dessus.",
   "sortBy": "Trier les villes",
   "sortOn": "Trier les villes : {order}",
   "sortExport": "Ordre de l’export",

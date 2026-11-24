@@ -10,6 +10,7 @@ const STYLE: CityStyle = {
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
   cityRadius: 3,
+  cityPointRadius: 3,
   cityFontSize: 11,
 }
 
@@ -45,7 +46,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }],
+        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null, sharedColour: null }],
         STYLE,
         false,
         SIZE
@@ -68,8 +69,8 @@ describe('paintCities', () => {
       paintCities(
         ctx,
         [
-          { name: 'Lyon', at: [100, 50], colour: null, alert: null },
-          { name: 'Zadar', at: [300, 80], colour: null, alert: null },
+          { name: 'Lyon', at: [100, 50], colour: null, alert: null, sharedColour: null },
+          { name: 'Zadar', at: [300, 80], colour: null, alert: null, sharedColour: null },
         ],
         STYLE,
         false,
@@ -88,7 +89,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null }],
+        [{ name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null, sharedColour: null }],
         STYLE,
         true,
         SIZE
@@ -108,7 +109,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null }],
+        [{ name: 'Lyon', at: [100, 50], colour: null, alert: null, sharedColour: null }],
         STYLE,
         true,
         SIZE
@@ -125,7 +126,15 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Valencia', at: [100, 50], colour: '#3355aa', alert: 'missing' }],
+        [
+          {
+            name: 'Valencia',
+            at: [100, 50],
+            colour: '#3355aa',
+            alert: 'missing',
+            sharedColour: null,
+          },
+        ],
         STYLE,
         true,
         SIZE
@@ -142,11 +151,99 @@ describe('paintCities', () => {
       ])
     })
 
+    // CARTO-511, the dev's choice of 2026-11-24 on the workbench: the ring in the two polities' colours, in turn.
+    it('rings a city in a disputed zone with eight sectors, its holder’s colour and the other’s in turn', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          {
+            name: 'Miliana',
+            at: [100, 50],
+            colour: '#1e9802',
+            alert: 'disputed',
+            sharedColour: '#c07259',
+          },
+        ],
+        STYLE,
+        true,
+        SIZE
+      )
+
+      const sectors = calls.filter(({ op }) => op === 'stroke').map(({ stroke }) => stroke)
+      expect(sectors).toEqual(
+        Array.from({ length: 8 }, (_, index) => (index % 2 === 0 ? '#1e9802' : '#c07259'))
+      )
+      // The dark ring (8), the band between the light ring (4) and the status ring's edge (7) stroked down its middle
+      // (5.5) in eight arcs, the light ring, the dot
+      expect(calls.filter(({ op }) => op === 'arc').map(({ args }) => args[2])).toEqual([
+        8,
+        ...Array.from({ length: 8 }, () => 5.5),
+        4,
+        3,
+      ])
+    })
+
+    // Review QUAL-008: the other side — the polity drawn over it has no colour.
+    it('gives the cream to the sectors of a polity drawn over it with no colour', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          {
+            name: 'Velilla',
+            at: [100, 50],
+            colour: '#1e9802',
+            alert: 'disputed',
+            sharedColour: null,
+          },
+        ],
+        STYLE,
+        true,
+        SIZE
+      )
+
+      const sectors = calls.filter(({ op }) => op === 'stroke').map(({ stroke }) => stroke)
+      expect(sectors).toEqual(
+        Array.from({ length: 8 }, (_, index) => (index % 2 === 0 ? '#1e9802' : '#f3e7cd'))
+      )
+    })
+
+    it('gives a polity with no colour the light ring’s cream in a disputed ring, as it gives a hollow dot', () => {
+      const { ctx, calls } = recorder()
+      paintCities(
+        ctx,
+        [
+          {
+            name: 'Velilla',
+            at: [100, 50],
+            colour: null,
+            alert: 'disputed',
+            sharedColour: '#1e9802',
+          },
+        ],
+        STYLE,
+        true,
+        SIZE
+      )
+
+      const sectors = calls.filter(({ op }) => op === 'stroke').map(({ stroke }) => stroke)
+      expect(sectors.slice(0, 2)).toEqual(['#f3e7cd', '#1e9802'])
+    })
+
     it('rings a city to correct in yellow', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Metz', at: [100, 50], colour: '#3355aa', alert: 'toCorrect' }],
+        [
+          {
+            name: 'Metz',
+            at: [100, 50],
+            colour: '#3355aa',
+            alert: 'toCorrect',
+            sharedColour: null,
+          },
+        ],
         STYLE,
         true,
         SIZE
@@ -159,7 +256,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Toledo', at: [100, 50], colour: '#3355aa', alert: null }],
+        [{ name: 'Toledo', at: [100, 50], colour: '#3355aa', alert: null, sharedColour: null }],
         STYLE,
         true,
         SIZE
@@ -173,7 +270,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Caspe', at: [100, 50], colour: null, alert: 'missing' }],
+        [{ name: 'Caspe', at: [100, 50], colour: null, alert: 'missing', sharedColour: null }],
         STYLE,
         true,
         SIZE
@@ -202,8 +299,8 @@ describe('paintCities', () => {
       paintCities(
         ctx,
         [
-          { name: 'Lyon', at: [100, 50], colour: null, alert: null },
-          { name: 'Kiev', at: [2000, 50], colour: null, alert: null },
+          { name: 'Lyon', at: [100, 50], colour: null, alert: null, sharedColour: null },
+          { name: 'Kiev', at: [2000, 50], colour: null, alert: null, sharedColour: null },
         ],
         STYLE,
         false,
@@ -218,7 +315,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Lisbonne', at: [-20, 50], colour: null, alert: null }],
+        [{ name: 'Lisbonne', at: [-20, 50], colour: null, alert: null, sharedColour: null }],
         STYLE,
         false,
         SIZE
@@ -231,8 +328,8 @@ describe('paintCities', () => {
       paintCities(
         ctx,
         [
-          { name: 'Bergen', at: [100, -40], colour: null, alert: null },
-          { name: 'Tunis', at: [100, 640], colour: null, alert: null },
+          { name: 'Bergen', at: [100, -40], colour: null, alert: null, sharedColour: null },
+          { name: 'Tunis', at: [100, 640], colour: null, alert: null, sharedColour: null },
         ],
         STYLE,
         false,
@@ -246,8 +343,8 @@ describe('paintCities', () => {
       paintCities(
         ctx,
         [
-          { name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null },
-          { name: 'Kiev', at: [2000, 50], colour: '#3355aa', alert: null },
+          { name: 'Lyon', at: [100, 50], colour: '#3355aa', alert: null, sharedColour: null },
+          { name: 'Kiev', at: [2000, 50], colour: '#3355aa', alert: null, sharedColour: null },
         ],
         STYLE,
         true,
@@ -262,7 +359,7 @@ describe('paintCities', () => {
       const { ctx, calls } = recorder()
       paintCities(
         ctx,
-        [{ name: 'Brest', at: [-4, 50], colour: '#3355aa', alert: 'missing' }],
+        [{ name: 'Brest', at: [-4, 50], colour: '#3355aa', alert: 'missing', sharedColour: null }],
         STYLE,
         true,
         SIZE

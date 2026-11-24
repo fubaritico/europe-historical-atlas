@@ -118,6 +118,23 @@ export function suzerainsOf(document: YearDocument, polity: string): Set<string>
 }
 
 /**
+ * Whether two polities' common ground is an overlap — hatched — and not vassalage: neither is the other's suzerain, at
+ * any depth (`s02`, H-05a). **The one rule** the hatches are cut by ({@link overlapCandidates}) and a city in a disputed
+ * zone is judged by (the Cartographer's `cityVerdicts`, CARTO-511), so the two cannot part.
+ * @param above - each polity's suzerains at any depth ({@link suzerainsOf}), however the caller keeps them
+ * @param a - one polity's id
+ * @param b - the other's
+ * @returns `true` when their common ground is an overlap
+ */
+export function isOverlapPair(
+  above: (polity: string) => ReadonlySet<string>,
+  a: string,
+  b: string
+): boolean {
+  return !above(a).has(b) && !above(b).has(a)
+}
+
+/**
  * Whether two boxes share ground, edges included.
  * @param a - one box
  * @param b - the other
@@ -138,15 +155,14 @@ export function overlapCandidates(
   shapes: readonly PolityShape[]
 ): [PolityShape, PolityShape][] {
   const above = new Map(shapes.map((each) => [each.polity, suzerainsOf(document, each.polity)]))
+  // Every shape's suzerains are in the map, read once for all the pairs; a polity not in it never is asked
+  const suzerains = (polity: string): ReadonlySet<string> =>
+    above.get(polity) ?? suzerainsOf(document, polity)
   const pairs: [PolityShape, PolityShape][] = []
   for (const [i, a] of shapes.entries()) {
     for (const b of shapes.slice(i + 1)) {
       if (!boxesMeet(a.box, b.box)) continue
-      if (
-        above.get(a.polity)?.has(b.polity) === true ||
-        above.get(b.polity)?.has(a.polity) === true
-      )
-        continue
+      if (!isOverlapPair(suzerains, a.polity, b.polity)) continue
       pairs.push([a, b])
     }
   }

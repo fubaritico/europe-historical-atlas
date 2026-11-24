@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import { citiesToPaint, createCityAlertCache } from './cityAlertCache'
@@ -79,6 +80,36 @@ describe('createCityAlertCache', () => {
       )
       const after = cache.alertsOf(store.getState().document, store.getState().version, cities)
       expect([before.get('metz')?.alert, after.get('metz')?.alert]).toEqual(['toCorrect', null])
+    })
+
+    // CARTO-511, review QUAL-002: the bridge from the verdict to the ring's second colour.
+    it('marks Metz disputed, sharing the ground with a rival drawn over the Empire, and names the rival', () => {
+      const document = documentWithIds()
+      const first = document.anchors.length
+      for (const point of [
+        [2.5, 47.5],
+        [3.5, 47.5],
+        [3.5, 46.5],
+        [2.5, 46.5],
+      ] as [number, number][])
+        addAnchor(document, point, 0)
+      document.polities.push({
+        id: 'rival',
+        name: 'Rival',
+        rank: 'duchy',
+        status: 'country',
+        suzerain: null,
+        existsFrom: null,
+        existsTo: null,
+        colour: null,
+        wikidata: 'Q99',
+      })
+      closeRing(document, 'rival', [first, first + 1, first + 2, first + 3])
+      expect(createCityAlertCache().alertsOf(document, 0, [METZ]).get('metz')).toEqual({
+        alert: 'disputed',
+        holder: 'hre',
+        sharedWith: 'rival',
+      })
     })
 
     it('computes them again when the cities are read again', () => {

@@ -45,7 +45,9 @@ function levelText(verdict: CityVerdict): VerdictText | null {
  */
 export function verdictText(verdict: CityVerdict): VerdictText | null {
   if (verdict.kind === 'notEntered') return null
-  if (verdict.chain === null) return { key: verdict.kind, polity: verdict.bySources?.name ?? '' }
+  if (verdict.chain === null && verdict.kind !== 'disputed')
+    return { key: verdict.kind, polity: verdict.bySources?.name ?? '' }
+  if (verdict.kind === 'disputed') return chainText(verdict)
   return levelText(verdict) ?? chainText(verdict)
 }
 
@@ -57,6 +59,8 @@ export function verdictText(verdict: CityVerdict): VerdictText | null {
 function chainText(verdict: CityVerdict): VerdictText {
   const { kind, onMap } = verdict
   const polity = onMap?.name ?? ''
+  // Said with the polity of its chain (`onMap`) and the one on top it shares the ground with (CARTO-511)
+  if (kind === 'disputed') return { key: 'disputed', polity: verdict.disputedWith?.name ?? '' }
   if (kind === 'misplaced') return { key: onMap === null ? 'unclaimed' : 'misplacedChain', polity }
   if (kind === 'cannotCompare') return { key: 'cannotCompareMap', polity }
   return { key: kind, polity }

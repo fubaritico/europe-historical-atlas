@@ -85,11 +85,13 @@ describe('scene', () => {
         document,
         inputs(document, {
           viewport,
-          cities: [{ name: 'Corner', lonLat: [2, 46], holder: null, alert: null }],
+          cities: [
+            { name: 'Corner', lonLat: [2, 46], holder: null, alert: null, sharedWith: null },
+          ],
         })
       )
       expect(built.cities).toEqual([
-        { name: 'Corner', at: built.anchors[2], colour: null, alert: null },
+        { name: 'Corner', at: built.anchors[2], colour: null, alert: null, sharedColour: null },
       ])
     })
 
@@ -612,7 +614,7 @@ describe('holderColour', () => {
     if (hre !== undefined) hre.wikidata = 'Q12548'
     const held = inputs(document, {
       colours: new Map([['hre', '#3355aa']]),
-      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'hre', alert: null }],
+      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'hre', alert: null, sharedWith: null }],
     })
 
     expect(buildScene(document, { ...held, citiesAsPoints: true }).cities[0]?.colour).toBe(
@@ -625,13 +627,40 @@ describe('holderColour', () => {
   it("hands a city's alert to the painter only when the cities are drawn as points", () => {
     const document = sharedBorderDocument()
     const missing = inputs(document, {
-      cities: [{ name: 'Caspe', lonLat: [1, 47], holder: null, alert: 'missing' }],
+      cities: [
+        { name: 'Caspe', lonLat: [1, 47], holder: null, alert: 'missing', sharedWith: null },
+      ],
     })
 
     expect(buildScene(document, { ...missing, citiesAsPoints: true }).cities[0]?.alert).toBe(
       'missing'
     )
     expect(buildScene(document, missing).cities[0]?.alert).toBeNull()
+  })
+
+  // CARTO-511, review QUAL-001: the ring's second colour, the polity it shares the ground with.
+  it('hands the colour of the polity a disputed city shares the ground with, only as points', () => {
+    const document = sharedBorderDocument()
+    const disputed = inputs(document, {
+      colours: new Map([
+        ['hre', '#3355aa'],
+        ['fr-couronne', '#aa5533'],
+      ]),
+      cities: [
+        {
+          name: 'Metz',
+          lonLat: [3, 47],
+          holder: 'hre',
+          alert: 'disputed',
+          sharedWith: 'fr-couronne',
+        },
+      ],
+    })
+
+    expect(
+      buildScene(document, { ...disputed, citiesAsPoints: true }).cities[0]?.sharedColour
+    ).toBe('#aa5533')
+    expect(buildScene(document, disputed).cities[0]?.sharedColour).toBeNull()
   })
 })
 

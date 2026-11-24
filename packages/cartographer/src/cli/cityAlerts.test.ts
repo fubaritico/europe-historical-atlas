@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
+import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import {
@@ -191,7 +192,72 @@ describe('parseCityAlertArgs', () => {
   })
 })
 
+/**
+ * The map with Normandy drawn over France, owing it no homage — hatched ground at 0.5–1.5° E, 46.5–47.5° N, Orléans
+ * in it (CARTO-511).
+ * @returns the map
+ */
+function mapWithRival() {
+  const document = map()
+  const first = document.anchors.length
+  for (const point of [
+    [0.5, 47.5],
+    [1.5, 47.5],
+    [1.5, 46.6],
+    [0.5, 46.6],
+  ] as [number, number][])
+    addAnchor(document, point, 0)
+  document.polities.push({
+    id: 'normandy',
+    name: 'Normandie',
+    rank: 'duchy',
+    status: 'country',
+    suzerain: null,
+    existsFrom: null,
+    existsTo: null,
+    colour: null,
+    wikidata: 'Q999',
+  })
+  closeRing(document, 'normandy', [first, first + 1, first + 2, first + 3])
+  return document
+}
+
 describe('cityAlertReport', () => {
+  // CARTO-511: a city of its chain's polity, under another drawn over it — listed apart, never on alert.
+  describe('a disputed zone', () => {
+    it('lists apart a city in a disputed zone, and keeps it off the alerts', () => {
+      const report = cityAlertReport(mapWithRival(), [RIGHT, ACROSS], null)
+
+      expect(report.alerted.map(({ city: { id } }) => id)).toEqual(['2'])
+      expect(report.disputed.map(({ city: { id }, verdict: { kind } }) => [id, kind])).toEqual([
+        ['1', 'disputed'],
+      ])
+    })
+
+    it('tells a city in a disputed zone on one line: the polity holding it, under the other', () => {
+      const text = formatCityAlerts(cityAlertReport(mapWithRival(), [RIGHT], null), '1100')
+
+      expect(text.split('\n')).toEqual([
+        'Carte 1100 : 0 ville(s) en alerte sur 1.',
+        '',
+        'En zone disputée, pas en alerte — à revoir si la hachure n’est pas voulue : 1',
+        '  Orléans — fiche 1 — Reaume de France (Q70972), sous Normandie (Q999)',
+        '',
+      ])
+    })
+
+    // Review QUAL-007: the cities on alert first, the disputed ones apart after them.
+    it('tells the disputed cities after the cities on alert', () => {
+      const lines = formatCityAlerts(
+        cityAlertReport(mapWithRival(), [RIGHT, ACROSS], null),
+        '1100'
+      ).split('\n')
+      const alert = lines.findIndex((line) => line.startsWith('Metz — fiche 2'))
+      const apart = lines.findIndex((line) => line.startsWith('En zone disputée'))
+      expect([alert >= 0, apart > alert]).toEqual([true, true])
+    })
+  })
+
   describe('happy path', () => {
     it('keeps the cities whose dot is on alert, and counts every city judged', () => {
       const report = cityAlertReport(map(), [RIGHT, ACROSS, UNDRAWN, UNENTERED], null)
@@ -256,7 +322,11 @@ describe('cityAlertReport', () => {
     it('leaves out a city of another year, as the canvas does', () => {
       const later = { ...ACROSS, id: '6', date: inYear(1200) }
 
-      expect(cityAlertReport(map(), [later], null)).toEqual({ judged: 0, alerted: [] })
+      expect(cityAlertReport(map(), [later], null)).toEqual({
+        judged: 0,
+        alerted: [],
+        disputed: [],
+      })
     })
   })
 
@@ -270,7 +340,7 @@ describe('cityAlertReport', () => {
     })
 
     it('says nothing is on alert on a map with no city', () => {
-      expect(cityAlertReport(map(), [], null)).toEqual({ judged: 0, alerted: [] })
+      expect(cityAlertReport(map(), [], null)).toEqual({ judged: 0, alerted: [], disputed: [] })
     })
   })
 })
@@ -374,7 +444,7 @@ describe('formatCityAlerts', () => {
     })
 
     it('says only the head when no city is on alert', () => {
-      expect(formatCityAlerts({ judged: 2, alerted: [] }, '1100')).toBe(
+      expect(formatCityAlerts({ judged: 2, alerted: [], disputed: [] }, '1100')).toBe(
         'Carte 1100 : 0 ville(s) en alerte sur 2.\n'
       )
     })

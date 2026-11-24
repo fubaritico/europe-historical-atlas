@@ -52,6 +52,8 @@
   "stateToDeclare": "Holder not on the map yet ({count})",
   "stateCannotCompare": "Cannot be compared ({count})",
   "stateAgrees": "At the right place ({count})",
+  "stateDisputed": "In a disputed zone ({count})",
+  "disputed": "In a disputed zone: {onMap}, which holds it by the sources, shares the ground with {polity}, drawn over it.",
   "sortBy": "Sort the cities",
   "sortOn": "Sort the cities: {order}",
   "sortExport": "The export’s order",

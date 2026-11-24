@@ -100,6 +100,8 @@ export interface SceneInputs {
     readonly holder: string | null
     /** What its point says: a holder to enter, the map to correct, or `null` when all is well (CARTO-389). */
     readonly alert: CityAlert | null
+    /** In a disputed zone, the registry id of the polity it shares the ground with; `null` otherwise (CARTO-511). */
+    readonly sharedWith: string | null
   }[]
   /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
   citiesAsPoints: boolean
@@ -427,12 +429,13 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     ),
     selected: inputs.selected,
     selectedEdge: inputs.selectedEdge ?? null,
-    cities: inputs.cities.map(({ name, lonLat, holder, alert }) => ({
+    cities: inputs.cities.map(({ name, lonLat, holder, alert, sharedWith }) => ({
       name,
       at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),
       // Read only as points: a named city's dot keeps its ink.
       colour: inputs.citiesAsPoints ? holderColour(inputs.colours, holder) : null,
       alert: inputs.citiesAsPoints ? alert : null,
+      sharedColour: inputs.citiesAsPoints ? holderColour(inputs.colours, sharedWith) : null,
     })),
     citiesAsPoints: inputs.citiesAsPoints,
     hatches: projectedHatches(inputs.overlaps, inputs.colours, inputs.viewport),

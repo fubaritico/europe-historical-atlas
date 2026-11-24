@@ -51,7 +51,15 @@ const VERDICTS: ReadonlyMap<string, CityVerdict> = new Map(
     ] as const satisfies readonly (readonly [string, CityVerdictKind])[]
   ).map(([id, kind]) => [
     id,
-    { onMap: null, bySources: null, kind, chain: null, expected: null, expectedOnMap: null },
+    {
+      onMap: null,
+      bySources: null,
+      kind,
+      chain: null,
+      expected: null,
+      expectedOnMap: null,
+      disputedWith: null,
+    },
   ])
 )
 
@@ -73,6 +81,35 @@ describe('citiesSorted', () => {
 
     it('puts the map to correct first, then no holder, then the right place', () => {
       expect(names('verification')).toEqual(['Évreux', 'Aachen', 'Paris', 'Metz', 'Trier'])
+    })
+
+    // CARTO-511, review QUAL-004: a disputed city after those that cannot be compared, before the right place.
+    it('puts a city in a disputed zone after one that cannot be compared and before one at the right place', () => {
+      const kinds: readonly [string, CityVerdictKind][] = [
+        ['Metz', 'agrees'],
+        ['Évreux', 'disputed'],
+        ['Paris', 'cannotCompare'],
+      ]
+      const verdicts = new Map(
+        kinds.map(([id, kind]): [string, CityVerdict] => [
+          id,
+          {
+            onMap: null,
+            bySources: null,
+            kind,
+            chain: null,
+            expected: null,
+            expectedOnMap: null,
+            disputedWith: null,
+          },
+        ])
+      )
+      const three = CITIES.slice(0, 3)
+      expect(citiesSorted(three, 'verification', verdicts).map(({ name }) => name)).toEqual([
+        'Paris',
+        'Évreux',
+        'Metz',
+      ])
     })
 
     it('groups by holder by the sources, by name, the cities with no holder last', () => {

@@ -144,6 +144,7 @@ const STYLE: PaintStyle = {
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
   cityRadius: 3,
+  cityPointRadius: 3,
   cityFontSize: 11,
   hatchWidth: 6,
 }

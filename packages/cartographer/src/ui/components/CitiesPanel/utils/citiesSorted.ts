@@ -3,7 +3,8 @@ import type { CityMark, CitySort } from '../../../../state/citiesSlice'
 
 /**
  * The rank of each verification, by verification: the map to correct first (the yellow of CARTO-386), then the cities
- * with no holder (the red), then those that cannot be compared, then those at the right place.
+ * with no holder (the red), then those that cannot be compared, then those in a disputed zone (CARTO-511), then those
+ * at the right place.
  */
 const VERIFICATION_RANK: Readonly<Record<CityVerdictKind, number>> = {
   misplaced: 0,
@@ -11,7 +12,8 @@ const VERIFICATION_RANK: Readonly<Record<CityVerdictKind, number>> = {
   notEntered: 2,
   incomplete: 3,
   cannotCompare: 4,
-  agrees: 5,
+  disputed: 5,
+  agrees: 6,
 }
 
 /** Names compared as a reader would: accents and case ignored (« Évreux » beside « Evreux »). */

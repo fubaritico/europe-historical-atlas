@@ -234,7 +234,8 @@ Scenario: by state — CARTO-369, the dev, 2026-11-07
   When I open the advanced filters
   Then « Par vérification » (the map checked against the sources; my word, taken by the dev — « état » read as a State) heads
     the dialogue: « Pas au bon endroit (n) », « Détenteur pas encore sur la carte (n) »,
-    « Comparaison impossible (n) », « Au bon endroit (n) » — every state, a state with no city counted 0
+    « Comparaison impossible (n) », « En zone disputée (n) » (CARTO-511), « Au bon endroit (n) » — every state, a state
+    with no city counted 0
   And « Sans détenteur » stays with the countries, under « Pas encore sur la carte », where CARTO-370 put it
   When I tick « Pas au bon endroit »
   Then only the cities the map puts elsewhere stay in the list, and « Afficher les N villes trouvées » shows them
@@ -289,7 +290,31 @@ Scenario: a city whose holder cannot be coloured
   Given a city whose holder is not entered, has no Wikidata id, or is not a polity of the map
   When the cities are shown as points
   Then it is a hollow grey ring: nothing is coloured that the sources do not say
+
+Scenario: a city in a disputed zone — CARTO-511, the historian's request and the dev's mark, 2026-11-24
+  # Miliana, held by the Almoravids by its chain, under the Hammadids drawn over them: hatched ground, two powers.
+  Given the polity painted on top of a city is not in its chain
+  And another polity under it is, and neither of the two is the other's suzerain — their common ground is hatched
+  When the cities are shown as points
+  Then its point is a dot in the colour of the polity of its chain, its status ring cut in eight sectors, that
+    polity's colour and the other's in turn — a polity with no colour gives its sectors the light ring's cream
+  And every point is drawn at radius 4 (it was 3: a ring in two colours did not read — the dev, on the workbench)
+  And its box says "In a disputed zone: <the polity of its chain>, which holds it by the sources, shares the ground
+    with <the other>, drawn over it." in an information, neither a warning nor an error — a sheet with no title, its
+    holder entered, is judged the same way
+  And « Par vérification » counts it under « En zone disputée (n) », between « Comparaison impossible » and « Au bon
+    endroit »
+  And `pnpm cities:alerts` lists it apart, not on alert: a polity spilling over its neighbour by a slip of the hand
+    reads the same, the model declaring no disputed zone
+
+Scenario: a vassal drawn inside its suzerain is no disputed zone
+  Given a duchy drawn inside its kingdom, owing it homage, over a city whose chain names the kingdom only
+  Then the city is not at the right place, as before: a vassal inside its suzerain is vassalage, never hatched
 ```
+
+> **Not built (the dev, 2026-11-24)**: the status rings pulsing — the yellow and the red from white to their ink, a
+> disputed ring's sectors from one polity's colour to the other's. It needs the canvas cut in two layers, the cities
+> and the edit strokes redrawn alone while a point pulses — CARTO-512.
 
 ## The city chosen on the map, and its information box (CARTO-384, the dev, 2026-11-07)
 

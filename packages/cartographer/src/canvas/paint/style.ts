@@ -55,6 +55,9 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
   cityRadius: 3,
+  // A point's dot, larger than a named city's (CARTO-511, the dev's choice of 2026-11-24): at 3 a ring cut in two
+  // colours did not read.
+  cityPointRadius: 4,
   cityFontSize: 11,
   // An overlap's stripes (CARTO-364): wide enough to read a colour, narrow enough to read two in a small piece.
   hatchWidth: 10,
@@ -92,6 +95,7 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     riverWidthMajor: style.riverWidthMajor * pixelRatio,
     riverWidthMinor: style.riverWidthMinor * pixelRatio,
     cityRadius: style.cityRadius * pixelRatio,
+    cityPointRadius: style.cityPointRadius * pixelRatio,
     cityFontSize: style.cityFontSize * pixelRatio,
     hatchWidth: style.hatchWidth * pixelRatio,
   }

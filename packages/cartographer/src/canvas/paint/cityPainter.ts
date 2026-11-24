@@ -33,9 +33,10 @@ export interface CityCanvas {
  * What a city's point says on the map (CARTO-389, the dev, 2026-11-08: *"to see at first glance the cities that should
  * have a source, and to prioritise the search for sources by zone"*): **`missing`**, red — nobody has entered its
  * holder; **`toCorrect`**, yellow — the map puts it elsewhere, or lacks its holder. The same two levels as the list's
- * names (CARTO-386); `canvas/cityVerdict`'s `cityAlert` reads them from a verdict.
+ * names (CARTO-386); `canvas/cityVerdict`'s `cityAlert` reads them from a verdict. **`disputed`** (CARTO-511) — right
+ * by the sources, on ground two polities share: its ring in both their colours.
  */
-export type CityAlert = 'missing' | 'toCorrect'
+export type CityAlert = 'missing' | 'toCorrect' | 'disputed'
 
 /** The cities' colours and sizes, in device pixels. */
 export interface CityStyle {
@@ -47,8 +48,10 @@ export interface CityStyle {
   cityMissing: string
   /** The ring of a city to correct on the map — the theme's `--caution` (CARTO-389). */
   cityToCorrect: string
-  /** The dot's radius. */
+  /** A named city's dot's radius. */
   cityRadius: number
+  /** A point's coloured dot's radius — its rings grow from it (CARTO-511). */
+  cityPointRadius: number
   /** The name's size. */
   cityFontSize: number
 }
@@ -63,6 +66,11 @@ export interface CityOnScreen {
   readonly colour: string | null
   /** What its point says (CARTO-389), or `null` when all is well — and always `null` for a named city. */
   readonly alert: CityAlert | null
+  /**
+   * In a disputed zone, the colour of the polity on top it shares the ground with; `null` otherwise, or when that
+   * polity has no colour (CARTO-511).
+   */
+  readonly sharedColour: string | null
 }
 
 /** A full turn, for an arc. */
@@ -123,7 +131,7 @@ export function paintCities(
 ): void {
   if (cities.length === 0) return
   if (asPoints) {
-    const around = style.cityRadius * POINT_REACH
+    const around = style.cityPointRadius * POINT_REACH
     for (const city of cities) {
       if (onCanvas(city.at, size, { left: around, around })) paintPoint(ctx, city, style)
     }
@@ -164,34 +172,74 @@ function disc(ctx: CityCanvas, at: readonly [number, number], radius: number, in
   ctx.fill()
 }
 
-/** Each alert's ring, read from the style. */
-const STATUS_INK: Readonly<Record<CityAlert, (style: CityStyle) => string>> = {
-  missing: (style) => style.cityMissing,
-  toCorrect: (style) => style.cityToCorrect,
+/** How many sectors a disputed point's ring is cut into, the two colours in turn — a hatch bent round. */
+const DISPUTED_SECTORS = 8
+
+/**
+ * Lay a disputed point's status ring (CARTO-511, the dev's choice of 2026-11-24 on the workbench): sectors in turn of
+ * the colour of the polity holding it and of the one it shares the ground with, starting at 45° as the hatches lean.
+ * **A polity with no colour gives its sectors the light ring's cream** — as it gives a hollow dot: nothing is coloured
+ * that the map does not colour.
+ * @param ctx - the context
+ * @param city - the city on screen
+ * @param style - the colours and sizes, in device pixels
+ * @param band - the ring's inner and outer radius
+ * @param band.inner - its inner radius
+ * @param band.outer - its outer radius
+ */
+function paintSharedBand(
+  ctx: CityCanvas,
+  city: CityOnScreen,
+  style: CityStyle,
+  band: { readonly inner: number; readonly outer: number }
+): void {
+  const holder = city.colour ?? style.cityHalo
+  const shared = city.sharedColour ?? style.cityHalo
+  ctx.lineWidth = band.outer - band.inner
+  for (let index = 0; index < DISPUTED_SECTORS; index += 1) {
+    const from = (index / DISPUTED_SECTORS) * FULL_TURN - FULL_TURN / 8
+    ctx.beginPath()
+    ctx.arc(
+      city.at[0],
+      city.at[1],
+      (band.inner + band.outer) / 2,
+      from,
+      from + FULL_TURN / DISPUTED_SECTORS
+    )
+    ctx.strokeStyle = index % 2 === 0 ? holder : shared
+    ctx.stroke()
+  }
 }
 
 /**
  * The rings round a point (CARTO-389). **All well**: a dark ring outside a light one, so a point reads on light ground
  * and on dark alike — the look of 2026-11-05, unchanged. **With an alert** (the dev, 2026-11-08, after trying a status
  * ring between two light ones, *"not very readable"*: *"the colour, a white stroke, a thick status stroke, a black
- * stroke"*): the light ring, the status ring — red for a problem in the data, yellow to correct on the map,
- * three strokes wide — and the dark
- * ring outside, the same edge as a city where all is well.
+ * stroke"*): the light ring, the status ring — red for a problem in the data, yellow to correct on the map, the two
+ * polities' colours in turn in a disputed zone (CARTO-511) — three strokes wide, and the dark ring outside, the same
+ * edge as a city where all is well.
  * @param ctx - the context
  * @param city - the city on screen
  * @param style - the colours and sizes, in device pixels
  */
 function paintRings(ctx: CityCanvas, city: CityOnScreen, style: CityStyle): void {
-  const radius = style.cityRadius
-  const ring = style.cityRadius * RING_SCALE
+  const radius = style.cityPointRadius
+  const ring = radius * RING_SCALE
   if (city.alert === null) {
     disc(ctx, city.at, radius + 2 * ring, style.cityInk)
     disc(ctx, city.at, radius + ring, style.cityHalo)
     return
   }
-  const status = STATUS_INK[city.alert](style)
   disc(ctx, city.at, radius + 5 * ring, style.cityInk)
-  disc(ctx, city.at, radius + 4 * ring, status)
+  if (city.alert === 'disputed')
+    paintSharedBand(ctx, city, style, { inner: radius + ring, outer: radius + 4 * ring })
+  else
+    disc(
+      ctx,
+      city.at,
+      radius + 4 * ring,
+      city.alert === 'missing' ? style.cityMissing : style.cityToCorrect
+    )
   disc(ctx, city.at, radius + ring, style.cityHalo)
 }
 
@@ -207,9 +255,9 @@ function paintPoint(ctx: CityCanvas, city: CityOnScreen, style: CityStyle): void
   paintRings(ctx, city, style)
   const [x, y] = city.at
   ctx.beginPath()
-  ctx.arc(x, y, style.cityRadius, 0, FULL_TURN)
+  ctx.arc(x, y, style.cityPointRadius, 0, FULL_TURN)
   if (city.colour === null) {
-    ctx.lineWidth = style.cityRadius * RING_SCALE
+    ctx.lineWidth = style.cityPointRadius * RING_SCALE
     ctx.strokeStyle = style.cityInk
     ctx.stroke()
     return

@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest'
 import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { byChain, bySovereignLevel, cityAlert, cityVerdicts, paintedHolder } from './cityVerdict'
+import {
+  byChain,
+  bySovereignLevel,
+  cityAlert,
+  cityVerdicts,
+  mapPolities,
+  paintedHolder,
+} from './cityVerdict'
 
 import type { CityVerdictKind, MapPolities } from './cityVerdict'
 import type { CityMark } from '../state/citiesSlice'
@@ -143,6 +150,142 @@ describe('cityVerdicts', () => {
   })
 })
 
+/**
+ * The duchy over France with France given a Wikidata id, the duchy owing homage or not — a polity drawn over another
+ * that is not its suzerain makes hatched ground (CARTO-511).
+ * @param suzerain - the duchy's suzerain: `fr-couronne` for a vassal inside its kingdom, `null` for two powers
+ * @returns the document
+ */
+function overFrance(suzerain: string | null) {
+  const document = withDuchy()
+  for (const polity of document.polities) {
+    if (polity.id === 'fr-couronne') polity.wikidata = 'Q142'
+    if (polity.id === 'duchy') polity.suzerain = suzerain
+  }
+  return document
+}
+
+/** A chain naming France alone, stopping short. */
+const FRANCE_CHAIN: ContentChainReading[] = [
+  { titles: [{ name: 'Philippe — France', wikidata: 'Q142' }], end: 'unknown' },
+]
+
+// CARTO-511, the historian's request of 2026-11-24 and the dev's mark: Velilla, Miliana, Città di Castello.
+describe('cityVerdicts — a disputed zone', () => {
+  describe('happy path', () => {
+    it('puts in a disputed zone a city whose chain names the polity under the one painted on top', () => {
+      const verdict = cityVerdicts(overFrance(null), [{ ...CITY, chain: FRANCE_CHAIN }]).get('c')
+      expect([verdict?.kind, verdict?.onMap?.id, verdict?.disputedWith?.id]).toEqual([
+        'disputed',
+        'fr-couronne',
+        'duchy',
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('puts in a disputed zone a sheet with no title whose holder is the polity under', () => {
+      const city = { ...CITY, holder: { name: 'France', wikidata: 'Q142' } }
+      expect(cityVerdicts(overFrance(null), [city]).get('c')?.kind).toBe('disputed')
+    })
+
+    it('paints a disputed city in the colour of the polity of its chain, not of the one on top', () => {
+      const document = overFrance(null)
+      const verdict = cityVerdicts(document, [{ ...CITY, chain: FRANCE_CHAIN }]).get('c')
+      if (verdict === undefined) throw new Error('no verdict')
+      expect(paintedHolder(verdict, mapPolities(document))).toBe('fr-couronne')
+    })
+
+    // Review QUAL-003: the sovereign's level — the first judgement misplaced, not incomplete.
+    it('puts in a disputed zone a city whose chain reaches the sovereign drawn under, and names the title checked', () => {
+      const crowned: ContentChainReading[] = [
+        {
+          titles: [
+            { name: 'Comte — Vendôme', wikidata: 'Q100' },
+            { name: 'Philippe — France', wikidata: 'Q142' },
+          ],
+          end: 'sovereign',
+        },
+      ]
+      const verdict = cityVerdicts(overFrance(null), [{ ...CITY, chain: crowned }]).get('c')
+      expect([verdict?.kind, verdict?.expected, verdict?.disputedWith?.id]).toEqual([
+        'disputed',
+        'Philippe — France',
+        'duchy',
+      ])
+    })
+
+    // Review QUAL-003: past a polity under that shares no hatch with the top one, to the next.
+    it('looks past a suzerain of the polity on top to the next polity under it', () => {
+      const document = overFrance(null)
+      const first = document.anchors.length
+      for (const point of [
+        [0.8, 47.2],
+        [1.2, 47.2],
+        [1.2, 46.8],
+        [0.8, 46.8],
+      ] as [number, number][])
+        addAnchor(document, point, 0)
+      document.polities.push({
+        id: 'county',
+        name: 'Comté',
+        rank: 'county',
+        status: 'country',
+        suzerain: 'duchy',
+        existsFrom: null,
+        existsTo: null,
+        colour: null,
+        wikidata: 'Q7',
+      })
+      closeRing(document, 'county', [first, first + 1, first + 2, first + 3])
+      const verdict = cityVerdicts(document, [{ ...CITY, chain: FRANCE_CHAIN }]).get('c')
+      expect([verdict?.kind, verdict?.onMap?.id, verdict?.disputedWith?.id]).toEqual([
+        'disputed',
+        'fr-couronne',
+        'county',
+      ])
+    })
+
+    it('judges against the polity on top first: a city right there is never disputed', () => {
+      const chain = [{ titles: [{ name: 'Duc', wikidata: 'Q1' }], end: 'unknown' as const }]
+      const verdict = cityVerdicts(overFrance(null), [{ ...CITY, chain }]).get('c')
+      expect([verdict?.kind, verdict?.disputedWith]).toEqual(['agrees', null])
+    })
+  })
+
+  describe('managed errors', () => {
+    // The hatches' rule: a duchy inside its kingdom is vassalage — a city there is wrong, never disputed.
+    it('keeps wrong a city in a vassal drawn inside its suzerain when only the suzerain is in its chain', () => {
+      const verdict = cityVerdicts(overFrance('fr-couronne'), [
+        { ...CITY, chain: FRANCE_CHAIN },
+      ]).get('c')
+      expect([verdict?.kind, verdict?.onMap?.id, verdict?.disputedWith]).toEqual([
+        'incomplete',
+        'duchy',
+        null,
+      ])
+    })
+
+    it('keeps wrong a city whose chain names none of the polities under it', () => {
+      const elsewhere = [{ titles: [{ name: 'Comte', wikidata: 'Q9' }], end: 'unknown' as const }]
+      expect(cityVerdicts(overFrance(null), [{ ...CITY, chain: elsewhere }]).get('c')?.kind).toBe(
+        'incomplete'
+      )
+    })
+  })
+
+  // L4: N/A — no throw on this path.
+
+  describe('edge cases', () => {
+    it('judges a city off the duchy against France alone, never disputed', () => {
+      const verdict = cityVerdicts(overFrance(null), [
+        { ...CITY, lon: 0.2, chain: FRANCE_CHAIN },
+      ]).get('c')
+      expect([verdict?.kind, verdict?.disputedWith]).toEqual(['agrees', null])
+    })
+  })
+})
+
 // CARTO-389, the dev, 2026-11-08: the point says which cities need a source (red) or the map to change (yellow).
 describe('cityAlert', () => {
   describe('happy path', () => {
@@ -158,6 +301,10 @@ describe('cityAlert', () => {
 
     it('raises nothing for a city where all is well', () => {
       expect(cityAlert('agrees')).toBeNull()
+    })
+
+    it('raises « disputed », its own mark, for a city in a disputed zone (CARTO-511)', () => {
+      expect(cityAlert('disputed')).toBe('disputed')
     })
   })
 
@@ -259,6 +406,7 @@ function verdict(kind: CityVerdictKind, chain: ContentChainReading[] | null) {
     chain,
     expected: null,
     expectedOnMap: null,
+    disputedWith: null,
   }
 }
 

@@ -1,12 +1,12 @@
+import { isOverlapPair, suzerainsOf } from '@europe-historical-atlas/core/data/overlaps'
 import { isIdentified, sameTerritory } from '@europe-historical-atlas/core/data/territoryMatch'
 
-import { polityLocator } from '../geometry/fillHit'
+import { politiesLocator } from '../geometry/fillHit'
 
 import { projectedTerritories } from './paint/scene'
 
 import type { CityAlert } from './paint/cityPainter'
 import type { CityHolder, CityMark } from '../state/citiesSlice'
-import type { Point } from '../viewport/viewport'
 import type { ContentChainReading } from '@europe-historical-atlas/core/data/contentFormat'
 import type { TerritoryIds } from '@europe-historical-atlas/core/data/territoryMatch'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
@@ -42,6 +42,14 @@ export type CityVerdictKind =
   | 'toDeclare'
   /** The map has the sources' holder under the city. */
   | 'agrees'
+  /**
+   * **In a disputed zone** (CARTO-511): the polity on top is not in the city's chain, but another polity under it is,
+   * and the two share hatched ground — neither is the other's suzerain, at any depth, the hatches' own rule
+   * (`data/overlaps`). Right by the sources, on ground the map says two polities hold. A slip of the hand that spills
+   * a polity over its neighbour reads the same: the model declares no disputed zone (the dev, 2026-11-06), so the
+   * hatching on the map and this state are where the author sees it.
+   */
+  | 'disputed'
   /** The map has another polity, or none, under the city — by its chain, one that is not in it (CARTO-435). */
   | 'misplaced'
   /**
@@ -52,8 +60,13 @@ export type CityVerdictKind =
 
 /** Both answers and their comparison. */
 export interface CityVerdict {
-  /** The polity the map has under the city, or `null` over ground nobody claims. */
+  /**
+   * The polity the map has under the city — the one painted on top, or, in a disputed zone, the one under it that holds
+   * it by the sources, by its chain or by the holder entered —; `null` over ground nobody claims.
+   */
   readonly onMap: PolityOnMap | null
+  /** In a disputed zone, the polity on top it shares the ground with; `null` otherwise (CARTO-511). */
+  readonly disputedWith: PolityOnMap | null
   /** The holder by the sources, or `null` while not entered. */
   readonly bySources: CityHolder | null
   /** Whether they agree, and if not, why. */
@@ -187,22 +200,12 @@ function checkedLevel(reading: ContentChainReading, map: MapPolities): number {
 }
 
 /**
- * The polity the map has under a point: the territories' rings tested in longitude and latitude, where both the
- * anchors and the city are — the one painted last wins, as on the canvas. Mercator keeps a point inside or outside a
- * ring.
+ * A polity of the map under a city, as the verdict compares it: its name and what it is recognised by.
  * @param document - the year open, for the polities' names and ids
- * @param locate - which polity's territory a point is in, over the territories in longitude and latitude, prepared
- *   once for every city (`geometry/fillHit.polityLocator`)
- * @param lonLat - the point, longitude first
- * @returns the polity, or `null` over ground nobody claims
+ * @param id - the polity's registry id, as the territories carry it
+ * @returns the polity
  */
-function polityOnMap(
-  document: YearDocument,
-  locate: (at: Point) => string | null,
-  lonLat: [number, number]
-): PolityOnMap | null {
-  const id = locate(lonLat)
-  if (id === null) return null
+function polityOnMap(document: YearDocument, id: string): PolityOnMap {
   const polity = document.polities.find((candidate) => candidate.id === id)
   // A claim naming a polity the registry lacks is never in the territories (`projectedTerritories`): the id stands in
   // only where that guard were broken, visibly an id rather than a plausible name — as `featureUnder` does.
@@ -233,9 +236,64 @@ export function byChain(
   return chain.some((reading) => reading.end === 'unknown') ? 'incomplete' : 'misplaced'
 }
 
+/** One polity under a city judged: the verdict's kind, and the title checked with the name the map gives it. */
+interface Judgement {
+  /** The kind. */
+  readonly kind: CityVerdictKind
+  /** The title checked, by its name, or `null`. */
+  readonly expected: string | null
+  /** The name the map gives that title's polity, or `null`. */
+  readonly expectedOnMap: string | null
+}
+
+const plain = (kind: CityVerdictKind): Judgement => ({
+  kind,
+  expected: null,
+  expectedOnMap: null,
+})
+
+/**
+ * Judge a city against one polity under it — by the chain's sovereign level, by the chain, or by the holder entered.
+ * @param city - the city
+ * @param onMap - the polity under it, or `null` over ground nobody claims
+ * @param map - the map's polities
+ * @returns the judgement
+ */
+function judged(city: CityMark, onMap: PolityOnMap | null, map: MapPolities): Judgement {
+  const crowned = city.chain?.find((reading) => reading.end === 'sovereign')
+  if (crowned !== undefined) return bySovereignLevel(crowned, onMap, map)
+  if (city.chain !== null) return plain(byChain(city.chain, onMap))
+  const bySources = city.holder
+  if (bySources === null) return plain('notEntered')
+  // A sheet with no title: its holder entered as text carries a Wikidata id and no CMS territory, so it is compared
+  // by its id alone — deliberately (review QUAL-001, CARTO-450)
+  if (bySources.wikidata === null) return plain('cannotCompare')
+  if (map.find(bySources) === null) return plain('toDeclare')
+  return plain(onMap !== null && sameTerritory(onMap, bySources) ? 'agrees' : 'misplaced')
+}
+
+/**
+ * Each polity's suzerains at any depth, read once for one judging of the year — the document is edited live, so the
+ * memo lives no longer than the call that makes it (review ARCH-003).
+ * @param document - the year open
+ * @returns the suzerains of a polity, by its id
+ */
+function suzerainsMemo(document: YearDocument): (polity: string) => ReadonlySet<string> {
+  const known = new Map<string, ReadonlySet<string>>()
+  return (polity) => {
+    const kept = known.get(polity)
+    if (kept !== undefined) return kept
+    const read = suzerainsOf(document, polity)
+    known.set(polity, read)
+    return read
+  }
+}
+
 /**
  * Compare, for each city, who holds it on the map with who holds it by the sources — the territories projected once
- * for them all.
+ * for them all. **Judged against the polity on top first, as the canvas paints it**; where that one is not in the
+ * city's chain, against each other polity under it sharing hatched ground with it: the first right one makes the
+ * city *disputed* (CARTO-511), never plainly right.
  * @param document - the year open
  * @param cities - the cities of that year
  * @returns each city's verdict, by its id
@@ -244,32 +302,32 @@ export function cityVerdicts(
   document: YearDocument,
   cities: readonly CityMark[]
 ): ReadonlyMap<string, CityVerdict> {
-  const locate = polityLocator(projectedTerritories(document, document.anchors))
+  const under = politiesLocator(projectedTerritories(document, document.anchors))
   const map = mapPolities(document)
+  const above = suzerainsMemo(document)
   return new Map(
     cities.map((city) => {
-      const onMap = polityOnMap(document, locate, [city.lon, city.lat])
-      const bySources = city.holder
+      const [top, ...below] = under([city.lon, city.lat])
+      const onTop = top === undefined ? null : polityOnMap(document, top)
       const verdict = (
-        kind: CityVerdictKind,
-        expected: string | null = null,
-        expectedOnMap: string | null = null
+        judgement: Judgement,
+        onMap: PolityOnMap | null,
+        disputedWith: PolityOnMap | null
       ): [string, CityVerdict] => [
         city.id,
-        { onMap, bySources, kind, chain: city.chain, expected, expectedOnMap },
+        { ...judgement, onMap, disputedWith, bySources: city.holder, chain: city.chain },
       ]
-      const crowned = city.chain?.find((reading) => reading.end === 'sovereign')
-      if (crowned !== undefined) {
-        const { kind, expected, expectedOnMap } = bySovereignLevel(crowned, onMap, map)
-        return verdict(kind, expected, expectedOnMap)
+      const first = judged(city, onTop, map)
+      if (top === undefined || (first.kind !== 'misplaced' && first.kind !== 'incomplete'))
+        return verdict(first, onTop, null)
+      for (const id of below) {
+        // Only the ground the map hatches: a duchy drawn inside its kingdom is vassalage, never a disputed zone
+        if (!isOverlapPair(above, top, id)) continue
+        const other = polityOnMap(document, id)
+        const second = judged(city, other, map)
+        if (second.kind === 'agrees') return verdict({ ...second, kind: 'disputed' }, other, onTop)
       }
-      if (city.chain !== null) return verdict(byChain(city.chain, onMap))
-      if (bySources === null) return verdict('notEntered')
-      // A sheet with no title: its holder entered as text carries a Wikidata id and no CMS territory, so it is compared
-      // by its id alone — deliberately (review QUAL-001, CARTO-450)
-      if (bySources.wikidata === null) return verdict('cannotCompare')
-      if (map.find(bySources) === null) return verdict('toDeclare')
-      return verdict(onMap !== null && sameTerritory(onMap, bySources) ? 'agrees' : 'misplaced')
+      return verdict(first, onTop, null)
     })
   )
 }
@@ -284,7 +342,7 @@ export function cityVerdicts(
  * @returns the registry id of the polity to paint, or `null`
  */
 export function paintedHolder(verdict: CityVerdict, map: MapPolities): string | null {
-  if (verdict.kind === 'agrees') return verdict.onMap?.id ?? null
+  if (verdict.kind === 'agrees' || verdict.kind === 'disputed') return verdict.onMap?.id ?? null
   if (verdict.chain === null)
     return verdict.bySources === null ? null : (map.find(verdict.bySources)?.id ?? null)
   return firstDrawn(verdict.chain, map)
@@ -312,6 +370,8 @@ function firstDrawn(chain: readonly ContentChainReading[], map: MapPolities): st
  * does not put in its chain — misplaced, a holder not drawn yet, or a chain that stops short of the polity under it;
  * **red** for what the data cannot answer — no holder entered, a polity under it with no Wikidata id to compare, or
  * a title the check needs that the map has not drawn (*"red, when the duchy does not exist"*).
+ * **Disputed** (CARTO-511, the dev, 2026-11-24: *"in the right state but not in the right fief — we need a mark all the
+ * same"*): a mark of its own, neither an error nor plain — the ring in the two polities' colours.
  * Only a city at the right place keeps its plain look. The slate of CARTO-435 is gone: it hid the yellow.
  * @param kind - the verdict
  * @returns the alert, or `null`
@@ -319,5 +379,6 @@ function firstDrawn(chain: readonly ContentChainReading[], map: MapPolities): st
 export function cityAlert(kind: CityVerdictKind): CityAlert | null {
   if (kind === 'notEntered' || kind === 'cannotCompare' || kind === 'toDeclare') return 'missing'
   if (kind === 'misplaced' || kind === 'incomplete') return 'toCorrect'
+  if (kind === 'disputed') return 'disputed'
   return null
 }

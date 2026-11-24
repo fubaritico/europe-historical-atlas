@@ -42,8 +42,10 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `filters` — The funnel's name and the advanced filters' title.
  * - `filtersOn` — The funnel's name while holders or states are ticked; `count` is how many, both kinds together.
  * - `byState`, `byStateHint` — The section of the states (CARTO-369), and what ticking one does.
- * - `stateMisplaced`, `stateToDeclare`, `stateCannotCompare`, `stateAgrees` — A state's box; `count` is how many cities
- *   of the year are in it.
+ * - `stateMisplaced`, `stateToDeclare`, `stateCannotCompare`, `stateDisputed`, `stateAgrees` — A state's box; `count`
+ *   is how many cities of the year are in it.
+ * - `disputed` — The verdict of a city in a disputed zone (CARTO-511): `onMap` is the polity under it that holds it by
+ *   the sources — by its chain, or by the holder entered —, `polity` the one drawn over it, sharing the ground.
  * - `sortBy` — The sort menu's name (CARTO-382); `sortOn` — its button's, `order` the order in use.
  * - `sortExport`, `sortName`, `sortVerification`, `sortHolder` — The orders in the menu.
  * - `byHolder`, `byHolderHint` — The section of the map's polities, and what ticking one does.

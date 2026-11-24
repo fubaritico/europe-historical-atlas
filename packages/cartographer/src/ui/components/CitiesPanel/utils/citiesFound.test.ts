@@ -52,7 +52,15 @@ const VERDICTS: ReadonlyMap<string, CityVerdict> = new Map(
     ] as const
   ).map(([id, kind]) => [
     id,
-    { onMap: null, bySources: null, kind, chain: null, expected: null, expectedOnMap: null },
+    {
+      onMap: null,
+      bySources: null,
+      kind,
+      chain: null,
+      expected: null,
+      expectedOnMap: null,
+      disputedWith: null,
+    },
   ])
 )
 

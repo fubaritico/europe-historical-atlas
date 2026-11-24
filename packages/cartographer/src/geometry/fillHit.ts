@@ -157,18 +157,33 @@ function flips(ring: BandedRing, at: Point): boolean {
  *   ground
  */
 export function polityLocator(territories: readonly PolityRings[]): (at: Point) => string | null {
+  const under = politiesLocator(territories)
+  return (at) => under(at, 1)[0] ?? null
+}
+
+/**
+ * Every polity whose territory is under a point, the one painted last first (CARTO-511): a city on ground two polities
+ * cover is judged against each of them. Prepared once, as {@link polityLocator}, which is its first answer.
+ * @param territories - every polity's rings, in painting order
+ * @returns the question: the ids of the polities under a point, top first — at most `limit` of them, all by default —
+ *   empty over unclaimed ground
+ */
+export function politiesLocator(
+  territories: readonly PolityRings[]
+): (at: Point, limit?: number) => string[] {
   const prepared = territories.map(({ polity, rings }) => ({
     polity,
     rings: rings.map((ring) => bandedRing(ring)),
   }))
-  return (at) => {
-    for (let index = prepared.length - 1; index >= 0; index -= 1) {
+  return (at, limit = Infinity) => {
+    const found: string[] = []
+    for (let index = prepared.length - 1; index >= 0 && found.length < limit; index -= 1) {
       const territory = prepared[index]
       if (territory === undefined) continue
       let inside = false
       for (const ring of territory.rings) if (flips(ring, at)) inside = !inside
-      if (inside) return territory.polity
+      if (inside) found.push(territory.polity)
     }
-    return null
+    return found
   }
 }

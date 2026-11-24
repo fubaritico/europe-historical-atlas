@@ -12,6 +12,8 @@ export interface CityPaint {
   readonly alert: CityAlert | null
   /** The registry id of the polity whose colour fills the dot — `null` for a hollow dot (CARTO-450). */
   readonly holder: string | null
+  /** In a disputed zone, the registry id of the polity on top it shares the ground with; `null` otherwise (CARTO-511). */
+  readonly sharedWith: string | null
 }
 
 /**
@@ -60,7 +62,11 @@ export function createCityAlertCache(): CityAlertCache {
       const alerts = new Map<string, CityPaint>()
       const map = mapPolities(document)
       for (const [id, verdict] of cityVerdicts(document, citiesOfYear(cities, document.year))) {
-        alerts.set(id, { alert: cityAlert(verdict.kind), holder: paintedHolder(verdict, map) })
+        alerts.set(id, {
+          alert: cityAlert(verdict.kind),
+          holder: paintedHolder(verdict, map),
+          sharedWith: verdict.disputedWith?.id ?? null,
+        })
       }
       last = { document, version, cities, alerts }
       return alerts
@@ -87,7 +93,7 @@ export function citiesToPaint(
     version: number
   },
   cache: CityAlertCache
-): (ShownCity & { alert: CityAlert | null })[] {
+): (ShownCity & { alert: CityAlert | null; sharedWith: string | null })[] {
   const alerts =
     state.citiesAsPoints && state.shownCities.size > 0
       ? cache.alertsOf(state.document, state.version, state.cities)
@@ -101,7 +107,7 @@ export function citiesToPaint(
     const paint = alerts.get(city.id)
     // Not judged — the cities shown as names, or none shown: no point is painted, so no colour to give it
     return paint === undefined
-      ? { ...city, holder: null, alert: null }
-      : { ...city, holder: paint.holder, alert: paint.alert }
+      ? { ...city, holder: null, alert: null, sharedWith: null }
+      : { ...city, holder: paint.holder, alert: paint.alert, sharedWith: paint.sharedWith }
   })
 }

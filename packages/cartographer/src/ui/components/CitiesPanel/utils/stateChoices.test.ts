@@ -30,7 +30,15 @@ function year(kinds: readonly CityVerdictKind[]): {
   const verdicts = new Map(
     kinds.map((kind, index): [string, CityVerdict] => [
       String(index),
-      { onMap: null, bySources: null, kind, chain: null, expected: null, expectedOnMap: null },
+      {
+        onMap: null,
+        bySources: null,
+        kind,
+        chain: null,
+        expected: null,
+        expectedOnMap: null,
+        disputedWith: null,
+      },
     ])
   )
   return { cities, verdicts }
@@ -39,13 +47,14 @@ function year(kinds: readonly CityVerdictKind[]): {
 // CARTO-369, `s20`: « By state », the yellow ones first.
 describe('stateChoices', () => {
   describe('happy path', () => {
-    it('counts the cities of each state: two misplaced, one at the right place', () => {
-      const { cities, verdicts } = year(['misplaced', 'agrees', 'misplaced'])
+    it('counts the cities of each state: two misplaced, one disputed, one at the right place', () => {
+      const { cities, verdicts } = year(['misplaced', 'agrees', 'misplaced', 'disputed'])
       expect(stateChoices(cities, verdicts)).toEqual([
         { kind: 'misplaced', count: 2 },
         { kind: 'toDeclare', count: 0 },
         { kind: 'incomplete', count: 0 },
         { kind: 'cannotCompare', count: 0 },
+        { kind: 'disputed', count: 1 },
         { kind: 'agrees', count: 1 },
       ])
     })
@@ -61,8 +70,9 @@ describe('stateChoices', () => {
 
   describe('managed errors', () => {
     // Review of CARTO-371: a state read back from the browser that no box stands for must not filter.
-    it('offers « misplaced » and « agrees », not « notEntered » nor a name read back that is no state', () => {
-      expect(['misplaced', 'agrees', 'notEntered', 'foo'].map(isOfferedState)).toEqual([
+    it('offers « misplaced », « disputed » and « agrees », not « notEntered » nor a name read back that is no state', () => {
+      expect(['misplaced', 'disputed', 'agrees', 'notEntered', 'foo'].map(isOfferedState)).toEqual([
+        true,
         true,
         true,
         false,

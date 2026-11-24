@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { insideRings, polityAt, polityLocator } from './fillHit'
+import { insideRings, politiesLocator, polityAt, polityLocator } from './fillHit'
 
 import type { Point } from '../viewport/viewport'
 
@@ -195,6 +195,40 @@ describe('polityLocator', () => {
 
     it('finds nobody on an empty map', () => {
       expect(polityLocator([])([50, 50])).toBeNull()
+    })
+  })
+})
+
+// CARTO-511: a city on ground two polities cover is judged against each of them.
+describe('politiesLocator', () => {
+  describe('happy path', () => {
+    it('finds every polity under the point, the one painted last first', () => {
+      expect(politiesLocator([KINGDOM, DUCHY])([30, 30])).toEqual(['aq', 'fr'])
+    })
+  })
+
+  describe('variants', () => {
+    it('finds only the polities under the point, off the duchy the kingdom alone', () => {
+      expect(politiesLocator([KINGDOM, DUCHY])([80, 80])).toEqual(['fr'])
+    })
+
+    it('stops at the limit asked, the top first', () => {
+      expect(politiesLocator([KINGDOM, DUCHY])([30, 30], 1)).toEqual(['aq'])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('finds nobody over unclaimed ground', () => {
+      expect(politiesLocator([KINGDOM, DUCHY])([150, 50])).toEqual([])
+    })
+  })
+
+  // L4: N/A — the same prepared rings as polityLocator, whose degenerate rings are tested above.
+
+  describe('edge cases', () => {
+    it('leaves out a polity whose hole the point is in', () => {
+      const holed = { polity: 'pl', rings: [square(0, 0, 100), square(20, 20, 30)] }
+      expect(politiesLocator([KINGDOM, holed])([30, 30])).toEqual(['fr'])
     })
   })
 })

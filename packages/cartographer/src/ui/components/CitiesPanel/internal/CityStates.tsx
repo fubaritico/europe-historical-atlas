@@ -13,6 +13,7 @@ const STATE_LABEL: Readonly<Record<StateChoice['kind'], CitiesPanelMessageKey>> 
   toDeclare: 'stateToDeclare',
   incomplete: 'stateIncomplete',
   cannotCompare: 'stateCannotCompare',
+  disputed: 'stateDisputed',
   agrees: 'stateAgrees',
 }
 

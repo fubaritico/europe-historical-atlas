@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { addOverlap, overlapCandidates, pairOverlap, polityShape, suzerainsOf } from './overlaps'
+import {
+  addOverlap,
+  isOverlapPair,
+  overlapCandidates,
+  pairOverlap,
+  polityShape,
+  suzerainsOf,
+} from './overlaps'
 import { createYearDocument } from './yearDocument'
 
 import type { Overlap, PolityShape } from './overlaps'
@@ -265,6 +272,48 @@ describe('overlaps', () => {
       square(document, 'rus', [10, 10, 1])
 
       expect(overlapCandidates(document, shapesOf(document))).toEqual([])
+    })
+  })
+})
+
+const shared = (polity: string): ReadonlySet<string> =>
+  new Set(polity === 'x' || polity === 'y' ? ['kingdom'] : [])
+
+// CARTO-511, review ARCH-001: the one rule the hatches and a city's disputed zone are cut by.
+describe('isOverlapPair', () => {
+  /** A registry in a lookup: the county owes homage to the duchy, the duchy to the kingdom, the march to nobody. */
+  const SUZERAINS: Readonly<Record<string, readonly string[]>> = {
+    county: ['duchy', 'kingdom'],
+    duchy: ['kingdom'],
+    kingdom: [],
+    march: [],
+  }
+  const above = (polity: string): ReadonlySet<string> => new Set(SUZERAINS[polity] ?? [])
+
+  describe('happy path', () => {
+    it('makes an overlap of two polities neither of which owes the other homage', () => {
+      expect(isOverlapPair(above, 'march', 'duchy')).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('makes vassalage, never an overlap, of a vassal and its suzerain, whichever comes first', () => {
+      expect([
+        isOverlapPair(above, 'duchy', 'kingdom'),
+        isOverlapPair(above, 'kingdom', 'duchy'),
+      ]).toEqual([false, false])
+    })
+
+    it('makes vassalage of a suzerain two levels up', () => {
+      expect(isOverlapPair(above, 'kingdom', 'county')).toBe(false)
+    })
+  })
+
+  // L3–L4: N/A — a pure predicate over the sets it is handed.
+
+  describe('edge cases', () => {
+    it('makes an overlap of two vassals of the same suzerain, co-vassals', () => {
+      expect(isOverlapPair(shared, 'x', 'y')).toBe(true)
     })
   })
 })

@@ -20,6 +20,7 @@ function verdict(fields: Partial<CityVerdict>): CityVerdict {
     chain: null,
     expected: null,
     expectedOnMap: null,
+    disputedWith: null,
     ...fields,
   }
 }
@@ -67,6 +68,16 @@ describe('verdictText', () => {
         key: 'cannotCompareMap',
         polity: 'Mainz',
       })
+    })
+
+    // CARTO-511: said with the polity of its chain (the detail's `onMap`) and the one drawn over it.
+    it('names the polity drawn over a city in a disputed zone, by its chain or by its holder alone', () => {
+      const over = { id: 'papal', name: 'Papal States', wikidata: 'Q170174' }
+      for (const chain of [CHAIN, null])
+        expect(verdictText(verdict({ kind: 'disputed', chain, disputedWith: over }))).toEqual({
+          key: 'disputed',
+          polity: 'Papal States',
+        })
     })
   })
 

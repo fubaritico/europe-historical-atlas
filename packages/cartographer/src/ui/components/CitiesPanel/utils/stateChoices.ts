@@ -5,7 +5,7 @@ import type { CityMark } from '../../../../state/citiesSlice'
  * « Par vérification » (my word, taken by the dev on 2026-11-07: « état » read as a State), the advanced filters' section of the
  * states — the map checked against the sources (CARTO-369, the dev, 2026-11-07: *"toutes les villes sans
  * détenteur"*, and the others): the yellow ones first, as CARTO-386 colours them — the map to correct — then the cities
- * that cannot be compared, then those at the right place. « Sans détenteur » is not here: it is already a box of the
+ * that cannot be compared, then those in a disputed zone (CARTO-511), then those at the right place. « Sans détenteur » is not here: it is already a box of the
  * holders' section (CARTO-370), and a second box for the same cities would filter them twice.
  */
 export const STATE_ORDER = [
@@ -13,6 +13,7 @@ export const STATE_ORDER = [
   'toDeclare',
   'incomplete',
   'cannotCompare',
+  'disputed',
   'agrees',
 ] as const satisfies readonly CityVerdictKind[]
 
