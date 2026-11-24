@@ -109,6 +109,7 @@ describe('sheetValues', () => {
         holderName: null,
         holderQid: null,
         holderAsWritten: null,
+        byDistrict: false,
         where: 'p. 12',
         quotation: null,
       }
@@ -127,6 +128,7 @@ describe('sheetValues', () => {
           holderName: '',
           holderQid: '',
           holderAsWritten: '',
+          byDistrict: false,
           where: 'p. 12',
           quotation: '',
         },
@@ -146,6 +148,8 @@ describe('sheetValues', () => {
         holderName: 'Republic of Venice',
         holderQid: 'Q4948',
         holderAsWritten: 'Venetici',
+        // CMS-507: a holder inferred from the district keeps its mark through the form
+        byDistrict: true,
         where: 'p. 33',
         quotation: 'in the name of the emperor',
       }
@@ -172,10 +176,11 @@ describe('sheetValues', () => {
         holderName: 'Venice',
         holderAsWritten: 'Venetici',
       }
-      expect(testimonyBody(line)).toMatchObject({
+      expect(testimonyBody({ ...line, byDistrict: true })).toMatchObject({
         holderName: null,
         holderQid: null,
         holderAsWritten: null,
+        byDistrict: false,
       })
     })
 

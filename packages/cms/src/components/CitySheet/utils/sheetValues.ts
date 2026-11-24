@@ -64,6 +64,8 @@ export interface TestimonyValues {
   holderQid: string
   /** The holder's name as the source writes it, as typed — read when the subject is the holder (CMS-422). */
   holderAsWritten: string
+  /** Whether the holder is inferred from the city's district — read when the subject is the holder (CMS-507). */
+  byDistrict: boolean
   /** Where in the source, as typed. */
   where: string
   /** The source's own words, as typed. */
@@ -138,6 +140,8 @@ export interface TestimonyBody {
   holderQid: string | null
   /** The holder's name as the source writes it, for a line about the holder. */
   holderAsWritten: string | null
+  /** Whether the holder is inferred from the city's district, for a line about the holder (CMS-507). */
+  byDistrict: boolean
   /** Where in the source. */
   where: string | null
   /** The source's own words. */
@@ -237,6 +241,7 @@ export function emptyTestimony(): TestimonyValues {
     holderName: '',
     holderQid: '',
     holderAsWritten: '',
+    byDistrict: false,
     where: '',
     quotation: '',
   }
@@ -285,6 +290,7 @@ function testimonyValues(row: Record<string, unknown>): TestimonyValues {
     holderName: textOf(row.holderName),
     holderQid: textOf(row.holderQid),
     holderAsWritten: textOf(row.holderAsWritten),
+    byDistrict: row.byDistrict === true,
     where: textOf(row.where),
     quotation: textOf(row.quotation),
   }
@@ -437,11 +443,14 @@ export function communityBody(community: CommunityValues): CommunityBody {
  */
 function lineHolder(
   line: TestimonyValues
-): Pick<TestimonyBody, 'holderName' | 'holderQid' | 'holderAsWritten'> {
-  if (line.subject !== 'holder') return { holderName: null, holderQid: null, holderAsWritten: null }
+): Pick<TestimonyBody, 'holderName' | 'holderQid' | 'holderAsWritten' | 'byDistrict'> {
+  if (line.subject !== 'holder') {
+    return { holderName: null, holderQid: null, holderAsWritten: null, byDistrict: false }
+  }
   return {
     holderName: trimmed(line.holderName),
     holderQid: trimmed(line.holderQid),
     holderAsWritten: trimmed(line.holderAsWritten),
+    byDistrict: line.byDistrict,
   }
 }

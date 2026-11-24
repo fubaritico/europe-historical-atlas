@@ -186,6 +186,21 @@ describe('contentFileSchema — the cities at a date', () => {
     })
   })
 
+  describe('the holder inferred from its district (CMS-507)', () => {
+    it('reads a holder line marked as inferred, and refuses the mark set to false', () => {
+      const source = { id: '4', title: 'Rouergue', author: null, url: null }
+      const line = {
+        source,
+        where: null,
+        quotation: null,
+        subject: 'holder',
+        holder: { name: 'x', wikidata: null },
+      }
+      expect(acceptsCity(rome({ testimonies: [{ ...line, byDistrict: true }] }))).toBe(true)
+      expect(acceptsCity(rome({ testimonies: [{ ...line, byDistrict: false }] }))).toBe(false)
+    })
+  })
+
   describe('managed errors', () => {
     it('refuses an importance the map does not have', () => {
       expect(acceptsCity(rome({ importance: 'village' }))).toBe(false)

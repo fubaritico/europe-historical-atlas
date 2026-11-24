@@ -1,3 +1,4 @@
+import { ByDistrictField } from './ByDistrictField'
 import { TextField } from './TextField'
 
 import type { Say } from '../utils/say'
@@ -28,6 +29,7 @@ export function HolderLineFields({ path, say }: { path: string; say: Say }) {
         label={say('lineHolderAsWritten')}
         help={say('lineHolderAsWrittenHelp')}
       />
+      <ByDistrictField name={`${path}.byDistrict`} say={say} />
     </>
   )
 }

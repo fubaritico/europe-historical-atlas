@@ -227,8 +227,11 @@ export type ContentTestimonyValue =
   | { subject: 'importance'; importance: CityImportance }
   /** One reason for its importance, named. */
   | { subject: 'reason'; reason: LocalizedText }
-  /** Which polity held it at that date (CMS-335). */
-  | { subject: 'holder'; holder: ContentHolder }
+  /**
+   * Which polity held it at that date (CMS-335); `byDistrict` when the source proves the lord of the city's district,
+   * not the city by name — the holder inferred (CMS-507), absent when the city itself is attested.
+   */
+  | { subject: 'holder'; holder: ContentHolder; byDistrict?: true }
   /** A religious community there at that date, by its confession, named (CMS-433). */
   | { subject: 'community'; confession: LocalizedText }
 
@@ -285,6 +288,7 @@ const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('s
     quotation: z.nullable(z.string()),
     subject: z.literal('holder'),
     holder: holderSchema,
+    byDistrict: z.exactOptional(z.literal(true)),
   }),
   z.strictObject({
     source: sourceSchema,

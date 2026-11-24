@@ -121,6 +121,8 @@
   "lineHolderMissing": "Give the polity the source names.",
   "lineHolderQidHelp": "Optional — for instance: Q4948.",
   "lineHolderAsWritten": "Name in the source",
+  "byDistrict": "Inferred from its district",
+  "byDistrictHelp": "Ticked: the source proves the lord of the district, not this city by name — the city is inferred from it. Untick it once a source names the city itself.",
   "lineHolderAsWrittenHelp": "Optional — the name as the source writes it, copied as it stands: « Mathieu, comte nantais ».",
   "quotation": "Quotation",
   "quotationHelp": "The source’s own words, copied as they are. Optional, but it is what lets the line be checked without the book.",

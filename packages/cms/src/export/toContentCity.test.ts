@@ -161,6 +161,17 @@ describe('toContentCity', () => {
           holder: { name: 'Republic of Venice', wikidata: 'Q4948' },
         },
       ])
+      // CMS-507: the mark written only on a line inferred from the district
+      const inferred = toContentCity(
+        rome({ testimonies: [{ ...line, byDistrict: true }] }),
+        NO_CHAIN
+      )
+      expect(inferred.testimonies[0]).toMatchObject({ subject: 'holder', byDistrict: true })
+      const attested = toContentCity(
+        rome({ testimonies: [{ ...line, byDistrict: false }] }),
+        NO_CHAIN
+      )
+      expect('byDistrict' in (attested.testimonies[0] ?? {})).toBe(false)
       const nameOnly = toContentCity(
         rome({ holderName: 'Norse Greenland', holderQid: '' }),
         NO_CHAIN

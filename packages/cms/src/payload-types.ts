@@ -614,6 +614,10 @@ export interface PlacePeriod {
          */
         holderQid?: string | null;
         /**
+         * Cochée : la source prouve le seigneur du district, pas cette ville nommément — la ville en est déduite.
+         */
+        byDistrict?: boolean | null;
+        /**
          * Facultatif — le nom tel que la source l’écrit, recopié tel quel : « Mathieu, comte nantais ».
          */
         holderAsWritten?: string | null;
@@ -1543,6 +1547,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
         reason?: T;
         holderName?: T;
         holderQid?: T;
+        byDistrict?: T;
         holderAsWritten?: T;
         confession?: T;
         where?: T;

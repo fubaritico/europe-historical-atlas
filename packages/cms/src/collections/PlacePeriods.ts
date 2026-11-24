@@ -376,6 +376,20 @@ export const PlacePeriods: CollectionConfig = {
             description: 'Facultatif — par exemple : Q4948.',
           },
         },
+        // CMS-507: a holder line inferred from the title of the city's district — the source is the lord's, not one
+        // that names this city (`files/plans/historian/autonomy-and-1200.md` § 2.1). An added column with its default,
+        // so every line already saved reads as attested.
+        {
+          name: 'byDistrict',
+          type: 'checkbox',
+          label: 'Déduite de son district',
+          defaultValue: false,
+          admin: {
+            condition: (_data, sibling) => sibling.subject === 'holder',
+            description:
+              'Cochée : la source prouve le seigneur du district, pas cette ville nommément — la ville en est déduite.',
+          },
+        },
         // The identity is a claim (`files/plans/contribution/vassal-chain.md`, the state of the art): the name as the
         // source writes it stays beside the one the line is read as, so two records later found to be one person
         // can be merged by a signed arbitration, the reading kept (CMS-422).

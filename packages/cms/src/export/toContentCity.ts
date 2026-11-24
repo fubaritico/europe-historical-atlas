@@ -68,6 +68,8 @@ export interface DocTestimony {
   holderName?: string | null
   /** The polity's Wikidata id, for a line about the holder. */
   holderQid?: string | null
+  /** Whether the holder is inferred from the city's district, for a line about the holder (CMS-507). */
+  byDistrict?: boolean | null
   /** The source's own words. */
   quotation?: string | null
 }
@@ -190,7 +192,12 @@ function toTestimony(
     case 'reason':
       return { ...base, subject: 'reason', reason: reasonName(row.reason, `${where}, reason`) }
     case 'holder':
-      return { ...base, subject: 'holder', holder: toHolder(line.holderName, line.holderQid) }
+      return {
+        ...base,
+        subject: 'holder',
+        holder: toHolder(line.holderName, line.holderQid),
+        ...(row.byDistrict === true ? { byDistrict: true } : {}),
+      }
     case 'community':
       return {
         ...base,
