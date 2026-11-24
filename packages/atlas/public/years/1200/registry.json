@@ -191,14 +191,15 @@
     },
     {
       "id": "kingdom-of-serbia",
-      "name": "Kingdom of Serbia",
-      "rank": "kingdom",
+      "name": "Grand Principality of Serbia",
+      "rank": "principality",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#c09c59",
-      "wikidata": "Q241748"
+      "wikidata": null,
+      "territory": 36
     },
     {
       "id": "sultanate-of-rum",
@@ -1667,6 +1668,66 @@
       "colour": null,
       "wikidata": null,
       "territory": 8
+    },
+    {
+      "id": "lordship-of-strumica",
+      "name": "Lordship of Strumica and Prosek",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "byzantine-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 513
+    },
+    {
+      "id": "kingdom-of-croatia",
+      "name": "Kingdom of Croatia",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-hungary",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 508
+    },
+    {
+      "id": "republic-of-ragusa",
+      "name": "Republic of Ragusa",
+      "rank": "republic",
+      "status": "country",
+      "suzerain": "byzantine-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 174
+    },
+    {
+      "id": "principality-of-hum",
+      "name": "Principality of Hum",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 506
+    },
+    {
+      "id": "principality-of-doclea",
+      "name": "Principality of Duklja",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": "kingdom-of-serbia",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 37
     }
   ]
 }
