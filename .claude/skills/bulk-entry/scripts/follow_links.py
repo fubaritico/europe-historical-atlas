@@ -21,7 +21,7 @@ import urllib.parse
 import urllib.request
 
 UA = {'User-Agent': 'europe-historical-atlas research (historian; contact via github.com/fubaritico)'}
-JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()))
+JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat())))
 
 
 def say(message):

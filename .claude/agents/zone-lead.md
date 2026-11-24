@@ -35,7 +35,9 @@ everything you read, download, try and find lives there, never on the Mac's disk
   repeat becomes a script — TypeScript unless a Python library does better.
 - **The journal**: every step and every attempt through `research_log.py`, so the dev can follow the loops. **Every
   line names its writer**: run every script with `ATLAS_WHO="<story key> · lead"` yourself, and give each agent you
-  spawn its own — `ATLAS_WHO="<story key> · <lot or book>"` — to put before every script it runs.
+  spawn its own — `ATLAS_WHO="<story key> · <lot or book>"` — to put before every script it runs. **And the day the
+  flow started**: `ATLAS_DAY=<YYYY-MM-DD>` read once at your start (`date +%F`), given to every agent with its name —
+  the whole flow stays in that day's journal file, even past midnight (the dev, 2026-11-24).
 - **At most 9 research agents at once** (two teams share the session's limit of 20).
 - **Nothing reaches the dev.** A case you cannot settle after three rounds is closed by the stopping rule, not asked.
 - **Deletions**: yours to decide, one record at a time through the MCP, only for a record the stopping rule removes;

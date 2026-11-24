@@ -33,7 +33,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 # the disk the dev lends; ARCHIVE_HISTORIEN points elsewhere only to try the script on a copy
 ARCHIVE = pathlib.Path(os.environ.get('ARCHIVE_HISTORIEN', '/Volumes/Acer/atlas-historien'))
-JOURNAL = ARCHIVE / 'journal' / ('%s.log' % __import__('datetime').date.today().isoformat())
+JOURNAL = ARCHIVE / 'journal' / ('%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat()))
 TODAY = datetime.date.today().strftime('%d/%m/%Y')
 
 

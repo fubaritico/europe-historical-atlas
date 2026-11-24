@@ -20,7 +20,7 @@ import urllib.request
 
 REPO = pathlib.Path('/Users/stephanecottereau/Desktop/WebstormProjects/europe-map')
 ARCHIVE = pathlib.Path('/Volumes/Acer/atlas-historien')
-JOURNAL = ARCHIVE / 'journal' / ('%s.log' % __import__('datetime').date.today().isoformat())
+JOURNAL = ARCHIVE / 'journal' / ('%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat()))
 NODE = pathlib.Path('/Users/stephanecottereau/.nvm/versions/node/v24.22.1/bin')
 UA = {'User-Agent': 'europe-historical-atlas research (historian preflight)'}
 failures = []

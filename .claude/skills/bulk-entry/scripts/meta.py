@@ -15,7 +15,7 @@ def say(message):
     import datetime
     line = '%s  [%s]  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), __import__('os').environ.get('ATLAS_WHO', 'historien'), message)
     print(line, flush=True)
-    with open(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()), 'a', encoding='utf-8') as out:
+    with open(('/Volumes/Acer/atlas-historien/journal/%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat())), 'a', encoding='utf-8') as out:
         out.write(line + '\n')
 HERE = os.path.dirname(os.path.abspath(__file__))
 cand = json.load(open(G + '/cand.json'))

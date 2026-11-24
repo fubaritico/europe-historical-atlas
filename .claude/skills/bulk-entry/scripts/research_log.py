@@ -8,7 +8,8 @@ the single journal before it is filed as journal/ancien/journal.log. He follows 
 
 **Every line names its writer** (the dev, 2026-11-24: several teams write at once): `[<ATLAS_WHO>]` after the date,
 from the environment — `ATLAS_WHO="CARTO-505 · r39-maghreb" python3 -I research_log.py say "…"`; unset, `[historien]`.
-Every script of this skill that writes the journal does the same.
+Every script of this skill that writes the journal does the same. **A flow keeps the day it started**: `ATLAS_DAY`
+(YYYY-MM-DD) chooses the file, so a flow begun on the 24th writes the 24th's file past midnight; unset, today's.
 **In colour**: `python3 -I research_log.py follow` (`pnpm research-log`) follows the journal like `tail -f` from its
 last 40 lines, `follow all` (`pnpm research-log:all`) from its first line, each team (its story key) in
 its own colour — blue, orange, green… — the historian's own lines plain; the file itself stays plain text.
@@ -23,7 +24,7 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()))
+JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat())))
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 WORDS = {'found': 'TROUVÉ', 'nothing': 'RIEN', 'refused': 'REFUSÉ', 'not available': 'INACCESSIBLE',
          'not relevant': 'HORS SUJET'}
@@ -64,7 +65,9 @@ RESET = '\033[0m'
 
 
 def follow(lines=40):
-    """Follow the journal like `tail -f`, each team in its colour (its story key picks it); the file stays plain."""
+    """Follow the journal like `tail -f`, each team in its colour (its story key picks it); the files stay plain.
+    The journal is one file a day, and a flow keeps the file of the day it started (ATLAS_DAY), even past midnight:
+    so every day's file is watched, and a line is printed from whichever file grows."""
     import time
     seen = {}
 
@@ -78,30 +81,23 @@ def follow(lines=40):
         colour = seen.setdefault(team, COLOURS[len(seen) % len(COLOURS)])
         return colour + line + RESET
 
-    def today():
-        return JOURNAL.parent / ('%s.log' % datetime.date.today().isoformat())
-
-    current = today()
-    current.touch()
-    with current.open(encoding='utf-8') as journal:
+    folder = JOURNAL.parent
+    today = folder / ('%s.log' % datetime.date.today().isoformat())
+    today.touch()
+    with today.open(encoding='utf-8') as journal:
         for line in journal.readlines()[-lines:] if lines else journal.readlines():
             print(paint(line.rstrip('\n')), flush=True)
-    first = True
-    while True:  # one file a day: at midnight the next day's file is followed from its first line
-        with current.open(encoding='utf-8') as journal:
-            if first:  # its lines are already printed above
-                journal.seek(0, 2)
-                first = False
-            while True:
-                line = journal.readline()
-                if line:
-                    print(paint(line.rstrip('\n')), flush=True)
-                elif today() != current:
-                    current = today()
-                    current.touch()
-                    break
-                else:
-                    time.sleep(0.5)
+    sizes = {day: day.stat().st_size for day in folder.glob('[0-9]*.log')}
+    while True:
+        for day in sorted(folder.glob('[0-9]*.log')):
+            size = day.stat().st_size
+            if size > sizes.get(day, 0):
+                with day.open(encoding='utf-8') as journal:
+                    journal.seek(sizes.get(day, 0))
+                    for line in journal.read().splitlines():
+                        print(paint(line), flush=True)
+                sizes[day] = size
+        time.sleep(0.5)
 
 
 if sys.argv[1:2] == ['follow'] and len(sys.argv) <= 3:

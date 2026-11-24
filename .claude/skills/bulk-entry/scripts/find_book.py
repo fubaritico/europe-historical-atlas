@@ -18,7 +18,7 @@ import urllib.parse
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % __import__('datetime').date.today().isoformat()))
+JOURNAL = pathlib.Path(('/Volumes/Acer/atlas-historien/journal/%s.log' % (__import__('os').environ.get('ATLAS_DAY') or __import__('datetime').date.today().isoformat())))
 AGENT = {'User-Agent': 'historical-atlas-research/0.1 (non-commercial)'}
 
 
