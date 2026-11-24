@@ -51,6 +51,25 @@ this plan names them, never copies them.
 
 No plate exists for s16 (the share link) nor s17 (the map as a list, ATLAS-140).
 
+## 2b. The layout — the dev, 2026-11-24, late evening (thinking aloud, taken as the direction)
+
+> _« Tout doit être centré horizontalement. Parce qu'en fait, quand tu feras apparaître la frise synchronoptique, ça
+> poussera. Et je pense même que les dates doivent être centrées horizontalement en bas. Et que la barre de boutons, elle
+> pourrait être autant à gauche qu'à droite … parce que c'est petit. … Il faut rien de repliable … il faut qu'on arrive
+> à gérer l'encombrement. Et ce que je te dis là, ça rendra vraiment un espèce de redimensionnement vertical naturel. »_
+
+- **One column, centred, at the bottom**: the date's selector at the bottom centre — no longer in the top row as on the
+  plates. **The frieze appears at the bottom and pushes the date up**: what opens stacks vertically, centred, rather than
+  spreading to the sides.
+- **The button bar is small**: at the bottom, left or right — either holds.
+- **Nothing folds**: an element is there or is not; the clutter is managed by the stacking, which is what gives the
+  layout its natural vertical resizing.
+- _Proposed, mine_: **the map shrinks rather than being covered** — the canvas takes the height left above the bottom
+  column, so nothing of the map hides under the frieze (the canvas already resizes with the window); **the column is
+  centred on the map's visible width**, so the detail panel opening on the right (440 px) re-centres it instead of eating
+  its right edge.
+- The phone's plates already centre their buttons at the bottom (`.pbar`): the desktop and the phone follow one logic.
+
 ## 3. React and the map — how they share the state (ATLAS-392)
 
 ### The shape — _proposed_
@@ -137,7 +156,7 @@ For the dev, each in its ticket, never all at once:
 
 | point | plates | in the ticket |
 | --- | --- | --- |
-| **The button bar: bottom left on every plate, bottom right in A-15 and s13** | 2, 8, 16 | the shell |
+| ~~The button bar: bottom left on every plate, bottom right in A-15 and s13~~ — **either, it is small** (the dev, 24/11, § 2b) | 2, 8, 16 | the shell |
 | The frieze's button `T`: on the touch bars, absent from the desktop's at rest | 2, 15, 21 | the frieze |
 | A drawer covers the touch bar (detail), the frieze pushes it up — which? | 24, 25, 30 | the touch layouts |
 | The close button: « Fermer » + its key on the detail and help, a round cream button in the band per the README | 4, 14, 15 | the kit |
@@ -154,9 +173,9 @@ Each builds a screen whole, at every breakpoint it has, with its scenario's asse
    the atlas, the lot B tokens and fonts, React's weight before the first paint measured before and after.
 3. **The kit**: round button and its key, capsule, framed window, dark band, drawer — structure and behaviour, dressed
    with the dev's retouched pieces as they arrive, on the workbench page.
-4. **The shell**: the top row and the site bar in its three states, the button bar — **and the frieze's place kept**
+4. **The shell**: the site bar in its three states, the bottom column (§ 2b) and the button bar — **the frieze's place kept**
    (the bar moves up when the frieze opens, plate 15). Buttons wired to their commands as each screen lands.
-5. **The century** (s15): replaces the temporary year switch.
+5. **The century** (s15): at the bottom centre (§ 2b); replaces the temporary year switch.
 6. ATLAS-358 — **the frieze, in the MVP** · ATLAS-266 — the language (s11) · ATLAS-135 — help and the tour (s12) ·
    ATLAS-149 — the pad (s13, after A-19).
 7. ATLAS-155 — the detail panel — needs a click on an event to select it (picking: ATLAS-147, ATLAS-146).
@@ -173,4 +192,5 @@ Each builds a screen whole, at every breakpoint it has, with its scenario's asse
 | D3 | what is React | **everything but the canvas and its gestures**, the loading screen included — my proposal to keep it out was wrong | **the dev, 24/11** |
 | D3b | the frieze | in the MVP, its place kept from the shell on | **the dev, 24/11** |
 | D4 | « one overlay open at a time » in the store or in React alone | the store: Escape closes an overlay **or** leaves the focus, and the map must know which | me — **to decide** |
-| D5 | the button bar, left or right | the plates' left, or A-15's right | **the dev** |
+| D5 | the layout | everything centred, the dates at the bottom, the frieze pushing them up, nothing folds; the button bar left or right (§ 2b) | **the dev, 24/11** |
+| D6 | the map shrinks under the bottom column; the column centred on the map's visible width | yes (§ 2b) | me — **proposed** |
