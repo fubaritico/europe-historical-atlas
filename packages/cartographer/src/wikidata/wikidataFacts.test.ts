@@ -94,6 +94,13 @@ const MOSUL_CATEGORY = {
   claims: { P31: [item('Q4167836')] },
 }
 
+/** Q822270, entered for the vicomté of Carcassonne on 2026-11-23: Bernard Aton IV, a person (*human*, Q5). */
+const BERNARD_ATON = {
+  id: 'Q822270',
+  labels: { en: { language: 'en', value: 'Bernard Ato IV' } },
+  claims: { P31: [item('Q5')] },
+}
+
 /** Read a fixture, failing the test if it is not read. */
 function facts(entity: unknown): WikidataFacts {
   const read = readEntity(entity)
@@ -179,6 +186,14 @@ describe('readEntity', () => {
 
     it('says when an item is a Wikipedia category rather than a polity', () => {
       expect(facts(MOSUL_CATEGORY).notASubject).toBe('category')
+    })
+
+    it('says when an item is a person rather than a polity', () => {
+      expect(facts(BERNARD_ATON).notASubject).toBe('person')
+    })
+
+    it('says nothing of a polity', () => {
+      expect(facts(JERUSALEM).notASubject).toBeNull()
     })
 
     it('reads predecessors and successors from both pairs of properties', () => {

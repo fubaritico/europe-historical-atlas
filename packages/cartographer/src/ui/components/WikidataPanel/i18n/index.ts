@@ -11,8 +11,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `failed` — Wikidata did not answer — the browser's own words are in the console, English whatever the
  *   page.
  * - `unknown` — Wikidata has no such item.
- * - `notASubject` — The item is a page about Wikipedia itself; `kind` is `category`, `disambiguation` or
- *   `list`.
+ * - `notASubject` — The item is not a polity — a page about Wikipedia itself, or a person; `kind` is `category`,
+ *   `disambiguation`, `list` or `person`.
  * - `anachronism` — The year edited lies outside the item's dates; `when` is `notYet` or `noLonger`.
  * - `vassalState` — Beside the item's name, when it calls itself a vassal state.
  * - `proposals` — The accessible name of the list of suggestions.

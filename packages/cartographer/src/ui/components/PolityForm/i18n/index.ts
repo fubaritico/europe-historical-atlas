@@ -22,7 +22,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `removeTerritory` — The cross beside the territory held; `name` is its label.
  * - `territoryLabel` — A territory in the list; `name` its name, `id` its number in the CMS.
  * - `territoryProposals`, `proposalField`, `proposalVerb`, `proposalLabel` — What the CMS's territory proposes under
- *   « CMS ID » (CARTO-488): the list's name; a field's name (`field`); the button's verb by `state` — `empty`,
+ *   « Territoire du CMS » (CARTO-488): the list's name; a field's name (`field`); the button's verb by `state` — `empty`,
  *   `differs`, else agreed; and the button's full name, `verb`, `value` and `field`.
  * - `rankWarning` — A vassal ranking higher than its suzerain (CORE-489), under the suzerain: `vassal` and `suzerain`
  *   their names, `vassalRank` and `suzerainRank` their ranks, named.

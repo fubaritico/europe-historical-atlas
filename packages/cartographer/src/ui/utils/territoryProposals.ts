@@ -41,7 +41,7 @@ function compare(
 }
 
 /**
- * What the territory chosen in « CMS ID » proposes for the form: its name, its kind when it is a rank the form
+ * What the territory chosen in « Territoire du CMS » proposes for the form: its name, its kind when it is a rank the form
  * offers — a city, an abbey or an office is no rank of a polity — and the years it exists between, each when the CMS
  * gives it.
  * @param draft - the form's values

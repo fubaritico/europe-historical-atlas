@@ -44,14 +44,21 @@ const KIND = {
 /** The Holy Roman Empire, lord of every *State of the Holy Roman Empire*. */
 const HOLY_ROMAN_EMPIRE = 'Q12548'
 
-/** What kind of page about Wikipedia itself an item is — the panel words it in the page's language. */
-export type NotASubject = 'category' | 'disambiguation' | 'list'
+/**
+ * What an item is when it cannot be a polity — a page about Wikipedia itself, or a person — the panel words it in the
+ * page's language.
+ */
+export type NotASubject = 'category' | 'disambiguation' | 'list' | 'person'
 
-/** Items that are pages about Wikipedia itself, never a polity — an id entered by mistake. */
+/**
+ * Items never a polity — an id entered by mistake. A person (*human*, Q5) since 2026-11-23 (CARTO-498): the vicomté of
+ * Carcassonne was given Bernard Aton IV's id, Q822270, and nothing said so — its cities' chains then matched nothing.
+ */
 const NOT_A_SUBJECT: Readonly<Record<string, NotASubject>> = {
   Q4167836: 'category',
   Q4167410: 'disambiguation',
   Q13406463: 'list',
+  Q5: 'person',
 }
 
 /** One item a polity belonged to, with the years the item gives for it. */
@@ -86,7 +93,7 @@ export interface WikidataFacts {
   successors: string[]
   /** Its Wikipedia articles, by language, as URLs. */
   wikipedia: { en: string | null; fr: string | null }
-  /** When the item is not a subject at all — a Wikipedia category — or `null`. */
+  /** When the item is not a polity at all — a page about Wikipedia, or a person — or `null`. */
   notASubject: NotASubject | null
 }
 

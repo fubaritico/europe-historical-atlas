@@ -6,7 +6,7 @@ import { TerritoryProposalLine } from './TerritoryProposalLine'
 import type { TerritoryProposal, TerritoryProposalField } from '../../../utils/territoryProposals'
 
 /**
- * What the CMS's territory proposes, under the « CMS ID » field (CARTO-488): one line per field — « Use » on a blank
+ * What the CMS's territory proposes, under the « Territoire du CMS » field (CARTO-488): one line per field — « Use » on a blank
  * field, « Replace » on one filled otherwise, an inert « Agrees » where the form already says the same. Drawn as
  * Wikidata's proposals are, in the same classes. **It proposes, it never writes.**
  * @param props - the proposals and the click

@@ -60,7 +60,8 @@ Scenario: reopen a polity's form and change it
 Scenario: tie a polity with no Wikidata id to its CMS territory
   Given the map 1100 is open, and its « Thuringia » has no Wikidata id
   And the CMS export lists the territory « Thuringe », number 42
-  When I open Thuringia's form and type « thur » in « CMS ID »
+  When I open Thuringia's form and type « thur » in « Territoire du CMS » (« CMS ID » until CARTO-498: read as a number to
+    type, it is a name to search)
   Then « Thuringe — CMS ID 42 » is offered, and I choose it
   When I validate
   Then Thuringia carries the territory 42 in the registry
@@ -401,6 +402,8 @@ Scenario: the id names a Wikipedia page, not a polity
   Then the panel warns "<id> is a Wikipedia category, not a polity — check the id"
   And it proposes nothing
   And the same for a disambiguation page or a Wikipedia list
+  And the same for a person — "<id> is a person, not a polity — check the id" (CARTO-498: Bernard Aton IV, Q822270,
+    was given for the vicomté of Carcassonne)
 
 Scenario: an unknown id, or no network
   When the id typed is one Wikidata does not know

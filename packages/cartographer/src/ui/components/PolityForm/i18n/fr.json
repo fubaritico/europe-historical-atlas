@@ -23,7 +23,7 @@
   "idTaken": "Cet identifiant est déjà pris dans cette année.",
   "notAYear": "Une année, en nombre entier.",
   "rankWarning": "À vérifier : {vassal} ({vassalRank}) a un rang plus élevé que son suzerain, {suzerain} ({suzerainRank}). Vous pouvez enregistrer tel quel.",
-  "territory": "CMS ID",
+  "territory": "Territoire du CMS",
   "territoryHelp": "La fiche du CMS (menu Territoires) qui est ce pays : la chaîne de ses villes s’y compare quand il n’a pas d’identifiant Wikidata, comme la Thuringe de 1100.",
   "territoryPlaceholder": "Tapez un nom pour choisir…",
   "territoryList": "Territoires du CMS",

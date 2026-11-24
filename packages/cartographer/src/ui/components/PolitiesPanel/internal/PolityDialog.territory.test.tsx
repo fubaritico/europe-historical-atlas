@@ -57,7 +57,7 @@ function openDialog(
   return { store, user: userEvent.setup() }
 }
 
-const territoryField = () => screen.getByRole('combobox', { name: 'CMS ID' })
+const territoryField = () => screen.getByRole('combobox', { name: 'CMS territory' })
 
 // CARTO-450, the dev's rule of 2026-11-16: no Wikidata id, the CMS's territory number
 describe('PolityDialog — the CMS territory', () => {
@@ -101,7 +101,7 @@ describe('PolityDialog — the CMS territory', () => {
 })
 
 /**
- * Choose Jablé in « CMS ID ».
+ * Choose Jablé in « Territoire du CMS ».
  * @param user - the user
  * @returns nothing
  */

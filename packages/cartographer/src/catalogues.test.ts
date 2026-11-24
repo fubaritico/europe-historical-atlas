@@ -173,6 +173,7 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     category: true,
     disambiguation: true,
     list: true,
+    person: true,
   }),
   'WIKIDATA_PANEL_MESSAGES.anachronism.when': all<Anachronism['when']>({
     notYet: true,
@@ -189,7 +190,7 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     differs: true,
     same: true,
   }),
-  // What the CMS's territory proposes under « CMS ID » (CARTO-488).
+  // What the CMS's territory proposes under « Territoire du CMS » (CARTO-488).
   'POLITY_FORM_MESSAGES.proposalField.field': all<TerritoryProposalField>({
     name: true,
     rank: true,

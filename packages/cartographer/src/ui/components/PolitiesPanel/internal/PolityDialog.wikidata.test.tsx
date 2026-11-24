@@ -240,6 +240,22 @@ describe('WikidataPanel', () => {
     ).toBeTruthy()
   })
 
+  // CARTO-498, 2026-11-23: Bernard Aton IV's id was given for the vicomté of Carcassonne, and nothing said so.
+  it('says an id is a person’s, instead of offering anything', () => {
+    renderInEnglish(
+      <WikidataPanel
+        view={{
+          kind: 'found',
+          facts: { ...TRIPOLI, id: 'Q822270', notASubject: 'person' },
+          warning: null,
+          suggestions: [],
+        }}
+        onUse={() => undefined}
+      />
+    )
+    expect(screen.getByText('Q822270 is a person, not a polity — check the id')).toBeTruthy()
+  })
+
   it('says the item calls itself a vassal state, and says nothing of it otherwise', () => {
     const { container, rerender } = renderInEnglish(
       <WikidataPanel view={vassalView(true)} onUse={() => undefined} />
