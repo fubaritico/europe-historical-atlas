@@ -8,20 +8,8 @@ import { fr } from '@payloadcms/translations/languages/fr'
 import { TAB_MARK_SIDE } from '@europe-historical-atlas/core/utils/brandMark'
 
 import { ATLAS_NAME } from './atlasName'
-import { Confessions } from './collections/Confessions'
-import { Events } from './collections/Events'
-import { EventTypes } from './collections/EventTypes'
-import { ImportanceReasons } from './collections/ImportanceReasons'
-import { People } from './collections/People'
-import { PeriodNames } from './collections/PeriodNames'
-import { PlacePeriods } from './collections/PlacePeriods'
-import { Places } from './collections/Places'
-import { SiegeEngines } from './collections/SiegeEngines'
-import { Sources } from './collections/Sources'
-import { Territories } from './collections/Territories'
-import { Titles } from './collections/Titles'
+import { CMS_COLLECTIONS } from './collections/cmsCollections'
 import { Users } from './collections/Users'
-import { VassalLinks } from './collections/VassalLinks'
 import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
 import { exportEndpoint } from './export/exportEndpoint'
 import { mcpAccess } from './mcp/mcpAccess'
@@ -108,22 +96,8 @@ export function cmsConfig(options: { readonly transactions?: boolean } = {}): Co
     admin: adminConfig(),
     // The route « Exporter la base » calls (CMS-499)
     endpoints: [exportEndpoint],
-    collections: [
-      Events,
-      EventTypes,
-      SiegeEngines,
-      Places,
-      PlacePeriods,
-      PeriodNames,
-      ImportanceReasons,
-      Confessions,
-      People,
-      Territories,
-      Titles,
-      VassalLinks,
-      Sources,
-      Users,
-    ],
+    // A copy: building runs the plugins, and the MCP plugin adds its collection to the list it is given
+    collections: [...CMS_COLLECTIONS],
     localization: {
       locales: [
         { code: 'fr', label: 'Français' },

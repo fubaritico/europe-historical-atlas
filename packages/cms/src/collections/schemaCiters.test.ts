@@ -1,40 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { Confessions } from './Confessions'
-import { Events } from './Events'
-import { EventTypes } from './EventTypes'
-import { ImportanceReasons } from './ImportanceReasons'
-import { People } from './People'
-import { PeriodNames } from './PeriodNames'
-import { PlacePeriods } from './PlacePeriods'
-import { Places } from './Places'
+import { CMS_COLLECTIONS } from './cmsCollections'
 import { schemaCiters } from './schemaCiters'
-import { SiegeEngines } from './SiegeEngines'
-import { Sources } from './Sources'
-import { Territories } from './Territories'
-import { Titles } from './Titles'
-import { Users } from './Users'
-import { VassalLinks } from './VassalLinks'
 
-import type { CollectionConfig, Field } from 'payload'
+import type { Field } from 'payload'
 
 /** Every collection of the CMS. */
-const COLLECTIONS: CollectionConfig[] = [
-  Events,
-  EventTypes,
-  SiegeEngines,
-  Places,
-  PlacePeriods,
-  PeriodNames,
-  ImportanceReasons,
-  Confessions,
-  People,
-  Territories,
-  Titles,
-  VassalLinks,
-  Sources,
-  Users,
-]
+const COLLECTIONS = CMS_COLLECTIONS
 
 /**
  * The citers of a collection, as « collection:path ».

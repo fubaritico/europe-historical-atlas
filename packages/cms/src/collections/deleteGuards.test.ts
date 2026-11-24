@@ -1,41 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
-import { Confessions } from './Confessions'
-import { Events } from './Events'
-import { EventTypes } from './EventTypes'
-import { ImportanceReasons } from './ImportanceReasons'
-import { People } from './People'
+import { CMS_COLLECTIONS } from './cmsCollections'
 import { PeriodNames } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 import { PLACE_CITERS, Places } from './Places'
 import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { schemaCiters } from './schemaCiters'
-import { SiegeEngines } from './SiegeEngines'
 import { SOURCE_CITERS, Sources } from './Sources'
-import { Territories } from './Territories'
 import { Titles } from './Titles'
-import { Users } from './Users'
 import { VassalLinks } from './VassalLinks'
 
-import type { CollectionConfig } from 'payload'
-
 /** Every collection of the CMS: what may point at a place or a source. */
-const COLLECTIONS: CollectionConfig[] = [
-  Events,
-  EventTypes,
-  SiegeEngines,
-  Places,
-  PlacePeriods,
-  PeriodNames,
-  ImportanceReasons,
-  Confessions,
-  People,
-  Territories,
-  Titles,
-  VassalLinks,
-  Sources,
-  Users,
-]
+const COLLECTIONS = CMS_COLLECTIONS
 
 /**
  * Everything in the CMS that points at a collection, as « collection:path » — the schema's own reading

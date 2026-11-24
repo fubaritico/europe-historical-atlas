@@ -4,6 +4,7 @@ import path from 'node:path'
 import { getPayload } from 'payload'
 
 import config from '../payload.config'
+import { SCHEMA_MAP_FILE, cmsCollectionsIn, writeSchemaMap } from '../schemaMap/writeSchemaMap'
 
 import { finishMigrations, migrationFiles, referencesLeft } from './finishMigrations'
 import { dangersOfNewFiles } from './migrationDangers'
@@ -46,4 +47,8 @@ if (dangerous.length > 0) {
       'Rewrite it by hand if the data must survive (packages/cms/README.md), then add « // dangers reviewed: <why> ».'
   )
 }
+// The map of the schema follows every field change (CMS-280), drawn from the built configuration
+console.warn(
+  `[CMS] schema map written: ${writeSchemaMap(cmsCollectionsIn(await config), SCHEMA_MAP_FILE)}`
+)
 process.exit(left.length > 0 || dangerous.length > 0 ? 1 : 0)
