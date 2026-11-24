@@ -55,9 +55,9 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   cityMissing: '#c86a52',
   cityToCorrect: '#d9b44a',
   cityRadius: 3,
-  // A point's dot, larger than a named city's (CARTO-511, the dev's choice of 2026-11-24): at 3 a ring cut in two
-  // colours did not read.
-  cityPointRadius: 4,
+  // A point's dot (CARTO-511): 4 on the workbench, back to 3 the same day once seen on the map — the points took too
+  // much room and overlapped (the dev, 2026-11-24).
+  cityPointRadius: 3,
   cityFontSize: 11,
   // An overlap's stripes (CARTO-364): wide enough to read a colour, narrow enough to read two in a small piece.
   hatchWidth: 10,

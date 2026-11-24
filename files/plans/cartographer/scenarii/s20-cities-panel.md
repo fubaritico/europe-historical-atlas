@@ -298,7 +298,8 @@ Scenario: a city in a disputed zone — CARTO-511, the historian's request and t
   When the cities are shown as points
   Then its point is a dot in the colour of the polity of its chain, its status ring cut in eight sectors, that
     polity's colour and the other's in turn — a polity with no colour gives its sectors the light ring's cream
-  And every point is drawn at radius 4 (it was 3: a ring in two colours did not read — the dev, on the workbench)
+  And every point keeps its radius of 3 — 4, chosen on the workbench, took too much room on the map and the points
+    overlapped (the dev, 2026-11-24, the same day)
   And its box says "In a disputed zone: <the polity of its chain>, which holds it by the sources, shares the ground
     with <the other>, drawn over it." in an information, neither a warning nor an error — a sheet with no title, its
     holder entered, is judged the same way
