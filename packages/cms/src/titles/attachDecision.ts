@@ -47,8 +47,11 @@ export interface TitleRead {
 export type AttachDecision =
   /** No sheet covers the year: one is made, held by the title, its holder inferred from the district. */
   | { readonly kind: 'create' }
-  /** One sheet covers the year, with no holder and no line naming another: the title is set, the line added. */
-  | { readonly kind: 'attach'; readonly sheet: number | string }
+  /**
+   * One sheet covers the year, with no holder and no line naming another: the title is set — and the inferred line
+   * added, unless a line already attests the title's territory for this city (review QUAL-004 of CMS-507).
+   */
+  | { readonly kind: 'attach'; readonly sheet: number | string; readonly attested: boolean }
   /** The sheet is already held by this title: nothing is written. */
   | { readonly kind: 'unchanged'; readonly sheet: number | string }
   /** The city is held otherwise, or its sheets cannot be told apart: nothing is written, the reason said. */
@@ -137,7 +140,8 @@ export function attachDecision(
   if (other !== undefined) {
     return { kind: 'conflict', sheet: sheet.id, reason: { kind: 'otherLine', holder: other } }
   }
-  return { kind: 'attach', sheet: sheet.id }
+  const attested = sheet.testimonies.some((line) => line.subject === 'holder')
+  return { kind: 'attach', sheet: sheet.id, attested }
 }
 
 /**

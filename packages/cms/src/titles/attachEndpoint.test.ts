@@ -33,7 +33,7 @@ describe('attachHandler', () => {
       const response = await attachHandler(signedIn({ year: 1100, places: [1] }), PAYLOAD, attach)
       expect(response.status).toBe(200)
       expect(await response.json()).toEqual({ results: RESULTS })
-      expect(attach).toHaveBeenCalledWith(PAYLOAD, '7', 1100, [1])
+      expect(attach).toHaveBeenCalledWith(PAYLOAD, 7, 1100, [1])
     })
   })
 
@@ -42,6 +42,53 @@ describe('attachHandler', () => {
       expect(titleEndpoints.map(({ method, path }) => [method, path])).toEqual([
         ['post', '/:id/cities'],
       ])
+    })
+  })
+
+  describe('the inputs of the route (review SEC-003)', () => {
+    it('takes ids sent as their digits, as a script reading JSON may send them', async () => {
+      const attach = vi.fn<typeof attachCities>().mockResolvedValue([])
+      await attachHandler(signedIn({ year: 1100, places: ['1858', 6] }), PAYLOAD, attach)
+      expect(attach).toHaveBeenCalledWith(PAYLOAD, 7, 1100, [1858, 6])
+    })
+
+    it('refuses an id that is not a positive whole number, and more places than a district holds', async () => {
+      const attach = vi.fn<typeof attachCities>()
+      const tooMany = Array.from({ length: 501 }, (_, index) => index + 1)
+      for (const places of [['abc'], [-3], [1.5], tooMany]) {
+        expect(
+          (await attachHandler(signedIn({ year: 1100, places }), PAYLOAD, attach)).status
+        ).toBe(400)
+      }
+      expect(
+        (await attachHandler(signedIn({ year: 1100, places: [1] }, '../x'), PAYLOAD, attach)).status
+      ).toBe(400)
+      expect(attach).not.toHaveBeenCalled()
+    })
+
+    it('runs two attachments one after the other', async () => {
+      const order: string[] = []
+      let release: () => void = () => undefined
+      const first = vi.fn<typeof attachCities>(async () => {
+        order.push('first starts')
+        await new Promise<void>((resolve) => {
+          release = resolve
+        })
+        order.push('first ends')
+        return []
+      })
+      const second = vi.fn<typeof attachCities>(() => {
+        order.push('second starts')
+        return Promise.resolve([])
+      })
+      const one = attachHandler(signedIn({ year: 1100, places: [1] }), PAYLOAD, first)
+      const two = attachHandler(signedIn({ year: 1100, places: [2] }), PAYLOAD, second)
+      await vi.waitFor(() => {
+        expect(order).toEqual(['first starts'])
+      })
+      release()
+      await Promise.all([one, two])
+      expect(order).toEqual(['first starts', 'first ends', 'second starts'])
     })
   })
 

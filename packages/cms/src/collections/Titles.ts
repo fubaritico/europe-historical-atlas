@@ -95,5 +95,11 @@ export const Titles: CollectionConfig = {
     claimLines(
       'Facultatif : la source qui dit que cette personne tenait ce territoire à cette date.'
     ),
+    // CMS-507: a block of the page, no column — the cities are attached through the title's route
+    {
+      name: 'citiesUnderAuthority',
+      type: 'ui',
+      admin: { components: { Field: '/components/TitleCities/TitleCities#TitleCities' } },
+    },
   ],
 }

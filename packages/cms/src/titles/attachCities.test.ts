@@ -164,6 +164,25 @@ describe('attachCities', () => {
   })
 
   describe('variants', () => {
+    it('attaches a sheet whose line attests the territory, adding no inferred line beside it', async () => {
+      const castres = await place('Castres')
+      const attesting = {
+        source,
+        subject: 'holder',
+        holderName: 'comté de Toulouse',
+        holderQid: 'Q1334322',
+      }
+      const id = await sheet1100(castres, { testimonies: [attesting] })
+      const [result] = await attachCities(payload, raymond, 1100, [castres])
+      expect(result).toMatchObject({ result: 'attached', sheet: id })
+      const saved = await payload.findByID({ collection: 'place-periods', id, depth: 0 })
+      expect([
+        saved.holderTitle,
+        saved.testimonies?.length,
+        saved.testimonies?.[0]?.byDistrict,
+      ]).toEqual([raymond, 1, false])
+    }, 60_000)
+
     it('changes nothing for a city the title already holds', async () => {
       const toulouse = await place('Toulouse')
       const id = await sheet1100(toulouse, { holderTitle: raymond })
@@ -185,6 +204,7 @@ describe('attachCities', () => {
         expect.objectContaining({
           result: 'conflict',
           reason: { kind: 'otherTitle', title: other },
+          holder: expect.stringContaining('vicomté d’Albi') as unknown,
         }),
         expect.objectContaining({
           result: 'conflict',

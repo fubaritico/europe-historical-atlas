@@ -437,9 +437,10 @@ export function communityBody(community: CommunityValues): CommunityBody {
 }
 
 /**
- * A line's holder as the collection stores it: the polity and its id for a line about the holder, `null` otherwise.
+ * A line's holder as the collection stores it: for a line about the holder, the polity, its id, the name as the source
+ * writes it and whether it is inferred from the district (CMS-507); `null` and `false` for any other line.
  * @param line - the form's line
- * @returns the two fields
+ * @returns the four fields
  */
 function lineHolder(
   line: TestimonyValues

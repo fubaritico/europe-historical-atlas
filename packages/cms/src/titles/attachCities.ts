@@ -6,6 +6,8 @@
  * district: the title's first source line, its territory named (the historian's calls of 2026-11-24).
  */
 
+import { APIError } from 'payload'
+
 import { relationId } from '../fields/relationId'
 
 import { attachDecision, titleYears } from './attachDecision'
@@ -29,6 +31,8 @@ export interface AttachResult {
   readonly sheet: number | string | null
   /** Why a conflict was left as it is. */
   readonly reason?: ConflictReason
+  /** The other title's name, for a city held by another title. */
+  readonly holder?: string
   /** What failed, for a city the base refused. */
   readonly error?: string
 }
@@ -120,6 +124,24 @@ function inferredLine(title: TitleOnce) {
 }
 
 /**
+ * A city left as it is, with the other title's name when another title holds it.
+ * @param payload - Payload
+ * @param decision - the conflict
+ * @param decision.sheet - its sheet
+ * @param decision.reason - why it is left
+ * @returns what is said of it
+ */
+async function conflictResult(
+  payload: AttachPort,
+  decision: { sheet: number | string | null; reason: ConflictReason }
+): Promise<Pick<AttachResult, 'result' | 'sheet' | 'reason' | 'holder'>> {
+  const { sheet, reason } = decision
+  if (reason.kind !== 'otherTitle') return { result: 'conflict', sheet, reason }
+  const other = await payload.findByID({ collection: 'titles', id: reason.title, depth: 0 })
+  return { result: 'conflict', sheet, reason, holder: String(other.label) }
+}
+
+/**
  * Carry one decision out.
  * @param payload - Payload
  * @param decision - what to do
@@ -134,7 +156,7 @@ async function carryOut(
   place: number | string,
   title: TitleOnce,
   year: number
-): Promise<Pick<AttachResult, 'result' | 'sheet' | 'reason'>> {
+): Promise<Pick<AttachResult, 'result' | 'sheet' | 'reason' | 'holder'>> {
   switch (decision.kind) {
     case 'create': {
       const sheet = await payload.create({
@@ -162,7 +184,10 @@ async function carryOut(
         // Every line sent back with its own: an update that carries the lines replaces them all
         data: {
           holderTitle: Number(title.id),
-          testimonies: [...(saved.testimonies ?? []), inferredLine(title)],
+          // A line attesting the territory already: no inferred one beside it
+          testimonies: decision.attested
+            ? (saved.testimonies ?? [])
+            : [...(saved.testimonies ?? []), inferredLine(title)],
         } as never,
       })
       return { result: 'attached', sheet: decision.sheet }
@@ -170,7 +195,7 @@ async function carryOut(
     case 'unchanged':
       return { result: 'unchanged', sheet: decision.sheet }
     case 'conflict':
-      return { result: 'conflict', sheet: decision.sheet, reason: decision.reason }
+      return conflictResult(payload, decision)
   }
 }
 
@@ -207,7 +232,11 @@ export async function attachCities(
       const decision = attachDecision(await sheetsOf(payload, place), title, year)
       results.push({ place, name, ...(await carryOut(payload, decision, place, title, year)) })
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error)
+      // Payload's own refusals are meant to be read; anything else stays in the server's log (review SEC-002)
+      const message =
+        error instanceof APIError
+          ? error.message
+          : 'erreur interne, le détail est dans la console du serveur'
       console.error(`[CMS] attaching ${name} to title ${String(titleId)} failed`, error)
       results.push({ place, name, result: 'failed', sheet: null, error: message })
     }

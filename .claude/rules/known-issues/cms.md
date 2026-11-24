@@ -152,3 +152,11 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   the route; the `csrf` and `cors` origins set; and online the export cannot write the atlas's folder anyway (`names.md`).
   Also left by the review: while the export runs (about 12 s), the greyed button is not announced to a screen reader;
   the toast that ends it is (A11Y-001, the same as the Wikidata button). **Severity: worth knowing.**
+- **« Rattacher » on a title's page writes with every right** (2026-11-24, CMS-507, reviews SEC-001 and ARCH-002): the
+  route `POST /api/titles/:id/cities` checks a signed-in user only, then `attachCities` reads and writes through the
+  Local API without `user` nor `overrideAccess: false` — the same family as « Exporter la base » above. No effect while
+  the CMS is local, with one contributor. **Trigger**: going online (CMS-228) — pass the request's user to every call,
+  keeping the hooks that read with full rights on purpose, and no other `locale` carried into the write (the trap of
+  2026-11-23). Also left: its two writes pass their data `as never`, Payload's generated row type requiring the fields a
+  condition hides (population on a holder line); a field renamed in `PlacePeriods` shows only as a city « failed ».
+  **Severity: worth knowing.**

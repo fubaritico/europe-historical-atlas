@@ -37,7 +37,11 @@ describe('attachDecision', () => {
     })
 
     it('attaches the title to the one sheet that covers the year, held by nobody', () => {
-      expect(attachDecision([sheet(3, 1100)], RAYMOND, 1100)).toEqual({ kind: 'attach', sheet: 3 })
+      expect(attachDecision([sheet(3, 1100)], RAYMOND, 1100)).toEqual({
+        kind: 'attach',
+        sheet: 3,
+        attested: false,
+      })
     })
   })
 
@@ -52,6 +56,7 @@ describe('attachDecision', () => {
       expect(attachDecision([sheet(3, 1094, 1105)], RAYMOND, 1100)).toEqual({
         kind: 'attach',
         sheet: 3,
+        attested: false,
       })
     })
 
@@ -67,6 +72,19 @@ describe('attachDecision', () => {
       const byName = { subject: 'holder', holderName: 'Comté de Toulouse', holderQid: null }
       const lines = { testimonies: [byId, byName] }
       expect(attachDecision([sheet(3, 1100, null, lines)], RAYMOND, 1100).kind).toBe('attach')
+    })
+  })
+
+  describe('a line already attesting the territory (review QUAL-004)', () => {
+    it('attaches the title, saying no inferred line is to be added', () => {
+      const line = { subject: 'holder', holderName: 'comté de Toulouse', holderQid: 'Q1334322' }
+      expect(
+        attachDecision([sheet(3, 1100, null, { testimonies: [line] })], RAYMOND, 1100)
+      ).toEqual({
+        kind: 'attach',
+        sheet: 3,
+        attested: true,
+      })
     })
   })
 
