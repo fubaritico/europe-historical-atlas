@@ -50,8 +50,8 @@
       "id": "taifa-of-zaragoza",
       "name": "Taifa of Zaragoza",
       "rank": "kingdom",
-      "status": "country",
-      "suzerain": null,
+      "status": null,
+      "suzerain": "kingdom-of-castile",
       "existsFrom": 1018,
       "existsTo": 1110,
       "colour": "#5987c0",
@@ -62,7 +62,7 @@
       "name": "Taifa de Molina",
       "rank": "kingdom",
       "status": null,
-      "suzerain": "taifa-of-zaragoza",
+      "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
       "colour": null,
@@ -74,7 +74,7 @@
       "shortName": "Lleida",
       "rank": "kingdom",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "county-of-urgell",
       "existsFrom": 1039,
       "existsTo": 1110,
       "colour": null,
@@ -140,8 +140,8 @@
       "id": "taifa-of-albarracin",
       "name": "Taifa of Albarracín",
       "rank": "kingdom",
-      "status": "country",
-      "suzerain": null,
+      "status": null,
+      "suzerain": "almoravid-dynasty",
       "existsFrom": 1012,
       "existsTo": 1104,
       "colour": "#95c059",
@@ -158,6 +158,18 @@
       "existsTo": 1194,
       "colour": "#009900",
       "wikidata": "Q3708094"
+    },
+    {
+      "id": "principality-of-sasun",
+      "name": "Principality of Sasun",
+      "rank": "principality",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 394
     },
     {
       "id": "fatimid-caliphate",
@@ -419,6 +431,18 @@
       "wikidata": "Q12544"
     },
     {
+      "id": "lordship-of-melitene",
+      "name": "Lordship of Melitene",
+      "rank": "lordship",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 395
+    },
+    {
       "id": "duche-de-fondi",
       "name": "Duchy of Gaeta",
       "rank": null,
@@ -504,7 +528,8 @@
       "existsFrom": 1000,
       "existsTo": 1241,
       "colour": "#c07259",
-      "wikidata": "Q1122052"
+      "wikidata": "Q1035516",
+      "territory": 360
     },
     {
       "id": "principality-of-rostov-suzdal",
@@ -750,6 +775,19 @@
       "wikidata": "Q1233672"
     },
     {
+      "id": "viscomte-de-carcassone",
+      "name": "vicomté de Carcassonne",
+      "shortName": "Carcassone",
+      "rank": "viscounty",
+      "status": null,
+      "suzerain": "county-of-barcelona",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#59c066",
+      "wikidata": null,
+      "territory": 238
+    },
+    {
       "id": "county-of-blois",
       "name": "County of Blois",
       "rank": "county",
@@ -872,15 +910,15 @@
     },
     {
       "id": "taifa-of-denia",
-      "name": "Taifa of Dénia",
-      "shortName": "Dénia",
+      "name": "Taifa of Majorca",
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1076,
+      "existsTo": 1203,
       "colour": "#c07659",
-      "wikidata": "Q252323"
+      "wikidata": "Q3315525",
+      "territory": 7
     },
     {
       "id": "old-kingdom-of-norway",
@@ -1827,6 +1865,225 @@
       "colour": "#118536",
       "wikidata": null,
       "territory": 378
+    },
+    {
+      "id": "saltukids",
+      "name": "Saltukids",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009900",
+      "wikidata": null,
+      "territory": 387
+    },
+    {
+      "id": "emirate-of-kars",
+      "name": "Emirate of Kars",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009900",
+      "wikidata": null,
+      "territory": 392
+    },
+    {
+      "id": "shaddadids-of-ani",
+      "name": "Shaddadids of Ani",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009900",
+      "wikidata": null,
+      "territory": 391
+    },
+    {
+      "id": "shah-armens",
+      "name": "Shah-Armens",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009900",
+      "wikidata": null,
+      "territory": 388
+    },
+    {
+      "id": "mengujekids",
+      "name": "Mengujekids",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#009900",
+      "wikidata": null,
+      "territory": 393
+    },
+    {
+      "id": "kingdom-of-galicia",
+      "name": "Kingdom of Galicia",
+      "rank": "county",
+      "status": null,
+      "suzerain": "kingdom-of-leon",
+      "existsFrom": 910,
+      "existsTo": 1833,
+      "colour": "#c97676",
+      "wikidata": "Q303421",
+      "territory": 327
+    },
+    {
+      "id": "county-of-portugal",
+      "name": "County of Portugal",
+      "rank": "county",
+      "status": null,
+      "suzerain": "kingdom-of-leon",
+      "existsFrom": 868,
+      "existsTo": 1139,
+      "colour": "#59c06a",
+      "wikidata": "Q1139807",
+      "territory": 323
+    },
+    {
+      "id": "kingdom-of-munster",
+      "name": "Kingdom of Munster",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q20973653"
+    },
+    {
+      "id": "kingdom-of-ailech",
+      "name": "Kingdom of Ailech",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q15104874"
+    },
+    {
+      "id": "norse-greenland",
+      "name": "Norse Greenland",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q16488964"
+    },
+    {
+      "id": "emirate-of-gafsa",
+      "name": "Emirate of Gafsa",
+      "rank": "emirate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q132690209"
+    },
+    {
+      "id": "emirate-of-gabes",
+      "name": "Emirate of Gabès",
+      "rank": "emirate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q134514492"
+    },
+    {
+      "id": "seljuk-sultanate-of-kerman",
+      "name": "Seljuk Sultanate of Kerman",
+      "rank": "sultanate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q491790"
+    },
+    {
+      "id": "sharifate-of-medina",
+      "name": "Sharifate of Medina",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "fatimid-caliphate",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q122206321"
+    },
+    {
+      "id": "emirate-of-mosul",
+      "name": "Emirate of Mosul",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 383
+    },
+    {
+      "id": "hadhbanis-of-irbil",
+      "name": "Hadhbanis of Irbil",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": "great-seljuk-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q3676643"
+    },
+    {
+      "id": "lordship-of-kaysun",
+      "name": "Lordship of Kaysun and Raban",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 380
+    },
+    {
+      "id": "armenian-principality-of-cilicia",
+      "name": "Armenian Principality of Cilicia",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q4224856"
+    },
+    {
+      "id": "archbishopric-of-salzburg",
+      "name": "Prince-Archbishopric of Salzburg",
+      "rank": "archiepiscopal_lordship",
+      "status": null,
+      "suzerain": "kingdom-of-germany",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 92
     }
   ]
 }
