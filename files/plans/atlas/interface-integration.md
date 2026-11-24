@@ -4,6 +4,13 @@
 > commencer à faire un plan et des tickets d'intégration de l'interface utilisateur. Et comment on gérerait la
 > superposition entre l'interface React et le partage de l'état de l'application entre du React et du non-React. »_
 > **A draft: every line marked _proposed_ is mine until the dev says otherwise** (`by` column, § 7).
+>
+> **The dev's answer, same evening** — the cut is taken: _« l'important, c'est de poser la couche React par-dessus la
+> carte, de partager donc ce store »_, then the buttons, then what is worth it, **with the frieze's place kept: it is in
+> the MVP**. And three corrections: **only the canvas is not React** — the canvas and its keyboard and mouse gestures;
+> the loading screen is React too (my reason to keep it out was wrong: `index.html` holds the canvas alone, the splash
+> is built by JavaScript today). **The plates are indicative** — the boxes and the modals were proposals, and **the dev
+> retouches the graphic pieces for me to integrate**: nothing is lifted from a plate as it stands.
 
 **Read from**: the lot B plates (`files/resources/claude-design/atlas-html/planches-lot-b/`, its `README.md`, the PNGs in
 `atlas-png/… Interface-png LOT2/`), inventoried 2026-11-24; the scenarios `scenarii/s01`, `s11`–`s17`, the holes
@@ -36,8 +43,8 @@ this plan names them, never copies them.
 | 8, 9, 10 | the pad, three variants of its corners — **A-19 open** | s13 | ATLAS-149 (Backlog) |
 | 11, 12, 13, 51, 52 | the snapshot: its toast, the PNG, the print sheet — **A-20 open** | s14 | **new** |
 | 14, 24, 28, 30 | the detail panel (right, 440 px; a drawer from the bottom on a phone and an iPad upright) | — | ATLAS-155 (À faire), with ATLAS-147 and ATLAS-244 for a country |
-| 15, 25 | the synchronoptic frieze | — | ATLAS-358 (Idées) — its own epic, proposed 05/11 |
-| 1a, 20, 31, 32 | the loading screen | s01 | **new**, with ATLAS-394 |
+| 15, 25 | the synchronoptic frieze | — | ATLAS-358 — **in the MVP** (the dev, 24/11), its place kept from the shell on |
+| 1a, 20, 31, 32 | the loading screen | s01 | **new**, in React, with ATLAS-394 |
 | 20–32 | the touch layouts: the centred bar, the drawers, no pad | — | ATLAS-137 (Backlog) |
 | 16–18, 26, 36–39 | the site's pages: Atlas, Sources (stack of dates, a year, a work), About | — | **not the atlas's canvas**: a site — its own epic, after this one |
 | 40–52, 48a–d | the ornament kit; the dark theme (a trial) | — | ATLAS-461 (En cours) |
@@ -95,12 +102,14 @@ a button never disagree.
 - **The plain-DOM pieces of today** (`ui/notice`, `ui/errorNet`, `ui/progressOverlay`, `ui/yearSwitch`) are replaced
   one by one by their React screen, each in the ticket that builds it — never two versions on screen.
 
-### The loading screen stays out of React — _proposed_
+### Everything but the canvas is React — decided by the dev, 2026-11-24
 
-The splash must show **before** any JavaScript — and React's ~45 kB (gzipped, `architecture.md`, not measured here)
-before it would delay the first thing the reader sees. So: its markup and style in `index.html`, its bar moved by a
-few lines subscribed to the store; React mounted **after** the first map, which also settles « does React delay the
-map » (`architecture.md`, to measure). The error screen of ATLAS-394 takes the splash's place by the same plain DOM.
+The canvas and its keyboard and mouse gestures stay the map's; **every other element on screen is React, the loading
+screen included**. `index.html` holds the canvas alone and the splash is built by JavaScript today (`app/mapUi.ts`),
+so nothing showed before the JavaScript anyway: React is mounted **first**, beside the canvas, the loading screen its
+first screen, then the map starts under it. What remains to measure is React's own weight before the first paint
+(~45 kB gzipped per `architecture.md`, not measured here) — in ticket 2, before and after. The error screen
+(ATLAS-394) and the modal (ATLAS-395) are React screens fed by the store.
 
 ## 4. The design system and lot B
 
@@ -111,6 +120,9 @@ map » (`architecture.md`, to measure). The error screen of ATLAS-394 takes the 
   button come from `@fubaritico/react` (focus, keyboard, roles); the ornamented pieces — the round button and its key,
   the capsule, the framed window and its corners, the dark band, the drawer — are the atlas's components over them.
   **Whether some of them belong in the design system is the dev's call** (§ 7, D2).
+- **The plates are indicative, the pieces are the dev's** (24/11): he retouches the graphic elements — the frames,
+  the cartouches, the boxes and modals the plates proposed — and I integrate what he hands over. Until a piece
+  arrives, a component is built with its structure, its behaviour and its tokens, and a plain dress.
 - **The plates' CSS is not ported**: written by script, one rule per combination, in fixed pixels (README). Each piece
   is rewritten with variables, the corners as one `<symbol>` + `<use>`; class names are namespaced, the plates reusing
   `.band`, `.row`, `.btn`, `.cap` for different things.
@@ -132,30 +144,33 @@ For the dev, each in its ticket, never all at once:
 | Laurels on the snapshot's toast (`b-laurier`), while « no laurels without antiquity » (19/11) | 11 | the snapshot |
 | A-19 (the pad's corners), A-20 (the snapshot's size) | 8–10, 12–13 | the pad, the snapshot |
 
-## 6. The tickets, in order — _proposed_
+## 6. The tickets, in order — the cut taken by the dev, 2026-11-24
 
 Each builds a screen whole, at every breakpoint it has, with its scenario's assertions (`/scenarii-to-code`):
 
-1. **ATLAS-392 — the store and the commands** (exists, Backlog): the contract above, the year moved out of
-   `dev.political`, the temporary year switch reading the store. No screen yet — the ground of all the rest.
-2. **new — React beside the map, and the theme**: the root mounted after the first map, the design system installed
-   in the atlas, the lot B tokens and fonts, the bundle's weight and the first display measured before/after.
-3. **new — the kit**: round button and its key, capsule, framed window, dark band, drawer — on the workbench page.
-4. **new — the shell**: the top row and the site bar in its three states, the button bar — empty buttons wired to
-   their commands as each screen lands.
-5. **new — the century** (s15): replaces the temporary year switch.
-6. ATLAS-266 — the language (s11) · ATLAS-135 — help and the tour (s12) · ATLAS-149 — the pad (s13, after A-19).
+1. **ATLAS-392 — the store and the commands**: the contract above, the year moved out of `dev.political`, the
+   temporary year switch reading the store. No screen yet — the ground of all the rest.
+2. **React over the map, and the theme**: the root mounted beside the canvas at startup, the design system installed in
+   the atlas, the lot B tokens and fonts, React's weight before the first paint measured before and after.
+3. **The kit**: round button and its key, capsule, framed window, dark band, drawer — structure and behaviour, dressed
+   with the dev's retouched pieces as they arrive, on the workbench page.
+4. **The shell**: the top row and the site bar in its three states, the button bar — **and the frieze's place kept**
+   (the bar moves up when the frieze opens, plate 15). Buttons wired to their commands as each screen lands.
+5. **The century** (s15): replaces the temporary year switch.
+6. ATLAS-358 — **the frieze, in the MVP** · ATLAS-266 — the language (s11) · ATLAS-135 — help and the tour (s12) ·
+   ATLAS-149 — the pad (s13, after A-19).
 7. ATLAS-155 — the detail panel — needs a click on an event to select it (picking: ATLAS-147, ATLAS-146).
-8. **new — the loading screen** of lot B, plain DOM, with ATLAS-394 and ATLAS-395.
-9. **new — the snapshot** (s14, after A-20) · ATLAS-137 — the touch layouts.
-10. ATLAS-358 — the frieze, its own epic; the site's pages, their own epic.
+8. **The loading screen** of lot B, in React, with ATLAS-394 and ATLAS-395.
+9. **The snapshot** (s14, after A-20) · ATLAS-137 — the touch layouts.
+10. The site's pages: their own epic, after the MVP.
 
 ## 7. Decisions
 
 | # | question | proposed | by |
 | --- | --- | --- | --- |
-| D1 | Zustand's vanilla store for the shared state, beside a port of commands | yes — the Cartographer's store, already known; one owner per fact | me — **to decide** |
+| D1 | Zustand's vanilla store for the shared state, beside a port of commands | yes — the Cartographer's store, already known; one owner per fact | **the dev, 24/11** (« partager ce store ») |
 | D2 | the ornamented pieces in the atlas, or in `fubaritico-ds` | in the atlas first; one moves into the design system when a second application needs it | me — **to decide** |
-| D3 | the loading screen outside React, React mounted after the first map | yes, measured in ticket 2 | me — **to decide** |
+| D3 | what is React | **everything but the canvas and its gestures**, the loading screen included — my proposal to keep it out was wrong | **the dev, 24/11** |
+| D3b | the frieze | in the MVP, its place kept from the shell on | **the dev, 24/11** |
 | D4 | « one overlay open at a time » in the store or in React alone | the store: Escape closes an overlay **or** leaves the focus, and the map must know which | me — **to decide** |
 | D5 | the button bar, left or right | the plates' left, or A-15's right | **the dev** |
