@@ -1,7 +1,13 @@
 import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 
+import { registerRefusals } from './refuseRemovingCited'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
+
 import type { CollectionConfig } from 'payload'
+
+/** A confession a community or its line still cites is neither put in the bin nor erased from under it (CMS-509). */
+const REFUSALS = registerRefusals({ subject: 'Cette confession', cited: 'citée' })
 
 /**
  * The confessions a city's communities belong to — catholic, orthodox, Church of the East, Sunni Muslim, Jewish, pagan…
@@ -11,6 +17,12 @@ import type { CollectionConfig } from 'payload'
 export const Confessions: CollectionConfig = {
   slug: 'confessions',
   labels: { singular: 'Confession', plural: 'Confessions' },
+  // CMS-509: a confession removed goes to the bin — a duplicate merged away too — and comes back from it
+  trash: true,
+  hooks: {
+    beforeChange: [refuseRestoringOverBin, REFUSALS.beforeChange],
+    beforeDelete: [REFUSALS.beforeDelete],
+  },
   admin: {
     useAsTitle: 'name',
     description:

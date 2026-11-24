@@ -74,6 +74,12 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   line cites, a title a link or a sheet cites, is refused and the message names what cites it — so undo **in order:
   the sheet, then its place, then its source**. Read the record (find by id) before, check after that a plain find no
   longer returns it. Each record put in the bin is said to the code instance with the others of the batch.
+- **Two duplicates are merged by a command, never by hand** (CMS-509 — the Ponthieu merged by hand on 2026-11-23):
+  `pnpm cms:merge <collection> <id kept> <id merged away>`, from the repository's root, while no agent writes. It
+  copies the base, moves every record that cites the one merged away — titles, lines, sheets, houses — to the one kept,
+  then puts it in the bin, all or nothing; it names what the merged-away record held of its own (its lines, its names in
+  other languages), to carry by hand if they matter. It works in every collection with a bin, the registers included —
+  the one way to retire a territory or a person, whose records my key never puts in the bin itself.
 - **A quotation is pasted, never retyped** (2026-11-23: eight quotations altered in one evening — maître for maitre,
   uğrattı for uğratıp — by entry agents and by me, each retyping a text it had read). The content of every call is
   printed by a script from the checked report, JSON-escaped, and pasted as it stands; after a wave, a script compares

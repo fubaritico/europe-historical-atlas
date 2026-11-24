@@ -127,6 +127,20 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   que sa descente retire aussi). Les autres (`holderTitleDown`, `uniqueWikidata`…) ont la même forme. **Remède appliqué
   là** : défaire d'abord la migration plus récente qui touche les mêmes colonnes. **Sévérité : à savoir** — le prochain qui
   tombe se lit ainsi.
+- **Le serveur du CMS n'écrit dans aucune transaction** (24/11, CMS-509, trouvé par le test de la fusion) : l'adaptateur
+  SQLite de Payload n'en ouvre une que si `transactionOptions` est donné (3.92, `db-sqlite/index.ts` →
+  `defaultBeginTransaction`, qui ne fait rien). Un geste qui écrit plusieurs fiches — un crochet qui réenregistre les
+  titres d'un territoire renommé (`refreshTitlesOf`) — peut donc s'arrêter à mi-chemin. **Remède appliqué là où ça
+  compte** : la fusion des doublons se construit avec `cmsConfig({ transactions: true })` (mode `immediate`) et refuse de
+  partir sans transaction. **Pour le serveur** : décision à prendre si un geste à moitié fait apparaît — des transactions
+  pour tout le CMS veulent un verrou d'écriture par requête, à mesurer avec les agents qui écrivent en parallèle.
+  **Sévérité : à savoir.**
+- **Les quatre registres ont leur corbeille, et le MCP n'y met rien** (24/11, CMS-509) : territoires, personnes,
+  confessions et raisons d'importance ont `trash: true` ; ce qui les cite est lu dans le schéma (`schemaCiters`), pour
+  leurs refus (`registerRefusals`) comme pour la fusion — une maison qui nomme son fondateur compte, ce que l'ancienne liste
+  des seuls titres ratait. Par le MCP, une fiche de registre ne va pas à la corbeille (`registerRefusals`) : les retirer
+  reste au dev, ou à `pnpm cms:merge`, tant qu'il n'a pas ouvert ce geste à l'historien
+  (`files/plans/historian/autonomy-and-1200.md` § 7 d). **Sévérité : à savoir.**
 - **A record without its English line is refused at its next save** (2026-11-23, CMS-495): English is required on
   places, territories, people and the four registers — wanted (the dev, 2026-11-22: _"a translation field is never
   left empty"_), never loosened. Since the same evening no record lacks it; a new one is given its English line in the

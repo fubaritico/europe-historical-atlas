@@ -96,9 +96,14 @@ function adminConfig(): NonNullable<Config['admin']> {
  * sends Payload's log to the standard error (CARTO-456). **A new object at each call**: building runs the plugins, and
  * the MCP plugin adds its collection to the object it is given — built twice, one object refuses its own slug
  * (measured: `DuplicateCollection`, « payload-mcp-api-keys »).
+ * @param options - what a command changes in it
+ * @param options.transactions - true for a command that writes several records as one gesture (the merge of two
+ *   duplicates, CMS-509): Payload's SQLite adapter runs **no** transaction unless asked (3.92, `db-sqlite/index.ts`:
+ *   `defaultBeginTransaction`, which does nothing), so the server writes record by record, and only such a command
+ *   asks for them — `immediate`, the write lock taken at the start
  * @returns the configuration, not built
  */
-export function cmsConfig(): Config {
+export function cmsConfig(options: { readonly transactions?: boolean } = {}): Config {
   return {
     admin: adminConfig(),
     // The route « Exporter la base » calls (CMS-499)
@@ -136,6 +141,7 @@ export function cmsConfig(): Config {
       client: { url: required('DATABASE_URL') },
       push: false,
       migrationDir: MIGRATION_DIR,
+      ...(options.transactions === true ? { transactionOptions: { behavior: 'immediate' } } : {}),
     }),
   }
 }

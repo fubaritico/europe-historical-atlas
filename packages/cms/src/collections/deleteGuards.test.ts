@@ -9,6 +9,7 @@ import { PeriodNames } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 import { PLACE_CITERS, Places } from './Places'
 import { refuseRestoringOverBin } from './refuseRestoringOverBin'
+import { schemaCiters } from './schemaCiters'
 import { SiegeEngines } from './SiegeEngines'
 import { SOURCE_CITERS, Sources } from './Sources'
 import { Territories } from './Territories'
@@ -16,7 +17,7 @@ import { Titles } from './Titles'
 import { Users } from './Users'
 import { VassalLinks } from './VassalLinks'
 
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 /** Every collection of the CMS: what may point at a place or a source. */
 const COLLECTIONS: CollectionConfig[] = [
@@ -37,38 +38,15 @@ const COLLECTIONS: CollectionConfig[] = [
 ]
 
 /**
- * Every field of a list of fields that points at a collection, by its path — `lines.source` inside a list or a group,
- * the fields of a row, a collapsible or a tab read as their parent's.
- * @param fields - the fields
- * @param target - the collection pointed at
- * @param prefix - the path of the list or group they are in
- * @returns the paths
- */
-function pointersAt(fields: readonly Field[], target: string, prefix = ''): string[] {
-  return fields.flatMap((field): string[] => {
-    if (field.type === 'tabs')
-      return field.tabs.flatMap((tab) =>
-        pointersAt(tab.fields, target, 'name' in tab ? `${prefix}${tab.name}.` : prefix)
-      )
-    if (field.type === 'relationship' || field.type === 'upload') {
-      const to = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
-      return (to as string[]).includes(target) ? [`${prefix}${field.name}`] : []
-    }
-    if (!('fields' in field)) return []
-    // A named list or group opens a path; a row or a collapsible holds its parent's fields.
-    return pointersAt(field.fields, target, 'name' in field ? `${prefix}${field.name}.` : prefix)
-  })
-}
-
-/**
- * Everything in the CMS that points at a collection, as « collection:path ».
+ * Everything in the CMS that points at a collection, as « collection:path » — the schema's own reading
+ * (`schemaCiters`, CMS-509), which the merge and the registers' refusals use too.
  * @param target - the collection pointed at
  * @returns the pointers, sorted
  */
 function citersOf(target: string): string[] {
-  return COLLECTIONS.flatMap((collection) =>
-    pointersAt(collection.fields, target).map((path) => `${collection.slug}:${path}`)
-  ).sort()
+  return schemaCiters(COLLECTIONS, target)
+    .map(({ collection, path }) => `${collection}:${path}`)
+    .sort()
 }
 
 // CMS-454: a place or a source is deleted over MCP only when nothing cites it. The base empties a field under a

@@ -416,6 +416,7 @@ export interface Person {
   founder?: (number | null) | Person;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -724,6 +725,7 @@ export interface ImportanceReason {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -890,6 +892,7 @@ export interface Territory {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Les confessions qu’on peut donner à une communauté sur une fiche « Ville à une date » : catholique, orthodoxe, musulmane sunnite, juive… Ajoutez-en autant qu’il faut.
@@ -918,6 +921,7 @@ export interface Confession {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1583,6 +1587,7 @@ export interface ImportanceReasonsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1599,6 +1604,7 @@ export interface ConfessionsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1661,6 +1667,7 @@ export interface PeopleSelect<T extends boolean = true> {
   founder?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1699,6 +1706,7 @@ export interface TerritoriesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

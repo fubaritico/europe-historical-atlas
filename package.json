@@ -8,6 +8,7 @@
     "dev:cartographer": "pnpm --filter @europe-historical-atlas/cartographer dev",
     "dev:cms": "pnpm --filter @europe-historical-atlas/cms dev",
     "export:content": "pnpm --filter @europe-historical-atlas/cms export",
+    "cms:merge": "pnpm -s --filter @europe-historical-atlas/cms merge",
     "cities:alerts": "pnpm -s --filter @europe-historical-atlas/cms export:print | pnpm -s --filter @europe-historical-atlas/cartographer cities:alerts",
     "names:check": "pnpm -s --filter @europe-historical-atlas/cms export:print | pnpm -s --filter @europe-historical-atlas/cms names:check",
     "research-log": "python3 -I .claude/skills/bulk-entry/scripts/research_log.py follow",

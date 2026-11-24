@@ -516,10 +516,40 @@ describe('titles and links', () => {
       const ofCount = await payload.findByID({ collection: 'titles', id: count, depth: 0 })
       await expect(
         payload.delete({ collection: 'people', id: ofCount.person as number })
-      ).rejects.toThrow('Cette personne est citée par 1 titre(s)')
+      ).rejects.toThrow('Cette personne est citée par 1 fiche(s) : « Mathias II — ')
       await expect(payload.delete({ collection: 'territories', id: nantes })).rejects.toThrow(
-        'Ce territoire est cité par 1 titre(s)'
+        'Ce territoire est cité par 1 fiche(s) : « Mathias II — '
       )
+    })
+
+    // CMS-509: the registers' citers read from the schema — a house names a person, which the list of titles missed
+    it('refuses to delete a person a house of the register names, a citation the titles alone missed', async () => {
+      const founder = await payload.create({
+        collection: 'people',
+        data: {
+          name: 'Robert le Fort',
+          otherNames: [{ language: 'en', form: 'Robert the Strong' }],
+          kind: 'person',
+        },
+      })
+      await payload.create({
+        collection: 'people',
+        data: {
+          name: 'Robertiens',
+          otherNames: [{ language: 'en', form: 'Robertians' }],
+          kind: 'house',
+          founder: founder.id,
+        },
+      })
+      await expect(payload.delete({ collection: 'people', id: founder.id })).rejects.toThrow(
+        '« Robertiens » (people)'
+      )
+    })
+
+    it('refuses to put in the bin a territory a title names, the same rule as its deletion', async () => {
+      await expect(
+        payload.update({ collection: 'territories', id: nantes, data: { deletedAt: now() } })
+      ).rejects.toThrow('Ce territoire est cité par 1 fiche(s)')
     })
   })
 

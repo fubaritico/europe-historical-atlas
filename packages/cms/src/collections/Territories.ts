@@ -5,9 +5,14 @@ import { otherNamesField } from '../fields/otherNames'
 import { trimmedText } from '../fields/trimmedText'
 import { wikidataField } from '../fields/wikidata'
 
-import { refreshTitlesOf, refuseDeletingCited } from './claimDependants'
+import { refreshTitlesOf } from './claimDependants'
+import { registerRefusals } from './refuseRemovingCited'
+import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 
 import type { CollectionConfig } from 'payload'
+
+/** A territory a title still names is neither put in the bin nor erased from under it (CMS-509). */
+const REFUSALS = registerRefusals({ subject: 'Ce territoire', cited: 'cité' })
 
 /**
  * What a territory of the register is: a land held — from an empire to a lordship — or an office exercised. The kind
@@ -74,17 +79,12 @@ export const Territories: CollectionConfig = {
   slug: 'territories',
   labels: { singular: 'Territoire', plural: 'Territoires' },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'kind', 'wikidata'] },
+  // CMS-509: a territory removed goes to the bin — a duplicate merged away too — and comes back from it with « Restaurer »
+  trash: true,
   hooks: {
     afterChange: [refreshTitlesOf('territory')],
-    beforeDelete: [
-      refuseDeletingCited({
-        collection: 'titles',
-        fields: ['territory'],
-        subject: 'Ce territoire',
-        cited: 'cité',
-        what: 'titre(s)',
-      }),
-    ],
+    beforeChange: [refuseRestoringOverBin, REFUSALS.beforeChange],
+    beforeDelete: [REFUSALS.beforeDelete],
   },
   fields: [
     {

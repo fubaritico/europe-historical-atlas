@@ -21,6 +21,7 @@ the server refuses to start without either.
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `pnpm dev:cms`                                                  | the admin and the API on port 3100                                           |
 | `pnpm export:content`                                           | writes the content the atlas reads, then reload the atlas                    |
+| `pnpm cms:merge <collection> <kept> <merged away>`              | merges two duplicates: every citation moved, the other to the bin (CMS-509)  |
 | `pnpm --filter @europe-historical-atlas/cms generate:types`     | after a field change: `src/payload-types.ts`, committed as Payload writes it |
 | `pnpm --filter @europe-historical-atlas/cms generate:importmap` | after a new admin component: `src/app/(payload)/admin/importMap.js`          |
 

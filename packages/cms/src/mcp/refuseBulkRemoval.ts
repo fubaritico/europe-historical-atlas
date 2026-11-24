@@ -6,7 +6,7 @@ import type { CollectionBeforeOperationHook } from 'payload'
  * How a request that came through the MCP endpoint is told: the plugin marks it (`@payloadcms/plugin-mcp` 3.92,
  * `endpoints/mcp.js`: `req.payloadAPI = 'MCP'`) — a value Payload's own type does not list.
  */
-const MCP_API = 'MCP'
+export const MCP_API = 'MCP'
 
 /**
  * Over MCP, a record leaves one at a time, by its id — deleted (CMS-454) or put in the bin (CMS-508). The plugin's

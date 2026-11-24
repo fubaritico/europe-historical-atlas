@@ -1,5 +1,7 @@
 import { APIError } from 'payload'
 
+import { mapRelations } from '../fields/mapRelations'
+
 import { isSet } from './claimDependants'
 
 import type { CollectionBeforeChangeHook, Field, PayloadRequest } from 'payload'
@@ -55,29 +57,14 @@ function idPointer(id: unknown, relationTo: string | string[]): Pointer | null {
  * @returns the records pointed at
  */
 export function pointersOf(fields: readonly Field[], doc: unknown): Pointer[] {
-  if (doc === null || typeof doc !== 'object') return []
-  const record = doc as Record<string, unknown>
-  return fields.flatMap((field): Pointer[] => {
-    if (field.type === 'tabs')
-      return field.tabs.flatMap((tab) =>
-        pointersOf(tab.fields, 'name' in tab ? record[tab.name] : record)
-      )
-    if (field.type === 'relationship' || field.type === 'upload') {
-      const value = record[field.name]
-      const values = Array.isArray(value) ? (value as unknown[]) : [value]
-      return values.flatMap((each) => {
-        const pointer = pointerOf(each, field.relationTo)
-        return pointer === null ? [] : [pointer]
-      })
-    }
-    if (!('fields' in field)) return []
-    if (!('name' in field)) return pointersOf(field.fields, record)
-    const nested = record[field.name]
-    // A list's rows each hold the fields; a group's value holds them once
-    return Array.isArray(nested)
-      ? (nested as unknown[]).flatMap((row) => pointersOf(field.fields, row))
-      : pointersOf(field.fields, nested)
+  const pointers: Pointer[] = []
+  // The one walk over a record's relations (CMS-509, review ARCH-001), read only: every value is given back as it was
+  mapRelations(fields, doc, (value, relationTo) => {
+    const pointer = pointerOf(value, relationTo)
+    if (pointer !== null) pointers.push(pointer)
+    return value
   })
+  return pointers
 }
 
 /**
