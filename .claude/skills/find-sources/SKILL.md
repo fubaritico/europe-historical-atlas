@@ -77,6 +77,9 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`. **Then by
     subject, by myself** (the dev, 2026-11-23): the polities, the actors, the region, the period — never only the
     titles he gave. The free scholarly works filed, the loan-only listed; **to him, only what was not found**.
+    **An empty search is never an answer** (the dev, 2026-11-24, on « Sandnes neighbouring farms Roussell », dropped
+    after one try): the script shows its reformulations, to judge; then find the book's **exact title** by a web
+    search, and search that title on archive.org, Gallica and Google Books; the journal says why it is dropped.
 13. Gallica.
 14. The BnF, then JSTOR — in his Chrome, never while he tests an app there. Not logged in or refused:
     write **CONNEXION IMPOSSIBLE**, stop everything, nothing counted.

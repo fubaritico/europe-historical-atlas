@@ -47,15 +47,43 @@ def files(identifier):
     return data.get('metadata', {}), (text[0] if text else None)
 
 
+def search(query):
+    """The items of one archive.org query, texts only."""
+    asked = urllib.parse.urlencode([('q', '(%s) AND mediatype:texts' % query), ('fl[]', 'identifier'),
+                                    ('fl[]', 'title'), ('fl[]', 'creator'), ('fl[]', 'year'),
+                                    ('fl[]', 'access-restricted-item'), ('rows', '15'), ('output', 'json')])
+    return json.loads(fetch('https://archive.org/advancedsearch.php?' + asked))['response']['docs']
+
+
+def ladder(words):
+    """The reformulations of a search that found nothing (the dev, 2026-11-24: one empty search is never an answer):
+    the names as authors with the other words, the other words as a title, the other words alone. A name is a word
+    starting with a capital. A name alone as an author is never tried: it brings back any homonym (24/11, Roussell)."""
+    names = [w for w in words.split() if w[:1].isupper() and len(w) > 2]
+    rest = [w for w in words.split() if w not in names]
+    steps = []
+    if names and rest:
+        steps.append('creator:(%s) AND (%s)' % (' OR '.join(names), ' '.join(rest)))
+    if rest:
+        steps.append('title:(%s)' % ' '.join(rest))
+        steps.append(' '.join(rest))
+    return steps
+
+
 if len(sys.argv) == 3 and sys.argv[1] == 'search':
     words = sys.argv[2]
     say('archive.org : je cherche « %s »' % words)
-    query = urllib.parse.urlencode([('q', '(%s) AND mediatype:texts' % words), ('fl[]', 'identifier'),
-                                    ('fl[]', 'title'), ('fl[]', 'creator'), ('fl[]', 'year'),
-                                    ('fl[]', 'access-restricted-item'), ('rows', '15'), ('output', 'json')])
-    found = json.loads(fetch('https://archive.org/advancedsearch.php?' + query))['response']['docs']
+    found = search(words)
     if not found:
-        say('archive.org : rien pour « %s »' % words)
+        # Every reformulation is tried and shown, none taken for the answer: a script cannot judge relevance (24/11).
+        for step in ladder(words):
+            looser = search(step)
+            say('archive.org : rien pour « %s » — reformulé « %s » : %d résultats, à juger' % (words, step, len(looser)))
+            for item in looser[:5]:
+                print('    ? %s | %s | %s | %s' % (item.get('identifier'), str(item.get('title'))[:70],
+                                                   str(item.get('creator'))[:40], item.get('year')))
+        say('archive.org : aucune réponse exacte pour « %s » — ensuite : le titre exact du livre par une recherche '
+            'web, puis ce titre sur archive.org, Gallica, Google Books ; dire au journal pourquoi on abandonne' % words)
     for item in found:
         print('  %s | %s | %s | %s | %s' % (item.get('identifier'), str(item.get('title'))[:70],
                                             str(item.get('creator'))[:40], item.get('year'),
