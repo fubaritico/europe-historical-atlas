@@ -8,7 +8,8 @@ this, I do that, the date"). One line per thing done, in French, dated to the se
 **Every line names its writer** (the dev, 2026-11-24: several teams write at once): `[<ATLAS_WHO>]` after the date,
 from the environment — `ATLAS_WHO="CARTO-505 · r39-maghreb" python3 -I research_log.py say "…"`; unset, `[historien]`.
 Every script of this skill that writes the journal does the same.
-**In colour**: `python3 -I research_log.py follow` follows the journal like `tail -f`, each team (its story key) in
+**In colour**: `python3 -I research_log.py follow` (`pnpm research-log`) follows the journal like `tail -f` from its
+last 40 lines, `follow all` (`pnpm research-log:all`) from its first line, each team (its story key) in
 its own colour — blue, orange, green… — the historian's own lines plain; the file itself stays plain text.
 
 `attempt` is the only way an attempt is recorded: it appends the line to registre/attempts.jsonl (its date added) and
@@ -77,7 +78,7 @@ def follow(lines=40):
         return colour + line + RESET
 
     with JOURNAL.open(encoding='utf-8') as journal:
-        for line in journal.readlines()[-lines:]:
+        for line in journal.readlines()[-lines:] if lines else journal.readlines():
             print(paint(line.rstrip('\n')), flush=True)
         while True:
             line = journal.readline()
@@ -87,8 +88,8 @@ def follow(lines=40):
                 time.sleep(0.5)
 
 
-if len(sys.argv) == 2 and sys.argv[1] == 'follow':
-    follow()
+if sys.argv[1:2] == ['follow'] and len(sys.argv) <= 3:
+    follow(None if sys.argv[2:] == ['all'] else 40)
     sys.exit(0)
 if len(sys.argv) != 3 or sys.argv[1] not in ('say', 'attempt'):
     sys.exit(__doc__)
