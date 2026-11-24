@@ -28,8 +28,3 @@ Open issues of the data on disk: `years/`, the relief, the spikes that write the
   worktree comes back to `main` and is committed like code, then pushed. The `*.autosave.*` folders beside them stay
   the Cartographer's copies, ignored; the historian's copy of a map before drawing goes to the archive disk
   (`/Volumes/Acer/atlas-historien/cartes/<year>/`), never beside it. **Severity: à savoir.**
-- **`years/1200/` superposes polities of several years** (seen by the dev on 2026-11-08 in the Cartographer: Kingdom of
-  Mann, Kingdom of Alba, Old Kingdom of Norway over one another), though he believed it cleaned to one date. Published
-  as it is the same evening. **Remedy**: the script that keeps only the polities of a year — ask the main instance where it
-  is and how it was run (`files/spikes/cliopatria-import/`?), run it at 1200, publish the result. First step of the next
-  session. **Severity: gênant** — the retouch of 1200 is blocked until it is done.

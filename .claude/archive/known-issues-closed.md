@@ -1,5 +1,15 @@
 # Known issues — closed
 
+- **Closed 2026-11-24** (measured, read-only, by `files/spikes/year-overlaps/measure.ts` on the dev's working copy of
+  `years/1200/`: 112 polities, 66 pieces covered twice, every one under 1 % of the smaller polity, the largest 916 km²
+  between the Qara Khitai and the Kimek Khanate; Mann over Alba 7 km² — border slivers, no epoch laid over another) —
+  from `rules/known-issues/data.md`:
+- **`years/1200/` superposes polities of several years** (seen by the dev on 2026-11-08 in the Cartographer: Kingdom of
+  Mann, Kingdom of Alba, Old Kingdom of Norway over one another), though he believed it cleaned to one date. Published
+  as it is the same evening. **Remedy**: the script that keeps only the polities of a year — ask the main instance where it
+  is and how it was run (`files/spikes/cliopatria-import/`?), run it at 1200, publish the result. First step of the next
+  session. **Severity: gênant** — the retouch of 1200 is blocked until it is done.
+
 - **Closed 2026-11-15** (no push since CMS-276, `f49efbb`: a schema change goes through a migration before the server starts) — from `rules/known-issues/cms.md`:
 - **Un ajout de champ pur peut figer le serveur, sans question dans le terminal** (03/11, `49a623d`) : une collection
   ajoutée au plugin MCP a ajouté une colonne à la table des clés. Le push l'a créée (`importance_reasons_find`), puis a
