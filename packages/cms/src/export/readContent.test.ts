@@ -46,7 +46,13 @@ describe('readContent', () => {
     it('reads a migrated base into content the schema accepts', async () => {
       const { readMigrationFiles } = await import('payload')
       const { migrateBase } = await import('../migrate/migrateBase')
-      await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+      await migrateBase(
+        payload,
+        databaseUrl,
+        new Date(),
+        await readMigrationFiles({ payload }),
+        () => []
+      )
       const warn = vi.fn()
       const content = await read(config, warn)
       expect(contentFileSchema.safeParse(content).success).toBe(true)

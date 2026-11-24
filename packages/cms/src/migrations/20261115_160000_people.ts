@@ -2,6 +2,8 @@ import { sql } from '@payloadcms/db-sqlite'
 
 import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-sqlite'
 
+// dangers reviewed: written by hand — the renames keep the rows and their ids (CMS-422, 2026-11-15)
+
 /**
  * CMS-422, step 1 — the register of people: `actors` renamed `people`, extended (birth and death, foundation and
  * end, house, founder), opened to the MCP keys.

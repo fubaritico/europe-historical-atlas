@@ -26,6 +26,16 @@ function snapshotAt(file: string): MigrationSnapshot {
 }
 
 /**
+ * The migrations of a folder: its TypeScript files but the index Payload writes beside them — one rule, read by
+ * `finishMigrations`, `referencesLeft` and `migrate:create` (review ARCH-003 of CMS-280).
+ * @param folder - the migrations' folder
+ * @returns their file names
+ */
+export function migrationFiles(folder: string): string[] {
+  return readdirSync(folder).filter((file) => file.endsWith('.ts') && file !== 'index.ts')
+}
+
+/**
  * Finish, in place, every migration of a folder the generator wrote: its types imported as types
  * (`typeOnlyImports`), and each column it adds with a foreign key written with the actions its snapshot declares
  * (`addedReferences`) — the two things Payload's and Drizzle's generators get wrong. The index Payload writes beside
@@ -36,8 +46,7 @@ function snapshotAt(file: string): MigrationSnapshot {
  */
 export function finishMigrations(folder: string): string[] {
   const fixed: string[] = []
-  for (const file of readdirSync(folder)) {
-    if (!file.endsWith('.ts') || file === 'index.ts') continue
+  for (const file of migrationFiles(folder)) {
     const where = path.join(folder, file)
     const source = readFileSync(where, 'utf8')
     const snapshotFile = where.replace(/\.ts$/, '.json')
@@ -61,8 +70,7 @@ export function finishMigrations(folder: string): string[] {
  * @returns each file with its columns left, empty when every reference is whole
  */
 export function referencesLeft(folder: string): { file: string; columns: string[] }[] {
-  return readdirSync(folder)
-    .filter((file) => file.endsWith('.ts') && file !== 'index.ts')
+  return migrationFiles(folder)
     .filter((file) => existsSync(path.join(folder, file.replace(/\.ts$/, '.json'))))
     .map((file) => ({
       file,

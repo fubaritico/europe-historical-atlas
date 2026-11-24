@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type * as MigrateModule from './migrateBase'
 import type { Migration } from './migrateBase'
+import type { MigrationDanger } from './migrationDangers'
 import type { Payload } from 'payload'
 
 /**
@@ -35,6 +36,27 @@ const LATER: Migration = {
     await db.run(sql`SELECT 1`)
   },
   down: () => Promise.resolve(),
+}
+
+/** A migration the suite never applies: the one an unread danger refuses. */
+const UNREAD: Migration = {
+  name: '29991231_000001_unread',
+  up: () => Promise.resolve(),
+  down: () => Promise.resolve(),
+}
+
+/**
+ * The unread dangers of {@link UNREAD} — a table dropped on the way up, a rebuild on the way down — and of no other.
+ * @param name - a migration's name
+ * @returns its dangers
+ */
+function unreadDangersOf(name: string): MigrationDanger[] {
+  return name === UNREAD.name
+    ? [
+        { direction: 'up', kind: 'drop-table', table: 'places_locales' },
+        { direction: 'down', kind: 'rebuild', table: 'place_periods' },
+      ]
+    : []
 }
 
 const folder = mkdtempSync(path.join(tmpdir(), 'cms-migrations-'))
@@ -86,14 +108,16 @@ async function asPushed(): Promise<void> {
  * Run `migrateBase` at a given minute of the suite's day.
  * @param minute - the minute, so each copy has its own name
  * @param migrations - the migrations to give it
+ * @param dangersOf - the unread dangers of a migration; none unless a test says
  * @returns its report
  */
 function migrateAt(
   minute: number,
-  migrations: readonly Migration[]
+  migrations: readonly Migration[],
+  dangersOf: (name: string) => readonly MigrationDanger[] = () => []
 ): ReturnType<typeof MigrateModule.migrateBase> {
   const now = new Date(Date.UTC(2026, 10, 15, 15, minute))
-  return module.migrateBase(payload, databaseUrl, now, migrations)
+  return module.migrateBase(payload, databaseUrl, now, migrations, dangersOf)
 }
 
 beforeAll(async () => {
@@ -154,6 +178,18 @@ describe('migrateBase', () => {
   })
 
   describe('managed errors', () => {
+    it('refuses a pending migration that can lose data either way, unread: named, no copy, nothing applied', async () => {
+      const before = copies()
+      const refusal = await migrateAt(3, [...onDisk, LATER, UNREAD], unreadDangersOf).catch(
+        (error: unknown) => (error instanceof Error ? error.message : String(error))
+      )
+      expect(refusal).toContain(`${UNREAD.name}: up drops the table places_locales`)
+      // Either way: the way down's rebuild is refused too (review SEC-005)
+      expect(refusal).toContain(`${UNREAD.name}: down rebuilds`)
+      expect(copies()).toEqual(before)
+      expect(await rows()).not.toContainEqual(expect.objectContaining({ name: UNREAD.name }))
+    }, 60_000)
+
     it('refuses a base under migrations that the push ran on again, and writes nothing', async () => {
       const db = payload.db as unknown as Parts
       await db.drizzle.run(sql`INSERT INTO payload_migrations (name, batch) VALUES ('dev', -1)`)

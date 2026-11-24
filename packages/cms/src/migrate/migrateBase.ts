@@ -4,8 +4,10 @@ import path from 'node:path'
 import { sql } from '@payloadcms/db-sqlite'
 
 import { backupPath, decideBaseline, fileStamp } from './baseline'
+import { dangerSentence } from './migrationDangers'
 
 import type { MigrationRow } from './baseline'
+import type { MigrationDanger } from './migrationDangers'
 import type { Payload, readMigrationFiles } from 'payload'
 
 /** A migration as Payload reads it from disk: its name, its `up` and `down`. */
@@ -60,17 +62,24 @@ async function readRows(db: SqliteParts): Promise<MigrationRow[] | null> {
  * A pushed base that differs from the collections is **refused** — an error naming what differs, nothing written:
  * the dev's server does not start on a base whose schema nobody can vouch for. So is a base under migrations that
  * the push ran on again: Payload's `migrate` would ask about it in the terminal, and a « no » exits with success.
+ *
+ * **A pending migration that can lose data, unread, is refused** (CMS-280): a table or a column dropped, a rename, a
+ * rebuild — named, nothing copied, nothing written, until the migration says `// dangers reviewed: <why>`. Either way:
+ * a way down is what undoes a mistake, and the trap of 2026-11-15 was in one (review SEC-005).
+ * Only on a base that holds something: a new base is built from nothing, and has nothing to lose.
  * @param payload - Payload, initialised on the base (its config sets `push: false`)
  * @param databaseUrl - the base's `DATABASE_URL`, where the copy goes beside it
  * @param now - the moment, for the copy's name
  * @param migrations - the migrations, oldest first — `readMigrationFiles({ payload })`, given by the caller
+ * @param dangersOf - the unread dangers of a migration, by its name (`dangersOnDisk`)
  * @returns what was done
  */
 export async function migrateBase(
   payload: Payload,
   databaseUrl: string,
   now: Date,
-  migrations: readonly Migration[]
+  migrations: readonly Migration[],
+  dangersOf: (name: string) => readonly MigrationDanger[]
 ): Promise<MigrateReport> {
   const db = payload.db as unknown as SqliteParts
   const names = migrations.map((migration) => migration.name)
@@ -86,6 +95,17 @@ export async function migrateBase(
   const pending = action.kind === 'baseline' ? [] : names.filter((name) => !recorded.includes(name))
   if (action.kind === 'none' && pending.length === 0) {
     return { backup: null, adopted: [], applied: [] }
+  }
+  const unread = pending.flatMap((name) =>
+    dangersOf(name).map((danger) => `${name}: ${dangerSentence(danger)}`)
+  )
+  if (unread.length > 0) {
+    throw new Error(
+      `[CMS] a pending migration can lose what the base holds, either way, and nobody said it was read — nothing was written:\n` +
+        `${unread.join('\n')}\n` +
+        'Read it; rewrite it by hand if the data must survive (packages/cms/README.md), then add the line ' +
+        '« // dangers reviewed: <why> » to it.'
+    )
   }
   const backup = await copyBase(db, databaseUrl, now, recorded)
   if (action.kind === 'baseline') await adopt(db, action.markApplied)

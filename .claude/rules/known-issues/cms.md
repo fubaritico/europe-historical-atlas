@@ -16,7 +16,10 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   ses lignes recopiées — la suppression ne remonte jamais vers le parent (`plain_french_names`, 23/11). **La
   descente générée en écrit une même pour une simple colonne ajoutée** (`holder_title`, 15/11 : `place_periods`
   reconstruite, ses lignes de source effacées en cascade) — relire chaque `down`, l'écrire à la main en `DROP INDEX`
-  puis `DROP COLUMN`, et la prouver sur la copie (`payload migrate:down`) ; (3)
+  puis `DROP COLUMN`, et la prouver sur la copie (`payload migrate:down`). **Depuis le 24/11 (CMS-280)**,
+  `migrate:create` nomme une reconstruction, une suppression ou un renommage et échoue ; `migrate` refuse une migration
+  qui en a, dans un sens ou dans l'autre, tant qu'elle ne porte pas `// dangers reviewed: <why>`
+  (`src/migrate/migrationDangers.ts` — un garde-fou, pas une preuve : un mot-clé assemblé à l'exécution n'est pas lu) ; (3)
   drizzle-kit écrit une clé ajoutée sans son `ON DELETE` : `migrate:create` la complète (`finishMigrations`), dit celles
   qu'il n'a pas pu compléter et échoue alors. **Sévérité : à savoir.**
 - **Supprimer une personne, un territoire ou un titre qu'une affirmation cite est refusé par un crochet**

@@ -68,7 +68,13 @@ beforeAll(async () => {
   const { default: config } = await import('../payload.config')
   const { migrateBase } = await import('./migrateBase')
   payload = await getPayload({ config })
-  await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+  await migrateBase(
+    payload,
+    databaseUrl,
+    new Date(),
+    await readMigrationFiles({ payload }),
+    () => []
+  )
   ponthieu = await territory('comté de Ponthieu')
   blank = await territory('comté de Blois')
   frenchOnly = await territory('comté de Nantes')

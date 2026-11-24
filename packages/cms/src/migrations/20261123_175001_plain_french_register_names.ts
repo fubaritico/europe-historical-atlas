@@ -2,6 +2,8 @@ import { sql } from '@payloadcms/db-sqlite'
 
 import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-sqlite'
 
+// dangers reviewed: written by hand — the dropped tables are children nothing points at, their rows copied first (CMS-495)
+
 /**
  * The people's and the four registers' name becomes their French name alone, their other languages in the table « Le
  * nom dans les autres langues » (CMS-495, the dev, 2026-11-23: _"finish it"_) — as `plain_french_names` did for the

@@ -58,7 +58,13 @@ beforeAll(async () => {
   const { default: config } = await import('../payload.config')
   const { migrateBase } = await import('../migrate/migrateBase')
   payload = await getPayload({ config })
-  await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+  await migrateBase(
+    payload,
+    databaseUrl,
+    new Date(),
+    await readMigrationFiles({ payload }),
+    () => []
+  )
   source = (
     await payload.create({ collection: 'sources', data: { title: 'Anne Comnène, Alexiade' } })
   ).id

@@ -1,6 +1,8 @@
 import { sql } from '@payloadcms/db-sqlite'
 import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-sqlite'
 
+// dangers reviewed: the way down rebuilds payload_locked_documents_rels, which holds only edit locks (CMS-280)
+
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE TABLE \`territories\` (
   	\`id\` integer PRIMARY KEY NOT NULL,

@@ -46,6 +46,14 @@ asks in its terminal — such a migration is written by hand, then proved by `sr
 applies every migration to an empty base and fails on any difference with the collections. **Going back** is the copy:
 stop the server, put the copy in place of `cms.db`, start it again.
 
+**A migration that can lose data is stopped** (CMS-280, `src/migrate/migrationDangers.ts`): a table or a column
+dropped, a rename, a table rebuilt — SQLite's copy-drop-rename, which erases in cascade what points at the table, as
+the generated way down of 2026-11-15 did. `migrate:create` names them and fails; `migrate` refuses a pending one that
+has any, either way, nothing copied, nothing written. The way down taking back what its way up brought is not one. The
+whole file is read, `sql.raw(…)` and helpers included; it is a guard, not a proof — a keyword assembled at run time is
+not seen. Once read — rewritten by hand when the data must survive — the migration says so in one line, with the
+reason: `// dangers reviewed: <why>`.
+
 ## Connect Claude to it — the MCP server
 
 The CMS is an MCP server (`@payloadcms/plugin-mcp`) at `http://localhost:3100/api/mcp`, so a Claude Code session can

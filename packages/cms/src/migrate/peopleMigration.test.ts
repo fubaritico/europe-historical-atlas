@@ -1,9 +1,12 @@
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { sql } from '@payloadcms/db-sqlite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { dangersOnDisk } from './migrationDangers'
+import { MIGRATION_DIR } from './paths'
 
 import type { Migration } from './migrateBase'
 import type { Payload } from 'payload'
@@ -45,7 +48,14 @@ beforeAll(async () => {
   payload = await getPayload({ config })
   db = (payload.db as unknown as { drizzle: Rows }).drizzle
   onDisk = await readMigrationFiles({ payload })
-  migrate = (migrations) => migrateBase(payload, databaseUrl, new Date(), migrations)
+  migrate = (migrations) =>
+    migrateBase(
+      payload,
+      databaseUrl,
+      new Date(),
+      migrations,
+      dangersOnDisk(MIGRATION_DIR, (file) => readFileSync(file, 'utf8'))
+    )
   // The old schema: the initial migration alone, then rows the way the dev's base holds them
   await migrate(onDisk.filter((m) => m.name.endsWith('_initial')))
   await db.run(

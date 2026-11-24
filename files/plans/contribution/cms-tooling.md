@@ -77,6 +77,12 @@ through tests and scripts on a database of my own.
 
 - A script reads the SQL a new migration holds and flags: `DROP TABLE`, `DROP COLUMN`, a rename, and SQLite's table
   rebuild (create `__new_…`, copy, drop the old). On a flag, `/cms-field` stops and asks the dev.
+- **Built on 2026-11-24** (`src/migrate/migrationDangers.ts`): `migrate:create` names the dangers and fails;
+  `migrate` refuses a pending one that has any, either way; a migration read says `// dangers reviewed: <why>`. The
+  whole file is read (`sql.raw`, helpers), after the security review found the first version read only `sql\`…\``. The way
+  down taking back what its way up brought is not flagged — every way down would be. Measured on the repository's
+  migrations: the people's renames, the two hand-written drops of translation tables (marked reviewed), and the
+  rebuild in the way down of `titles_and_links` (the trap of 2026-11-15 — applied long ago, so never pending). `/cms-field` (CMS-277) does not exist yet; the stop is in the commands themselves.
 
 ### 7. The schema map — CMS-280
 

@@ -73,7 +73,13 @@ beforeAll(async () => {
   const { default: config } = await import('../payload.config')
   const { migrateBase } = await import('./migrateBase')
   payload = await getPayload({ config })
-  await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+  await migrateBase(
+    payload,
+    databaseUrl,
+    new Date(),
+    await readMigrationFiles({ payload }),
+    () => []
+  )
   ankara = await place('Ankara')
   blank = await place('Blois')
   frenchOnly = await place('Nantes')

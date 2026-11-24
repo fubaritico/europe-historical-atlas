@@ -37,7 +37,13 @@ beforeAll(async () => {
   const { default: config } = await import('../payload.config')
   const { migrateBase } = await import('./migrateBase')
   payload = await getPayload({ config })
-  await migrateBase(payload, databaseUrl, new Date(), await readMigrationFiles({ payload }))
+  await migrateBase(
+    payload,
+    databaseUrl,
+    new Date(),
+    await readMigrationFiles({ payload }),
+    () => []
+  )
   const source = await payload.create({
     collection: 'sources',
     data: { title: 'Annales Magdeburgenses', kind: 'primary' },
