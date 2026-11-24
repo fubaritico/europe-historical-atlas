@@ -1,6 +1,7 @@
 import { claimLines } from '../fields/claimLines'
 import { historicalDateField } from '../fields/historicalDate'
 import { refuseBulkDeleteOverMcp } from '../mcp/refuseBulkDelete'
+import { titleEndpoints } from '../titles/attachEndpoint'
 
 import { refreshLinksOfTitle, refuseDeletingCited } from './claimDependants'
 import { refuseDuplicateClaim } from './refuseDuplicateClaim'
@@ -18,6 +19,8 @@ export const Titles: CollectionConfig = {
   slug: 'titles',
   labels: { singular: 'Titre', plural: 'Titres' },
   admin: { useAsTitle: 'label', defaultColumns: ['label', 'person', 'territory'] },
+  // CMS-507: the cities under its authority, attached at a year — the page's block and the historian's script.
+  endpoints: titleEndpoints,
   hooks: {
     // Over MCP, one record at a time (CMS-454).
     beforeOperation: [refuseBulkDeleteOverMcp],
