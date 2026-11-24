@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    // React 19's automatic runtime (ATLAS-519): the transform injects the import, and the ESLint config switches
+    // `react/react-in-jsx-scope` off to agree — the Cartographer's setting.
+    "jsx": "react-jsx"
   },
-  "include": ["src"]
+  // `vitest.setup.ts` is test code — it calls `cleanup()` — so it is typed with the suites.
+  "include": ["src", "vitest.setup.ts"]
 }

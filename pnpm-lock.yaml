@@ -227,9 +227,24 @@ importers:
       '@europe-historical-atlas/core':
         specifier: workspace:^
         version: link:../core
+      '@fubaritico/react':
+        specifier: 'catalog:'
+        version: 0.10.0(next@16.4.6(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fubaritico/styles':
+        specifier: 'catalog:'
+        version: 0.10.0(@fubaritico/tokens@0.10.0)
+      '@fubaritico/tokens':
+        specifier: 'catalog:'
+        version: 0.10.0
       lil-gui:
         specifier: 'catalog:'
         version: 0.21.0
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
       three:
         specifier: 'catalog:'
         version: 0.186.0
@@ -237,27 +252,66 @@ importers:
         specifier: 'catalog:'
         version: 5.0.15(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
+      '@testing-library/dom':
+        specifier: 'catalog:'
+        version: 10.4.2
+      '@testing-library/react':
+        specifier: 'catalog:'
+        version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@testing-library/user-event':
+        specifier: 'catalog:'
+        version: 14.6.7(@testing-library/dom@10.4.2)
       '@types/fontkit':
         specifier: 'catalog:'
         version: 2.0.9
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.3.0(@types/react@19.3.0)
       '@types/three':
         specifier: 'catalog:'
         version: 0.186.0
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 6.1.1(vite@8.3.5(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.77.4)(tsx@4.23.15)(yaml@2.9.1))
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.3(vitest@5.0.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.6.1)
       eslint-plugin-eha:
         specifier: workspace:*
         version: link:../eslint-plugin-eha
+      eslint-plugin-jsx-a11y:
+        specifier: 'catalog:'
+        version: 6.10.2(eslint@9.39.5(jiti@2.6.1))
+      eslint-plugin-react:
+        specifier: 'catalog:'
+        version: 7.37.5(eslint@9.39.5(jiti@2.6.1))
+      eslint-plugin-react-hooks:
+        specifier: 'catalog:'
+        version: 7.1.1(eslint@9.39.5(jiti@2.6.1))
+      eslint-plugin-react-refresh:
+        specifier: 'catalog:'
+        version: 0.5.7(eslint@9.39.5(jiti@2.6.1))
       fontkit:
         specifier: 'catalog:'
         version: 2.0.4
+      globals:
+        specifier: 'catalog:'
+        version: 17.12.0
       jsdom:
         specifier: 'catalog:'
         version: 30.0.1
       tsx:
         specifier: 'catalog:'
         version: 4.23.15
+      typescript-eslint:
+        specifier: 'catalog:'
+        version: 8.70.0(eslint@9.39.5(jiti@2.6.1))(typescript@5.7.3)
       vite:
         specifier: 'catalog:'
         version: 8.3.5(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.77.4)(tsx@4.23.15)(yaml@2.9.1)

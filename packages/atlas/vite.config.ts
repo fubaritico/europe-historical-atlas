@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 
+import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 import { bandsBake } from './bake/bandsBake'
@@ -15,7 +16,8 @@ import { DEFAULT_RELIEF_PARAMS } from './src/tunables/params'
 const here = (path: string): string => fileURLToPath(new URL(path, import.meta.url))
 
 /**
- * Vite config — vanilla TypeScript + three.js. HMR is on by default; the dev server opens the browser.
+ * Vite config — the map in three.js, the interface over it in React (ATLAS-519, the dev, 2026-11-24: everything but the
+ * canvas is React). HMR is on by default; the dev server opens the browser.
  *
  * `optimizeDeps.entries` is pinned to our own entry so Vite's dependency scanner does NOT crawl the
  * vendored three.js sources under `opensrc/` (its example `.html` files import many exotic packages that
@@ -31,6 +33,7 @@ export default defineConfig({
   },
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
+    react(),
     namesBake({
       publicDir: here('./public'),
       face: here('./src/scene/political/names/face/fondamento.woff2'),

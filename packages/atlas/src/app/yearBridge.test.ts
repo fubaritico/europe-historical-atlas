@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createAtlasStore } from './atlasStore'
+import { createAtlasStore } from '../state/atlasStore'
+
 import { bridgeYear } from './yearBridge'
 
 /** Node's process, which runs these tests — the atlas has no Node types, so only what is used is declared. */

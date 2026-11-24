@@ -1,7 +1,7 @@
 {
   "name": "@europe-historical-atlas/atlas",
   "version": "1.0.0",
-  "description": "The 3D atlas: renderer, scene modules, camera, controls, DOM overlay, and the composition root.",
+  "description": "The 3D atlas: renderer, scene modules, camera, controls, the React interface over the map, and the composition root.",
   "type": "module",
   "private": true,
   "scripts": {
@@ -18,18 +18,36 @@
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
+    "@fubaritico/react": "catalog:",
+    "@fubaritico/styles": "catalog:",
+    "@fubaritico/tokens": "catalog:",
     "lil-gui": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "three": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@testing-library/dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
     "@types/fontkit": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@types/three": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
     "eslint-plugin-eha": "workspace:*",
+    "eslint-plugin-jsx-a11y": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
     "fontkit": "catalog:",
+    "globals": "catalog:",
     "jsdom": "catalog:",
     "tsx": "catalog:",
+    "typescript-eslint": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
   }

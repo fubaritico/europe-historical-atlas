@@ -1,4 +1,4 @@
-import type { AtlasStore } from './atlasStore'
+import type { AtlasStore } from '../state/atlasStore'
 
 /**
  * The map's side of the year (ATLAS-392): a year requested in the atlas's store is drawn on the map, and the request is

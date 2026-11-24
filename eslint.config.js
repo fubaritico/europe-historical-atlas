@@ -130,13 +130,32 @@ const BOUNDARIES = [
   // No row points inside `packages/cartographer`, and that is not an omission: a row here would never
   // fire, its glob being resolved against whichever config ESLint loaded. The Cartographer's layers are
   // policed by its own config, composed from LAYER through `layerBoundary`. See that function's header.
+]
+
+/**
+ * The interface may not draw in 3D: what is in the scene is three.js's, what is over it is React's (the dev, 2026-11-24 —
+ * everything but the canvas is React).
+ */
+const ATLAS_UI_HAS_NO_THREE = {
+  name: 'three',
+  message:
+    'Architecture boundary: ui/ is the flat interface over the map. A 3D element belongs in scene/, handed what it shows.',
+}
+
+/**
+ * The atlas's layers, with **package-relative** directories — one table read twice: by this root config, prefixed with
+ * the package's path, for `eslint` run from the repository's root (lint-staged at the commit); by the atlas's own
+ * config, as they are, for `pnpm lint` run from the package (ATLAS-519, when React came to the atlas). A glob resolves
+ * against the config ESLint loaded, so one prefix cannot serve both (see `layerBoundary`'s header).
+ */
+export const ATLAS_LAYERS = [
   {
-    dir: 'packages/atlas/src/scene',
+    dir: 'src/scene',
     forbid: ['camera', 'controls', 'app', 'loading', 'devPanel', 'main'],
     why: 'scene/ draws what it is handed: it may read what the map has been given (sources/) and the settings (tunables/), but not the camera, the controls, the running map (app/), the loading that fills it, the dev panel or main.',
   },
   {
-    dir: 'packages/atlas/src/camera',
+    dir: 'src/camera',
     forbid: [
       'scene',
       'controls',
@@ -152,12 +171,12 @@ const BOUNDARIES = [
     why: 'camera/ is independent — it must not import from scene/, controls/, the data layer, or main.',
   },
   {
-    dir: 'packages/atlas/src/controls',
+    dir: 'src/controls',
     forbid: ['scene', 'pipeline', 'app', 'loading', 'sources', 'devPanel', 'main'],
     why: 'controls/ may depend on camera/ (the CameraControls contract) but not on scene/ or main.',
   },
   {
-    dir: 'packages/atlas/src/picking',
+    dir: 'src/picking',
     forbid: [
       'scene',
       'camera',
@@ -174,7 +193,7 @@ const BOUNDARIES = [
     why: 'picking/ answers WHERE, never WHAT. It takes a camera and an object to cast against, and must know nothing of the scene that built them, of what is being computed, or of the DOM around it.',
   },
   {
-    dir: 'packages/atlas/src/ui',
+    dir: 'src/ui',
     forbid: [
       'scene',
       'camera',
@@ -188,15 +207,34 @@ const BOUNDARIES = [
       'devPanel',
       'main',
     ],
-    why: 'ui/ is plain DOM over the canvas — it must know nothing of the scene, the data or what is being computed. The composition root drives it.',
+    paths: [ATLAS_UI_HAS_NO_THREE],
+    why: 'ui/ is the interface over the canvas, React since ATLAS-519 — it must know nothing of the scene, the data or what is being computed. It reads the atlas\u2019s store (state/) and is handed the map\u2019s commands; the composition root drives it.',
   },
   {
-    dir: 'packages/atlas/src/tunables',
+    dir: 'src/state',
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'picking',
+      'ui',
+      'pipeline',
+      'app',
+      'loading',
+      'sources',
+      'tunables',
+      'devPanel',
+      'main',
+    ],
+    why: 'state/ is the atlas\u2019s store, the facts the map and the interface share (ATLAS-392) — a leaf both read, knowing nothing of either.',
+  },
+  {
+    dir: 'src/tunables',
     forbid: ['scene', 'picking', 'ui', 'app', 'loading', 'sources', 'devPanel', 'main'],
     why: 'tunables/ is the settings the whole map reads, with their defaults and ranges — a leaf but for one type of the controls\u2019 (the camera\u2019s rectangle): it must know nothing of what reads it.',
   },
   {
-    dir: 'packages/atlas/src/sources',
+    dir: 'src/sources',
     forbid: [
       'scene',
       'camera',
@@ -212,17 +250,17 @@ const BOUNDARIES = [
     why: 'sources/ is what the map has been given so far — a leaf the loading fills and the layers read: it knows only core.',
   },
   {
-    dir: 'packages/atlas/src/app',
+    dir: 'src/app',
     forbid: ['loading', 'devPanel', 'main'],
     why: 'app/ is the running map — the viewport, the loop, the pointer, the screens over the canvas. It is handed what it shows; it never loads it, and never knows the dev panel.',
   },
   {
-    dir: 'packages/atlas/src/loading',
+    dir: 'src/loading',
     forbid: ['camera', 'controls', 'picking', 'devPanel', 'main'],
     why: 'loading/ is what the map is made from and the order it is paid in. It tells the screens (app/) and fills the layers (scene/), and knows nothing of the camera, the pointer or the dev panel.',
   },
   {
-    dir: 'packages/atlas/src/devPanel',
+    dir: 'src/devPanel',
     forbid: ['main'],
     why: 'devPanel/ shows the settings and wires each control to the map: it may reach every layer below, but not the composition root.',
   },
@@ -308,15 +346,46 @@ export const layerBoundary = ({ files, forbid = [], why = '', paths }) => ({
  * @param {{dir: string, forbid: string[], why: string}} boundary - the layer and what it may not reach
  * @returns {object} an ESLint flat-config entry restricting that layer's imports
  */
-const boundaryConfig = ({ dir, forbid, why }) =>
+const boundaryConfig = ({ dir, forbid, why, paths }) =>
   layerBoundary({
     files: [`${dir}/**/*.{ts,tsx}`],
     forbid,
     why,
-    // Gated on the package rather than applied to every row: the atlas may one day want React in its
-    // own DOM overlay, and forbidding it there would be a boundary nobody decided.
-    ...(dir.startsWith('packages/core/') ? { paths: CORE_IS_PURE } : {}),
+    // Gated on the package rather than applied to every row: React is the atlas's interface (ATLAS-519), and
+    // forbidding it there would be a boundary nobody decided. A row may carry its own bans (the atlas's ui/).
+    ...(dir.startsWith('packages/core/') ? { paths: CORE_IS_PURE } : paths ? { paths } : {}),
   })
+
+/**
+ * The atlas's layer boundaries, its directories under a prefix — `packages/atlas/` from this root, nothing from the
+ * atlas's own config.
+ * @param {string} prefix - what goes before each `src/…` directory
+ * @returns {object[]} one ESLint flat-config entry per layer
+ */
+export const atlasBoundaries = (prefix) =>
+  ATLAS_LAYERS.map((row) => boundaryConfig({ ...row, dir: `${prefix}${row.dir}` }))
+
+/**
+ * The atlas's testing/ folders hold what its tests share (ATLAS-293): test code, kept out of coverage and of Sonar.
+ * Product code reaching into one would ship fixtures in the bundle with nothing to say so. Its own rule, not a pattern
+ * in the boundary rows: `no-restricted-imports` is one rule, and a second entry for it would erase every boundary.
+ * @param {string} prefix - what goes before `src/`, as for {@link atlasBoundaries}
+ * @returns {object} the ESLint flat-config entry
+ */
+export const atlasTestingRule = (prefix) => ({
+  files: [`${prefix}src/**/*.{ts,tsx}`],
+  ignores: ['**/*.test.{ts,tsx}', '**/testing/**'],
+  rules: {
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'ImportDeclaration[source.value=/(^|\\/)testing\\//]',
+        message:
+          'testing/ is test code: only a test or another testing/ module may import it — never the product.',
+      },
+    ],
+  },
+})
 
 export default tseslint.config(
   // Plugins
@@ -494,27 +563,11 @@ export default tseslint.config(
   // Architecture boundaries — the dependency direction, enforced rather than documented.
   // Direction: geo/ and utils/ are leaves <- data/ (domain and ports) <- pipeline/ (the CPU work) ;
   // all four form the three-free core package. In the atlas: camera/ is independent, controls/ depends
-  // on camera/, scene/ renders, picking/ answers WHERE, ui/ is plain DOM, tunables/ is the settings (a
-  // leaf), app/ the running map, loading/ what the map is made from, devPanel/ the panel over the settings,
+  // on camera/, scene/ renders, picking/ answers WHERE, ui/ is the React interface, state/ the store it shares
+  // with the map (a leaf), tunables/ is the settings (a leaf), app/ the running map, loading/ what the map is made from, devPanel/ the panel over the settings,
   // and main.ts is the composition root that may be imported by nobody.
   ...BOUNDARIES.map(boundaryConfig),
+  ...atlasBoundaries('packages/atlas/'),
 
-  // The atlas's testing/ folders hold what its tests share (ATLAS-293): test code, kept out of coverage and of
-  // Sonar. Product code reaching into one would ship fixtures in the bundle with nothing to say so. Its own rule,
-  // not a pattern in the rows above: `no-restricted-imports` is one rule, and a second entry for it would erase
-  // every boundary under it.
-  {
-    files: ['packages/atlas/src/**/*.ts'],
-    ignores: ['**/*.test.ts', '**/testing/**'],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'ImportDeclaration[source.value=/(^|\\/)testing\\//]',
-          message:
-            'testing/ is test code: only a test or another testing/ module may import it — never the product.',
-        },
-      ],
-    },
-  }
+  atlasTestingRule('packages/atlas/')
 )
