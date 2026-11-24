@@ -406,7 +406,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c07459",
+      "colour": "#d4982f",
       "wikidata": "Q179293"
     },
     {
@@ -629,7 +629,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#d4982f",
+      "colour": "#c97676",
       "wikidata": "Q175276"
     },
     {
@@ -1242,6 +1242,210 @@
       "existsTo": null,
       "colour": "#41580b",
       "wikidata": "Q109073"
+    },
+    {
+      "id": "kingdom-of-england",
+      "name": "Kingdom of England",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 118
+    },
+    {
+      "id": "lordship-of-ireland",
+      "name": "Lordship of Ireland",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 417
+    },
+    {
+      "id": "lordship-of-leinster",
+      "name": "Lordship of Leinster",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "lordship-of-ireland",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 447
+    },
+    {
+      "id": "lordship-of-meath",
+      "name": "Lordship of Meath",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "lordship-of-ireland",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 448
+    },
+    {
+      "id": "lordship-of-ulster",
+      "name": "Lordship of Ulster",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "lordship-of-ireland",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 449
+    },
+    {
+      "id": "kingdom-of-connacht",
+      "name": "Kingdom of Connacht",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "lordship-of-ireland",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 406
+    },
+    {
+      "id": "kingdom-of-desmond",
+      "name": "Kingdom of Desmond",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "lordship-of-ireland",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 453
+    },
+    {
+      "id": "kingdom-of-ailech",
+      "name": "Kingdom of Ailech",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 166
+    },
+    {
+      "id": "kingdom-of-tir-conaill",
+      "name": "Kingdom of Tír Conaill",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 454
+    },
+    {
+      "id": "kingdom-of-airgialla",
+      "name": "Kingdom of Airgíalla",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-ailech",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 180
+    },
+    {
+      "id": "kingdom-of-deheubarth",
+      "name": "Kingdom of Deheubarth",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-england",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 439
+    },
+    {
+      "id": "ceredigion",
+      "name": "Ceredigion",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "kingdom-of-england",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 440
+    },
+    {
+      "id": "lordship-of-galloway",
+      "name": "Lordship of Galloway",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "kingdom-of-alba",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 420
+    },
+    {
+      "id": "lordship-of-carrick",
+      "name": "Lordship of Carrick",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "kingdom-of-alba",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 458
+    },
+    {
+      "id": "earldom-of-caithness",
+      "name": "Earldom of Caithness",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "kingdom-of-alba",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 428
+    },
+    {
+      "id": "earldom-of-orkney",
+      "name": "Earldom of Orkney",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "old-kingdom-of-norway",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 429
+    },
+    {
+      "id": "channel-islands",
+      "name": "Channel Islands",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": "angevin-empire",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 419
     }
   ]
 }
