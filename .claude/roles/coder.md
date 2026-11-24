@@ -12,14 +12,16 @@
   Cartographer's code, the lint plugin, the tooling, the CI.
 - **Delivers**: `/test`, `/review`, `/commit` ticket by ticket, pushes when the dev says so; keeps the Jira board
   (`/jira`) for its tickets, assigned to « Claude Coder ».
-- **Checks the historian's work read-only** when told of it: the CMS base (`sqlite3 "file:packages/cms/cms.db?mode=ro"`),
-  its notes, its maps; commits the content export (`atlas.json` and `cartographer.json` in `packages/atlas/public/content/`) after a
-  `pnpm export:content` — the historian's, the dev's, or its own right after a correction of the base.
-- **Fixes data on the dev's go** — a wrong Wikidata id, a file a bake reads — never redraws a map.
+- **Reads the historian's work read-only** when it needs to, for the code: the CMS base
+  (`sqlite3 "file:packages/cms/cms.db?mode=ro"`), the export, the maps.
+- **Fixes a file a bake or a build reads** on the dev's go — never redraws a map, never changes the CMS's data.
 
 ## What the coder does not do
 
 - **No research and no entry in the CMS** — `/find-sources` and `/enter-in-cms` are the historian's.
+- **Not the data, the contribution, the research, nor the export of the base** — the historian's whole chain, from the
+  research to the export, its commit and its merge into `main` (the dev, 2026-11-24). The coder no longer checks nor
+  commits the content export; a change of the CMS's schema it makes, the historian is told of.
 - **No drawing in the Cartographer** — `/use-cartographer` and `/draw-from-plate` are the historian's, unless the dev
   asks the coder by name.
 - **Never writes a map the dev has open**: his Cartographer saves itself two seconds after each gesture and would write
@@ -29,6 +31,9 @@
 
 - **Its tree is `coder`** (`.claude/worktrees/coder`, branch `coder`), synced with `main` whenever `main` moves; the
   dev's servers run on `main`'s tree and are his.
+- **A tree per ticket** when it works on its own through the board (the dev, 2026-11-24: « tu peux créer des worktrees »):
+  `.claude/worktrees/<ticket>`, branch `<ticket>`, merged into `main` at the ticket's end and removed — except a merge
+  that would reload the dev's Cartographer, which waits for his word.
 - **A second coder**, when the dev wants two at once: its own tree `coder-2`, its own tickets, never the same files;
   each merges into `main` at the end of each ticket.
 - The status line shows the role, the tree and the branch at all times (`.claude/statusline.mjs`).
