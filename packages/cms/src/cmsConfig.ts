@@ -23,6 +23,7 @@ import { Titles } from './collections/Titles'
 import { Users } from './collections/Users'
 import { VassalLinks } from './collections/VassalLinks'
 import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
+import { exportEndpoint } from './export/exportEndpoint'
 import { mcpAccess } from './mcp/mcpAccess'
 import { MIGRATION_DIR } from './migrate/paths'
 
@@ -33,6 +34,9 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** The mark's component, in the import map's terms (from `src/`). */
 const BRAND_MARK_PATH = '/components/BrandMark/BrandMark#BrandMark'
+
+/** The button that exports the base from the admin's screen (CMS-499). */
+const EXPORT_BUTTON_PATH = '/components/ExportButton/ExportButton#ExportButton'
 
 /** The mark in the navigation: a little larger than Payload's 18 px icon, the dev's ask (2026-10-30). */
 const NAV_MARK_SIDE = 24
@@ -54,7 +58,8 @@ function required(name: string): string {
 }
 
 /**
- * The admin: the dev's user, the import map, the dark theme, the atlas's mark and its tab title — a new object at
+ * The admin: the dev's user, the import map, the dark theme, the button « Exporter la base », the atlas's mark and its
+ * tab title — a new object at
  * each call, as {@link cmsConfig}'s.
  * @returns the admin's configuration
  */
@@ -65,6 +70,8 @@ function adminConfig(): NonNullable<Config['admin']> {
     // Dark only, the dev's call (2026-10-30)
     theme: 'dark',
     components: {
+      // « Exporter la base », at the top right of every page (CMS-499)
+      actions: [EXPORT_BUTTON_PATH],
       graphics: {
         Icon: { path: BRAND_MARK_PATH, clientProps: { side: NAV_MARK_SIDE, names: 'dashboard' } },
         Logo: { path: BRAND_MARK_PATH, clientProps: { side: LOGIN_MARK_SIDE, names: 'atlas' } },
@@ -94,6 +101,8 @@ function adminConfig(): NonNullable<Config['admin']> {
 export function cmsConfig(): Config {
   return {
     admin: adminConfig(),
+    // The route « Exporter la base » calls (CMS-499)
+    endpoints: [exportEndpoint],
     collections: [
       Events,
       EventTypes,

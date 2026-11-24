@@ -142,3 +142,10 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   check of the right to create (`permissions.collections[slug].create`) — no effect while the CMS is local, with one
   contributor. **Remedy**: look at the field after each Payload bump; with accounts (CMS-228), read `useAuth()` and hide
   the button without that right. **Severity: worth knowing.**
+- **« Exporter la base » writes to the disk for any signed-in user** (2026-11-24, CMS-499, reviews SEC-001 and SEC-005):
+  the route `POST /api/export-content` checks only that a user is signed in — `users` has no role to check — and relies
+  on Payload's session cookie with no `csrf` list of origins set. No effect while the CMS is local, on `127.0.0.1`, with
+  one contributor. **Trigger**: going online (CMS-228) — a role allowed to export, with its migration, then the check on
+  the route; the `csrf` and `cors` origins set; and online the export cannot write the atlas's folder anyway (`names.md`).
+  Also left by the review: while the export runs (about 12 s), the greyed button is not announced to a screen reader;
+  the toast that ends it is (A11Y-001, the same as the Wikidata button). **Severity: worth knowing.**

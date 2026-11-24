@@ -118,7 +118,9 @@ export the script runs. _Proposed place_: the top right of every page of the adm
 put its own buttons (`admin.components.actions`, verified in its types) — seen from every screen, with no footer to
 build. **Online, the export cannot write the atlas's folder** (no disk is shared with the site): there it serves the
 two files, or asks for the site to be built again — to design with the going online (CMS-228). The button does not
-commit the files: the coder still does.
+commit the files: the coder still does. **Built on 2026-11-24 (CMS-499)**: « Exporter la base » at the top right of
+every page, the route `POST /api/export-content` for a signed-in contributor, the same two steps as the script
+(`export/writeContent.ts`); about 12 s on the base of that night, greyed and saying « Export en cours… » meanwhile.
 
 ## What it asks, in order (to become tickets once 6 to 9 are decided)
 
