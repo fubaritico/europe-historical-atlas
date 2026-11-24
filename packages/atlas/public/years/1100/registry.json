@@ -1956,8 +1956,8 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": -100,
+      "existsTo": 1138,
       "colour": null,
       "wikidata": "Q20973653"
     },
@@ -1967,7 +1967,7 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
+      "existsFrom": 600,
       "existsTo": null,
       "colour": null,
       "wikidata": "Q15104874"
@@ -2084,6 +2084,78 @@
       "colour": null,
       "wikidata": null,
       "territory": 92
+    },
+    {
+      "id": "kingdom-of-osraige",
+      "name": "Kingdom of Osraige",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-munster",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 404
+    },
+    {
+      "id": "kingdom-of-connacht",
+      "name": "Kingdom of Connacht",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-munster",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 406
+    },
+    {
+      "id": "kingdom-of-breifne",
+      "name": "Kingdom of Bréifne",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-munster",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 407
+    },
+    {
+      "id": "kingdom-of-mide",
+      "name": "Kingdom of Mide",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-munster",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 408
+    },
+    {
+      "id": "ulaid",
+      "name": "Ulaid",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-ailech",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 405
+    },
+    {
+      "id": "kingdom-of-airgialla",
+      "name": "Kingdom of Airgíalla",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": "kingdom-of-ailech",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 180
     }
   ]
 }
