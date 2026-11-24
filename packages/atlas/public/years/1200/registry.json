@@ -40,7 +40,7 @@
       "name": "County of Urgell",
       "rank": "county",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "county-of-barcelona",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#c0a859",
@@ -188,17 +188,6 @@
       "existsTo": null,
       "colour": "#598bc0",
       "wikidata": "Q2069303"
-    },
-    {
-      "id": "crown-of-aragon",
-      "name": "Crown of Aragon",
-      "rank": null,
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#8c4513",
-      "wikidata": "Q204920"
     },
     {
       "id": "kingdom-of-serbia",
@@ -611,17 +600,6 @@
       "wikidata": "Q1334322"
     },
     {
-      "id": "county-of-berga",
-      "name": "County of Berga",
-      "rank": "county",
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#8c59c0",
-      "wikidata": "Q956729"
-    },
-    {
       "id": "kingdom-of-leon",
       "name": "Kingdom of León",
       "rank": "kingdom",
@@ -798,17 +776,6 @@
       "existsTo": null,
       "colour": "#c059b0",
       "wikidata": "Q174306"
-    },
-    {
-      "id": "almoravid-dynasty",
-      "name": "Almoravid Dynasty",
-      "rank": null,
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#a3c059",
-      "wikidata": "Q75613"
     },
     {
       "id": "kara-khitans",
@@ -1446,6 +1413,90 @@
       "colour": null,
       "wikidata": null,
       "territory": 419
+    },
+    {
+      "id": "kingdom-of-aragon",
+      "name": "Kingdom of Aragon",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 28
+    },
+    {
+      "id": "county-of-barcelona",
+      "name": "County of Barcelona",
+      "rank": "county",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 24
+    },
+    {
+      "id": "lordship-of-albarracin",
+      "name": "Lordship of Albarracín",
+      "rank": "lordship",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 414
+    },
+    {
+      "id": "banu-ghaniya-of-majorca",
+      "name": "Banu Ghaniya of Majorca",
+      "rank": "emirate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 409
+    },
+    {
+      "id": "viscounty-of-carcassonne",
+      "name": "Viscounty of Carcassonne",
+      "rank": "viscounty",
+      "status": "country",
+      "suzerain": "kingdom-of-aragon",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 238
+    },
+    {
+      "id": "viscounty-of-bearn",
+      "name": "Viscounty of Béarn",
+      "rank": "viscounty",
+      "status": "country",
+      "suzerain": "kingdom-of-aragon",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 282
+    },
+    {
+      "id": "county-of-bigorre",
+      "name": "County of Bigorre",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "kingdom-of-aragon",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": null,
+      "territory": 412
     }
   ]
 }
