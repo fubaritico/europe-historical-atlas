@@ -4,50 +4,38 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-23 — l'historien : la recherche déménage sur le disque Acer, l'Anatolie mise en place
+### 2026-11-23/24 — l'historien : le nord-ouest de la Péninsule saisi et dessiné, les taïfas réglées
 
-Session **23/11 14:33 → 16:36** (≈ 2 h ; la plage du journal, 13:20 → 16:30, est partagée avec celle du matin) ; le
-chantier totalise **389 h 32**. Rien n'est poussé ; douze commits, `7942469f` → `dfff9703`. Le détail : `next-historian.md`.
+Session **23/11 22:46 → 24/11 00:56** (2 h 10, au journal ; la plage du jour, 13:20 → 00:55, est partagée) ; le
+chantier totalise **397 h 57 sur 62 plages**. Rien n'est poussé ; les exports sont commités par le codeur. Le détail :
+`next-historian.md` et `/Volumes/Acer/atlas-historien/1100/iberie-nord-ouest/resultats/note-de-region.md`.
 
-- **Ses règles, écrites dans `/find-sources`** : l'existence d'une ville se vérifie aussi dans un livre, autant que
-  possible ; **le contexte des années d'avant, c'est moi qui le construis**, précis à la date, au lieu et aux acteurs, et
-  les questions ville par ville en sortent ; le formulaire de mise en place revient, ce qu'il donne aide et ne prouve
-  rien ; une région déjà faite est refaite à neuf puis confrontée fiche par fiche.
-- **`/find-sources` réécrite selon les bonnes pratiques** : 375 lignes de règles et d'historique → 168 lignes d'ordres ;
-  l'ancien texte entier dans `references/rules-in-full.md`.
-- **Le disque Acer** (`/Volumes/Acer/atlas-historien/`) devient, par sa décision, l'espace de travail alloué des
-  recherches, leur seule source de vérité : rien de l'historien sur le Mac ni dans le dépôt. Ce qui resservira à la
-  racine (`ouvrages/`, `lieux/`, `outils/`), ce qui vaut pour une année et une zone sous l'année. L'ancien matériel de
-  1100 (13 409 fichiers), les 21 notes de `files/plans/sources/` et mes copies de carte y sont copiés et vérifiés ; il a
-  effacé les originaux. Trois scripts nouveaux (`archive.py`, `count_sheets.py`, `find_book.py`), les autres repointés.
-- **REPO-501** (un RAG sur l'archive, sur le disque) en tête du Backlog ; je lui dirai quand le construire (30 livres).
-- **L'audit des instructions du soir** : treize renvois laissés en retard par mes changements, corrigés (`dfff9703`).
-- **L'Anatolie de 1100** : ses six axes et ses cinq livres notés ; quatre trouvés et lus (Kaldellis, Angold, Setton I,
-  l'Alexiade) ; le contexte de 1071 à 1101 écrit ; 138 fiches comptées. Rien saisi.
-- **Mes fautes** : des questions qu'il n'avait pas à trancher ; deux commandes de suppression données à taper, contre
-  ma mémoire ; des renvois laissés en retard, trouvés par l'audit.
+- **La base** : Ferrol et Pontevedra recréées (ma faute du soir d'avant, avec son accord) ; les 26 fiches du nord-ouest
+  puis 6 de la frontière León-Castille saisies d'après Reilly, Flórez, López Ferreiro (Coria, Salamanque, Ávila, Toro,
+  Tordesillas, Becerril, Nogal, Liébana, Palencia → León) ; 63 fiches au nom de pays repassé en français ; le Ponthieu
+  en double fusionné ; Saragosse → Almoravides (Kennedy p. 173) ; Agde, Birecik, Tui reliés par un titre et un lien.
+- **Son atlas** (García de Cortázar, Planeta 2005) lu en entier : la Pisuerga entre León et Castille (p. 185) ; aucune
+  planche ne sépare Galice et Portugal ; référence, jamais décalqué. **Les sources de Kings and Generals** : rien d'utile.
+- **Le dessin, à sa demande, dans son Cartographe** : la Castille ramenée à la Pisuerga, León sur le nord-ouest, la
+  Galice et le Portugal créés en vassaux, Lisbonne aux Almoravides, Saragosse et Albarracín vassales, Majorque nommée.
+  **82 → 39 alertes.**
+- **Mes fautes** : 2 pages sur 30 de son atlas lues avant de lui répondre ; l'identifiant d'une personne donné pour
+  celui d'un pays (Carcassonne) ; trop de réglages laissés à lui. Sa colère du soir : le système est trop compliqué.
 
-### 2026-11-23 — l'historien : la méthode de recherche refaite, aucune recherche lancée
+### 2026-11-23 — l'historien : l'Anatolie de 1100 cherchée en trois tours et saisie, les agents devenus chercheurs
 
-Plage **23/11 13:20 → 14:18** (57 min au journal) ; le chantier totalise **387 h 20 sur 62 plages**. Rien n'est poussé.
-Commit `add0fb1d`. Le détail : `next-historian.md` et `/find-sources`, « The run, in order » et « The obligation ».
+Session **23/11 16:42 → 20:25** (la plage du journal, 13:20 → 20:22, 7 h 01, est partagée avec les sessions du jour) ;
+le chantier totalise **393 h 24 sur 62 plages**. Rien n'est poussé. Le détail : `next-historian.md`.
 
-- **Son constat** : la carte ne ressemble pas à ce que les autres dessinent — l'Anatolie de la reconquête d'Alexis Iᵉʳ,
-  Ancyre aux Danichmendides, la Castille, aucune ville dans le Caucase ni l'ancienne Arménie.
-- **Mesuré** : 3 529 lectures du registre sur 3 534 étaient des pages Wikipédia ; aucun ouvrage du disque ouvert ; sur
-  13 705 fiches de 1100, 11 949 ont un détenteur sans aucune ligne (le pays dessiné sous la ville), 412 sur Wikipédia
-  seule ; un seul lieu en Arménie, Géorgie et Azerbaïdjan.
-- **Ses règles, écrites dans les skills** (`find-sources`, `bulk-entry`, `enter-in-cms`, l'agent `source-researcher`,
-  `roles/historian.md`, `rules/decision-tree.md`) : Wikipédia n'est qu'une amorce ; un détenteur exige un livre lu ;
-  notre carte n'est jamais une base de vérification ; six canaux obligatoires et l'index des livres sur un à deux
-  degrés ; trois phases — la mise en place par formulaires (ses axes, ses noms, ses ressources), l'exécution qui croise
-  les lectures, le démontage qui vide le disque ; chaque essai compté et dit dans un journal ; CONNEXION IMPOSSIBLE ;
-  J'AI BESOIN DE TOI, les cas bloqués sur une page lisible ; une ville lue dans une source est une ville à ajouter.
-- **Dans les scripts de `/bulk-entry`** : `log.py`, `prepare.py`, `region_gate.py`, `cited_works.py` (nouveaux) ;
-  `meta.py` ne lit plus la carte, `verifyv.py` refuse un détenteur sans livre — essayés sur un lot de deux pages et sur
-  une copie d'une ancienne vague (70 fiches refusées sur 70).
-- **Sept ouvrages ajoutés par lui sur le disque**, inscrits dans `bibliotheque.md` ; le Palgrave de Byzance ouvert, un
-  essai au registre (son texte donne aux Danichmendides le plateau central), ses cartes pas regardées.
-- **Mes fautes** : je m'arrêtais à Wikipédia depuis des semaines et la saisie en masse recopiait la carte ; des
-  réponses trop longues pour une seule question ; le cas d'Ancyre repris alors qu'il parlait du déroulé ; une recherche
-  lancée par formulaire qu'il n'avait pas demandée ; une suppression de 740 Mo donnée à décider.
+- **La méthode, à sa demande** : l'agent `source-researcher` réécrit en chercheur (`skills: [find-sources]`, il suit les
+  liens et les cartes, range les livres qu'il trouve, écrit à l'historien) ; l'agent `book-reader`, nouveau ; dans
+  `/bulk-entry`, `preflight.py` (tout vérifié avant une nuit, le MCP compris), `follow_links.py`, `build_saisie.py`,
+  `loop_state.py` ; dans `/find-sources`, dix agents par défaut, une seule question, l'échelle quand un livre n'a pas la
+  réponse, la boucle. Ses PDF rangés dans `bibliotheque/` sur Acer. **Non commité** : à commiter sur son mot.
+- **L'Anatolie de 1100** : trois tours de recherche (29 lots, Opus), 50 ouvrages environ rangés dans `ouvrages/` ;
+  138 fiches confrontées et saisies, vérifiées par script contre une copie de la base ; Chonai, Palu, Çemişgezek créées ;
+  Ridwan et Thoros Iᵉʳ ; trois fiches fausses de moi supprimées, trois doublons fusionnés. `cities:alerts` : 57 alertes.
+- **Le tour 3 n'est pas saisi** : son résultat est dans `resultats/saisie.json`, le point de reprise dit l'ordre.
+- **Mes fautes** : des citations déformées en les recopiant, par les agents de saisie et par moi — réparées, et la règle
+  tient désormais : le contenu est imprimé par script et collé tel quel ; des lots trop gros, arrêtés à leur limite sans
+  rapport ; ma « erreur » sur le prince de Sassoun, qui n'en était pas une.

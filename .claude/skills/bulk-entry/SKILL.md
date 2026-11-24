@@ -38,7 +38,7 @@ map and could never contradict it. Now (`/find-sources`, « Never » and « The 
 4. **Step 8 refuses** a holder line whose source is an encyclopaedia alone, or a work absent from the register.
 
 **The gate — run it before step 1, and again before step 7**: `python3 -I scripts/region_gate.py <year> <zone>`.
-It refuses (exit 1) while the region's note is missing, while **one atlas on disk** (`other-historical-atlases-pdf/`,
+It refuses (exit 1) while the region's note is missing, while **one atlas on disk** (`/Volumes/Acer/atlas-historien/bibliotheque/`,
 the Palgrave atlas of Byzantine history among them — on disk since 23/10 and never opened until 23/11) has no attempt
 for the region, while the works cited by the Wikipedia pages (their « Sources », « Bibliography », footnotes) were not
 listed, or while no work was read. It prints the attempts by kind and result — the count he judges. A refused region
@@ -126,11 +126,15 @@ never delete; a mistyped quotation is **noted, never updated by the agent** (the
 | step | command                                                               | reads → writes                                                                                                                                   |
 | ---- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | `cand.py <lot> <pool.json> <year>`                                    | a pool (list of `{q, lon, lat, url}`) → `cand.json`                                                                                              |
-| 0    | `prepare.py <year> <zone>`, `log.py say|attempt`, `region_gate.py <year> <zone>` — the zone as the archive names it (`anatolie`) | the journal, `registre/attempts.jsonl`, the archive; the gate reads the attempts and the region's note                     |
+| 0    | `prepare.py <year> <zone>`, `research_log.py say|attempt`, `region_gate.py <year> <zone>` — the zone as the archive names it (`anatolie`) | the journal, `registre/attempts.jsonl`, the archive; the gate reads the attempts and the region's note                     |
 | 0    | `count_sheets.py <year> <west> <south> <east> <north> [--list]`       | the base (read-only) → the zone's sheets counted by what carries their holder and their existence                                               |
 | 0, 9 | `archive.py check|open|work|read|given|note|close …`                  | the archive on the external disk (`/Volumes/Acer/atlas-historien/`): its checks, the works at its root, the research under `<year>/<zone>/`     |
 | 3    | `find_book.py search "<words>"`, `find_book.py get <id> <folder>`     | archive.org → the items found; a work's text → `<folder>/texte.txt`                                                                              |
 | 2    | `meta.py <lot> <year> [<zone>]` (the zone when `holders.json` is there: it runs the gate) | `cand.json` (+ `holders.json`) → `meta.json`                                                                             |
+| 0    | `preflight.py` | every check a script can make for every step, up to the export — exit 1 on a failure, each with its remedy |
+| loop | `build_saisie.py <year> <zone>` | the checked reports (+ `resultats/arbitrages.json`) → `resultats/saisie.json` and `saisie.md`: the deliverable, sheet by sheet (confirmer, corriger, rattacher, vider, fusionner, supprimer, créer) |
+| loop | `loop_state.py <year> <zone> <round>` | the deliverable + `travail/a-lire.jsonl` → `travail/etat-boucle.json`: open questions, books for the readers, books for his browser, questions to dig; whether the loop stops |
+| any  | `follow_links.py <out> <lang> "<Title>"` | one Wikipedia page read as a reader does → `page.txt`, `maps.md` + each map as an image (Commons file page: author, source, licence), `links.md` (the index, « See also », works cited) |
 | 3    | `fetch_rest.py <lot> <list.json>`, then `cited_works.py <lot> <year> <zone>` | QIDs → `rend/<q>.json` with the works cited (resumes) → `cited.json`, the attempt « wikipedia-bibliography »                            |
 | 5    | `sentences.py <lot> <year>`                                           | `meta.json` + pages → `tri-a..h.json`                                                                                                            |
 | 6    | `mkv.py <lot> <year>`                                                 | verdicts + `rend/` → `enter-va..vh.json`, `pending.json`, `weak.json` — move them to `wave<N>/` at once                                          |

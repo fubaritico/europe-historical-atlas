@@ -135,8 +135,8 @@ Every step is said in the journal as it happens. The detail of each is below.
 - **Everything is said in the journal as it happens** (the dev, 2026-11-23: _"I want logs — I am checking, I found
   this, I do that, the date"_): `/Volumes/Acer/atlas-historien/journal.log`, which he follows with `tail -f`. One dated
   French line before each source opened, after each thing found, at each decision —
-  `python3 -I .claude/skills/bulk-entry/scripts/log.py say "…"`; an attempt is recorded **only** by
-  `log.py attempt '<json>'`, which writes the register and the journal together. A script that fetches or reads logs
+  `python3 -I .claude/skills/bulk-entry/scripts/research_log.py say "…"`; an attempt is recorded **only** by
+  `research_log.py attempt '<json>'`, which writes the register and the journal together. A script that fetches or reads logs
   the same way. Give him the `tail -f` command at the start of every research.
 - **Ask him for his axes of research before starting** (the dev, 2026-11-23: _"I can give you a list of axes of
   research, which can change your way of searching. You can ask for it when I ask you to research something. You leave
@@ -166,7 +166,7 @@ Every step is said in the journal as it happens. The detail of each is below.
   research there — in **his** Chrome, never while he tests an application in it, and after reminding him to check he
   is logged in (`references/reading-accounts.md`; I never click « Me connecter ») — check the session is logged in; if
   it is not, or the site refuses: write **CONNEXION IMPOSSIBLE**
-  with the library's name — in the journal (`log.py say`) and as the first words of the message to him — and **stop the
+  with the library's name — in the journal (`research_log.py say`) and as the first words of the message to him — and **stop the
   research there**. No other channel is carried on meanwhile, nothing is entered, the attempt is not counted
   (`region_gate.py` accepts only a search that really ran, `found` or `nothing`, for these two). He logs in; the
   research starts again at that channel.
@@ -216,7 +216,7 @@ Every step is said in the journal as it happens. The detail of each is below.
    one language misses the literature of the others (Siurana is _Šiurāna_; Lleida is _Lārida_, _Lérida_, _Ilerda_).
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
    list the works its footnotes cite; those works are what the next steps look for.
-3. **The atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
+3. **The atlases on disk first** — `/Volumes/Acer/atlas-historien/bibliotheque/` (git-ignored; the list, each
    one's status and licence: `/Volumes/Acer/atlas-historien/bibliotheque.md`). Extract their text into the research's `travail/` on the archive
    (`pypdf`, run by `/Volumes/Acer/atlas-historien/outils/py`; Read cannot render single pages without poppler, so split a scan into
    four-page PDFs and read each whole), search it for every name of the place, read the map's legend and date on the

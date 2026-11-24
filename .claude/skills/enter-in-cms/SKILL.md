@@ -72,6 +72,10 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   **in order: the sheet, then its place, then its source**; nothing until the box is ticked. **There is no bin**: a
   deletion comes back only from a copy of the base, so read the record (find by id) before deleting it, and check after
   that it is gone. Each deletion is said to the code instance with the others of the batch.
+- **A quotation is pasted, never retyped** (2026-11-23: eight quotations altered in one evening — maître for maitre,
+  uğrattı for uğratıp — by entry agents and by me, each retyping a text it had read). The content of every call is
+  printed by a script from the checked report, JSON-escaped, and pasted as it stands; after a wave, a script compares
+  the base with the report (`verify_entry.py` in the research's `travail/`). An agent that enters is given that file.
 - **Every fact with its source.** A value with no source is not entered. A fact *de mémoire* is never entered — it is
   researched first (climb the chain of reference: the quotation, then the work Wikipedia or the page cites).
 - **A line speaks of the sheet's date** (the dev, 2026-11-10). A quotation is a line of the 1100 sheet when the holding
@@ -187,6 +191,10 @@ that exists is reused (its id), never created again.
      - **A place entered before 2026-11-22 may still bear its name of the time as its name** (132 names differ from
        Wikidata's, `../../../files/plans/contribution/noms-a-trier.md`): never rename one in passing — the map
        reads it — report it in the message to the coder.
+     - **After every entry, `pnpm names:check`** from the main tree (read-only, about 4 minutes, beside
+       `pnpm cities:alerts`; the coder's, `49d160db`): it compares each place's name with Wikidata's and rewrites
+       `noms-a-trier.md`. A name listed there is either a name of the time (the place takes today's name, the old one
+       becomes its « Nom d'époque ») or a variant to keep — said to the coder, who adds it to the kept names.
    - `location` = **`{ "longitude": …, "latitude": … }`** — the MCP tools take an object and store Payload's
      `[longitude, latitude]` tuple; never send the tuple. Wikidata P625 gives the latitude first: read both by name.
    - `wikidata` = `Q` followed by digits, or nothing.

@@ -3,7 +3,7 @@
 Reads the attempts register (/Volumes/Acer/atlas-historien/registre/attempts.jsonl) and the region's note
 (/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md), and refuses (exit 1) while one of these is missing:
   1. the region's note, with its sections « Index references » and « Attempts »;
-  2. one attempt per atlas on disk (files/resources/other-historical-atlases-pdf/*.pdf) for this region —
+  2. one attempt per atlas on disk (/Volumes/Acer/atlas-historien/bibliotheque/*.pdf) for this region —
      `found`, `nothing` or `not relevant`, each one opened or ruled out by its title, never skipped;
   3. at least one attempt in each compulsory channel (the dev, 2026-11-23): `wikipedia-bibliography` (the works the
      region's pages cite, listed), `jstor`, `gallica`, `bnf`, `archive-org` — a library is never « not relevant »;
@@ -28,7 +28,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[4]
 YEAR, REGION = int(sys.argv[1]), sys.argv[2]
 NOTE = pathlib.Path('/Volumes/Acer/atlas-historien') / str(YEAR) / REGION / 'resultats/note-de-region.md'  # the zone's note, on the archive
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
-ATLASES = ROOT / 'files/resources/other-historical-atlases-pdf'
+ATLASES = pathlib.Path('/Volumes/Acer/atlas-historien/bibliotheque')
 # The channels the dev made compulsory on 2026-11-23: none is skipped, a search there may only come back empty.
 CHANNELS = ('wikipedia-bibliography', 'jstor', 'gallica', 'bnf', 'archive-org')
 # Only a single work can be ruled out as not relevant — never a library — and its reason is written.

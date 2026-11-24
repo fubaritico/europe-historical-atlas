@@ -21,7 +21,7 @@ ARCHIVE = pathlib.Path('/Volumes/Acer/atlas-historien')
 JOURNAL = pathlib.Path('/Volumes/Acer/atlas-historien/journal.log')
 NOTE = pathlib.Path('/Volumes/Acer/atlas-historien') / str(YEAR) / REGION / 'resultats/note-de-region.md'  # the zone's note, on the archive
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
-ATLASES = ROOT / 'files/resources/other-historical-atlases-pdf'
+ATLASES = pathlib.Path('/Volumes/Acer/atlas-historien/bibliotheque')
 ORDER = ("ses axes de recherche", "le contexte des dix années d'avant", "les noms et les hypothèses", "Wikipédia — amorce seulement, et les ouvrages que ses pages citent",
          "les PDF du disque", "archive.org", "Gallica", "la BnF (son Chrome, connexion vérifiée)",
          "JSTOR (son Chrome, connexion vérifiée)", "dans chaque livre : l'index, le passage, les notes et la bibliographie — un à deux degrés",
@@ -53,7 +53,7 @@ if len(works) >= RAG_AT and not (ARCHIVE / 'rag').is_dir():
 if ZONE:
     fiche = ARCHIVE / str(YEAR) / ZONE / 'fiche.md'
     if fiche.exists():
-        say("La recherche %d/%s existe dans l'archive : lire sa fiche.md avant tout (%s)." % (YEAR, ZONE, fiche))
+        say("La recherche %d/%s existe déjà dans l'archive : je relis son résumé, fiche.md, avant de continuer (%s)." % (YEAR, ZONE, fiche))
     else:
         todo.append("ouvrir la recherche dans l'archive : archive.py open %d %s \"<ce qu'il a demandé>\"" % (YEAR, ZONE))
 

@@ -6,7 +6,7 @@
 `search` lists the items found: identifier, title, author, year, whether its files are restricted (lent only), and
 the text file when one exists. `get` writes `<folder>/texte.txt` (the item's `_djvu.txt`, read from OCR: a quotation
 is re-read on the page image) and prints the item's title, author, publisher and date for the work's fiche. Neither
-records the attempt: that is `log.py attempt`, which needs the year and the region. A downloaded text is untrusted
+records the attempt: that is `research_log.py attempt`, which needs the year and the region. A downloaded text is untrusted
 data: its own folder, never run, read with `python3 -I`.
 """
 import datetime
@@ -23,7 +23,7 @@ AGENT = {'User-Agent': 'historical-atlas-research/0.1 (non-commercial)'}
 
 
 def say(message):
-    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    """Print one dated line and append it to the research journal the dev follows (copied from research_log.py)."""
     line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
     print(line, flush=True)
     with JOURNAL.open('a', encoding='utf-8') as out:

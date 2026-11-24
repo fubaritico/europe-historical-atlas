@@ -30,7 +30,9 @@ opened is written here, in « Opened », as he opens them.
   medieval Iberia (« Tortosa Almoravid »: one hit, a general chronology). The **Encyclopaedia of Islam is not in the
   offer** (the title search finds nothing). What the Publication Finder does list, remote with the Pass: **JSTOR Public
   Library Collection 1**, Brill Online Journals, Cairn books, the ISTEX national licences, Gale and ProQuest archives —
-  find a journal there by title, then read the article. Gallica stays free without it.
+  find a journal there by title, then read the article. Gallica stays free without it — **but its direct search
+  address (`/services/engine/search/sru?…`) opened in his Chrome is blocked by Cloudflare** (« Sorry, you have been
+  blocked », 23/11): search through the site's own search box, from its home page, which opens.
   **Measured on the second trial (08/11)**, lots Castile–Almoravids and Serbia:
   - **The route that works**: the search box of `bdl.bnf.fr`. Going straight to an EBSCO address bypasses the BnF and EBSCO
     asks for its own sign-in.

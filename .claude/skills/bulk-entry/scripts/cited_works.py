@@ -33,4 +33,4 @@ json.dump(works, open(G + '/cited.json', 'w'), ensure_ascii=False, indent=1)
 row = {'year': YEAR, 'region': REGION, 'kind': 'wikipedia-bibliography', 'degree': 0, 'where': '%d pages Wikipédia du lot %s' % (pages, os.path.basename(G)),
        'words': 'notes et bibliographies des pages', 'result': 'found' if works else 'nothing',
        'note': '%d ouvrages relevés ; les plus cités : %s' % (len(works), ' ; '.join('%s (%d)' % (w['work'], w['pages']) for w in works[:8]))}
-subprocess.run(['python3', '-I', HERE + '/log.py', 'attempt', json.dumps(row, ensure_ascii=False)], check=True)
+subprocess.run(['python3', '-I', HERE + '/research_log.py', 'attempt', json.dumps(row, ensure_ascii=False)], check=True)

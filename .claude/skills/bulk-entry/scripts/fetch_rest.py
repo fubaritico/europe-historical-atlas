@@ -8,7 +8,7 @@ UA = {'User-Agent': 'historical-atlas-research/0.1 (non-commercial)'}
 OUT = sys.argv[4] if len(sys.argv) > 4 and sys.argv[3] == '--test' else G + '/rend'
 os.makedirs(OUT, exist_ok=True)
 def say(message):
-    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    """Print one dated line and append it to the research journal the dev follows (copied from research_log.py)."""
     import datetime
     line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
     print(line, flush=True)

@@ -2,8 +2,8 @@
 this, I do that, the date"). One line per thing done, in French, dated to the second, printed and appended to
 /Volumes/Acer/atlas-historien/journal.log. He follows it with:  tail -f /Volumes/Acer/atlas-historien/journal.log
 
-  python3 -I log.py say "<what I am doing or what I found>"
-  python3 -I log.py attempt '<one attempt as JSON — the fields are region_gate.py's>'
+  python3 -I research_log.py say "<what I am doing or what I found>"
+  python3 -I research_log.py attempt '<one attempt as JSON — the fields are region_gate.py's>'
 
 `attempt` is the only way an attempt is recorded: it appends the line to registre/attempts.jsonl (its date added) and
 says it in the journal, so nothing is tried without being shown. A script of this skill that reads or fetches copies

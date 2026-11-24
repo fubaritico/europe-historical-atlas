@@ -26,15 +26,26 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 **Setup — before any page is opened, Wikipedia included**
 
-0. `archive.py check` — the archive disk is mounted, or **DISQUE ABSENT** and stop. Read `ouvrages/index.md` and,
+0. **The checks, all before anything else** (the dev, 2026-11-23: _"you checked the disk; what else?"_) — each said in
+   the journal, a failure said to him at once with its remedy, never met halfway through:
+   - **`python3 -I bulk-entry/scripts/preflight.py`** — everything a script can check, for every step up to the
+     export: the disk (mounted, writable, room, its tree, the library), the Python libraries, the scripts, the agent
+     loading this method, archive.org, Wikipedia, Wikidata, Commons, OpenEdition, Persée, the base, his CMS server
+     (port 3100), Node 24 and pnpm, the Mac not going to sleep. Exit 1 on any failure, each with its remedy;
+   - **then by me, with my tools**: one read through the MCP « cms »; the Chrome extension answers; **his logins** —
+     JSTOR through the BnF proxy (`www-jstor-org.bnf.idm.oclc.org/action/doBasicSearch?Query=<w>`) shows results, not
+     the BnF sign-in page; Gallica's home page opens. Not logged in → **CONNEXION IMPOSSIBLE**, said now, the sign-in tab
+     left open for him (I never click « Me connecter »). For a night run, all of it before he goes to bed.
+   Read `ouvrages/index.md` and,
    when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again. `archive.py open` the research.
    The base already has sheets for this region at this date: « A region already researched », step 1, first.
 1. Create the region's note `/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md` (sections: Axes given, Resources given,
    Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
    Cities met in the sources, Existence to read, Attempts).
-2. **The form** (`AskUserQuestion`, one question per call, in French): « Donne-moi un axe de recherche », again
-   until « Je n'ai pas d'autre axe »; then « Donne-moi une référence — un livre, une carte, un PDF, un lien »,
-   again until « Je n'ai pas d'autre référence ». What he already gave in his message is not asked again. Write
+2. **One question, once — the setup is fast** (the dev, 2026-11-23: _"there must not be half an hour of
+   preparation"_). His request carries the zone, the year and, if he has them, his axes and references
+   (« Castille 1100, axes : …, références : … »). What it lacks is asked **once, in one message**: « Tes axes et tes
+   références pour <zone> <year> ? (rien : je pars sans) » — then go, whatever the answer. Never asked again. Write
    each answer in the note at once, in his words. **What he gives are mostly references of books** (from the
    videos he watches, which give him no summary): **they prove nothing** — they help: sources to read, context,
    words, vocabulary, names, dates **to verify**. He gives nothing: start without.
@@ -43,7 +54,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    written there as a `.md`. Each has its line in the note's « Resources given »: what it is, where it comes
    from, what I read on it (a map: title, date, legend, names), what it gives to verify, its state. I look at
    every image myself; a name I cannot read is written « illegible », never guessed.
-3. `log.py say` the research; give him once: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
+3. `research_log.py say` the research; give him once: `tail -f /Volumes/Acer/atlas-historien/journal.log`.
 4. `prepare.py <year> <zone>`: what is at hand (the archive included), the order, what is still to do.
 5. **Build the context myself**: the ten years before the date — further back when his points go further — year by
    year, in the note. Every line names **the date, the place, the actors, the work and page**. No generality.
@@ -51,14 +62,21 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 6. From the context, list **the precise questions**: this city, at this date, held by whom, of whom.
 7. Reread « Never ». A rule that contradicts the request is said to him before starting.
 
-**Execution — each step said in the journal before and after; every attempt by `log.py attempt`**
+**Execution — each step said in the journal before and after; every attempt by `research_log.py attempt`**
 
 8. Names and hypotheses: every name of each place and actor in each language; every holder ever put forward.
 9. Resources he gave — opened first.
-10. Wikipedia, every language: priming only. List the works its pages cite (`cited_works.py`).
-11. The PDFs on disk (`files/resources/other-historical-atlases-pdf/`): each opened, or ruled out with its reason
+10. Wikipedia, every language: priming only. List the works its pages cite (`cited_works.py`). **Follow its links,
+    as a reader does** (the dev, 2026-11-23: _"I only followed links from Wikipedia pages"_): every map and image of
+    the page opened on Commons — author, source, licence, then looked at, its names read; the pages of its actors,
+    places, battles and « See also », one to two degrees, each giving its own maps and cited works — **by
+    `follow_links.py <out> <lang> "<Title>"`** (`bulk-entry/scripts/`), on every page read: page, maps as images with
+    their Commons file pages, and the index.
+11. The PDFs on disk (`/Volumes/Acer/atlas-historien/bibliotheque/`): each opened, or ruled out with its reason
     (title, period, index — one test is enough). Text and map legends. `pypdf` with `2>/dev/null`.
-12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`.
+12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`. **Then by
+    subject, by myself** (the dev, 2026-11-23): the polities, the actors, the region, the period — never only the
+    titles he gave. The free scholarly works filed, the loan-only listed; **to him, only what was not found**.
 13. Gallica.
 14. The BnF, then JSTOR — in his Chrome, never while he tests an app there. Not logged in or refused:
     write **CONNEXION IMPOSSIBLE**, stop everything, nothing counted.
@@ -89,14 +107,14 @@ The external disk the dev allocates — **not given, not mine** — and **the si
 everything a research reads, downloads, tries and finds lives there, nothing on the internal disk, nothing in the
 scratchpad. **What can serve again is at the root; what belongs to one year and one zone is under that year.**
 Being allocated: tidy and readable by a person, every folder with its `fiche.md`; nothing of his touched
-(`ATLAS-BOOKS/`, the PDFs at its root); nothing deleted without his word; never filled for nothing. French names;
+(`ATLAS-BOOKS/`; his PDFs gathered in `bibliotheque/` on 2026-11-23, at his word); nothing deleted without his word; never filled for nothing. French names;
 what a person reads is a `.md`.
 
 ```
 atlas-historien/
 ├── LISEZ-MOI.md              how it is filed, one page
 ├── journal.log               the journal he follows: tail -f /Volumes/Acer/atlas-historien/journal.log
-├── registre/attempts.jsonl   every attempt of every research (log.py attempt); the gate reads it
+├── registre/attempts.jsonl   every attempt of every research (research_log.py attempt); the gate reads it
 ├── ouvrages/                 REUSABLE — one folder per work, once: <author>-<year>-<short-title>/
 │   ├── index.md              every work: author, title, what it covers (regions, centuries), the researches it served
 │   └── <work>/               fiche.md · texte.txt · livre.pdf · pages/p-<n>.png — fetched straight here
@@ -143,12 +161,43 @@ new; the old sheets are judged by it, never the reverse.
    | nothing | remove a holder that had no line; keep a Wikipedia line but no holder on it; list the place « holder to read » |
    | the place did not exist, or is a duplicate | delete it myself (sheet, then place, then source — `/enter-in-cms`) |
 
+   **Removing a holder empties three fields**, « Tenue par » (`holder_title`) **and** the holder written as text
+   (`holderName`, `holderQid`) — with the text left, the sheet is judged on it, copied from the map (the coder,
+   2026-11-23, read in `cityVerdict.ts`). The sheet stays on the map, with no country, **red in the Cartographer and in
+   `pnpm cities:alerts`** until a sourced holder is entered: wanted, nothing else is erased.
+
 4. **Re-read every old quotation of a work** in its text. Not found word for word: remove the line.
 5. **Report in the note**: sheets confirmed, corrected, emptied of their holder, deleted. Then the export,
    `pnpm cities:alerts --map <year>`, the message to the coder.
 
 Region by region, when each is redone — never the whole base at once. Before the first region: ask the coder
 what the Cartographer and `cities:alerts` do with a sheet that has no holder.
+
+## When the book does not have it — the ladder, before giving up
+
+The place is expected to be found (the dev, 2026-11-23: _"you are supposed to find it — how does the agent cope?"_).
+A book that does not name it is one rung, not the end. Climb, each rung an attempt in the journal:
+
+1. **Its other names.** Every name of the place and of its fortress — Greek, Latin, Arabic, Turkish, Armenian,
+   Syriac, the crusaders' spellings, the old transliterations (Mamistra / Mopsuestia / Misis) — looked up in the index
+   and grepped in the text; an OCR text read with the letters it mangles (`rn` for `m`, a lost accent).
+2. **Its district.** The fortress above it, the see it belongs to, the valley, the neighbouring towns: who held the
+   district at the date holds the place, said as « par son district » (`holderBasis: district`).
+3. **The dates around.** The nearest holding read before the date and the nearest after: the same holder on both
+   sides, with nothing between, is a tenure through the date — kept as such, `fragile`, both readings cited; two
+   holders, the change is dated or the place stays divided.
+4. **Another kind of witness.** A chronicle of the time (the Alexiad, Matthew of Edessa, Ibn al-Athir, Michael the
+   Syrian, Albert of Aachen…), a topographical dictionary (the _Tabula Imperii Byzantini_), a list of sees or bishops (a
+   bishop proves a town), a survey of castles, coins and seals — the existence of a place is often there, not in the
+   political histories.
+5. **The next book.** The notes and the bibliography of the book that was silent, one to two degrees; the same
+   question in the other languages of Wikipedia and in their sources.
+6. **What is behind a door.** Loan-only on archive.org, the BnF, JSTOR, Gallica: listed by exact title and page, read
+   by the historian in his Chrome.
+
+Only then, **unknown is an answer**: `holder: null` or `existed1100: unknown`, `fragile: true`, the rungs climbed
+written, the books that would answer listed — in « J'AI BESOIN DE TOI » when only he can open them. **Never filled**:
+not from memory, not from the map, not from a neighbour's holder without the district's witness.
 
 ## A reading is kept only if
 
@@ -170,13 +219,44 @@ Not found / dropped: <quotation not checked, lead that led nowhere>
 
 ## Agents
 
-None without his number. **Before such a work starts, he chooses from a scale** (the dev, 2026-11-23): one form
-(`AskUserQuestion`) whose options are 5 · 10 · 15 · 20 agents, each with its estimate from the measured cost (a lot,
-research and entry together, ≈ 0.3 % of his week: 5 ≈ 1.5 %, 10 ≈ 3 %, 15 ≈ 4.5 %, 20 ≈ 6 %) and the number of lots
-the work needs; he may write another number, or none. Research on Opus (`subagent_type: "source-researcher"`, lots of 10–15 places), entry on
+**Ten agents by default, decided at the start, then no human step until the end** (the dev, 2026-11-23 evening: _"10
+by default… decided at the very start so that there is no more human intervention after"_ — it replaces the scale of
+the same afternoon). Another number only if his request names one. Measured cost: ≈ 0.3 % of his week per lot with the
+agent of 13/11; the rewritten agent (60 turns) is measured on its first lot and said in the journal. **Unattended**:
+the first lot runs alone and **I** check it in its files — it opened the library, looked at maps, followed links, found
+books (`worksFound`); if so the others start, ten at a time at most; if not, the run stops and the report says why. A
+case it cannot settle goes to « J'AI BESOIN DE TOI » and the others go on; emptying `travail/` waits for his word in
+the morning. Research on Opus (`subagent_type: "source-researcher"`, lots of 10–15 places), entry on
 Sonnet. I re-check every quotation an agent brings. An agent saves the texts it reads in its lot's folder
-(`<year>/<zone>/travail/<lot>/sources/`); at the lot's end I file each work in `ouvrages/` (`archive.py work`).
+(`<year>/<zone>/travail/<lot>/sources/`) and files each work it finds in `ouvrages/` at once (`archive.py work`), so
+the lots running beside it find it; I check the filed works at the lot's end.
 Detail and costs: `references/rules-in-full.md`, « Agents ».
+
+## The loop — rounds until the questions are answered (the dev, 2026-11-23: _"write the loop… like a review"_)
+
+The pattern of `/review`: rounds, each checked, bounded, and at the end a deliverable — **`resultats/saisie.json` and
+`saisie.md`, the data to enter in the CMS** (`build_saisie.py`), never only reports.
+
+- **Round 1 — research.** The lots, ten agents (`source-researcher`). Each report re-checked by me (`recheck.py`), then
+  `build_saisie.py`.
+- **Between rounds — the state.** `loop_state.py <year> <zone>` lists **the open questions** (a sheet with no holder, an
+  existence unknown, a divergence not settled, a holder on one fragile witness) and **the book queue**
+  (`travail/a-lire.jsonl`: every book an agent wants read, with the question it answers and where it can be had).
+- **Round 2 and after — reading and digging.** For every open question with a book that can be had: a reader
+  (`book-reader`) per book, ten at a time; a question with no book left: a researcher on that question alone, the
+  ladder from its last rung. A book behind a door (loan, BnF, JSTOR): read by me in his Chrome, when he is logged in.
+  Each round ends with `build_saisie.py`: the deliverable grows round by round.
+- **Talking while they work.** An agent writes to me (`SendMessage` to `main`) when it is stuck — a rung failed and it
+  wants more turns, a book it cannot open, a reading it cannot tell apart — and when it finds a fact that settles
+  another district. I answer at once: more turns or a book granted, a pointer to a work already filed, or « stop and
+  list it ». A fact that settles another lot is sent to that lot's agent while it runs (as the Danishmend of 1100,
+  read in Mélikoff, settles every Danishmendid town).
+- **When it stops** — whichever comes first: **no open question left**; **a round that moved no question** (the books
+  queued were read and the ladder climbed, nothing more to be had); **three rounds**; **the night's budget** (his share
+  of the week, said at the start; ten agents by default). A divergence kept beside a most probable reading is a result,
+  not an open question. `loop_state.py <year> <zone> <round>` says which, in the journal.
+  The last `build_saisie.py` is the deliverable; what stays open is one French page, « J'AI BESOIN DE TOI », each case
+  with the rungs climbed and the books that would answer.
 
 ## References
 

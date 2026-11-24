@@ -13,7 +13,7 @@ STAYS = {'outils', 'LISEZ-MOI.md'}  # the local launchers stay on the internal d
 
 
 def say(message):
-    """Print one dated line and append it to the research journal the dev follows (copied from log.py)."""
+    """Print one dated line and append it to the research journal the dev follows (copied from research_log.py)."""
     line = '%s  %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
     print(line, flush=True)
     with (ARCHIVE / 'journal.log').open('a', encoding='utf-8') as out:
