@@ -30,13 +30,13 @@ describe('recentMaps', () => {
   // L3, L4: N/A — a sort of what the archive already read and checked.
 
   describe('edge cases', () => {
-    it('keeps the newest twelve', () => {
-      const maps = Array.from({ length: 20 }, (_, at) => ({
+    it('keeps the newest thirty', () => {
+      const maps = Array.from({ length: 40 }, (_, at) => ({
         name: `m${String(at)}`,
         changedAt: at,
       }))
       const kept = recentMaps(maps)
-      expect([kept.length, kept[0]?.name, kept.at(-1)?.name]).toEqual([RECENT_COUNT, 'm19', 'm8'])
+      expect([kept.length, kept[0]?.name, kept.at(-1)?.name]).toEqual([RECENT_COUNT, 'm39', 'm10'])
     })
 
     it('orders maps written at the same time by name, numbers read as numbers', () => {

@@ -128,7 +128,8 @@ describe('editorMenus', () => {
         paste: { label: 'Coller', enabled: true },
       })[1]
 
-      expect(edit?.entries.some((entry) => entry.kind === 'command' && entry.enabled)).toBe(false)
+      // CARTO-555: the menu itself greyed, its commands left as they are, never seen while it is shut.
+      expect(edit?.enabled).toBe(false)
     })
   })
 

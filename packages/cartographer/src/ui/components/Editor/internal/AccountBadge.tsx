@@ -1,4 +1,5 @@
 import { useTranslation } from '../../../hooks/useTranslation'
+import { StartIcon } from '../../../icons/startIcons'
 import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
@@ -19,7 +20,9 @@ export function AccountBadge({ email, onSignOut }: { email: string; onSignOut?: 
   return (
     <>
       <span className="app-account">{t('signedInAs', { email })}</span>
-      {onSignOut !== undefined && <BarButton label={t('signOut')} onPress={onSignOut} />}
+      {onSignOut !== undefined && (
+        <BarButton label={t('signOut')} icon={<StartIcon kind="signOut" />} onPress={onSignOut} />
+      )}
     </>
   )
 }

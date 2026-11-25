@@ -84,10 +84,14 @@ textarea,
     sans-serif;
 }
 
+/*
+ * The top bar in three parts (CARTO-555): the mark and the menus on the left, the name in the very middle of the bar,
+ * the account on the right — two equal outer columns, so the middle one is centred whatever the sides hold.
+ */
 .shell__appbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
-  justify-content: space-between;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
 }

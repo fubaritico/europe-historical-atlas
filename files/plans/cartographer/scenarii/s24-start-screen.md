@@ -20,6 +20,12 @@
 > « Ouvrir… », an open folder — drawn as 1 px lines on half pixels, after the first drawing (squares) came out blurred
 > and jagged. A thumbnail of each map: CARTO-554.
 >
+> **The top bar, the same evening (CARTO-555, the dev's list)**: the mark on the left, Fichier and Édition against
+> it; the name in the middle of the bar; « Connecté : … » aligned, « Se déconnecter » with its glyph, on the right; no
+> file buttons. A menu with nothing to do is greyed itself, never opened on greyed commands. **Walked by me** on a
+> trial: signed out, the two menus greyed; signed in on the start screen, Fichier open and Édition greyed; thirty tiles
+> scrolling, 56 px over the title and under the panel.
+>
 > **The coder's calls, said to the dev the same evening, open to his word**: the map open is kept in the tab (a reload
 > reopens it, a new tab starts on this screen); the last maps are ordered by when they were last written — a map opened
 > and left unchanged does not climb — and leave the automatic saves to *Open…*, where they stay; a name kept in the tab
@@ -43,7 +49,8 @@ Scenario: the last maps, newest first
   Then « Cartes récentes » lists « 1100 — modifiée aujourd’hui à 19:41 », then « 1200 — modifiée le 20 novembre 2026 à
     09:05 »
   And the automatic save is not listed — Open… lists it
-  And at most twelve maps are listed
+  And at most ~~twelve~~ thirty maps are listed, as tiles in a panel that stops as far from the window's bottom as
+    the title is from its top, the tiles scrolling inside it (the dev, CARTO-555)
 
 Scenario: a map opened with one click
   When I click « 1200 » in « Cartes récentes »
@@ -53,9 +60,9 @@ Scenario: a map opened with one click
 Scenario: the menus and the bar on the start screen
   Then Fichier offers « Nouvelle carte… » and « Ouvrir… »
   And « Fermer la carte », « Enregistrer », « Enregistrer sous… » and « Enregistrer une copie » are greyed, never hidden
-  And every command of Édition is greyed
-  And the bar's « Enregistrer », « Enregistrer sous… » and « Enregistrer une copie » are greyed, each saying
-    « — ouvrez d’abord une carte », « Ouvrir… » acting
+  And ~~every command of Édition is greyed~~ Édition is greyed itself and does not open (CARTO-555)
+  And ~~the bar's « Enregistrer », « Enregistrer sous… » and « Enregistrer une copie » are greyed, each saying
+    « — ouvrez d’abord une carte », « Ouvrir… » acting~~ the bar holds no file button (CARTO-555)
   And ‹cmd+O› opens « Ouvrir une carte », where every map is a choice; every other key is declined in the console
   And the top bar's right end reads « Connecté : <my address> » beside « Se déconnecter »
 

@@ -1,9 +1,5 @@
 {
   "notBuilt": "not built yet ({scenarios})",
-  "openHint": "Open another map ({keys})",
-  "saveHint": "Save the map ({keys})",
-  "saveAsHint": "Save the map under another name, and go on working on the new one ({keys})",
-  "saveCopyHint": "Save a copy of the map, and stay on this one",
   "closeYear": "{close} {year}",
   "nothingToUndo": "nothing to undo",
   "nothingToRedo": "nothing to redo",
@@ -13,8 +9,6 @@
   "menuBar": "The Cartographer’s menus",
   "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}",
   "signOut": "Sign out",
-  "signInFirst": "sign in first",
-  "openMapFirst": "open a map first",
   "signedInAs": "Signed in: {email}",
   "sessionExpired": "Session expired"
 }

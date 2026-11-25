@@ -41,13 +41,16 @@ export function MenuBar({ label, menus }: MenuBarProps) {
   return (
     <div ref={bar} role="menubar" aria-label={label} className="menu-bar">
       {menus.map((menu) => (
+        // A menu greyed while it is open shows its list no more (review ARCH-002 of CARTO-555): the gate is the render,
+        // not only the opening.
         <div key={menu.id} className="menu-bar__menu">
           <button
             id={`${id}-${menu.id}`}
             type="button"
             role="menuitem"
             aria-haspopup="menu"
-            aria-expanded={open === menu.id}
+            aria-expanded={open === menu.id && menu.enabled !== false}
+            aria-disabled={menu.enabled === false ? true : undefined}
             tabIndex={stop === menu.id ? 0 : -1}
             data-menu={menu.id}
             className="menu-bar__title"
@@ -58,7 +61,7 @@ export function MenuBar({ label, menus }: MenuBarProps) {
           >
             {menu.label}
           </button>
-          {open === menu.id && (
+          {open === menu.id && menu.enabled !== false && (
             <MenuList
               entries={menu.entries}
               labelledBy={`${id}-${menu.id}`}

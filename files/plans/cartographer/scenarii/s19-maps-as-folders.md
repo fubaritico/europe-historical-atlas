@@ -266,8 +266,12 @@ Scenario: a key held opens its dialogue once
   When I hold ‹cmd+O›
   Then « Open a map » opens once, and the repetitions do nothing
 
-Scenario: the tooltips say the keys of this system
-  When I hover [Save] on a Mac
-  Then its tooltip reads « Enregistrer la carte (⌘S) »
-  And off a Mac it reads « Enregistrer la carte (Ctrl+S) »
+Scenario: ~~the tooltips say the keys of this system~~
+  ~~When I hover [Save] on a Mac~~
+  ~~Then its tooltip reads « Enregistrer la carte (⌘S) »~~
+  ~~And off a Mac it reads « Enregistrer la carte (Ctrl+S) »~~
 ```
+
+> **Struck 2026-11-25 (CARTO-555, the dev)**: the top bar's four file buttons are gone — they doubled the menu Fichier,
+> which says each command's keys as this system writes them. [Open…], [Save], [Save as…] and [Save a copy] above are
+> Fichier's commands, and their keys.

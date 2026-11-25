@@ -17,7 +17,7 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
   store: CartographerStoreHook
   /** The canvas's undo and redo, gesture first — never `store.undo()` straight (ARCH-101). */
   history: HistoryRelay
-  /** Nobody signed in (CARTO-535): every command greyed, never hidden — the menu shows what exists. */
+  /** Nobody signed in (CARTO-535): the menus greyed whole, their titles shown and shut (CARTO-555). */
   disabled?: boolean
   /** Whether a map is open — `false` on the start screen, where a new map and *Open…* alone act (CARTO-536). */
   mapOpen: boolean
@@ -30,8 +30,8 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
  * @param props - the store, the relay and the gestures
  * @param props.store - the store
  * @param props.history - the canvas's undo and redo
- * @param props.disabled - nobody signed in: every command greyed
- * @param props.mapOpen
+ * @param props.disabled - nobody signed in: the menus greyed whole
+ * @param props.mapOpen - whether a map is open — Édition greyed whole on the start screen
  * @returns the menu bar
  */
 export function MenuBarPanel({

@@ -31,7 +31,7 @@ export type BarButtonAction =
 export type BarButtonProps = BarButtonAction & {
   /** Its name — the visible label, or the accessible one when it shows a glyph. */
   label: string
-  /** A glyph in place of the label. */
+  /** A glyph — in place of the label for the `icon` look, before it otherwise (« Se déconnecter », CARTO-555). */
   icon?: ReactNode
   /** The look: a text button, a square glyph button, or the bar's one filled button. */
   variant?: 'text' | 'icon' | 'primary'
@@ -74,11 +74,12 @@ export function BarButton({
       type="button"
       className={`bar-button bar-button--${variant}`}
       aria-disabled={available ? undefined : 'true'}
-      aria-label={icon === undefined ? undefined : label}
+      aria-label={variant === 'icon' ? label : undefined}
       title={available ? hint : `${label} — ${unavailable}`}
       onClick={handleClick}
     >
-      {icon ?? label}
+      {variant === 'icon' ? (icon ?? label) : icon}
+      {variant === 'icon' ? null : label}
     </button>
   )
 }

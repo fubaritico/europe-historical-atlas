@@ -1,16 +1,12 @@
 import type { MenuDefinition } from '../../MenuBar'
 
 /**
- * Every command of the menus greyed (CARTO-535: nobody signed in) — the menus keep showing what exists, as a greyed
- * command always does (CARTO-345); the separators stay.
+ * The menus greyed whole (CARTO-555, the dev: « désactiver Fichier et Édition au lieu de désactiver les menus »): each
+ * title stays on the bar, greyed, and does not open — nobody signed in (CARTO-535), or Édition with no map open
+ * (CARTO-536). Their commands are left as they are, never seen while the menu is shut.
  * @param menus - the menus
- * @returns the same menus, nothing enabled
+ * @returns the same menus, each greyed
  */
 export function greyed(menus: readonly MenuDefinition[]): MenuDefinition[] {
-  return menus.map((menu) => ({
-    ...menu,
-    entries: menu.entries.map((entry) =>
-      entry.kind === 'command' ? { ...entry, enabled: false } : entry
-    ),
-  }))
+  return menus.map((menu) => ({ ...menu, enabled: false }))
 }

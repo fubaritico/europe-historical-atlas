@@ -9,8 +9,6 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `notBuilt` — Why a button does nothing yet; `scenarios` names the scenarios that will build it.
- * - `openHint`, `saveHint`, `saveAsHint`, `saveCopyHint` — The tooltips of *Open…*, *Save*, *Save as…* and *Save a
- *   copy* (`s19`); `keys`, the first three's shortcut as the system writes it (CARTO-345).
  * - `closeYear` — Close the open year; `close` is the shared action's label, `year` the year as text.
  * - `nothingToUndo`, `nothingToRedo` — Why undo or redo is unavailable.
  * - `undoHint`, `redoHint` — The tooltip of undo and redo; `label` is the button's name, `keys` its shortcut.
@@ -18,9 +16,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `menuBar` — The menu bar's accessible name (CARTO-345).
  * - `placeholder` — The shell's placeholders, where a zone is not given; `zone` is `appBar`, `docBar`,
  *   `tools` or `panels`.
- * - `signOut`, `signedInAs`, `signInFirst`, `sessionExpired` — The session (CARTO-535): the button, who is signed in
- *   (`email`), why the bar's gestures are greyed, and the expired session's dialogue's name.
- * - `openMapFirst` — Why the three saves are greyed on the start screen (CARTO-536).
+ * - `signOut`, `signedInAs`, `sessionExpired` — The session (CARTO-535): the button, who is signed in (`email`), and the
+ *   expired session's dialogue's name.
  */
 export type EditorMessageKey = keyof typeof en
 
