@@ -95,7 +95,10 @@ export interface AutosaveKeeperDeps {
 
 /** The keeper. */
 export interface AutosaveKeeper {
-  /** Start saving automatically: every change from now on is written a moment later. */
+  /**
+   * Start saving automatically: every change from now on is written a moment later — into the folder of the first
+   * start, when it starts again.
+   */
   start: () => void
   /** Stop listening and cancel a pending write. */
   stop: () => void
@@ -111,8 +114,15 @@ interface AutosaveCell {
   queue: Promise<void>
   /** The last write failed: said once, then said again when one succeeds. */
   failing: boolean
-  /** When the keeper started — the time in every autosave's name of this opening. */
+  /** When the keeper first started — the time in every autosave's name of this opening. */
   startedAt: Date
+  /** Whether it has started once: started again (after signing in again, CARTO-535), it writes to the same folder. */
+  opened: boolean
+  /**
+   * A write was waiting when it stopped: owed at the next start, never written at the moment of stopping (review
+   * QUAL-003 of 2026-11-25 — a change made just before signing out is not left out of the autosave).
+   */
+  owed: boolean
 }
 
 /**
@@ -179,11 +189,14 @@ export function createAutosaveKeeper(deps: AutosaveKeeperDeps): AutosaveKeeper {
     queue: Promise.resolve(),
     failing: false,
     startedAt: deps.now(),
+    opened: false,
+    owed: false,
   }
   return {
     start: () => {
       if (cell.unsubscribe !== null) return
-      cell.startedAt = deps.now()
+      if (!cell.opened) cell.startedAt = deps.now()
+      cell.opened = true
       let seen = deps.store.getState().version
       cell.unsubscribe = deps.store.subscribe(() => {
         const { version } = deps.store.getState()
@@ -191,11 +204,14 @@ export function createAutosaveKeeper(deps: AutosaveKeeperDeps): AutosaveKeeper {
         seen = version
         schedule(deps, cell)
       })
+      if (cell.owed) schedule(deps, cell)
+      cell.owed = false
     },
     stop: () => {
       cell.unsubscribe?.()
       cell.unsubscribe = null
       if (cell.pending !== null) deps.timers.clear(cell.pending)
+      cell.owed = cell.owed || cell.pending !== null
       cell.pending = null
     },
   }

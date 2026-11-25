@@ -9,7 +9,7 @@ import { ACTION_MESSAGES } from '../../i18n/actions'
 
 import { SAVE_FIRST_MESSAGES } from './i18n'
 
-import type { SaveFirstAnswer } from '../../../persistence/mapChange'
+import type { SaveFirstAnswer, SaveFirstReason } from '../../../persistence/mapChange'
 import type { QuestionRelay } from '../../../persistence/questionRelay'
 
 /**
@@ -22,14 +22,17 @@ import type { QuestionRelay } from '../../../persistence/questionRelay'
 
 /** What the dialogue needs. */
 export interface SaveFirstDialogProps {
-  /** The relay *Open…* asks through, with the name of the map about to be opened. */
-  questions: QuestionRelay<string, SaveFirstAnswer>
+  /**
+   * The relay *Open…* and « Se déconnecter » ask through (CARTO-535), with why — the map about to be opened, or
+   * signing out.
+   */
+  questions: QuestionRelay<SaveFirstReason, SaveFirstAnswer>
 }
 
 /**
- * Render the question, open while *Open…* waits for an answer.
+ * Render the question, open while *Open…* or « Se déconnecter » waits for an answer.
  * @param props - the relay
- * @param props.questions - the relay: it holds the map about to be opened and takes the answer
+ * @param props.questions - the relay: it holds why the question is asked and takes the answer
  * @returns the dialogue
  */
 export function SaveFirstDialog({ questions }: SaveFirstDialogProps) {
@@ -38,7 +41,16 @@ export function SaveFirstDialog({ questions }: SaveFirstDialogProps) {
   const action = useTranslation(ACTION_MESSAGES)
 
   // State
-  const map = useSyncExternalStore(questions.subscribe, questions.current)
+  const reason = useSyncExternalStore(questions.subscribe, questions.current)
+
+  // Derived
+  const title = reason?.kind === 'signOut' ? t('signOutTitle') : t('title')
+  const question =
+    reason === null
+      ? ''
+      : reason.kind === 'signOut'
+        ? t('signOutQuestion')
+        : t('question', { map: reason.map })
 
   // Handlers
   const yes = (): void => {
@@ -53,12 +65,12 @@ export function SaveFirstDialog({ questions }: SaveFirstDialogProps) {
 
   // Render
   return (
-    <Modal isOpen={map !== null} onClose={dismiss} aria-label={t('title')}>
+    <Modal isOpen={reason !== null} onClose={dismiss} aria-label={title}>
       <div className="short-dialogue">
         <Card>
-          <Card.Header>{t('title')}</Card.Header>
+          <Card.Header>{title}</Card.Header>
           <Card.Body>
-            <p className="short-dialogue__text">{map === null ? '' : t('question', { map })}</p>
+            <p className="short-dialogue__text">{question}</p>
           </Card.Body>
           <Card.Footer align="end">
             <Button type="button" variant="secondary" onClick={no}>

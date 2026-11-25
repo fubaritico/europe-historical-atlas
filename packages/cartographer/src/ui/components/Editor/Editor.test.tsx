@@ -97,9 +97,13 @@ function mount(results = createResultRelay(), session: SessionHandle = sessionAt
       results={results}
       wikidata={NO_WIKIDATA}
       session={session}
+      onSignOut={onSignOut}
     />
   )
 }
+
+/** « Se déconnecter », as the entry hands it. */
+const onSignOut = vi.fn()
 
 /** The text in the status bar's result zone. */
 function resultText(): string | null | undefined {
@@ -315,7 +319,21 @@ describe('Editor', () => {
         await Promise.resolve()
       })
 
-      expect(session.keeper.signOut).toHaveBeenCalledTimes(1)
+      expect(onSignOut).toHaveBeenCalledTimes(1)
+    })
+
+    it('while a session expired, names who without « Sign out » — the dialogue asks to sign in again', () => {
+      mount(undefined, sessionAt({ kind: 'expired', user: USER, problem: null }))
+
+      expect(document.querySelector('.app-account')?.textContent).toBe(
+        'Signed in: author@example.org'
+      )
+      const bar = document.querySelector<HTMLElement>('.shell__appbar') ?? document.body
+      expect(
+        within(bar)
+          .queryAllByRole('button')
+          .some((button) => button.textContent === 'Sign out')
+      ).toBe(false)
     })
 
     it('an expired session keeps the map under a dialogue that asks to sign in again', () => {
