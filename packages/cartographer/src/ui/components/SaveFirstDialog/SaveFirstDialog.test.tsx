@@ -9,7 +9,7 @@ import { LocaleProvider } from '../LocaleProvider'
 
 import { SaveFirstDialog } from './SaveFirstDialog'
 
-import type { SaveFirstAnswer } from '../../../persistence/mapChange'
+import type { SaveFirstAnswer, SaveFirstReason } from '../../../persistence/mapChange'
 import type { ReactElement } from 'react'
 
 /**
@@ -30,11 +30,21 @@ const dialog = () => document.querySelector('dialog')
  * @returns the relay, the answer awaited, a user
  */
 function mounted(map = '1200', mount = renderInEnglish) {
-  const questions = createQuestionRelay<string, SaveFirstAnswer>('opening a map is already asking')
+  return askedFor({ kind: 'open', map }, mount)
+}
+
+/**
+ * Mount the dialogue over a fresh relay, the question asked for a reason.
+ * @param reason - why it is asked
+ * @param mount - the language to render in
+ * @returns the relay, the answer awaited, a user
+ */
+function askedFor(reason: SaveFirstReason, mount = renderInEnglish) {
+  const questions = createQuestionRelay<SaveFirstReason, SaveFirstAnswer>('busy')
   mount(<SaveFirstDialog questions={questions} />)
   let answer: Promise<SaveFirstAnswer> = Promise.resolve('cancel')
   act(() => {
-    answer = questions.ask(map)
+    answer = questions.ask(reason)
   })
   return { questions, answer, user: userEvent.setup() }
 }
@@ -108,8 +118,15 @@ describe('SaveFirstDialog', () => {
   // L4: N/A — the relay refuses a second question itself (questionRelay.test.ts); the dialogue only answers.
 
   describe('edge cases', () => {
+    it('before signing out, says so, never a map’s name (CARTO-535)', () => {
+      askedFor({ kind: 'signOut' })
+
+      expect(open().getByText('You are about to sign out. Save the current map?')).toBeTruthy()
+      expect(dialog()?.getAttribute('aria-label')).toBe('Sign out')
+    })
+
     it('shows nothing while no question is asked', () => {
-      const questions = createQuestionRelay<string, SaveFirstAnswer>('busy')
+      const questions = createQuestionRelay<SaveFirstReason, SaveFirstAnswer>('busy')
       renderInEnglish(<SaveFirstDialog questions={questions} />)
 
       expect(dialog()?.hasAttribute('open')).toBe(false)

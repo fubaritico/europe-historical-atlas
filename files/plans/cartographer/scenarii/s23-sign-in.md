@@ -8,6 +8,11 @@
 > sign-in, a reload, the sign-out, the CMS stopped — each as written below. **Not walked, tested only**: the expired
 > session's dialogue and the unreadable answer. **Not walked by the dev.**
 >
+> **Completed the same evening, the ticket reopened (my fault: closed before its table was read)**: the relief prepared
+> behind the sign-in screen, the automatic save following the session, « save first? » before signing out — tested,
+> not walked yet. **Not in this ticket**: the start screen and its signed-in states, « Fermer la carte » (CARTO-536);
+> « Ajouter au CMS » refused until signed in again (CARTO-498).
+>
 > **The session is the CMS's own** — Payload's cookie, which the Cartographer's dev server relays and the page never
 > holds; signing in here signs in the CMS's admin too, on the same host (`localhost`). A trial is browsed on
 > `127.0.0.1`, never `localhost`, or it replaces the dev's own session (REPO-542).
@@ -49,11 +54,25 @@ Scenario: the session is prolonged while I draw
   Given I am signed in
   Then every thirty minutes the session is prolonged, unseen
 
+Scenario: the relief is prepared behind the sign-in screen
+  Given nobody is signed in
+  When I open the Cartographer
+  Then the relief is baked while the form waits
+  And signing in, then out and in again, finds it ready — its seconds never added after signing in
+
 Scenario: signing out
-  Given I am signed in
+  Given I am signed in, every change saved
   When I press « Se déconnecter »
-  Then the form comes back, the chrome greyed
-  And signing in again bakes the backdrop again, the map itself kept
+  Then the form comes back, the chrome greyed, the map kept for the next sign-in
+  And the automatic save stops until someone signs in again — then it writes to the same folder
+
+Scenario: signing out with a change not saved
+  Given I am signed in and the map holds a change not saved yet
+  When I press « Se déconnecter »
+  Then the dialogue « Se déconnecter » asks « Vous allez vous déconnecter. Voulez-vous enregistrer la carte en cours ? »
+  And [Oui] saves, then signs out — a save that fails keeps me signed in, its own alarm saying why
+  And [Non] signs out, the change unsaved
+  And ‹escape› signs nothing out
 
 Scenario: the CMS not started
   Given the CMS does not answer, or not within ten seconds
@@ -68,6 +87,8 @@ Scenario: the session expires while I draw
   And a dialogue « Session expirée » over it reads « Votre session a expiré : reconnectez-vous. Rien de votre dessin
     n’est perdu. », my address kept
   And ‹escape› and a click beside it do not close it
+  And the top bar names me, without « Se déconnecter »
+  And the automatic save goes on, nothing lost
   And signing in again closes it and the editor goes on
 
 Scenario: an answer the Cartographer cannot read — a defect of the Cartographer

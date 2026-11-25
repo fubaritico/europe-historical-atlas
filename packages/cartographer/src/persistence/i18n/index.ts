@@ -20,6 +20,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `copySaved`, `copyNotSaved`, `noSuchMap`, `openAskFailed` — A map opened, saved as, copied (`s19`)
  * - `autosaveKeptAgain`, `autosaveNotKept`, `autosaveUnconfirmed` — The automatic save (`autosaveKeeper.ts`)
  * - `sessionBroken` — The session's answer unreadable, in the error dialogue (`sessionKeeper.ts`, CARTO-535)
+ * - `signOutAskFailed` — « save first? » could not be asked before signing out (`signOut.ts`, CARTO-535)
  */
 export type PersistenceMessageKey = keyof typeof en
 

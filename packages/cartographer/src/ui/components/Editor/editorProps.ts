@@ -51,6 +51,8 @@ export interface EditorProps {
   results: ResultRelay
   /** Who is signed in, and the keeper that signs in and out (CARTO-535) — the editor shows only once someone is. */
   session: SessionHandle
+  /** « Se déconnecter »: the map saved first when the author says so, then the session closed (CARTO-535). */
+  onSignOut: () => void
 }
 
 /** The session, as the editor reads and drives it (CARTO-535). */

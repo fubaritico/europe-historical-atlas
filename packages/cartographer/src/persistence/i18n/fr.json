@@ -29,5 +29,6 @@
   "openAskFailed": "non ouverte — la question avant l’ouverture n’a pas pu être posée (détail dans la console)",
   "notSavedWikidata": "{year} non enregistré : l’identifiant Wikidata du pays « {name} » est « {value} », qui n’est pas un identifiant — il s’écrit Q suivi de chiffres, par exemple Q70972. Corrigez-le ou videz-le dans le formulaire du pays, puis enregistrez.",
   "notSavedPolityField": "{year} non enregistré : le champ « {field} » du pays « {name} » est refusé. Corrigez-le dans le formulaire du pays (détail dans la console), puis enregistrez.",
+  "signOutAskFailed": "non déconnecté — la question avant la déconnexion n’a pas pu être posée (détail dans la console)",
   "sessionBroken": "La session n’a pas pu être lue : le serveur du Cartographe a envoyé une réponse illisible. C’est un défaut du Cartographe ; le détail est dans la console."
 }

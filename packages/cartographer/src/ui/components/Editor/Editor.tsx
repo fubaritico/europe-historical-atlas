@@ -14,8 +14,8 @@ import type { EditorProps } from './editorProps'
 /**
  * Render the editor — once someone is signed in (CARTO-535); before, the chrome greyed and the sign-in form where the
  * map would be. **An expired session keeps the editor mounted** under its dialogue, nothing drawn lost; **signing out
- * unmounts the map**, so signing in again re-bakes the backdrop (a couple of seconds) — the document itself lives in the
- * store and is kept.
+ * unmounts the map** and signing in again mounts it anew — the canvas rebuilt, the view not kept, but the backdrop found
+ * already baked (`loaders/preparedBackdrop`) and the document kept in the store.
  * @param props - the store, how to load, the names, the relay for messages from outside React, and the session
  * @param props.session - who is signed in, and the keeper that signs in and out
  * @returns the editor, or the sign-in screen
@@ -23,11 +23,6 @@ import type { EditorProps } from './editorProps'
 export function Editor({ session: handle, ...editor }: EditorProps) {
   // Store
   const session = useStore(handle.store, (state) => state.session)
-
-  // Handlers
-  const handleSignOut = () => {
-    void handle.keeper.signOut()
-  }
 
   // Render
   if (!mayEdit(session))
@@ -50,7 +45,12 @@ export function Editor({ session: handle, ...editor }: EditorProps) {
     <>
       <SignedInEditor
         {...editor}
-        account={<AccountBadge email={session.user.email} onSignOut={handleSignOut} />}
+        account={
+          <AccountBadge
+            email={session.user.email}
+            {...(session.kind === 'signedIn' ? { onSignOut: editor.onSignOut } : {})}
+          />
+        }
       />
       {session.kind === 'expired' && <ExpiredSession session={session} keeper={handle.keeper} />}
     </>

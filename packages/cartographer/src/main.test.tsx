@@ -175,7 +175,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       expect(root.querySelector('main > h1')).not.toBeNull()
     })
 
-    it('with nobody signed in, shows the sign-in form where the map would be, and asks for no backdrop', async () => {
+    it('with nobody signed in, shows the sign-in form where the map would be, the backdrop prepared behind it', async () => {
       answerSession(null)
       const root = document.createElement('div')
       root.id = 'root'
@@ -190,8 +190,9 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       expect(root.querySelector('form.sign-in-form')).not.toBeNull()
       expect(root.querySelector('[data-testid="map-area"], canvas')).toBeNull()
       expect(asked).toContain(`${CMS_SESSION_ROUTE}/`)
-      expect(asked).not.toContain('/heightmaps/europe-dem-z6-1920.json')
-      expect(asked).not.toContain('/masks/europe-land.json')
+      // The dev's table of 2026-11-25 (CARTO-535): the relief is baked behind the sign-in screen
+      expect(asked).toContain('/heightmaps/europe-dem-z6-1920.json')
+      expect(asked).toContain('/masks/europe-land.json')
     })
   })
 

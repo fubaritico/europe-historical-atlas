@@ -86,6 +86,45 @@ describe('createAutosaveKeeper', () => {
   })
 
   describe('variants', () => {
+    it('stopped and started again — signing out, then in (CARTO-535) — writes to the same folder', async () => {
+      const { store, written, keeper } = world()
+      keeper.start()
+      keeper.stop()
+      await vi.advanceTimersByTimeAsync(60_000)
+
+      keeper.start()
+      store.gesture()
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(written).toEqual(['1100.autosave.2026-11-02T19-05-12'])
+    })
+
+    it('a write still waiting when it stopped is written after the next start, never at the stop', async () => {
+      const { store, written, keeper } = world()
+      keeper.start()
+      store.gesture()
+      await vi.advanceTimersByTimeAsync(1000)
+
+      keeper.stop()
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(written).toEqual([])
+
+      keeper.start()
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(written).toEqual(['1100.autosave.2026-11-02T19-05-12'])
+    })
+
+    it('stopped, writes nothing of a gesture', async () => {
+      const { store, written, keeper } = world()
+      keeper.start()
+      keeper.stop()
+
+      store.gesture()
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(written).toEqual([])
+    })
+
     it('rewrites the same folder after each pause — one per opening, never one per gesture', async () => {
       const { store, written, keeper } = world()
       keeper.start()

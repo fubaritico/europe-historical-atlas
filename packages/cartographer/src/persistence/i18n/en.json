@@ -29,5 +29,6 @@
   "openAskFailed": "not opened — the question before opening could not be asked (details in the console)",
   "notSavedWikidata": "{year} not saved: the Wikidata id of {name} is “{value}”, which is no id — it is Q followed by digits, for example Q70972. Correct it or empty it in the polity’s form, then save.",
   "notSavedPolityField": "{year} not saved: the field “{field}” of {name} is refused. Correct it in the polity’s form (details in the console), then save.",
+  "signOutAskFailed": "not signed out — the question before signing out could not be asked (details in the console)",
   "sessionBroken": "The session could not be read: the Cartographer’s server sent an answer it cannot read. It is a defect of the Cartographer; the details are in the console."
 }

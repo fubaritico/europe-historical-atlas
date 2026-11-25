@@ -4,14 +4,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import { createFetchContentSource } from '@europe-historical-atlas/core/data/contentSource'
-import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
-import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
-import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
-import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 import { createAfterPaint } from '@europe-historical-atlas/core/utils/afterPaint'
 import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
@@ -23,11 +19,11 @@ import { REFUSAL_EVENT } from './devServer/refusalJournalRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { shortcutText } from './i18n/commandKeys'
 import { createLocaleStore } from './i18n/localeStore'
-import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { CONTENT_URL, loadCities } from './loaders/cityLoad'
-import { openEditor } from './loaders/opening'
-import { loadVectorLayers } from './loaders/vectorLayers'
+import { createEditorBackdropLoad } from './loaders/editorBackdrop'
+import { preparedBackdrop } from './loaders/preparedBackdrop'
 import { createAlarmBoard } from './persistence/alarmBoard'
+import { autosaveFollowsSession } from './persistence/autosaveFollowsSession'
 import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
 import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
@@ -42,6 +38,7 @@ import { createQuestionRelay } from './persistence/questionRelay'
 import { journalRefusals } from './persistence/refusalJournal'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
+import { createSignOut } from './persistence/signOut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
@@ -86,8 +83,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `ui/styles/sheets.ts`.
 import './ui/styles/sheets'
 
-import type { OpeningProgress } from './loaders/opening'
-import type { SaveFirstAnswer } from './persistence/mapChange'
+import type { SaveFirstAnswer, SaveFirstReason } from './persistence/mapChange'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ReactToastContent } from '@fubaritico/react/Toast'
 
@@ -227,52 +223,27 @@ const compute = createWorkerMapCompute({
   },
 })
 
-/**
- * The assets, served over a relative URL exactly as the atlas loads them.
- *
- * Both paths are the Cartographer's own `publicDir`, which *is* the atlas's (`vite.config.ts`) — so
- * these are the same bytes the published map renders, not a copy of them.
- *
- * The atlas declares the same two strings in `mapPipeline.ts`, and they are left as two declarations
- * rather than shared through `core`: a deployment path is not domain code, and the cost of them drifting
- * is a loud `transport` failure at startup, not a silent wrong picture. Worth a line, not a module.
- * @param onProgress - told how far the whole opening has got, and which step runs, for the waiting bar
- * @returns the baked backdrop and the coastline and river layers projected into its frame
- */
-const loadTheBackdrop = (onProgress: OpeningProgress) =>
-  openEditor(
-    {
-      loadBackdrop: (onBake) =>
-        loadBackdrop({
-          // The atlas's relief, so the two backdrops are one bake (CORE-421; the parity table promised it since 18/10).
-          heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z6-1920'),
-          landMask: createFetchLandMaskSource('/masks/europe-land'),
-          compute,
-          toImage: bakeToBitmap,
-          options: DEFAULT_TERRAIN_OPTIONS,
-          onProgress: onBake,
-        }),
-      // After the bake, and reusing its mask rather than fetching three megabytes again. The order is not
-      // arbitrary: the shoreline is traced through that mask, and the frame it is projected into is the one
-      // the DEM declared — so neither can be had before the backdrop is.
-      loadVectors: (backdrop) =>
-        loadVectorLayers({
-          mask: backdrop.mask,
-          rivers: createFetchRiverSource('/rivers/europe-rivers.json'),
-          frame: backdrop.frame,
-        }),
-      afterPaint: createAfterPaint({
-        hidden: () => document.visibilityState === 'hidden',
-        requestFrame: (callback) => {
-          window.requestAnimationFrame(callback)
-        },
-        queueTask: (callback) => {
-          window.setTimeout(callback, 0)
-        },
-      }),
+/** The editor's backdrop: the relief baked by the worker, the coast and the rivers projected (`loaders/editorBackdrop`). */
+const loadTheBackdrop = createEditorBackdropLoad({
+  compute,
+  afterPaint: createAfterPaint({
+    hidden: () => document.visibilityState === 'hidden',
+    requestFrame: (callback) => {
+      window.requestAnimationFrame(callback)
     },
-    onProgress
-  )
+    queueTask: (callback) => {
+      window.setTimeout(callback, 0)
+    },
+  }),
+})
+
+/**
+ * The backdrop, prepared from the page's opening — behind the sign-in screen, its seconds not added after signing in
+ * (CARTO-535, the dev's table of 2026-11-25) — and joined by the map when it mounts, after signing in as after signing in
+ * again.
+ */
+const backdrop = preparedBackdrop(loadTheBackdrop)
+backdrop.prepare()
 
 /**
  * The polities' colours, for the canvas and every panel alike — one source, with the palette given here
@@ -412,9 +383,14 @@ const autosaveKeeper = createAutosaveKeeper({
   report: notices,
   words: diskWords,
 })
-void yearSession.openOnStartup().then(() => {
-  if (yearSession.phase() === 'ready') autosaveKeeper.start()
-})
+// It runs while the map is open and someone is signed in — or was, until a session expired mid-drawing — and stops
+// while nobody is (CARTO-535, the dev's table of 2026-11-25)
+const autosave = autosaveFollowsSession(
+  autosaveKeeper,
+  session.store,
+  () => yearSession.phase() === 'ready'
+)
+void yearSession.openOnStartup().then(autosave.follow)
 /** Save the map — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
 const handleSave = (): void => {
   void yearSession.save()
@@ -426,9 +402,25 @@ const mapPicker = createDialogueOpener()
 const saveAsPicker = createDialogueOpener()
 
 /** *Open…* asks whether to save the map open when it holds changes (`s19`) — answered in `SaveFirstDialog`. */
-const saveFirstQuestions = createQuestionRelay<string, SaveFirstAnswer>(
-  'opening a map is already asking'
+const saveFirstQuestions = createQuestionRelay<SaveFirstReason, SaveFirstAnswer>(
+  '« save first? » is already asking'
 )
+
+/**
+ * « Se déconnecter »: a change not yet saved goes through « save first? », then the session closes (CARTO-535, the dev's
+ * table of 2026-11-25).
+ */
+const signOut = createSignOut({
+  isModified: () => yearSession.isModified(),
+  save: () => yearSession.save(),
+  askSaveFirst: saveFirstQuestions.ask,
+  signOut: () => session.keeper.signOut(),
+  report: notices,
+  words: diskWords,
+})
+const handleSignOut = (): void => {
+  void signOut()
+}
 
 /**
  * Open another map: ask whether to save the map open when it changed, carry the view, then reload on the map chosen —
@@ -614,12 +606,13 @@ createRoot(container).render(
               history={history}
               heading={<PageHeading store={store} />}
               store={store}
-              load={loadTheBackdrop}
+              load={backdrop.load}
               style={CHROME_PAINT_STYLE}
               colours={colours}
               wikidata={wikidata}
               results={results}
               session={session}
+              onSignOut={handleSignOut}
             />
             <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
             <AlarmDialog alarms={alarms} />

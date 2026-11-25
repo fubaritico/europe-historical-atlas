@@ -1,4 +1,6 @@
 {
   "title": "Open a map",
-  "question": "You are about to open {map}. Save the current map?"
+  "question": "You are about to open {map}. Save the current map?",
+  "signOutTitle": "Sign out",
+  "signOutQuestion": "You are about to sign out. Save the current map?"
 }

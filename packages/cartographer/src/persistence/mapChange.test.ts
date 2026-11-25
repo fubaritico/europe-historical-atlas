@@ -28,8 +28,8 @@ function world(
       },
     },
     version: () => version,
-    askSaveFirst: (map) => {
-      calls.push(`ask ${map}`)
+    askSaveFirst: (reason) => {
+      calls.push(`ask ${reason.kind === 'open' ? reason.map : reason.kind}`)
       return Promise.resolve(over.answer ?? 'yes')
     },
     carryView: () => calls.push('carry'),

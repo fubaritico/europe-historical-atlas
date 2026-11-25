@@ -19,6 +19,9 @@ import type { YearSession } from './yearSession'
 /** The author's answer to the question: save first, do not, or open nothing. */
 export type SaveFirstAnswer = 'yes' | 'no' | 'cancel'
 
+/** Why « save first? » is asked: a map about to be opened (`s19`), or signing out (CARTO-535). */
+export type SaveFirstReason = { kind: 'open'; map: string } | { kind: 'signOut' }
+
 /** What changing the map needs. */
 export interface MapChangeDeps {
   /** The page's session: what it is, whether it changed, and how it saves. */
@@ -27,10 +30,10 @@ export interface MapChangeDeps {
   version: () => number
   /**
    * Ask whether to save the current map before opening another — the question dialogue, through a relay.
-   * @param map - the map about to be opened
+   * @param reason - the map about to be opened
    * @returns the answer
    */
-  askSaveFirst: (map: string) => Promise<SaveFirstAnswer>
+  askSaveFirst: (reason: SaveFirstReason) => Promise<SaveFirstAnswer>
   /** Keep the view now on screen for the next page. */
   carryView: () => void
   /** The current query, `window.location.search`. */
@@ -64,7 +67,7 @@ export async function changeMap(deps: MapChangeDeps, map: string): Promise<boole
   if (deps.session.isModified()) {
     let answer: SaveFirstAnswer
     try {
-      answer = await deps.askSaveFirst(map)
+      answer = await deps.askSaveFirst({ kind: 'open', map })
     } catch (error: unknown) {
       // A question already up (the relay busy) — a wiring fault, said loudly; the page stays.
       console.error(
