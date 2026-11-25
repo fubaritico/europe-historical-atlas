@@ -391,6 +391,9 @@ Two authors is the ordinary case of tier B — accounts, review, conflicts — a
 same year" scenario resolves only the part git resolves by itself: nothing is destroyed. Who is allowed,
 and what the second author sees, is unspecified.
 
+> **Locally, 2026-11-25 (CARTO-535, [s23](s23-sign-in.md))**: the Cartographer is behind the CMS's account — anyone
+> signed in may draw. Online, roles, review and conflicts stay open (REPO-533, CMS-228).
+
 ### H-30 · Online, does overwriting a year still rename the old one?
 
 [s05](s05-derive-a-year.md) decided that replacing an existing year **renames the old one** rather than

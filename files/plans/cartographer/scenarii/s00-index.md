@@ -46,6 +46,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 20  | [the cities as guides](s20-cities-panel.md)               | `{Cities}`: an eye per city, none at opening; a double-click says who holds it (CARTO-193) |
 | 21  | [the panels moved and docked](s21-panels-moved-and-docked.md) | dragged by the head, floating or docked, magnetised to the right column, resized, kept (CARTO-342) |
 | 22  | [copy and paste between maps](s22-copy-paste.md) | a polity, a stretch, a sheet — copied in one map, pasted in place in another; the menu bar (CARTO-345) |
+| 23  | [behind the CMS's account](s23-sign-in.md) | the sign-in where the map would be, the chrome greyed, the session kept, expired, the CMS stopped (CARTO-535) |
 
 ## The two tools — decided 2026-09-22
 
