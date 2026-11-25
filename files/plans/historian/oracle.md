@@ -49,3 +49,29 @@ The night's research resumes with one team of at most 3 agents (the dev, 25/11):
 the Maghreb, then the JSTOR/BnF/Gallica catch-up of Anatolia and the two Empires. **Gallica** refuses scripts
 (Cloudflare): the historian searches it through the site's page in the dev's Chrome. The dev is notified at the end
 of the plan, and at a ceiling of 25 % of the week.
+
+## 6. The professional oracle — Qdrant (epic REPO-545, the dev, 2026-11-25)
+
+> _"We need the tool, the real one"_ — professional, local, now, because the archive grows from 1200 to 1300, 1400…
+> up to 1900. The aim: speed, tokens, scale.
+
+**Why the first oracle is not enough**: `sqlite-vec` compares a question with every embedding (no index); the time of
+a search grows with the archive. **Qdrant** brings an HNSW index, payload filters applied during the search,
+quantization, snapshots and a web dashboard, with an official TypeScript client.
+
+| decision | why | by |
+| --- | --- | --- |
+| Qdrant, local, over LanceDB | a real vector database with filters, quantization and a dashboard; LanceDB's own docs warn of HNSW latency variance under filters | the dev, on my recommendation |
+| Its storage in an APFS `.sparsebundle` on Acer, mounted with the session | Qdrant wants a POSIX file system; Acer is exFAT | mine |
+| The official Apple Silicon binary from Qdrant's GitHub releases, in `outils/qdrant/` | no Homebrew formula; Docker would keep its images on the Mac's disk | mine, the download agreed by the dev |
+| Listening on 127.0.0.1 only | nothing reachable from outside the machine | mine |
+| Passages, `bge-m3` and the embeddings already computed are kept | nothing recomputed | mine |
+
+| # | ticket | what |
+| --- | --- | --- |
+| 1 | REPO-546 | the APFS image, mounted and unmounted by `session.ts` |
+| 2 | REPO-547 | Qdrant on Acer, started and stopped with the historian's session |
+| 3 | REPO-548 | the migration: one collection, the embeddings copied, `embed` and `recall` on Qdrant |
+| 4 | REPO-549 | filters by zone, century, book and language |
+| 5 | REPO-550 | the measure at 1, 2 and 5 million points, with and without quantization |
+| 6 | REPO-551 | the MCP server and the method on Qdrant |
