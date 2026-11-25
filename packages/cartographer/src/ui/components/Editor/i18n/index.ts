@@ -9,7 +9,6 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `notBuilt` — Why a button does nothing yet; `scenarios` names the scenarios that will build it.
- * - `closeYear` — Close the open year; `close` is the shared action's label, `year` the year as text.
  * - `nothingToUndo`, `nothingToRedo` — Why undo or redo is unavailable.
  * - `undoHint`, `redoHint` — The tooltip of undo and redo; `label` is the button's name, `keys` its shortcut.
  * - `checkYear` — Check the year — a command not built yet.

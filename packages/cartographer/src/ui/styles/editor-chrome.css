@@ -1228,6 +1228,35 @@
   font-size: 11.5px;
 }
 
+/* The tabs of the maps open (CARTO-556): one today, side by side when several maps are open. */
+.doc-tabs {
+  display: flex;
+  align-items: stretch;
+}
+
+/* A tab: its name and zoom, a plain button — the tab shown on the panel's ground, the others on the bar's. */
+.doc-tab__tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+
+.doc-tab[data-active='false'] {
+  background: none;
+  color: var(--ink-dim);
+}
+
+.doc-tab__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .doc-tab .bar-button--icon {
   width: 24px;
   height: 24px;

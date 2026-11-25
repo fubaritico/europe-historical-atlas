@@ -86,7 +86,7 @@ Scenario: a reload reopens the map open
 
 Scenario: « Fermer la carte »
   Given 1200 is open, every change saved
-  When I choose Fichier › Fermer la carte
+  When I choose Fichier › Fermer la carte, or click the cross of its tab « 1200 @ 58 % » (CARTO-556)
   Then the start screen comes back, 1200 at the top of « Cartes récentes »
 
 Scenario: « Fermer la carte » with a change not saved
