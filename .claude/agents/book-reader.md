@@ -3,6 +3,7 @@ name: book-reader
 description: The historian's reader for one book in the research loop — given a book and the open questions waiting on it (a place, a year, holder or existence), it fetches the book, reads its index and the passages under every name, answers each question with quotations copied from the saved text and checked by script, files the book in the archive and queues the books its notes point to. Spawned by the historian session in the rounds after the research lots, ten at a time at most. Never writes the CMS.
 tools: Read, Write, Edit, Bash, WebFetch, WebSearch, SendMessage
 model: opus
+omitClaudeMd: true
 maxTurns: 40
 skills:
   - find-sources
@@ -28,8 +29,8 @@ your report.
    times out) and **file it at once** — `python3 -I
    /Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/bulk-entry/scripts/archive.py work
    <author-year-short-title> <text file> "<author>" "<title>" "<publisher>" "<year>" "<kind>" "<where found>" "<what it
-   covers>"`, every field copied from its title page. A text that cannot be had: say it to the historian
-   (`SendMessage`, `to: "main"`) and stop.
+   covers>"`, every field copied from its title page. A text that cannot be had: say it to your zone lead
+   (`SendMessage` to the `LEAD` your prompt names; else `to: "main"`) and stop.
 2. **The index first.** Every name of each place and of its lords, in every language and spelling; the pages it gives.
 3. **The passages.** A script greps the names, writes each passage with its lines around and its printed page
    (`pages.json` when there) to `ROOT/work/<NAME>/passages.txt`; read that, never the whole book.
@@ -39,7 +40,7 @@ your report.
 5. **The notes and the bibliography** of the passages read: each book they point to that answers a still-open question
    is appended to `ROOT/a-lire.jsonl` (`{"title", "author", "where", "id", "question", "qid", "from": "<NAME>"}`).
 
-Talk to the historian (`SendMessage`, `to: "main"`) when the book settles more than your questions, or when you are
+Talk to your zone lead (`SendMessage` to the `LEAD` your prompt names; else `to: "main"`) when the book settles more than your questions, or when you are
 stuck; go on while you wait.
 
 ## Where you write, and nothing else

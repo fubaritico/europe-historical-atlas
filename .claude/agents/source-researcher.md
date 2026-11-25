@@ -3,6 +3,7 @@ name: source-researcher
 description: The historian's research agent for one lot of places at one year — a researcher, not a fetcher. It reads what we own first, then reads as a person does (every page's links and maps, every book's index and bibliography), finds the books by subject, confronts the readings and says what it could not find. Answers, per place, whether it existed at the year, who held it and of whom, every quotation copied from a saved text and checked by script. Spawned by the historian session, one per lot, only in the number the dev sets. Never writes the CMS.
 tools: Read, Write, Edit, Bash, WebFetch, WebSearch, SendMessage
 model: opus
+omitClaudeMd: true
 maxTurns: 60
 skills:
   - find-sources
@@ -77,8 +78,10 @@ This is the order; each step feeds the next.
 
 ## Talking to the historian while you work
 
-You are not alone: write to the historian with `SendMessage` (`to: "main"`), one short message, and go on with the
-rest of the lot while you wait — his answer arrives at your next step.
+You are not alone: write with `SendMessage`, one short message, and go on with the rest of the lot while you wait —
+the answer arrives at your next step. **To your zone lead when your prompt names one (`LEAD: <id>`)**, never to
+`main` then: the historian session runs two leads and is not the one to answer (2026-11-24, its context filled with
+your announcements). Without a lead, to the historian (`to: "main"`).
 
 - **Ask** when a place is stuck after the rungs you could climb — « more turns? », « may I read <book>? », « a work
   already filed on <district>? » — or when two readings cannot be told apart by what you can open.
