@@ -46,10 +46,11 @@ if not ARCHIVE.is_dir():
 index = ARCHIVE / 'ouvrages/index.md'
 works = [l for l in index.read_text(encoding='utf-8').splitlines() if l.startswith('| `')] if index.exists() else []
 say("L'archive est branchée : %d ouvrages déjà rangés (ouvrages/index.md), à relire avant d'en chercher d'autres." % len(works))
-# REPO-501: the historian tells the dev when the archive is large enough for the RAG to be worth building
-RAG_AT = 30
-if len(works) >= RAG_AT and not (ARCHIVE / 'rag').is_dir():
-    say('LE MOMENT DU RAG : %d ouvrages rangés (seuil %d) — le dire au dev, ticket REPO-501.' % (len(works), RAG_AT))
+# REPO-538: the oracle (catalogue, index, recall) is asked before any book; say it when it is missing
+if not (ARCHIVE / 'oracle-data' / 'oracle.sqlite').is_file():
+    say("ORACLE ABSENT : %s introuvable — les livres rangés ne sont pas indexés ; le dire au dev, épique REPO-538." % (ARCHIVE / 'oracle-data' / 'oracle.sqlite'))
+else:
+    say("L'oracle répond : mcp__oracle__search et mcp__oracle__recall avant d'ouvrir ou de télécharger un livre.")
 if ZONE:
     fiche = ARCHIVE / str(YEAR) / ZONE / 'fiche.md'
     if fiche.exists():

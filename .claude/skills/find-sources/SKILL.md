@@ -149,10 +149,15 @@ atlas-historien/
 - `recherches/essais.md`: every attempt — channel, words, found or nothing.
 - `resultats/extraits.md`: every sentence kept — work, page, quotation, what it bears on.
 - A work in copyright is marked so: its facts are read, its plates and images never reused in the atlas.
-- **The RAG — REPO-501, top of the Backlog.** A local index of the works, on this disk (code, index, model), to find
-  the passages already read under every name of a place. Not a source: a passage it returns is its work's witness,
-  re-read in the text. **I tell the dev when it is time to build it** — `prepare.py` says « LE MOMENT DU RAG » from
-  30 works filed. Until then every text is filed page by page, its page numbers kept.
+- **The oracle — built 2026-11-25 (epic REPO-538, plan `files/plans/historian/oracle.md`).** A TypeScript project on
+  this disk, `outils/oracle/` (its own git), its data in `oracle-data/`: the catalogue of every filed book
+  (`catalog has` before any download — `find_book.py get` and `archive.py work` refuse a book already filed), a
+  full-text index of all their passages (FTS5, accents ignored), embeddings by `bge-m3` on a dedicated Ollama
+  (port 11435, model in `outils/ollama-models/`), and `search` / `recall` — also as the MCP server `oracle` of the
+  lead, researcher and reader agents. **Asked first, before any book is opened or downloaded.** Not a source: a
+  passage it returns is its book's witness, re-read in the text. Re-indexed at the end of each zone
+  (`node outils/oracle/src/cli.ts index build`, Node 24), embeddings added by `embed`. Every text is still filed
+  with its page numbers where the scan has them.
 
 ## A region already researched
 

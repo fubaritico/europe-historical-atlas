@@ -1,7 +1,12 @@
 ---
 name: book-reader
 description: The historian's reader for one book in the research loop — given a book and the open questions waiting on it (a place, a year, holder or existence), it fetches the book, reads its index and the passages under every name, answers each question with quotations copied from the saved text and checked by script, files the book in the archive and queues the books its notes point to. Spawned by the historian session in the rounds after the research lots, ten at a time at most. Never writes the CMS.
-tools: Read, Write, Edit, Bash, WebFetch, WebSearch, SendMessage
+tools: Read, Write, Edit, Bash, WebFetch, WebSearch, SendMessage, mcp__oracle__search, mcp__oracle__recall
+mcpServers:
+  - oracle:
+      type: stdio
+      command: /Users/stephanecottereau/.nvm/versions/node/v24.22.1/bin/node
+      args: ["/Volumes/Acer/atlas-historien/outils/oracle/src/cli.ts", "mcp"]
 model: opus
 omitClaudeMd: true
 maxTurns: 40
@@ -23,6 +28,8 @@ open questions it may answer, each `{place, qid, question: holder|existence, con
 your report.
 
 ## How you read
+
+**The oracle first** (REPO-539, the dev, 25/11): if your book is already filed, `mcp__oracle__search` with `work` set to its folder gives the passages under each name, with their line or page — read those, never the whole text. A book already filed is never downloaded again (`find_book.py get` refuses it).
 
 1. **Have the text.** Already in `ouvrages/` or `bibliotheque/`: read it there. Else fetch it (archive.org:
    `archive.org/metadata/<id>` gives the files and the storage server `d1` + `dir`, used when `archive.org/download`

@@ -30,6 +30,30 @@ def say(message):
         out.write(line + '\n')
 
 
+
+ORACLE = pathlib.Path('/Volumes/Acer/atlas-historien/outils/oracle')
+NODE = pathlib.Path.home() / '.nvm/versions/node/v24.22.1/bin/node'
+
+
+def already_filed(query):
+    """Ask the oracle's catalogue (REPO-510) whether a book is already filed; its folder, or None.
+
+    `query` is an archive.org identifier or « author year title ». The oracle answers « Trouvé : ouvrages/<folder>/… »
+    and exits 0 when it is there, 1 when not; anything else (the oracle missing, Node missing) stops the script, said
+    in the journal — a download is never made blind."""
+    import subprocess
+    run = subprocess.run([str(NODE), str(ORACLE / 'src' / 'cli.ts'), 'catalog', 'has', query],
+                         capture_output=True, text=True, cwd=str(ORACLE))
+    if run.returncode == 1:
+        return None
+    if run.returncode != 0:
+        say('CATALOGUE INJOIGNABLE — l\'oracle n\'a pas répondu (%s) : rien n\'est téléchargé ni rangé' % (run.stderr.strip()[:200] or run.returncode))
+        sys.exit(1)
+    for line in run.stdout.splitlines():
+        if 'ouvrages/' in line:
+            return line.split('ouvrages/', 1)[1].split('/', 1)[0]
+    return run.stdout.strip()[:200]
+
 def fetch(url):
     """The bytes of one address; a failure is said and stops the script (nothing is guessed in its place)."""
     try:
@@ -91,6 +115,10 @@ if len(sys.argv) == 3 and sys.argv[1] == 'search':
     say('archive.org : %d résultats pour « %s »' % (len(found), words))
 elif len(sys.argv) == 4 and sys.argv[1] == 'get':
     identifier, folder = sys.argv[2], pathlib.Path(sys.argv[3])
+    there = already_filed(identifier)
+    if there and there != folder.name:
+        say('archive.org : %s est déjà rangé dans ouvrages/%s — rien n\'est téléchargé' % (identifier, there))
+        sys.exit(0)
     meta, text = files(identifier)
     if not text:
         say('archive.org : %s n\'a pas de texte lisible (prêt seulement, ou pas de reconnaissance de caractères)' % identifier)

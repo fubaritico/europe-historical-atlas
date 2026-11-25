@@ -45,6 +45,30 @@ def say(message):
         out.write(line + '\n')
 
 
+
+ORACLE = pathlib.Path('/Volumes/Acer/atlas-historien/outils/oracle')
+NODE = pathlib.Path.home() / '.nvm/versions/node/v24.22.1/bin/node'
+
+
+def already_filed(query):
+    """Ask the oracle's catalogue (REPO-510) whether a book is already filed; its folder, or None.
+
+    `query` is an archive.org identifier or « author year title ». The oracle answers « Trouvé : ouvrages/<folder>/… »
+    and exits 0 when it is there, 1 when not; anything else (the oracle missing, Node missing) stops the script, said
+    in the journal — a download is never made blind."""
+    import subprocess
+    run = subprocess.run([str(NODE), str(ORACLE / 'src' / 'cli.ts'), 'catalog', 'has', query],
+                         capture_output=True, text=True, cwd=str(ORACLE))
+    if run.returncode == 1:
+        return None
+    if run.returncode != 0:
+        say('CATALOGUE INJOIGNABLE — l\'oracle n\'a pas répondu (%s) : rien n\'est téléchargé ni rangé' % (run.stderr.strip()[:200] or run.returncode))
+        sys.exit(1)
+    for line in run.stdout.splitlines():
+        if 'ouvrages/' in line:
+            return line.split('ouvrages/', 1)[1].split('/', 1)[0]
+    return run.stdout.strip()[:200]
+
 def check():
     """Stop at once when the disk is not mounted."""
     if not ARCHIVE.is_dir():
@@ -100,6 +124,12 @@ elif command == 'open' and len(args) == 4:
 elif command == 'work' and len(args) == 10:
     folder, text, author, title, publisher, year, kind, where, covers = args[1:]
     path = ARCHIVE / 'ouvrages' / folder
+    import re as _re
+    _id = _re.search(r'archive\.org[^A-Za-z0-9]*(?:item\s+)?`?([A-Za-z0-9_.-]{6,})', where)
+    _there = already_filed(_id.group(1) if _id else '%s %s %s' % (author, year, title))
+    if _there and _there != folder:
+        say('archive : refusé — ce livre est déjà rangé dans ouvrages/%s ; ne pas le ranger sous %s' % (_there, folder))
+        sys.exit(1)
     if (path / 'fiche.md').exists():
         say('archive : l\'ouvrage %s est déjà rangé, laissé tel quel' % folder)
         sys.exit(0)
