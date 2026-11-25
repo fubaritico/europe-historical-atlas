@@ -38,12 +38,11 @@ départ et ses états connectés, « Fermer la carte », que le tableau des éta
 le CMS de l'usage : `localhost`** (le cookie se partage entre les ports) ; **un essai : `127.0.0.1`, jamais
 `localhost`**, ou il remplace sa session (`known-issues/cms.md`).
 
-**REPO-542 À valider** : commité sur sa branche (`9a3ef960`), **pas fusionné** — `main` portait mes notes de session non
-commitées dans `known-issues/cms.md` ; les commiter, puis fusionner (un conflit possible sur ce fichier, à résoudre en
-gardant les deux). Il attend ses deux règles de permission (le commentaire du ticket les donne mot pour mot). **Rien
-n'est poussé** : il a dit de pousser quand tout sera fini.
+**REPO-542 À valider**, fusionné dans `main` à la fin de la session : `pnpm --dir <arbre>/packages/cms trial:start` /
+`trial:stop`. Il attend ses deux règles de permission (le commentaire du ticket les donne mot pour mot). **Rien n'est
+poussé** : il a dit de pousser quand tout sera fini.
 
-**Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog), REPO-542.
+**Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog).
 **Prioritaire, à lui proposer** : ATLAS-527, le crédit Cliopatria sur l'atlas — le site en ligne n'est pas en règle.
 **L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : ATLAS-519 Fait ; suivent
 ATLAS-520 (les pièces), 521 (la barre du site, la colonne du bas, la barre verticale à droite), 522 (le siècle), la
