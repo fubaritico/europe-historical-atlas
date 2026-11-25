@@ -5,6 +5,7 @@ import { pasteCommand } from '../../../utils/pasteCommand'
 import { MenuBar } from '../../MenuBar'
 import { EDITOR_MESSAGES } from '../i18n'
 import { editorMenus } from '../utils/editorMenus'
+import { greyed } from '../utils/greyed'
 
 import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
 import type { CartographerStoreHook } from '../../../../state/store'
@@ -16,6 +17,8 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
   store: CartographerStoreHook
   /** The canvas's undo and redo, gesture first — never `store.undo()` straight (ARCH-101). */
   history: HistoryRelay
+  /** Nobody signed in (CARTO-535): every command greyed, never hidden — the menu shows what exists. */
+  disabled?: boolean
 }
 
 /**
@@ -25,9 +28,10 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
  * @param props - the store, the relay and the gestures
  * @param props.store - the store
  * @param props.history - the canvas's undo and redo
+ * @param props.disabled - nobody signed in: every command greyed
  * @returns the menu bar
  */
-export function MenuBarPanel({ store, history, ...gestures }: MenuBarPanelProps) {
+export function MenuBarPanel({ store, history, disabled, ...gestures }: MenuBarPanelProps) {
   // Store
   const undoLabel = store((state) => state.undoLabel)
   const redoLabel = store((state) => state.redoLabel)
@@ -67,5 +71,5 @@ export function MenuBarPanel({ store, history, ...gestures }: MenuBarPanelProps)
   )
 
   // Render
-  return <MenuBar label={t('menuBar')} menus={menus} />
+  return <MenuBar label={t('menuBar')} menus={disabled === true ? greyed(menus) : menus} />
 }

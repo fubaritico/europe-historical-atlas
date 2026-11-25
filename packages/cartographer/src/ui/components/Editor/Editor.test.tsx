@@ -1,4 +1,5 @@
 import { act, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
@@ -9,6 +10,7 @@ import { CHROME_PAINT_STYLE } from '../../../canvas/paint/style'
 import { createResultRelay } from '../../../persistence/resultRelay'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createPolityColourSource } from '../../../state/polityColourSource'
+import { createSessionStore } from '../../../state/sessionStore'
 import { createCartographerStore } from '../../../state/store'
 import { UNFRAMED } from '../../../viewport/viewport'
 import { renderInEnglish } from '../../testing/renderInEnglish'
@@ -16,7 +18,9 @@ import { createMapNameStore } from '../../utils/mapNameSource'
 
 import { Editor } from './Editor'
 
+import type { SessionState } from '../../../state/sessionStore'
 import type { MapAreaProps } from '../MapArea'
+import type { SessionHandle } from './editorProps'
 
 /** A Wikidata source that knows nothing — the form's panel stays quiet (CARTO-243). */
 const NO_WIKIDATA = { read: () => Promise.resolve({ found: new Map(), unknown: [] }) }
@@ -41,11 +45,34 @@ vi.mock('../MapArea', () => ({
   },
 }))
 
+/** A keeper that records its gestures and answers at once. */
+function stubKeeper() {
+  return {
+    check: vi.fn(() => Promise.resolve()),
+    signIn: vi.fn(() => Promise.resolve()),
+    signOut: vi.fn(() => Promise.resolve()),
+  }
+}
+
+/**
+ * A session standing where a test puts it.
+ * @param state - where it stands; someone signed in by default
+ * @returns the session's store and a stub keeper
+ */
+function sessionAt(
+  state: SessionState = { kind: 'signedIn', user: { id: 1, email: 'author@example.org' } }
+) {
+  const store = createSessionStore()
+  store.getState().setSession(state)
+  return { store, keeper: stubKeeper() }
+}
+
 /**
  * The editor, mounted with everything the entry gives it.
  * @param results - the relay the year session says into; a fresh one by default
+ * @param session - the session; someone signed in by default
  */
-function mount(results = createResultRelay()): void {
+function mount(results = createResultRelay(), session: SessionHandle = sessionAt()): void {
   handed = null
   renderInEnglish(
     <Editor
@@ -69,6 +96,7 @@ function mount(results = createResultRelay()): void {
       colours={COLOURS}
       results={results}
       wikidata={NO_WIKIDATA}
+      session={session}
     />
   )
 }
@@ -183,6 +211,145 @@ describe('Editor', () => {
       mount()
 
       expect(document.querySelectorAll('.shell__status')).toHaveLength(1)
+    })
+  })
+
+  describe('the session (CARTO-535)', () => {
+    const USER = { id: 1, email: 'author@example.org' }
+
+    it('with nobody signed in, puts the form where the map would be, and no tool nor panel', () => {
+      mount(undefined, sessionAt({ kind: 'signedOut', problem: null }))
+
+      expect(document.querySelector('.shell__canvas form.sign-in-form')).not.toBeNull()
+      expect(document.querySelector('[data-testid="map-area"]')).toBeNull()
+      expect(document.querySelector('.shell__rail [role="toolbar"]')).toBeNull()
+      expect(handed).toBeNull()
+    })
+
+    it('with nobody signed in, greys the bar’s file gestures rather than hiding them', () => {
+      mount(undefined, sessionAt({ kind: 'signedOut', problem: null }))
+
+      const open = within(document.querySelector<HTMLElement>('.shell__appbar') ?? document.body)
+        .getAllByRole('button')
+        .find((button) => button.textContent === 'Open…')
+      expect(open).toBeDefined()
+      expect(open?.getAttribute('aria-disabled')).toBe('true')
+      expect(open?.getAttribute('title')).toBe('Open… — sign in first')
+    })
+
+    it('with nobody signed in, greys every file gesture and every menu command, never hides them', async () => {
+      mount(undefined, sessionAt({ kind: 'signedOut', problem: null }))
+      const user = userEvent.setup()
+
+      const bar = document.querySelector<HTMLElement>('.shell__appbar') ?? document.body
+      for (const name of ['Open…', 'Save', 'Save as…', 'Save a copy']) {
+        const button = within(bar)
+          .getAllByRole('button')
+          .find((candidate) => candidate.textContent === name)
+        expect(button?.getAttribute('aria-disabled')).toBe('true')
+      }
+      await user.click(within(bar).getByRole('menuitem', { name: 'Edit' }))
+      const commands = within(document.body)
+        .getAllByRole('menuitem')
+        .filter((item) => item.textContent !== 'File' && item.textContent !== 'Edit')
+      expect(commands.length).toBeGreaterThan(0)
+      for (const command of commands) expect(command.getAttribute('aria-disabled')).toBe('true')
+    })
+
+    it('with nobody signed in, the form signs in through the keeper', async () => {
+      const session = sessionAt({ kind: 'signedOut', problem: null })
+      mount(undefined, session)
+      const user = userEvent.setup()
+
+      await user.type(within(document.body).getByLabelText('Address'), 'author@example.org')
+      await user.type(within(document.body).getByLabelText('Password'), 'secret')
+      await user.click(within(document.body).getByRole('button', { name: 'Sign in' }))
+
+      expect(session.keeper.signIn).toHaveBeenCalledWith('author@example.org', 'secret')
+    })
+
+    it('with nobody signed in after a problem, the form says it', () => {
+      mount(undefined, sessionAt({ kind: 'signedOut', problem: { kind: 'offline' } }))
+
+      expect(document.querySelector('.sign-in-form [role="alert"]')?.textContent).toContain(
+        'The CMS does not answer'
+      )
+    })
+
+    it('the expired dialogue refuses to close, said on the console', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      mount(undefined, sessionAt({ kind: 'expired', user: USER, problem: null }))
+      const dialog = document.querySelector('dialog form.sign-in-form')?.closest('dialog')
+
+      act(() => {
+        // Escape closes a native dialog and fires `close`, which the design system's Modal hands to `onClose`
+        dialog?.dispatchEvent(new Event('close'))
+      })
+
+      expect(document.querySelector('dialog form.sign-in-form')).not.toBeNull()
+      expect(dialog?.getAttribute('aria-label')).toBe('Session expired')
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('the session dialogue stays'))
+      warn.mockRestore()
+    })
+
+    it('while the CMS is asked, says so in the form', () => {
+      mount(undefined, sessionAt({ kind: 'checking' }))
+
+      expect(document.querySelector('.sign-in-form [role="status"]')?.textContent).toBe(
+        'Checking the session…'
+      )
+    })
+
+    it('signed in, names who at the bar’s end, and « Sign out » signs out', async () => {
+      const session = sessionAt()
+      mount(undefined, session)
+
+      expect(document.querySelector('.app-account')?.textContent).toBe(
+        'Signed in: author@example.org'
+      )
+      const signOut = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
+        (button) => button.textContent === 'Sign out'
+      )
+      await act(async () => {
+        signOut?.click()
+        await Promise.resolve()
+      })
+
+      expect(session.keeper.signOut).toHaveBeenCalledTimes(1)
+    })
+
+    it('an expired session keeps the map under a dialogue that asks to sign in again', () => {
+      mount(undefined, sessionAt({ kind: 'expired', user: USER, problem: null }))
+
+      expect(document.querySelector('[data-testid="map-area"]')).not.toBeNull()
+      expect(document.querySelector('dialog form.sign-in-form')).not.toBeNull()
+    })
+
+    it('« Try again » in the expired dialogue asks the CMS again', async () => {
+      const session = sessionAt({ kind: 'expired', user: USER, problem: { kind: 'offline' } })
+      mount(undefined, session)
+
+      const retry = [...document.querySelectorAll<HTMLButtonElement>('dialog button')].find(
+        (button) => button.textContent === 'Try again'
+      )
+      await act(async () => {
+        retry?.click()
+        await Promise.resolve()
+      })
+
+      expect(session.keeper.check).toHaveBeenCalledTimes(1)
+    })
+
+    it('signing in opens the editor without remounting the page', () => {
+      const session = sessionAt({ kind: 'signedOut', problem: null })
+      mount(undefined, session)
+
+      act(() => {
+        session.store.getState().setSession({ kind: 'signedIn', user: USER })
+      })
+
+      expect(document.querySelector('[data-testid="map-area"]')).not.toBeNull()
+      expect(document.querySelector('form.sign-in-form')).toBeNull()
     })
   })
 })

@@ -4,4 +4,4 @@
  * component, a barrel as its boundary).
  */
 export { Editor } from './Editor'
-export type { EditorProps } from './Editor'
+export type { EditorProps, SessionHandle } from './editorProps'

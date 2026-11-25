@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { answer, createBodyMiddleware } from './httpEndpoint'
 
-import type { BodyStream, EndpointRequest, RequestHandler, ResponseSink } from './httpEndpoint'
+import type {
+  BodyStream,
+  EndpointRequest,
+  EndpointResponse,
+  RequestHandler,
+  ResponseSink,
+} from './httpEndpoint'
 
 /** A request stream carrying the headers given and a short body, replayed by `emit`. */
 function streamOf(headers: Record<string, string | string[] | undefined>) {
@@ -35,7 +41,7 @@ function requestSeenWith(
 ): EndpointRequest | undefined {
   const handle = vi.fn<RequestHandler>(() => answer(200, {}))
   const req = streamOf(headers)
-  createBodyMiddleware({ handle, what: 'the test' })(req, sink())
+  createBodyMiddleware({ handle, failure: 'the test failed' })(req, sink())
   req.emit()
   return handle.mock.calls[0]?.[0]
 }
@@ -72,6 +78,81 @@ describe('createBodyMiddleware', () => {
   describe('edge cases', () => {
     it('hands an empty If-Match header on as an empty string, not as absent', () => {
       expect(requestSeenWith({ 'if-match': '' })?.ifMatch).toBe('')
+    })
+  })
+})
+
+/**
+ * An endpoint that sets two cookies, as the CMS can.
+ * @returns its answer
+ */
+const setsTwoCookies = (): EndpointResponse => ({
+  ...answer(200, {}),
+  setCookie: ['a=1; Path=/', 'b=2; Path=/'],
+})
+
+describe('createBodyMiddleware, the session’s cookie (CARTO-535)', () => {
+  it('hands the request’s Cookie header to the endpoint', () => {
+    expect(requestSeenWith({ cookie: 'payload-token=t; theme=dark' })?.cookie).toBe(
+      'payload-token=t; theme=dark'
+    )
+  })
+
+  it('sends every cookie the endpoint sets as its own Set-Cookie header — an array, never joined', () => {
+    const headers = new Map<string, unknown>()
+    const res: ResponseSink = {
+      statusCode: 0,
+      setHeader: (name, value) => {
+        headers.set(name.toLowerCase(), value)
+        return res
+      },
+      end: () => res,
+    }
+    const req = streamOf({})
+    createBodyMiddleware({ handle: setsTwoCookies, failure: 'the test failed' })(req, res)
+    req.emit()
+    expect(headers.get('set-cookie')).toEqual(['a=1; Path=/', 'b=2; Path=/'])
+  })
+})
+
+/**
+ * Run one request through the middleware with an endpoint that answers by a promise.
+ * @param handle - the endpoint
+ * @returns what was sent, once the promise has settled
+ */
+async function sentBy(handle: RequestHandler): Promise<{ status: number; body: string }> {
+  const sent = { status: 0, body: '' }
+  const res: ResponseSink = {
+    statusCode: 0,
+    setHeader: () => res,
+    end: (body) => {
+      sent.status = res.statusCode
+      sent.body = body ?? ''
+      return res
+    },
+  }
+  const req = streamOf({})
+  createBodyMiddleware({ handle, failure: 'the test failed' })(req, res)
+  req.emit()
+  await new Promise((settle) => setTimeout(settle, 0))
+  return sent
+}
+
+describe('createBodyMiddleware, an endpoint that answers later (CARTO-498)', () => {
+  describe('happy path', () => {
+    it('sends the answer once it arrives', async () => {
+      expect(await sentBy(() => Promise.resolve(answer(200, { id: 7 })))).toEqual({
+        status: 200,
+        body: '{"id":7}',
+      })
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('answers 500 when the answer fails, and says so on the console', async () => {
+      const sent = await sentBy(() => Promise.reject(new Error('boom')))
+      expect(sent.status).toBe(500)
+      expect(console.error).toHaveBeenCalled()
     })
   })
 })

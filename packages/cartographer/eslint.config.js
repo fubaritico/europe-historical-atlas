@@ -183,6 +183,7 @@ export default tseslint.config(
             useArrangeMenu: 'state',
             useCloseOutside: 'effect',
             useCitiesView: 'derived',
+            useStore: 'store',
             useCityFilters: 'derived',
             useColourPickerWords: 'context',
             useDismiss: 'effect',
