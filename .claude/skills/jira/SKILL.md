@@ -136,12 +136,29 @@ API**; their MCP inputs below are read from the tools' own descriptions — chec
 | **change** a title, a description, labels, components, the parent, the assignee | `editJiraIssue` | every field is **set, not appended**: send the whole list of labels |
 | **assign** | `editJiraIssue` | `fields: { "assignee": { "accountId": "…" } }` |
 | **place** a ticket above another | `editJiraIssue` | `rankBeforeIssue: "EHA-12"` — never in À faire unless he asked |
-| **close** (the old `done`) | the closing comment, `transitionJiraIssue` `41`, then `editJiraIssue` | **« Fait » reads newest on top** (the dev, 2026-11-20): place the ticket before the first of `project = EHA AND status = Fait ORDER BY Rank ASC` — a column follows the rank, never a date |
+| **close** (the old `done`) | the closing comment, `transitionJiraIssue` `41`, then `editJiraIssue` | **« Fait » reads newest on top** (the dev, 2026-11-20): place the ticket before the first of `project = EHA AND status = Fait ORDER BY Rank ASC` — a column follows the rank, never a date — and set its end date (below) in the same edit |
+| **date** a ticket | `editJiraIssue` | `fields: { "customfield_10015": "2026-11-24" }` (« Date de début ») when it starts · `fields: { "duedate": "2026-11-25" }` (« Date d'échéance », used as the end) when it closes — see « Every ticket carries its dates » |
 | **block** | `editJiraIssue` + `createJiraIssueLink` | flag: `customfield_10021: [{ "value": "Impediment" }]` (unflag: `null`); link type `Blocks`, the blocker inward |
 | **an epic's progress** | `searchJiraIssuesUsingJql` | `parent = EHA-363 ORDER BY status` |
 
 A long answer costs context: `executeWrite({ name: "editJiraIssue", inputs, responseFields: ["key", "fields.status.name"] })`
 returns only what is asked. A tool not listed above is found by `discover`.
+
+### Every ticket carries its dates — a start and an end (the dev's call, 2026-11-25)
+
+> _« Ce serait bien que tu mettes la date de début et la date de fin d'un ticket. Même si tu le fais en une seule
+> journée, au moins on sait quand est-ce qu'il a été fait … moi, je peux le lire quand j'ouvre la fiche du ticket. »_
+
+- **The start**: « Date de début » (`customfield_10015`), set to the day work begins — with the transition `31`, or
+  at the first commit when the ticket was not moved first.
+- **The end**: « Date d'échéance » (`duedate`), set to the day the work was finished — with the closing edit. Both
+  fields show in the ticket's details and draw its bar in the **Chronologie** tab. Jira's own « Résolu » date is the
+  day of the transition, not of the work: a ticket closed late on the board keeps the true end here.
+- **A ticket closed after the fact** (an audit, an old ticket): the start and the end are read from its commits
+  (`git log --grep=<key>`, or the commits its comments cite), and the closing comment says the board was late.
+- **Every closing comment ends with a « Dates » line**: « commencé le 24/11, fini le 25/11 ».
+- **Never a guessed date**: a day no commit or comment gives is left empty and said in the comment.
+- **Priority stays at my discretion** (the dev, same day) — but the dates are systematic.
 
 ## The Definition of Done — one for every ticket, written once here
 
@@ -176,6 +193,7 @@ codeur — **Ce qui a été fait** : <how it was fixed or built, two sentences a
 <the same lines as they are now>
 ```
 **Commit** : <hash(es)> — **essayé par** : <moi, comment — ou les mots du dev>
+**Dates** : commencé le <jj/mm>, fini le <jj/mm>
 ````
 
 The key change, not the whole diff: five to fifteen lines. A new feature has no « avant » code: one line saying the
@@ -186,10 +204,10 @@ behaviour before. **The line numbers are read from the committed file**, never g
 | moment | gesture |
 | --- | --- |
 | **start-session** | read À valider par le développeur and the top of À faire; tell the dev what waits on him. **His moves are the state** — never propose to revert them. Deduce from the work done which ticket has moved on |
-| I start a ticket he chose | transition `31`, assignee the role |
+| I start a ticket he chose | transition `31`, assignee the role, **« Date de début » to today** |
 | a look or a decision is his | transition `61` + a comment saying exactly what he has to look at or decide |
 | he reports a fault | comment his words, transition `31` |
-| done, DoD met | the closing comment, then transition `41` |
+| done, DoD met | the closing comment, then transition `41`, then the edit that ranks it **and sets « Date d'échéance »** |
 | he mentions a thought in passing | create it in Idées (transition `51`) from the template, tell him in one line |
 | a review or a test surfaces a new problem | Idées — never straight into Backlog |
 | **end-session** | every ticket I touched carries a comment saying where it stands |
