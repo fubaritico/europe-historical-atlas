@@ -24,20 +24,21 @@ function fileMenu(): MenuDefinition {
 
 describe('greyed', () => {
   describe('happy path', () => {
-    it('greys every command', () => {
-      const [menu] = greyed([fileMenu()])
-
+    it('greys each menu whole (CARTO-555)', () => {
       expect(
-        menu?.entries.filter((entry) => entry.kind === 'command').map((entry) => entry.enabled)
+        greyed([fileMenu(), { ...fileMenu(), id: 'edit' }]).map((menu) => menu.enabled)
       ).toEqual([false, false])
     })
   })
 
   describe('variants', () => {
-    it('keeps the separators and the order', () => {
+    it('keeps its title, its lines and their order', () => {
       const [menu] = greyed([fileMenu()])
 
-      expect(menu?.entries.map((entry) => entry.kind)).toEqual(['command', 'separator', 'command'])
+      expect([menu?.label, menu?.entries.map((entry) => entry.kind)]).toEqual([
+        'File',
+        ['command', 'separator', 'command'],
+      ])
     })
   })
 
@@ -48,18 +49,11 @@ describe('greyed', () => {
 
       greyed(menus)
 
-      expect(menus[0]?.entries[0]).toMatchObject({ enabled: true })
+      expect(menus[0]?.enabled).toBeUndefined()
     })
   })
 
-  describe('unmanaged errors', () => {
-    // L4: N/A — no input is parsed, nothing is awaited.
-    it('keeps every other field of a command', () => {
-      const [menu] = greyed([fileMenu()])
-
-      expect(menu?.entries[0]).toMatchObject({ id: 'open', label: 'Open…' })
-    })
-  })
+  // L4: N/A — no input is parsed, nothing is awaited.
 
   describe('edge cases', () => {
     it('no menus, no menus', () => {

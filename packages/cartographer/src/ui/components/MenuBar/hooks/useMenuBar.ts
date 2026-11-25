@@ -4,6 +4,7 @@ import { answerTitleKey } from '../utils/answerTitleKey'
 import { commandToRun } from '../utils/commandToRun'
 import { focusMarked } from '../utils/focusMarked'
 import { menuAlong } from '../utils/menuAlong'
+import { refusesGreyed } from '../utils/refusesGreyed'
 
 import { useCloseOutside } from './useCloseOutside'
 
@@ -66,7 +67,8 @@ export function useMenuBar(menus: readonly MenuDefinition[]): MenuBarControl {
   // Handlers
   const openMenu = (id: string | null, from: MenuStart) => {
     setStart(from)
-    setOpen(id)
+    // A menu greyed whole stays shut (CARTO-555): its title is reached, and says so to a screen reader, but opens nothing.
+    setOpen(refusesGreyed(menus, id) ? null : id)
   }
   const handleTitle = (event: MouseEvent<HTMLButtonElement>) => {
     openMenu(open === titleOf(event) ? null : titleOf(event), 'first')

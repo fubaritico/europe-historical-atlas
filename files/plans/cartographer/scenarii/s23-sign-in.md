@@ -31,8 +31,9 @@ Scenario: nobody signed in — the form where the map would be
   And then the form « Connexion » — « Connectez-vous avec votre compte du CMS. », « Adresse », « Mot de passe »,
     « Se connecter » — stands where the map would be
   And there is no tool rail, no panel, no status bar
-  And the top bar's four file buttons and every command of « Fichier » and « Édition » are greyed, never hidden,
-    each saying « — connectez-vous d’abord »
+  And ~~the top bar's four file buttons and every command of « Fichier » and « Édition » are greyed, never hidden,
+    each saying « — connectez-vous d’abord »~~ the menus « Fichier » and « Édition » are greyed themselves, never
+    hidden, and do not open; the bar holds no file button (CARTO-555, the dev, 2026-11-25)
 
 Scenario: « Se connecter » waits for both fields
   Given the form is empty

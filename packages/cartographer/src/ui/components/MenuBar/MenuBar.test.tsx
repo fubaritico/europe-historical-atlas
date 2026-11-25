@@ -67,6 +67,18 @@ function openItems(): string[] {
     )
 }
 
+/**
+ * The bar with Edit greyed whole, File open.
+ * @returns the user
+ */
+function mountGreyed() {
+  const greyed = menus(vi.fn()).map((menu) =>
+    menu.id === 'edit' ? { ...menu, enabled: false } : menu
+  )
+  renderInEnglish(<MenuBar label="Menus" menus={greyed} />)
+  return userEvent.setup()
+}
+
 describe('MenuBar', () => {
   describe('happy path', () => {
     it('opens a menu on its title, its commands listed with their keys', async () => {
@@ -130,6 +142,78 @@ describe('MenuBar', () => {
   })
 
   describe('managed errors', () => {
+    // CARTO-555: a menu greyed whole — nobody signed in, or Édition with no map open.
+    describe('a menu greyed whole', () => {
+      it('marks its title greyed, the other title left open', () => {
+        mountGreyed()
+
+        expect(
+          ['File', 'Edit'].map((name) =>
+            screen.getByRole('menuitem', { name }).getAttribute('aria-disabled')
+          )
+        ).toEqual([null, 'true'])
+      })
+
+      it('opens nothing on a click on its title, and says so in the console', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        const user = mountGreyed()
+        await user.click(screen.getByRole('menuitem', { name: 'Edit' }))
+
+        expect(screen.queryByRole('menu')).toBeNull()
+        expect(warn).toHaveBeenCalledWith('[Cartographer] the menu edit is greyed: not opened')
+        warn.mockRestore()
+      })
+
+      it('shuts its list when it is greyed while open', async () => {
+        const chosen = vi.fn()
+        const user = userEvent.setup()
+        const { rerender } = renderInEnglish(<MenuBar label="Menus" menus={menus(chosen)} />)
+        await user.click(screen.getByRole('menuitem', { name: 'Edit' }))
+        rerender(
+          <MenuBar
+            label="Menus"
+            menus={menus(chosen).map((menu) => ({ ...menu, enabled: false }))}
+          />
+        )
+
+        expect(screen.queryByRole('menu')).toBeNull()
+        expect(screen.getByRole('menuitem', { name: 'Edit' }).getAttribute('aria-expanded')).toBe(
+          'false'
+        )
+      })
+
+      it('opens nothing on ‹↓› on its title, the focus staying there', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        const user = mountGreyed()
+        screen.getByRole('menuitem', { name: 'Edit' }).focus()
+        await user.keyboard('{ArrowDown}')
+
+        expect(screen.queryByRole('menu')).toBeNull()
+        expect(document.activeElement?.textContent).toBe('Edit')
+        vi.restoreAllMocks()
+      })
+
+      it('opens nothing on ‹→› from the open menu beside it, which closes', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        const user = mountGreyed()
+        await user.click(screen.getByRole('menuitem', { name: 'File' }))
+        await user.keyboard('{ArrowRight}')
+
+        expect(screen.queryByRole('menu')).toBeNull()
+        vi.restoreAllMocks()
+      })
+
+      it('opens nothing when the pointer slides onto it from an open menu, which closes', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+        const user = mountGreyed()
+        await user.click(screen.getByRole('menuitem', { name: 'File' }))
+        await user.hover(screen.getByRole('menuitem', { name: 'Edit' }))
+
+        expect(screen.queryByRole('menu')).toBeNull()
+        vi.restoreAllMocks()
+      })
+    })
+
     it('does nothing for a greyed command clicked, and says so in the console', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const { user, chosen } = mount()

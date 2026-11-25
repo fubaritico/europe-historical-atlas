@@ -35,4 +35,10 @@ export interface MenuDefinition {
   label: string
   /** Its lines, in order. */
   entries: readonly MenuEntry[]
+  /**
+   * `false` greys the menu itself: its title stays on the bar, greyed, and does not open (CARTO-555, the dev: « désactiver
+   * Fichier et Édition au lieu de désactiver les menus ») — nobody signed in, or Édition with no map open. Open when
+   * absent.
+   */
+  enabled?: boolean
 }

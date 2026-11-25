@@ -1,9 +1,5 @@
 {
   "notBuilt": "pas encore construit ({scenarios})",
-  "openHint": "Ouvrir une autre carte ({keys})",
-  "saveHint": "Enregistrer la carte ({keys})",
-  "saveAsHint": "Enregistrer la carte sous un autre nom, et continuer sur la nouvelle ({keys})",
-  "saveCopyHint": "Enregistrer une copie de la carte, et rester sur celle-ci",
   "closeYear": "{close} {year}",
   "nothingToUndo": "rien à annuler",
   "nothingToRedo": "rien à rétablir",
@@ -13,8 +9,6 @@
   "menuBar": "Menus du Cartographe",
   "placeholder": "{zone, select, appBar {barre de l’application} docBar {barre du document} tools {outils} panels {panneaux} other {{zone}}}",
   "signOut": "Se déconnecter",
-  "signInFirst": "connectez-vous d’abord",
-  "openMapFirst": "ouvrez d’abord une carte",
   "signedInAs": "Connecté : {email}",
   "sessionExpired": "Session expirée"
 }

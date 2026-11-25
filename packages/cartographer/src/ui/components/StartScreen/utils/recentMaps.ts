@@ -2,8 +2,8 @@ import { isAutosaveName } from '@europe-historical-atlas/core/data/mapName'
 
 import type { DatedMap } from '../../../../persistence/yearArchive'
 
-/** How many maps the start screen lists — Illustrator's own count of recent files is of that order. */
-export const RECENT_COUNT = 12
+/** How many maps the start screen lists — some thirty, its panel scrolling past what fits (the dev, CARTO-555). */
+export const RECENT_COUNT = 30
 
 /**
  * The last maps, as the start screen lists them (CARTO-536): the most recently written first, the automatic saves left

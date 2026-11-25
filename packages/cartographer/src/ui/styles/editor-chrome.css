@@ -1011,7 +1011,13 @@
 .app-start {
   display: flex;
   align-items: stretch;
-  gap: 10px;
+  gap: 6px;
+  padding-left: 9px;
+}
+
+/* The mark, at the left end, the menus against it (CARTO-555). */
+.app-start > .brand-mark {
+  align-self: center;
 }
 
 /*
@@ -1042,6 +1048,15 @@
 .menu-bar__title:hover,
 .menu-bar__title[aria-expanded='true'] {
   background: var(--hover);
+}
+
+/* A menu greyed whole (CARTO-555): its title in the off ink, no hover — there, and shut. */
+.menu-bar__title[aria-disabled='true'] {
+  color: var(--ink-off);
+}
+
+.menu-bar__title[aria-disabled='true']:hover {
+  background: none;
 }
 
 .menu-bar__title:focus-visible,
@@ -1109,11 +1124,9 @@
 }
 
 .app-brand {
-  align-self: flex-start;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 0 0 9px;
 }
 
 .brand-mark {
@@ -1154,12 +1167,24 @@
 .bar-actions {
   display: flex;
   align-items: stretch;
+  justify-content: flex-end;
+}
+
+/* « Connecté : … », on the bar's middle line beside « Se déconnecter » (CARTO-555). */
+.app-account {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--ink-dim);
+  line-height: 16px;
+  white-space: nowrap;
 }
 
 .bar-button {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 0 11px;
   border: 0;
   border-left: 1px solid var(--line-soft);
@@ -1936,10 +1961,13 @@
 }
 
 .start-screen__main {
+  display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
   min-width: 0;
-  padding: 56px 48px 48px;
-  overflow-y: auto;
+  min-height: 0;
+  /* The same margin under the panel as over the title (the dev, CARTO-555): the panel stops there, its tiles scroll. */
+  padding: 56px 48px;
 }
 
 .start-screen__welcome {
@@ -1951,7 +1979,11 @@
 }
 
 .start-screen__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   max-width: 1072px;
+  min-height: 0;
   margin: 0 auto;
   padding: 32px 24px 40px;
   background: var(--panel);
@@ -1970,8 +2002,10 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 24px 32px;
+  min-height: 0;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
   list-style: none;
 }
 

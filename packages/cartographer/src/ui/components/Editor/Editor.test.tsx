@@ -251,34 +251,23 @@ describe('Editor', () => {
       expect(handed).toBeNull()
     })
 
-    it('with nobody signed in, greys the bar’s file gestures rather than hiding them', () => {
-      mount(undefined, sessionAt({ kind: 'signedOut', problem: null }))
-
-      const open = within(document.querySelector<HTMLElement>('.shell__appbar') ?? document.body)
-        .getAllByRole('button')
-        .find((button) => button.textContent === 'Open…')
-      expect(open).toBeDefined()
-      expect(open?.getAttribute('aria-disabled')).toBe('true')
-      expect(open?.getAttribute('title')).toBe('Open… — sign in first')
-    })
-
-    it('with nobody signed in, greys every file gesture and every menu command, never hides them', async () => {
+    // CARTO-555: the menus Fichier and Édition greyed whole, never hidden; no file button on the bar any more.
+    it('with nobody signed in, greys the menus Fichier and Édition themselves, and they do not open', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       mount(undefined, sessionAt({ kind: 'signedOut', problem: null }))
       const user = userEvent.setup()
+      const bar = within(document.querySelector<HTMLElement>('.shell__appbar') ?? document.body)
 
-      const bar = document.querySelector<HTMLElement>('.shell__appbar') ?? document.body
-      for (const name of ['Open…', 'Save', 'Save as…', 'Save a copy']) {
-        const button = within(bar)
-          .getAllByRole('button')
-          .find((candidate) => candidate.textContent === name)
-        expect(button?.getAttribute('aria-disabled')).toBe('true')
-      }
-      await user.click(within(bar).getByRole('menuitem', { name: 'Edit' }))
-      const commands = within(document.body)
-        .getAllByRole('menuitem')
-        .filter((item) => item.textContent !== 'File' && item.textContent !== 'Edit')
-      expect(commands.length).toBeGreaterThan(0)
-      for (const command of commands) expect(command.getAttribute('aria-disabled')).toBe('true')
+      const file = bar.getByRole('menuitem', { name: 'File' })
+      const edit = bar.getByRole('menuitem', { name: 'Edit' })
+      expect([file, edit].map((title) => title.getAttribute('aria-disabled'))).toEqual([
+        'true',
+        'true',
+      ])
+      await user.click(file)
+      expect(document.querySelector('[role="menu"]')).toBeNull()
+      expect(bar.queryByRole('button', { name: 'Open…' })).toBeNull()
+      warn.mockRestore()
     })
 
     it('with nobody signed in, the form signs in through the keeper', async () => {
@@ -420,21 +409,18 @@ describe('Editor', () => {
       expect([onNewMap.mock.calls.length, onOpen.mock.calls.length]).toEqual([1, 1])
     })
 
-    it('greys the saves of the bar, Open… acting, and names who is signed in with « Sign out »', () => {
+    it('leaves Fichier open and greys Édition whole, and names who is signed in with « Sign out »', () => {
       mount(undefined, sessionAt(), null)
 
       const bar = document.querySelector<HTMLElement>('.shell__appbar') ?? document.body
-      const button = (name: string) =>
-        within(bar)
-          .getAllByRole('button')
-          .find((candidate) => candidate.textContent === name)
       expect(
-        ['Open…', 'Save', 'Save as…', 'Save a copy'].map((name) =>
-          button(name)?.getAttribute('aria-disabled')
+        ['File', 'Edit'].map((name) =>
+          within(bar).getByRole('menuitem', { name }).getAttribute('aria-disabled')
         )
-      ).toEqual([null, 'true', 'true', 'true'])
-      expect(button('Save')?.getAttribute('title')).toBe('Save — open a map first')
-      expect(button('Sign out')).toBeDefined()
+      ).toEqual([null, 'true'])
+      expect(
+        within(bar).getByRole('button', { name: 'Sign out' }).querySelector('svg')
+      ).not.toBeNull()
       expect(bar.querySelector('.app-brand__year')).toBeNull()
     })
 
