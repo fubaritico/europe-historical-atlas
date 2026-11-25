@@ -13,7 +13,8 @@
  * Run its tests: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
  */
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { ROLE_LABELS, readRole } from './hooks/role-state.mjs'
@@ -47,17 +48,86 @@ export const contextPart = (used) => {
 }
 
 /**
+ * Says how much of the plan's weekly limit is used — `rate_limits.seven_day.used_percentage`, sent only to claude.ai
+ * subscribers and after the session's first answer (code.claude.com/docs/en/statusline). The dev, 2026-11-25: the
+ * historian's agent teams spend the week, and the session must see it.
+ * @param {unknown} used - The weekly percentage, absent before the first answer.
+ * @returns {string} E.g. ` · semaine 41 %`, or nothing when Claude Code sent no percentage.
+ */
+export const weekPart = (used) =>
+  typeof used === 'number' && Number.isFinite(used) ? ` · semaine ${Math.round(used)} %` : ''
+
+/**
+ * The usage to keep from one status JSON — the 5-hour and 7-day windows of the plan's limits.
+ * @param {{ rate_limits?: { five_hour?: { used_percentage?: number, resets_at?: number }, seven_day?: { used_percentage?: number, resets_at?: number } } }} status - The status JSON.
+ * @param {string} at - The moment, ISO 8601.
+ * @returns {{ at: string, fiveHour: number | null, sevenDay: number | null, sevenDayResetsAt: number | null } | null} The record, or null when Claude Code sent no limits.
+ */
+export const usageRecord = (status, at) => {
+  const five = status.rate_limits?.five_hour?.used_percentage
+  const seven = status.rate_limits?.seven_day?.used_percentage
+  if (typeof five !== 'number' && typeof seven !== 'number') return null
+  return {
+    at,
+    fiveHour: typeof five === 'number' ? five : null,
+    sevenDay: typeof seven === 'number' ? seven : null,
+    sevenDayResetsAt: status.rate_limits?.seven_day?.resets_at ?? null,
+  }
+}
+
+/**
+ * Whether a record says something the journal's last line does not — a line is kept only when a percentage moves,
+ * so the journal grows by the change, not by the refresh.
+ * @param {string | undefined} lastLine - The journal's last line, absent for a new journal.
+ * @param {{ fiveHour: number | null, sevenDay: number | null }} record - The record to append.
+ * @returns {boolean} True when the record is to be appended.
+ */
+export const usageMoved = (lastLine, record) => {
+  if (!lastLine) return true
+  try {
+    const last = JSON.parse(lastLine)
+    return last.fiveHour !== record.fiveHour || last.sevenDay !== record.sevenDay
+  } catch {
+    return true
+  }
+}
+
+/**
+ * Appends the usage to `.claude/state/usage.jsonl` (ignored by git) when it moved, so a session can read the week's
+ * consumption: `tail -n 20 .claude/state/usage.jsonl`.
+ * @param {string} root - The tree's root.
+ * @param {object} status - The status JSON.
+ * @returns {string} Nothing when all went well, else ` · journal d'usage illisible` for the line — a failure is said.
+ */
+const keepUsage = (root, status) => {
+  const record = usageRecord(status, new Date().toISOString())
+  if (!record) return ''
+  try {
+    const dir = join(root, '.claude', 'state')
+    const path = join(dir, 'usage.jsonl')
+    const lines = existsSync(path) ? readFileSync(path, 'utf8').trimEnd().split('\n') : []
+    if (usageMoved(lines.at(-1), record)) {
+      mkdirSync(dir, { recursive: true })
+      appendFileSync(path, `${JSON.stringify(record)}\n`)
+    }
+    return ''
+  } catch {
+    return " · journal d'usage illisible"
+  }
+}
+
+/**
  * Builds the line from what Claude Code sends, the session's role note and the branch.
- * @param {{ agent?: { name?: string }, workspace?: { git_worktree?: string }, context_window?: { used_percentage?: number } }} status - The status JSON.
+ * @param {{ agent?: { name?: string }, workspace?: { git_worktree?: string }, context_window?: { used_percentage?: number }, rate_limits?: { seven_day?: { used_percentage?: number } } }} status - The status JSON.
  * @param {string | null} branch - The checked-out branch, or null when git could not tell.
  * @param {string | null} [noted] - The session's role note.
- * @returns {string} The line, e.g. `codeur · arbre coder · branche coder · contexte 34 %`.
+ * @returns {string} The line, e.g. `codeur · arbre coder · branche coder · contexte 34 % · semaine 41 %`.
  */
 export const statusLine = (status, branch, noted = null) => {
   const role = noted ?? status.agent?.name
   const label = role ? (ROLE_LABELS[role] ?? role) : 'sans rôle'
   const tree = status.workspace?.git_worktree ?? 'main'
-  return `${label} · arbre ${tree} · branche ${branch ?? 'inconnue'}${contextPart(status.context_window?.used_percentage)}`
+  return `${label} · arbre ${tree} · branche ${branch ?? 'inconnue'}${contextPart(status.context_window?.used_percentage)}${weekPart(status.rate_limits?.seven_day?.used_percentage)}`
 }
 
 /**
@@ -90,5 +160,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // The note lives where the hooks write it: the folder the session was launched in (`CLAUDE_PROJECT_DIR` for them,
   // `workspace.project_dir` here), which the current folder may have left.
   const root = status.workspace?.project_dir ?? revParse(dir, ['--show-toplevel'])
-  process.stdout.write(statusLine(status, revParse(dir, ['--abbrev-ref', 'HEAD']), root ? readRole(root, status.session_id) : null))
+  const kept = root ? keepUsage(root, status) : ''
+  process.stdout.write(
+    `${statusLine(status, revParse(dir, ['--abbrev-ref', 'HEAD']), root ? readRole(root, status.session_id) : null)}${kept}`,
+  )
 }

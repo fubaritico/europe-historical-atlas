@@ -1,14 +1,14 @@
 // Run: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, realpathSync } from 'node:fs'
+import { mkdtempSync, readFileSync, realpathSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { describe, it } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { writeRole } from './hooks/role-state.mjs'
-import { contextPart, statusLine } from './statusline.mjs'
+import { contextPart, statusLine, usageMoved, usageRecord, weekPart } from './statusline.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const script = join(here, 'statusline.mjs')
@@ -85,5 +85,54 @@ describe('statusline', () => {
   it('run on input that is not JSON, it says the line cannot be read', () => {
     const out = execFileSync('node', [script], { input: 'nope', encoding: 'utf8' })
     assert.match(out, /^ligne d'état illisible/)
+  })
+})
+
+describe('statusline, the plan usage', () => {
+  it('the weekly percentage is said, rounded', () => {
+    assert.equal(weekPart(41.2), ' · semaine 41 %')
+  })
+  it('no weekly percentage before the first answer says nothing', () => {
+    assert.equal(weekPart(undefined), '')
+  })
+  it('the line carries the week after the context', () => {
+    const line = statusLine(
+      { agent: { name: 'historian' }, workspace: {}, context_window: { used_percentage: 20 }, rate_limits: { seven_day: { used_percentage: 63 } } },
+      'main',
+    )
+    assert.equal(line, 'historien · arbre main · branche main · contexte 20 % · semaine 63 %')
+  })
+  it('a record keeps both windows and the week reset', () => {
+    const status = { rate_limits: { five_hour: { used_percentage: 12 }, seven_day: { used_percentage: 63, resets_at: 1764500000 } } }
+    assert.deepEqual(usageRecord(status, '2026-11-25T15:00:00Z'), {
+      at: '2026-11-25T15:00:00Z',
+      fiveHour: 12,
+      sevenDay: 63,
+      sevenDayResetsAt: 1764500000,
+    })
+  })
+  it('no limits sent means no record', () => {
+    assert.equal(usageRecord({}, '2026-11-25T15:00:00Z'), null)
+  })
+  it('a record is appended only when a percentage moved', () => {
+    const last = JSON.stringify({ at: 'x', fiveHour: 12, sevenDay: 63 })
+    assert.equal(usageMoved(last, { fiveHour: 12, sevenDay: 63 }), false)
+    assert.equal(usageMoved(last, { fiveHour: 13, sevenDay: 63 }), true)
+    assert.equal(usageMoved(undefined, { fiveHour: 12, sevenDay: 63 }), true)
+  })
+  it('run in a tree, the script writes the usage journal once per change', () => {
+    const tree = realpathSync(mkdtempSync(join(tmpdir(), 'statusline-usage-')))
+    execFileSync('git', ['init', '-q', tree], { env: withoutGit })
+    const input = JSON.stringify({
+      session_id: 's',
+      workspace: { current_dir: tree, project_dir: tree },
+      rate_limits: { five_hour: { used_percentage: 5 }, seven_day: { used_percentage: 40 } },
+    })
+    execFileSync('node', [script], { input, encoding: 'utf8', env: withoutGit })
+    const out = execFileSync('node', [script], { input, encoding: 'utf8', env: withoutGit })
+    assert.match(out, / · semaine 40 %$/)
+    const lines = readFileSync(join(tree, '.claude', 'state', 'usage.jsonl'), 'utf8').trim().split('\n')
+    assert.equal(lines.length, 1)
+    assert.equal(JSON.parse(lines[0]).sevenDay, 40)
   })
 })
