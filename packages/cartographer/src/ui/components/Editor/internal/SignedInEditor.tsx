@@ -93,7 +93,7 @@ export function SignedInEditor({
     <Shell
       heading={heading}
       appbar={<AppBarPanel {...bar} store={store} history={history} account={account} />}
-      docbar={<DocBarPanel store={store} history={history} />}
+      docbar={<DocBarPanel {...bar} store={store} history={history} />}
       canvas={
         <MapArea
           store={store}

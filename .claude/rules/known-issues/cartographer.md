@@ -253,3 +253,8 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
 - **Le glisser d'un pays dans `{Polities}` laisse deux points ouverts** (CARTO-457, revue du 16/11, ma décision) : un
   relâcher hors des lignes n'est dit qu'en console, pas dans la zone de résultat ; les écouteurs du glisser se réinscrivent
   à chaque rendu du panneau (correct, le glisser vit dans une référence). **Sévérité : cosmétique.**
+- **The tabs of the maps open are a tablist half made** (2026-11-25, CARTO-556, review A11Y-001, my decision): each tab's
+  cross sits inside the `role="tablist"`, beside its `role="tab"`; no tab names a panel, and the arrows do not move
+  along them. Every control stays reachable by ‹Tab›; a screen reader may count the tabs without their crosses.
+  **Trigger**: several maps open at once — then the crosses out of the tablist's children (or the wrappers
+  `role="presentation"`), and the arrows along the tabs. **Severity: cosmétique.**

@@ -27,6 +27,9 @@ function store() {
 
 const meta = () => document.querySelector('.doc-tab__meta')?.textContent
 
+/** The map open, and its close, as the editor hands them to the document bar. */
+const MAP = { mapName: createMapNameStore('1100'), onCloseMap: () => undefined }
+
 describe('top bars, bound', () => {
   describe('happy path', () => {
     // The dev, 2026-11-25 (CARTO-555): the bar writes the application's name alone — the map open is the document tab's.
@@ -65,7 +68,7 @@ describe('top bars, bound', () => {
       history.register(answer)
       const undo = vi.spyOn(shared.getState(), 'undo')
       shared.setState({ undoLabel: 'Draw France' })
-      renderInEnglish(<DocBarPanel store={shared} history={history} />)
+      renderInEnglish(<DocBarPanel store={shared} history={history} {...MAP} />)
 
       await userEvent.click(screen.getByRole('button', { name: 'Undo Draw France' }))
       expect(answer).toHaveBeenCalledWith('undo')
@@ -77,7 +80,7 @@ describe('top bars, bound', () => {
     it('writes the zoom and follows the view, with no re-render', () => {
       const shared = store()
       const ratio = window.devicePixelRatio
-      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />)
+      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} {...MAP} />)
       expect(meta()).toBe('@ —')
       act(() => {
         shared.getState().setViewport({ scale: 0.48 * ratio, originX: 0, originY: 0 })
@@ -91,7 +94,7 @@ describe('top bars, bound', () => {
       const shared = store()
       const warn = vi.fn()
       shared.setState({ undoLabel: 'Draw France' })
-      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(warn)} />)
+      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(warn)} {...MAP} />)
 
       await userEvent.click(screen.getByRole('button', { name: 'Undo Draw France' }))
       expect(warn).toHaveBeenCalledOnce()
@@ -104,7 +107,7 @@ describe('top bars, bound', () => {
     it('stops following the view once unmounted', () => {
       const shared = store()
       const { unmount } = renderInEnglish(
-        <DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />
+        <DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} {...MAP} />
       )
       unmount()
       expect(() => {

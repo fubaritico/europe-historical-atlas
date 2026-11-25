@@ -1,6 +1,5 @@
 {
   "notBuilt": "not built yet ({scenarios})",
-  "closeYear": "{close} {year}",
   "nothingToUndo": "nothing to undo",
   "nothingToRedo": "nothing to redo",
   "undoHint": "{label} ({keys})",

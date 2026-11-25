@@ -1,6 +1,5 @@
 {
   "notBuilt": "pas encore construit ({scenarios})",
-  "closeYear": "{close} {year}",
   "nothingToUndo": "rien à annuler",
   "nothingToRedo": "rien à rétablir",
   "undoHint": "{label} ({keys})",
