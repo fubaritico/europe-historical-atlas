@@ -9,7 +9,194 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 24/11, 11 h 40 : l'essai du chef de zone est rentré ; ses verdicts à appliquer
+## ▶ ON REPREND ICI — 26/11 : LE MAGHREB, LE RATTRAPAGE, PUIS LA CORRECTION DE LA CARTE DE 1200
+
+**Fait le 25/11** : 11 zones de 1200 saisies (îles, Ibérie, France, Balkans, Anatolie, Empire ouest et est, Levant,
+Italie, Scandinavie, Hongrie-Pologne, Rus') — **5 940 villes**, 2 283 alertes (dessin en attente, sa décision) ;
+Opole et Nysa (titre 953, fiches 19690-19691) commitées, **push à faire si la CI n'était pas libre** (`gh run list
+-L 1`, puis push seul). **L'oracle** : épiques REPO-538 et REPO-545 (Qdrant) — tout Fait sauf **REPO-540** (les
+empreintes, en fond : `oracle-data/embed-run.log`, ~85 000 / 585 065). L'oracle suit la session (crochet REPO-544) ;
+**la réindexation de fin de zone est à moi** : `session:stop`, `catalog build`, `index build`, `session:start`
+(tout par `npm --prefix /Volumes/Acer/atlas-historien/outils/oracle run …`, Node 24). Tableau de bord Qdrant :
+http://127.0.0.1:6333/dashboard. Tes PDF : `bibliotheque-texte/` (OCR Vision, à relire sur la page).
+**À faire, dans l'ordre** : (1) CARTO Maghreb (3 agents, l'oracle, Gallica par Chrome) ; (2) le rattrapage
+JSTOR/BnF/Gallica d'Anatolie, des deux Empires, de l'Italie (della Grossa, ark:/12148/bpt6k480065p) ; (3) **à
+proposer** (il n'a pas répondu) : le ticket « chaînes ouvertes (549) et litiges repris par l'oracle », quand les
+empreintes seront avancées, et la page des vassaux directs (52 souverains, 118 vassaux directs) pour la correction ;
+(4) la correction de la carte avec lui — **je ne dessine pas** sauf sa décision. **Semaine** : 23 % à 22 h 51
+(repart le 2/12, 7 h). **Doublons à lui** : 9 livres du catalogue (`catalog dupes`), 2 PDF de sa bibliothèque
+(Ancient Rome ×2, Penguin medieval = Penguin 2005). `travail/` des zones (Scandinavie 168 Mo…) à vider sur son mot.
+
+## ▶ Avant — 25/11, 22 h : LA RUS' EN DERNIÈRE ZONE DE LA NUIT ; TROIS AGENTS D'OUTILLAGE EN COURS
+
+**Fait** : CARTO-543 Hongrie-Pologne (297 fiches, `5dc396a2`) ; Jarosław d'Opole créé (personne 1004), **Opole et Nysa
+restent à saisir** (titre puis fiches, scripts de la zone) — en tête du rattrapage. **En cours** : CARTO-552 Rus'
+(3 agents, la dernière de la nuit : semaine 20 % à 21 h 21) ; REPO-549/550 (filtres et mesure, agent Sonnet) ;
+REPO-553 (texte et OCR Vision des PDF du dev vers `bibliotheque-texte/`, outil `oracle/tools/pdf-text/`, agent Sonnet).
+**À mon retour de chaque agent** : réindexer l'oracle moi-même (arrêter `embed`, `index build`, relancer) avec les
+livres de la Scandinavie, de la Hongrie-Pologne, de la Rus' et `bibliotheque-texte/` une fois branché ; REPO-551
+(pages des agents : filtres) ; fermer REPO-545. **Demain** : Opole-Nysa, le Maghreb, le rattrapage
+JSTOR/BnF/Gallica (Anatolie, deux Empires, Italie : della Grossa).
+
+## ▶ Avant — 25/11, 21 h : QDRANT EN SERVICE (épique REPO-545), HONGRIE-POLOGNE EN COURS
+
+**Fait** : REPO-544 (l'oracle suit la session, `95edeec2`), REPO-546/547/548 (Qdrant 1.20.2, binaire officiel, base
+dans `outils/qdrant-store.sparsebundle` APFS monté sur `/Volumes/oracle-qdrant`, tableau de bord
+http://127.0.0.1:6333/dashboard, collection `passages`, `embed` écrit dans Qdrant ; git de l'oracle `b09eafa`).
+**En cours** : un agent Sonnet sur REPO-549 (filtres zone/siècle/livre/langue) et REPO-550 (mesure à 1, 2, 5 M) ; à
+son retour : la part du dépôt de REPO-551 (pages des agents et `/find-sources` : filtrer par zone et siècle), puis
+REPO-545 fermé et le dev prévenu. **Recherche** : CARTO-543 Hongrie-Pologne (3 agents) ; puis Rus', Maghreb,
+rattrapage. Semaine : 18 % à 20 h 03, plafond 25 %. **Ma faute** : un push pendant une CI (95edeec2) — vérifier puis
+pousser en deux commandes.
+
+## ▶ Avant — 25/11, 20 h 15 : L'ORACLE EN SERVICE, LA NUIT CONTINUE
+
+**Fait** : REPO-510, 501, 539 en Fait ; REPO-540 en cours (`embed` détaché, journal
+`oracle-data/embed-run.log`, ~22 000 / 553 519 empreintes à 20 h 10 ; **mon Ollama du port 11435 meurt avec cette
+session** : à la reprise, `node outils/oracle/src/ollama/start.ts` puis relancer `embed`, détaché). **La réindexation
+est à moi seule**, en fin de zone : arrêter `embed` (`pkill -f "cli.ts embed"`), `cli.ts index build`, relancer
+`embed` (une réindexation l'avait tué à 19 h 45). Scandinavie (CARTO-541) saisie et poussée (`91cbba86`) ; la carte de
+1200 : 5 542 villes. **En cours** : CARTO-543 Hongrie-Pologne (3 agents). Puis Rus', Maghreb, rattrapage. Semaine :
+18 % à 20 h 03, plafond 25 %. Doublons du catalogue (9 certains) : leur fusion attend son mot.
+
+## ▶ Avant — 25/11, 18 h 45 : L'ORACLE D'ABORD, PUIS LA RECHERCHE DE LA NUIT (sa décision)
+
+**Sa consigne** : les tickets, un plan suivi sans lui, prévenu à la fin, puis la recherche de la nuit au minimum.
+**Épique REPO-538** (plan `files/plans/historian/oracle.md`, `c64ef3e9`) : REPO-510 le catalogue, REPO-501 l'index et
+`recall`, REPO-539 l'oracle branché sur la méthode, REPO-540 les empreintes de tout le corpus (≈ 21 h, en fond). Code
+en **TypeScript** sur Acer (`outils/oracle/`, son git), données `oracle-data/`, modèle `bge-m3` sur un Ollama à moi
+(port 11435, `outils/ollama-models/`) — son Ollama (11434) intouché. Construit par un agent Sonnet ; je relis, je
+teste, je bouge les tickets (dates : `customfield_10015` au début, `duedate` à la fin). **L'Italie (CARTO-534)
+saisie et poussée** (`bdd914ca`) ; la carte de 1200 : 5 460 villes, 2 185 alertes. Semaine : 15 % à 18 h 41.
+**Ensuite** : une équipe de 3, Scandinavie, Hongrie-Pologne, Rus', Maghreb, puis le rattrapage (dont Gallica page par
+page : della Grossa, ark:/12148/bpt6k480065p).
+
+## ▶ Avant — 25/11, 18 h 15 : LA NUIT, AU MINIMUM (sa décision)
+
+**Fait le 25/11** : Anatolie (CARTO-526), Empire ouest (525), Empire est (528), Levant (529) saisis, poussés, en Fait ;
+la carte de 1200 a 5 093 villes, 2 002 alertes (dessin en attente). **Semaine** (repart le 2/12 à 7 h) : 14 % à 17 h 51
+— budget ~14 %/jour ; mesuré ~3 points/heure à deux équipes, ~2 points par zone. **La nuit, sa consigne** : continuer
+« avec le minimum » — **une équipe à la fois, 3 agents au plus** ; l'Italie (CARTO-534) finit, puis Scandinavie,
+Hongrie-Pologne, Rus', Maghreb ; puis le rattrapage JSTOR/BnF/Gallica d'Anatolie et des deux Empires (saisis sans le
+portail). **Plafond que je me fixe : 25 % de la semaine** → je n'ouvre plus de zone et je le lui dis. **Gallica** :
+Cloudflare refuse les scripts ; je le fais par la page de recherche du site dans son Chrome (une adresse avec
+parenthèses est bloquée). **Repostes** : les correctifs construits par script après `verify_entry` sont à moi (mémoire
+`script-built-repairs-are-mine-to-post`) ; tout autre refus de l'outil va à lui.
+
+## ▶ Avant — 25/11, 15 h : TOUTES LES VILLES DE 1200 D'ABORD, LE DESSIN APRÈS (sa décision)
+
+**Plus de dessin zone par zone** (le dev, 25/11, remplace le « dessin de chaque zone à moi » du 24/11 et le § 3 du plan
+d'autonomie sur ce point) : on termine la recherche et la saisie de **toutes** les villes de 1200, puis on corrige la carte
+**ensemble** — il dessine le plus souvent, je l'assiste : les pays absents de la carte à créer, les frontières, les
+alertes et statuts des villes, les vassaux directs qui en découlent ; je dessine parfois, à sa demande. Équipes : **5
+agents au plus chacune** ; les agents d'équipe démarrent sans `CLAUDE.md` (`61cbf222`). **CARTO-526 (Anatolie) saisie**
+(`3d0ba854`, non poussé ; 174 fiches, 71 alertes, dessin en attente). CARTO-525 (Empire ouest) en cours. Puis : Empire
+est, Levant, Italie, Scandinavie, Hongrie-Pologne, Maghreb, Rus'.
+
+## ▶ Avant — 25/11, vers 14 h : RECHERCHE EN PAUSE (sa demande, le coût du forfait)
+
+Les deux chefs relancés à 13 h (CARTO-526, CARTO-525) et tous leurs agents ont été arrêtés. **L'Anatolie a été coupée
+EN PLEINE SAISIE** (trois agents postaient les fiches 1–165 et des liens) : avant toute suite, rapprocher la base de
+la copie `1200/anatolie-caucase/travail/cms-avant-saisie-2026-11-25.db` (`verify_entry.py`), puis finir ou retirer.
+L'Empire ouest était en recherche (lots du tour 3), rien en base. **À décider avec lui** : les chercheurs sur Sonnet
+(42 % du forfait d'après `/usage`, Opus), un essai Opus contre Sonnet sur deux lots déjà faits, moins d'agents par
+zone. Push des sept commits : attend son oui.
+
+## ▶ Avant — 25/11 : la carte de 1200, où la nuit du 24 l'a laissée (session close sur forfait)
+
+**Fait et poussé** : CARTO-516 îles Britanniques (`2befe0e9`), CARTO-506 Ibérie (`276bee1a`) — en Fait.
+**Commités en local, NON poussés** (cinq commits du codeur devant, ATLAS-392/519/521, qui attendent le mot du dev) :
+CARTO-518 France (`a2b4e4d3`), CARTO-517 Balkans (`2ea4c421`). **D'abord** : le mot du dev sur le push, puis
+`gh run list -L 1`, push, les deux stories en Fait (commentaire de la France déjà posté). La carte de 1200 : **18
+alertes sur 2 493**.
+**Restes des Balkans** : Céphalonie-Zante, Omiš, Ivanko et les zones disputées non dessinés ; deux angles du Hum (23°,
+59°) ; Byzance a perdu un anneau de 3 points en Crimée (34.0–34.16 E, 45.0 N) — à remettre depuis la copie
+`cartes/1200/1200.before-claude-2026-11-24-2112`. **À trancher** : Saint-Quentin (roi) contre le Vermandois d'Éléonore.
+**Arrêtés en recherche, sans écriture** : CARTO-525 Empire ouest, CARTO-526 Anatolie-Caucase — les reprendre depuis
+leurs dossiers d'Acer. Puis Empire est, Levant, Italie, Scandinavie, Hongrie-Pologne, Maghreb, Rus'.
+**Leçons de la nuit** : un chef de zone n'a pas SendMessage (il reçoit, ne répond pas) ; les chercheurs écrivaient à
+`main` (corrigé, `LEAD:`) ; deux équipes font des 429 à Wikidata ; le forfait tient environ quatre zones par jour à
+deux équipes ; le dev veut les chercheurs sur **Opus** (le jugement). Le dessin par un agent général marche (îles
+926→8, Ibérie 229→0, France 445→9, Balkans 63→2).
+
+## Avant — 24/11, 17 h 45 : la carte de 1200, zone après zone, deux chefs de zone à la fois (sa demande)
+
+**Sa consigne** : toutes les zones de 1200 (§ 4 du plan), deux équipes en parallèle, ticket par ticket ; un ticket fini
+→ export, `cities:alerts`, commit, push (`gh run list -L 1` avant), story en Fait, puis le suivant. **Ma règle** : deux
+zones en même temps ne se touchent jamais (boîtes disjointes) ; la suivante est la première de l'ordre du § 4 dont la
+boîte ne touche pas celle qui tourne. Le dessin de chaque zone dans `years/1200` est à moi (un seul à la fois), après
+sa saisie. Les stories se créent au lancement de chaque zone. **Lancées à 17 h 45** : CARTO-506 l'Ibérie
+(`1200/iberie/`), CARTO-516 les îles Britanniques (`1200/iles-britanniques/`). **Aucune suppression** dans cette
+session (outils MCP anciens, refusés depuis CMS-508) : les chefs listent « À retirer » dans leur note. **Dans le message de chaque chef (sa consigne, 17 h 55)** : créer les villes qui manquent — un témoin par pays et
+par vassal, des villes de chaque côté d'une frontière qui bouge, les fondations d'avant l'année — et garder les deux
+détenteurs d'une ville en litige (une ville existante en litige est acceptée ; je la dessine en zone disputée). **Les pauses du CMS (accord avec le codeur, 24/11, 19 h)** : il regroupe ses migrations et relances ; je lui
+signale en une ligne chaque fenêtre sans écriture (les deux zones en recherche, ou entre deux zones), avec sa durée ;
+il ne demande jamais de pause pendant une saisie. **Les chercheurs écrivaient à « main »** : corrigé dans
+`agents/source-researcher.md`, `book-reader.md`, `zone-lead.md` (`LEAD: <id>`) — les agents lancés avant le
+correctif m'écrivent encore : je les renvoie à leur chef. **Erreurs 429** de Wikidata/Wikipédia avec deux équipes :
+espacer les requêtes. **État à 19 h 10** : CARTO-516 (îles) saisie — 1 005 fiches, 167 lieux créés, 0 défaut, note
+`1200/iles-britanniques/resultats/note-de-region.md` ; son dessin confié à un agent de dessin (copie de la carte dans
+`cartes/1200/`), puis export, commit, push, Fait. CARTO-517 (Balkans-Byzance) lancée à 19 h 09. CARTO-506 (Ibérie) en
+cours. **19 h 20** : CARTO-506 (Ibérie) saisie — 499 fiches, 30 lieux, 0 défaut ; son dessin attend la fin de celui des
+îles (un seul dessinateur) : brief prêt, `1200/iberie/travail/dessin/a-dessiner.md`, même consigne que l'agent des
+îles. CARTO-518 (France) lancée à 19 h 19. Les chefs n'ont pas SendMessage : ils reçoivent, ne répondent pas — la
+pause se mesure aux heures d'écriture de la base (`max(updated_at)`). **19 h 50** : CARTO-516 en Fait (`2befe0e9`, poussé avec les commits du codeur). L'Ibérie en dessin par un agent
+(même brief que les îles) ; ensuite export, commit, push, CARTO-506 en Fait. **20 h 25** : CARTO-506 en Fait (`276bee1a`, poussé) ; la carte de 1200 a 8 alertes (les îles). En cours :
+CARTO-517 (Balkans), CARTO-518 (France). Après elles : Empire ouest, Anatolie-Caucase, Empire est, Levant, Italie,
+Scandinavie, Hongrie-Pologne, Maghreb, Rus' — deux à la fois, boîtes disjointes ; dessin par un agent général (brief
+des îles et de l'Ibérie), un seul à la fois. **20 h 40** : CARTO-518 (France) saisie — 688 fiches, 22 lieux, 12 villes en litige ; ses 4 défauts réparés par moi
+(titres 508, 515, 539 depuis `france/travail/payloads/titles-fix/`, personne 642, QID 489, 490, 611, 615 ; copie
+`france/travail/cms-avant-corrections-2026-11-24.db`), 0 défaut. Son dessin confié à un agent (brief
+`1200/france/travail/dessin/a-dessiner.md`) ; puis export, commit, push, Fait. CARTO-525 (Empire ouest) lancée à
+20 h 38 avec CARTO-517 (Balkans) toujours en cours. **À la reprise par une session neuve** : `ListAgents` ne voit pas
+les agents de la session précédente — vérifier leurs dossiers sur Acer (`resultats/note-de-region.md` écrite = zone
+saisie) et les heures d'écriture de la base. **20 h 45** : CARTO-517 (Balkans) saisie — 302 fiches, 32 lieux, 23 litiges, 0 défaut ; dessin après la France
+(brief `1200/balkans-byzance/travail/dessin/a-dessiner.md`). CARTO-526 (Anatolie-Caucase) lancée à 20 h 39.
+**Contexte de la session vers 60 %** : elle reste ouverte tant que ses agents tournent (France en dessin, Empire ouest
+et Anatolie en recherche) — leurs comptes rendus n'arrivent qu'à elle ; aucune nouvelle zone n'y est plus lancée. La
+session neuve reprend les zones suivantes : Empire est, Levant, Italie, Scandinavie, Hongrie-Pologne, Maghreb, Rus'. **21 h 20** : CARTO-518 (France) dessinée et commitée `a2b4e4d3`, **non poussée** : cinq commits du codeur
+(ATLAS-392/519/521) devant, qui attendent le mot du dev — demandé au codeur ; la story passe en Fait au push. À
+trancher : Saint-Quentin (roi) contre le Vermandois d'Éléonore dans la note. Balkans en dessin (agent). **21 h 20 — ARRÊT SUR FORFAIT** (92 % utilisés, dit par le codeur) : CARTO-525 (Empire ouest) et CARTO-526
+(Anatolie-Caucase) **arrêtés en recherche**, avant toute écriture (dernière écriture de la base 19:37Z) — chefs et
+chercheurs stoppés ; leur travail est sur Acer (`1200/empire-ouest/`, `1200/anatolie-caucase/` : `resultats/saisie.json`
+partiel, `travail/`). **À la reprise** : relancer un chef par story sur le même dossier, en lui disant de reprendre
+l'existant (lots faits, `saisie.json`), pas de repartir de zéro. Seul le dessin des Balkans a continué. **21 h 30** : le dev — les 8 % restants sont à brûler cette nuit, le forfait revient à 7 h. **Relancé** : le chef de
+CARTO-526 (Anatolie-Caucase), seul, 3 chercheurs au plus, saisie au plus tôt ; s'il est coupé en pleine saisie, la
+copie de la base qu'il a prise est nommée dans `1200/anatolie-caucase/resultats/note-de-region.md` : vérifier la saisie
+contre elle (`verify_entry.py`) avant toute suite. CARTO-525 (Empire ouest) reste arrêté. **21 h 35, le dev** : réduire les modèles pour le forfait — `source-researcher` et `book-reader` passés de Opus à
+**Sonnet** (le plan § 3 les voulait Opus : à lui de dire s'il garde Sonnet au-delà de cette nuit) ; le chef reste Opus. **21 h 40 — tout est arrêté** (par le dev ou l'application) : le dessin des Balkans (aucun geste enregistré : la carte
+de 1200 est identique à `a2b4e4d3` ; copie `cartes/1200/1200.before-claude-2026-11-24-2112`) et le chef de l'Anatolie
+(aucune écriture en base, dernière à 19:37Z). Les chercheurs **revenus sur Opus** : son inquiétude est le jugement,
+l'interprétation des textes. **À la reprise** : dessin des Balkans (brief prêt), push de la France avec le mot du dev
+sur les commits du codeur, puis l'Anatolie et l'Empire ouest depuis leurs dossiers. **Ordre
+suivant** : France (après l'Ibérie et les îles), Balkans-Byzance, Empire ouest, Anatolie-Caucase, Empire est, Levant,
+Italie, Scandinavie, Hongrie-Pologne, Maghreb, Rus'.
+
+## Avant — 24/11, 17 h 05 : CARTO-515 (l'Irlande) est en Fait ; la suite, CARTO-506 (l'Ibérie de 1200)
+
+**Fait** : les huit royaumes d'Irlande dessinés dans sa 1100 (Munster, Ailech ; Osraige, Connacht, Bréifne, Mide sous
+Munster ; Ulaid, Airgíalla sous Ailech), reliés aux territoires 404–408 et 180 ; les anneaux Cliopatria irlandais
+retirés ; export, **0 alerte sur 13 701**, commit `312b76cd` (avec ses retouches de l'après-midi), poussé. Plan et
+capture : `/Volumes/Acer/atlas-historien/1100/irlande/travail/dessin/plan.py`, `resultats/irlande-1100-dessin.jpg`.
+**Ouvert** : la fin d'Ailech (Wikidata 780, contredit) ; les limites intérieures non sourcées ; rois de Dublin,
+Leinster, Cenél Conaill, Airgíalla en 1100 (JSTOR, prêt, dib.ie) ; annales en double → CMS-509 ; deux dossiers Curtis
+1923 dans `ouvrages/` à fusionner ; vider `irlande/travail/` et `al-andalus/travail/` sur son mot.
+`years/1200/registry.json` modifié (pas de ma main), non commité.
+
+## Avant — 24/11, 12 h 10 : appliquer les verdicts de CARTO-505, puis l'Ibérie de 1200
+
+**Depuis 11 h 40, tout poussé (CI verte jusqu'à `73971509`)** : le journal préfixé `[story · agent]`, un fichier par
+jour (`/Volumes/Acer/atlas-historien/journal/AAAA-MM-JJ.log`, l'ancien dans `journal/ancien/`), un flow garde le jour
+de son départ (`ATLAS_DAY`), `pnpm research-log` et `research-log:all` en couleur ; `find_book.py` montre ses
+reformulations quand une recherche est vide. **Tranché avec le codeur pour CMS-507** : la fiche créée prend l'année de
+la carte (refus hors des années du titre), importance « Ville », « Afficher dans l'atlas » décoché, une case
+`byDistrict` marque la ligne déduite (nouveau champ : mes outils MCP ne le voient qu'à la session suivante).
+**CMS-507 livré par le codeur (24/11, 12 h 15)** : l'étape 3.5 appelle `POST /api/titles/<id>/cities` avec
+`{ year, places: [ids] }`, 500 villes au plus par appel ; réponse `results` : created, attached, unchanged, conflict
+(reason, holder) ou failed. Le script de l'étape 3.5 est à écrire (TypeScript) avant l'Ibérie. Le dev est
+sur l'atlas avec le codeur : ne lui dire que story commencée, finie, contexte à 60 %.
+
+## Avant — 24/11, 11 h 40 : l'essai du chef de zone est rentré ; ses verdicts à appliquer
 
 **Décidé ce matin avec lui** (le plan, `files/plans/historian/autonomy-and-1200.md`, commité `5dfafd21`, poussé) : la
 ville fait foi, le seigneur est le chemin ; la règle d'arrêt ; une enclave seulement prouvée par un ouvrage, sinon
