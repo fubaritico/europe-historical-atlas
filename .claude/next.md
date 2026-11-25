@@ -28,32 +28,34 @@ suis la nouvelle session du codeur.
 **Le plan d'autonomie de 1200** : `files/plans/historian/autonomy-and-1200.md` (ma part au § 5). **Attendent sa décision**
 (§ 7) : le commit d'export allégé (point a) et la suppression des pays et des personnes ouverte à l'historien (point d).
 
-## ▶ ON REPREND ICI — le 25/11, 20 h 45 : CARTO-498, puis CARTO-536
+## ▶ ON REPREND ICI — le 26/11 au matin : CARTO-498
 
-**CARTO-535 est Fait et dans `main`** (`aeb83af1`) : son Cartographe demande son compte du CMS. **Reprendre CARTO-498**
-dans son arbre (`.claude/worktrees/CARTO-498`, sur `caaba5d0` : le **resynchroniser avec `main`** d'abord) — son code
-écrit, le canal vers le CMS passe de la clé MCP à la session (un cookie relayé par le serveur du Cartographe, comme
-`devServer/cmsSession.ts`), « Ajouter au CMS » refusé tant qu'une session est expirée ; puis **CARTO-536**, l'écran de
-départ et ses états connectés, « Fermer la carte », que le tableau des états de CARTO-535 décrit. **Le Cartographe et
-le CMS de l'usage : `localhost`** (le cookie se partage entre les ports) ; **un essai : `127.0.0.1`, jamais
-`localhost`**, ou il remplace sa session (`known-issues/cms.md`).
+**Le 25/11 au soir, l'écran de départ et la barre du haut du Cartographe sont faits, validés par lui, poussés** (CI
+verte, déployée) : CARTO-536 (l'écran façon Illustrator, plus de `?map=`, la carte retenue dans l'onglet), CARTO-555
+(la barre, les menus grisés en entier, « Se déconnecter » ferme la carte), CARTO-556 (la croix de l'onglet ferme la
+carte ; `DocTab`/`DocTabs` prêts pour plusieurs cartes). **Ouvrir une carte** : l'écran de départ ou Fichier › Ouvrir…,
+plus jamais l'adresse (l'historien prévenu, son skill à jour). **Pour une page à son image** : sa capture, point par
+point — jamais une interprétation (mémoire `reproduce-the-reference`).
 
-**REPO-542 À valider**, fusionné dans `main` à la fin de la session : `pnpm --dir <arbre>/packages/cms trial:start` /
-`trial:stop`. Il attend ses deux règles de permission (le commentaire du ticket les donne mot pour mot). **Rien n'est
-poussé** : il a dit de pousser quand tout sera fini.
+**Reprendre CARTO-498** dans son arbre (`.claude/worktrees/CARTO-498`, sur `caaba5d0` : le **resynchroniser avec
+`main`** d'abord — `main` a beaucoup bougé, `main.tsx` surtout) : le canal vers le CMS passe de la clé MCP à la session
+(un cookie relayé par le serveur du Cartographe, comme `devServer/cmsSession.ts`), « Ajouter au CMS » refusé tant
+qu'une session est expirée. **Le Cartographe et le CMS de l'usage : `localhost`** ; **un essai : `127.0.0.1`, jamais
+`localhost`** (`known-issues/cms.md`) — `pnpm --dir <arbre>/packages/cms trial:start`, puis mon Cartographe sur 5199 avec
+`CMS_URL=http://127.0.0.1:3110`.
 
-**Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog).
+**À valider par lui** : REPO-542 (ses deux règles de permission, dans le commentaire du ticket). **En haut d'« À
+faire »** : CORE-486, CMS-441, CARTO-336 ; **CARTO-554** (les vignettes des cartes récentes), mis de côté par lui.
+**En cours** : CARTO-498, ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien),
+et les épiques. **Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog).
 **Prioritaire, à lui proposer** : ATLAS-527, le crédit Cliopatria sur l'atlas — le site en ligne n'est pas en règle.
-**L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : ATLAS-519 Fait ; suivent
-ATLAS-520 (les pièces), 521 (la barre du site, la colonne du bas, la barre verticale à droite), 522 (le siècle), la
-frise (ATLAS-358).
-**À valider par lui** : REPO-542 (ses règles de permission). **En cours** : CARTO-498 (débloqué par CARTO-535),
-ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien), et les épiques.
+**L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : suivent ATLAS-520,
+521, 522, la frise (ATLAS-358).
 
 ## Ce qui reste d'avant, toujours vrai
 
-- **En haut d'« À faire »** : CMS-499, CARTO-498 ; **CMS-459** (les citations en code wiki, critique)
-  est toujours en bas de la colonne : c'est à lui de le placer ; je le mettrais en tête.
+- **CMS-459** (les citations en code wiki, critique) est toujours en bas d'« À faire » : c'est à lui de le placer ; je
+  le mettrais en tête.
 - **En cours** : il en reste trop qui ne bougent plus (CMS-225, ATLAS-136, ATLAS-152, ATLAS-408…) — à trier avec lui.
   CMS-279 : il reste la garde du seed (une heure).
 - **Ses décisions en attente**, une à la fois : la case « Souverain » qui s'enregistre au clic (pas à « Enregistrer ») ; une
