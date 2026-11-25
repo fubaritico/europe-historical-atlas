@@ -4,12 +4,14 @@ import { barGestures } from './barGestures'
 
 import type { EditorProps } from '../editorProps'
 
-/** The nine fields the greyed bar needs, every one present. */
+/** The eleven fields the bar needs, every one present. */
 const NEEDED = [
   'onOpen',
   'onSave',
   'onSaveAs',
   'onSaveCopy',
+  'onNewMap',
+  'onCloseMap',
   'onCopy',
   'onPaste',
   'onSelectAll',
@@ -21,7 +23,7 @@ const NEEDED = [
  * The editor's props, each a distinct marker so a field handed in another's place shows.
  * @returns the props
  */
-function props(): Omit<EditorProps, 'session'> {
+function props(): Omit<EditorProps, 'session' | 'start'> {
   const marked = Object.fromEntries(
     [
       ...NEEDED,
@@ -35,7 +37,7 @@ function props(): Omit<EditorProps, 'session'> {
       'results',
     ].map((key) => [key, { marker: key }])
   )
-  return marked as unknown as Omit<EditorProps, 'session'>
+  return marked as unknown as Omit<EditorProps, 'session' | 'start'>
 }
 
 describe('barGestures', () => {

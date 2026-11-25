@@ -19,6 +19,8 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
   history: HistoryRelay
   /** Nobody signed in (CARTO-535): every command greyed, never hidden — the menu shows what exists. */
   disabled?: boolean
+  /** Whether a map is open — `false` on the start screen, where a new map and *Open…* alone act (CARTO-536). */
+  mapOpen: boolean
 }
 
 /**
@@ -29,9 +31,16 @@ export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | '
  * @param props.store - the store
  * @param props.history - the canvas's undo and redo
  * @param props.disabled - nobody signed in: every command greyed
+ * @param props.mapOpen
  * @returns the menu bar
  */
-export function MenuBarPanel({ store, history, disabled, ...gestures }: MenuBarPanelProps) {
+export function MenuBarPanel({
+  store,
+  history,
+  disabled,
+  mapOpen,
+  ...gestures
+}: MenuBarPanelProps) {
   // Store
   const undoLabel = store((state) => state.undoLabel)
   const redoLabel = store((state) => state.redoLabel)
@@ -60,6 +69,7 @@ export function MenuBarPanel({ store, history, disabled, ...gestures }: MenuBarP
   // Derived
   const menus = editorMenus(
     {
+      mapOpen,
       undoLabel,
       redoLabel,
       selected,

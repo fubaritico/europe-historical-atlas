@@ -46,6 +46,11 @@ export interface ShellProps {
   appbar?: ReactNode
   /** Document bar: the open year's tab. Step 5. */
   docbar?: ReactNode
+  /**
+   * The screens with no map — the sign-in (CARTO-535) and the start screen (CARTO-536): the top bar, then the screen over
+   * the whole window, as Illustrator's start screen — no document bar, no tool rail, no panels, no status bar.
+   */
+  bare?: boolean
   /** The tool rail — ⟨navigate⟩, ⟨draw⟩, ⟨edit⟩. Step 4d-2 (c2). */
   rail?: ReactNode
   /** The map. The only zone that exists today. */
@@ -72,6 +77,7 @@ export interface ShellProps {
  * @param props.heading - the page's `<h1>`, placed inside the canvas landmark
  * @param props.appbar - the top bar's content
  * @param props.docbar - the document bar's content
+ * @param props.bare - a screen with no map: the top bar and the screen alone
  * @param props.rail - the tool rail's content
  * @param props.canvas - the map, the one zone always given
  * @param props.dock - the panels' content
@@ -83,6 +89,7 @@ export function Shell({
   heading,
   appbar,
   docbar,
+  bare,
   rail,
   canvas,
   dock,
@@ -100,7 +107,7 @@ export function Shell({
   // 2026-10-21). The bars take the one-line fallback. The canvas may be retried: a remount reloads the
   // backdrop and redraws the document, which lives in the store.
   return (
-    <div className="shell">
+    <div className={bare === true ? 'shell shell--bare' : 'shell'}>
       <div className="shell__appbar">
         <ErrorBoundary zone="app-bar" compact>
           {appbar ?? <Placeholder zone="appBar" />}

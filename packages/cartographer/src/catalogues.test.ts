@@ -273,8 +273,9 @@ describe('the Cartographer catalogues', () => {
     it('finds the catalogues by their file names', () => {
       // 28 since s19 (2026-11-02): the snapshots' and the draft's dialogues gone, Save as…'s and the question before
       // opening added; 29 with {Cities} (CARTO-193), 30 with the panels’ frame (CARTO-342), 31 with the clipboard (CARTO-345),
-      // 32 with the panels' filter (CARTO-360); 33 with the sheet's paste (CARTO-345); 34 with the sign-in (CARTO-535).
-      expect(CATALOGUES.length).toBe(34)
+      // 32 with the panels' filter (CARTO-360); 33 with the sheet's paste (CARTO-345); 34 with the sign-in (CARTO-535);
+      // 36 with the start screen and « Nouvelle carte » (CARTO-536).
+      expect(CATALOGUES.length).toBe(36)
     })
   })
 

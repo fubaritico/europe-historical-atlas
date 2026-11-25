@@ -8,6 +8,7 @@ import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'
 import type { MapNameSource } from '../../utils/mapNameSource'
 import type { BackdropLoad } from '../MapArea'
+import type { StartScreenProps } from '../StartScreen'
 import type { ReactNode } from 'react'
 
 /** What the page needs, which is what the map needs plus the store. */
@@ -28,6 +29,12 @@ export interface EditorProps {
   onSaveAs: () => void
   /** The top bar's *Save a copy*. */
   onSaveCopy: () => void
+  /** Fichier › Nouvelle carte…, and the start screen's main button (CARTO-536). */
+  onNewMap: () => void
+  /** Fichier › Fermer la carte: back to the start screen (CARTO-536). */
+  onCloseMap: () => void
+  /** The start screen's reading of the maps, its clock, and a map opened from its list (CARTO-536). */
+  start: Pick<StartScreenProps, 'maps' | 'now' | 'onOpenMap'>
   /** Édition › Copier: the polity or the stretch selected, as ‹cmd+C› (CARTO-345). */
   onCopy: () => void
   /** Édition › Coller les entités: what the clipboard holds, as ‹cmd+V› (CARTO-345). */
@@ -36,7 +43,7 @@ export interface EditorProps {
   onSelectAll: () => void
   /** Édition › Copier la fiche: the polity selected's sheet alone, as ‹shift+cmd+C› (CARTO-345). */
   onCopySheet: () => void
-  /** The map open's name, which *Save as…* changes — written in the top bar. */
+  /** The map open's name, which *Save as…* changes — written in the top bar; `null` shows the start screen (CARTO-536). */
   mapName: MapNameSource
   /** The canvas's undo and redo, for the document bar's buttons. */
   history: HistoryRelay

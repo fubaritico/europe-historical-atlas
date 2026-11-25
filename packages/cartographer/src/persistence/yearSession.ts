@@ -1,7 +1,8 @@
-import { copyName, isNewMapName, yearNamed } from '@europe-historical-atlas/core/data/mapName'
+import { copyName, yearNamed } from '@europe-historical-atlas/core/data/mapName'
 import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { awaitConfirmation } from './awaitConfirmation'
+import { whyNotMapName } from './mapNaming'
 import { notSavedSentence } from './saveDiagnosis'
 import { timeWords } from './timeWords'
 import { YearChangedOnDisk } from './yearArchive'
@@ -415,14 +416,8 @@ async function askBeforeOverwriting(
  * @returns the sentence, or `null`
  */
 function whyNotSaveAs(deps: YearSessionDeps, cell: SessionCell, name: string): string | null {
-  const { t } = deps.words()
-  if (name === cell.map) return t('saveAsSameName')
-  if (!isNewMapName(name)) return t('saveAsBadName')
-  // A map named as a year is the atlas's map of that year: it must hold it (the dev's « non », 2026-11-02).
-  const named = yearNamed(name)
-  const held = deps.store.getState().document.year
-  if (named !== null && named !== held) return t('saveAsOtherYear', { name, held: String(held) })
-  return null
+  if (name === cell.map) return deps.words().t('saveAsSameName')
+  return whyNotMapName(name, deps.store.getState().document.year, deps.words())
 }
 
 /**

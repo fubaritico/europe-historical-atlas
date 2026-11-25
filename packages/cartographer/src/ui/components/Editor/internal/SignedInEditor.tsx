@@ -17,8 +17,8 @@ import type { EditorProps } from '../editorProps'
 import type { ReactNode } from 'react'
 
 /**
- * The editor once someone is signed in (CARTO-535): the shell filled, with the map in its zone and the status bar in
- * its row, and who is signed in at the top bar's right end.
+ * The editor once someone is signed in (CARTO-535) and a map is open (CARTO-536 — with none, the start screen): the
+ * shell filled, with the map in its zone and the status bar in its row, and who is signed in at the top bar's right end.
  *
  * **Why this is a component rather than JSX in `main.tsx`.** The status bar's node has to be reachable from two
  * places — the shell renders it, the map writes into it — so something has to hold a ref across both, and a ref needs
@@ -38,6 +38,8 @@ import type { ReactNode } from 'react'
  * @param props.onSave - saves the map open, called by the top bar's `[Save]`
  * @param props.onSaveAs - opens the *Save as…* dialogue, called by the top bar
  * @param props.onSaveCopy - saves a copy, called by the top bar
+ * @param props.onNewMap - opens « Nouvelle carte », called by the menu bar
+ * @param props.onCloseMap - closes the map, back to the start screen, called by the menu bar
  * @param props.onCopy - copies what is selected, called by the menu bar
  * @param props.onPaste - pastes what the clipboard holds, called by the menu bar
  * @param props.onSelectAll - selects every point of the polity selected, called by the menu bar
@@ -60,10 +62,10 @@ export function SignedInEditor({
   wikidata,
   results,
   account,
-  // The top bar's gestures, the map's name and the clipboard — onOpen, onSave, onSaveAs, onSaveCopy, onCopy, onPaste,
-  // onSelectAll, onCopySheet, mapName — handed on as they are.
+  // The top bar's gestures, the map's name and the clipboard — onNewMap, onOpen, onCloseMap, onSave, onSaveAs,
+  // onSaveCopy, onCopy, onPaste, onSelectAll, onCopySheet, mapName — handed on as they are.
   ...bar
-}: Omit<EditorProps, 'session'> & { account: ReactNode }) {
+}: Omit<EditorProps, 'session' | 'start'> & { account: ReactNode }) {
   // Store
   const year = store((state) => state.document.year)
   const docked = store((state) => state.panelLayout.docked.length)

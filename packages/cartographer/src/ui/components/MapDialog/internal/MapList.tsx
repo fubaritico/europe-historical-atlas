@@ -19,8 +19,8 @@ export type MapListing =
 export interface MapListProps {
   /** The maps, or where their reading stands. */
   listing: MapListing
-  /** The map open. */
-  map: string
+  /** The map open, or `null` from the start screen, where every map is a choice (CARTO-536). */
+  map: string | null
   /** The map selected, or `null`. */
   selected: string | null
   /**

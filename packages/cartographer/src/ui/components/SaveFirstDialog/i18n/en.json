@@ -2,5 +2,7 @@
   "title": "Open a map",
   "question": "You are about to open {map}. Save the current map?",
   "signOutTitle": "Sign out",
-  "signOutQuestion": "You are about to sign out. Save the current map?"
+  "signOutQuestion": "You are about to sign out. Save the current map?",
+  "closeTitle": "Close the map",
+  "closeQuestion": "You are about to close the map. Save the current map?"
 }

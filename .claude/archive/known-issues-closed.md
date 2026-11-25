@@ -453,3 +453,10 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   **Remedy**: the historian fills the list. **Severity: à savoir.**
   **Closed 2026-11-23**: every record has its English name, the eleven events their English title and description
   (`files/spikes/english-names/write_events.py`).
+
+- **An address with `?map=` that cannot be a map's name leaves the Cartographer blank** (2026-11-02,
+  `persistence/openingMap.ts`; was `?year=` the same morning): it throws before anything mounts, said on the console —
+  **my choice**, never answered by the dev: opening 1100 in its place would have him drawing on 1100 while believing it
+  another map. A well-formed name with no folder opens nothing, saving blocked, said in the alarm (`noSuchMap`). Only
+  _Open…_ and _Save as…_ write the address. **Severity: cosmétique.**
+  **Closed 2026-11-25 (CARTO-536)**: the address names no map any more — the dev: « je veux plus de variables d'URL ».

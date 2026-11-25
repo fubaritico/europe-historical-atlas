@@ -14,6 +14,7 @@
   "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}",
   "signOut": "Sign out",
   "signInFirst": "sign in first",
+  "openMapFirst": "open a map first",
   "signedInAs": "Signed in: {email}",
   "sessionExpired": "Session expired"
 }

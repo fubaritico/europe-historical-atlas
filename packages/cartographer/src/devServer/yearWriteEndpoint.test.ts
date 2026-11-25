@@ -508,15 +508,27 @@ describe('handleYearWrite, the list of the maps (s19)', () => {
       const response = handleYearWrite(listRequest(), yearsOnDisk().folder)
 
       expect(response.status).toBe(200)
-      expect(bodyOf(response)).toEqual({ maps: ['900', '1100', '1100-backup-2026-11-02', '1200'] })
+      expect(bodyOf(response).maps).toEqual(['900', '1100', '1100-backup-2026-11-02', '1200'])
+    })
+
+    // CARTO-536: the start screen orders the last maps by it.
+    it('says when each map was last written — its most recent file', () => {
+      const { folder } = memoryFolder(
+        { '1100/registry.json': 'r', '1100/polities.json': 'p', '1200/registry.json': 'r' },
+        { '1100/registry.json': 10, '1100/polities.json': 30, '1200/registry.json': 20 }
+      )
+      expect(bodyOf(handleYearWrite(listRequest(), folder)).changedAt).toEqual({
+        '1100': 30,
+        '1200': 20,
+      })
     })
   })
 
   describe('variants', () => {
     it('answers the list for a path written with no slash at all', () => {
-      expect(bodyOf(handleYearWrite(listRequest({ path: '' }), yearsOnDisk().folder))).toEqual({
-        maps: ['900', '1100', '1100-backup-2026-11-02', '1200'],
-      })
+      expect(bodyOf(handleYearWrite(listRequest({ path: '' }), yearsOnDisk().folder)).maps).toEqual(
+        ['900', '1100', '1100-backup-2026-11-02', '1200']
+      )
     })
   })
 
@@ -549,7 +561,10 @@ describe('handleYearWrite, the list of the maps (s19)', () => {
 
   describe('edge cases', () => {
     it('lists nothing in a folder with no map', () => {
-      expect(bodyOf(handleYearWrite(listRequest(), memoryFolder().folder))).toEqual({ maps: [] })
+      expect(bodyOf(handleYearWrite(listRequest(), memoryFolder().folder))).toEqual({
+        maps: [],
+        changedAt: {},
+      })
     })
   })
 })

@@ -147,6 +147,24 @@ textarea,
 }
 
 /*
+ * A screen with no map — the sign-in and the start screen (CARTO-536): the top bar, then the screen over the whole
+ * window, as Illustrator's start screen; the document bar, the rail and the dock are not laid at all.
+ */
+.shell--bare {
+  grid-template-rows: 30px minmax(0, 1fr);
+}
+
+.shell--bare > .shell__docbar,
+.shell--bare .shell__rail,
+.shell--bare .shell__dock {
+  display: none;
+}
+
+.shell--bare .shell__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/*
  * The status bar is a row of the shell, not something floating over the map.
  *
  * It was drawn over the canvas until 2026-10-08 because there was no shell to put it in. Now that the

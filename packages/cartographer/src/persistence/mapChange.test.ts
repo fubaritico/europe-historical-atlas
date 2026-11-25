@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { changeMap } from './mapChange'
+import { changeMap, closeMap } from './mapChange'
 import { persistenceWords } from './persistenceWords'
 
 import type { MapChangeDeps, SaveFirstAnswer } from './mapChange'
@@ -33,8 +33,7 @@ function world(
       return Promise.resolve(over.answer ?? 'yes')
     },
     carryView: () => calls.push('carry'),
-    search: '?map=1100',
-    go: (address) => calls.push(`go ${address}`),
+    go: (map) => calls.push(`go ${map ?? 'start'}`),
     report: vi.fn(),
     words: () => persistenceWords('en'),
   }
@@ -53,7 +52,7 @@ describe('changeMap', () => {
     it('asks, saves, carries the view, then goes to the map', async () => {
       const deps = world()
       expect(await changeMap(deps, '1200')).toBe(true)
-      expect(deps.calls).toEqual(['ask 1200', 'save', 'carry', 'go ?map=1200'])
+      expect(deps.calls).toEqual(['ask 1200', 'save', 'carry', 'go 1200'])
     })
   })
 
@@ -61,13 +60,13 @@ describe('changeMap', () => {
     it('opens without saving on [No]', async () => {
       const deps = world({ answer: 'no' })
       expect(await changeMap(deps, '1200')).toBe(true)
-      expect(deps.calls).toEqual(['ask 1200', 'carry', 'go ?map=1200'])
+      expect(deps.calls).toEqual(['ask 1200', 'carry', 'go 1200'])
     })
 
     it('asks nothing when the page holds no change', async () => {
       const deps = world({ modified: false })
       expect(await changeMap(deps, '1200')).toBe(true)
-      expect(deps.calls).toEqual(['carry', 'go ?map=1200'])
+      expect(deps.calls).toEqual(['carry', 'go 1200'])
     })
   })
 
@@ -109,6 +108,62 @@ describe('changeMap', () => {
       const deps = world()
       expect(await changeMap(deps, '1100')).toBe(false)
       expect(deps.calls).toEqual([])
+    })
+  })
+})
+
+describe('closeMap', () => {
+  describe('happy path', () => {
+    it('asks about closing, saves, carries the view, then goes to the start screen', async () => {
+      const deps = world()
+      expect(await closeMap(deps)).toBe(true)
+      expect(deps.calls).toEqual(['ask close', 'save', 'carry', 'go start'])
+    })
+  })
+
+  describe('variants', () => {
+    it('closes without saving on [No]', async () => {
+      const deps = world({ answer: 'no' })
+      expect(await closeMap(deps)).toBe(true)
+      expect(deps.calls).toEqual(['ask close', 'carry', 'go start'])
+    })
+
+    it('asks nothing when the page holds no change', async () => {
+      const deps = world({ modified: false })
+      expect(await closeMap(deps)).toBe(true)
+      expect(deps.calls).toEqual(['carry', 'go start'])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('keeps the map open when the question is dismissed', async () => {
+      const deps = world({ answer: 'cancel' })
+      expect(await closeMap(deps)).toBe(false)
+      expect(deps.calls).toEqual(['ask close'])
+    })
+
+    it('keeps the map open when the save fails', async () => {
+      const deps = world({ saves: false })
+      expect(await closeMap(deps)).toBe(false)
+      expect(deps.calls).toEqual(['ask close', 'save'])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('keeps the map open and raises the alarm when the question cannot be asked', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const deps = world()
+      deps.askSaveFirst = () => Promise.reject(new Error('already asking'))
+      expect(await closeMap(deps)).toBe(false)
+      expect(deps.report).toHaveBeenCalledWith(expect.objectContaining({ tone: 'alarm' }))
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps the map open when a gesture was drawn while it was being saved', async () => {
+      const deps = world({ drawsWhileSaving: true })
+      expect(await closeMap(deps)).toBe(false)
+      expect(deps.calls).toEqual(['ask close', 'save'])
     })
   })
 })

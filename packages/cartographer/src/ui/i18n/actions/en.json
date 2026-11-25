@@ -3,6 +3,8 @@
   "open": "Open…",
   "saveAs": "Save as…",
   "saveCopy": "Save a copy",
+  "newMap": "New map…",
+  "closeMap": "Close the map",
   "undo": "Undo",
   "redo": "Redo",
   "undoStep": "Undo {step}",

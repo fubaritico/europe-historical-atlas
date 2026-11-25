@@ -17,9 +17,9 @@ export interface MapChooserProps {
   source: { listMaps: () => Promise<readonly string[]> }
   /**
    * The map open, read at each opening — *Save as…* changes it without a reload.
-   * @returns its name
+   * @returns its name, or `null` from the start screen (CARTO-536)
    */
-  currentMap: () => string
+  currentMap: () => string | null
   /**
    * Open the map chosen — ask whether to save the page first, then reload on it (`persistence/mapChange.ts`).
    * @param map - the map chosen

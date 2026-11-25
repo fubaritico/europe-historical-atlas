@@ -13,6 +13,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `open` — Open a map.
  * - `saveAs` — Write the map under another name, and go on as the new map.
  * - `saveCopy` — Write a copy of the map, and stay on it.
+ * - `newMap` — Create an empty map of a year, and open it (CARTO-536).
+ * - `closeMap` — Close the map, back to the start screen (CARTO-536).
  * - `yes`, `no` — The answers to a question — *Open…*'s « save the current map? ».
  * - `undo` — Undo, with nothing to undo — the bare verb.
  * - `redo` — Redo, with nothing to redo — the bare verb.

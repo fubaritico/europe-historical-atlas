@@ -17,7 +17,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `stillReading`, `saveRunning`, `notSaved`, `notSavedWikidata`, `notSavedPolityField`, `saved`, `saveUnconfirmed`, `notSavedChanged` — The year on
  *   disk
  * - `mapPageChanged`, `saveAsSameName`, `saveAsBadName`, `saveAsOtherYear`, `saveAsTaken`, `saveAsFailed`,
- *   `copySaved`, `copyNotSaved`, `noSuchMap`, `openAskFailed` — A map opened, saved as, copied (`s19`)
+ *   `copySaved`, `copyNotSaved`, `noSuchMap`, `openAskFailed` — A map opened, saved as, copied, closed (`s19`, `s24`)
+ * - `newMapBadYear` — « Nouvelle carte »'s year, refused under its field (`newMap.ts`, CARTO-536)
+ * - `tabStorageRefused` — The tab's storage refused, so no map can be kept to open (`openMapStorage.ts`, CARTO-536)
  * - `autosaveKeptAgain`, `autosaveNotKept`, `autosaveUnconfirmed` — The automatic save (`autosaveKeeper.ts`)
  * - `sessionBroken` — The session's answer unreadable, in the error dialogue (`sessionKeeper.ts`, CARTO-535)
  * - `signOutAskFailed` — « save first? » could not be asked before signing out (`signOut.ts`, CARTO-535)

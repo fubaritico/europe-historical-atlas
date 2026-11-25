@@ -68,21 +68,26 @@ Scenario: the current map cannot be saved
 > the Cartographer closes on ‹escape›. The dev named only [Yes] and [No].
 
 ```gherkin
-Scenario: the address names the map
-  Given 1100-backup-2026-11-02 was opened
-  Then the address reads ?map=1100-backup-2026-11-02
-  And reloading the page opens 1100-backup-2026-11-02 again
-  But with no map in the address it opens 1100, as before
+Scenario: ~~the address names the map~~
+  ~~Given 1100-backup-2026-11-02 was opened~~
+  ~~Then the address reads ?map=1100-backup-2026-11-02~~
+  ~~And reloading the page opens 1100-backup-2026-11-02 again~~
+  ~~But with no map in the address it opens 1100, as before~~
 
-Scenario: an address naming no map
-  Given the address reads ?map=1300 and years/ holds no folder 1300
-  When the Cartographer starts
-  Then it opens nothing, and says « no map named 1300 — Open… lists the maps there are »
+Scenario: ~~an address naming no map~~
+  ~~Given the address reads ?map=1300 and years/ holds no folder 1300~~
+  ~~When the Cartographer starts~~
+  ~~Then it opens nothing, and says « no map named 1300 — Open… lists the maps there are »~~
 ```
 
-> The refusal of a name that is not a map keeps the choice of this morning for a year that is not one: opening 1100 in
+> ~~The refusal of a name that is not a map keeps the choice of this morning for a year that is not one: opening 1100 in
 > its place would have him drawing on 1100 while believing it another map. Said on screen now, not in the console only
-> — *proposal*.
+> — *proposal*.~~
+>
+> **Struck 2026-11-25 on the dev's word** (CARTO-536: *« je veux plus de variables d'URL »*, *« je veux pas le 1100 par
+> défaut »*): the address names no map. The map open is kept in the tab — a reload reopens it — and with none, the
+> start screen shows ([s24](s24-start-screen.md)). A map kept whose folder is gone is still refused by the session,
+> saving blocked, « no map named 1300 — Open… lists the maps there are ».
 
 ## Save
 

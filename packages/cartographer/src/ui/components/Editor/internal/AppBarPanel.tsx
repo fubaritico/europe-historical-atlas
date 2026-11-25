@@ -20,9 +20,16 @@ import type { ReactNode } from 'react'
  */
 
 /** What the top bar's binding needs: the gestures, where the map's name is read, and what the menus read. */
-export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'menus'> {
-  /** The map open's name, which *Save as…* changes. */
+export interface AppBarPanelProps extends Omit<
+  AppBarProps,
+  'name' | 'map' | 'menus' | 'unavailable' | 'withoutMap'
+> {
+  /** The map open's name, which *Save as…* changes — `null` on the start screen (CARTO-536). */
   mapName: MapNameSource
+  /** Fichier › Nouvelle carte… (CARTO-536). */
+  onNewMap: () => void
+  /** Fichier › Fermer la carte (CARTO-536). */
+  onCloseMap: () => void
   /** The store the menus read the history and the selection from. */
   store: CartographerStoreHook
   /** The canvas's undo and redo, for Édition's first two commands. */
@@ -51,6 +58,8 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
  * @param props.onPaste - Édition › Coller les entités
  * @param props.onSelectAll - Édition › Tout sélectionner
  * @param props.onCopySheet - Édition › Copier la fiche
+ * @param props.onNewMap - Fichier › Nouvelle carte…
+ * @param props.onCloseMap - Fichier › Fermer la carte
  * @param props.signedOut - nobody signed in: every gesture greyed
  * @param props.account - who is signed in, at the right end
  * @returns the top bar
@@ -63,6 +72,8 @@ export function AppBarPanel({
   onPaste,
   onSelectAll,
   onCopySheet,
+  onNewMap,
+  onCloseMap,
   signedOut,
   account,
   ...gestures
@@ -81,6 +92,7 @@ export function AppBarPanel({
       map={map}
       {...gestures}
       {...(signedOut === true ? { unavailable: t('signInFirst') } : {})}
+      {...(map === null ? { withoutMap: t('openMapFirst') } : {})}
       account={account}
       menus={
         <MenuBarPanel
@@ -90,7 +102,10 @@ export function AppBarPanel({
           onPaste={onPaste}
           onSelectAll={onSelectAll}
           onCopySheet={onCopySheet}
+          onNewMap={onNewMap}
+          onCloseMap={onCloseMap}
           disabled={signedOut === true}
+          mapOpen={map !== null}
           {...gestures}
         />
       }

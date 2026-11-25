@@ -91,6 +91,24 @@ export interface YearArchive {
   save: (document: YearDocument, map: string, options?: SaveOptions) => Promise<SavedYearSummary>
 }
 
+/** A map, and when it was last written — what the start screen lists (CARTO-536). */
+export interface DatedMap {
+  /** The map's name. */
+  name: string
+  /** When its most recent file was written, in milliseconds since the epoch. */
+  changedAt: number
+}
+
+/** The maps with their dates — the start screen's reading, beside {@link YearArchive} (CARTO-536). */
+export interface DatedMapList {
+  /**
+   * Every map, with when it was last written, in the order of their names.
+   * @returns the maps
+   * @throws an `Error` when the list cannot be fetched or read
+   */
+  listDatedMaps: () => Promise<readonly DatedMap[]>
+}
+
 /** What the dev-server archive needs. */
 export interface DevServerYearArchiveDeps {
   /** The fetch to use — the window's in the application, a stub in tests. */
@@ -241,18 +259,45 @@ function readMapList(value: unknown, source: string): readonly string[] {
 }
 
 /**
+ * Read the list of maps with their dates, refusing a map with no time: our own server sends one for every map listed.
+ * @param value - the parsed body, `{ maps: [...], changedAt: { <map>: <ms> } }`
+ * @param source - where it came from, for the error
+ * @returns the maps and their dates
+ * @throws an `AssetError` saying what the answer lacks
+ */
+function readDatedMapList(value: unknown, source: string): readonly DatedMap[] {
+  const maps = readMapList(value, source)
+  const times =
+    value !== null && typeof value === 'object' && 'changedAt' in value
+      ? value.changedAt
+      : undefined
+  if (times === null || typeof times !== 'object')
+    throw assetError('yearRegistry', 'schema', source, 'the list of maps carries no dates')
+  return maps.map((name) => {
+    const changedAt = (times as Record<string, unknown>)[name]
+    if (typeof changedAt !== 'number' || !Number.isFinite(changedAt))
+      throw assetError('yearRegistry', 'schema', source, `the map ${name} has no date`)
+    return { name, changedAt }
+  })
+}
+
+/**
  * An archive kept by the Cartographer's dev server: reads are plain GETs on `years/`, writes go to the
  * endpoint `devServer/yearWriteEndpoint.ts` serves.
  * @param deps - the fetch, and the two places
- * @returns the archive
+ * @returns the archive, which lists the maps' dates too
  */
-export function createDevServerYearArchive(deps: DevServerYearArchiveDeps): YearArchive {
+export function createDevServerYearArchive(
+  deps: DevServerYearArchiveDeps
+): YearArchive & DatedMapList {
   const base = deps.yearsBase.replace(/\/$/, '')
   // The fingerprint of each map as this page last read or wrote it (CARTO-238, rung 3). A map with none —
   // never opened, never saved — is expected absent from disk; `null` is a fingerprint lost to a defect.
   const stamps = new Map<string, string | null>()
   return {
     listMaps: () => readJson(deps.fetch, 'yearRegistry', deps.writeRoute, readMapList),
+
+    listDatedMaps: () => readJson(deps.fetch, 'yearRegistry', deps.writeRoute, readDatedMapList),
 
     open: async (map) => {
       const paths = yearPaths(base, map)

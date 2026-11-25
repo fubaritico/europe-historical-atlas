@@ -246,3 +246,53 @@ describe('createDevServerYearArchive, maps by name', () => {
     })
   })
 })
+
+const dated = () => Response.json({ maps: ['1100', '1200'], changedAt: { '1100': 30, '1200': 20 } })
+
+// CARTO-536: the start screen's last maps, by date.
+describe('createDevServerYearArchive, the maps with their dates', () => {
+  describe('happy path', () => {
+    it('lists each map with when it was last written', async () => {
+      const { archive } = archiveWith([], dated)
+      expect(await archive.listDatedMaps()).toEqual([
+        { name: '1100', changedAt: 30 },
+        { name: '1200', changedAt: 20 },
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('lists no map when the folder holds none', async () => {
+      const { archive } = archiveWith([], () => Response.json({ maps: [], changedAt: {} }))
+      expect(await archive.listDatedMaps()).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('rejects a listing that carries no dates', async () => {
+      const { archive } = archiveWith([], () => Response.json({ maps: ['1100'] }))
+      await expect(archive.listDatedMaps()).rejects.toThrow('carries no dates')
+    })
+
+    it('rejects a map listed without its date, naming it', async () => {
+      const { archive } = archiveWith([], () =>
+        Response.json({ maps: ['1100', '1200'], changedAt: { '1100': 30, '1200': null } })
+      )
+      await expect(archive.listDatedMaps()).rejects.toThrow('the map 1200 has no date')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('rejects a listing the server refused', async () => {
+      const { archive } = archiveWith([], () => new Response('', { status: 500 }))
+      await expect(archive.listDatedMaps()).rejects.toThrow('HTTP 500')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('still refuses a listing that is not a list of names, before reading any date', async () => {
+      const { archive } = archiveWith([], () => Response.json({ maps: [1100], changedAt: {} }))
+      await expect(archive.listDatedMaps()).rejects.toThrow('not a list of names')
+    })
+  })
+})

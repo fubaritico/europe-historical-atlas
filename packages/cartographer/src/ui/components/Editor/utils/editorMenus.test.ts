@@ -22,6 +22,8 @@ const WORDS = {
  */
 function gestures(): EditorMenuGestures {
   return {
+    onNewMap: vi.fn(),
+    onCloseMap: vi.fn(),
     onOpen: vi.fn(),
     onSave: vi.fn(),
     onSaveAs: vi.fn(),
@@ -44,6 +46,7 @@ function gestures(): EditorMenuGestures {
 function menus(over: Partial<EditorMenuState> = {}, to = gestures()): MenuDefinition[] {
   return editorMenus(
     {
+      mapOpen: true,
       undoLabel: null,
       redoLabel: null,
       selected: null,
@@ -74,17 +77,58 @@ describe('editorMenus', () => {
       expect(menus().map((menu) => menu.label)).toEqual(['Fichier', 'Édition'])
     })
 
-    it('shows each command of Fichier with its keys, Save a copy with none', () => {
+    it('shows each command of Fichier with its keys, in Illustrator’s order', () => {
       const file = menus()[0]?.entries.map((entry) =>
-        entry.kind === 'command' ? [entry.label, entry.keys?.shown ?? null] : null
+        entry.kind === 'command' ? [entry.label, entry.keys?.shown ?? null] : entry.kind
       )
 
       expect(file).toEqual([
+        ['Nouvelle carte…', null],
         ['Ouvrir…', '⌘O'],
+        'separator',
+        ['Fermer la carte', null],
         ['Enregistrer', '⌘S'],
         ['Enregistrer sous…', '⇧⌘S'],
         ['Enregistrer une copie', null],
       ])
+    })
+
+    it('runs « Nouvelle carte… » and « Fermer la carte » through their gestures (CARTO-536)', () => {
+      const to = gestures()
+      const all = menus({}, to)
+      find(all, 'newMap').onChoose()
+      find(all, 'closeMap').onChoose()
+
+      expect(to.onNewMap).toHaveBeenCalledOnce()
+      expect(to.onCloseMap).toHaveBeenCalledOnce()
+    })
+  })
+
+  // CARTO-535's table: on the start screen, a new map and Open… alone.
+  describe('with no map open (CARTO-536)', () => {
+    it('offers « Nouvelle carte… » and « Ouvrir… », and greys the rest of Fichier', () => {
+      const file = menus({ mapOpen: false })[0]?.entries.flatMap((entry) =>
+        entry.kind === 'command' ? [[entry.id, entry.enabled]] : []
+      )
+
+      expect(file).toEqual([
+        ['newMap', true],
+        ['open', true],
+        ['closeMap', false],
+        ['save', false],
+        ['saveAs', false],
+        ['saveCopy', false],
+      ])
+    })
+
+    it('greys Édition whole, even with something to undo or to paste', () => {
+      const edit = menus({
+        mapOpen: false,
+        undoLabel: 'Créer France',
+        paste: { label: 'Coller', enabled: true },
+      })[1]
+
+      expect(edit?.entries.some((entry) => entry.kind === 'command' && entry.enabled)).toBe(false)
     })
   })
 
