@@ -73,6 +73,14 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
 
 8. Names and hypotheses: every name of each place and actor in each language; every holder ever put forward.
 9. Resources he gave — opened first.
+9 bis. **The oracle — a channel of its own, compulsory, before any other** (the dev, 2026-11-25: _"it becomes one more
+    source"_). `mcp__oracle__search` with every name (and `qid` for the Wikidata aliases), `mcp__oracle__recall` with
+    the question in plain words, filtered by zone and century when the question allows (`zone`, `century`, `work`,
+    `lang`). It answers from every book already filed — `ouvrages/` and the dev's PDFs in `bibliotheque-texte/` —
+    with the book and the line or page: read those passages in the book, never the whole text again. Each query is
+    an attempt of kind `oracle` (`research_log.py attempt`); the gate refuses a region without one. A passage is
+    the witness of its book, never of the oracle. A book it lacks is fetched by the channels below, then indexed by
+    the historian session at the end of the zone.
 10. Wikipedia, every language: priming only. List the works its pages cite (`cited_works.py`). **Follow its links,
     as a reader does** (the dev, 2026-11-23: _"I only followed links from Wikipedia pages"_): every map and image of
     the page opened on Commons — author, source, licence, then looked at, its names read; the pages of its actors,
@@ -81,15 +89,18 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
     their Commons file pages, the index, and `flags.md` — the page's banners of missing sources and its annotated
     sentences with their notes: every annotated sentence that bears on a holder goes to the next channels as the work
     and page to read; every flagged one is dropped.
-11. The PDFs on disk (`/Volumes/Acer/atlas-historien/bibliotheque/`): each opened, or ruled out with its reason
-    (title, period, index — one test is enough). Text and map legends. `pypdf` with `2>/dev/null`.
+11. The PDFs on disk (`/Volumes/Acer/atlas-historien/bibliotheque/`): their text, OCR included, is in
+    `bibliotheque-texte/<book>/texte.txt` page by page (REPO-553), and in the oracle — searched there first; the PDF
+    itself opened for its maps and legends, or ruled out with its reason (title, period, index — one test is enough).
 12. archive.org: `find_book.py search "<title> <author>"`, then `find_book.py get <identifier> <folder>`. **Then by
     subject, by myself** (the dev, 2026-11-23): the polities, the actors, the region, the period — never only the
     titles he gave. The free scholarly works filed, the loan-only listed; **to him, only what was not found**.
     **An empty search is never an answer** (the dev, 2026-11-24, on « Sandnes neighbouring farms Roussell », dropped
     after one try): the script shows its reformulations, to judge; then find the book's **exact title** by a web
     search, and search that title on archive.org, Gallica and Google Books; the journal says why it is dropped.
-13. Gallica.
+13. Gallica. **Its scripts are refused by Cloudflare** (2026-11-25): searched by the historian session through the
+    site's own search page in the dev's Chrome, words typed in the field (an address with parentheses is blocked);
+    a text served page by page is never read by a loop of requests — listed for the catch-up instead.
 14. The BnF, then JSTOR — in his Chrome, never while he tests an app there. Not logged in or refused:
     write **CONNEXION IMPOSSIBLE**, stop everything, nothing counted.
 15. In every work read: the index for every name, the passage, the notes and bibliography → the next works.

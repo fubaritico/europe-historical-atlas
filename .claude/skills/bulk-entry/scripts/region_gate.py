@@ -30,7 +30,8 @@ NOTE = pathlib.Path('/Volumes/Acer/atlas-historien') / str(YEAR) / REGION / 'res
 ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 ATLASES = pathlib.Path('/Volumes/Acer/atlas-historien/bibliotheque')
 # The channels the dev made compulsory on 2026-11-23: none is skipped, a search there may only come back empty.
-CHANNELS = ('wikipedia-bibliography', 'jstor', 'gallica', 'bnf', 'archive-org')
+# The oracle (the index of the books already filed) joined them on 2026-11-25: « it becomes one more source ».
+CHANNELS = ('oracle', 'wikipedia-bibliography', 'jstor', 'gallica', 'bnf', 'archive-org')
 # Only a single work can be ruled out as not relevant — never a library — and its reason is written.
 WORKS = {'atlas-on-disk', 'book-index', 'book-passage'}
 KINDS = set(CHANNELS) | WORKS | {'library'}
