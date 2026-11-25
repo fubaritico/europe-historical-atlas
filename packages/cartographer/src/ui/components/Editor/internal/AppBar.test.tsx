@@ -9,11 +9,10 @@ import { AppBar } from './AppBar'
  * Render the bar on a map, a menu bar and an account standing in for theirs.
  * @param map - the map open, or `null` on the start screen
  */
-function mount(map: string | null = '1100'): void {
+function mount(): void {
   renderInEnglish(
     <AppBar
       name="Europe Historical Atlas Cartographer"
-      map={map}
       menus={<div data-testid="menus" />}
       account={<span data-testid="account" />}
     />
@@ -36,30 +35,18 @@ describe('AppBar', () => {
       expect(document.querySelector('.bar-actions > [data-testid="account"]')).not.toBeNull()
     })
 
-    it('writes the name and the map open in the middle, without the mark', () => {
+    // The dev, 2026-11-25: the map open is not written beside the name — the document tab says it.
+    it('writes the application’s name alone in the middle, without the mark nor the map', () => {
       mount()
 
-      expect(document.querySelector('.app-brand__name')?.textContent).toBe(
+      expect(document.querySelector('.app-brand')?.textContent).toBe(
         'Europe Historical Atlas Cartographer'
       )
-      expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')
       expect(document.querySelector('.app-brand .brand-mark')).toBeNull()
     })
   })
 
-  describe('variants', () => {
-    it('writes a working map’s name as it is', () => {
-      mount('1100-backup-2026-11-02')
-      expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100-backup-2026-11-02')
-    })
-
-    it('writes the name alone on the start screen, no map open', () => {
-      mount(null)
-      expect(document.querySelector('.app-brand')?.textContent).toBe(
-        'Europe Historical Atlas Cartographer'
-      )
-    })
-  })
+  // L2: N/A — the bar takes no map any more; it is the same with a map open or none.
 
   describe('managed errors', () => {
     // CARTO-555: the four file buttons doubled the menu Fichier — gone, the menu and the keys keep their gestures.

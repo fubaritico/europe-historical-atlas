@@ -306,12 +306,12 @@ describe('Editor', () => {
       warn.mockRestore()
     })
 
-    it('while the CMS is asked, says so in the form', () => {
+    // The dev, 2026-11-25: the form flashed, empty, at each map opened — the page reloads and the CMS is asked again.
+    it('while the CMS is asked, shows an empty screen, never the form', () => {
       mount(undefined, sessionAt({ kind: 'checking' }))
 
-      expect(document.querySelector('.sign-in-form [role="status"]')?.textContent).toBe(
-        'Checking the session…'
-      )
+      expect(document.querySelector('.sign-in-screen')?.getAttribute('aria-busy')).toBe('true')
+      expect(document.querySelector('form.sign-in-form')).toBeNull()
     })
 
     it('signed in, names who at the bar’s end, and « Sign out » signs out', async () => {
@@ -421,7 +421,9 @@ describe('Editor', () => {
       expect(
         within(bar).getByRole('button', { name: 'Sign out' }).querySelector('svg')
       ).not.toBeNull()
-      expect(bar.querySelector('.app-brand__year')).toBeNull()
+      expect(bar.querySelector('.app-brand')?.textContent).toBe(
+        'Europe Historical Atlas Cartographer'
+      )
     })
 
     it('with nobody signed in and no map open, still shows the sign-in form first', () => {

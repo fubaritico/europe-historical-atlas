@@ -119,6 +119,14 @@ describe('createTabMapKeeper', () => {
       expect([keptOpenMap(storage), did]).toEqual([null, ['reload']])
     })
 
+    it('forgets the map and reloads on the start screen — « Se déconnecter »', () => {
+      const storage = memory()
+      keepOpenMap(storage, '1100')
+      const { kept, did } = keeper(storage)
+      kept.forget()
+      expect([keptOpenMap(storage), did]).toEqual([null, ['reload']])
+    })
+
     it('follows Save as… with no reload', () => {
       const storage = memory()
       const { kept, did } = keeper(storage)

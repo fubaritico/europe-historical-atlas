@@ -240,8 +240,9 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
         window.history.replaceState(null, '', '/')
       }
 
-      expect(root.querySelector('.app-brand__year')?.textContent).toBe('1100')
+      // The editor opens on the map kept, 1100, and the address leaves it so.
       expect(root.querySelector('.start-screen')).toBeNull()
+      expect(window.sessionStorage.getItem(OPEN_MAP_KEY)).toBe('1100')
     })
 
     it('opens on the start screen when the name kept cannot be a map’s, said in the console', async () => {

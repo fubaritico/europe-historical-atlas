@@ -1150,15 +1150,6 @@
   white-space: nowrap;
 }
 
-.app-brand__sep {
-  color: var(--ink-off);
-}
-
-.app-brand__year {
-  color: var(--ink-dim);
-  line-height: 16px;
-}
-
 /*
  * The two top bars' buttons, after the handoff's `appbar` and `docbar` (`design/chrome.css`): full height,
  * a soft hairline between them, the hover fill. Unavailable is `aria-disabled` (`BarButton.tsx`), drawn in

@@ -19,8 +19,12 @@ export interface SignedOutShellProps {
 }
 
 /**
- * The Cartographer while nobody is signed in (CARTO-535): the chrome — the top bar and its menus, every command greyed —
- * and the sign-in form where the map would be; no tools, no panels, no status bar.
+ * The Cartographer while nobody is signed in (CARTO-535): the chrome — the top bar and its menus, greyed — and the
+ * sign-in form where the map would be; no tools, no panels, no status bar.
+ *
+ * **While the CMS is still asked, an empty screen, never the form** (the dev, 2026-11-25): opening a map reloads the page,
+ * and the session is asked again — the form flashed, its fields empty, between the start screen and the map's loading,
+ * for someone signed in all along. It shows once the CMS has answered that nobody is.
  * @param props - the heading, the greyed bar, the session and its keeper
  * @param props.heading - the page's `<h1>`
  * @param props.appbar - the top bar, greyed
@@ -43,16 +47,20 @@ export function SignedOutShell({ heading, appbar, session, keeper }: SignedOutSh
       docbar={<></>}
       rail={<></>}
       canvas={
-        <div className="sign-in-screen">
-          <SignInForm
-            expired={false}
-            email=""
-            checking={session.kind === 'checking'}
-            problem={session.kind === 'signedOut' ? session.problem : null}
-            onSignIn={keeper.signIn}
-            onRetry={handleRetry}
-          />
-        </div>
+        session.kind === 'checking' ? (
+          <div className="sign-in-screen" aria-busy="true" />
+        ) : (
+          <div className="sign-in-screen">
+            <SignInForm
+              expired={false}
+              email=""
+              checking={false}
+              problem={session.problem}
+              onSignIn={keeper.signIn}
+              onRetry={handleRetry}
+            />
+          </div>
+        )
       }
       status={<></>}
       dockWidth={null}

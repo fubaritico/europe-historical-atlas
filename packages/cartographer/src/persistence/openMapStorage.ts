@@ -62,6 +62,8 @@ export interface TabMapKeeper {
    * @param map - the map to open, or `null` for the start screen
    */
   reloadOn: (map: string | null) => void
+  /** No map kept, then the page reloaded — « Se déconnecter » closes the map (the dev, 2026-11-25). */
+  forget: () => void
   /**
    * Keep the map the page has become, with no reload — *Save as…*; a refused write said.
    * @param map - the map's name
@@ -88,11 +90,15 @@ export interface TabMapKeeperDeps {
  * @returns the keeper
  */
 export function createTabMapKeeper(deps: TabMapKeeperDeps): TabMapKeeper {
+  const reloadOn = (map: string | null): void => {
+    const kept = map === null ? forgetOpenMap(deps.storage) : keepOpenMap(deps.storage, map)
+    if (kept) deps.reload()
+    else deps.refused(map)
+  }
   return {
-    reloadOn: (map) => {
-      const kept = map === null ? forgetOpenMap(deps.storage) : keepOpenMap(deps.storage, map)
-      if (kept) deps.reload()
-      else deps.refused(map)
+    reloadOn,
+    forget: () => {
+      reloadOn(null)
     },
     follow: (map) => {
       if (!keepOpenMap(deps.storage, map)) deps.refused(map)

@@ -29,8 +29,8 @@ const meta = () => document.querySelector('.doc-tab__meta')?.textContent
 
 describe('top bars, bound', () => {
   describe('happy path', () => {
-    // s19: the map's name, read from its source — and followed when *Save as…* changes it, with no reload.
-    it('writes the open map’s name and follows it when it changes', () => {
+    // The dev, 2026-11-25 (CARTO-555): the bar writes the application's name alone — the map open is the document tab's.
+    it('writes the application’s name alone, never the map open, even after Save as…', () => {
       const mapName = createMapNameStore('1100')
       renderInEnglish(
         <AppBarPanel
@@ -49,11 +49,13 @@ describe('top bars, bound', () => {
           onCopySheet={vi.fn()}
         />
       )
-      expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')
+      expect(document.querySelector('.app-brand')?.textContent).toBe(
+        'Europe Historical Atlas Cartographer'
+      )
       act(() => {
         mapName.set('1100-essai')
       })
-      expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100-essai')
+      expect(document.querySelector('.app-brand')?.textContent).not.toContain('1100-essai')
     })
 
     it('undoes through the canvas’s relay, never the store straight (ARCH-101)', async () => {

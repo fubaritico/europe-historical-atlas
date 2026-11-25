@@ -95,7 +95,6 @@ export function AppBarPanel({
   return (
     <AppBar
       name={app('name')}
-      map={map}
       account={account}
       menus={
         <MenuBarPanel

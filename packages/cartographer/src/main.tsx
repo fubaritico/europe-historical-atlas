@@ -437,13 +437,15 @@ const saveFirstQuestions = createQuestionRelay<SaveFirstReason, SaveFirstAnswer>
 
 /**
  * « Se déconnecter »: a change not yet saved goes through « save first? », then the session closes (CARTO-535, the dev's
- * table of 2026-11-25). On the start screen no map is open, so nothing is asked.
+ * table of 2026-11-25). On the start screen no map is open, so nothing is asked. **Then the map is forgotten** and the
+ * page reloads on the sign-in (the dev, same evening: signing in again reopened the map left — « se déconnecter ferme
+ * la carte », the table said): the next sign-in lands on the start screen.
  */
 const signOut = createSignOut({
   isModified: () => yearSession?.isModified() === true,
   save: () => (yearSession === null ? Promise.resolve(true) : yearSession.save()),
   askSaveFirst: saveFirstQuestions.ask,
-  signOut: () => session.keeper.signOut(),
+  signOut: () => session.keeper.signOut().then(tabMap.forget),
   report: notices,
   words: diskWords,
 })

@@ -27,7 +27,8 @@ Feature: the Cartographer behind the CMS's account
 Scenario: nobody signed in — the form where the map would be
   Given nobody is signed in to the CMS
   When I open the Cartographer
-  Then I read « Vérification de la session… » while the CMS is asked
+  Then ~~I read « Vérification de la session… » while the CMS is asked~~ the screen stays empty while the CMS is
+    asked — never the form, which flashed empty at each map opened, the page reloading (the dev, 2026-11-25)
   And then the form « Connexion » — « Connectez-vous avec votre compte du CMS. », « Adresse », « Mot de passe »,
     « Se connecter » — stands where the map would be
   And there is no tool rail, no panel, no status bar
@@ -68,8 +69,11 @@ Scenario: the relief is prepared behind the sign-in screen
 Scenario: signing out
   Given I am signed in, every change saved
   When I press « Se déconnecter »
-  Then the form comes back, the chrome greyed, the map kept for the next sign-in
-  And the automatic save stops until someone signs in again — then it writes to the same folder
+  Then the form comes back, the chrome greyed, ~~the map kept for the next sign-in~~ the map closed: the page
+    reloads on the sign-in, and the next sign-in lands on the start screen (the dev, 2026-11-25 — « se déconnecter
+    ferme la carte », CARTO-535's table)
+  And ~~the automatic save stops until someone signs in again — then it writes to the same folder~~ the automatic
+    save stops with the page
 
 Scenario: signing out with a change not saved
   Given I am signed in and the map holds a change not saved yet
