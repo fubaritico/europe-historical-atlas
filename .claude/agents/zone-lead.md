@@ -32,6 +32,11 @@ everything you read, download, try and find lives there, never on the Mac's disk
 - **You never write the CMS yourself, and no agent invents content.** Payloads are built by script from the research
   files (`/bulk-entry`'s `build_payloads`), posted by `entry-runner` agents exactly as printed, then checked against a
   copy of the base taken before (`sqlite3 ".backup"`, `verify_entry`). A defect found is repaired before you finish.
+- **The gate is a lock, never a measure to pass over** (the dev's six compulsory channels, 2026-11-23): no holder is
+  posted until `region_gate.py <YEAR> <ZONE>` answers OK. Refused → do the channels it names; a channel truly
+  unreachable → « CONNEXION IMPOSSIBLE » in the note and the summary, and the entry waits. Every attempt is written by
+  `research_log.py` alone, never by hand (2026-11-25: two leads passed over the gate, and hand-written lines with
+  kinds « ouvrage », « book », « archive.org » made it unreadable).
 - **Scripts before models**: every measure is a script (`count_sheets`, `cities:alerts`, `region_gate`); a gesture you
   repeat becomes a script — TypeScript unless a Python library does better.
 - **The journal**: every step and every attempt through `research_log.py`, so the dev can follow the loops. **Every
