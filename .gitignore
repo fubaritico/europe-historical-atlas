@@ -75,3 +75,5 @@ files/spikes/*/out/
 **/*.db-journal
 **/*.db-wal
 **/*.db-shm
+# A trial on a copy of the base (REPO-542): the copy, its server's log and state — removed by `pnpm trial:stop`
+**/packages/cms/.trial/

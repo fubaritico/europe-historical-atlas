@@ -18,6 +18,8 @@
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
     "seed": "pnpm migrate && NODE_OPTIONS=--no-deprecation payload run src/seed/run.ts",
     "retitle": "NODE_OPTIONS=--no-deprecation payload run src/seed/retitle.ts",
+    "trial:start": "NODE_OPTIONS=--no-deprecation payload run src/trial/start.ts",
+    "trial:stop": "NODE_OPTIONS=--no-deprecation payload run src/trial/stop.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",

@@ -50,6 +50,15 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   temporaire). Le même soir, le codeur note que le dev a coupé trois fois son serveur parce que la session de
   l'historien le relançait : deux sessions ne lancent jamais le CMS chacune de leur côté. **Remède** : il le lance
   lui-même, ou il en donne l'ordre en toutes lettres ; je dis au premier refus d'où il vient. **Sévérité : à savoir.**
+  **Pour un essai, depuis le 25/11 (REPO-542)** : `pnpm --dir <arbre>/packages/cms trial:start` **depuis un arbre de
+  travail**, jamais l'arbre principal (refusé : son `.env` porte ses clés) — une copie de sa base (dossier `0700`, copie
+  `0600` : elle porte les empreintes des mots de passe), un compte jetable (jamais d'identifiant lu : la lecture de
+  `.env.test-user` a été refusée, à raison), un secret à lui, un CMS détaché sur un port libre dès 3110 — puis
+  `trial:stop`, qui ne coupe que son serveur (`next dev` sur son port, vérifié avant tout signal). **Toujours sur `127.0.0.1`, jamais `localhost`** : le
+  cookie de Payload est celui de l'hôte, quel que soit le port ; le soir du 25/11, l'essai de CARTO-535 sur `localhost`
+  a remplacé puis effacé la session de son admin. **Son geste**, pour que l'essai tourne sans lui : deux règles de
+  permission, `Bash(pnpm --dir /Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/worktrees/*/packages/cms trial:start)`
+  et la même en `trial:stop`.
 - **Les fichiers que Payload écrit lui-même ne se lintent pas** : `src/app/(payload)/**` et `src/payload-types.ts`
   (_« do not modify it »_), plus `next-env.d.ts` de Next. Ignorés dans la config du CMS **et** dans celle de la racine,
   parce que lint-staged lance ESLint depuis la racine. Après un changement de champ : `pnpm --filter
@@ -83,11 +92,11 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   après-midi** (plus aucun territoire « bishopric », contrôlé par le codeur) : reste au codeur à retirer la valeur de la
   liste. **Sévérité : à savoir.**
 - **1 546 citations sont du code wiki, pas la phrase de la page** — CMS-459 (16/11, relevé par le codeur) : « [[comté de
-    Toulouse|comtes de Toulouse]] », « {{s-|XI|e}} » — les agents de l'historien ont copié le texte source de Wikipédia.
-    Un lecteur ne retrouve pas la phrase, et le passage surligné (CMS-441) ne peut pas la trouver. **Le dev : bloquant, à
-    corriger maintenant.** Remède en cours : la phrase de la page, produite par l'analyseur de Wikipédia et vérifiée sur la
-    page (`/Volumes/Acer/atlas-historien/1100/toutes-zones/recherches/avant-2026-11-23/chaines/chains-1100-verify/render_quotes.py`), appliquée d'un coup par le codeur sur une copie de la base ;
-    et les agents citent désormais la page lue, jamais son code. **Sévérité : bloquant.**
+        Toulouse|comtes de Toulouse]] », « {{s-|XI|e}} » — les agents de l'historien ont copié le texte source de Wikipédia.
+        Un lecteur ne retrouve pas la phrase, et le passage surligné (CMS-441) ne peut pas la trouver. **Le dev : bloquant, à
+        corriger maintenant.** Remède en cours : la phrase de la page, produite par l'analyseur de Wikipédia et vérifiée sur la
+        page (`/Volumes/Acer/atlas-historien/1100/toutes-zones/recherches/avant-2026-11-23/chaines/chains-1100-verify/render_quotes.py`), appliquée d'un coup par le codeur sur une copie de la base ;
+        et les agents citent désormais la page lue, jamais son code. **Sévérité : bloquant.**
 - **Une mise à jour groupée (`where`) est faite en parallèle par Payload** (3.92, `operations/update.js:324`) : si la
   liste tient les deux bouts d'un même maillon, le crochet qui rafraîchit les maillons dépendants le réécrit deux fois à la
   fois, et l'une échoue sur un identifiant de ligne en double (16/11, titres 29 et 11). Rien de perdu (contrôlé). Remède :
