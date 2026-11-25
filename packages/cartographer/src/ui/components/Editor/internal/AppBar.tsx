@@ -3,6 +3,7 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { BrandMark } from '../../../icons/brandMark'
 import { EDITOR_MESSAGES } from '../i18n'
+import { gesture } from '../utils/gesture'
 
 import { BarButton } from './BarButton'
 
@@ -37,6 +38,13 @@ export interface AppBarProps {
   onSaveCopy: () => void
   /** The menu bar, beside the name (CARTO-345) — built by its binding, which knows the store. */
   menus?: ReactNode
+  /**
+   * Why the four file gestures cannot act — nobody signed in (CARTO-535): each button says it, greyed, never hidden.
+   * Absent, they act.
+   */
+  unavailable?: string
+  /** Who is signed in and « Se déconnecter », at the bar's right end (CARTO-535). */
+  account?: ReactNode
 }
 
 /**
@@ -49,9 +57,21 @@ export interface AppBarProps {
  * @param props.onSaveAs - open the dialogue of *Save as…*
  * @param props.onSaveCopy - save a copy
  * @param props.menus - the menu bar, beside the name
+ * @param props.unavailable - why the file gestures cannot act, or nothing
+ * @param props.account - who is signed in, at the right end
  * @returns the brand and the actions, the two ends of the bar
  */
-export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy, menus }: AppBarProps) {
+export function AppBar({
+  name,
+  map,
+  onOpen,
+  onSave,
+  onSaveAs,
+  onSaveCopy,
+  menus,
+  unavailable,
+  account,
+}: AppBarProps) {
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
@@ -74,20 +94,21 @@ export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy, menus 
       <div className="bar-actions">
         <BarButton
           label={action('open')}
-          onPress={onOpen}
-          hint={t('openHint', { keys: shortcut('open').shown })}
+          {...gesture(onOpen, t('openHint', { keys: shortcut('open').shown }), unavailable)}
         />
         <BarButton
           label={action('save')}
-          onPress={onSave}
-          hint={t('saveHint', { keys: shortcut('save').shown })}
+          {...gesture(onSave, t('saveHint', { keys: shortcut('save').shown }), unavailable)}
         />
         <BarButton
           label={action('saveAs')}
-          onPress={onSaveAs}
-          hint={t('saveAsHint', { keys: shortcut('saveAs').shown })}
+          {...gesture(onSaveAs, t('saveAsHint', { keys: shortcut('saveAs').shown }), unavailable)}
         />
-        <BarButton label={action('saveCopy')} onPress={onSaveCopy} hint={t('saveCopyHint')} />
+        <BarButton
+          label={action('saveCopy')}
+          {...gesture(onSaveCopy, t('saveCopyHint'), unavailable)}
+        />
+        {account}
       </div>
     </>
   )

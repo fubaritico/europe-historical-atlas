@@ -206,6 +206,6 @@ export function createYearWriteMiddleware(
 ): (req: BodyStream, res: ResponseSink) => void {
   return createBodyMiddleware({
     handle: (request) => handleYearWrite(request, folder),
-    what: 'the save',
+    failure: 'the save failed on disk',
   })
 }

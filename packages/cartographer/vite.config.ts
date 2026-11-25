@@ -11,8 +11,9 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
+import { CMS_SESSION_ROUTE } from './src/devServer/cmsSessionRoute.ts'
 import { REFUSAL_EVENT } from './src/devServer/refusalJournalRoute.ts'
 import { isRefusalEntry, refusalLine } from './src/devServer/refusalLine.ts'
 import { createYearsFolderOnDisk } from './src/devServer/yearsOnDisk.ts'
@@ -20,7 +21,10 @@ import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute.ts'
 
 import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint.ts'
 import type { YearFolder } from './src/devServer/diskFolder.ts'
+import type * as CmsSessionModule from './src/devServer/cmsSession.ts'
+import type * as CmsSessionEndpoint from './src/devServer/cmsSessionEndpoint.ts'
 import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint.ts'
+import type * as FetchWithin from '@europe-historical-atlas/core/utils/fetchWithin'
 import type { Plugin, ViteDevServer } from 'vite'
 
 /** The folder the atlas reads its years from — inside the shared `public/`. */
@@ -167,6 +171,44 @@ function refusalJournalPlugin(): Plugin {
 }
 
 /**
+ * Build the session's middleware, on the CMS of the dev's machine (CARTO-535). The CMS's address is read from
+ * `packages/cartographer/.env` — `CMS_URL`, by default the CMS's own, `http://127.0.0.1:3100`. Its `CMS_` prefix keeps
+ * it out of the page: Vite hands the page only what starts with `VITE_`.
+ * @param server - the dev server
+ * @returns the endpoint's middleware
+ */
+async function loadCmsSessionMiddleware(server: ViteDevServer): Promise<Middleware> {
+  const endpoint = (await server.ssrLoadModule(
+    '/src/devServer/cmsSessionEndpoint.ts'
+  )) as typeof CmsSessionEndpoint
+  const session = (await server.ssrLoadModule(
+    '/src/devServer/cmsSession.ts'
+  )) as typeof CmsSessionModule
+  const within = (await server.ssrLoadModule(
+    '@europe-historical-atlas/core/utils/fetchWithin'
+  )) as typeof FetchWithin
+  const env = loadEnv(server.config.mode, server.config.root, 'CMS_')
+  return endpoint.createCmsSessionMiddleware(
+    session.createCmsSession(env.CMS_URL ?? 'http://127.0.0.1:3100', within.fetchWithin)
+  )
+}
+
+/**
+ * The Cartographer behind the CMS's account (CARTO-535): `/__cms/session` signs in, out, and says who is signed in,
+ * relaying to the CMS of the dev's machine. `apply: 'serve'` — online, the accounts are the online CMS's (REPO-533).
+ * @returns the plugin
+ */
+function signInWithTheCms(): Plugin {
+  return {
+    name: 'cartographer-cms-session',
+    apply: 'serve',
+    configureServer(server) {
+      mountEndpoint(server, CMS_SESSION_ROUTE, loadCmsSessionMiddleware, 'session')
+    },
+  }
+}
+
+/**
  * The Cartographer's Vite configuration.
  *
  * **`publicDir` points at the atlas's own `public/`, and that is a wiring decision rather than a
@@ -190,6 +232,6 @@ function refusalJournalPlugin(): Plugin {
  * is one favicon, and the drift this repository recorded as cosmetic cannot happen.
  */
 export default defineConfig({
-  plugins: [react(), saveYearsFromTheEditor(), refusalJournalPlugin()],
+  plugins: [react(), saveYearsFromTheEditor(), refusalJournalPlugin(), signInWithTheCms()],
   publicDir: '../atlas/public',
 })

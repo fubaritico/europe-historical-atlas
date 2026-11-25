@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 
 import { useTranslation } from '../../../hooks/useTranslation'
 import { APP_MESSAGES } from '../../../i18n/app'
+import { EDITOR_MESSAGES } from '../i18n'
 
 import { AppBar } from './AppBar'
 import { MenuBarPanel } from './MenuBarPanel'
@@ -10,6 +11,7 @@ import type { AppBarProps } from './AppBar'
 import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { MapNameSource } from '../../../utils/mapNameSource'
+import type { ReactNode } from 'react'
 
 /**
  * The top bar's binding: the one place it knows where the map's name comes from (`react-canvas-and-panels`). `AppBar`
@@ -33,6 +35,10 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
   onSelectAll: () => void
   /** Édition › Copier la fiche, and ‹shift+cmd+C›. */
   onCopySheet: () => void
+  /** Nobody signed in (CARTO-535): every gesture of the bar and its menus greyed. */
+  signedOut?: boolean
+  /** Who is signed in and « Se déconnecter », at the bar's right end. */
+  account?: ReactNode
 }
 
 /**
@@ -45,6 +51,8 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
  * @param props.onPaste - Édition › Coller les entités
  * @param props.onSelectAll - Édition › Tout sélectionner
  * @param props.onCopySheet - Édition › Copier la fiche
+ * @param props.signedOut - nobody signed in: every gesture greyed
+ * @param props.account - who is signed in, at the right end
  * @returns the top bar
  */
 export function AppBarPanel({
@@ -55,10 +63,13 @@ export function AppBarPanel({
   onPaste,
   onSelectAll,
   onCopySheet,
+  signedOut,
+  account,
   ...gestures
 }: AppBarPanelProps) {
   // Context
   const app = useTranslation(APP_MESSAGES)
+  const t = useTranslation(EDITOR_MESSAGES)
 
   // State
   const map = useSyncExternalStore(mapName.subscribe, mapName.get)
@@ -69,6 +80,8 @@ export function AppBarPanel({
       name={app('name')}
       map={map}
       {...gestures}
+      {...(signedOut === true ? { unavailable: t('signInFirst') } : {})}
+      account={account}
       menus={
         <MenuBarPanel
           store={store}
@@ -77,6 +90,7 @@ export function AppBarPanel({
           onPaste={onPaste}
           onSelectAll={onSelectAll}
           onCopySheet={onCopySheet}
+          disabled={signedOut === true}
           {...gestures}
         />
       }

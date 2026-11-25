@@ -1,7 +1,8 @@
 ---
 paths:
-  - "packages/cartographer/**"
+  - 'packages/cartographer/**'
 ---
+
 # Known issues — the Cartographer
 
 Open issues of `packages/cartographer`, its tests and its tooling. Loaded by path; indexed in `.claude/known-issues.md`.
@@ -9,13 +10,13 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
 - **Modifier le code du serveur de dev du Cartographe (`src/devServer/`) n'est pris en compte qu'après un redémarrage
   du serveur** (18/10). `vite.config.ts` charge chaque point d'entrée à sa première requête puis le garde en mémoire
   (`mountEndpoint`) : une modification faite après ce chargement est ignorée, et le serveur répond avec l'ancien code —
-  vu sur *Open snapshot* (*« "/1100/snapshots" is not a draft »*). Modifier `vite.config.ts`, lui, redémarre le serveur.
+  vu sur _Open snapshot_ (_« "/1100/snapshots" is not a draft »_). Modifier `vite.config.ts`, lui, redémarre le serveur.
   Remède : après un changement dans `devServer/`, demander au dev de relancer `pnpm dev:cartographer` ; remède durable,
   oublier le module chargé quand un fichier de `devServer/` change (`server.watcher`). **Sévérité : à savoir.**
 - **Les raccourcis d'empilement (16/10) laissent un constat de revue ouvert, par ma décision.** — CARTO-123 (1) ~~A11Y-002 :
   le même message répété n'est pas relu~~ — **fait le 18/10** (CARTO-121) : `writeResult` alterne un espace sans
-  largeur sur une répétition ; pas d'essai au lecteur d'écran, par décision du dev (*« l'accessibilité pour la
-  politesse »* dans un outil de dessin). (2)
+  largeur sur une répétition ; pas d'essai au lecteur d'écran, par décision du dev (_« l'accessibilité pour la
+  politesse »_ dans un outil de dessin). (2)
   ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
   trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
   raccourci du même genre. **Sévérité : cosmétique.**
@@ -35,7 +36,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   Mesuré le 12/10 dans le navigateur du dev (Retina, ×2) : le trait de 1,4 de la maquette (grille 18×18) ne
   tombe jamais sur des pixels physiques entiers — 58 à 62 % de pixels pleins à ×2, 13 à 37 % à ×1. Un trait
   de 1 px aligné sur un demi-pixel rend les traits droits nets mais pas les courbes ; un trait de 2 px aligné
-  rend tout net mais alourdit. **Verdict du dev** : *« ce qui doit être net est net »* — les outils restent
+  rend tout net mais alourdit. **Verdict du dev** : _« ce qui doit être net est net »_ — les outils restent
   tels quels ; la barre prend **ses dessins en formes pleines**, posés sur des pixels entiers (100 % à ×1 et
   ×2). Il note que le standard serait 16/1 et 24/1,5. **À retenir** : à ×2, un demi-pixel CSS vaut un pixel
   physique entier — un décalage de 0,5 n'y floute rien, il floute à ×1 ; et un texte sans `line-height`
@@ -43,18 +44,18 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
 - **La revue de fin de session du 11/10 a laissé ouvert, par décision de moi, ce qui suit — aucun n'est
   bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.** — CARTO-121, CARTO-207
   **Accessibilité** : (1) ~~la hiérarchie de l'arbre `{Polities}` n'est pas annoncée~~ — **fait** (`1d2429c`) :
-  un texte masqué *« vassal of X »* sur la ligne (`PolityList.tsx`). (2) ~~le changement d'outil au clavier et
+  un texte masqué _« vassal of X »_ sur la ligne (`PolityList.tsx`). (2) ~~le changement d'outil au clavier et
   un déplacement dans la pile ne sont pas annoncés~~ — **fait** (`1d2429c`, `toolKeys.ts`, `arrange.ts`). (3)
-  **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (*« the anchor
-  list »*) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
+  **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (_« the anchor
+  list »_) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
   `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée. (6) **La poubelle désactivée ne dit pas pourquoi au clavier** (12/10,
-  A11Y-001) : un bouton `disabled` ne prend pas le focus et son `title` *« Select a polity to delete »* ne
+  A11Y-001) : un bouton `disabled` ne prend pas le focus et son `title` _« Select a polity to delete »_ ne
   s'entend qu'au survol. Laissé tel quel : D3 veut la poubelle grisée sans cible, et la barre d'état dit déjà
-  *« Sélectionnez un pays »*. Remède si besoin : `aria-disabled` + une description masquée.
+  _« Sélectionnez un pays »_. Remède si besoin : `aria-disabled` + une description masquée.
   (7) **⟨retracer⟩ ne se trace pas au clavier non plus** (14/10, A11Y-002) — même manque que (3) : le rail l'annonce
   avec ‹R›, rien ne permet de choisir une ancre sans pointeur. Et **‹espace› est la seule touche simple entendue sur
   toute la page** (quand le pointeur est sur la carte et que le focus est arrivé par un clic) : voulu par le dev
-  (*« quel que soit l'outil, espace donne la main »*), et un focus arrivé par ‹Tab› la laisse au contrôle
+  (_« quel que soit l'outil, espace donne la main »_), et un focus arrivé par ‹Tab› la laisse au contrôle
   (A11Y-001, corrigé). Ni réglable ni désactivable, ce que WCAG 2.1.4 demanderait pour une touche simple globale ;
   remède si besoin : une préférence. **‹alt› n'est entendu que par le canevas** (14/10, ARCH-002) : focus ailleurs,
   l'aperçu de l'autre côté ne bascule qu'au prochain mouvement du pointeur — le clic, lui, lit `altKey` et décide
@@ -80,9 +81,9 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   **Le remède est une couleur, donc une décision du dev** : une encre d'alerte plus claire, réservée au
   texte. `theme.test.ts` porte ce manque en **manque déclaré** — le test tombe le jour où une teinte
   assez claire est posée, et il faut alors basculer la paire dans `TEXT_PAIRS`.
-  **Déclencheur** : le premier message d'erreur affiché, au formulaire de `(c2)` — *« id déjà pris »*.
+  **Déclencheur** : le premier message d'erreur affiché, au formulaire de `(c2)` — _« id déjà pris »_.
   **Déclassé le 09/10 par le dev** : le contraste n'est pas une contrainte qu'il tient pour l'éditeur
-  (*« on s'en fout des contrastes »*). Le manque reste mesuré et déclaré, plus rien n'en dépend.
+  (_« on s'en fout des contrastes »_). Le manque reste mesuré et déclaré, plus rien n'en dépend.
   **Sévérité : cosmétique.**
 - **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.** — CARTO-120
   Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur
@@ -115,7 +116,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   Lu en source : il n'enregistre son `afterEach` que `if (typeof afterEach === 'function')`, donc **seulement
   si les hooks du runner sont globaux**. Toutes nos configs les importent explicitement.
   **Ce que ça coûte sans le remède** : les rendus s'empilent dans le même document et une requête par rôle
-  trouve l'élément du test précédent — l'erreur se lit *« Found multiple elements »*, ce qui **accuse le
+  trouve l'élément du test précédent — l'erreur se lit _« Found multiple elements »_, ce qui **accuse le
   sélecteur et pas la fuite**. Trouvé par un test écrit exprès pour ça.
   **Remède en place** : `packages/cartographer/vitest.setup.ts`. **Tout nouveau paquet React devra avoir le
   sien** — c'est la chose qu'on oubliera.
@@ -123,9 +124,9 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   test qui compte les appels ne voit pas la différence.** Trouvé en revue le 07/10, sur du code livré le
   même soir, et c'est un **vrai bug qui aurait mordu en dev uniquement**, donc exactement là où le dev
   travaille.
-  **Le mécanisme, à ne pas re-déduire** : `StrictMode` exécute *setup → cleanup → setup* **synchronement**
+  **Le mécanisme, à ne pas re-déduire** : `StrictMode` exécute _setup → cleanup → setup_ **synchronement**
   au premier montage, avant qu'aucune microtâche ne tourne. Avec un garde booléen (`if (started.current)
-  return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel écouteur. Or le cleanup
+return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel écouteur. Or le cleanup
   du **premier** setup a déjà basculé son drapeau `settled`. Le seul `.then` qui existe est donc lié à une
   fermeture annulée. Les deux assets se chargent, le terrain se cuit, **et la réponse part à la poubelle** —
   l'éditeur reste sur « Préparation du fond de carte… » pour toujours.
@@ -171,13 +172,13 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   `persistence/openingMap.ts`; was `?year=` the same morning): it throws before anything mounts, said on the console —
   **my choice**, never answered by the dev: opening 1100 in its place would have him drawing on 1100 while believing it
   another map. A well-formed name with no folder opens nothing, saving blocked, said in the alarm (`noSuchMap`). Only
-  *Open…* and *Save as…* write the address. **Severity: cosmétique.**
+  _Open…_ and _Save as…_ write the address. **Severity: cosmétique.**
 - **`packages/cartographer/.autosave/` is left on disk, unused** (2026-11-02): the snapshots and the draft are removed
   (`s19`) — the automatic save is a map of `years/` now — but the folder still holds the old snapshots (26 files, 31 MB)
   and drafts, git-ignored. My `rm -rf` was refused by the permissions, rightly. **Remedy**: the dev deletes it
   (`! rm -rf ~/Desktop/WebstormProjects/europe-map/packages/cartographer/.autosave`). **Severity: cosmétique.**
 - **The automatic saves pile up in `years/`** (2026-11-02): one folder per opening of a map, kept by the dev's call
-  (*"for now we keep them"*), each listed in *Open…*. **Trigger to revisit**: the list grows too long to read. My
+  (_"for now we keep them"_), each listed in _Open…_. **Trigger to revisit**: the list grows too long to read. My
   proposal of that evening, not taken: remove it at the tab's close when nothing is unsaved (a beacon), keep it
   otherwise. **Severity: à savoir.**
 - **A view carried from one map to the next that cannot be read opens on the whole backdrop, said in the console**
@@ -196,8 +197,8 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   dialogue sends the author to the paste of a stretch, which exists since `e833792`. **Trigger**: the sheet's paste,
   built with its own dialogue — both dialogues in one block. **Severity: à savoir.**
 - **The hemisphere letters stay French in the English interface** (2026-11-07, CARTO-368 review A11Y-001 · ARCH-001):
-  `viewport/coordinateLabel` writes `E`/`O` and `N`/`S` whatever the language, by its decision of 2026-09-17 (*"the
-  letters are French because the interface is"*), so the status bar and a city's box read « 0°25′O » under « Coordinates ».
+  `viewport/coordinateLabel` writes `E`/`O` and `N`/`S` whatever the language, by its decision of 2026-09-17 (_"the
+  letters are French because the interface is"_), so the status bar and a city's box read « 0°25′O » under « Coordinates ».
   **Trigger**: the language switch, ATLAS-266 — the letters from the catalogue, both callers and their tests in one pass,
   the dev's call. **Severity: cosmétique.**
 - **Two ways of telling an anchor lies on a water** (2026-11-08, review ARCH-002 of the retrace that takes a neighbour's
@@ -223,7 +224,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   letting go, would be said to keep its points. **Severity: cosmétique.**
 - **The retrace's scenario still says the start moves to any anchor further along** (2026-11-13): since `4e563cb` a
   second click on a non-neighbouring anchor ends the run on a straight segment, and on an open outline the two ends are
-  no neighbours. **Remedy**: `/scenarii-to-code` §7 on `s03`'s *Retracing a stretch*. **Severity: à savoir.**
+  no neighbours. **Remedy**: `/scenarii-to-code` §7 on `s03`'s _Retracing a stretch_. **Severity: à savoir.**
 - **A polity with no colour (`none`): the form offers it, the rail's swatch does not** (2026-11-19, CARTO-484). The
   form's colour field holds three states — a colour, « automatic », « none » (`allowNone`, design system 0.10.0) — and a
   tribe set to « none » is the **name-only people** (the Sámi and the Kvens of 1100): no fill, no fade, no edge, its
@@ -232,6 +233,17 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   pressed in it on a polity with no colour changes nothing (`recolouring`); the list shows the struck swatch.
   **An overlap with a polity with no colour is not hatched** (`core/data/overlapHatches`) — the dev wants to try
   stripes of the other polity over bare ground for Karelia (CORE-486). **Severity: à savoir.**
+- **The sign-in (CARTO-535) leaves five points open, by my decision after its review of 2026-11-25** (the dev: « tu es
+  libre »): (1) **the account gate is the page's only** — the dev server's write routes (`/__years`) take any request
+  from this machine, signed in or not; harmless while the Cartographer runs on the dev's machine alone. **Trigger**:
+  the Cartographer online (CARTO-200), or the channel to the CMS on the session (CARTO-498). (2) **`CMS_URL` is not
+  checked**: an `http://` address off the loopback would carry the password in clear. **Trigger**: the CMS online
+  (REPO-533). (3) **A sign-out the CMS could not close shows nobody signed in**, the refusal said in the form; the
+  cookie may still be valid, and a reload signs back in — staying signed in instead would trap the dev in the editor.
+  (4) **The « session » alarm is never withdrawn** by a later good answer: the author dismisses it, as a dialogue he may
+  be reading is never closed under him. (5) **Screen-reader courtesies** (the editor's rule): the greyed « Se
+  connecter » is natively `disabled` (silent at ‹Tab›), the focus is not put back on the password after a refusal,
+  « Vérification… » is a live region mounted with its text. **Severity: à savoir.**
 - **Le glisser d'un pays dans `{Polities}` laisse deux points ouverts** (CARTO-457, revue du 16/11, ma décision) : un
   relâcher hors des lignes n'est dit qu'en console, pas dans la zone de résultat ; les écouteurs du glisser se réinscrivent
   à chaque rendu du panneau (correct, le glisser vit dans une référence). **Sévérité : cosmétique.**

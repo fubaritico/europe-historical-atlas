@@ -18,6 +18,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `menuBar` — The menu bar's accessible name (CARTO-345).
  * - `placeholder` — The shell's placeholders, where a zone is not given; `zone` is `appBar`, `docBar`,
  *   `tools` or `panels`.
+ * - `signOut`, `signedInAs`, `signInFirst`, `sessionExpired` — The session (CARTO-535): the button, who is signed in
+ *   (`email`), why the bar's gestures are greyed, and the expired session's dialogue's name.
  */
 export type EditorMessageKey = keyof typeof en
 

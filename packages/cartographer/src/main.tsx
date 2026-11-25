@@ -18,6 +18,7 @@ import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
+import { CMS_SESSION_ROUTE } from './devServer/cmsSessionRoute'
 import { REFUSAL_EVENT } from './devServer/refusalJournalRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { shortcutText } from './i18n/commandKeys'
@@ -78,6 +79,7 @@ import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { pasteClipboard } from './ui/utils/pasteClipboard'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
+import { startSession, whenSignedIn } from './ui/utils/startSession'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 
@@ -338,6 +340,14 @@ localeStore.subscribe(() => {
  */
 const diskWords = () => persistenceWords(localeStore.get())
 
+/**
+ * Who is signed in, with the CMS's account (CARTO-535): the editor and every command act only once someone is. An
+ * answer of the dev server the page cannot read opens the error dialogue (the dev: the user always gets a feedback).
+ */
+const session = startSession(CMS_SESSION_ROUTE, () => {
+  alarms.raise({ topic: 'session', text: diskWords().t('sessionBroken'), sign: 'error' })
+})
+
 /** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
 const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
 /** The maps on disk: read and written by the session, listed by *Open…*. */
@@ -409,7 +419,7 @@ void yearSession.openOnStartup().then(() => {
 const handleSave = (): void => {
   void yearSession.save()
 }
-installSaveShortcut(window, handleSave)
+installSaveShortcut(window, whenSignedIn(session, 'save', handleSave))
 
 /** *Open…*'s dialogue, and *Save as…*'s — one opener per dialogue. */
 const mapPicker = createDialogueOpener()
@@ -463,8 +473,12 @@ const handleSaveCopy = (): void => {
   void yearSession.saveCopy()
 }
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
+// Gated like every other command (review ARCH-004 of 2026-11-25): a polity still selected from before a sign-out would
+// otherwise be moved in the pile with nobody signed in
 listenForStackingKeys(document, (move) => {
-  arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
+  whenSignedIn(session, 'stacking', () => {
+    arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
+  })()
 })
 
 /** The system the shortcuts are shown for, read once (CARTO-345, the shortcut converter). */
@@ -504,39 +518,24 @@ const copyDeps = () => ({
 const handleCopy = (): void => {
   copySelection(store.getState(), copyDeps())
 }
-listenForCommand(document, 'copy', handleCopy)
+listenForCommand(document, 'copy', whenSignedIn(session, 'copy', handleCopy))
 
 /** Copy the polity selected's sheet alone (the dev, 2026-11-05) — ‹shift+cmd+C› and « Copier la fiche ». */
 const handleCopySheet = (): void => {
   copySheetOfSelection(store.getState(), copyDeps())
 }
-listenForCommand(document, 'copySheet', handleCopySheet)
+listenForCommand(document, 'copySheet', whenSignedIn(session, 'copySheet', handleCopySheet))
 
 /** Paste what the clipboard holds — polities into this map, a stretch onto the polity selected — one step (CARTO-345). */
 const handlePaste = (): void => {
-  const {
-    document,
-    target,
-    pastePolities,
-    pastePoints,
-    chooseTarget,
-    raiseWarning,
-    askSheetPaste,
-  } = store.getState()
   pasteClipboard({
+    ...store.getState(),
     content: clipboard.get(),
-    document,
-    target,
-    pastePolities,
-    pastePoints,
-    chooseTarget,
-    raiseWarning,
-    askSheetPaste,
     say: results.say,
     words: clipboardWordsNow(),
   })
 }
-listenForCommand(document, 'paste', handlePaste)
+listenForCommand(document, 'paste', whenSignedIn(session, 'paste', handlePaste))
 
 // What the clipboard holds, said to the store, so a polity's menu and Édition can light their commands (CARTO-345).
 const summarise = (): void => {
@@ -577,11 +576,11 @@ const handleSelectAll = (): void => {
   }
   askSelectAll()
 }
-listenForCommand(document, 'selectAll', handleSelectAll)
+listenForCommand(document, 'selectAll', whenSignedIn(session, 'selectAll', handleSelectAll))
 
 // ‹cmd+O› and ‹cmd+shift+S›: *Open…* and *Save as…*, as their buttons and the menu (CARTO-345).
-listenForCommand(document, 'open', mapPicker.open)
-listenForCommand(document, 'saveAs', saveAsPicker.open)
+listenForCommand(document, 'open', whenSignedIn(session, 'open', mapPicker.open))
+listenForCommand(document, 'saveAs', whenSignedIn(session, 'saveAs', saveAsPicker.open))
 
 /**
  * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built
@@ -620,6 +619,7 @@ createRoot(container).render(
               colours={colours}
               wikidata={wikidata}
               results={results}
+              session={session}
             />
             <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
             <AlarmDialog alarms={alarms} />

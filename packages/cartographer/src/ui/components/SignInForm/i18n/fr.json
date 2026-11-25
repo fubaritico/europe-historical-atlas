@@ -1,0 +1,14 @@
+{
+  "title": "Connexion",
+  "lead": "Connectez-vous avec votre compte du CMS.",
+  "expired": "Votre session a expiré : reconnectez-vous. Rien de votre dessin n’est perdu.",
+  "checking": "Vérification de la session…",
+  "email": "Adresse",
+  "password": "Mot de passe",
+  "signIn": "Se connecter",
+  "signingIn": "Connexion…",
+  "offline": "Le CMS ne répond pas : lancez-le, puis réessayez.",
+  "retry": "Réessayer",
+  "refused": "Le CMS a refusé : {reason}",
+  "broken": "Le serveur du Cartographe a envoyé une réponse illisible : c’est un défaut du Cartographe (détail dans la console)."
+}

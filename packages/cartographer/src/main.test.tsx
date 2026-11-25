@@ -1,6 +1,8 @@
 import { act } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { CMS_SESSION_ROUTE } from './devServer/cmsSessionRoute'
+
 import type { Root } from 'react-dom/client'
 
 /**
@@ -36,6 +38,34 @@ vi.mock('react-dom/client', async (original) => {
  */
 const ENTRY_TIMEOUT_MS = 20_000
 
+/**
+ * Stand in for `fetch`: the dev server's session route answers with the user given (`null` for nobody), anything else
+ * never settles.
+ * @param user - who is signed in, or `null`
+ */
+function answerSession(user: { id: number; email: string } | null): void {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((input: unknown) =>
+      typeof input === 'string' && input.startsWith(CMS_SESSION_ROUTE)
+        ? Promise.resolve(new Response(JSON.stringify({ user }), { status: 200 }))
+        : new Promise(() => undefined)
+    )
+  )
+}
+
+/**
+ * Run the entry, and let the session's answer reach the screen.
+ */
+async function runEntry(): Promise<void> {
+  await act(async () => {
+    await import('./main')
+  })
+  await act(async () => {
+    await Promise.resolve()
+  })
+}
+
 describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
   beforeEach(() => {
     vi.resetModules()
@@ -57,12 +87,10 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
         }
       }
     )
-    // A promise that never settles, so the canvas area stays in its waiting state for the whole test
-    // rather than racing to a failure on a microtask. Determinism, not optimism.
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(() => new Promise(() => undefined))
-    )
+    // The session's route answers someone signed in (CARTO-535), so the editor opens; every other asset is a promise
+    // that never settles, so the canvas area stays in its waiting state for the whole test rather than racing to a
+    // failure on a microtask. Determinism, not optimism.
+    answerSession({ id: 1, email: 'author@example.org' })
   })
 
   afterEach(() => {
@@ -78,9 +106,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       expect(root.querySelector('h1')?.textContent).toBe('Cartographer — year 1100')
     })
@@ -90,9 +116,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       // The entry no longer mounts a canvas straight away, and that is the point of 4d-3: the frame
       // everything projects against comes from the DEM's own metadata, so there is nothing to draw on
@@ -108,9 +132,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       // Only the string calls: `fetch` also accepts a `Request` or a `URL`, and stringifying one of
       // those would read as `[object Object]` — which is what the typed lint objects to, correctly.
@@ -130,9 +152,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       const heading = root.querySelector('h1')
 
@@ -150,23 +170,69 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       expect(root.querySelector('main > h1')).not.toBeNull()
+    })
+
+    it('with nobody signed in, shows the sign-in form where the map would be, and asks for no backdrop', async () => {
+      answerSession(null)
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await runEntry()
+
+      const asked = vi
+        .mocked(fetch)
+        .mock.calls.map((call) => call[0])
+        .filter((url): url is string => typeof url === 'string')
+      expect(root.querySelector('form.sign-in-form')).not.toBeNull()
+      expect(root.querySelector('[data-testid="map-area"], canvas')).toBeNull()
+      expect(asked).toContain(`${CMS_SESSION_ROUTE}/`)
+      expect(asked).not.toContain('/heightmaps/europe-dem-z6-1920.json')
+      expect(asked).not.toContain('/masks/europe-land.json')
     })
   })
 
   describe('managed errors', () => {
+    it('an answer of the session it cannot read opens the error dialogue, and the form says it too', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      vi.stubGlobal(
+        'fetch',
+        vi.fn((input: unknown) =>
+          typeof input === 'string' && input.startsWith(CMS_SESSION_ROUTE)
+            ? Promise.resolve(new Response('{}', { status: 200 }))
+            : new Promise(() => undefined)
+        )
+      )
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await runEntry()
+
+      await vi.waitFor(() => {
+        const dialogues = [...document.querySelectorAll('dialog')].map(
+          (dialog) => dialog.textContent
+        )
+        expect(dialogues.some((text) => text?.includes('The session could not be read'))).toBe(true)
+      })
+      expect(root.querySelector('.sign-in-form [role="alert"]')?.textContent).toContain(
+        'cannot read'
+      )
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('answered 200 with {}'))
+      error.mockRestore()
+    })
+
     it('refuses to start when #root is absent, rather than mounting nowhere', async () => {
       await expect(import('./main')).rejects.toThrow(/#root is missing/)
     })
   })
 
   describe('unmanaged errors', () => {
-    // L4: N/A — the module awaits nothing and catches nothing, so there is no swallowed rejection and no
-    // out-of-order resolution to guard. The one failure it can have is the absent container above.
+    // L4: N/A — the module awaits nothing and catches nothing; the session it starts settles every request itself
+    // (`persistence/sessionClient.test.ts`). The one failure it can have is the absent container above.
     it('leaves the document untouched when it refuses', async () => {
       await expect(import('./main')).rejects.toThrow()
 
@@ -181,9 +247,7 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       root.id = 'root'
       document.body.append(decoy, root)
 
-      await act(async () => {
-        await import('./main')
-      })
+      await runEntry()
 
       expect(decoy.childElementCount).toBe(0)
       expect(root.querySelector('h1')).not.toBeNull()

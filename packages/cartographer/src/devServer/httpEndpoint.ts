@@ -1,7 +1,7 @@
 /**
  * The HTTP plumbing every dev-server endpoint of the Cartographer shares — the year save
- * (`yearWriteEndpoint.ts`): the request and response a handler sees, the
- * same-machine lock, the body read whole under a cap, and the 500 a failing disk answers.
+ * (`yearWriteEndpoint.ts`) and the session (`cmsSessionEndpoint.ts`): the request and response a handler sees, the
+ * same-machine lock, the body read whole under a cap, and the 500 an unexpected failure answers.
  *
  * **No Node type here**, as in the endpoints: it compiles with the browser application and runs in the
  * server, the streams reduced to what is read and written.
@@ -31,6 +31,11 @@ export interface EndpointRequest {
    * that very year (CARTO-238, rung 3). Absent, the write is unconditional.
    */
   ifMatch?: string | undefined
+  /**
+   * The `Cookie` header — the CMS's session the browser holds for `localhost`, read by the session's endpoint
+   * (CARTO-535). Absent from a request that carries none.
+   */
+  cookie?: string | undefined
   /** The body, as text. */
   body: string
 }
@@ -41,6 +46,11 @@ export interface EndpointResponse {
   status: number
   /** A JSON body — `{ reason }` when refused. */
   body: string
+  /**
+   * The cookies to set in the browser — the CMS's session, opened, prolonged or closed (CARTO-535), relayed as the
+   * CMS wrote them. Absent from every other answer.
+   */
+  setCookie?: readonly string[]
 }
 
 /** The loopback names a request from this machine carries in its `Host`. */
@@ -91,7 +101,7 @@ export interface ResponseSink {
   /** The status to send. */
   statusCode: number
   /** Set a header. */
-  setHeader: (name: string, value: string) => unknown
+  setHeader: (name: string, value: string | readonly string[]) => unknown
   /** Send the body and close. */
   end: (body?: string) => unknown
 }
@@ -113,6 +123,8 @@ function headerOf(value: string | string[] | undefined): string | undefined {
 function send(res: ResponseSink, response: EndpointResponse): void {
   res.statusCode = response.status
   res.setHeader('content-type', 'application/json')
+  if (response.setCookie !== undefined && response.setCookie.length > 0)
+    res.setHeader('set-cookie', [...response.setCookie])
   res.end(response.body)
 }
 
@@ -128,18 +140,24 @@ function diskCodeOf(error: unknown): string {
 }
 
 /** One endpoint's answer to a request whose body has been read whole. */
-export type RequestHandler = (request: EndpointRequest) => EndpointResponse
+export type RequestHandler = (
+  request: EndpointRequest
+) => EndpointResponse | Promise<EndpointResponse>
 
 /** What a body-reading middleware needs to know about the endpoint it serves. */
 export interface EndpointWiring {
   /** Answer the request. */
   handle: RequestHandler
-  /** What a disk failure is called, for the log and the page — *"the save"*. */
-  what: string
+  /**
+   * The sentence an unexpected failure of the handler is said with, on the log and to the page — *"the save failed on
+   * disk"* for the year, *"the session failed in the dev server"* for the session (review QUAL-006 of 2026-11-25).
+   */
+  failure: string
 }
 
 /**
- * Answer a request whose body has been read whole, sending 500 when the disk itself fails.
+ * Answer a request whose body has been read whole, sending 500 when the handler fails unexpectedly — the disk, for
+ * the year's save.
  *
  * **The `catch` answers and logs, it never continues**: a write that threw has written nothing the plan
  * did not already allow for (`writeAll`'s two passes), and the author must learn that the save failed
@@ -147,33 +165,40 @@ export interface EndpointWiring {
  * @param req - the request
  * @param res - the response
  * @param body - the body, as text
- * @param wiring - the endpoint's handler and the name of what it writes
+ * @param wiring - the endpoint's handler and the sentence its failure is said with
  */
 function respond(req: BodyStream, res: ResponseSink, body: string, wiring: EndpointWiring): void {
-  try {
-    send(
-      res,
-      wiring.handle({
-        method: req.method,
-        path: req.url,
-        host: headerOf(req.headers.host),
-        origin: headerOf(req.headers.origin),
-        ifMatch: headerOf(req.headers['if-match']),
-        body,
-      })
-    )
-  } catch (error: unknown) {
+  const failed = (error: unknown): void => {
     // The full error, absolute paths and all, goes to the server's terminal; the page gets a fixed
     // sentence and Node's code (`ENOSPC`, `EACCES`), enough to tell a full disk from a permission (SEC-001).
-    console.error(`${LOG_TAG} ${wiring.what} failed on disk`, error)
-    send(res, answer(500, { reason: `${wiring.what} failed on disk${diskCodeOf(error)}` }))
+    console.error(`${LOG_TAG} ${wiring.failure}`, error)
+    send(res, answer(500, { reason: `${wiring.failure}${diskCodeOf(error)}` }))
+  }
+  try {
+    const response = wiring.handle({
+      method: req.method,
+      path: req.url,
+      host: headerOf(req.headers.host),
+      origin: headerOf(req.headers.origin),
+      ifMatch: headerOf(req.headers['if-match']),
+      cookie: headerOf(req.headers.cookie),
+      body,
+    })
+    // An endpoint that waits on another server (CARTO-498, the CMS) answers later; its failure is said the same way.
+    if (response instanceof Promise)
+      response.then((later) => {
+        send(res, later)
+      }, failed)
+    else send(res, response)
+  } catch (error: unknown) {
+    failed(error)
   }
 }
 
 /**
  * A Connect middleware that reads a request's body whole, caps its size at {@link MAX_BODY_BYTES}, and
  * hands it to the endpoint — the part every dev-server endpoint of the Cartographer shares.
- * @param wiring - the endpoint's handler and the name of what it writes
+ * @param wiring - the endpoint's handler and the sentence its failure is said with
  * @returns the middleware
  */
 export function createBodyMiddleware(

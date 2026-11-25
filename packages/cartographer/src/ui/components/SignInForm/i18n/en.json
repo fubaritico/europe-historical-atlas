@@ -1,0 +1,14 @@
+{
+  "title": "Sign in",
+  "lead": "Sign in with your CMS account.",
+  "expired": "Your session has expired: sign in again. Nothing of your drawing is lost.",
+  "checking": "Checking the session…",
+  "email": "Address",
+  "password": "Password",
+  "signIn": "Sign in",
+  "signingIn": "Signing in…",
+  "offline": "The CMS does not answer: start it, then try again.",
+  "retry": "Try again",
+  "refused": "The CMS refused: {reason}",
+  "broken": "The Cartographer’s server sent an answer it cannot read: a defect of the Cartographer (details in the console)."
+}
