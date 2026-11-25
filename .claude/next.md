@@ -12,66 +12,44 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **Pour le codeur, de l'historien (23/11)** : les notes de recherche sont sur Acer ; `wikidataId.ts:3` et `cityVerdict.ts:21` citent encore
 `files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md`.
 
-**À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) ranger avec l'historien l'index
-de la mémoire (172 lignes, limite 200) ; (2) la côte libanaise de sa 1100, dessinée seldjoukide alors qu'elle était
-fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ; (3) plus tard, CORE-486.
+**À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) la côte libanaise de sa 1100,
+dessinée seldjoukide alors qu'elle était fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ;
+(2) plus tard, CORE-486. L'index de la mémoire est rangé (24/11 : 47 lignes, une par thème).
 
-## ▶ La règle du soir du 23/11 — à tenir dès l'ouverture
+## ▶ Depuis le 24/11 — les rôles et l'autonomie
 
-**Il ne s'occupe plus des outils, seulement de son atlas** (mémoire `we-run-ourselves`) : on lui dit quand un ticket
-commence, quand il est fini, quand le contexte atteint 60 % — **par notification quand il est à distance** (23/11, 20 h 10).
-Le CMS et le MCP se règlent entre l'historien et moi. **À la reprise** : `ListAgents`, et dire à l'historien que je suis la
-nouvelle session du codeur. **Sa saisie de l'Espagne du nord-ouest (1100) est à moitié faite** (23/11, 22 h 30) : 26
-fiches gardent le titre 6 (Castille), Ferrol et Pontevedra n'ont plus de fiche 1100 — **pas d'export à commiter** avant
-son « CMS libre » final. Rien n'est poussé depuis `5b12959a` ; la CI est verte jusque-là.
+**Les données sont à l'historien, toute la chaîne** (le dev, 24/11 ; `roles/coder.md`, mémoire `data-chain-is-the-historians`) :
+recherche, saisie, export, son commit, sa fusion et le push. Je n'exporte plus, ne commite plus d'export, n'écris plus de
+donnée du CMS ; je lui demande une pause avant une migration ou une relance du serveur, rien d'autre. **J'avance seul par
+le tableau** (le dev, 24/11) : un arbre par ticket (`.claude/worktrees/<ticket>`), fusionné et retiré à la fin — sauf une
+fusion qui rechargerait son Cartographe, qui attend son mot. **À la reprise** : `ListAgents`, et dire à l'historien que je
+suis la nouvelle session du codeur.
 
-## ▶ ON REPREND ICI — le 23/11, 20 h 30 : les noms (CMS-495, En cours)
+**Le plan d'autonomie de 1200** : `files/plans/historian/autonomy-and-1200.md` (ma part au § 5). **Attendent sa décision**
+(§ 7) : le commit d'export allégé (point a) et la suppression des pays et des personnes ouverte à l'historien (point d).
 
-Le plan : `files/plans/contribution/names.md` ; l'état, les commentaires du 23/11 sur CMS-495. **Fait le 23/11**, dans
-`main` : les noms anglais lus dans Wikidata (13 558 lieux, 319 territoires, 391 personnes) et mes traductions des
-registres ; l'anglais **obligatoire** dans le tableau « Le nom dans les autres langues » d'un territoire et d'un lieu ; le
-nom de tout le registre est le français seul (migrations `plain_french_names`, `plain_french_register_names`) ; les 30
-noms d'époque posés ; **le « + » du « Nom d'époque » ouvre son tiroir sur le lieu de la fiche** (`708377f7`, essayé dans
-un navigateur sur une copie de la base) ; **`pnpm names:check`** (`49d160db`, 3 min 40 : 0 nom à trier le 23/11 au soir) ;
-**le détenteur d'une ville est le pays de son titre** dans l'export (`fbad3a1c`, 3 villes sans détenteur sur 13 698).
+## ▶ ON REPREND ICI — le 25/11, 20 h 45 : CARTO-498, puis CARTO-536
 
-**Ce qui reste, dans l'ordre** : (1) les pays en français ; (2) à l'historien, les quatorze noms d'époque d'Anatolie et
-la relecture de mes traductions (`noms-anglais-a-faire.md`). Puis CMS-499 et CARTO-498, en tête d'« À faire ».
+**CARTO-535 est Fait et dans `main`** (`aeb83af1`) : son Cartographe demande son compte du CMS. **Reprendre CARTO-498**
+dans son arbre (`.claude/worktrees/CARTO-498`, sur `caaba5d0` : le **resynchroniser avec `main`** d'abord) — son code
+écrit, le canal vers le CMS passe de la clé MCP à la session (un cookie relayé par le serveur du Cartographe, comme
+`devServer/cmsSession.ts`), « Ajouter au CMS » refusé tant qu'une session est expirée ; puis **CARTO-536**, l'écran de
+départ et ses états connectés, « Fermer la carte », que le tableau des états de CARTO-535 décrit. **Le Cartographe et
+le CMS de l'usage : `localhost`** (le cookie se partage entre les ports) ; **un essai : `127.0.0.1`, jamais
+`localhost`**, ou il remplace sa session (`known-issues/cms.md`).
 
-**Deux pièges du 23/11** (`known-issues/cms.md`) : le seed ne bâtit plus une base neuve (avec CMS-279) ; une commande du
-CMS lancée depuis l'arbre `coder` crée une base neuve. **Essayer le CMS dans un navigateur** : mon serveur depuis l'arbre
-`coder` sur une copie (`sqlite3 ".backup"`, `DATABASE_URL=file:<chemin absolu>`, port 3101), un utilisateur d'essai
-créé dans la copie seule (`payload run`) ; tout supprimé après.
+**REPO-542 À valider** : commité sur sa branche (`9a3ef960`), **pas fusionné** — `main` portait mes notes de session non
+commitées dans `known-issues/cms.md` ; les commiter, puis fusionner (un conflit possible sur ce fichier, à résoudre en
+gardant les deux). Il attend ses deux règles de permission (le commentaire du ticket les donne mot pour mot). **Rien
+n'est poussé** : il a dit de pousser quand tout sera fini.
 
-**Sa 1100 est à lui** (22/11) : il retouche lui-même l'est de l'Anatolie ; `polities.json` et `registry.json` ne sont
-ni commités ni touchés, et **je lui demande avant toute fusion qui lui ferait recharger le Cartographe**.
-
-**Deux règles du code qui sont de moi, à garder ou à lever par lui** : une fiche ne prend qu'un nom d'époque de son
-propre lieu ; un nom que des fiches citent ne change pas de lieu. **En attente de lui** (CARTO-498) : un pays relié au
-CMS garde-t-il un nom et des dates modifiables dans le Cartographe ; les 201 pays par un script en lot.
-
-**Sur le tableau** : CMS-499 puis CARTO-498 en tête d'« À faire » (son geste, vu le 23/11), puis CORE-486 et
-CMS-441. **En Idées** : REPO-496, REPO-500 (le contrôle des villes muet sur un vassal direct non dessiné), CMS-494.
-**Un manque** : l'historien n'a pas d'outil pour créer un événement. Deux personnes pour Danichmend (9 et 179) : à lui.
-
-**Les icônes** : ATLAS-288 fermé le 21/11, sept types sur treize ; les six autres au Backlog (ATLAS-478 à 483), faites
-quand une carte en a besoin. **ATLAS-448** (une seule langue sur la carte) est porté par CMS-495.
-**ATLAS-461, les ornements — En cours, chez Claude Design** : j'attends ce qu'il rend (`~/Desktop/claude-design-ornements`).
-
-**Le tableau** : Jira depuis le 20/11, par le MCP d'Atlassian et `/jira` ; le Backlog est une page, pas une colonne. **Les
-rangs** : `core/src/data/ranks.ts` ; à lui, le rang des États pontificaux, un score pour la seigneurie épiscopale et le despotat.
-
-**L'export** : `pnpm export:content` écrit `atlas.json` et `cartographer.json` dans `packages/atlas/public/content/` ; le dernier commité,
-`f697be4f` (23/11). **Le Cartographe ne lit l'export qu'à l'ouverture de sa page.** Une copie de la base d'avant la
-migration des noms : `packages/cms/.backups/cms-20261122-000012-…db` ; celle du 20/11, `cms.backup-2026-11-20-oriflamme.db`
-(ignorées par git, à supprimer avec son accord).
-
-**Ses règles récentes** : une correction prête va dans `main` tout de suite (19/11) — **sauf quand l'historien dessine
-sur l'arbre principal** (22/11) ; ce qui resservira va dans un spike, le reste est supprimé (18/11). **Ne jamais pousser
-pendant qu'une CI déploie** : `gh run list -L 1` avant. **Il ne valide plus une fonctionnalité** (20/11) : je la teste
-et je la clos ; ne va à lui que ce qui se juge à l'œil ou se décide, en un seul geste.
-
-**Sur `main`, pas à moi** : `editor-chrome.css` (CARTO-465, pas validé), les fichiers de l'historien.
+**Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog), REPO-542.
+**Prioritaire, à lui proposer** : ATLAS-527, le crédit Cliopatria sur l'atlas — le site en ligne n'est pas en règle.
+**L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : ATLAS-519 Fait ; suivent
+ATLAS-520 (les pièces), 521 (la barre du site, la colonne du bas, la barre verticale à droite), 522 (le siècle), la
+frise (ATLAS-358).
+**À valider par lui** : REPO-542 (ses règles de permission). **En cours** : CARTO-498 (débloqué par CARTO-535),
+ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien), et les épiques.
 
 ## Ce qui reste d'avant, toujours vrai
 

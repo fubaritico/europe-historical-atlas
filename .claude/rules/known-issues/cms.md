@@ -189,3 +189,7 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   2026-11-23). Also left: its two writes pass their data `as never`, Payload's generated row type requiring the fields a
   condition hides (population on a holder line); a field renamed in `PlacePeriods` shows only as a city « failed ».
   **Severity: worth knowing.**
+- **A key of the MCP plugin does not open Payload's REST API** (2026-11-25, CARTO-498): Payload 3.92 registers an API-key
+  strategy for every auth collection **except** `payload-mcp-api-keys` (`payload/src/index.ts`, line 975) — such a key
+  opens `/api/mcp` only; on `/api/<collection>` the request is nobody, and the default access refuses it. Proved on a
+  copy of the base. **Remedy taken**: the Cartographer acts with the CMS's own session (CARTO-535). **Severity: à savoir.**
