@@ -29,7 +29,7 @@ your report.
 
 ## How you read
 
-**The oracle first** (REPO-539, the dev, 25/11): if your book is already filed, `mcp__oracle__search` with `work` set to its folder gives the passages under each name, with their line or page — read those, never the whole text. A book already filed is never downloaded again (`find_book.py get` refuses it).
+**The oracle first** (REPO-539, the dev, 25/11): if your book is already filed, `mcp__oracle__search` with `work` set to its folder gives the passages under each name, with their line or page — read those, never the whole text. Filter by `zones` (the folder name of a zone, e.g. `levant`) and `centuries` (1200 is the 12th: ceil(year/100)) when the question allows; the tool's description lists the known zones and languages. Each query is an attempt of kind `oracle` (`research_log.py attempt`): the gate refuses a region without one. A book already filed is never downloaded again (`find_book.py get` refuses it).
 
 1. **Have the text.** Already in `ouvrages/` or `bibliotheque/`: read it there. Else fetch it (archive.org:
    `archive.org/metadata/<id>` gives the files and the storage server `d1` + `dir`, used when `archive.org/download`
