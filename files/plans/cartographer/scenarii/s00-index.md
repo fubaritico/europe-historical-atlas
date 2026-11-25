@@ -47,6 +47,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 21  | [the panels moved and docked](s21-panels-moved-and-docked.md) | dragged by the head, floating or docked, magnetised to the right column, resized, kept (CARTO-342) |
 | 22  | [copy and paste between maps](s22-copy-paste.md) | a polity, a stretch, a sheet — copied in one map, pasted in place in another; the menu bar (CARTO-345) |
 | 23  | [behind the CMS's account](s23-sign-in.md) | the sign-in where the map would be, the chrome greyed, the session kept, expired, the CMS stopped (CARTO-535) |
+| 24  | [the start screen](s24-start-screen.md) | no map opened by itself: « Nouvelle carte… », « Ouvrir… », the last maps; « Fermer la carte »; no address (CARTO-536) |
 
 ## The two tools — decided 2026-09-22
 

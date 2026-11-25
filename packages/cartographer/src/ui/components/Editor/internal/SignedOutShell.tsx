@@ -39,6 +39,7 @@ export function SignedOutShell({ heading, appbar, session, keeper }: SignedOutSh
     <Shell
       heading={heading}
       appbar={appbar}
+      bare
       docbar={<></>}
       rail={<></>}
       canvas={

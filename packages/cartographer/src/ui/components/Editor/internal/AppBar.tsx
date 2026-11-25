@@ -1,10 +1,10 @@
 import { useShortcut } from '../../../hooks/useShortcut'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
-import { BrandMark } from '../../../icons/brandMark'
 import { EDITOR_MESSAGES } from '../i18n'
 import { gesture } from '../utils/gesture'
 
+import { AppBrand } from './AppBrand'
 import { BarButton } from './BarButton'
 
 import type { ReactNode } from 'react'
@@ -26,8 +26,8 @@ import type { ReactNode } from 'react'
 export interface AppBarProps {
   /** The application's name, written beside the mark. */
   name: string
-  /** The map open — its folder's name (`s19`). */
-  map: string
+  /** The map open — its folder's name (`s19`) — or `null` on the start screen, nothing written (CARTO-536). */
+  map: string | null
   /** *Open…*: the maps of `years/`, one to open. */
   onOpen: () => void
   /** *Save*: the map open, as ‹ctrl+S›. */
@@ -45,6 +45,11 @@ export interface AppBarProps {
   unavailable?: string
   /** Who is signed in and « Se déconnecter », at the bar's right end (CARTO-535). */
   account?: ReactNode
+  /**
+   * Why the three saves are greyed while *Open…* acts — no map open, on the start screen (CARTO-536); absent when a map
+   * is. A reason of {@link AppBarProps.unavailable} greys all four first.
+   */
+  withoutMap?: string
 }
 
 /**
@@ -59,6 +64,7 @@ export interface AppBarProps {
  * @param props.menus - the menu bar, beside the name
  * @param props.unavailable - why the file gestures cannot act, or nothing
  * @param props.account - who is signed in, at the right end
+ * @param props.withoutMap
  * @returns the brand and the actions, the two ends of the bar
  */
 export function AppBar({
@@ -71,24 +77,21 @@ export function AppBar({
   menus,
   unavailable,
   account,
+  withoutMap,
 }: AppBarProps) {
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
   const shortcut = useShortcut()
 
+  // Derived
+  const unsaveable = unavailable ?? withoutMap
+
   // Render
   return (
     <>
       <div className="app-start">
-        <div className="app-brand">
-          <BrandMark />
-          <span className="app-brand__name">{name}</span>
-          <span className="app-brand__sep" aria-hidden="true">
-            ·
-          </span>
-          <span className="app-brand__year">{map}</span>
-        </div>
+        <AppBrand name={name} map={map} />
         {menus}
       </div>
       <div className="bar-actions">
@@ -98,15 +101,15 @@ export function AppBar({
         />
         <BarButton
           label={action('save')}
-          {...gesture(onSave, t('saveHint', { keys: shortcut('save').shown }), unavailable)}
+          {...gesture(onSave, t('saveHint', { keys: shortcut('save').shown }), unsaveable)}
         />
         <BarButton
           label={action('saveAs')}
-          {...gesture(onSaveAs, t('saveAsHint', { keys: shortcut('saveAs').shown }), unavailable)}
+          {...gesture(onSaveAs, t('saveAsHint', { keys: shortcut('saveAs').shown }), unsaveable)}
         />
         <BarButton
           label={action('saveCopy')}
-          {...gesture(onSaveCopy, t('saveCopyHint'), unavailable)}
+          {...gesture(onSaveCopy, t('saveCopyHint'), unsaveable)}
         />
         {account}
       </div>

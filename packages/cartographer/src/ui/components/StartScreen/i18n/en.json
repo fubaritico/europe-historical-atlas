@@ -1,0 +1,11 @@
+{
+  "welcome": "Welcome to the Cartographer",
+  "start": "Start",
+  "home": "Home",
+  "recent": "Recent maps",
+  "reading": "Reading the maps…",
+  "failed": "The maps could not be listed (details in the console).",
+  "retry": "Retry",
+  "empty": "No map yet: create one with « New map ».",
+  "changed": "changed {when}"
+}

@@ -8,6 +8,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../i18n/actions'
 
 import { SAVE_FIRST_MESSAGES } from './i18n'
+import { questionWords } from './utils/questionWords'
 
 import type { SaveFirstAnswer, SaveFirstReason } from '../../../persistence/mapChange'
 import type { QuestionRelay } from '../../../persistence/questionRelay'
@@ -44,13 +45,7 @@ export function SaveFirstDialog({ questions }: SaveFirstDialogProps) {
   const reason = useSyncExternalStore(questions.subscribe, questions.current)
 
   // Derived
-  const title = reason?.kind === 'signOut' ? t('signOutTitle') : t('title')
-  const question =
-    reason === null
-      ? ''
-      : reason.kind === 'signOut'
-        ? t('signOutQuestion')
-        : t('question', { map: reason.map })
+  const { title, question } = questionWords(reason, t)
 
   // Handlers
   const yes = (): void => {

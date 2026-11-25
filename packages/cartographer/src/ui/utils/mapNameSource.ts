@@ -1,6 +1,7 @@
 /**
  * The name of the map the page is (`s19`), as the chrome reads it: the top bar writes it, the page's heading says it,
- * and *Save as…* changes it without a reload. A tiny external store, like the dialogue openers
+ * and *Save as…* changes it without a reload. **`null` on the start screen**, where no map is open (CARTO-536) — the page
+ * reloads to open one, so a name never becomes `null` once set. A tiny external store, like the dialogue openers
  * (`dialogueOpener.ts`): the session that changes it lives outside React.
  */
 
@@ -8,9 +9,9 @@
 export interface MapNameSource {
   /**
    * The name now.
-   * @returns the map's name
+   * @returns the map's name, or `null` when no map is open
    */
-  get: () => string
+  get: () => string | null
   /**
    * Listen to it changing.
    * @param listener - called after each change
@@ -30,10 +31,10 @@ export interface MapNameStore extends MapNameSource {
 
 /**
  * Build the store on the map the page opened.
- * @param initial - the map's name
+ * @param initial - the map's name, or `null` on the start screen
  * @returns the store
  */
-export function createMapNameStore(initial: string): MapNameStore {
+export function createMapNameStore(initial: string | null): MapNameStore {
   let name = initial
   const listeners = new Set<() => void>()
   return {

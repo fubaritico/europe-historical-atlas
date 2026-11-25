@@ -5,8 +5,10 @@ every session is [`journal.md`](journal.md) (local, never committed).
 
 ## Opening, aiming, seeing
 
-- **Open a map**: `http://localhost:<port>/?map=<map>`. **Wait for the backdrop** (~10 s, only in the tab in front): a
-  click or a wheel notch sent before is lost. Screenshot first, act after.
+- **Open a map**: `http://localhost:<port>/`, then click the map in « Cartes récentes » on the start screen, or
+  Fichier › Ouvrir… (‹cmd+O›) and double-click it — **the address names no map since CARTO-536** (2026-11-25): a
+  `?map=` is not read. A tab that had a map open reopens it at a reload. **Wait for the backdrop** (~10 s, only in the
+  tab in front): a click or a wheel notch sent before is lost. Screenshot first, act after.
 - **Show the cities**: in {Cities}, tick « Show all the cities of <year> » and « Show as points » — before any retouch
   (the dev, 2026-11-08: *"display those cities!"*). A ring round a point is its holder's colour.
 - **Aim a polity** in {Polities}: type in its filter, click the row. **With the white arrow in hand, a click on empty

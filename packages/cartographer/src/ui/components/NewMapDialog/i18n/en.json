@@ -1,0 +1,10 @@
+{
+  "title": "New map",
+  "text": "An empty map of the year, on the relief. If the map open holds changes, you will be asked whether to save it first.",
+  "year": "Year",
+  "yearHint": "In digits, \"-\" before the Common Era",
+  "name": "Map name",
+  "nameHint": "Letters, digits, \"-\", \"_\" and \".\" — a year's name for the map the atlas publishes",
+  "create": "Create",
+  "creating": "Creating…"
+}

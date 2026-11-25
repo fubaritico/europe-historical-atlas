@@ -1,0 +1,11 @@
+{
+  "welcome": "Bienvenue dans le Cartographe",
+  "start": "Commencer",
+  "home": "Accueil",
+  "recent": "Cartes récentes",
+  "reading": "Lecture des cartes…",
+  "failed": "Les cartes n’ont pas pu être listées (détail dans la console).",
+  "retry": "Réessayer",
+  "empty": "Aucune carte pour l’instant : créez-en une avec « Nouvelle carte ».",
+  "changed": "modifiée {when}"
+}

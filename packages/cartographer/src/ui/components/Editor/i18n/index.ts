@@ -20,6 +20,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `tools` or `panels`.
  * - `signOut`, `signedInAs`, `signInFirst`, `sessionExpired` — The session (CARTO-535): the button, who is signed in
  *   (`email`), why the bar's gestures are greyed, and the expired session's dialogue's name.
+ * - `openMapFirst` — Why the three saves are greyed on the start screen (CARTO-536).
  */
 export type EditorMessageKey = keyof typeof en
 

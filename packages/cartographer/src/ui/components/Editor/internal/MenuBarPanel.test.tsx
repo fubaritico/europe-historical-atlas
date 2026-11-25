@@ -49,6 +49,9 @@ function mount(shared = store(), held: ClipboardContent | null = null) {
       onSave={vi.fn()}
       onSaveAs={vi.fn()}
       onSaveCopy={vi.fn()}
+      onNewMap={vi.fn()}
+      onCloseMap={vi.fn()}
+      mapOpen
       onCopy={onCopy}
       onPaste={onPaste}
       onSelectAll={vi.fn()}

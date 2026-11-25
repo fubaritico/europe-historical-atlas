@@ -97,3 +97,66 @@
 .workbench__zone--bar {
   height: 30px;
 }
+
+/* The start screen's icon proposals (CARTO-536): a row per button, its three proposals side by side. */
+.start-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.start-icons__row {
+  display: grid;
+  /* Whole pixels, never shares of the width: a glyph between two pixels blurs (2026-11-25, x = 512.33). */
+  grid-template-columns: repeat(3, 224px);
+  gap: 16px;
+}
+
+.start-icons__glyph {
+  flex: 0 0 auto;
+  display: block;
+}
+
+.start-icons__label {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+.start-icons__proposal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.start-icons__sizes {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.start-icons__button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 168px;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.start-icons__button--primary {
+  background: var(--ink-off);
+}
+
+/* The start screen's plate: a cell of the map's size, as the shell gives it. */
+.workbench__start {
+  height: 600px;
+}

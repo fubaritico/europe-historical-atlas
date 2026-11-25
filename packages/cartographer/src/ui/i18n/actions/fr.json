@@ -3,6 +3,8 @@
   "open": "Ouvrir…",
   "saveAs": "Enregistrer sous…",
   "saveCopy": "Enregistrer une copie",
+  "newMap": "Nouvelle carte…",
+  "closeMap": "Fermer la carte",
   "undo": "Annuler",
   "redo": "Rétablir",
   "undoStep": "Annuler {step}",

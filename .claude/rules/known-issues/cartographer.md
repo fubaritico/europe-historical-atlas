@@ -168,11 +168,17 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   instantanés. **Et un piège de test** : `getByText` de Testing Library replie l'espace fine insécable (`\u202f`, avant
   « ? » et « ; » en français) en espace dans le texte de la page, **pas** dans la chaîne attendue — comparer le
   `textContent` exact. **Sévérité : à savoir.**
-- **An address with `?map=` that cannot be a map's name leaves the Cartographer blank** (2026-11-02,
-  `persistence/openingMap.ts`; was `?year=` the same morning): it throws before anything mounts, said on the console —
-  **my choice**, never answered by the dev: opening 1100 in its place would have him drawing on 1100 while believing it
-  another map. A well-formed name with no folder opens nothing, saving blocked, said in the alarm (`noSuchMap`). Only
-  _Open…_ and _Save as…_ write the address. **Severity: cosmétique.**
+- **The map open is kept in the tab, never the address** (2026-11-25, CARTO-536, `persistence/openMapStorage.ts`): a
+  reload reopens it, a new tab starts on the start screen. Two calls of mine, open to the dev's word: a name kept that
+  cannot be a map's opens the start screen, said in the console; the last maps are ordered by when they were last
+  written, so a map opened and left unchanged does not climb. **Not in the rung**: the view of a map is the tab's, so a
+  map opened in a new tab opens on the whole relief. **Trigger**: the dev missing his view in a new tab. **Severity: à
+  savoir.** **Left open by the review of the same evening** (my decision, all low): (1) one map listed without its date
+  fails the whole list of the start screen, said with « Réessayer » — a folder removed between the listing and its
+  reading, rare; (2) the start screen's notes are live regions mounted with their text, as « Vérification… »
+  (CARTO-535, point 5); (3) « Nouvelle carte » cancelled while its write runs: the late answer may close the dialogue
+  opened again meanwhile; (4) the bar's gestures are listed three times in `Editor/utils/barGestures.ts` — the type
+  refuses a key picked and not handed, not one forgotten in both.
 - **`packages/cartographer/.autosave/` is left on disk, unused** (2026-11-02): the snapshots and the draft are removed
   (`s19`) — the automatic save is a map of `years/` now — but the folder still holds the old snapshots (26 files, 31 MB)
   and drafts, git-ignored. My `rm -rf` was refused by the permissions, rightly. **Remedy**: the dev deletes it

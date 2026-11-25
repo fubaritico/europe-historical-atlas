@@ -2,5 +2,7 @@
   "title": "Ouvrir une carte",
   "question": "Vous allez ouvrir {map}. Voulez-vous enregistrer la carte en cours ?",
   "signOutTitle": "Se déconnecter",
-  "signOutQuestion": "Vous allez vous déconnecter. Voulez-vous enregistrer la carte en cours ?"
+  "signOutQuestion": "Vous allez vous déconnecter. Voulez-vous enregistrer la carte en cours ?",
+  "closeTitle": "Fermer la carte",
+  "closeQuestion": "Vous allez fermer la carte. Voulez-vous enregistrer la carte en cours ?"
 }

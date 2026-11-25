@@ -29,9 +29,9 @@ import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
 import { keepClipboard, keptClipboard } from './persistence/clipboardStorage'
 import { guardedStorage } from './persistence/guardedStorage'
-import { changeMap } from './persistence/mapChange'
+import { createMapGestures } from './persistence/mapGestures'
 import { routeNotices } from './persistence/noticeRouter'
-import { addressForMap, openingMapOf } from './persistence/openingMap'
+import { createTabMapKeeper, keptOpenMap } from './persistence/openMapStorage'
 import { readPanelLayout, writePanelLayout } from './persistence/panelLayoutStorage'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
@@ -40,6 +40,7 @@ import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
 import { createSignOut } from './persistence/signOut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
+import { windowTimers } from './persistence/windowTimers'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
 import { summariseClipboard } from './state/clipboardSlice'
@@ -56,6 +57,7 @@ import { Editor } from './ui/components/Editor'
 import { ErrorBoundary, ZoneBreaksContext, readZoneBreaks } from './ui/components/ErrorBoundary'
 import { LocaleProvider } from './ui/components/LocaleProvider'
 import { MapDialog } from './ui/components/MapDialog'
+import { NewMapDialog } from './ui/components/NewMapDialog'
 import { NoticeToaster, noticeToasts } from './ui/components/NoticeToaster'
 import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
@@ -77,6 +79,7 @@ import { createMapNameStore } from './ui/utils/mapNameSource'
 import { pasteClipboard } from './ui/utils/pasteClipboard'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
 import { startSession, whenSignedIn } from './ui/utils/startSession'
+import { whenMapOpen } from './ui/utils/whenMapOpen'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 
@@ -84,7 +87,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 import './ui/styles/sheets'
 
 import type { SaveFirstAnswer, SaveFirstReason } from './persistence/mapChange'
-import type { OverwriteQuestion } from './persistence/yearSession'
+import type { OverwriteQuestion, YearSession } from './persistence/yearSession'
 import type { ReactToastContent } from '@fubaritico/react/Toast'
 
 /**
@@ -142,22 +145,19 @@ if (!container) {
   throw new Error('Cartographer: #root is missing from index.html — nothing to mount into.')
 }
 
-/** The map the editor opens on when the address names none — the published map of 1100, the first century (P3). */
-const FIRST_MAP = '1100'
-
-/**
- * The map this page edits: `?map=1100-backup-2026-11-02` in the address, written by *Open…* and *Save as…*
- * (`persistence/mapChange.ts`), or the first map. A `map` that cannot be a map's name throws here, before anything
- * mounts — said on the console rather than opening 1100 in its place (`persistence/openingMap.ts`).
- */
-const MAP = openingMapOf(window.location.search, FIRST_MAP)
-
-/** The map's name as the chrome reads it — *Save as…* changes it without a reload. */
-const mapName = createMapNameStore(MAP)
-
 // The tab's storage, guarded as the page's is (CARTO-427, review): the view is written at every change, and a browser
 // refusing it keeps nothing, said once in the console.
 const tabStorage = guardedStorage(() => window.sessionStorage)
+
+/**
+ * The map this tab edits — kept in the tab by *Open…*, *Save as…* and « Nouvelle carte » (`persistence/openMapStorage`),
+ * never in the address (the dev, 2026-11-25, CARTO-536) — or `null`: no map is open, and the start screen shows. No map
+ * opens by itself (the dev: « je veux pas de fichier par défaut »).
+ */
+const MAP = keptOpenMap(tabStorage)
+
+/** The map's name as the chrome reads it — *Save as…* changes it without a reload; `null` on the start screen. */
+const mapName = createMapNameStore(MAP)
 
 /**
  * The view last on screen in this tab — the previous map's, when *Open…* brought the page here (`s19`), or this one's
@@ -243,7 +243,8 @@ const loadTheBackdrop = createEditorBackdropLoad({
  * again.
  */
 const backdrop = preparedBackdrop(loadTheBackdrop)
-backdrop.prepare()
+// Not on the start screen: opening a map reloads the page, so a backdrop baked here would be thrown away.
+if (MAP !== null) backdrop.prepare()
 
 /**
  * The polities' colours, for the canvas and every panel alike — one source, with the palette given here
@@ -312,6 +313,23 @@ localeStore.subscribe(() => {
 const diskWords = () => persistenceWords(localeStore.get())
 
 /**
+ * The map open, kept in the tab (CARTO-536): a reload on a map or on the start screen; a browser refusing the tab's
+ * storage changes nothing, said in the error dialogue (review ARCH-001 of 2026-11-25).
+ */
+const tabMap = createTabMapKeeper({
+  storage: tabStorage,
+  reload: () => {
+    window.location.reload()
+  },
+  refused: (map) => {
+    console.error(
+      `[Cartographer] the tab's storage refused ${map ?? 'the start screen'}: the page stays`
+    )
+    alarms.raise({ topic: 'year', text: diskWords().t('tabStorageRefused'), sign: 'error' })
+  },
+})
+
+/**
  * Who is signed in, with the CMS's account (CARTO-535): the editor and every command act only once someone is. An
  * answer of the dev server the page cannot read opens the error dialogue (the dev: the user always gets a feedback).
  */
@@ -339,80 +357,91 @@ const yearArchive = createDevServerYearArchive({
  * `/years` is read with a plain GET, the folder the atlas reads too; the write route is served by the dev
  * server only (`vite.config.ts`), so the built site answers a save with an error, said in the alarm dialogue.
  */
-const yearSession = createYearSession({
-  store,
-  archive: yearArchive,
-  map: MAP,
-  // *Save as…* made the page another map: the address and the top bar follow, with no reload.
-  onMapChanged: (map) => {
-    mapName.set(map)
-    window.history.replaceState(null, '', addressForMap(window.location.search, map))
-  },
-  report: notices,
-  words: diskWords,
-  confirmOverwrite: overwriteQuestions.ask,
-  now: () => new Date(),
-  timers: {
-    set: (run, delayMs) => window.setTimeout(run, delayMs),
-    clear: (handle) => {
-      window.clearTimeout(handle)
-    },
-  },
-})
+const yearSession: YearSession | null =
+  MAP === null
+    ? null
+    : createYearSession({
+        store,
+        archive: yearArchive,
+        map: MAP,
+        // *Save as…* made the page another map: the tab and the top bar follow, with no reload.
+        onMapChanged: (map) => {
+          mapName.set(map)
+          tabMap.follow(map)
+        },
+        report: notices,
+        words: diskWords,
+        confirmOverwrite: overwriteQuestions.ask,
+        now: () => new Date(),
+        timers: windowTimers,
+      })
+
 /**
  * The automatic save — the page written as `years/<map>.autosave.<time of opening>` two seconds after each gesture,
  * one folder per opening, kept (the dev, 2026-11-02; `persistence/autosaveKeeper.ts`). Started once the map is open
- * and saving is allowed: an autosave of an empty or unreadable page would only be noise in *Open…*.
+ * and saving is allowed: an autosave of an empty or unreadable page would only be noise in *Open…*. None on the start
+ * screen, where no map is open (the dev's table, CARTO-535).
  */
-const autosaveKeeper = createAutosaveKeeper({
-  store,
-  // The copy `<map>.autosave.<date>`, then the map open itself (the dev, 2026-11-02: "you keep everything").
-  write: writeCopyThenMap({
-    saveCopy: (document, map) => yearArchive.save(document, map, { overwrite: true }),
-    saveMap: () => yearSession.saveSilently(),
-  }),
-  map: () => yearSession.map(),
-  delayMs: AUTOSAVE_DELAY_MS,
-  now: () => new Date(),
-  timers: {
-    set: (run, delayMs) => window.setTimeout(run, delayMs),
-    clear: (handle) => {
-      window.clearTimeout(handle)
-    },
-  },
-  report: notices,
-  words: diskWords,
-})
-// It runs while the map is open and someone is signed in — or was, until a session expired mid-drawing — and stops
-// while nobody is (CARTO-535, the dev's table of 2026-11-25)
-const autosave = autosaveFollowsSession(
-  autosaveKeeper,
-  session.store,
-  () => yearSession.phase() === 'ready'
-)
-void yearSession.openOnStartup().then(autosave.follow)
-/** Save the map — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
-const handleSave = (): void => {
-  void yearSession.save()
+if (yearSession !== null) {
+  const autosaveKeeper = createAutosaveKeeper({
+    store,
+    // The copy `<map>.autosave.<date>`, then the map open itself (the dev, 2026-11-02: "you keep everything").
+    write: writeCopyThenMap({
+      saveCopy: (document, map) => yearArchive.save(document, map, { overwrite: true }),
+      saveMap: () => yearSession.saveSilently(),
+    }),
+    map: () => yearSession.map(),
+    delayMs: AUTOSAVE_DELAY_MS,
+    now: () => new Date(),
+    timers: windowTimers,
+    report: notices,
+    words: diskWords,
+  })
+  // It runs while the map is open and someone is signed in — or was, until a session expired mid-drawing — and stops
+  // while nobody is (CARTO-535, the dev's table of 2026-11-25)
+  const autosave = autosaveFollowsSession(
+    autosaveKeeper,
+    session.store,
+    () => yearSession.phase() === 'ready'
+  )
+  void yearSession.openOnStartup().then(autosave.follow)
 }
-installSaveShortcut(window, whenSignedIn(session, 'save', handleSave))
 
-/** *Open…*'s dialogue, and *Save as…*'s — one opener per dialogue. */
+/**
+ * A command of the map open — signed in, and a map open (CARTO-535, CARTO-536); declined in the console otherwise.
+ * @param command - the command's name, for the console
+ * @param run - what it does with the map's session
+ * @returns the command
+ */
+const onMap = (command: string, run: (mapSession: YearSession) => void): (() => void) =>
+  whenSignedIn(session, command, whenMapOpen(yearSession, command, run))
+
+/** Save the map — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
+const handleSave = onMap('save', (mapSession) => {
+  void mapSession.save()
+})
+installSaveShortcut(window, handleSave)
+
+/** *Open…*'s dialogue, *Save as…*'s and « Nouvelle carte »'s — one opener per dialogue. */
 const mapPicker = createDialogueOpener()
 const saveAsPicker = createDialogueOpener()
+const newMapPicker = createDialogueOpener()
 
-/** *Open…* asks whether to save the map open when it holds changes (`s19`) — answered in `SaveFirstDialog`. */
+/**
+ * *Open…*, « Fermer la carte » and « Nouvelle carte » ask whether to save the map open when it holds changes (`s19`,
+ * CARTO-536) — answered in `SaveFirstDialog`.
+ */
 const saveFirstQuestions = createQuestionRelay<SaveFirstReason, SaveFirstAnswer>(
   '« save first? » is already asking'
 )
 
 /**
  * « Se déconnecter »: a change not yet saved goes through « save first? », then the session closes (CARTO-535, the dev's
- * table of 2026-11-25).
+ * table of 2026-11-25). On the start screen no map is open, so nothing is asked.
  */
 const signOut = createSignOut({
-  isModified: () => yearSession.isModified(),
-  save: () => yearSession.save(),
+  isModified: () => yearSession?.isModified() === true,
+  save: () => (yearSession === null ? Promise.resolve(true) : yearSession.save()),
   askSaveFirst: saveFirstQuestions.ask,
   signOut: () => session.keeper.signOut(),
   report: notices,
@@ -422,53 +451,36 @@ const handleSignOut = (): void => {
   void signOut()
 }
 
-/**
- * Open another map: ask whether to save the map open when it changed, carry the view, then reload on the map chosen —
- * or say why the page stays.
- * @param map - the map chosen in the dialogue
- */
+/** *Open…*, « Fermer la carte », « Nouvelle carte » and *Save as…*, with a map open or from the start screen (CARTO-536). */
+const mapGestures = createMapGestures({
+  session: yearSession,
+  version: () => store.getState().version,
+  askSaveFirst: saveFirstQuestions.ask,
+  carryView: () => {
+    carryView(tabStorage, store.getState().viewport)
+  },
+  reloadOn: tabMap.reloadOn,
+  archive: yearArchive,
+  emptyYear: openEmptyYear,
+  report: notices,
+  words: diskWords,
+})
 const handleOpenMap = (map: string): void => {
-  void changeMap(
-    {
-      session: {
-        map: () => yearSession.map(),
-        isModified: () => yearSession.isModified(),
-        // Saved as ‹ctrl+S› saves.
-        save: () => yearSession.save(),
-      },
-      version: () => store.getState().version,
-      askSaveFirst: saveFirstQuestions.ask,
-      carryView: () => {
-        carryView(tabStorage, store.getState().viewport)
-      },
-      search: window.location.search,
-      go: (address) => {
-        window.location.assign(address)
-      },
-      report: notices,
-      words: diskWords,
-    },
-    map
-  )
+  void mapGestures.openMap(map)
 }
-
-/**
- * *Save as…*: the session saves the map open, then writes the page under the name, and the page goes on as that map —
- * its autosave following it under the new name.
- * @param name - the name typed
- * @returns done, or the refusal the form shows
- */
-const handleSaveAs = (name: string) => yearSession.saveAs(name)
+const handleCloseMap = onMap('closeMap', () => {
+  void mapGestures.closeMap()
+})
 
 /** *Save a copy*: the page written as `<map>.copy.<date and time>`, the page staying its map. */
-const handleSaveCopy = (): void => {
-  void yearSession.saveCopy()
-}
+const handleSaveCopy = onMap('saveCopy', (mapSession) => {
+  void mapSession.saveCopy()
+})
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
 // Gated like every other command (review ARCH-004 of 2026-11-25): a polity still selected from before a sign-out would
 // otherwise be moved in the pile with nobody signed in
 listenForStackingKeys(document, (move) => {
-  whenSignedIn(session, 'stacking', () => {
+  onMap('stacking', () => {
     arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
   })()
 })
@@ -497,37 +509,38 @@ const clipboard = createHeldClipboard(HELD, (content) =>
 
 /**
  * Where a copy goes and is said: the map's name, the tab's clipboard, the status bar, the words of the moment.
+ * @param mapSession - the map's session
  * @returns the copy's dependencies
  */
-const copyDeps = () => ({
-  map: yearSession.map(),
+const copyDeps = (mapSession: YearSession) => ({
+  map: mapSession.map(),
   keep: clipboard.hold,
   say: results.say,
   words: clipboardWordsNow(),
 })
 
 /** Copy the points or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
-const handleCopy = (): void => {
-  copySelection(store.getState(), copyDeps())
-}
-listenForCommand(document, 'copy', whenSignedIn(session, 'copy', handleCopy))
+const handleCopy = onMap('copy', (mapSession) => {
+  copySelection(store.getState(), copyDeps(mapSession))
+})
+listenForCommand(document, 'copy', handleCopy)
 
 /** Copy the polity selected's sheet alone (the dev, 2026-11-05) — ‹shift+cmd+C› and « Copier la fiche ». */
-const handleCopySheet = (): void => {
-  copySheetOfSelection(store.getState(), copyDeps())
-}
-listenForCommand(document, 'copySheet', whenSignedIn(session, 'copySheet', handleCopySheet))
+const handleCopySheet = onMap('copySheet', (mapSession) => {
+  copySheetOfSelection(store.getState(), copyDeps(mapSession))
+})
+listenForCommand(document, 'copySheet', handleCopySheet)
 
 /** Paste what the clipboard holds — polities into this map, a stretch onto the polity selected — one step (CARTO-345). */
-const handlePaste = (): void => {
+const handlePaste = onMap('paste', () => {
   pasteClipboard({
     ...store.getState(),
     content: clipboard.get(),
     say: results.say,
     words: clipboardWordsNow(),
   })
-}
-listenForCommand(document, 'paste', whenSignedIn(session, 'paste', handlePaste))
+})
+listenForCommand(document, 'paste', handlePaste)
 
 // What the clipboard holds, said to the store, so a polity's menu and Édition can light their commands (CARTO-345).
 const summarise = (): void => {
@@ -542,8 +555,10 @@ store.subscribe(
   (state) => state.copyAsked,
   (asked) => {
     if (asked === null) return
-    store.getState().chooseTarget(asked.polity)
-    answerCopyRequest(store.getState(), asked.what, copyDeps())
+    onMap('copy', (mapSession) => {
+      store.getState().chooseTarget(asked.polity)
+      answerCopyRequest(store.getState(), asked.what, copyDeps(mapSession))
+    })()
   }
 )
 store.subscribe(
@@ -559,7 +574,7 @@ store.subscribe(
  * ‹cmd+A› — Édition › Tout sélectionner (`open-outlines.md`): every point of the polity selected, the white arrow
  * taken. With none selected, the status bar says so.
  */
-const handleSelectAll = (): void => {
+const handleSelectAll = onMap('selectAll', () => {
   const { target, askSelectAll } = store.getState()
   if (target === null) {
     console.warn('[Cartographer] select all refused: no polity selected.')
@@ -567,12 +582,13 @@ const handleSelectAll = (): void => {
     return
   }
   askSelectAll()
-}
-listenForCommand(document, 'selectAll', whenSignedIn(session, 'selectAll', handleSelectAll))
+})
+listenForCommand(document, 'selectAll', handleSelectAll)
 
-// ‹cmd+O› and ‹cmd+shift+S›: *Open…* and *Save as…*, as their buttons and the menu (CARTO-345).
+// ‹cmd+O›: *Open…*, as its button and the menu (CARTO-345) — on the start screen too, the one key there (CARTO-535's
+// table). ‹cmd+shift+S›: *Save as…*, a map open only.
 listenForCommand(document, 'open', whenSignedIn(session, 'open', mapPicker.open))
-listenForCommand(document, 'saveAs', whenSignedIn(session, 'saveAs', saveAsPicker.open))
+listenForCommand(document, 'saveAs', onMap('saveAs', saveAsPicker.open))
 
 /**
  * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built
@@ -598,6 +614,9 @@ createRoot(container).render(
               onSave={handleSave}
               onSaveAs={saveAsPicker.open}
               onSaveCopy={handleSaveCopy}
+              onNewMap={newMapPicker.open}
+              onCloseMap={handleCloseMap}
+              start={{ maps: yearArchive, now: () => new Date(), onOpenMap: handleOpenMap }}
               onCopy={handleCopy}
               onPaste={handlePaste}
               onSelectAll={handleSelectAll}
@@ -621,11 +640,12 @@ createRoot(container).render(
             <MapDialog
               picker={mapPicker}
               source={yearArchive}
-              currentMap={yearSession.map}
+              currentMap={mapName.get}
               onOpen={handleOpenMap}
             />
             <SaveFirstDialog questions={saveFirstQuestions} />
-            <SaveAsDialog picker={saveAsPicker} saveAs={handleSaveAs} />
+            <SaveAsDialog picker={saveAsPicker} saveAs={mapGestures.saveAs} />
+            <NewMapDialog picker={newMapPicker} create={mapGestures.createMap} />
           </ErrorBoundary>
         </ZoneBreaksContext>
       </PlatformContext>

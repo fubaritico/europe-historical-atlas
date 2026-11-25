@@ -7,6 +7,10 @@ describe('createMapNameStore', () => {
     expect(createMapNameStore('1100').get()).toBe('1100')
   })
 
+  it('holds no map on the start screen (CARTO-536)', () => {
+    expect(createMapNameStore(null).get()).toBeNull()
+  })
+
   it('tells its listeners when the map changes', () => {
     const store = createMapNameStore('1100')
     const listener = vi.fn()

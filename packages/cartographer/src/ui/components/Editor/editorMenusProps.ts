@@ -3,8 +3,10 @@ import type { ActionMessageKey } from '../../i18n/actions'
 import type { PasteCommand } from '../../utils/pasteCommand'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
-/** What the menus read of the editor: the history, the selection, the clipboard. */
+/** What the menus read of the editor: whether a map is open, the history, the selection, the clipboard. */
 export interface EditorMenuState {
+  /** Whether a map is open — `false` on the start screen (CARTO-536). */
+  mapOpen: boolean
   /** The gesture an undo would take back, or `null`. */
   undoLabel: string | null
   /** The gesture a redo would apply again, or `null`. */
@@ -19,6 +21,10 @@ export interface EditorMenuState {
 
 /** What the menus' commands do. */
 export interface EditorMenuGestures {
+  /** « Nouvelle carte… »: a year and a name, then an empty map (CARTO-536). */
+  onNewMap: () => void
+  /** « Fermer la carte »: back to the start screen (CARTO-536). */
+  onCloseMap: () => void
   /** *Open…*. */
   onOpen: () => void
   /** *Save*. */

@@ -11,6 +11,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `title` — The dialogue's title and accessible name.
  * - `question` — The question, the dev's words (`s19`).
  * - `signOutTitle`, `signOutQuestion` — The same question before signing out (CARTO-535).
+ * - `closeTitle`, `closeQuestion` — The same question before « Fermer la carte » (CARTO-536).
  */
 export type SaveFirstMessageKey = keyof typeof en
 

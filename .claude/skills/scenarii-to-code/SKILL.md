@@ -136,7 +136,7 @@ Three honest answers, and picking the wrong one is how specification gets invent
 **`ls` the folder before trusting the tables below** — a scenario written since may not be in them yet; one missing
 here is added in the commit that writes it. `s00` and `s99` hold no Gherkin (the background and the holes).
 
-**The Cartographer** — `files/plans/cartographer/scenarii/`, s01 to s23 on 2026-11-25.
+**The Cartographer** — `files/plans/cartographer/scenarii/`, s01 to s24 on 2026-11-25.
 
 | scenario | what it specifies | the step that owes it |
 | --- | --- | --- |
@@ -163,6 +163,7 @@ here is added in the commit that writes it. `s00` and `s99` hold no Gherkin (the
 | `s21-panels-moved-and-docked` | panels moved, resized, magnetised to the right column | 5 (CARTO-342) |
 | `s22-copy-paste` | copy and paste between maps | 5 (CARTO-345) |
 | `s23-sign-in` | the Cartographer behind the CMS's account: the sign-in, the greyed chrome, the session expired | 5 (CARTO-535) |
+| `s24-start-screen` | the start screen: no map by default, « Nouvelle carte… », the last maps, « Fermer la carte », no address | 5 (CARTO-536) |
 
 **The atlas** — `files/plans/atlas/scenarii/`, written 2026-11-01 (ATLAS-324) **from the code**, then checked
 against what the dev saw: each says when it was built and whether it was walked. s01 to s17 on 2026-11-08 — s11 on,

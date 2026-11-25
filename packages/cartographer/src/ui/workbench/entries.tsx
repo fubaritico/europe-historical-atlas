@@ -15,6 +15,8 @@ import { EMPTY_DRAFT, RANKS } from '../utils/polityDraft'
 import { BarIconCandidates } from './BarIconCandidates'
 import { BrokenZone } from './BrokenZone'
 import { IconSharpness } from './IconSharpness'
+import { StartIconCandidates } from './StartIconCandidates'
+import { StartScreenPlate } from './StartScreenPlate'
 
 import type { WorkbenchEntry } from './Workbench'
 import type { PolityRow } from '../utils/polityRows'
@@ -255,6 +257,20 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         </ErrorBoundary>
       </div>
     ),
+  },
+  {
+    id: 'start-screen',
+    title: 'Start screen',
+    note: 'What the Cartographer shows signed in with no map open (CARTO-536), over three literal maps — the automatic save left to Open….',
+    width: 1200,
+    render: () => <StartScreenPlate />,
+  },
+  {
+    id: 'start-icons',
+    title: 'Icons — the start screen',
+    note: '« Nouvelle carte… » and « Ouvrir… », three proposals each (CARTO-536): every glyph at 16 px, at 32 px, and in place before its label. The dev chose B for « Nouvelle carte… » and A for « Ouvrir… » (2026-11-25), now in `icons/startIcons.tsx`.',
+    width: 760,
+    render: () => <StartIconCandidates />,
   },
   {
     id: 'bar-icons',

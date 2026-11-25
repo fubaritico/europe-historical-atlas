@@ -2,6 +2,7 @@ import { act } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CMS_SESSION_ROUTE } from './devServer/cmsSessionRoute'
+import { OPEN_MAP_KEY } from './persistence/openMapStorage'
 
 import type { Root } from 'react-dom/client'
 
@@ -55,6 +56,17 @@ function answerSession(user: { id: number; email: string } | null): void {
 }
 
 /**
+ * The strings `fetch` was asked for.
+ * @returns the URLs
+ */
+function askedUrls(): string[] {
+  return vi
+    .mocked(fetch)
+    .mock.calls.map((call) => call[0])
+    .filter((url): url is string => typeof url === 'string')
+}
+
+/**
  * Run the entry, and let the session's answer reach the screen.
  */
 async function runEntry(): Promise<void> {
@@ -91,9 +103,12 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
     // that never settles, so the canvas area stays in its waiting state for the whole test rather than racing to a
     // failure on a microtask. Determinism, not optimism.
     answerSession({ id: 1, email: 'author@example.org' })
+    // A map kept open in the tab, as *Open…* leaves it (CARTO-536); the start screen's tests forget it.
+    window.sessionStorage.setItem(OPEN_MAP_KEY, '1100')
   })
 
   afterEach(() => {
+    window.sessionStorage.clear()
     act(() => {
       for (const root of roots.splice(0)) root.unmount()
     })
@@ -193,6 +208,54 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
       // The dev's table of 2026-11-25 (CARTO-535): the relief is baked behind the sign-in screen
       expect(asked).toContain('/heightmaps/europe-dem-z6-1920.json')
       expect(asked).toContain('/masks/europe-land.json')
+    })
+  })
+
+  // CARTO-536: no map opens by itself.
+  describe('the start screen (CARTO-536)', () => {
+    it('with no map kept in the tab, opens on the start screen, the maps listed and no backdrop asked', async () => {
+      window.sessionStorage.removeItem(OPEN_MAP_KEY)
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await runEntry()
+
+      expect(root.querySelector('.start-screen')).not.toBeNull()
+      expect(root.querySelector('[data-testid="map-area"], canvas')).toBeNull()
+      expect(askedUrls()).toContain('/__years')
+      expect(askedUrls()).not.toContain('/heightmaps/europe-dem-z6-1920.json')
+      expect(askedUrls().some((url) => url.startsWith('/years/'))).toBe(false)
+    })
+
+    it('opens the map kept in the tab, never one named in the address', async () => {
+      window.history.replaceState(null, '', '?map=1200')
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      try {
+        await runEntry()
+      } finally {
+        window.history.replaceState(null, '', '/')
+      }
+
+      expect(root.querySelector('.app-brand__year')?.textContent).toBe('1100')
+      expect(root.querySelector('.start-screen')).toBeNull()
+    })
+
+    it('opens on the start screen when the name kept cannot be a map’s, said in the console', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      window.sessionStorage.setItem(OPEN_MAP_KEY, '../secret')
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await runEntry()
+
+      expect(root.querySelector('.start-screen')).not.toBeNull()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('« ../secret »'))
+      warn.mockRestore()
     })
   })
 

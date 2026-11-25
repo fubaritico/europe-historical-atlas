@@ -1,18 +1,63 @@
-import type { MenuDefinition, MenuEntry } from '../../MenuBar'
+import { greyed } from './greyed'
+
+import type { MenuCommand, MenuDefinition, MenuEntry } from '../../MenuBar'
 import type { EditorMenuGestures, EditorMenuState, EditorMenuWords } from '../editorMenusProps'
 
 /**
- * The *Fichier* menu: the four gestures of the maps on disk (`s19`).
+ * The gestures of the map open, in *Fichier* (`s19`, CARTO-536): « Fermer la carte », then the three saves — greyed on
+ * the start screen, where no map is open (the dev's table, CARTO-535). « Fermer la carte » takes no key: ‹cmd+W› is the
+ * browser's.
+ * @param mapOpen - whether a map is open, or the start screen is up
+ * @param gestures - what they do
+ * @param words - the words and the keys
+ * @returns the four entries
+ */
+function mapOpenEntries(
+  mapOpen: boolean,
+  gestures: EditorMenuGestures,
+  words: EditorMenuWords
+): MenuEntry[] {
+  const { action, shortcut } = words
+  const entry = (
+    id: string,
+    label: string,
+    keys: MenuCommand['keys'],
+    onChoose: () => void
+  ): MenuEntry => ({ kind: 'command', id, label, keys, enabled: mapOpen, onChoose })
+  return [
+    entry('closeMap', action('closeMap'), null, gestures.onCloseMap),
+    entry('save', action('save'), shortcut('save'), gestures.onSave),
+    entry('saveAs', action('saveAs'), shortcut('saveAs'), gestures.onSaveAs),
+    entry('saveCopy', action('saveCopy'), null, gestures.onSaveCopy),
+  ]
+}
+
+/**
+ * The *Fichier* menu: a new map and *Open…* (CARTO-536), which act on the start screen too, then the gestures of the
+ * map open — Illustrator's order. « Nouvelle carte » takes no key: ‹cmd+N› is the browser's.
+ * @param mapOpen - whether a map is open, or the start screen is up
  * @param gestures - what they do
  * @param words - the words and the keys
  * @returns the menu
  */
-function fileMenu(gestures: EditorMenuGestures, words: EditorMenuWords): MenuDefinition {
+function fileMenu(
+  mapOpen: boolean,
+  gestures: EditorMenuGestures,
+  words: EditorMenuWords
+): MenuDefinition {
   const { action, shortcut } = words
   return {
     id: 'file',
     label: action('menuFile'),
     entries: [
+      {
+        kind: 'command',
+        id: 'newMap',
+        label: action('newMap'),
+        keys: null,
+        enabled: true,
+        onChoose: gestures.onNewMap,
+      },
       {
         kind: 'command',
         id: 'open',
@@ -21,30 +66,8 @@ function fileMenu(gestures: EditorMenuGestures, words: EditorMenuWords): MenuDef
         enabled: true,
         onChoose: gestures.onOpen,
       },
-      {
-        kind: 'command',
-        id: 'save',
-        label: action('save'),
-        keys: shortcut('save'),
-        enabled: true,
-        onChoose: gestures.onSave,
-      },
-      {
-        kind: 'command',
-        id: 'saveAs',
-        label: action('saveAs'),
-        keys: shortcut('saveAs'),
-        enabled: true,
-        onChoose: gestures.onSaveAs,
-      },
-      {
-        kind: 'command',
-        id: 'saveCopy',
-        label: action('saveCopy'),
-        keys: null,
-        enabled: true,
-        onChoose: gestures.onSaveCopy,
-      },
+      { kind: 'separator', id: 'maps' },
+      ...mapOpenEntries(mapOpen, gestures, words),
     ],
   }
 }
@@ -174,5 +197,7 @@ export function editorMenus(
   gestures: EditorMenuGestures,
   words: EditorMenuWords
 ): MenuDefinition[] {
-  return [fileMenu(gestures, words), editMenu(state, gestures, words)]
+  const edit = editMenu(state, gestures, words)
+  // No map, nothing to edit: Édition greyed whole, never hidden (the dev's table, CARTO-535).
+  return [fileMenu(state.mapOpen, gestures, words), ...(state.mapOpen ? [edit] : greyed([edit]))]
 }

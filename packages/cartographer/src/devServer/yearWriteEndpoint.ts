@@ -111,8 +111,19 @@ export function listMaps(folder: YearFolder): string[] {
 }
 
 /**
- * `GET /__years`: the list of the maps. A read, which a browser sends without an `Origin`: it needs a loopback `Host`,
- * as any read here — and no CORS header lets another site read the answer.
+ * When each map was last written — its most recent file — for the start screen's last maps (CARTO-536). A map listed
+ * holds its `registry.json`, so it always has a time.
+ * @param folder - the years folder
+ * @param maps - the maps listed
+ * @returns milliseconds since the epoch, by map
+ */
+function changedAtOf(folder: YearFolder, maps: readonly string[]): Record<string, number | null> {
+  return Object.fromEntries(maps.map((map) => [map, lastChangeOf(folder, map)]))
+}
+
+/**
+ * `GET /__years`: the list of the maps, and when each was last written. A read, which a browser sends without an
+ * `Origin`: it needs a loopback `Host`, as any read here — and no CORS header lets another site read the answer.
  * @param request - the request
  * @param folder - where the years live
  * @returns the list, or the refusal
@@ -122,7 +133,8 @@ function answerTheList(request: EndpointRequest, folder: YearFolder): EndpointRe
     console.warn(`${LOG_TAG} refused a list of the maps for the host ${String(request.host)}`)
     return answer(403, { reason: 'only the Cartographer served by this machine may list the maps' })
   }
-  return answer(200, { maps: listMaps(folder) })
+  const maps = listMaps(folder)
+  return answer(200, { maps, changedAt: changedAtOf(folder, maps) })
 }
 
 /**

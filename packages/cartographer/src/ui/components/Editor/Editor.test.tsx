@@ -67,12 +67,30 @@ function sessionAt(
   return { store, keeper: stubKeeper() }
 }
 
+/** The start screen's gestures and reading, as the entry hands them (CARTO-536). */
+const start = {
+  maps: {
+    listDatedMaps: vi.fn(() =>
+      Promise.resolve([{ name: '1100', changedAt: Date.UTC(2026, 10, 25, 19, 41) }])
+    ),
+  },
+  now: () => new Date(Date.UTC(2026, 10, 25, 20, 0)),
+  onOpenMap: vi.fn(),
+}
+const onNewMap = vi.fn()
+const onOpen = vi.fn()
+
 /**
  * The editor, mounted with everything the entry gives it.
  * @param results - the relay the year session says into; a fresh one by default
  * @param session - the session; someone signed in by default
+ * @param map - the map open; `null` for the start screen (CARTO-536)
  */
-function mount(results = createResultRelay(), session: SessionHandle = sessionAt()): void {
+function mount(
+  results = createResultRelay(),
+  session: SessionHandle = sessionAt(),
+  map: string | null = '1100'
+): void {
   handed = null
   renderInEnglish(
     <Editor
@@ -83,15 +101,18 @@ function mount(results = createResultRelay(), session: SessionHandle = sessionAt
       load={() => new Promise(() => undefined)}
       style={CHROME_PAINT_STYLE}
       heading={<h1>Cartographer — year 1100</h1>}
-      onOpen={() => undefined}
+      onOpen={onOpen}
       onSave={() => undefined}
       onSaveAs={() => undefined}
       onSaveCopy={() => undefined}
+      onNewMap={onNewMap}
+      onCloseMap={() => undefined}
+      start={start}
       onCopy={() => undefined}
       onPaste={() => undefined}
       onSelectAll={() => undefined}
       onCopySheet={() => undefined}
-      mapName={createMapNameStore('1100')}
+      mapName={createMapNameStore(map)}
       history={createHistoryRelay()}
       colours={COLOURS}
       results={results}
@@ -368,6 +389,71 @@ describe('Editor', () => {
 
       expect(document.querySelector('[data-testid="map-area"]')).not.toBeNull()
       expect(document.querySelector('form.sign-in-form')).toBeNull()
+    })
+  })
+
+  // CARTO-536 — signed in, no map open: the start screen, after Illustrator's.
+  describe('the start screen (CARTO-536)', () => {
+    it('signed in with no map open, shows the start screen where the map would be, no tool nor panel', async () => {
+      mount(undefined, sessionAt(), null)
+
+      const screen = within(document.querySelector<HTMLElement>('.shell__canvas') ?? document.body)
+      expect(screen.getByRole('heading', { name: 'Welcome to the Cartographer' })).toBeDefined()
+      expect(await screen.findByRole('button', { name: /^1100/ })).toBeDefined()
+      expect(document.querySelector('[data-testid="map-area"]')).toBeNull()
+      expect(document.querySelector('.shell__rail [role="toolbar"]')).toBeNull()
+    })
+
+    it('opens a map of the list, and « New map… » and « Open… » through their gestures', async () => {
+      onNewMap.mockClear()
+      onOpen.mockClear()
+      start.onOpenMap.mockClear()
+      mount(undefined, sessionAt(), null)
+      const user = userEvent.setup()
+      const screen = within(document.querySelector<HTMLElement>('.shell__canvas') ?? document.body)
+
+      await user.click(await screen.findByRole('button', { name: /^1100/ }))
+      await user.click(screen.getByRole('button', { name: 'New map…' }))
+      await user.click(screen.getByRole('button', { name: 'Open…' }))
+
+      expect(start.onOpenMap).toHaveBeenCalledWith('1100')
+      expect([onNewMap.mock.calls.length, onOpen.mock.calls.length]).toEqual([1, 1])
+    })
+
+    it('greys the saves of the bar, Open… acting, and names who is signed in with « Sign out »', () => {
+      mount(undefined, sessionAt(), null)
+
+      const bar = document.querySelector<HTMLElement>('.shell__appbar') ?? document.body
+      const button = (name: string) =>
+        within(bar)
+          .getAllByRole('button')
+          .find((candidate) => candidate.textContent === name)
+      expect(
+        ['Open…', 'Save', 'Save as…', 'Save a copy'].map((name) =>
+          button(name)?.getAttribute('aria-disabled')
+        )
+      ).toEqual([null, 'true', 'true', 'true'])
+      expect(button('Save')?.getAttribute('title')).toBe('Save — open a map first')
+      expect(button('Sign out')).toBeDefined()
+      expect(bar.querySelector('.app-brand__year')).toBeNull()
+    })
+
+    it('with nobody signed in and no map open, still shows the sign-in form first', () => {
+      mount(undefined, sessionAt({ kind: 'signedOut', problem: null }), null)
+
+      expect(document.querySelector('.shell__canvas form.sign-in-form')).not.toBeNull()
+      expect(document.querySelector('.start-screen')).toBeNull()
+    })
+
+    it('keeps the start screen under the expired dialogue', () => {
+      mount(
+        undefined,
+        sessionAt({ kind: 'expired', user: { id: 1, email: 'author@example.org' }, problem: null }),
+        null
+      )
+
+      expect(document.querySelector('.start-screen')).not.toBeNull()
+      expect(document.querySelector('form.sign-in-form')).not.toBeNull()
     })
   })
 })

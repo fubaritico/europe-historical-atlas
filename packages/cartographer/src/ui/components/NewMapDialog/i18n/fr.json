@@ -1,0 +1,10 @@
+{
+  "title": "Nouvelle carte",
+  "text": "Une carte vide de l’année, sur le relief. Si la carte ouverte a des modifications, il vous sera demandé s’il faut l’enregistrer d’abord.",
+  "year": "Année",
+  "yearHint": "En chiffres, « - » avant notre ère",
+  "name": "Nom de la carte",
+  "nameHint": "Lettres, chiffres, « - », « _ » et « . » — le nom d’une année pour la carte que l’atlas publie",
+  "create": "Créer",
+  "creating": "Création…"
+}

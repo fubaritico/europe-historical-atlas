@@ -3,6 +3,10 @@
 > [Index](s00-index.md) · CARTO-535 · its decisions are the ticket's (the table of the four states; the CMS stopped,
 > no drawing; `?map=` in development only) and the dev's two calls of 2026-11-25, below.
 >
+> **Since CARTO-536 (2026-11-25, evening)**: signing in opens the start screen when no map is open in the tab
+> ([s24](s24-start-screen.md)), the map otherwise; the address names no map any more — « `?map=` in development only »
+> below is replaced by the dev's « je veux plus de variables d'URL ».
+>
 > **Built 2026-11-25 (`93d8b923`, merged `9a6965d0`, CARTO-535).** **Walked by me the same evening**, on a copy of the
 > base with a throwaway account, my own CMS (3110) and Cartographer (5199): the sign-in screen, a wrong password, the
 > sign-in, a reload, the sign-out, the CMS stopped — each as written below. **Not walked, tested only**: the expired
