@@ -117,6 +117,9 @@ When the dev proposes something:
   method that would serve in another repository — feed it as such a lesson is learned, in the `main` project's
   `patterns/` folder, linked from `Cross-project engineering patterns — index`. Use the CLI when the MCP is not
   loaded: `basic-memory tool search-notes|write-note|edit-note … --project main`; search before writing.
+- **Know where I stand** (the dev, 2026-11-26: _"when my knee hurts, I know my knee hurts"_) — my context window is
+  read in `.claude/state/context/<session id>.json` (the id is in my scratchpad's path), written by the status line at
+  each refresh: say it when asked, unasked past 75 %, and close with `/end-session` before 95 %.
 - **Model**: suggest a lighter model for a plain lookup or research; the dev chooses (`/model`).
 - **Never `--no-verify`** on commit without the dev's explicit agreement.
 - **Language**: reply to the developer in **French**; write file contents (config, rules, plans, code

@@ -13,8 +13,8 @@
  * Run its tests: node --test '.claude/*.test.mjs' '.claude/hooks/*.test.mjs'
  */
 import { execFileSync } from 'node:child_process'
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { basename, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { ROLE_LABELS, readRole } from './hooks/role-state.mjs'
@@ -117,6 +117,47 @@ const keepUsage = (root, status) => {
 }
 
 /**
+ * What a session must know of its own context window — the dev, 2026-11-26: _"you must know where you stand; when my
+ * knee hurts, I know my knee hurts"_. The status line is shown to him only; the session reads this record instead.
+ * @param {{ session_id?: string, context_window?: { used_percentage?: number, context_window_size?: number, total_input_tokens?: number } }} status - The status JSON.
+ * @param {string} at - The moment, ISO 8601.
+ * @returns {{ at: string, used: number, size: number | null, tokens: number | null } | null} The record, or null when
+ *   Claude Code sent no percentage (before the session's first answer) or no session id.
+ */
+export const contextRecord = (status, at) => {
+  const used = status.context_window?.used_percentage
+  if (typeof used !== 'number' || !Number.isFinite(used) || !status.session_id) return null
+  const size = status.context_window?.context_window_size
+  const tokens = status.context_window?.total_input_tokens
+  return {
+    at,
+    used: Math.round(used),
+    size: typeof size === 'number' ? size : null,
+    tokens: typeof tokens === 'number' ? tokens : null,
+  }
+}
+
+/**
+ * Writes the session's context to `.claude/state/context/<session id>.json` (ignored by git), replaced at each
+ * refresh, so the session can say where it stands: `cat .claude/state/context/<its session id>.json`.
+ * @param {string} root - The tree's root.
+ * @param {object} status - The status JSON.
+ * @returns {string} Nothing when all went well, else ` · contexte non noté` for the line — a failure is said.
+ */
+const keepContext = (root, status) => {
+  const record = contextRecord(status, new Date().toISOString())
+  if (!record) return ''
+  try {
+    const dir = join(root, '.claude', 'state', 'context')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, `${basename(status.session_id)}.json`), `${JSON.stringify(record)}\n`)
+    return ''
+  } catch {
+    return ' · contexte non noté'
+  }
+}
+
+/**
  * Builds the line from what Claude Code sends, the session's role note and the branch.
  * @param {{ agent?: { name?: string }, workspace?: { git_worktree?: string }, context_window?: { used_percentage?: number }, rate_limits?: { seven_day?: { used_percentage?: number } } }} status - The status JSON.
  * @param {string | null} branch - The checked-out branch, or null when git could not tell.
@@ -160,7 +201,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // The note lives where the hooks write it: the folder the session was launched in (`CLAUDE_PROJECT_DIR` for them,
   // `workspace.project_dir` here), which the current folder may have left.
   const root = status.workspace?.project_dir ?? revParse(dir, ['--show-toplevel'])
-  const kept = root ? keepUsage(root, status) : ''
+  const kept = root ? `${keepUsage(root, status)}${keepContext(root, status)}` : ''
   process.stdout.write(
     `${statusLine(status, revParse(dir, ['--abbrev-ref', 'HEAD']), root ? readRole(root, status.session_id) : null)}${kept}`,
   )

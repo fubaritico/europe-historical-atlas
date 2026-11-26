@@ -8,7 +8,7 @@ import { describe, it } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { writeRole } from './hooks/role-state.mjs'
-import { contextPart, statusLine, usageMoved, usageRecord, weekPart } from './statusline.mjs'
+import { contextPart, contextRecord, statusLine, usageMoved, usageRecord, weekPart } from './statusline.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const script = join(here, 'statusline.mjs')
@@ -110,6 +110,19 @@ describe('statusline, the plan usage', () => {
       sevenDay: 63,
       sevenDayResetsAt: 1764500000,
     })
+  })
+  it('a context record keeps the percentage, the window size and the tokens', () => {
+    const status = { session_id: 's', context_window: { used_percentage: 35.6, context_window_size: 1000000, total_input_tokens: 358369 } }
+    assert.deepEqual(contextRecord(status, '2026-11-26T22:00:00Z'), {
+      at: '2026-11-26T22:00:00Z',
+      used: 36,
+      size: 1000000,
+      tokens: 358369,
+    })
+  })
+  it('no percentage or no session means no context record', () => {
+    assert.equal(contextRecord({ session_id: 's', context_window: {} }, 'x'), null)
+    assert.equal(contextRecord({ context_window: { used_percentage: 10 } }, 'x'), null)
   })
   it('no limits sent means no record', () => {
     assert.equal(usageRecord({}, '2026-11-25T15:00:00Z'), null)
