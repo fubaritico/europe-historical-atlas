@@ -32,7 +32,7 @@ suis la nouvelle session du codeur.
 
 ## ▶ ON REPREND ICI — après le 26/11 au soir : CARTO-568
 
-**Le 26/11, deux tickets faits et fusionnés dans `main`, pas poussés** : CARTO-498 (« Ajouter au CMS » par la session
+**Le 26/11, deux tickets faits et fusionnés dans `main`, poussés le soir par le push de l'historien (`c7bc10f7`)** : CARTO-498 (« Ajouter au CMS » par la session
 de la personne connectée, plus de clé ; la fenêtre « Le CMS » quand il n'est pas lancé) et CARTO-567 (la session ne se
 prolonge qu'après un geste ; deux heures sans geste, reconnexion ; « La carte est enregistrée. »). **Il les essaiera
 lui-même sur `main`** ; son CMS prendra `tokenExpiration: 7200` à son prochain démarrage. `CMS_API_KEY` du `.env` du
@@ -45,7 +45,9 @@ dates ; il lit le CMS par la même session que CARTO-498. **Un essai : `127.0.0.
 `pnpm --dir <arbre>/packages/cms trial:start`, mon Cartographe sur 5199 avec `CMS_URL=http://127.0.0.1:3110`.
 **À préparer** : DESIGN-558 — le Claude du design system a fait le chat de l'agent (l'historien, 26/11) ; demander à sa
 session (`fubaritico-ds`) le paquet, la version et les composants, et les noter sur le ticket. ATLAS-559 (le kit) reste
-ouvert.
+ouvert. **De l'historien, 26/11** : CARTO-571, fusionner la source Fournier en double (`pnpm cms:merge sources 5856 49`,
+après sa pause : ses agents écrivent la nuit) ; relire `count_chains.py` et `direct_vassals.py` (non commités, dans
+`.claude/skills/bulk-entry/scripts/`) avant de les prendre.
 
 **À valider par lui** : REPO-542 (ses deux règles de permission, dans le commentaire du ticket). **En haut d'« À
 faire »** : CORE-486, CMS-441, CARTO-336, et CARTO-568 là où il l'a rangé ; **CARTO-554** (les vignettes des cartes récentes), mis de côté.
