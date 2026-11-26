@@ -183,6 +183,7 @@ export default tseslint.config(
             useArrangeMenu: 'state',
             useCloseOutside: 'effect',
             useAddToCms: 'derived',
+            useAdditionRefs: 'ref',
             useCitiesView: 'derived',
             useStore: 'store',
             useCmsChannel: 'context',

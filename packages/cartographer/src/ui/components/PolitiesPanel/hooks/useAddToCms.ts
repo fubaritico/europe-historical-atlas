@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
+import { useTranslation } from '../../../hooks/useTranslation'
+import { POLITY_FORM_MESSAGES } from '../../PolityForm'
 import { failAddition, settleAddition } from '../utils/settleAddition'
+
+import { useAdditionRefs } from './useAdditionRefs'
 
 import type { TerritoryAdded } from '../../../../persistence/cmsTerritory'
 import type { AddToCmsOffer } from '../../../utils/addToCmsOffer'
@@ -14,7 +18,8 @@ import type { AdditionSink } from '../utils/settleAddition'
  * choice in the list would (saved with the polity at OK, like every field of the dialogue).
  *
  * **What the author is told**: the outcome under the button — created, found, or why nothing was written; a session the
- * CMS refused also opens the session's dialogue, to sign in again (`channel.sessionLost`). A failure
+ * CMS refused also opens the session's dialogue, to sign in again (`channel.sessionLost`), and a CMS
+ * that does not answer the alarm dialogue (`channel.report`, topic `cms`). A failure
  * of the dev server itself (the network, a throw) is a `console.error` and the same refusal on screen
  * (`rules/error-handling.md`).
  * @param channel - how the chrome reaches the CMS
@@ -27,29 +32,17 @@ export function useAddToCms(
   offer: AddToCmsOffer,
   onField: (field: PolityFormField, value: string | null) => void
 ): AddToCmsProps | null {
+  // Context
+  const t = useTranslation(POLITY_FORM_MESSAGES)
+
   // Refs
-  // Set again at each setup: StrictMode runs setup → cleanup → setup, and a flag only cleared would stay cleared
-  const open = useRef(true)
-  // The Wikidata item the form offers now: an answer for another item is not written on the polity (review QUAL-001)
-  const offeredNow = useRef<string | null>(null)
+  const { open, offeredNow } = useAdditionRefs(
+    offer.kind === 'ready' ? offer.territory.wikidata : null
+  )
 
   // State
   const [sending, setSending] = useState(false)
   const [outcome, setOutcome] = useState<TerritoryAdded | null>(null)
-
-  // Derived
-  const offered = offer.kind === 'ready' ? offer.territory.wikidata : null
-
-  // Effects
-  useEffect(() => {
-    open.current = true
-    return () => {
-      open.current = false
-    }
-  }, [])
-  useEffect(() => {
-    offeredNow.current = offered
-  }, [offered])
 
   // Return
   if (channel.mode === 'online') return null
@@ -69,6 +62,9 @@ export function useAddToCms(
       open: () => open.current,
       offeredNow: () => offeredNow.current,
       sessionLost: channel.sessionLost,
+      cmsOffline: () => {
+        channel.report({ tone: 'alarm', topic: 'cms', text: t('cmsOffline') })
+      },
       onField,
       setSending,
       setOutcome,

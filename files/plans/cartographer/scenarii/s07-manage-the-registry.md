@@ -106,6 +106,8 @@ Scenario: my session expired — nothing written, the session's dialogue opens
 Scenario: the CMS does not answer, or refuses
   When I press « Ajouter au CMS » and the CMS is not started
   Then the line reads « Le CMS ne répond pas : lancez-le, puis réessayez. Rien n’a été écrit. »
+  And the alarm dialogue « Le CMS » opens with the same sentence (CARTO-498: « une fenêtre »), even when I closed
+    the form before the CMS answered
   When the CMS refuses the territory
   Then the line reads « Le CMS a refusé : <its words>. Rien n’a été écrit. »
 ```

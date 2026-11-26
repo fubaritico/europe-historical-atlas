@@ -13,6 +13,7 @@ import { CmsChannelContext } from '../../../utils/cmsChannel'
 import { PolityDialog } from './PolityDialog'
 
 import type { CmsTerritoryPort, TerritoryAdded } from '../../../../persistence/cmsTerritory'
+import type { Report } from '../../../../persistence/notice'
 import type { WikidataFacts } from '../../../../wikidata/wikidataFacts'
 import type { WikidataSource } from '../../../../wikidata/wikidataSource'
 import type { CmsChannel } from '../../../utils/cmsChannel'
@@ -68,11 +69,13 @@ function openOffline(answer: () => Promise<TerritoryAdded>, polity: YearPolity =
   store.getState().createPolity(polity, STEP)
   const territories = { add: vi.fn<CmsTerritoryPort['add']>(answer) }
   const sessionLost = vi.fn()
+  const report = vi.fn<Report>()
   const channel: CmsChannel = {
     mode: 'offline',
     territories,
     pageOf: (id) => `http://localhost:3100/admin/collections/territories/${String(id)}`,
     sessionLost,
+    report,
   }
   const { unmount } = renderInEnglish(
     <PolityDialog store={store} editing={polity} isOpen onClose={vi.fn()} wikidata={WIKIDATA} />,
@@ -82,7 +85,7 @@ function openOffline(answer: () => Promise<TerritoryAdded>, polity: YearPolity =
       ),
     }
   )
-  return { store, territories, sessionLost, unmount, user: userEvent.setup() }
+  return { store, territories, sessionLost, report, unmount, user: userEvent.setup() }
 }
 
 beforeEach(() => {
@@ -141,12 +144,12 @@ describe('PolityDialog — « Ajouter au CMS »', () => {
   })
 
   describe('managed errors', () => {
-    it('asks to start the CMS when it does not answer, and writes nothing', async () => {
-      const { store, user } = openOffline(() => Promise.resolve({ kind: 'offline' }))
+    it('asks to start the CMS when it does not answer, in the alarm dialogue too, and writes nothing', async () => {
+      const { store, report, user } = openOffline(() => Promise.resolve({ kind: 'offline' }))
       await user.click(await screen.findByRole('button', { name: 'Add to the CMS' }))
-      expect((await screen.findByRole('alert')).textContent).toBe(
-        'The CMS does not answer: start it, then try again. Nothing was written.'
-      )
+      const sentence = 'The CMS does not answer: start it, then try again. Nothing was written.'
+      expect((await screen.findByRole('alert')).textContent).toBe(sentence)
+      expect(report).toHaveBeenCalledWith({ tone: 'alarm', topic: 'cms', text: sentence })
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[0]?.territory).toBeUndefined()
     })

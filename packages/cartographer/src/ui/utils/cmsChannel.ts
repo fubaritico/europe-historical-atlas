@@ -6,6 +6,7 @@ import { createCmsTerritoryClient } from '../../persistence/cmsTerritory'
 import { deploymentModeOf } from '../../persistence/deploymentMode'
 
 import type { CmsTerritoryPort } from '../../persistence/cmsTerritory'
+import type { Report } from '../../persistence/notice'
 
 /**
  * How the chrome reaches the CMS (CARTO-498): on the author's machine, through the dev server's port; online, not from
@@ -29,6 +30,8 @@ export type CmsChannel =
        * opens over the map, as when the session expires while drawing (CARTO-535), nothing drawn lost.
        */
       sessionLost: () => void
+      /** Shows a notice — the CMS not started opens the alarm dialogue (CARTO-498: « une fenêtre »). */
+      report: Report
     }
   /** Online: the chrome offers no direct write to the CMS. */
   | { mode: 'online' }
@@ -42,22 +45,31 @@ export const CmsChannelContext = createContext<CmsChannel | null>(null)
 /** A territory's page in the CMS of the author's machine — `localhost`, where the password manager knows the CMS. */
 const CMS_TERRITORY_PAGE = 'http://localhost:3100/admin/collections/territories/'
 
+/** What the composition root hands the channel: the route it names, and the two ways a refusal reaches the screen. */
+export interface CmsWiring {
+  /** The dev server's « Ajouter au CMS » route, `CMS_TERRITORY_ROUTE` — named by the composition root alone. */
+  route: string
+  /** Says that the CMS refused the session — the session's keeper's. */
+  sessionLost: () => void
+  /** Routes a notice — a toast or the alarm dialogue. */
+  report: Report
+}
+
 /**
  * The channel for a page served from a host — the dev's rule of 2026-11-25, *the address decides*: on this machine,
  * « Ajouter au CMS » creates through the dev server; online, the chrome writes no CMS (REPO-533). Called once, by the
  * composition root.
  * @param hostname - `location.hostname`
- * @param route - the dev server's « Ajouter au CMS » route, `CMS_TERRITORY_ROUTE` — named by the composition root, the
- * one place that names `devServer/`
- * @param sessionLost - says that the CMS refused the session, the session's keeper's
+ * @param wiring - the route, and how a refusal reaches the screen
  * @returns the channel
  */
-export function cmsChannelOf(hostname: string, route: string, sessionLost: () => void): CmsChannel {
+export function cmsChannelOf(hostname: string, wiring: CmsWiring): CmsChannel {
   if (deploymentModeOf(hostname) === 'online') return { mode: 'online' }
   return {
     mode: 'offline',
-    territories: createCmsTerritoryClient(route, (input, init) => fetchWithin(input, init)),
+    territories: createCmsTerritoryClient(wiring.route, (input, init) => fetchWithin(input, init)),
     pageOf: (id) => `${CMS_TERRITORY_PAGE}${String(id)}`,
-    sessionLost,
+    sessionLost: wiring.sessionLost,
+    report: wiring.report,
   }
 }

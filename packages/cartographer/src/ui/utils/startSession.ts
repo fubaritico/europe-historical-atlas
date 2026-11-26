@@ -7,6 +7,7 @@ import { createSessionStore, mayEdit } from '../../state/sessionStore'
 import { cmsChannelOf } from './cmsChannel'
 
 import type { CmsChannel } from './cmsChannel'
+import type { Report } from '../../persistence/notice'
 import type { SessionHandle } from '../components/Editor'
 
 /**
@@ -41,10 +42,11 @@ export function startSession(route: string, defect: (detail: string) => void): S
  * root.
  * @param session - the page's session
  * @param route - the dev server's « Ajouter au CMS » route, `CMS_TERRITORY_ROUTE` — named by the composition root
+ * @param report - routes a notice: the CMS not started opens the alarm dialogue
  * @returns the channel
  */
-export function pageCmsChannel(session: SessionHandle, route: string): CmsChannel {
-  return cmsChannelOf(window.location.hostname, route, session.keeper.lost)
+export function pageCms(session: SessionHandle, route: string, report: Report): CmsChannel {
+  return cmsChannelOf(window.location.hostname, { route, sessionLost: session.keeper.lost, report })
 }
 
 /**

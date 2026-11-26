@@ -270,4 +270,5 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   (4) **The loopback names are written twice**, the server's `LOOPBACK_HOST` and the page's `deploymentMode` (ARCH-004):
   the server's is the guard, the page's only shows the button. (5) **The line under the button outlives what it
   says** — seen in the walk of the same evening: « Le CMS l’avait déjà : relié au territoire n° 657 » stays after the tie
-  is removed and the Wikidata id changed, until the next press. **Severity: à savoir.**
+  is removed and the Wikidata id changed, until the next press. (6) **The « Le CMS » alarm is never withdrawn** by a later success (review QUAL-003): the author
+  closes it, as the « session » alarm of CARTO-535's point 4. **Severity: à savoir.**
