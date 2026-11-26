@@ -20,9 +20,10 @@ export type NoticeTone = 'success' | 'info' | 'warning' | 'alarm'
  * What a notice is about. A notice replaces the earlier one of its topic — one toast per topic on screen — and a
  * `success` withdraws the alarm of its topic: a save confirmed after its doubt closes it. `carving` is the canvas's: a
  * vassal not closed over a suzerain still open (`open-outlines.md`), raised as an alarm only. `session` is the sign-in's:
- * an answer of the dev server it cannot read (CARTO-535), an alarm only.
+ * an answer of the dev server it cannot read (CARTO-535), an alarm only. `cms` is « Ajouter au CMS »'s: the CMS not
+ * started (CARTO-498), an alarm only.
  */
-export type NoticeTopic = 'year' | 'autosave' | 'carving' | 'overlap' | 'session'
+export type NoticeTopic = 'year' | 'autosave' | 'carving' | 'overlap' | 'session' | 'cms'
 
 /** One notice. */
 export interface Notice {

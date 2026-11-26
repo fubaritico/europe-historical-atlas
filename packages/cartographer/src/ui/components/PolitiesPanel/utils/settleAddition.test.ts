@@ -14,6 +14,7 @@ function sinkWith(fields: { open?: boolean; offered?: string | null } = {}) {
     open: () => fields.open ?? true,
     offeredNow: () => (fields.offered === undefined ? 'Q272033' : fields.offered),
     sessionLost: vi.fn(),
+    cmsOffline: vi.fn(),
     onField: vi.fn<AdditionSink['onField']>(),
     setSending: vi.fn(),
     setOutcome: vi.fn(),
@@ -50,6 +51,7 @@ describe('settleAddition', () => {
       settleAddition({ kind: 'signedOut' }, 'Q272033', sink)
 
       expect(sink.sessionLost).toHaveBeenCalledTimes(1)
+      expect(sink.cmsOffline).not.toHaveBeenCalled()
       expect(sink.onField).not.toHaveBeenCalled()
       expect(sink.setOutcome).toHaveBeenCalledWith({ kind: 'signedOut' })
     })
@@ -61,6 +63,7 @@ describe('settleAddition', () => {
 
       expect(sink.onField).not.toHaveBeenCalled()
       expect(sink.sessionLost).not.toHaveBeenCalled()
+      expect(sink.cmsOffline).toHaveBeenCalledTimes(1)
       expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('wrote nothing: offline'))
     })
   })
@@ -103,6 +106,15 @@ describe('settleAddition', () => {
       settleAddition({ kind: 'signedOut' }, 'Q272033', sink)
 
       expect(sink.sessionLost).toHaveBeenCalledTimes(1)
+      expect(sink.setOutcome).not.toHaveBeenCalled()
+    })
+
+    it('still opens the alarm when the CMS does not answer after the polity dialogue closed', () => {
+      const sink = sinkWith({ open: false })
+
+      settleAddition({ kind: 'offline' }, 'Q272033', sink)
+
+      expect(sink.cmsOffline).toHaveBeenCalledTimes(1)
       expect(sink.setOutcome).not.toHaveBeenCalled()
     })
 

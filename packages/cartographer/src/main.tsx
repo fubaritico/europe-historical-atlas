@@ -78,7 +78,7 @@ import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { pasteClipboard } from './ui/utils/pasteClipboard'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
-import { pageCmsChannel, startSession, whenSignedIn } from './ui/utils/startSession'
+import { pageCms, startSession, whenSignedIn } from './ui/utils/startSession'
 import { whenMapOpen } from './ui/utils/whenMapOpen'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
@@ -608,7 +608,7 @@ const zoneBreaks = import.meta.env.DEV ? readZoneBreaks(window.location.search) 
 createRoot(container).render(
   <StrictMode>
     <LocaleProvider store={localeStore}>
-      <ChromeContexts platform={PLATFORM} cms={pageCmsChannel(session, CMS_TERRITORY_ROUTE)}>
+      <ChromeContexts platform={PLATFORM} cms={pageCms(session, CMS_TERRITORY_ROUTE, notices)}>
         <ZoneBreaksContext value={zoneBreaks}>
           <ErrorBoundary zone="cartographer">
             <Editor

@@ -76,6 +76,7 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     carving: true,
     overlap: true,
     session: true,
+    cms: true,
   }),
   'TOOL_MESSAGES.toolName.tool': all<EditorTool>({
     navigate: true,

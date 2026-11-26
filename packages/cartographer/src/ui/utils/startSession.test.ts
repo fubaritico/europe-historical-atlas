@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PROLONG_EVERY_MS } from '../../persistence/sessionKeeper'
 import { createSessionStore } from '../../state/sessionStore'
 
-import { pageCmsChannel, startSession, whenSignedIn } from './startSession'
+import { pageCms, startSession, whenSignedIn } from './startSession'
 
 import type { SessionState } from '../../state/sessionStore'
 
@@ -152,12 +152,12 @@ describe('startSession', () => {
   })
 })
 
-describe('pageCmsChannel', () => {
+describe('pageCms', () => {
   describe('happy path', () => {
     it('reaches the CMS on this machine, and tells the session when the CMS refuses it', () => {
       const session = sessionAt({ kind: 'signedIn', user: USER })
 
-      const channel = pageCmsChannel(session, '/__cms/territories')
+      const channel = pageCms(session, '/__cms/territories', vi.fn())
       if (channel.mode === 'offline') channel.sessionLost()
 
       expect(channel.mode).toBe('offline')

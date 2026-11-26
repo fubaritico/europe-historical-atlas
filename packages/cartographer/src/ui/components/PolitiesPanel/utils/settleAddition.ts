@@ -9,6 +9,8 @@ export interface AdditionSink {
   offeredNow: () => string | null
   /** Says that the CMS refused the session: the session's dialogue opens. */
   sessionLost: () => void
+  /** Says that the CMS does not answer: the alarm dialogue opens (CARTO-498: « une fenêtre »). */
+  cmsOffline: () => void
   /**
    * Writes a field of the form.
    * @param field - the field
@@ -29,7 +31,8 @@ export interface AdditionSink {
 
 /**
  * Act on the dev server's answer to « Ajouter au CMS » (CARTO-498). A session the CMS refused opens the session's
- * dialogue even when the polity's dialogue was closed meanwhile — the session is the whole editor's. The territory is
+ * dialogue, and a CMS that does not answer the alarm dialogue, even when the polity's dialogue was closed meanwhile —
+ * both are the whole editor's. The territory is
  * written on the polity only while the form still names the item sent (review QUAL-001): an answer for another item
  * ties nothing, said on the console, and the line under the button still says what the CMS did.
  * @param result - how the creation ended
@@ -38,6 +41,7 @@ export interface AdditionSink {
  */
 export function settleAddition(result: TerritoryAdded, sent: string, sink: AdditionSink): void {
   if (result.kind === 'signedOut') sink.sessionLost()
+  if (result.kind === 'offline') sink.cmsOffline()
   if (!sink.open()) return
   sink.setSending(false)
   sink.setOutcome(result)
