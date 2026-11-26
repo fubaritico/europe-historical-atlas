@@ -12,6 +12,8 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **Pour le codeur, de l'historien (23/11)** : les notes de recherche sont sur Acer ; `wikidataId.ts:3` et `cityVerdict.ts:21` citent encore
 `files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md`.
 
+**De l'historien (26/11)** : l'épique **ATLAS-557** (l'agent de l'atlas, pour les lecteurs) t'est assignée, découpée en 8 tickets ; DESIGN-558 d'abord (Claude Design, sur la base des composants de chat du design system en marque blanche), puis ATLAS-559 (le choix du kit). Un crochet de plus dans `settings.json`, `oracle-session.mjs` (REPO-544) : il démarre et arrête l'oracle de l'historien, et ne fait rien dans tes sessions.
+
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) la côte libanaise de sa 1100,
 dessinée seldjoukide alors qu'elle était fatimide (`/Volumes/Acer/atlas-historien/1100/levant/resultats/note-de-region.md`) ;
 (2) plus tard, CORE-486. L'index de la mémoire est rangé (24/11 : 47 lignes, une par thème).

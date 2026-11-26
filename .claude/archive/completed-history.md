@@ -2,6 +2,21 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-25, soir — le codeur : le Cartographe derrière le compte du CMS, l'essai sur une copie sans le dev
+
+Session **25/11 18:10 → 20:43** (2 h 33 ; la plage du jour au journal, 12:26 → 20:42, est partagée avec la session de
+l'après-midi) ; le chantier totalise **419 h 39 sur 64 plages**. Rien n'est poussé (le dev : à la fin de tout).
+
+- **CARTO-535 Fait**, fusionné (`9a6965d0`, `aeb83af1`) : la connexion, le chrome grisé, la session prolongée, expirée,
+  le CMS éteint, la réponse illisible (ses deux décisions du soir) ; puis, le ticket rouvert, le relief préparé derrière
+  l'écran de connexion, la sauvegarde automatique qui suit la session, « Enregistrer d'abord ? » avant de se
+  déconnecter. Deux revues ; essayé à la main sur une copie de la base ; scénario `s23` (`a983f0d5`).
+- **REPO-542 À valider** : `pnpm trial:start` / `trial:stop`, un CMS sur une copie avec un compte jetable ; commité sur
+  sa branche (`9a3ef960`), pas fusionné ; attend ses deux règles de permission.
+- **Mes fautes** : CARTO-535 fermé sans avoir relu son tableau des états (rouvert, complété le soir même) ; l'essai sur
+  `localhost` a remplacé puis effacé sa session de l'admin du CMS (d'où la règle `127.0.0.1`) ; un `cd` ; un titre de
+  commit trop long.
+
 ### 2026-11-25 — le codeur : le point sur les tickets, l'interface React mesurée, la connexion du Cartographe commencée
 
 Session **25/11 12:26 → 18:08** (5 h 42 au journal) ; le chantier totalise **417 h 05 sur 64 plages**. Rien de poussé par moi.

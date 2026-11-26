@@ -4,6 +4,23 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
+### 2026-11-25/26 — l'historien : onze zones de 1200 saisies, l'oracle construit sur Qdrant, l'agent de l'atlas découpé
+
+Session **25/11 12:26 → 26/11 01:39** (13 h 12, 7 052 actions, au journal ; plage partagée avec le codeur). Le détail :
+`next-historian.md` et les notes de région sur Acer.
+
+- **La carte de 1200** : Anatolie (526), Empire ouest (525), Empire est (528), Levant (529), Italie (534), Scandinavie
+  (541), Hongrie-Pologne (543, Opole-Nysa compris), Rus' (552) saisis par des chefs de zone (5 puis 3 agents), chacun
+  à 0 défaut, exporté, poussé, en Fait ; avec la France et les Balkans d'hier : **5 940 villes**, 2 283 alertes, rien
+  dessiné (sa décision : toutes les villes d'abord, la correction ensemble, mémoire `all-cities-first-then-the-map-together`).
+- **L'oracle** (épiques REPO-538, REPO-545) : catalogue, index FTS5, Qdrant local dans une image APFS sur Acer,
+  `bge-m3` sur un Ollama à moi (11435), filtres zone/siècle/langue, MCP pour les agents, canal obligatoire de
+  `/find-sources` et du portail ; il suit la session (REPO-544) ; ses PDF texte et OCR Vision (REPO-553). Reste
+  REPO-540 (les empreintes, ~18 h). Agents d'équipe sans `CLAUDE.md` ; jauge de la semaine sur la ligne d'état.
+- **ATLAS-557** (l'agent de l'atlas) créé et découpé en 8 tickets, le prompt pour Claude Design sur son bureau.
+- **Mes fautes** : un push pendant une CI ; une réindexation qui a arrêté le calcul ; deux zones saisies malgré le
+  portail ; Python avant sa demande de TypeScript ; un chef relancé tandis qu'il voulait la pause.
+
 ### 2026-11-25/26, nuit — le codeur : l'écran de départ façon Illustrator, la barre du haut, l'onglet de la carte
 
 Session **25/11 20:45 → 26/11 00:22** (3 h 37 ; la plage du journal, 12:26 → 00:22, est partagée avec les deux
@@ -23,18 +40,3 @@ pousser ») ; CI verte jusqu'au déploiement, Sonar compris (run 45717522108).
 - **Mes fautes** : « comme Illustrator » interprété au lieu d'être reproduit, trois fois, jusqu'à sa colère (mémoire
   `reproduce-the-reference`) ; des icônes dessinées en carrés, floues et crénelées ; dit à tort que l'onglet portait le
   nom de la carte ; deux titres de commit refusés.
-
-### 2026-11-25, soir — le codeur : le Cartographe derrière le compte du CMS, l'essai sur une copie sans le dev
-
-Session **25/11 18:10 → 20:43** (2 h 33 ; la plage du jour au journal, 12:26 → 20:42, est partagée avec la session de
-l'après-midi) ; le chantier totalise **419 h 39 sur 64 plages**. Rien n'est poussé (le dev : à la fin de tout).
-
-- **CARTO-535 Fait**, fusionné (`9a6965d0`, `aeb83af1`) : la connexion, le chrome grisé, la session prolongée, expirée,
-  le CMS éteint, la réponse illisible (ses deux décisions du soir) ; puis, le ticket rouvert, le relief préparé derrière
-  l'écran de connexion, la sauvegarde automatique qui suit la session, « Enregistrer d'abord ? » avant de se
-  déconnecter. Deux revues ; essayé à la main sur une copie de la base ; scénario `s23` (`a983f0d5`).
-- **REPO-542 À valider** : `pnpm trial:start` / `trial:stop`, un CMS sur une copie avec un compte jetable ; commité sur
-  sa branche (`9a3ef960`), pas fusionné ; attend ses deux règles de permission.
-- **Mes fautes** : CARTO-535 fermé sans avoir relu son tableau des états (rouvert, complété le soir même) ; l'essai sur
-  `localhost` a remplacé puis effacé sa session de l'admin du CMS (d'où la règle `127.0.0.1`) ; un `cd` ; un titre de
-  commit trop long.
