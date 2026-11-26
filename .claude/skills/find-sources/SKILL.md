@@ -41,8 +41,10 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
      (port 3100), Node 24 and pnpm, the Mac not going to sleep. Exit 1 on any failure, each with its remedy;
    - **then by me, with my tools**: one read through the MCP « cms »; the Chrome extension answers; **his logins** —
      JSTOR through the BnF proxy (`www-jstor-org.bnf.idm.oclc.org/action/doBasicSearch?Query=<w>`) shows results, not
-     the BnF sign-in page; Gallica's home page opens. Not logged in → **CONNEXION IMPOSSIBLE**, said now, the sign-in tab
-     left open for him (I never click « Me connecter »). For a night run, all of it before he goes to bed.
+     the BnF sign-in page; Gallica's home page opens. The BnF sign-in page with its fields prefilled by his Chrome: I
+     click « Me connecter » myself (the dev, 2026-11-26: _"you can log in by pressing the button, the fields are
+     prefilled"_) — never typing an identifier or a password. Fields empty or refused → **CONNEXION IMPOSSIBLE**, said
+     now, the sign-in tab left open for him. For a night run, all of it before he goes to bed.
    Read `ouvrages/index.md` and,
    when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again. `archive.py open` the research.
    The base already has sheets for this region at this date: « A region already researched », step 1, first.
