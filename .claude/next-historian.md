@@ -9,7 +9,29 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 26/11 : LE MAGHREB, LE RATTRAPAGE, PUIS LA CORRECTION DE LA CARTE DE 1200
+## ▶ ON REPREND ICI — 26/11 après-midi : REPRENDRE LA VEILLE DES EMPREINTES (REPO-540), PUIS LE RESTE
+
+**La session du 26/11 (01 h 41 → ~14 h 45) a eu un seul rôle, sa demande : surveiller le calcul des empreintes.** Il a
+fermé le terminal à la fin (bloqué) : le crochet a arrêté l'oracle proprement — **à relancer, et la veille avec**.
+
+- **Le calcul** : il restait **~131 000 passages** (442 665 points dans Qdrant, collection `green`) ; ~6,5 passages/s,
+  donc ~5 h 30. Une session d'historien le relance d'elle-même (crochet) ; sinon `npm --prefix
+  /Volumes/Acer/atlas-historien/outils/oracle run session:start` (Node 24). Vérifier : `curl -s
+  127.0.0.1:6333/collections/passages` (status, points_count) et la fin de `oracle-data/embed-run.log`.
+- **La veille** : une boucle de fond toutes les 5 min, qui note une ligne dans `oracle-data/veille-nuit.log` et me
+  réveille sur : disque absent, image de Qdrant démontée, calcul arrêté, Qdrant muet, échange > 5 Go, compteur figé
+  10 min. **Chercher le calcul par `pgrep -f 'cli.ts embe[d]'`** — sans les crochets la boucle se trouve elle-même
+  (ma faute de la nuit). **Rien d'autre sans sa demande** : ni Maghreb, ni agent (la recherche Autriche-Alpes de la
+  session d'avant a été arrêtée — ne pas la relancer sans lui).
+- **Acer saute quand il déplace le Mac** (14 h 16, et la veille aussi) : la reprise, décrite au paragraphe « 26/11,
+  14 h 16 » plus bas, a marché sans rien perdre. **Sa priorité : aucune corruption** — toujours vérifier le volume
+  (`diskutil verifyVolume`) et la base (`PRAGMA quick_check`) avant de relancer. Spotlight (`mds_stores`) restait
+  coincé sur le disque après le retour : la piste du terminal bloqué ; le remède, Acer hors de Spotlight, est son réglage.
+- **Fait aussi** : poussé les deux commits de doc (`a255a4ea`, sur son « pousse main ») ; **ATLAS-566** créé, dans
+  « À faire » pour le codeur — les frontières débordent du plan relief (Éthiopie, Mali, Asie centrale en 1300 ; les
+  frontières sont des lignes 3D sans coupe au rectangle du relief, lu dans le code).
+
+## ▶ AVANT — 26/11 : LE MAGHREB, LE RATTRAPAGE, PUIS LA CORRECTION DE LA CARTE DE 1200
 
 **Fait le 25/11** : 11 zones de 1200 saisies (îles, Ibérie, France, Balkans, Anatolie, Empire ouest et est, Levant,
 Italie, Scandinavie, Hongrie-Pologne, Rus') — **5 940 villes**, 2 283 alertes (dessin en attente, sa décision) ;
@@ -27,7 +49,7 @@ empreintes seront avancées, et la page des vassaux directs (52 souverains, 118 
 (repart le 2/12, 7 h). **Doublons à lui** : 9 livres du catalogue (`catalog dupes`), 2 PDF de sa bibliothèque
 (Ancient Rome ×2, Penguin medieval = Penguin 2005). `travail/` des zones (Scandinavie 168 Mo…) à vider sur son mot.
 
-**26/11, 01 h 20** : Qdrant bloqué (le Mac à court de mémoire : 6,2 Go d'échange) — arrêté de force, relancé à 01 h 37, rien perdu ; **8 doublons exacts retirés** vers `_retires/ouvrages-doublons/` (sa décision), oracle réindexé. Les anciens points de reprise : `archive/next-historian-history.md`.
+**26/11, 01 h 20** : Qdrant bloqué (le Mac à court de mémoire : 6,2 Go d'échange) — arrêté de force, relancé à 01 h 37, rien perdu ; **8 doublons exacts retirés** vers `_retires/ouvrages-doublons/` (sa décision), oracle réindexé. **26/11, 14 h 16** : Acer éjecté quelques secondes (le Mac déplacé) — l'image de Qdrant démontée, Qdrant bloqué à 650 % de CPU, le calcul arrêté à 312 128 / 443 561. **La reprise, qui a marché** : arrêter Qdrant (TERM puis KILL), `hdiutil detach` des attaches orphelines, `hdiutil attach -nomount` + `diskutil verifyVolume` (sain), `PRAGMA quick_check` sur `oracle.sqlite` (ok), `session:start` → 442 665 points, rien perdu. Ma veille (`oracle-data/veille-nuit.log`) contrôle aussi le montage de l'image. Les anciens points de reprise : `archive/next-historian-history.md`.
 
 ## Les cartes — l'épique CARTO-400 (les vingt cartes de base)
 
