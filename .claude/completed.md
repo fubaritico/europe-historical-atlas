@@ -4,22 +4,21 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-25/26 — l'historien : onze zones de 1200 saisies, l'oracle construit sur Qdrant, l'agent de l'atlas découpé
+### 2026-11-26 — le codeur : « Ajouter au CMS » par la session, deux heures sans geste
 
-Session **25/11 12:26 → 26/11 01:39** (13 h 12, 7 052 actions, au journal ; plage partagée avec le codeur). Le détail :
-`next-historian.md` et les notes de région sur Acer.
+Session **26/11 15:24 → 19:24**, dans la plage du journal 14:08 → 19:24 (5 h 15, partagée avec l'historien qui veillait
+l'oracle). **Fusionné dans `main`, pas poussé.**
 
-- **La carte de 1200** : Anatolie (526), Empire ouest (525), Empire est (528), Levant (529), Italie (534), Scandinavie
-  (541), Hongrie-Pologne (543, Opole-Nysa compris), Rus' (552) saisis par des chefs de zone (5 puis 3 agents), chacun
-  à 0 défaut, exporté, poussé, en Fait ; avec la France et les Balkans d'hier : **5 940 villes**, 2 283 alertes, rien
-  dessiné (sa décision : toutes les villes d'abord, la correction ensemble, mémoire `all-cities-first-then-the-map-together`).
-- **L'oracle** (épiques REPO-538, REPO-545) : catalogue, index FTS5, Qdrant local dans une image APFS sur Acer,
-  `bge-m3` sur un Ollama à moi (11435), filtres zone/siècle/langue, MCP pour les agents, canal obligatoire de
-  `/find-sources` et du portail ; il suit la session (REPO-544) ; ses PDF texte et OCR Vision (REPO-553). Reste
-  REPO-540 (les empreintes, ~18 h). Agents d'équipe sans `CLAUDE.md` ; jauge de la semaine sur la ligne d'état.
-- **ATLAS-557** (l'agent de l'atlas) créé et découpé en 8 tickets, le prompt pour Claude Design sur son bureau.
-- **Mes fautes** : un push pendant une CI ; une réindexation qui a arrêté le calcul ; deux zones saisies malgré le
-  portail ; Python avant sa demande de TypeScript ; un chef relancé tandis qu'il voulait la pause.
+- **CARTO-498 Fait** (`1189bb29`, `214eab78`) : « Ajouter au CMS » crée ou relie le territoire avec la session de
+  la personne connectée, le cookie de Payload relayé par le serveur du Cartographe, plus de clé MCP ; le CMS absent
+  ouvre la fenêtre « Le CMS », la session perdue celle de reconnexion. Revue à sept relecteurs, essai sur une copie
+  de la base (657 trouvé, 779 créé). L'alignement carte/CMS sorti dans **CARTO-568** (« À faire », sa décision).
+- **CARTO-567 Fait** (`464c1d4b`) : la session ne se prolonge qu'après un geste, battement de 10 min, deux heures
+  écrites dans le CMS ; la fenêtre dit « La carte est enregistrée. » (sa formulation). Essayé avec des durées
+  raccourcies.
+- **Mes fautes** : une resynchronisation dont git avait doublé un bloc de `httpEndpoint.ts`, non relu — chaque requête
+  partait deux fois, attrapé par la revue (mémoire `resync-worktree-with-main`) ; un passage en « À faire » tenté
+  sans son ordre écrit, refusé par le mode auto.
 
 ### 2026-11-25/26, nuit — le codeur : l'écran de départ façon Illustrator, la barre du haut, l'onglet de la carte
 

@@ -30,26 +30,27 @@ suis la nouvelle session du codeur.
 **Le plan d'autonomie de 1200** : `files/plans/historian/autonomy-and-1200.md` (ma part au § 5). **Attendent sa décision**
 (§ 7) : le commit d'export allégé (point a) et la suppression des pays et des personnes ouverte à l'historien (point d).
 
-## ▶ ON REPREND ICI — le 26/11 au matin : CARTO-498
+## ▶ ON REPREND ICI — après le 26/11 au soir : CARTO-568
 
-**Le 25/11 au soir, l'écran de départ et la barre du haut du Cartographe sont faits, validés par lui, poussés** (CI
-verte, déployée) : CARTO-536 (l'écran façon Illustrator, plus de `?map=`, la carte retenue dans l'onglet), CARTO-555
-(la barre, les menus grisés en entier, « Se déconnecter » ferme la carte), CARTO-556 (la croix de l'onglet ferme la
-carte ; `DocTab`/`DocTabs` prêts pour plusieurs cartes). **Ouvrir une carte** : l'écran de départ ou Fichier › Ouvrir…,
-plus jamais l'adresse (l'historien prévenu, son skill à jour). **Pour une page à son image** : sa capture, point par
-point — jamais une interprétation (mémoire `reproduce-the-reference`).
+**Le 26/11, deux tickets faits et fusionnés dans `main`, pas poussés** : CARTO-498 (« Ajouter au CMS » par la session
+de la personne connectée, plus de clé ; la fenêtre « Le CMS » quand il n'est pas lancé) et CARTO-567 (la session ne se
+prolonge qu'après un geste ; deux heures sans geste, reconnexion ; « La carte est enregistrée. »). **Il les essaiera
+lui-même sur `main`** ; son CMS prendra `tokenExpiration: 7200` à son prochain démarrage. `CMS_API_KEY` du `.env` du
+Cartographe ne sert plus (le lui rappeler s'il l'a posée). **Pour une page à son image** : sa capture, point par point
+(mémoire `reproduce-the-reference`). **Un arbre** : `git worktree add`, puis `EnterWorktree`, et `ExitWorktree` (keep)
+avant la fusion — la ligne d'état suit (sa règle du 26/11, `CLAUDE.md`).
 
-**Reprendre CARTO-498** dans son arbre (`.claude/worktrees/CARTO-498`, sur `caaba5d0` : le **resynchroniser avec
-`main`** d'abord — `main` a beaucoup bougé, `main.tsx` surtout) : le canal vers le CMS passe de la clé MCP à la session
-(un cookie relayé par le serveur du Cartographe, comme `devServer/cmsSession.ts`), « Ajouter au CMS » refusé tant
-qu'une session est expirée. **Le Cartographe et le CMS de l'usage : `localhost`** ; **un essai : `127.0.0.1`, jamais
-`localhost`** (`known-issues/cms.md`) — `pnpm --dir <arbre>/packages/cms trial:start`, puis mon Cartographe sur 5199 avec
-`CMS_URL=http://127.0.0.1:3110`.
+**Ensuite** : **CARTO-568** (« À faire », sa décision) — confronter la carte au CMS, l'aligner, puis bloquer le nom et les
+dates ; il lit le CMS par la même session que CARTO-498. **Un essai : `127.0.0.1`, jamais `localhost`** —
+`pnpm --dir <arbre>/packages/cms trial:start`, mon Cartographe sur 5199 avec `CMS_URL=http://127.0.0.1:3110`.
+**À préparer** : DESIGN-558 — le Claude du design system a fait le chat de l'agent (l'historien, 26/11) ; demander à sa
+session (`fubaritico-ds`) le paquet, la version et les composants, et les noter sur le ticket. ATLAS-559 (le kit) reste
+ouvert.
 
 **À valider par lui** : REPO-542 (ses deux règles de permission, dans le commentaire du ticket). **En haut d'« À
-faire »** : CORE-486, CMS-441, CARTO-336 ; **CARTO-554** (les vignettes des cartes récentes), mis de côté par lui.
-**En cours** : CARTO-498, ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien),
-et les épiques. **Les arbres en attente** : CARTO-498, CMS-225 (son code commencé, le ticket au Backlog).
+faire »** : CORE-486, CMS-441, CARTO-336, et CARTO-568 là où il l'a rangé ; **CARTO-554** (les vignettes des cartes récentes), mis de côté.
+**En cours** : ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien), et les
+épiques. **Les arbres en attente** : CMS-225 (son code commencé, le ticket au Backlog).
 **Prioritaire, à lui proposer** : ATLAS-527, le crédit Cliopatria sur l'atlas — le site en ligne n'est pas en règle.
 **L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : suivent ATLAS-520,
 521, 522, la frise (ATLAS-358).

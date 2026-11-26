@@ -2,6 +2,23 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-25/26 — l'historien : onze zones de 1200 saisies, l'oracle construit sur Qdrant, l'agent de l'atlas découpé
+
+Session **25/11 12:26 → 26/11 01:39** (13 h 12, 7 052 actions, au journal ; plage partagée avec le codeur). Le détail :
+`next-historian.md` et les notes de région sur Acer.
+
+- **La carte de 1200** : Anatolie (526), Empire ouest (525), Empire est (528), Levant (529), Italie (534), Scandinavie
+  (541), Hongrie-Pologne (543, Opole-Nysa compris), Rus' (552) saisis par des chefs de zone (5 puis 3 agents), chacun
+  à 0 défaut, exporté, poussé, en Fait ; avec la France et les Balkans d'hier : **5 940 villes**, 2 283 alertes, rien
+  dessiné (sa décision : toutes les villes d'abord, la correction ensemble, mémoire `all-cities-first-then-the-map-together`).
+- **L'oracle** (épiques REPO-538, REPO-545) : catalogue, index FTS5, Qdrant local dans une image APFS sur Acer,
+  `bge-m3` sur un Ollama à moi (11435), filtres zone/siècle/langue, MCP pour les agents, canal obligatoire de
+  `/find-sources` et du portail ; il suit la session (REPO-544) ; ses PDF texte et OCR Vision (REPO-553). Reste
+  REPO-540 (les empreintes, ~18 h). Agents d'équipe sans `CLAUDE.md` ; jauge de la semaine sur la ligne d'état.
+- **ATLAS-557** (l'agent de l'atlas) créé et découpé en 8 tickets, le prompt pour Claude Design sur son bureau.
+- **Mes fautes** : un push pendant une CI ; une réindexation qui a arrêté le calcul ; deux zones saisies malgré le
+  portail ; Python avant sa demande de TypeScript ; un chef relancé tandis qu'il voulait la pause.
+
 ### 2026-11-25, soir — le codeur : le Cartographe derrière le compte du CMS, l'essai sur une copie sans le dev
 
 Session **25/11 18:10 → 20:43** (2 h 33 ; la plage du jour au journal, 12:26 → 20:42, est partagée avec la session de
