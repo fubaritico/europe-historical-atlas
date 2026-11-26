@@ -1,7 +1,7 @@
 {
   "title": "Connexion",
   "lead": "Connectez-vous avec votre compte du CMS.",
-  "expired": "Votre session a expiré : reconnectez-vous. Rien de votre dessin n’est perdu.",
+  "expired": "Votre session a expiré : reconnectez-vous. La carte est enregistrée.",
   "checking": "Vérification de la session…",
   "email": "Adresse",
   "password": "Mot de passe",

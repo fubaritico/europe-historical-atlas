@@ -4,8 +4,10 @@ import type { SessionState, SignInProblem } from '../state/sessionStore'
 /**
  * The keeper of the session (CARTO-535): it asks the CMS who is signed in at the opening, signs in and out, and —
  * the dev's wish that a session never interrupts him while he draws — **prolongs the session at a fixed pace while
- * someone is signed in** (Payload's sessions last two hours, `tokenExpiration`). When the CMS no longer knows it, the
- * editor stays and a dialogue asks to sign in again: nothing drawn is lost.
+ * someone is signed in and has made a gesture since the last beat** (Payload's sessions last two hours,
+ * `tokenExpiration`). The dev's rule of 2026-11-26 (CARTO-567): *« si une personne est inactive, elle revient, il faut
+ * au moins qu'elle se reconnecte »* — two hours without a gesture, the session expires. When the CMS no longer knows
+ * it, the editor stays and a dialogue asks to sign in again: nothing drawn is lost.
  *
  * Every outcome that is not a success is said on the console (`rules/error-handling.md`), and shown by the screen the
  * session's state leads to.
@@ -44,6 +46,11 @@ export interface SessionKeeperDeps {
   /** How often the session is prolonged while someone is signed in, in milliseconds. */
   everyMs: number
   /**
+   * Whether the author made a gesture since the last time it was asked — read once per beat, which starts it over.
+   * @returns `true` when a gesture was made
+   */
+  gestured: () => boolean
+  /**
    * Show a defect on screen — the dev server answering with nothing readable (the dev, CARTO-535: the user always gets
    * a feedback, the console says more). The composition root opens the error dialogue.
    * @param detail - what was received, for the console
@@ -70,8 +77,11 @@ export interface SessionKeeper {
   lost: () => void
 }
 
-/** Thirty minutes: well inside Payload's two hours, few requests. */
-export const PROLONG_EVERY_MS = 30 * 60 * 1000
+/**
+ * Ten minutes: a session left idle runs out between two hours and two hours ten after the last gesture — the beat after
+ * it is the last that prolongs (CARTO-567). Six requests an hour while someone works.
+ */
+export const PROLONG_EVERY_MS = 10 * 60 * 1000
 
 /**
  * The problem an outcome is, if it is one.
@@ -139,12 +149,39 @@ function expireIn(store: SessionSink, why: string): boolean {
 }
 
 /**
+ * Prolong the session once, at a beat: kept as it was when the CMS says so; expired when the CMS no longer knows it;
+ * said and left for the next beat when the CMS could not answer.
+ * @param port - the dev server's session routes
+ * @param store - the session's store
+ * @param expire - turns the session into an expired one, its loop stopped
+ * @param defect - shows a defect on screen
+ * @returns `true` when the prolonging did not happen and is still owed — the CMS restarting, a refusal, an answer that
+ * cannot be read
+ */
+async function prolongOnce(
+  port: SessionPort,
+  store: SessionSink,
+  expire: (why: string) => void,
+  defect: (detail: string) => void
+): Promise<boolean> {
+  const outcome = await port.refresh()
+  if (outcome.kind === 'signedIn' || store.getState().session.kind !== 'signedIn') return false
+  if (outcome.kind === 'signedOut') {
+    expire('the CMS no longer knows the session')
+    return false
+  }
+  // The CMS restarting, or a refusal of the dev server: the next beat tries again, the session as it was
+  sayOutcome(outcome, 'the session could not be prolonged', defect)
+  return true
+}
+
+/**
  * Build the keeper.
  * @param deps - the port, the store, the timers and the pace
  * @returns the keeper
  */
 export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
-  const { port, store, timers, everyMs, defect } = deps
+  const { port, store, timers, everyMs, gestured, defect } = deps
   let loop: unknown = null
   const stopProlonging = () => {
     if (loop !== null) timers.stop(loop)
@@ -153,12 +190,11 @@ export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
   const expire = (why: string) => {
     if (expireIn(store, why)) stopProlonging()
   }
+  // A gesture is owed until a prolonging succeeds: a refresh the CMS could not answer leaves it for the next beat
+  // (review QUAL-001 of 2026-11-26), so an author working while the CMS restarts is not cut short
+  let owed = false
   const prolong = async () => {
-    const outcome = await port.refresh()
-    if (outcome.kind === 'signedIn' || store.getState().session.kind !== 'signedIn') return
-    if (outcome.kind === 'signedOut') expire('the CMS no longer knows the session')
-    // The CMS restarting, or a refusal of the dev server: the next beat tries again, the session as it was
-    else sayOutcome(outcome, 'the session could not be prolonged', defect)
+    owed = await prolongOnce(port, store, expire, defect)
   }
   // The newest gesture wins (review QUAL-001 of 2026-11-25): a « Réessayer » answered after a newer sign-in, or a
   // second click, never writes over what a later request settled. The beats are not counted: they re-read the state.
@@ -179,7 +215,11 @@ export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
     sayOutcome(outcome, what, defect)
     stopProlonging()
     store.getState().setSession(next(store.getState().session, outcome))
-    if (outcome.kind === 'signedIn') loop = timers.every(() => void prolong(), everyMs)
+    // A beat with no gesture since the last lets the session run out: two hours idle, the CMS forgets it (CARTO-567)
+    if (outcome.kind === 'signedIn')
+      loop = timers.every(() => {
+        if (gestured() || owed) void prolong()
+      }, everyMs)
   }
   return {
     check: () => newest('asking who is signed in', () => port.who()),

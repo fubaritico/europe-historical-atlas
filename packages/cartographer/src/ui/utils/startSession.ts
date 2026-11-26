@@ -1,5 +1,6 @@
 import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
+import { createGestureWatch } from '../../persistence/gestureWatch'
 import { createSessionClient } from '../../persistence/sessionClient'
 import { PROLONG_EVERY_MS, createSessionKeeper } from '../../persistence/sessionKeeper'
 import { createSessionStore, mayEdit } from '../../state/sessionStore'
@@ -11,8 +12,8 @@ import type { Report } from '../../persistence/notice'
 import type { SessionHandle } from '../components/Editor'
 
 /**
- * The page's session (CARTO-535): its store, its keeper on the dev server's routes, prolonged every thirty minutes by
- * the window's timers — and the CMS asked at once who is signed in. Called once, by the composition root.
+ * The page's session (CARTO-535): its store, its keeper on the dev server's routes, prolonged every ten minutes by
+ * the window's timers when the author made a gesture since (CARTO-567) — and the CMS asked at once who is signed in. Called once, by the composition root.
  * @param route - the dev server's session routes, `CMS_SESSION_ROUTE` — named by the composition root, the one place
  * that names `devServer/`
  * @param defect - shows on screen an answer of the dev server the page cannot read (the error dialogue)
@@ -30,6 +31,7 @@ export function startSession(route: string, defect: (detail: string) => void): S
       },
     },
     everyMs: PROLONG_EVERY_MS,
+    gestured: createGestureWatch(window).gestured,
     defect,
   })
   void keeper.check()
