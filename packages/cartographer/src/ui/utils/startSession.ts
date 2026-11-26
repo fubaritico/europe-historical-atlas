@@ -4,6 +4,9 @@ import { createSessionClient } from '../../persistence/sessionClient'
 import { PROLONG_EVERY_MS, createSessionKeeper } from '../../persistence/sessionKeeper'
 import { createSessionStore, mayEdit } from '../../state/sessionStore'
 
+import { cmsChannelOf } from './cmsChannel'
+
+import type { CmsChannel } from './cmsChannel'
 import type { SessionHandle } from '../components/Editor'
 
 /**
@@ -30,6 +33,18 @@ export function startSession(route: string, defect: (detail: string) => void): S
   })
   void keeper.check()
   return { store, keeper }
+}
+
+/**
+ * The page's channel to the CMS (CARTO-498), tied to its session: decided from the page's address, and a session the
+ * CMS refuses to « Ajouter au CMS » opens the session's dialogue (`SessionKeeper.lost`). Called once, by the composition
+ * root.
+ * @param session - the page's session
+ * @param route - the dev server's « Ajouter au CMS » route, `CMS_TERRITORY_ROUTE` — named by the composition root
+ * @returns the channel
+ */
+export function pageCmsChannel(session: SessionHandle, route: string): CmsChannel {
+  return cmsChannelOf(window.location.hostname, route, session.keeper.lost)
 }
 
 /**

@@ -15,7 +15,10 @@
 > **Completed the same evening, the ticket reopened (my fault: closed before its table was read)**: the relief prepared
 > behind the sign-in screen, the automatic save following the session, « save first? » before signing out — tested,
 > not walked yet. **Not in this ticket**: the start screen and its signed-in states, « Fermer la carte » (CARTO-536);
-> « Ajouter au CMS » refused until signed in again (CARTO-498).
+> « Ajouter au CMS » refused until signed in again (CARTO-498) — **built 2026-11-26**: a session the CMS refuses to it
+> opens « Session expirée » below ([s07](s07-manage-the-registry.md)). **Known, CARTO-567**: the session is prolonged
+> every thirty minutes while the page is open, gesture or not — so it never expires while the Cartographer stays open;
+> the dev's call of 2026-11-26 is two hours **without a gesture**.
 >
 > **The session is the CMS's own** — Payload's cookie, which the Cartographer's dev server relays and the page never
 > holds; signing in here signs in the CMS's admin too, on the same host (`localhost`). A trial is browsed on

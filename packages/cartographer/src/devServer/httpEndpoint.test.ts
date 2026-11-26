@@ -57,6 +57,25 @@ afterEach(() => {
 
 describe('createBodyMiddleware', () => {
   describe('happy path', () => {
+    it('hands each request to the endpoint once, and answers once', () => {
+      const handle = vi.fn<RequestHandler>(() => answer(200, {}))
+      const end = vi.fn()
+      const res: ResponseSink = {
+        statusCode: 0,
+        setHeader: () => res,
+        end: (body) => {
+          end(body)
+          return res
+        },
+      }
+      const req = streamOf({ cookie: 'payload-token=t' })
+      createBodyMiddleware({ handle, failure: 'the test failed' })(req, res)
+      req.emit()
+      expect(handle).toHaveBeenCalledTimes(1)
+      expect(handle.mock.calls[0]?.[0].cookie).toBe('payload-token=t')
+      expect(end).toHaveBeenCalledTimes(1)
+    })
+
     it('hands the If-Match header to the endpoint as ifMatch', () => {
       expect(requestSeenWith({ 'if-match': '1a2b3c4d' })?.ifMatch).toBe('1a2b3c4d')
     })

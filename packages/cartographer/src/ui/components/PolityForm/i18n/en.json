@@ -34,5 +34,14 @@
   "territoryProposals": "What the CMS proposes",
   "proposalField": "{field, select, name {Name} rank {Rank} existsFrom {Exists from} existsTo {Exists to} other {{field}}}",
   "proposalVerb": "{state, select, empty {Use} differs {Replace} same {Agrees} other {{state}}}",
-  "proposalLabel": "{verb} “{value}” for {field}"
+  "proposalLabel": "{verb} “{value}” for {field}",
+  "addToCms": "Add to the CMS",
+  "addingToCms": "Adding to the CMS…",
+  "cmsPage": "Complete its record in the CMS",
+  "cmsCreated": "Created in the CMS, no. {id}. Export the base, then reload the Cartographer to find it in the list.",
+  "cmsFound": "The CMS already had it: tied to territory no. {id}.",
+  "cmsOffline": "The CMS does not answer: start it, then try again. Nothing was written.",
+  "cmsSignedOut": "Your CMS session has expired: sign in again, then try again. Nothing was written.",
+  "cmsRefused": "The CMS refused: {reason}. Nothing was written.",
+  "cmsBlock": "{reason, select, noWikidata {To add it to the CMS, type its Wikidata id.} notAPolity {This Wikidata id is not a polity: it cannot go to the CMS.} noRank {To add it to the CMS, choose its rank.} noFrenchName {Wikidata has no French name: create the territory in the CMS.} noEnglishName {Wikidata has no English name: create the territory in the CMS.} badYear {A year is not a whole number: correct it to add it to the CMS.} other {{reason}}}"
 }

@@ -14,7 +14,7 @@ import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
-import { CMS_SESSION_ROUTE } from './devServer/cmsSessionRoute'
+import { CMS_SESSION_ROUTE, CMS_TERRITORY_ROUTE } from './devServer/cmsRoutes'
 import { REFUSAL_EVENT } from './devServer/refusalJournalRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { shortcutText } from './i18n/commandKeys'
@@ -53,6 +53,7 @@ import { PANEL_IDS } from './state/panelsSlice'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { AlarmDialog } from './ui/components/AlarmDialog'
+import { ChromeContexts } from './ui/components/ChromeContexts'
 import { Editor } from './ui/components/Editor'
 import { ErrorBoundary, ZoneBreaksContext, readZoneBreaks } from './ui/components/ErrorBoundary'
 import { LocaleProvider } from './ui/components/LocaleProvider'
@@ -64,7 +65,6 @@ import { PageHeading } from './ui/components/PageHeading'
 import { SaveAsDialog } from './ui/components/SaveAsDialog'
 import { SaveFirstDialog } from './ui/components/SaveFirstDialog'
 import { SheetPasteDialog } from './ui/components/SheetPasteDialog'
-import { PlatformContext } from './ui/i18n/platformContext'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
 import { listenForCommand, shownPlatform } from './ui/utils/commandListener'
 import {
@@ -78,7 +78,7 @@ import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { pasteClipboard } from './ui/utils/pasteClipboard'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
-import { startSession, whenSignedIn } from './ui/utils/startSession'
+import { pageCmsChannel, startSession, whenSignedIn } from './ui/utils/startSession'
 import { whenMapOpen } from './ui/utils/whenMapOpen'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
@@ -608,7 +608,7 @@ const zoneBreaks = import.meta.env.DEV ? readZoneBreaks(window.location.search) 
 createRoot(container).render(
   <StrictMode>
     <LocaleProvider store={localeStore}>
-      <PlatformContext value={PLATFORM}>
+      <ChromeContexts platform={PLATFORM} cms={pageCmsChannel(session, CMS_TERRITORY_ROUTE)}>
         <ZoneBreaksContext value={zoneBreaks}>
           <ErrorBoundary zone="cartographer">
             <Editor
@@ -650,7 +650,7 @@ createRoot(container).render(
             <NewMapDialog picker={newMapPicker} create={mapGestures.createMap} />
           </ErrorBoundary>
         </ZoneBreaksContext>
-      </PlatformContext>
+      </ChromeContexts>
     </LocaleProvider>
   </StrictMode>
 )

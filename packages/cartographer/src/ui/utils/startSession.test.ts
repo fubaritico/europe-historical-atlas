@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PROLONG_EVERY_MS } from '../../persistence/sessionKeeper'
 import { createSessionStore } from '../../state/sessionStore'
 
-import { startSession, whenSignedIn } from './startSession'
+import { pageCmsChannel, startSession, whenSignedIn } from './startSession'
 
 import type { SessionState } from '../../state/sessionStore'
 
@@ -19,7 +19,7 @@ const idle = () => Promise.resolve()
 function sessionAt(state: SessionState) {
   const store = createSessionStore()
   store.getState().setSession(state)
-  return { store, keeper: { check: idle, signIn: idle, signOut: idle } }
+  return { store, keeper: { check: idle, signIn: idle, signOut: idle, lost: vi.fn() } }
 }
 
 afterEach(() => {
@@ -150,4 +150,22 @@ describe('startSession', () => {
       expect(defect).toHaveBeenCalledWith('the dev server answered 200 with {}')
     })
   })
+})
+
+describe('pageCmsChannel', () => {
+  describe('happy path', () => {
+    it('reaches the CMS on this machine, and tells the session when the CMS refuses it', () => {
+      const session = sessionAt({ kind: 'signedIn', user: USER })
+
+      const channel = pageCmsChannel(session, '/__cms/territories')
+      if (channel.mode === 'offline') channel.sessionLost()
+
+      expect(channel.mode).toBe('offline')
+      expect(session.keeper.lost).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // L2: the page's address decides the mode, tested by cmsChannelOf
+  // L3, L4: N/A — it reads the address and hands the keeper's gesture
+  // L5: N/A — one call, at the composition root
 })

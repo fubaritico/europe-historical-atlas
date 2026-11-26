@@ -70,6 +70,46 @@ Scenario: tie a polity with no Wikidata id to its CMS territory
   But an export older than CARTO-450 lists no territory: the field says to run the CMS export again
 ```
 
+> **« Ajouter au CMS » — built 2026-11-26 (CARTO-498). Walked by me the same evening** on a copy of the base (trial
+> CMS 3110, my Cartographer 5199, a throwaway account): found (657), created (779), session closed from the CMS's admin
+> then signed in again — each as written below. **Not walked by the dev.** The flow offline: on the author's
+> machine, a polity tied to Wikidata and to no territory gets its territory created in the CMS from its form, **in the
+> name of whoever is signed in** — the dev server relays the session's cookie (CARTO-535); no key on disk. Online, the
+> form offers no button (REPO-533). Written from the code, its messages quoted as the code writes them.
+
+```gherkin
+Scenario: add a polity to the CMS from its form
+  Given I am signed in, the CMS runs, and « County of Tripoli » is tied to Wikidata Q272033 and to no CMS territory
+  When I open its form and press « Ajouter au CMS »
+  Then the button reads « Ajout au CMS… », greyed, while the CMS answers
+  And the line under it reads « Créé dans le CMS, n° 512. Exportez la base, puis rafraîchissez le Cartographe pour le
+    retrouver dans la liste. »
+  And « Compléter la fiche dans le CMS » opens the territory's page in the CMS
+  When I validate
+  Then the polity carries the territory 512
+
+Scenario: the CMS already has the territory
+  Given the CMS already has a territory for Wikidata Q272033, number 42
+  When I press « Ajouter au CMS »
+  Then the line reads « Le CMS l’avait déjà : relié au territoire n° 42. » and nothing is created
+
+Scenario: my session expired — nothing written, the session's dialogue opens
+  Given my session is no longer known to the CMS
+  When I press « Ajouter au CMS »
+  Then the line reads « Votre session du CMS a expiré : reconnectez-vous, puis réessayez. Rien n’a été écrit. »
+  And the session's dialogue of s23 opens over the map, « Votre session a expiré : reconnectez-vous. Rien de votre
+    dessin n’est perdu. », my address kept
+  And it opens even when I closed the form before the CMS answered
+  When I sign in again and press « Ajouter au CMS »
+  Then the territory is created
+
+Scenario: the CMS does not answer, or refuses
+  When I press « Ajouter au CMS » and the CMS is not started
+  Then the line reads « Le CMS ne répond pas : lancez-le, puis réessayez. Rien n’a été écrit. »
+  When the CMS refuses the territory
+  Then the line reads « Le CMS a refusé : <its words>. Rien n’a été écrit. »
+```
+
 ```gherkin
 Scenario: rename from the map, mid-century
   Given I am drawing the year 1200

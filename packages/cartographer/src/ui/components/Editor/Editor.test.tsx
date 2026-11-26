@@ -51,6 +51,7 @@ function stubKeeper() {
     check: vi.fn(() => Promise.resolve()),
     signIn: vi.fn(() => Promise.resolve()),
     signOut: vi.fn(() => Promise.resolve()),
+    lost: vi.fn(),
   }
 }
 

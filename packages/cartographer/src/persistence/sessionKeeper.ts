@@ -63,6 +63,11 @@ export interface SessionKeeper {
   signIn: (email: string, password: string) => Promise<void>
   /** Sign out. */
   signOut: () => Promise<void>
+  /**
+   * The CMS refused the session elsewhere — « Ajouter au CMS » (CARTO-498): as when a beat finds it gone, the editor
+   * stays and the dialogue asks to sign in again. Nothing when nobody is signed in, or the dialogue is already up.
+   */
+  lost: () => void
 }
 
 /** Thirty minutes: well inside Payload's two hours, few requests. */
@@ -120,6 +125,20 @@ function signedOutState(_now: SessionState, outcome: SessionOutcome): SessionSta
 }
 
 /**
+ * Turn a session someone holds into an expired one — the editor stays, the dialogue asks to sign in again.
+ * @param store - the session's store
+ * @param why - what found it gone, for the console
+ * @returns `true` when it expired now; `false` when nobody was signed in, or it already had
+ */
+function expireIn(store: SessionSink, why: string): boolean {
+  const now = store.getState().session
+  if (now.kind !== 'signedIn') return false
+  console.warn(`[Cartographer] ${why}: asking to sign in again`)
+  store.getState().setSession({ kind: 'expired', user: now.user, problem: null })
+  return true
+}
+
+/**
  * Build the keeper.
  * @param deps - the port, the store, the timers and the pace
  * @returns the keeper
@@ -127,25 +146,19 @@ function signedOutState(_now: SessionState, outcome: SessionOutcome): SessionSta
 export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
   const { port, store, timers, everyMs, defect } = deps
   let loop: unknown = null
-  const set = (session: SessionState) => {
-    store.getState().setSession(session)
-  }
   const stopProlonging = () => {
     if (loop !== null) timers.stop(loop)
     loop = null
   }
+  const expire = (why: string) => {
+    if (expireIn(store, why)) stopProlonging()
+  }
   const prolong = async () => {
     const outcome = await port.refresh()
-    const now = store.getState().session
-    if (outcome.kind === 'signedIn' || now.kind !== 'signedIn') return
-    if (outcome.kind === 'signedOut') {
-      console.warn('[Cartographer] the CMS no longer knows the session: asking to sign in again')
-      stopProlonging()
-      set({ kind: 'expired', user: now.user, problem: null })
-      return
-    }
+    if (outcome.kind === 'signedIn' || store.getState().session.kind !== 'signedIn') return
+    if (outcome.kind === 'signedOut') expire('the CMS no longer knows the session')
     // The CMS restarting, or a refusal of the dev server: the next beat tries again, the session as it was
-    sayOutcome(outcome, 'the session could not be prolonged', defect)
+    else sayOutcome(outcome, 'the session could not be prolonged', defect)
   }
   // The newest gesture wins (review QUAL-001 of 2026-11-25): a « Réessayer » answered after a newer sign-in, or a
   // second click, never writes over what a later request settled. The beats are not counted: they re-read the state.
@@ -165,7 +178,7 @@ export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
     }
     sayOutcome(outcome, what, defect)
     stopProlonging()
-    set(next(store.getState().session, outcome))
+    store.getState().setSession(next(store.getState().session, outcome))
     if (outcome.kind === 'signedIn') loop = timers.every(() => void prolong(), everyMs)
   }
   return {
@@ -174,6 +187,9 @@ export function createSessionKeeper(deps: SessionKeeperDeps): SessionKeeper {
     signOut: () => {
       stopProlonging()
       return newest('signing out', () => port.signOut(), signedOutState)
+    },
+    lost: () => {
+      expire('the CMS refused the session to « Ajouter au CMS »')
     },
   }
 }

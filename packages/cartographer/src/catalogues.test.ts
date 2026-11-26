@@ -9,6 +9,7 @@ import type { OpeningStep } from './loaders/opening'
 import type { NoticeTopic } from './persistence/notice'
 import type { LayerId } from './state/layersSlice'
 import type { EditorTool, PenMode } from './state/toolSlice'
+import type { AddToCmsBlock } from './ui/utils/addToCmsOffer'
 import type { TerritoryProposal, TerritoryProposalField } from './ui/utils/territoryProposals'
 import type {
   Anachronism,
@@ -202,6 +203,14 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     empty: true,
     differs: true,
     same: true,
+  }),
+  'POLITY_FORM_MESSAGES.cmsBlock.reason': all<AddToCmsBlock>({
+    noWikidata: true,
+    notAPolity: true,
+    noRank: true,
+    noFrenchName: true,
+    noEnglishName: true,
+    badYear: true,
   }),
   // The shell's empty zones — `Editor/internal/Placeholder`'s `PlaceholderZone`, private to its folder.
   'EDITOR_MESSAGES.placeholder.zone': ['appBar', 'docBar', 'tools', 'panels'],
