@@ -5,6 +5,8 @@ export const Users: CollectionConfig = {
   slug: 'users',
   labels: { singular: 'Contributeur', plural: 'Contributeurs' },
   admin: { useAsTitle: 'email' },
-  auth: true,
+  // Two hours, written out (CARTO-567, the dev's rule of 2026-11-26): a session the Cartographer stops prolonging — no
+  // gesture for two hours — runs out, and its author signs in again. Payload's default is the same; said, not assumed.
+  auth: { tokenExpiration: 7200 },
   fields: [],
 }

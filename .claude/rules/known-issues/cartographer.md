@@ -272,3 +272,9 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   says** — seen in the walk of the same evening: « Le CMS l’avait déjà : relié au territoire n° 657 » stays after the tie
   is removed and the Wikidata id changed, until the next press. (6) **The « Le CMS » alarm is never withdrawn** by a later success (review QUAL-003): the author
   closes it, as the « session » alarm of CARTO-535's point 4. **Severity: à savoir.**
+- **The two hours of a session are written in three places nothing ties** (2026-11-26, CARTO-567, review ARCH-001, my
+  decision): `tokenExpiration: 7200` in the CMS (`collections/Users.ts`), the keeper's beat of ten minutes
+  (`persistence/sessionKeeper.ts`, `PROLONG_EVERY_MS`) and the comments that reason from both. The Cartographer cannot
+  read the CMS's setting. Harmless while the CMS's length stays well above the beat. **Trigger**: a CMS length brought
+  near ten minutes — then a working author would be cut between two beats; derive the beat from one shared length.
+  **Severity: à savoir.**

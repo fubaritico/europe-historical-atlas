@@ -56,14 +56,22 @@ function handTimers() {
  * A keeper over a fresh store.
  * @param port - the port
  * @param start - where the session stands at first
+ * @param gestured - whether the author made a gesture since the last beat; always, by default
  * @returns the keeper, the store and the timers
  */
-function keeperOver(port: SessionPort, start?: SessionState) {
+function keeperOver(port: SessionPort, start?: SessionState, gestured: () => boolean = () => true) {
   const store = createSessionStore()
   if (start !== undefined) store.getState().setSession(start)
   const hand = handTimers()
   const defect = vi.fn()
-  const keeper = createSessionKeeper({ port, store, timers: hand.timers, everyMs: PACE, defect })
+  const keeper = createSessionKeeper({
+    port,
+    store,
+    timers: hand.timers,
+    everyMs: PACE,
+    gestured,
+    defect,
+  })
   return { keeper, store, hand, defect, session: () => store.getState().session }
 }
 
@@ -154,6 +162,49 @@ describe('createSessionKeeper', () => {
 
       expect(port.refresh).toHaveBeenCalledTimes(1)
       expect(session()).toEqual({ kind: 'signedIn', user: USER })
+    })
+
+    it('lets the session run out when no gesture was made since the last beat (CARTO-567)', async () => {
+      const port = portAnswering(SIGNED_IN)
+      const { keeper, session, hand } = keeperOver(port, undefined, () => false)
+      await keeper.check()
+
+      await hand.beat()
+
+      expect(port.refresh).not.toHaveBeenCalled()
+      expect(session()).toEqual({ kind: 'signedIn', user: USER })
+      expect(hand.running()).toBe(1)
+    })
+
+    it('keeps a gesture owed when its prolonging failed, and prolongs at the next beat without a new one', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const port = portAnswering(SIGNED_IN)
+      let made = true
+      const { keeper, hand } = keeperOver(port, undefined, () => {
+        const answer = made
+        made = false
+        return answer
+      })
+      await keeper.check()
+      port.refresh.mockResolvedValueOnce({ kind: 'offline' })
+      await hand.beat()
+
+      await hand.beat()
+
+      expect(port.refresh).toHaveBeenCalledTimes(2)
+    })
+
+    it('prolongs again at the first beat after a gesture', async () => {
+      const port = portAnswering(SIGNED_IN)
+      let made = false
+      const { keeper, hand } = keeperOver(port, undefined, () => made)
+      await keeper.check()
+      await hand.beat()
+
+      made = true
+      await hand.beat()
+
+      expect(port.refresh).toHaveBeenCalledTimes(1)
     })
 
     it('signing in again after an expiry opens the editor again, prolonged by one loop only', async () => {

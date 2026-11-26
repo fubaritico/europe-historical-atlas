@@ -53,7 +53,7 @@ describe('SignInForm', () => {
       mount({ expired: true, email: 'author@example.org' })
 
       expect(address().value).toBe('author@example.org')
-      expect(screen.getByText(/Nothing of your drawing is lost/)).not.toBeNull()
+      expect(screen.getByText(/The map is saved/)).not.toBeNull()
     })
 
     it('while the CMS is asked, says so and waits', () => {

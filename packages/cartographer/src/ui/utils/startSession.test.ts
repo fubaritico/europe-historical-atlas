@@ -107,7 +107,7 @@ describe('startSession', () => {
     expect(fetchFile).toHaveBeenCalledWith('/__cms/session/', expect.anything())
   })
 
-  it('prolongs the session every thirty minutes with the window’s timers, and stops once signed out', async () => {
+  it('prolongs the session at each beat after a gesture on the window, and stops once signed out', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     try {
       const fetchFile = vi.fn((input: unknown) =>
@@ -127,10 +127,15 @@ describe('startSession', () => {
 
       await vi.advanceTimersByTimeAsync(PROLONG_EVERY_MS)
       expect(refreshes()).toBe(1)
+      await vi.advanceTimersByTimeAsync(PROLONG_EVERY_MS)
+      expect(refreshes()).toBe(1)
+      window.dispatchEvent(new Event('pointerdown'))
+      await vi.advanceTimersByTimeAsync(PROLONG_EVERY_MS)
+      expect(refreshes()).toBe(2)
       await keeper.signOut()
       await vi.advanceTimersByTimeAsync(PROLONG_EVERY_MS * 2)
 
-      expect(refreshes()).toBe(1)
+      expect(refreshes()).toBe(2)
     } finally {
       vi.useRealTimers()
     }

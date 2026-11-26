@@ -97,8 +97,7 @@ Scenario: my session expired — nothing written, the session's dialogue opens
   Given my session is no longer known to the CMS
   When I press « Ajouter au CMS »
   Then the line reads « Votre session du CMS a expiré : reconnectez-vous, puis réessayez. Rien n’a été écrit. »
-  And the session's dialogue of s23 opens over the map, « Votre session a expiré : reconnectez-vous. Rien de votre
-    dessin n’est perdu. », my address kept
+  And the session's dialogue of s23 opens over the map, « Votre session a expiré : reconnectez-vous. La carte est enregistrée. », my address kept
   And it opens even when I closed the form before the CMS answered
   When I sign in again and press « Ajouter au CMS »
   Then the territory is created

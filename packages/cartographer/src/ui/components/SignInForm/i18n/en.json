@@ -1,7 +1,7 @@
 {
   "title": "Sign in",
   "lead": "Sign in with your CMS account.",
-  "expired": "Your session has expired: sign in again. Nothing of your drawing is lost.",
+  "expired": "Your session has expired: sign in again. The map is saved.",
   "checking": "Checking the session…",
   "email": "Address",
   "password": "Password",

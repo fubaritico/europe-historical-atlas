@@ -16,9 +16,11 @@
 > behind the sign-in screen, the automatic save following the session, « save first? » before signing out — tested,
 > not walked yet. **Not in this ticket**: the start screen and its signed-in states, « Fermer la carte » (CARTO-536);
 > « Ajouter au CMS » refused until signed in again (CARTO-498) — **built 2026-11-26**: a session the CMS refuses to it
-> opens « Session expirée » below ([s07](s07-manage-the-registry.md)). **Known, CARTO-567**: the session is prolonged
-> every thirty minutes while the page is open, gesture or not — so it never expires while the Cartographer stays open;
-> the dev's call of 2026-11-26 is two hours **without a gesture**.
+> opens « Session expirée » below ([s07](s07-manage-the-registry.md)). ~~**Known, CARTO-567**: the session is prolonged
+> every thirty minutes while the page is open, gesture or not — so it never expires while the Cartographer stays open~~ —
+> **built 2026-11-26 (CARTO-567)**: the dev's call of that day, two hours **without a gesture**, below. **Walked by me
+> the same evening** with the lengths cut short for the trial (a session of 60 s, a beat of 20 s): idle 100 s, the
+> dialogue opened; a key every 10 s for 100 s, the session held. **Not walked by the dev.**
 >
 > **The session is the CMS's own** — Payload's cookie, which the Cartographer's dev server relays and the page never
 > holds; signing in here signs in the CMS's admin too, on the same host (`localhost`). A trial is browsed on
@@ -96,12 +98,20 @@ Scenario: the session expires while I draw
   Given I am signed in and the CMS no longer knows my session
   When the session is next prolonged
   Then the map stays, nothing drawn lost
-  And a dialogue « Session expirée » over it reads « Votre session a expiré : reconnectez-vous. Rien de votre dessin
-    n’est perdu. », my address kept
+  And a dialogue « Session expirée » over it reads « Votre session a expiré : reconnectez-vous. La carte est enregistrée. », my address kept
   And ‹escape› and a click beside it do not close it
   And the top bar names me, without « Se déconnecter »
   And the automatic save goes on, nothing lost
   And signing in again closes it and the editor goes on
+
+Scenario: two hours without a gesture, I sign in again (CARTO-567)
+  Given I am signed in, and the CMS's sessions last two hours
+  When I draw, click or type at least once every ten minutes
+  Then the session is prolonged at each beat after a gesture, and nothing asks me to sign in
+  When I make no gesture — a press of the pointer, a key, the wheel — for two hours
+  Then the session runs out, between two hours and two hours ten after my last gesture
+  And my next « Ajouter au CMS », or the next beat after a gesture, opens the session's dialogue
+  And a pointer only moved over the map is no gesture
 
 Scenario: an answer the Cartographer cannot read — a defect of the Cartographer
   Given the Cartographer's own server answers with nothing it can read
