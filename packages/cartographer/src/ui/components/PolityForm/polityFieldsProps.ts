@@ -1,9 +1,29 @@
+import type { TerritoryAdded } from '../../../persistence/cmsTerritory'
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
+import type { AddToCmsOffer } from '../../utils/addToCmsOffer'
 import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../utils/polityDraft'
 import type { RankWarning } from '../../utils/rankWarnings'
 import type { TerritoryProposal } from '../../utils/territoryProposals'
 import type { WikidataView } from '../../utils/wikidataView'
 import type { ColorValue } from '@fubaritico/behaviors'
+
+/** « Ajouter au CMS », as the form shows it (CARTO-498, the flow offline). */
+export interface AddToCmsProps {
+  /** What is offered: the territory's page, the territory ready to add, or why not yet. */
+  offer: AddToCmsOffer
+  /** Whether a creation is on its way — the button waits. */
+  sending: boolean
+  /** How the last creation ended, or `null` before any. */
+  outcome: TerritoryAdded | null
+  /**
+   * The address of a territory's page in the CMS.
+   * @param id - its number
+   * @returns the address
+   */
+  pageOf: (id: number) => string
+  /** The author clicked « Ajouter au CMS ». */
+  onAdd: () => void
+}
 
 /** The fields a form event can name: every text field and every list of the draft — the colour and the box their own. */
 export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour' | 'forceShortName'>
@@ -27,6 +47,8 @@ export interface PolityFieldsProps {
   rankWarnings: readonly RankWarning[]
   /** What the CMS's territory chosen proposes for the form's fields — taken on the author's click alone (CARTO-488). */
   territoryProposals: readonly TerritoryProposal[]
+  /** « Ajouter au CMS » under « Territoire du CMS » (CARTO-498) — `null` online, where the chrome writes no CMS. */
+  addToCms: AddToCmsProps | null
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
   idLocked?: boolean
   /**

@@ -7,6 +7,7 @@ import { POLITY_FORM_MESSAGES } from '../i18n'
 import { errorOf } from '../utils/errorOf'
 import { textField } from '../utils/textField'
 
+import { AddToCms } from './AddToCms'
 import { ColourField } from './ColourField'
 import { RankWarnings } from './RankWarnings'
 import { ShortNameFields } from './ShortNameFields'
@@ -75,6 +76,7 @@ export function PolityFields(props: PolityFieldsProps) {
         onSelect={choose('territory')}
       />
       <TerritoryProposals proposals={props.territoryProposals} onUse={onField} />
+      {props.addToCms !== null && <AddToCms {...props.addToCms} />}
     </>
   )
 }

@@ -182,8 +182,10 @@ export default tseslint.config(
           hooks: {
             useArrangeMenu: 'state',
             useCloseOutside: 'effect',
+            useAddToCms: 'derived',
             useCitiesView: 'derived',
             useStore: 'store',
+            useCmsChannel: 'context',
             useCityFilters: 'derived',
             useColourPickerWords: 'context',
             useDismiss: 'effect',

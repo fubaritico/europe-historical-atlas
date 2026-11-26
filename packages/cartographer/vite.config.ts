@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
-import { CMS_SESSION_ROUTE } from './src/devServer/cmsSessionRoute.ts'
+import { CMS_SESSION_ROUTE, CMS_TERRITORY_ROUTE } from './src/devServer/cmsRoutes.ts'
 import { REFUSAL_EVENT } from './src/devServer/refusalJournalRoute.ts'
 import { isRefusalEntry, refusalLine } from './src/devServer/refusalLine.ts'
 import { createYearsFolderOnDisk } from './src/devServer/yearsOnDisk.ts'
@@ -23,6 +23,8 @@ import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint.ts'
 import type { YearFolder } from './src/devServer/diskFolder.ts'
 import type * as CmsSessionModule from './src/devServer/cmsSession.ts'
 import type * as CmsSessionEndpoint from './src/devServer/cmsSessionEndpoint.ts'
+import type * as CmsTerritoryEndpoint from './src/devServer/cmsTerritoryEndpoint.ts'
+import type * as CmsTerritoriesModule from './src/devServer/cmsTerritories.ts'
 import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint.ts'
 import type * as FetchWithin from '@europe-historical-atlas/core/utils/fetchWithin'
 import type { Plugin, ViteDevServer } from 'vite'
@@ -209,6 +211,45 @@ function signInWithTheCms(): Plugin {
 }
 
 /**
+ * Build the « Ajouter au CMS » middleware, on the CMS of the dev's machine (CARTO-498). It writes with the session of
+ * whoever is signed in, read from the request's cookie — no key on disk. The CMS's address is the session's,
+ * `CMS_URL` in `packages/cartographer/.env`, by default `http://127.0.0.1:3100`.
+ * @param server - the dev server
+ * @returns the endpoint's middleware
+ */
+async function loadCmsTerritoryMiddleware(server: ViteDevServer): Promise<Middleware> {
+  const endpoint = (await server.ssrLoadModule(
+    '/src/devServer/cmsTerritoryEndpoint.ts'
+  )) as typeof CmsTerritoryEndpoint
+  const territories = (await server.ssrLoadModule(
+    '/src/devServer/cmsTerritories.ts'
+  )) as typeof CmsTerritoriesModule
+  const within = (await server.ssrLoadModule(
+    '@europe-historical-atlas/core/utils/fetchWithin'
+  )) as typeof FetchWithin
+  const env = loadEnv(server.config.mode, server.config.root, 'CMS_')
+  return endpoint.createCmsTerritoryMiddleware(
+    territories.createCmsTerritories(env.CMS_URL ?? 'http://127.0.0.1:3100', within.fetchWithin)
+  )
+}
+
+/**
+ * « Ajouter au CMS » from a polity's form: `POST /__cms/territories` creates its territory in the CMS of the dev's
+ * machine — the flow offline (CARTO-498). `apply: 'serve'`: the built site has no such server, and online the
+ * contribution goes another way (REPO-533).
+ * @returns the plugin
+ */
+function addTerritoriesToTheCms(): Plugin {
+  return {
+    name: 'cartographer-cms-territories',
+    apply: 'serve',
+    configureServer(server) {
+      mountEndpoint(server, CMS_TERRITORY_ROUTE, loadCmsTerritoryMiddleware, '« Ajouter au CMS »')
+    },
+  }
+}
+
+/**
  * The Cartographer's Vite configuration.
  *
  * **`publicDir` points at the atlas's own `public/`, and that is a wiring decision rather than a
@@ -232,6 +273,12 @@ function signInWithTheCms(): Plugin {
  * is one favicon, and the drift this repository recorded as cosmetic cannot happen.
  */
 export default defineConfig({
-  plugins: [react(), saveYearsFromTheEditor(), refusalJournalPlugin(), signInWithTheCms()],
+  plugins: [
+    react(),
+    saveYearsFromTheEditor(),
+    refusalJournalPlugin(),
+    signInWithTheCms(),
+    addTerritoriesToTheCms(),
+  ],
   publicDir: '../atlas/public',
 })

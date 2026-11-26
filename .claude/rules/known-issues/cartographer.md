@@ -241,8 +241,9 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   stripes of the other polity over bare ground for Karelia (CORE-486). **Severity: à savoir.**
 - **The sign-in (CARTO-535) leaves five points open, by my decision after its review of 2026-11-25** (the dev: « tu es
   libre »): (1) **the account gate is the page's only** — the dev server's write routes (`/__years`) take any request
-  from this machine, signed in or not; harmless while the Cartographer runs on the dev's machine alone. **Trigger**:
-  the Cartographer online (CARTO-200), or the channel to the CMS on the session (CARTO-498). (2) **`CMS_URL` is not
+  from this machine, signed in or not; harmless while the Cartographer runs on the dev's machine alone — since
+  2026-11-26 the CMS's own route (`/__cms/territories`, CARTO-498) needs the session, which the CMS checks.
+  **Trigger**: the Cartographer online (CARTO-200). (2) **`CMS_URL` is not
   checked**: an `http://` address off the loopback would carry the password in clear. **Trigger**: the CMS online
   (REPO-533). (3) **A sign-out the CMS could not close shows nobody signed in**, the refusal said in the form; the
   cookie may still be valid, and a reload signs back in — staying signed in instead would trap the dev in the editor.
@@ -258,3 +259,15 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   along them. Every control stays reachable by ‹Tab›; a screen reader may count the tabs without their crosses.
   **Trigger**: several maps open at once — then the crosses out of the tablist's children (or the wrappers
   `role="presentation"`), and the arrows along the tabs. **Severity: cosmétique.**
+- **« Ajouter au CMS » (CARTO-498) leaves four points open, by my decision after its review of 2026-11-26**: (1) **a 403
+  of the CMS is read as a session lost**, the session's dialogue opened (`devServer/cmsTerritories.ts`): true while every
+  signed-in user may create a territory (`Territories` sets no access). **Trigger**: accounts with roles (CMS-228) —
+  then a right refused must be told apart, say by asking the CMS who is signed in before opening the dialogue. (2) **Two
+  clicks before React re-renders** would send two creations: the guard reads the render's `sending`; React 19 renders a
+  click's update at once, and the base's unique index on a territory's Wikidata refuses the second, said under the
+  button. (3) **The focus is lost** when the button greys and when it turns into the link (A11Y-001), and the line under
+  it is a live region mounted with its text (A11Y-002) — the editor's screen-reader courtesy, as CARTO-535's point 5.
+  (4) **The loopback names are written twice**, the server's `LOOPBACK_HOST` and the page's `deploymentMode` (ARCH-004):
+  the server's is the guard, the page's only shows the button. (5) **The line under the button outlives what it
+  says** — seen in the walk of the same evening: « Le CMS l’avait déjà : relié au territoire n° 657 » stays after the tie
+  is removed and the Wikidata id changed, until the next press. **Severity: à savoir.**

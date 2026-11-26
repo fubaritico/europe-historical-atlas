@@ -24,6 +24,12 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `territoryProposals`, `proposalField`, `proposalVerb`, `proposalLabel` — What the CMS's territory proposes under
  *   « Territoire du CMS » (CARTO-488): the list's name; a field's name (`field`); the button's verb by `state` — `empty`,
  *   `differs`, else agreed; and the button's full name, `verb`, `value` and `field`.
+ * - `addToCms`, `addingToCms`, `cmsPage` — « Ajouter au CMS » under « Territoire du CMS » (CARTO-498), its button while it
+ *   sends, and the link to the territory's page in the CMS.
+ * - `cmsCreated`, `cmsFound` — How it ended: created now, or found by its Wikidata item; `id` the territory's number.
+ * - `cmsOffline`, `cmsSignedOut`, `cmsRefused` — Why nothing was written: the CMS not started, the session expired, or its refusal
+ *   in its words (`reason`).
+ * - `cmsBlock` — Why it cannot be added yet, by `reason` — `addToCmsOffer`'s `AddToCmsBlock`.
  * - `rankWarning` — A vassal ranking higher than its suzerain (CORE-489), under the suzerain: `vassal` and `suzerain`
  *   their names, `vassalRank` and `suzerainRank` their ranks, named.
  * - `nameMissing`, `idMissing`, `idTaken`, `notAYear` — Why a field is refused — `polityDraft`'s

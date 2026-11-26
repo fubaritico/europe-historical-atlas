@@ -201,4 +201,6 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
 - **A key of the MCP plugin does not open Payload's REST API** (2026-11-25, CARTO-498): Payload 3.92 registers an API-key
   strategy for every auth collection **except** `payload-mcp-api-keys` (`payload/src/index.ts`, line 975) — such a key
   opens `/api/mcp` only; on `/api/<collection>` the request is nobody, and the default access refuses it. Proved on a
-  copy of the base. **Remedy taken**: the Cartographer acts with the CMS's own session (CARTO-535). **Severity: à savoir.**
+  copy of the base. **Remedy taken**: the Cartographer acts with the CMS's own session (CARTO-535), « Ajouter au CMS »
+  too since 2026-11-26 (CARTO-498) — `CMS_API_KEY` in `packages/cartographer/.env` is read by nothing any more.
+  **Severity: à savoir.**

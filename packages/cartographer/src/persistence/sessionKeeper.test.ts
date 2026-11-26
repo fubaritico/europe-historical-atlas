@@ -210,6 +210,32 @@ describe('createSessionKeeper', () => {
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('sign in again'))
     })
 
+    it('the CMS refused the session to « Ajouter au CMS »: the editor stays, the dialogue asks to sign in again', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { keeper, session, hand } = keeperOver(portAnswering(SIGNED_IN))
+      await keeper.check()
+
+      keeper.lost()
+
+      expect(session()).toEqual({ kind: 'expired', user: USER, problem: null })
+      expect(hand.running()).toBe(0)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('« Ajouter au CMS »'))
+    })
+
+    it('a session lost while nobody is signed in, or already expired, changes nothing', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const expired: SessionState = { kind: 'expired', user: USER, problem: { kind: 'offline' } }
+      const nobody = keeperOver(portAnswering(SIGNED_IN), { kind: 'signedOut', problem: null })
+      const already = keeperOver(portAnswering(SIGNED_IN), expired)
+
+      nobody.keeper.lost()
+      already.keeper.lost()
+
+      expect(nobody.session()).toEqual({ kind: 'signedOut', problem: null })
+      expect(already.session()).toEqual(expired)
+      expect(warn).not.toHaveBeenCalled()
+    })
+
     it('a refusal while expired keeps the dialogue, with the refusal in it', async () => {
       vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const port = portAnswering({ kind: 'refused', reason: 'locked' })

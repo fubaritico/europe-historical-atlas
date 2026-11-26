@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CMS_SESSION_ROUTE } from './devServer/cmsSessionRoute'
+import { CMS_SESSION_ROUTE } from './devServer/cmsRoutes'
 import { OPEN_MAP_KEY } from './persistence/openMapStorage'
 
 import type { Root } from 'react-dom/client'

@@ -1,11 +1,14 @@
 import { Modal } from '@fubaritico/react/Modal'
 
+import { useCmsChannel } from '../../../hooks/useCmsChannel'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { addToCmsOffer } from '../../../utils/addToCmsOffer'
 import { rankWarnings } from '../../../utils/rankWarnings'
 import { territoryProposals } from '../../../utils/territoryProposals'
 import { wikidataViewOf } from '../../../utils/wikidataView'
 import { POLITY_FORM_MESSAGES, PolityForm } from '../../PolityForm'
+import { useAddToCms } from '../hooks/useAddToCms'
 import { usePolityDraft } from '../hooks/usePolityDraft'
 import { useWikidataItem } from '../hooks/useWikidataItem'
 import { ignoreOverlayClick } from '../utils/ignoreOverlayClick'
@@ -55,6 +58,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   // Context
   const form = useTranslation(POLITY_FORM_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
+  const cms = useCmsChannel()
 
   // State
   const { draft, errors, suzerains, ranks, close, onField, onColour, onForceShortName, onSubmit } =
@@ -71,6 +75,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
     territories.find((territory) => String(territory.id) === draft.territory)
   )
   const wikidataView = wikidataViewOf(reading, draft, document.year, others)
+  const addToCms = useAddToCms(cms, addToCmsOffer(draft, wikidataView), onField)
   const territoryOptions = territories.map((territory) => ({
     value: String(territory.id),
     label: form('territoryLabel', { name: territory.name, id: String(territory.id) }),
@@ -94,6 +99,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         ranks={ranks}
         rankWarnings={warnings}
         territoryProposals={proposals}
+        addToCms={addToCms}
         idLocked={editing !== null}
         onField={onField}
         onColour={onColour}
