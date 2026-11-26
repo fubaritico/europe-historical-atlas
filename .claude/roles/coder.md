@@ -33,7 +33,9 @@
   dev's servers run on `main`'s tree and are his.
 - **A tree per ticket** when it works on its own through the board (the dev, 2026-11-24: « tu peux créer des worktrees »):
   `.claude/worktrees/<ticket>`, branch `<ticket>`, merged into `main` at the ticket's end and removed — except a merge
-  that would reload the dev's Cartographer, which waits for his word.
+  that would reload the dev's Cartographer, which waits for his word. **The session enters it** with `EnterWorktree`
+  (`path`) once created, and leaves it with `ExitWorktree` (`keep`) before the merge — otherwise its folder stays in
+  `main` and the status line says `arbre main · branche main` while it writes in the ticket's tree (the dev, 2026-11-26).
 - **A second coder**, when the dev wants two at once: its own tree `coder-2`, its own tickets, never the same files;
   each merges into `main` at the end of each ticket.
 - The status line shows the role, the tree and the branch at all times (`.claude/statusline.mjs`).

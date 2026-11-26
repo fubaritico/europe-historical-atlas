@@ -2,7 +2,8 @@
   "agent": "coder",
   "statusLine": {
     "type": "command",
-    "command": "node \"$(git rev-parse --show-toplevel)/.claude/statusline.mjs\""
+    "command": "node \"$(dirname \"$(git rev-parse --path-format=absolute --git-common-dir)\")/.claude/statusline.mjs\"",
+    "refreshInterval": 10
   },
   "idleCompaction": false,
   "hooks": {

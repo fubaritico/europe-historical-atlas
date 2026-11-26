@@ -70,7 +70,9 @@ When the dev proposes something:
 - **A pasted `Screenshot …` name means `~/Desktop`** — the dev's screenshots always land there, so read
   `~/Desktop/<the name>.png` directly instead of asking for the file again. The name alone is the path.
 - **Never `cd` — always absolute paths.** A `cd` shifts the working directory under every later command,
-  and inside a compound command it triggers a permission prompt.
+  and inside a compound command it triggers a permission prompt. **One exception: a worktree is entered with
+  `EnterWorktree` (`path`, after `git worktree add`) and left with `ExitWorktree` (`keep`)** — there the shift is wanted,
+  and it is what lets the status line show the real tree and branch (the dev, 2026-11-26).
 - **Plans = `.md` in `files/plans/`**, **committed like code** (`files/plans/` and `files/spikes/` are
   tracked; the rest of `files/`, `files/resources/` included, stays ignored) — do NOT use the harness "plan mode".
 - **Review → Test → Commit** per change — no accumulation; fix pre-existing issues a review surfaces in
