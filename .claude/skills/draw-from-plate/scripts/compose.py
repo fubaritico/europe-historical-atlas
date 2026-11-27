@@ -179,6 +179,16 @@ def piece(item, folder, spec=None):
         return line.buffer(km_to_deg(item['km'], line.centroid.y))
     if 'rings' in item:
         return unary_union([Polygon(r) for r in json.load(open(os.path.join(folder, item['rings'])))['rings']])
+    if 'districts_in' in item:
+        # an outline from an earlier map, its straight lines replaced by real limits: every NUTS 3 district at least
+        # `share` inside it (the order of work, point 5 — the 1100 Bavaria ran in straight lines to Cheb and Znojmo)
+        shape_ = unary_union([Polygon(r).buffer(0) for r in
+                              json.load(open(os.path.join(folder, item['districts_in'])))['rings']])
+        share = item.get('share', 0.5)
+        picked = [k for k, g in all_nuts().items() if g.intersects(shape_)
+                  and g.intersection(shape_).area >= share * g.area]
+        print(f'  districts in the earlier outline: {len(picked)} {sorted(picked)}')
+        return unary_union([all_nuts()[k] for k in picked])
     raise SystemExit(f'unknown piece {item}')
 
 

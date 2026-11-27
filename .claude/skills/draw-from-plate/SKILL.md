@@ -45,8 +45,14 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
 4. **Precision by zone**: **Western Europe exact** (commune limits, no geometric line); **Central Europe as exact as
    the data allows**; the farther from Europe, the more Cliopatria's lines are acceptable — _"sometimes we will have no
    choice, and it won't matter much; in some parts it matters a lot."_
-5. **A vassal with too few sheets for the vote is researched before it is drawn** — never laid as district patches
-   (Brandenburg of 1200: 6 sheets, three islands; held back for a research lot).
+5. **A vassal with too few sheets for the vote starts from the dev's previous map, never waits** (the dev, 27/11:
+   _"if you understood it, make it intelligible in the skill"_). Its outline on his map of the year before (his 1100
+   for 1200: Bavaria, Swabia, the two Lotharingias, Carinthia…), **minus what has split off since** and is already laid
+   (Bavaria of 1200 = his Bavaria of 1100 without Austria and Styria), cut by the suzerain's domain with `compose.py`
+   (`{"rings": <file>}`), checked against the public-domain plate of the period (Shepherd 1911, pl. 72, the Empire under
+   the Hohenstaufen). The research of its places is launched at the same time and **corrects the outline afterwards,
+   without blocking it** — the vote takes over once the sheets are there. Never district patches (Brandenburg of 1200:
+   6 sheets, three islands).
 6. **The same retracing for France and Spain** after the Empire (the dev, 27/11) — every sovereign of Western Europe.
 
 1. **The data** (once, on the archive disk, `outils/geodata/`, each with its licence in `geodata.py`): BKG DLM250
