@@ -45,3 +45,29 @@
 
 **Aside, asked the same day**: rivers always shown, as in the Cartographer — no code, set the dev panel's
 "minors visible from" to 0 and judge; if kept, the default moves.
+
+## A polity shown or not in the atlas — CARTO-588 (2026-11-28)
+
+> The dev's rule, 2026-11-28, said and confirmed in his words. **The purpose**: the historian enters and draws the whole
+> chain of homage now — duchies, then counties, bishoprics, abbeys inside them — and the general map shows only what
+> it should; later, the focus mode on a kingdom or on the empire can show more of that realm, with nothing to enter
+> again. Hiding is a choice of display, never a loss of data.
+
+**A box per polity, « Montrer dans l'atlas »**, from the second rank of homage down. A polity unticked is **folded**
+into its first suzerain shown: its ground takes that suzerain's colour, no hole, no border between them, its own
+vassals one rank up. The levels of detail are counted on what is shown.
+
+**Its default**, by the polity's place under a **king** — not by its size (the dev: « oublie la notion de la taille,
+c'est la profondeur de vassalité qui est importante » — the depth in the hierarchical chain, its name since 28/11):
+
+|                          | N-1                                                  | N-2                                                         | N-3 and deeper   |
+| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------- | ---------------- |
+| **a kingdom**            | always shown, no box — the zoom already reveals them | box, **unticked**                                           | box, unticked    |
+| **the empire**           | always shown, no box                                 | box **ticked when its suzerain is a kingdom**, unticked else | box, unticked    |
+
+**Why**: by default the atlas shows the direct vassals of a sovereign or of a king. In the empire there is one floor
+more — the emperor above kings such as Bohemia's — so a direct vassal of the king of Bohemia sits at N-2 and holds the
+place Normandy holds under the king of France; a vassal of a duke of the empire is a small fief, as a kingdom's N-2.
+
+**In the atlas** the year is kept whole and only the general map's copy is folded, so the focus mode will have the
+whole year at hand.
