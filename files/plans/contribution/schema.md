@@ -290,7 +290,7 @@ erDiagram
     date createdAt "createdAt"
     date deletedAt "deletedAt"
   }
-  vassal_links["Maillon"] {
+  hierarchy_links["Maillon"] {
     text label "Maillon"
     relationship vassal "Vassal · requis"
     radio answersTo "Relève de · requis"
@@ -371,8 +371,8 @@ erDiagram
   titles }o--|| people : "person"
   titles }o--|| territories : "territory"
   titles }o--o{ sources : "lines.source"
-  vassal_links }o--|| titles : "vassal"
-  vassal_links }o--o| titles : "suzerain"
-  vassal_links }o--o{ sources : "lines.source"
+  hierarchy_links }o--|| titles : "vassal"
+  hierarchy_links }o--o| titles : "suzerain"
+  hierarchy_links }o--o{ sources : "lines.source"
   sources }o--o{ sources : "copyOf"
 ```

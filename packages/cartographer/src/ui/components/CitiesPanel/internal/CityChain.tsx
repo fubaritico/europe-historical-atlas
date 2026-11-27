@@ -35,7 +35,7 @@ function outrankedSteps(titles: readonly ContentChainTitle[]): OutrankedStep[] {
 }
 
 /**
- * A city's chain of vassalage as the dev laid it on 2026-11-17, after Carcassonne's four readings read as one list:
+ * A city's hierarchical chain as the dev laid it on 2026-11-17, after Carcassonne's four readings read as one list:
  * each reading whole, from the holder up — numbered when there are several, set apart from the next —, one title per
  * line, each climbing behind an arrow, the last saying how the reading ends: « souverain », or why it stops. Nothing
  * shared between readings is written once: each reads alone (the dev: _"once it is this chain, once that one"_).

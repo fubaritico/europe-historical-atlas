@@ -13,7 +13,7 @@ import { citiesOfYear } from '../state/citiesSlice'
 import type { CityVerdict, CityVerdictKind, PolityOnMap } from '../canvas/cityVerdict'
 import type { CityAlert } from '../canvas/paint/cityPainter'
 import type { CityMark } from '../state/citiesSlice'
-import type { ChainEnd } from '@europe-historical-atlas/core/data/vassalChain'
+import type { ChainEnd } from '@europe-historical-atlas/core/data/hierarchyChain'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**

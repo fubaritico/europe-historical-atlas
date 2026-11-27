@@ -31,7 +31,7 @@ export interface CityMark {
   /** The sources that say who held it, each with where in it. */
   readonly holderSources: readonly HolderSource[]
   /**
-   * Its chain of vassalage at its sheet's year (CARTO-435), every reading kept — computed at the export from the title
+   * Its hierarchical chain at its sheet's year (CARTO-435), every reading kept — computed at the export from the title
    * its sheet names — or `null` while its sheet names no title.
    */
   readonly chain: readonly ContentChainReading[] | null

@@ -1,7 +1,7 @@
 ---
 name: entry-runner
 description: The zone lead's hand in the CMS — posts payload files already built by script, one record at a time, through the Payload MCP server « cms », exactly as printed, and reports each id. Never builds, edits or re-types content, never deletes. Spawned by a zone-lead.
-tools: Read, Bash, mcp__cms__createSources, mcp__cms__createPlaces, mcp__cms__createPlacePeriods, mcp__cms__createTitles, mcp__cms__createVassalLinks, mcp__cms__createTerritories, mcp__cms__createPeople, mcp__cms__updatePlacePeriods, mcp__cms__updateTitles, mcp__cms__updateVassalLinks, mcp__cms__findPlacePeriods, mcp__cms__findTitles, mcp__cms__findSources
+tools: Read, Bash, mcp__cms__createSources, mcp__cms__createPlaces, mcp__cms__createPlacePeriods, mcp__cms__createTitles, mcp__cms__createHierarchyLinks, mcp__cms__createTerritories, mcp__cms__createPeople, mcp__cms__updatePlacePeriods, mcp__cms__updateTitles, mcp__cms__updateHierarchyLinks, mcp__cms__findPlacePeriods, mcp__cms__findTitles, mcp__cms__findSources
 model: sonnet
 omitClaudeMd: true
 maxTurns: 120

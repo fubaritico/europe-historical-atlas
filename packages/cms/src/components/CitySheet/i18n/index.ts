@@ -9,7 +9,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * Its messages that take values:
  * - `placeRemove`, `reasonRemove`, `reasonAdded`, `reasonRemoved` — `name`, the place or
  *   reason.
- * - `addSuzerainOf`, `linkLineOf`, `linkSuzerainHelp` — `name`, the title the chain of vassalage stops at.
+ * - `addSuzerainOf`, `linkLineOf`, `linkSuzerainHelp` — `name`, the title the hierarchical chain stops at.
  * - `chain` — `year`, as text. `chainReadings` — `count`, how many readings.
  * - `holderSovereignDrops` — `count`, how many links of the holder « Enregistrer » will remove.
  * - `reasonResults` — `count`, how many reasons match.

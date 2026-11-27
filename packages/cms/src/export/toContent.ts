@@ -88,7 +88,7 @@ export interface ExportContext {
    * @returns nothing
    */
   warn: (message: string) => void
-  /** The titles and the links every city's chain of vassalage is computed from (CARTO-435). */
+  /** The titles and the links every city's hierarchical chain is computed from (CARTO-435). */
   register: ChainRegister
 }
 

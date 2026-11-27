@@ -8,7 +8,7 @@ import { CITY_SHEET_MESSAGES } from '../i18n'
 
 import { ChainReadingLine } from './ChainReadingLine'
 
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 
 const say = createTranslator(CITY_SHEET_MESSAGES, 'fr')
 

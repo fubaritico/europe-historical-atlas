@@ -1,9 +1,9 @@
 import { useChainSaver } from './useChainSaver'
+import { useHierarchyLinks } from './useHierarchyLinks'
 import { useSaveAll } from './useSaveAll'
-import { useVassalLinks } from './useVassalLinks'
 
 import type { ChainWriters } from '../internal/HolderChain'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 import type { SheetValues } from '../utils/sheetValues'
 import type { FormikHelpers } from 'formik'
@@ -33,7 +33,7 @@ export function useSheetSave(
   saveSheet: (values: SheetValues, helpers: FormikHelpers<SheetValues>) => Promise<void>,
   say: Say
 ): SheetSave {
-  const { readChain, ...links } = useVassalLinks(api)
+  const { readChain, ...links } = useHierarchyLinks(api)
   const saver = useChainSaver()
   const { submit } = useSaveAll({ saver, initialValues, saveSheet }, say)
   return { readChain, writers: { ...links, saver }, submit }

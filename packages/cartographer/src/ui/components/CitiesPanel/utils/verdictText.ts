@@ -2,7 +2,7 @@ import { withMapName } from './titleFormat'
 
 import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CitiesPanelMessageKey } from '../i18n'
-import type { ChainEnd } from '@europe-historical-atlas/core/data/vassalChain'
+import type { ChainEnd } from '@europe-historical-atlas/core/data/hierarchyChain'
 
 /** A sentence of the panel, and the polity it names. */
 export interface VerdictText {

@@ -16,7 +16,7 @@ import type { LonLat } from '../../../../viewport/coordinateLabel'
  * Where a city is, and who holds it — the body of its information box ({@link CityDialog}), as the dev's screen of
  * 2026-11-16 draws it: a heading per section — its coordinates, the holder by the sources, the sources numbered (each
  * work's title in italics), the
- * polity on the map, the chain of vassalage one title per line — then the verdict. **Its coordinates are written as
+ * polity on the map, the hierarchical chain one title per line — then the verdict. **Its coordinates are written as
  * the status bar writes the pointer's** (CARTO-368): degrees and minutes, a hemisphere letter, never a minus sign. A
  * verdict to correct or to research is said in an alert (the dev, 2026-11-16).
  * @param props - the city's name, its position, its verdict and its sources

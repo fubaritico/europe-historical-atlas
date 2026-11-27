@@ -123,7 +123,7 @@ describe('CityDialog', () => {
       expect(screen.getByRole('region', { name: 'Metz' }).textContent).not.toContain('To check')
     })
 
-    it('writes the chain of vassalage one title per line, the last « sovereign »', () => {
+    it('writes the hierarchical chain one title per line, the last « sovereign »', () => {
       const chain = [
         {
           titles: [
@@ -142,7 +142,7 @@ describe('CityDialog', () => {
         />
       )
       expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
-        'Chain of vassalage: Baudouin III — comté de Hainaut; → Henri IV — royaume de Germanie; ' +
+        'Hierarchical chain: Baudouin III — comté de Hainaut; → Henri IV — royaume de Germanie; ' +
           '→ Henri IV — Saint-Empire · sovereign'
       )
       // The dev, 2026-11-16: each person's name in italics
@@ -169,7 +169,7 @@ describe('CityDialog', () => {
         />
       )
       expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
-        'Chain of vassalage — 2 readings according to the sources: ' +
+        'Hierarchical chain — 2 readings according to the sources: ' +
           'Reading 1; Bernard Aton IV — Viscounty of Carcassonne · sovereign; ' +
           'Reading 2; Bernard Aton IV — Viscounty of Carcassonne; → Raymond IV — comté de Toulouse · sovereign'
       )
@@ -193,7 +193,7 @@ describe('CityDialog', () => {
         />
       )
       expect(cityDetailText(screen.getByRole('region', { name: 'Metz' }))).toContain(
-        'Chain of vassalage: Godefroy — Basse-Lotharingie, 1087–1100; → Henri IV — Saint-Empire · sovereign'
+        'Hierarchical chain: Godefroy — Basse-Lotharingie, 1087–1100; → Henri IV — Saint-Empire · sovereign'
       )
     })
 
@@ -253,7 +253,7 @@ describe('CityDialog', () => {
       const region = screen.getByRole('region', { name: 'Metz' })
       expect(region.querySelectorAll('.city-detail__reading')).toHaveLength(2)
       expect(cityDetailText(region)).toContain(
-        'Chain of vassalage — 2 readings according to the sources: ' +
+        'Hierarchical chain — 2 readings according to the sources: ' +
           'Reading 1; Comté de Hainaut; → Royaume de Germanie · beyond, we do not know; ' +
           'Reading 2; Comté de Hainaut; → Royaume de France · the links contradict one another'
       )

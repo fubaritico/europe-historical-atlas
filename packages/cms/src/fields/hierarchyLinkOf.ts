@@ -4,9 +4,9 @@ import { toHistoricalDate } from './dateReading'
 import { relationId } from './relationId'
 
 import type { EventDateFields } from './historicalDate'
-import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { HierarchyLink } from '@europe-historical-atlas/core/data/hierarchyChain'
 
-/** A link of vassalage as the CMS stores it — its relations bare or populated. */
+/** A hierarchical link as the CMS stores it — its relations bare or populated. */
 export interface StoredLink {
   /** Its id. */
   readonly id: number | string
@@ -21,7 +21,7 @@ export interface StoredLink {
 }
 
 /**
- * A stored link as `core`'s chain reads it (`vassalChain`): « no one » becomes a sovereign link, a suzerain becomes
+ * A stored link as `core`'s chain reads it (`hierarchyChain`): « no one » becomes a sovereign link, a suzerain becomes
  * the title it answers to.
  *
  * A link that cannot say whom it answers to — its suzerain gone, its vassal gone, its date unreadable — is left out:
@@ -29,7 +29,7 @@ export interface StoredLink {
  * @param link - the link as stored
  * @returns the link for the chain, or `null` when it is left out
  */
-export function vassalLinkOf(link: StoredLink): VassalLink | null {
+export function hierarchyLinkOf(link: StoredLink): HierarchyLink | null {
   const vassal = relationId(link.vassal)
   if (vassal === null || link.date === undefined || link.date === null) return null
   const date = toHistoricalDate(link.date)

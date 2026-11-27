@@ -1,7 +1,7 @@
 import type { PendingWiring } from './pendingLine'
-import type { ChainReading } from './readVassalChain'
+import type { ChainReading } from './readHierarchyChain'
 
-/** A link of vassalage named by its two titles, as the chain read named them. */
+/** A hierarchical link named by its two titles, as the chain read named them. */
 export interface LinkNames {
   /** The vassal's title. */
   readonly vassal: string

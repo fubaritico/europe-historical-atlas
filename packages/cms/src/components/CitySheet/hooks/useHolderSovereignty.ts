@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { NO_SOVEREIGNTY, sovereigntyOf } from '../utils/pendingLine'
 
 import type { HolderSovereignty, SovereigntyError } from '../utils/pendingLine'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 
 /** The holder's own « Souverain », as the block holds it. */
 export interface HolderSovereigntyState {

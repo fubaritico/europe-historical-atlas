@@ -8,7 +8,7 @@
  * **A mechanism, not a statement**: an overlap is shown whether it is a slip of the hand or ground two powers held;
  * what it means is the author's to know. Declaring a disputed zone, with its source, is set aside on purpose (the
  * dev: *"restons simples"*). **One exception, which is not one**: a polity over one of its suzerains — at any
- * depth — is vassalage (`s02`, H-05a), never an overlap.
+ * depth — is a hierarchical tie (`s02`, H-05a), never an overlap.
  *
  * The geometry is `polygon-clipping`'s (MIT, the clipping Turf uses), in longitude and latitude — the document's
  * own coordinates, so the atlas can read the same pieces one day. It can refuse a degenerate shape by throwing;
@@ -118,7 +118,7 @@ export function suzerainsOf(document: YearDocument, polity: string): Set<string>
 }
 
 /**
- * Whether two polities' common ground is an overlap — hatched — and not vassalage: neither is the other's suzerain, at
+ * Whether two polities' common ground is an overlap — hatched — and not a hierarchical tie: neither is the other's suzerain, at
  * any depth (`s02`, H-05a). **The one rule** the hatches are cut by ({@link overlapCandidates}) and a city in a disputed
  * zone is judged by (the Cartographer's `cityVerdicts`, CARTO-511), so the two cannot part.
  * @param above - each polity's suzerains at any depth ({@link suzerainsOf}), however the caller keeps them

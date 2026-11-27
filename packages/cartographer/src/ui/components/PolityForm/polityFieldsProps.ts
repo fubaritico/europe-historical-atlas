@@ -50,7 +50,7 @@ export interface PolityFieldsProps {
   /** The ranks it may take, as stored — the usual ones and every one the year already uses (`rankChoices`). */
   ranks: readonly string[]
   /**
-   * The steps of vassalage the ranks contradict — a vassal scoring higher than its suzerain (CORE-489): said under the
+   * The hierarchical steps the ranks contradict — a vassal scoring higher than its suzerain (CORE-489): said under the
    * suzerain, never refused.
    */
   rankWarnings: readonly RankWarning[]

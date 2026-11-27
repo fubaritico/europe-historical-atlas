@@ -74,7 +74,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   in the bin**, never deleted (CMS-508, the dev's go of 2026-11-24 — 39 sheets deleted that morning had to be put back
   by hand): `update` it by its `id` with `deletedAt` set to the current date and time (ISO 8601). It leaves every
   search and the export; the dev restores it, or empties the bin, in the admin — my key deletes nothing. On
-  `place-periods`, `places`, `period-names`, `sources`, `titles`, `vassal-links` only; never a record of the dev's, nor
+  `place-periods`, `places`, `period-names`, `sources`, `titles`, `hierarchy-links` only; never a record of the dev's, nor
   one I did not create; never `people`, `territories`, `confessions`, `importance-reasons`. Two refusals to expect: one
   record at a time, by `id` (a `where` writing `deletedAt` is refused); a place a sheet or an event cites, a source a
   line cites, a title a link or a sheet cites, is refused and the message names what cites it — so undo **in order:
@@ -109,7 +109,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   make most probable, and the summary to the code instance says why. A holder with no QID only when there is truly
   none to name (« Aucun — ville abandonnée »), declared as such.
 - **The holder is the nearest lord the sources prove, not the level the map draws** (the dev, 2026-11-14: the online
-  MVP stops at one level of vassalage for readability, *"but later we will have to send everything"*). Bautzen in 1100
+  MVP stops at one hierarchical level for readability, *"but later we will have to send everything"*). Bautzen in 1100
   is held by Wiprecht of Groitzsch, who holds it of the Duke of Bohemia: the sheet names Wiprecht, even though the map
   draws only Bohemia. The Cartographer then says « to declare » until the base knows who that lord holds of — CMS-422
   (a polity entered like a place, with the source of its suzerain) and CARTO-435 (climbing the chain) close it. A
@@ -119,13 +119,13 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   only where it holds the lordship (comital rights, an immunity). An abbey given the village, a bishop drawing a rent or
   a tithe, a noble owning manses is the **owner**: useful, kept as a note or its own line, never the sheet's holder.
   Pitten: the counts of Formbach owned the lands, the place obeyed Margrave Ottokar II — the sheet names Ottokar.
-- **Every place carries the tree of vassalage above its holder, up to the sovereign** (the dev, 2026-11-14: *"we must
+- **Every place carries the hierarchical tree above its holder, up to the sovereign** (the dev, 2026-11-14: *"we must
   have the tree of vassalage per place"* — held by Schmurtz, who answers to the counts of Basel, who answer to the duchy
   of Alsace, which answers to the Holy Roman Empire). **A point in the Cartographer is valid only when this chain climbs
   without a gap to the duchy drawn under it and to that duchy's suzerain.** Climbing it is also the check: each link —
   this vassal really held of that suzerain at the date — is proven by its own witness, so a wrong holder shows up as a
   link no source carries. **Each link is established once for a given date**, then reused by every place under that
-  lord: more work once, more reliability everywhere (the dev, same day). They are entered in the base as titles and links of vassalage
+  lord: more work once, more reliability everywhere (the dev, same day). They are entered in the base as titles and hierarchical links
   (CMS-422, step 5 below); the year's register `/Volumes/Acer/atlas-historien/<year>/toutes-zones/resultats/vassalage.md` — one line per link: the vassal,
   its suzerain, the witness, the doubt if any — stays the working list every research lot reads first and extends.
 - **The map is the dev's.** A fact that changes a border or a suzerain is entered as a source line *and* sent to the
@@ -163,7 +163,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   that holds the district** at the date (the duke, the margrave, the count of the county — the map's vassal when a source
   confirms it), with a line citing a source on that vassal's tenure; the holderName is that vassal's own name, nothing
   added (Kraubath → the duke of Carinthia, Würmla → the margrave of Austria). The sheet names the first link only: the
-  chain above it, up to the highest suzerain, is the register's (« Every place carries the tree of vassalage », above),
+  chain above it, up to the highest suzerain, is the register's (« Every place carries the hierarchical tree », above),
   each link proven once. « No witness names a lord below the Empire » is never a reason
   to leave a place out: climb one level, not to nothing. Only the Empire itself, when no vassal is between, is the holder.
 - **No sheet without a line** (the coder's remark, 2026-11-14, taken by the historian): a sheet with no line asserts the
@@ -246,7 +246,7 @@ that exists is reused (its id), never created again.
    - **`wikidata` is unique** in places, people and territories (b76c62c, 15/11): a create or a correction that
      repeats a QID another record carries is refused (a validation error on « wikidata »). Never retry with an altered
      QID: find the record that carries it and reuse it. An empty `wikidata` is stored as absent.
-5. **Titles and links of vassalage** (`titles`, `vassal-links`, CMS-422). A title is a person holding a territory over a
+5. **Titles and hierarchical links** (`titles`, `hierarchy-links`, CMS-422). A title is a person holding a territory over a
    date; a link, a title answering to another (« no-one » only when a source says so). **One of each per person,
    territory and years — per vassal, suzerain and years** (e3f15e4, 15/11): a second one is refused and the refusal
    names the existing record; a second source saying the same thing is **one more line on it**, never a second record.
@@ -281,7 +281,7 @@ Two batches never write the same sheet at once — an update re-sends all its li
 
 - **A grouped update (`where`) is run in parallel by Payload** (3.92, `operations/update.js`): when the list holds both
   ends of one link (a vassal title and its suzerain title), that link is rewritten twice at once and the refusal names a
-  duplicate line id in `vassal_links_lines` (16/11, titles 29 and 11). Nothing is lost, but update such titles one by one.
+  duplicate line id in `hierarchy_links_lines` (16/11, titles 29 and 11). Nothing is lost, but update such titles one by one.
 - **A refusal names every issue** (the sheet is checked by `core/data/citySheet.ts` before it is saved): read them all,
   fix them all, then retry once. Never retry blind.
 - **An interrupted or refused call may have acted**: search for the record before creating it again.

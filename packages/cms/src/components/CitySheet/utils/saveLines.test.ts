@@ -4,8 +4,8 @@ import { NO_SOVEREIGNTY, emptyLine } from './pendingLine'
 import { saveLines } from './saveLines'
 
 import type { HolderSovereignty, PendingLine, PendingWiring } from './pendingLine'
+import type { ChangedHierarchyLink, LinkAnswer, NewHierarchyLink } from './saveHierarchyLink'
 import type { LinesState, LinesTargets } from './saveLines'
-import type { ChangedVassalLink, LinkAnswer, NewVassalLink } from './saveVassalLink'
 
 const SAVED: LinkAnswer = { kind: 'saved' }
 const REFUSED: LinkAnswer = { kind: 'refused', message: 'Refusé.' }
@@ -26,10 +26,10 @@ function wiringOf(
     return Promise.resolve(answers[name] ?? SAVED)
   }
   const wiring: PendingWiring = {
-    saveLink: vi.fn((link: NewVassalLink) =>
+    saveLink: vi.fn((link: NewHierarchyLink) =>
       answer('saveLink', `saveLink ${String(link.vassal)}→${String(link.suzerain)}`)
     ),
-    updateLink: vi.fn((change: ChangedVassalLink) =>
+    updateLink: vi.fn((change: ChangedHierarchyLink) =>
       answer('updateLink', `updateLink ${change.link}`)
     ),
     deleteLink: vi.fn((link: string) => answer('deleteLink', `deleteLink ${link}`)),

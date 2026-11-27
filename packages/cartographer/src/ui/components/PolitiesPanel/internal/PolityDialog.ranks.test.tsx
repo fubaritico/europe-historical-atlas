@@ -73,7 +73,7 @@ async function underAnjou(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('option', { name: 'County of Anjou' }))
 }
 
-// CARTO-487 and CORE-489, the dev, 2026-11-20: the ranks of the form, and the ladder of vassalage they check.
+// CARTO-487 and CORE-489, the dev, 2026-11-20: the ranks of the form, and the hierarchical ladder they check.
 describe('PolityDialog — the ranks', () => {
   describe('happy path', () => {
     it('offers the ranks the form lacked: a caliphate is chosen and saved', async () => {

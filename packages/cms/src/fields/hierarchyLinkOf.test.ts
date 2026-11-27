@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { vassalLinkOf } from './vassalLinkOf'
+import { hierarchyLinkOf } from './hierarchyLinkOf'
 
 const DATE = { start: { year: 1084 }, end: { year: 1103 } }
 const READ = {
@@ -9,11 +9,11 @@ const READ = {
   to: { year: 1103, month: null, day: null, calendar: null, circa: false, margin: null },
 }
 
-describe('vassalLinkOf', () => {
+describe('hierarchyLinkOf', () => {
   describe('happy path', () => {
     it('reads a link naming a suzerain as the title it answers to', () => {
       expect(
-        vassalLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: 8, date: DATE })
+        hierarchyLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: 8, date: DATE })
       ).toEqual({
         id: '1',
         vassal: '7',
@@ -26,13 +26,14 @@ describe('vassalLinkOf', () => {
   describe('variants', () => {
     it('reads a « no one » link as sovereign, whatever its suzerain field holds', () => {
       expect(
-        vassalLinkOf({ id: 2, vassal: 9, answersTo: 'no-one', suzerain: 8, date: DATE })?.suzerain
+        hierarchyLinkOf({ id: 2, vassal: 9, answersTo: 'no-one', suzerain: 8, date: DATE })
+          ?.suzerain
       ).toBeNull()
     })
 
     it('reads relations populated as well as bare', () => {
       expect(
-        vassalLinkOf({
+        hierarchyLinkOf({
           id: 1,
           vassal: { id: 7 },
           answersTo: 'suzerain',
@@ -46,19 +47,19 @@ describe('vassalLinkOf', () => {
   describe('managed errors', () => {
     it('leaves out a link whose suzerain is gone — « we do not know », never a sovereign', () => {
       expect(
-        vassalLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: null, date: DATE })
+        hierarchyLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: null, date: DATE })
       ).toBeNull()
     })
 
     it('leaves out a link whose vassal is gone', () => {
       expect(
-        vassalLinkOf({ id: 1, vassal: null, answersTo: 'suzerain', suzerain: 8, date: DATE })
+        hierarchyLinkOf({ id: 1, vassal: null, answersTo: 'suzerain', suzerain: 8, date: DATE })
       ).toBeNull()
     })
 
     it('leaves out a link whose date cannot be read', () => {
       expect(
-        vassalLinkOf({
+        hierarchyLinkOf({
           id: 1,
           vassal: 7,
           answersTo: 'suzerain',
@@ -71,7 +72,7 @@ describe('vassalLinkOf', () => {
 
   describe('edge cases', () => {
     it('leaves out a link with no date at all', () => {
-      expect(vassalLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: 8 })).toBeNull()
+      expect(hierarchyLinkOf({ id: 1, vassal: 7, answersTo: 'suzerain', suzerain: 8 })).toBeNull()
     })
   })
 

@@ -14,7 +14,7 @@ import type { CollectionConfig } from 'payload'
 export const SOURCE_CITERS = [
   { collection: 'place-periods', field: 'testimonies.source', what: 'fiche(s) de ville' },
   { collection: 'titles', field: 'lines.source', what: 'titre(s)' },
-  { collection: 'vassal-links', field: 'lines.source', what: 'maillon(s)' },
+  { collection: 'hierarchy-links', field: 'lines.source', what: 'maillon(s)' },
   { collection: 'period-names', field: 'lines.source', what: 'nom(s) d’époque' },
   { collection: 'events', field: 'sources', what: 'événement(s)' },
   { collection: 'siege-engines', field: 'sources', what: 'engin(s) de siège' },

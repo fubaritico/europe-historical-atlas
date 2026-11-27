@@ -2,14 +2,14 @@ import { FormRelationField } from './FormRelationField'
 import { HolderChain } from './HolderChain'
 
 import type { ChainWriters } from './HolderChain'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 
 /**
  * « Tenue par » (CMS-422, the dev's mock-up of 2026-11-15 and his words of 2026-11-16): **one** field, the holder of
  * the city at the sheet's date — a title, shown by its name « Mathias II, comte de Nantes », chosen with Payload's own
  * relationship field, or created by its « + » in a drawer whose person and territory have their own « + ». Under it,
- * the chain of vassalage, one line « Vassal de » per link, built by « ⊕ ».
+ * the hierarchical chain, one line « Vassal de » per link, built by « ⊕ ».
  *
  * The polity typed by name and its Wikidata id (CMS-335) are off the screen and kept in the base: the export reads
  * them for a city with no title yet, until 1100 is taken over into the titles (step 3).

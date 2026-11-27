@@ -11,7 +11,7 @@
  * 1100 on 2026-10-17 (County of Tripoli, Kingdom of Jerusalem, Armenian Cilicia, and a *category* entered by
  * mistake for the Emirate of Mosul).
  *
- * **Vassalage is read sideways** (CARTO-248): Wikidata has no *vassal of* property. Three roads lead to it,
+ * **The hierarchy is read sideways** (CARTO-248): Wikidata has no *vassal of* property. Three roads lead to it,
  * measured on eight real vassals of 1100 — *country* (P17) dated by its *start* and *end* qualifiers (the
  * County of Flanders: Kingdom of France 864–1529, then the Holy Roman Empire); *instance of* a State of the
  * Holy Roman Empire (Bohemia); and *instance of* a vassal state, which says that it is one, not of whom

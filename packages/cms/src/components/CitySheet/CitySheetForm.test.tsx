@@ -343,7 +343,7 @@ describe('CitySheetForm', () => {
       const span = { start: { year: 1084 }, end: { year: 1103 } }
       const fetcher = vi.fn<typeof fetch>((input) => {
         const url = input as string
-        const json = url.startsWith('/api/vassal-links?')
+        const json = url.startsWith('/api/hierarchy-links?')
           ? {
               docs: [
                 { id: 1, vassal: 10, answersTo: 'suzerain', suzerain: 20, date: span },
@@ -362,7 +362,7 @@ describe('CitySheetForm', () => {
       })
       vi.stubGlobal('fetch', fetcher)
       renderForm({ ...rome, holderTitle: 10 }, 1)
-      expect(await screen.findByText('Chaîne de vassalité en 1100')).toBeTruthy()
+      expect(await screen.findByText('Chaîne hiérarchique en 1100')).toBeTruthy()
       expect(
         screen.getByText('Mathias II — comté de Nantes → Alain IV — duché de Bretagne', {
           exact: false,

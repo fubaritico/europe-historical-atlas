@@ -60,7 +60,7 @@ interface StepAnswer {
 
 /**
  * Saves the block at the sheet's « Enregistrer » (the dev, 2026-11-16). **The holder ticked « Souverain »**: its title
- * ticked, then its own links of vassalage removed — the city a sovereign state, no chain. **Otherwise** nothing
+ * ticked, then its own hierarchical links removed — the city a sovereign state, no chain. **Otherwise** nothing
  * is sent while a line misses its suzerain — said under it —; then the links closed by ✕ are removed, the lines changed
  * are changed and the new ones added, lowest first, then each box changed is saved on its suzerain, and the holder
  * unticked last. The first refused or failed keeps its sentence and stops the rest. The chain is read again once
@@ -177,7 +177,7 @@ function finish(saved: boolean, answer: ChainAnswer, targets: LinesTargets): Cha
 async function removeLinks(links: readonly string[], targets: LinesTargets): Promise<StepAnswer> {
   let saved = false
   for (const link of links) {
-    const ok = await attempt(() => targets.wiring.deleteLink(link), 'a link of vassalage removed', {
+    const ok = await attempt(() => targets.wiring.deleteLink(link), 'a hierarchical link removed', {
       refused: (message) => {
         targets.wiring.onRemovalStopped(link, message)
       },
@@ -230,7 +230,7 @@ async function saveChanged(
               sourceChanged: line.original?.source !== source,
             }),
       targets,
-      'a link of vassalage',
+      'a hierarchical link',
       line.key
     )
     if (!ok) return { saved, stop: 'line' }

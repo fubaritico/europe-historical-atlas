@@ -3,7 +3,7 @@ import { ChainReadingLine } from './ChainReadingLine'
 import { PendingBlock } from './PendingBlock'
 
 import type { PendingLinks } from '../hooks/usePendingLinks'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 import type { RecordChoice } from '../utils/sheetValues'
 

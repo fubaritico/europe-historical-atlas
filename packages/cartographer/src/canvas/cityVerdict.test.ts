@@ -254,7 +254,7 @@ describe('cityVerdicts — a disputed zone', () => {
   })
 
   describe('managed errors', () => {
-    // The hatches' rule: a duchy inside its kingdom is vassalage — a city there is wrong, never disputed.
+    // The hatches' rule: a duchy inside its kingdom is a hierarchical tie — a city there is wrong, never disputed.
     it('keeps wrong a city in a vassal drawn inside its suzerain when only the suzerain is in its chain', () => {
       const verdict = cityVerdicts(overFrance('fr-couronne'), [
         { ...CITY, chain: FRANCE_CHAIN },

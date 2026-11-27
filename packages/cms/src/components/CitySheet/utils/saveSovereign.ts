@@ -1,13 +1,13 @@
-import { refusalOf } from './saveVassalLink'
+import { refusalOf } from './saveHierarchyLink'
 
-import type { LinkAnswer } from './saveVassalLink'
+import type { LinkAnswer } from './saveHierarchyLink'
 
 /** Ticks or unticks « souverain » on a title, in the base — the port every part of the chain is handed. */
 export type SaveSovereign = (title: number | string, sovereign: boolean) => Promise<LinkAnswer>
 
 /**
  * Ticks or unticks « souverain » on a title (the dev, 2026-11-16: *"the sovereign, you tick it"*), through Payload's
- * API so the collection's rules hold. Ticked, the chain of vassalage stops at that title over its dates.
+ * API so the collection's rules hold. Ticked, the hierarchical chain stops at that title over its dates.
  * @param fetcher - the `fetch` to use
  * @param api - the API's root: `/api`
  * @param title - the title's id

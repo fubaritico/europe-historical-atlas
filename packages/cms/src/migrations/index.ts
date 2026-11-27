@@ -15,6 +15,7 @@ import * as migration_20261123_175001_plain_french_register_names from './202611
 import * as migration_20261124_111246_by_district from './20261124_111246_by_district';
 import * as migration_20261124_155239_bin from './20261124_155239_bin';
 import * as migration_20261124_165133_register_bin from './20261124_165133_register_bin';
+import * as migration_20261128_010000_hierarchy_links from './20261128_010000_hierarchy_links';
 
 export const migrations = [
   {
@@ -101,5 +102,10 @@ export const migrations = [
     up: migration_20261124_165133_register_bin.up,
     down: migration_20261124_165133_register_bin.down,
     name: '20261124_165133_register_bin'
+  },
+  {
+    up: migration_20261128_010000_hierarchy_links.up,
+    down: migration_20261128_010000_hierarchy_links.down,
+    name: '20261128_010000_hierarchy_links',
   },
 ];

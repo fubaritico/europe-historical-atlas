@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 
 /** How long the chain waits after the last change of the title or the year before reading. */
 export const READ_DELAY_MS = 300
 
 /** Where the chain under the holder stands. */
-export type VassalChainState =
+export type HierarchyChainState =
   /** No title chosen: nothing to read. */
   | { kind: 'none' }
   /** A title chosen, but no year to read its chain at. */
@@ -22,7 +22,7 @@ export type VassalChainState =
   | { kind: 'failed' }
 
 /**
- * The chain of vassalage of the holder's title at the sheet's year (CMS-422 step 2c), read again whenever either
+ * The hierarchical chain of the holder's title at the sheet's year (CMS-422 step 2c), read again whenever either
  * changes, once the typing stops ({@link READ_DELAY_MS}) — « loading » at once, so an old chain never reads as the
  * new one's — and the newest answer only: an older one arriving late never replaces it. A failure is said under the
  * holder and in the console (the dev, 2026-10-30: nothing silent).
@@ -32,13 +32,13 @@ export type VassalChainState =
  * @param generation - raised to read the chain again, once a link is added from the sheet
  * @returns where the chain stands
  */
-export function useVassalChain(
+export function useHierarchyChain(
   title: number | string | null,
   year: number | null,
   read: (title: number | string, year: number) => Promise<ChainReading[]>,
   generation = 0
-): VassalChainState {
-  const [state, setState] = useState<VassalChainState>({ kind: 'none' })
+): HierarchyChainState {
+  const [state, setState] = useState<HierarchyChainState>({ kind: 'none' })
 
   useEffect(() => {
     let current = true
@@ -59,7 +59,7 @@ export function useVassalChain(
         },
         (error: unknown) => {
           if (!current) return
-          console.error('[CMS] the chain of vassalage could not be read', error)
+          console.error('[CMS] the hierarchical chain could not be read', error)
           setState({ kind: 'failed' })
         }
       )

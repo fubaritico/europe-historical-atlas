@@ -1,6 +1,6 @@
-import type { ChainReading } from './readVassalChain'
+import type { ChainReading } from './readHierarchyChain'
+import type { ChangedHierarchyLink, LinkAnswer, NewHierarchyLink } from './saveHierarchyLink'
 import type { SaveSovereign } from './saveSovereign'
-import type { ChangedVassalLink, LinkAnswer, NewVassalLink } from './saveVassalLink'
 
 /** Where a line « Vassal de » stands. */
 export type NewLinkStatus =
@@ -42,11 +42,11 @@ export interface PendingLine {
 
 /** What the lines' save is wired to. */
 export interface PendingWiring {
-  /** Saves a new link of vassalage. */
-  readonly saveLink: (link: NewVassalLink) => Promise<LinkAnswer>
-  /** Changes a link of vassalage. */
-  readonly updateLink: (change: ChangedVassalLink) => Promise<LinkAnswer>
-  /** Removes a link of vassalage. */
+  /** Saves a new hierarchical link. */
+  readonly saveLink: (link: NewHierarchyLink) => Promise<LinkAnswer>
+  /** Changes a hierarchical link. */
+  readonly updateLink: (change: ChangedHierarchyLink) => Promise<LinkAnswer>
+  /** Removes a hierarchical link. */
   readonly deleteLink: (link: string) => Promise<LinkAnswer>
   /** Ticks or unticks « souverain » on a title. */
   readonly saveSovereign: SaveSovereign
@@ -87,7 +87,7 @@ export interface HolderSovereignty {
   readonly sovereign: boolean
   /** Whether the base holds it so. */
   readonly was: boolean
-  /** The holder's own links of vassalage, in every reading — removed at « Enregistrer » once it is ticked. */
+  /** The holder's own hierarchical links, in every reading — removed at « Enregistrer » once it is ticked. */
   readonly links: readonly string[]
 }
 

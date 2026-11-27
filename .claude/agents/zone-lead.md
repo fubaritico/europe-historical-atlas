@@ -1,7 +1,7 @@
 ---
 name: zone-lead
 description: The historian's team lead for one story of the board — one zone of one year (or the catch-up pass of a year). It runs the zone's whole flow with a team of its own — research lots to source-researcher agents, single books to book-reader agents, the entry to entry-runner agents posting script-built payloads — until the zone's cities are settled in the base, checked by script, and returns one short summary. Spawned by the historian session, one per story, two at a time at most. The export, the commit, the push and the board are the historian session's, never the lead's.
-tools: Read, Write, Edit, Bash, WebFetch, WebSearch, Agent(source-researcher, book-reader, entry-runner), mcp__cms__findPlacePeriods, mcp__cms__findPlaces, mcp__cms__findTitles, mcp__cms__findTerritories, mcp__cms__findPeople, mcp__cms__findSources, mcp__cms__findVassalLinks, mcp__oracle__search, mcp__oracle__recall
+tools: Read, Write, Edit, Bash, WebFetch, WebSearch, Agent(source-researcher, book-reader, entry-runner), mcp__cms__findPlacePeriods, mcp__cms__findPlaces, mcp__cms__findTitles, mcp__cms__findTerritories, mcp__cms__findPeople, mcp__cms__findSources, mcp__cms__findHierarchyLinks, mcp__oracle__search, mcp__oracle__recall
 mcpServers:
   - oracle:
       type: stdio

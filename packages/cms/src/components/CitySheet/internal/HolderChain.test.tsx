@@ -14,9 +14,9 @@ import { HolderChain } from './HolderChain'
 
 import type { ChainWriters } from './HolderChain'
 import type { ChainSaver } from '../hooks/useChainSaver'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
+import type { LinkAnswer } from '../utils/saveHierarchyLink'
 import type { ChainAnswer } from '../utils/saveLines'
-import type { LinkAnswer } from '../utils/saveVassalLink'
 import type { SheetValues } from '../utils/sheetValues'
 
 const toast = vi.hoisted(() => ({ error: vi.fn() }))
@@ -278,7 +278,7 @@ describe('HolderChain', () => {
       expect(screen.queryByRole('group', { name: LINE })).toBeNull()
       expect(
         screen.getByText(
-          'Son lien de vassalité sera retiré à l’enregistrement — pour toutes les villes de ce titre.'
+          'Son lien hiérarchique sera retiré à l’enregistrement — pour toutes les villes de ce titre.'
         )
       ).toBeTruthy()
       expect(await save()).toBe(true)
@@ -468,7 +468,7 @@ describe('HolderChain', () => {
       expect(within(line).getByRole('alert').textContent).toBe(message)
       expect(toast.error).toHaveBeenCalledWith(message)
       expect(error).toHaveBeenCalledWith(
-        '[CMS] a link of vassalage could not be saved',
+        '[CMS] a hierarchical link could not be saved',
         expect.any(TypeError)
       )
     })
@@ -506,7 +506,7 @@ describe('HolderChain', () => {
           },
         ])
       )
-      await screen.findByText('Chaîne de vassalité en 1100')
+      await screen.findByText('Chaîne hiérarchique en 1100')
       expect(summary(container)).toContain('les maillons se contredisent')
     })
 

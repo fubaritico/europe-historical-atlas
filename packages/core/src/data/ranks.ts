@@ -48,7 +48,7 @@ export const POLITY_RANKS = [
 export type PolityRank = (typeof POLITY_RANKS)[number]
 
 /**
- * Each rank's **score of importance**, given by the dev (2026-11-20, CORE-489): what the ladder of vassalage is checked
+ * Each rank's **score of importance**, given by the dev (2026-11-20, CORE-489): what the hierarchical ladder is checked
  * against — a vassal never outranks its suzerain. `null` for a rank he has not scored yet: the despotate, which does
  * not appear before 1204 (Epirus) — to decide before the map of 1300.
  */
@@ -90,7 +90,7 @@ export function rankScore(rank: string | null): number | null {
 }
 
 /**
- * Whether a vassal **outranks its suzerain** — its score the higher of the two, which the ladder of vassalage does not
+ * Whether a vassal **outranks its suzerain** — its score the higher of the two, which the hierarchical ladder does not
  * allow (the dev, 2026-11-20): a kingdom (5) under a county (3). Equal scores are fine, and **nothing is said of a
  * rank with no score**: the check speaks only of what the dev scored.
  * @param vassal - the vassal's rank, as stored

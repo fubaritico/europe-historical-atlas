@@ -1,6 +1,7 @@
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 import { Confessions } from '../collections/Confessions'
+import { HierarchyLinks } from '../collections/HierarchyLinks'
 import { ImportanceReasons } from '../collections/ImportanceReasons'
 import { People } from '../collections/People'
 import { PeriodNames } from '../collections/PeriodNames'
@@ -9,7 +10,6 @@ import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
 import { TERRITORY_KINDS, Territories } from '../collections/Territories'
 import { Titles } from '../collections/Titles'
-import { VassalLinks } from '../collections/VassalLinks'
 import { OTHER_LANGUAGES, REQUIRED_OTHER_LANGUAGES } from '../fields/nameForms'
 
 /**
@@ -60,7 +60,7 @@ const LAND_KINDS = TERRITORY_KINDS.filter((kind) => kind !== 'office').join(', '
 /**
  * The collections a model reaches over MCP — the ones the historian enters its sources into: the places, a city at
  * a date with its holder (CMS-335), the sources, the importance reasons a city's line cites (CMS-431), the
- * confessions of its communities (CMS-433); and the chain of vassalage (CMS-422) — the register of people, the
+ * confessions of its communities (CMS-433); and the hierarchical chain (CMS-422) — the register of people, the
  * territories they hold, their titles, and the links between titles.
  * Everything else stays out until a need names it.
  *
@@ -84,7 +84,7 @@ export const MCP_COLLECTIONS = {
     description:
       'A city at a date (« Ville à une date »): its importance; `periodName`, an id from period-names — the name ' +
       'the place bore at that date, a name of that same place, the one the map writes; its holder `holderTitle`, an id from titles — the ' +
-      'person, for the territory held, the city answers to at that date; its chain of vassalage is computed from the ' +
+      'person, for the territory held, the city answers to at that date; its hierarchical chain is computed from the ' +
       'links of that title, never entered here — and, until 1100 is taken over, the polity holding it as text ' +
       '(holderName, holderQid); its source lines, each with a subject, a source and a quotation; its `communities`, each a confession, a ' +
       '`weight` (dominant or present) and `weightAttested` — true only when a source says that weight — and each named ' +
@@ -148,14 +148,14 @@ export const MCP_COLLECTIONS = {
       'A title: a `person` (an id from people) holding a `territory` (an id from territories) over a `date` ' +
       '({ start, end }, each { year, month, day, circa, margin, calendar }; end empty for a single year), with its ' +
       '`lines` — at least one, each { source, where, quotation, asWritten }. `sovereign` true when the title answers ' +
-      'to no one over its dates: the chain of vassalage stops at it (the dev, 2026-11-16 — never a link to no one). ' +
+      'to no one over its dates: the hierarchical chain stops at it (the dev, 2026-11-16 — never a link to no one). ' +
       '`label` is written by the server. Search by person and territory before creating. ' +
       TRASH_RULE,
   },
-  [VassalLinks.slug]: {
+  [HierarchyLinks.slug]: {
     enabled: ENTER_NEVER_DELETE,
     description:
-      'A link of vassalage: the title `vassal` answers, over a `date`, to the title `suzerain` (`answersTo` ' +
+      'A hierarchical link: the title `vassal` answers, over a `date`, to the title `suzerain` (`answersTo` ' +
       '"suzerain", always — a sovereign is ticked on its title, `sovereign`, never entered as a link to no one). With ' +
       'its `lines`. Entered once per pair and period, reused by every place under it; a divergent reading is a second ' +
       'link. `label` is written by the server. ' +

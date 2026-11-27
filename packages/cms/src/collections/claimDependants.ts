@@ -16,7 +16,7 @@ import type {
  */
 async function resave(
   req: PayloadRequest,
-  collection: 'titles' | 'vassal-links',
+  collection: 'titles' | 'hierarchy-links',
   where: Where
 ): Promise<void> {
   const { docs } = await req.payload.find({ collection, where, depth: 0, pagination: false, req })
@@ -50,7 +50,7 @@ export function refreshTitlesOf(field: 'person' | 'territory'): CollectionAfterC
 export const refreshLinksOfTitle: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
   const saved = doc as { id: number | string }
   if (operation === 'update') {
-    await resave(req, 'vassal-links', {
+    await resave(req, 'hierarchy-links', {
       or: [{ vassal: { equals: saved.id } }, { suzerain: { equals: saved.id } }],
     })
   }
@@ -65,7 +65,7 @@ export interface Citers {
    */
   readonly collection:
     | 'titles'
-    | 'vassal-links'
+    | 'hierarchy-links'
     | 'place-periods'
     | 'period-names'
     | 'events'

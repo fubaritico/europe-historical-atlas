@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { CMS_COLLECTIONS } from './cmsCollections'
+import { HierarchyLinks } from './HierarchyLinks'
 import { PeriodNames } from './PeriodNames'
 import { PlacePeriods } from './PlacePeriods'
 import { PLACE_CITERS, Places } from './Places'
@@ -8,7 +9,6 @@ import { refuseRestoringOverBin } from './refuseRestoringOverBin'
 import { schemaCiters } from './schemaCiters'
 import { SOURCE_CITERS, Sources } from './Sources'
 import { Titles } from './Titles'
-import { VassalLinks } from './VassalLinks'
 
 /** Every collection of the CMS: what may point at a place or a source. */
 const COLLECTIONS = CMS_COLLECTIONS
@@ -46,7 +46,7 @@ describe('what a deletion is refused for', () => {
       expect(citersOf('sources')).toEqual(
         expect.arrayContaining([
           'titles:lines.source',
-          'vassal-links:lines.source',
+          'hierarchy-links:lines.source',
           'place-periods:testimonies.source',
         ])
       )
@@ -61,7 +61,7 @@ describe('what a deletion is refused for', () => {
     it('hangs one refusal of the bin per citer on the place and on the source, after the restore’s', () => {
       expect(Places.hooks?.beforeChange).toHaveLength(PLACE_CITERS.length + 2)
       expect(Sources.hooks?.beforeChange).toHaveLength(SOURCE_CITERS.length + 1)
-      for (const collection of [Places, Sources, Titles, PeriodNames, PlacePeriods, VassalLinks])
+      for (const collection of [Places, Sources, Titles, PeriodNames, PlacePeriods, HierarchyLinks])
         expect(collection.hooks?.beforeChange?.[0]).toBe(refuseRestoringOverBin)
     })
   })

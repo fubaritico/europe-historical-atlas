@@ -1,6 +1,6 @@
 /**
  * The documents of a list the API answered — the one reading of Payload's `{ docs }` the form's fetches share (the
- * places' and sources' search, a place's sheets, the chain of vassalage), so its answer's shape is checked in one
+ * places' and sources' search, a place's sheets, the hierarchical chain), so its answer's shape is checked in one
  * place.
  * @param response - the API's answer
  * @param what - what was asked, as the errors name it: `the search in places`, `the place's sheets`

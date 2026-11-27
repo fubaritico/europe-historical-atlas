@@ -41,17 +41,17 @@ export const validateSuzerain: Validate = (value, { siblingData }) => {
 }
 
 /**
- * A link of vassalage (« maillon », CMS-422 step 2) — **a title answering to another, over a period, as the sources
+ * A hierarchical link (« maillon », CMS-422 step 2) — **a title answering to another, over a period, as the sources
  * say**: the count of Nantes to the duke of Brittany, 1084–1103. Entered once, read by every place under it
  * (`files/plans/contribution/vassal-chain.md`, rule 2). It names the title it is for, never the person alone (rule
  * 1: Robert II answers to two lords for two lands). A divergent reading is a second link.
  *
  * **Sovereignty is said, never inferred from a blank** (the dev's « vas-y », 2026-11-15): `answersTo` is « no-one »
  * when a source states the title answers to no one. A title with no link, or whose suzerain is gone, is « we do not
- * know » in the chain (`core/data/vassalChain`) — so nothing forgotten reads as certain.
+ * know » in the chain (`core/data/hierarchyChain`) — so nothing forgotten reads as certain.
  */
-export const VassalLinks: CollectionConfig = {
-  slug: 'vassal-links',
+export const HierarchyLinks: CollectionConfig = {
+  slug: 'hierarchy-links',
   labels: { singular: 'Maillon', plural: 'Maillons' },
   // CMS-508: a link removed goes to the bin, and comes back from it with « Restaurer »
   trash: true,
@@ -64,7 +64,7 @@ export const VassalLinks: CollectionConfig = {
       refuseRestoringOverBin,
       writeLinkLabel,
       refuseDuplicateClaim({
-        collection: 'vassal-links',
+        collection: 'hierarchy-links',
         relations: ['vassal', 'suzerain'],
         subject: 'Ce maillon',
       }),

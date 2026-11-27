@@ -3,7 +3,7 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 import { toHistoricalDate } from './dateReading'
 
 import type { EventDateFields } from './historicalDate'
-import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { HierarchyLink } from '@europe-historical-atlas/core/data/hierarchyChain'
 
 /** A title as the CMS stores it, as much as its sovereignty needs. */
 export interface StoredTitle {
@@ -22,7 +22,7 @@ export interface StoredTitle {
  * @param title - the title as stored
  * @returns the link that ends the chain at it, or `null`
  */
-export function sovereignLinkOf(title: StoredTitle): VassalLink | null {
+export function sovereignLinkOf(title: StoredTitle): HierarchyLink | null {
   if (title.sovereign !== true) return null
   const date = title.date === undefined || title.date === null ? null : toHistoricalDate(title.date)
   if (date === null || isDateRefusal(date)) {

@@ -96,7 +96,7 @@ export interface DocCitySheet {
   holderName?: string | null
   /** That polity's Wikidata id. */
   holderQid?: string | null
-  /** The title it answers to, bare or resolved (CMS-422) — where its chain of vassalage starts. */
+  /** The title it answers to, bare or resolved (CMS-422) — where its hierarchical chain starts. */
   holderTitle?: { id: DocId } | DocId | null
   /** Whether the atlas shows it (CMS-391). */
   showInAtlas?: boolean | null
@@ -235,7 +235,7 @@ function periodNameOf(value: DocCitySheet['periodName'], where: string): Content
 }
 
 /**
- * One city at a date, everything it points to written in, after the schema's check — and its chain of vassalage at
+ * One city at a date, everything it points to written in, after the schema's check — and its hierarchical chain at
  * its first year, computed from the register (CARTO-435).
  * @param sheet - the record, relations resolved
  * @param register - the titles and the links every chain is computed from

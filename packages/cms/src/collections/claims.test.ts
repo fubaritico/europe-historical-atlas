@@ -4,11 +4,11 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { chainPaths, vassalChain } from '@europe-historical-atlas/core/data/vassalChain'
+import { chainPaths, hierarchyChain } from '@europe-historical-atlas/core/data/hierarchyChain'
 
-import { vassalLinkOf } from '../fields/vassalLinkOf'
+import { hierarchyLinkOf } from '../fields/hierarchyLinkOf'
 
-import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { HierarchyLink } from '@europe-historical-atlas/core/data/hierarchyChain'
 import type { Payload } from 'payload'
 
 /**
@@ -46,7 +46,7 @@ function years(from: number, to: number) {
  * @returns the link saved
  */
 function link(data: Record<string, unknown>) {
-  return payload.create({ collection: 'vassal-links', data: data as never })
+  return payload.create({ collection: 'hierarchy-links', data: data as never })
 }
 
 /**
@@ -82,9 +82,13 @@ async function title(
  * The links the base holds, read as `core`'s chain reads them.
  * @returns the links
  */
-async function storedLinks(): Promise<VassalLink[]> {
-  const { docs } = await payload.find({ collection: 'vassal-links', depth: 0, pagination: false })
-  return docs.map(vassalLinkOf).filter((read): read is VassalLink => read !== null)
+async function storedLinks(): Promise<HierarchyLink[]> {
+  const { docs } = await payload.find({
+    collection: 'hierarchy-links',
+    depth: 0,
+    pagination: false,
+  })
+  return docs.map(hierarchyLinkOf).filter((read): read is HierarchyLink => read !== null)
 }
 
 beforeAll(async () => {
@@ -175,7 +179,7 @@ describe('titles and links', () => {
     })
 
     it('gives the chain of Nantes in 1100 from what the base holds: count → duke → king, sovereign', async () => {
-      expect(chainPaths(vassalChain(String(count), 1100, await storedLinks()))).toEqual([
+      expect(chainPaths(hierarchyChain(String(count), 1100, await storedLinks()))).toEqual([
         { titles: [String(count), String(duke), String(king)], end: 'sovereign' },
       ])
     })
@@ -184,7 +188,7 @@ describe('titles and links', () => {
   describe('variants', () => {
     it('names the king’s link « → personne », and holds no suzerain on it', async () => {
       const { docs } = await payload.find({
-        collection: 'vassal-links',
+        collection: 'hierarchy-links',
         where: { vassal: { equals: king } },
         depth: 0,
       })
@@ -203,7 +207,7 @@ describe('titles and links', () => {
         'Mathias II — comté nantais, 1084–1103'
       )
       const { docs } = await payload.find({
-        collection: 'vassal-links',
+        collection: 'hierarchy-links',
         where: { vassal: { equals: count } },
         depth: 0,
       })
@@ -223,7 +227,7 @@ describe('titles and links', () => {
         'Alain Fergent — duché de Bretagne, 1084–1112'
       )
       const { docs } = await payload.find({
-        collection: 'vassal-links',
+        collection: 'hierarchy-links',
         where: { suzerain: { equals: duke } },
         depth: 0,
       })
@@ -269,7 +273,7 @@ describe('titles and links', () => {
         lines: [{ source }],
       })
       // Gone again, so the refusals after it count only the base of `beforeAll`
-      await payload.delete({ collection: 'vassal-links', id: divergent.id })
+      await payload.delete({ collection: 'hierarchy-links', id: divergent.id })
       await payload.delete({ collection: 'titles', id: other.id })
     })
 
@@ -299,7 +303,7 @@ describe('titles and links', () => {
     it('accepts a link with no source line', async () => {
       const bare = await link({ vassal: count, suzerain: duke, date: years(1090, 1090), lines: [] })
       expect(bare.lines ?? []).toEqual([])
-      await payload.delete({ collection: 'vassal-links', id: bare.id })
+      await payload.delete({ collection: 'hierarchy-links', id: bare.id })
     })
 
     it('refuses a title that answers to itself', async () => {
@@ -492,11 +496,11 @@ describe('titles and links', () => {
           data: { date: { start: { year: 1100 } } },
         })
       ).rejects.toThrow(`(n° ${String(kept.id)})`)
-      const { docs } = await payload.find({ collection: 'vassal-links', limit: 1, depth: 0 })
+      const { docs } = await payload.find({ collection: 'hierarchy-links', limit: 1, depth: 0 })
       const anyLink = docs[0]
       if (anyLink === undefined) throw new Error('the fixture holds no link')
       await expect(
-        payload.update({ collection: 'vassal-links', id: anyLink.id, data: {} })
+        payload.update({ collection: 'hierarchy-links', id: anyLink.id, data: {} })
       ).resolves.toMatchObject({ id: anyLink.id })
     })
 
@@ -737,5 +741,5 @@ describe('titles and links', () => {
   })
 
   // L4: N/A — a failing database is Payload's, inside its transaction; the hooks add no I/O of their own past it.
-  // L5: a link whose suzerain is gone is `vassalLinkOf`'s edge (vassalLinkOf.test.ts) — the delete above refuses it.
+  // L5: a link whose suzerain is gone is `hierarchyLinkOf`'s edge (hierarchyLinkOf.test.ts) — the delete above refuses it.
 })

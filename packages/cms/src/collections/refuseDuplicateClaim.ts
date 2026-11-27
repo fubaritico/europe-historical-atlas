@@ -7,7 +7,7 @@ import type { CollectionBeforeChangeHook, Where } from 'payload'
 /** What makes a claim the same as another: its relations, and the years of its date. */
 interface ClaimIdentity {
   /** The collection the claims are in. */
-  readonly collection: 'titles' | 'vassal-links'
+  readonly collection: 'titles' | 'hierarchy-links'
   /**
    * The relation fields a twin holds the same: a title's person and territory, a link's vassal and suzerain — a link's
    * « no one » is its suzerain emptied, once its label's hook has run before this one.

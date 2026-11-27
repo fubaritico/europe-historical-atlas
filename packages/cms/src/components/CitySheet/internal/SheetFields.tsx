@@ -14,7 +14,7 @@ import { TestimoniesField } from './TestimoniesField'
 import type { ChainWriters } from './HolderChain'
 import type { OverlapWiring } from '../hooks/useOverlapCheck'
 import type { RecordSearches } from '../hooks/useRecordSearches'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 import type { SheetLists } from '../utils/sheetValues'
 
@@ -24,8 +24,8 @@ import type { SheetLists } from '../utils/sheetValues'
  * reasons, who held it and the chain above them, its religious communities (CMS-433), the lines of the sources.
  * @param props - the searches, the chain's reader and the link's writer, the overlap's wiring, the CMS's lists and the translator
  * @param props.searches - the searches of the places and the sources
- * @param props.readChain - the chain of vassalage of a title at a year, from the base
- * @param props.writers - what the chain of vassalage writes to the base
+ * @param props.readChain - the hierarchical chain of a title at a year, from the base
+ * @param props.writers - what the hierarchical chain writes to the base
  * @param props.overlap - the overlap rule's wiring, fed the chosen place's sheets
  * @param props.lists - every reason and every confession of the CMS
  * @param props.say - the translator

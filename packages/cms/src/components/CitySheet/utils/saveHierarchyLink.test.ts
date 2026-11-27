@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { saveVassalLink, updateVassalLink, withFirstSource } from './saveVassalLink'
+import { saveHierarchyLink, updateHierarchyLink, withFirstSource } from './saveHierarchyLink'
 
 const LINK = { vassal: 10, suzerain: 20, source: 4, year: 1100 }
 
@@ -18,13 +18,13 @@ function answering(status: number, body: unknown) {
   )
 }
 
-describe('saveVassalLink', () => {
+describe('saveHierarchyLink', () => {
   describe('happy path', () => {
     it('posts the link to « Maillons », its source as its one line, its year as its start', async () => {
       const fetcher = answering(201, { doc: { id: 7 } })
-      expect(await saveVassalLink(fetcher, '/api', LINK)).toEqual({ kind: 'saved' })
+      expect(await saveHierarchyLink(fetcher, '/api', LINK)).toEqual({ kind: 'saved' })
       const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
-      expect(url).toBe('/api/vassal-links')
+      expect(url).toBe('/api/hierarchy-links')
       expect(init.method).toBe('POST')
       expect(init.credentials).toBe('include')
       expect(JSON.parse(init.body as string)).toEqual({
@@ -47,7 +47,7 @@ describe('saveVassalLink', () => {
           },
         ],
       })
-      expect(await saveVassalLink(fetcher, '/api', LINK)).toEqual({
+      expect(await saveHierarchyLink(fetcher, '/api', LINK)).toEqual({
         kind: 'refused',
         message: 'Un titre ne relève pas de lui-même.',
       })
@@ -57,7 +57,7 @@ describe('saveVassalLink', () => {
   describe('managed errors', () => {
     it('gives the server’s sentence for a link entered twice', async () => {
       const fetcher = answering(400, { errors: [{ message: 'Ce maillon existe déjà.' }] })
-      expect(await saveVassalLink(fetcher, '/api', LINK)).toEqual({
+      expect(await saveHierarchyLink(fetcher, '/api', LINK)).toEqual({
         kind: 'refused',
         message: 'Ce maillon existe déjà.',
       })
@@ -67,29 +67,29 @@ describe('saveVassalLink', () => {
   describe('unmanaged errors', () => {
     it('throws on a server that fails, from 500 on — 499 is a refusal', async () => {
       await expect(
-        saveVassalLink(answering(499, { errors: [{ message: 'Refusé.' }] }), '/api', LINK)
+        saveHierarchyLink(answering(499, { errors: [{ message: 'Refusé.' }] }), '/api', LINK)
       ).resolves.toEqual({ kind: 'refused', message: 'Refusé.' })
 
-      await expect(saveVassalLink(answering(500, {}), '/api', LINK)).rejects.toThrow(
-        '[CMS] the API failed to save a link of vassalage (500)'
+      await expect(saveHierarchyLink(answering(500, {}), '/api', LINK)).rejects.toThrow(
+        '[CMS] the API failed to save a hierarchical link (500)'
       )
     })
 
     it('throws on a refusal whose errors carry no sentence', async () => {
-      await expect(saveVassalLink(answering(400, { errors: [] }), '/api', LINK)).rejects.toThrow(
+      await expect(saveHierarchyLink(answering(400, { errors: [] }), '/api', LINK)).rejects.toThrow(
         'without a message (400)'
       )
     })
 
     it('throws on a refusal without a sentence, JSON or not', async () => {
-      await expect(saveVassalLink(answering(403, 'Forbidden'), '/api', LINK)).rejects.toThrow(
-        '[CMS] the API refused a link of vassalage without a message (403)'
+      await expect(saveHierarchyLink(answering(403, 'Forbidden'), '/api', LINK)).rejects.toThrow(
+        '[CMS] the API refused a hierarchical link without a message (403)'
       )
     })
 
     it('lets an unreachable server through', async () => {
       const fetcher = vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
-      await expect(saveVassalLink(fetcher, '/api', LINK)).rejects.toThrow(TypeError)
+      await expect(saveHierarchyLink(fetcher, '/api', LINK)).rejects.toThrow(TypeError)
     })
   })
 
@@ -129,12 +129,12 @@ function patched(fetcher: ReturnType<typeof readingThenSaving>): unknown {
 }
 
 // Review ARCH-001, 2026-11-16: a changed suzerain once rewrote the lines from the sheet's copy, wiping the others
-describe('updateVassalLink', () => {
+describe('updateHierarchyLink', () => {
   describe('happy path', () => {
     it('changes the suzerain alone, never touching the lines, when the source did not change', async () => {
       const fetcher = readingThenSaving()
       const change = { link: '7', suzerain: 30, source: 4, sourceChanged: false }
-      expect(await updateVassalLink(fetcher, '/api', change)).toEqual({ kind: 'saved' })
+      expect(await updateHierarchyLink(fetcher, '/api', change)).toEqual({ kind: 'saved' })
       expect(patched(fetcher)).toEqual({ suzerain: 30 })
       expect(fetcher).toHaveBeenCalledOnce()
     })
@@ -143,7 +143,7 @@ describe('updateVassalLink', () => {
   describe('variants', () => {
     it('replaces the first line only when the source changed, the others kept whole', async () => {
       const fetcher = readingThenSaving()
-      await updateVassalLink(fetcher, '/api', {
+      await updateHierarchyLink(fetcher, '/api', {
         link: '7',
         suzerain: 30,
         source: 5,
@@ -157,7 +157,7 @@ describe('updateVassalLink', () => {
 
     it('removes the first line only when the source is emptied', async () => {
       const fetcher = readingThenSaving()
-      await updateVassalLink(fetcher, '/api', {
+      await updateHierarchyLink(fetcher, '/api', {
         link: '7',
         suzerain: 30,
         source: null,
@@ -171,13 +171,13 @@ describe('updateVassalLink', () => {
     it('saves nothing when the link cannot be read', async () => {
       const fetcher = vi.fn(() => Promise.resolve(new Response('', { status: 404 })))
       await expect(
-        updateVassalLink(fetcher, '/api', {
+        updateHierarchyLink(fetcher, '/api', {
           link: '7',
           suzerain: 30,
           source: 5,
           sourceChanged: true,
         })
-      ).rejects.toThrow('read a link of vassalage')
+      ).rejects.toThrow('read a hierarchical link')
       expect(fetcher).toHaveBeenCalledOnce()
     })
   })

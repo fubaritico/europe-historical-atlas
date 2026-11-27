@@ -23,7 +23,7 @@
   "riversLoss": "La carte s’affiche sans le réseau hydrographique.",
   "contentFailed": "{failure, select, transport {Les événements n’ont pas pu être chargés} schema {Les événements sont illisibles} consistency {Les événements sont incomplets} semantic {Les événements ne correspondent pas à cette carte} other {Les événements ont échoué}}",
   "contentLoss": "La carte s’affiche sans ses événements.",
-  "yearRegistryLoss": "Les pays s’affichent sans nom, sans rang et sans lien de vassalité : la géométrie est là, l’identité manque.",
+  "yearRegistryLoss": "Les pays s’affichent sans nom, sans rang et sans lien hiérarchique : la géométrie est là, l’identité manque.",
   "yearPolitiesLoss": "La carte s’affiche sans les pays ni leurs frontières.",
   "yearBordersLoss": "Les frontières s’affichent avec leur style déduit : les traits posés à la main sont perdus.",
   "assetNotice": "{failed}. {loss}",

@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { down } from '../migrations/20261121_220424_period_names'
 import { down as downBin } from '../migrations/20261124_155239_bin'
+import { down as downHierarchy } from '../migrations/20261128_010000_hierarchy_links'
 
 import type { MigrateDownArgs } from '@payloadcms/db-sqlite'
 import type { Payload } from 'payload'
@@ -92,8 +93,10 @@ describe('period_names, down', () => {
       // Inside a transaction, as Payload runs a migration: there `PRAGMA foreign_keys=OFF` does nothing, which is why
       // the generator's rebuild cascades in the dev's base and would not here outside one
       await payload.db.drizzle.transaction(async (tx) => {
-        // The bin's migration (CMS-508), later, already drops the key's « delete » box of the period names this down
-        // drops too: undone first, the base is as this down expects it
+        // The migrations after this one are undone first, newest first: the hierarchy links' rename (REPO-589), since
+        // the bin's way down drops one of its indexes by its old name; then the bin (CMS-508), which already drops the
+        // key's « delete » box of the period names this down drops too
+        await downHierarchy({ db: tx } as unknown as MigrateDownArgs)
         await downBin({ db: tx } as unknown as MigrateDownArgs)
         await down({ db: tx } as unknown as MigrateDownArgs)
       })

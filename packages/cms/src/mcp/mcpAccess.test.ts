@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { HierarchyLinks } from '../collections/HierarchyLinks'
 import { PeriodNames } from '../collections/PeriodNames'
 import { PlacePeriods } from '../collections/PlacePeriods'
 import { Places } from '../collections/Places'
 import { Sources } from '../collections/Sources'
 import { Titles } from '../collections/Titles'
-import { VassalLinks } from '../collections/VassalLinks'
 
 import { MCP_COLLECTIONS, mcpAccess } from './mcpAccess'
 import { refuseBulkRemovalOverMcp } from './refuseBulkRemoval'
@@ -36,6 +36,7 @@ describe('mcpAccess', () => {
     it('reaches the confessions, the importance reasons, the register of people, the places, the cities at a date and the sources, and nothing else', () => {
       expect(Object.keys(MCP_COLLECTIONS).sort()).toEqual([
         'confessions',
+        'hierarchy-links',
         'importance-reasons',
         'people',
         'period-names',
@@ -44,7 +45,6 @@ describe('mcpAccess', () => {
         'sources',
         'territories',
         'titles',
-        'vassal-links',
       ])
     })
 
@@ -67,7 +67,7 @@ describe('mcpAccess', () => {
       'periodNames',
       'sources',
       'titles',
-      'vassalLinks',
+      'hierarchyLinks',
       'importanceReasons',
       'confessions',
       'people',
@@ -84,7 +84,7 @@ describe('mcpAccess', () => {
     it('gives a bin to every collection the historian undoes its errors in, each refusing it by filter over MCP', () => {
       // One call with a wide filter would empty a collection into the bin (CMS-454, CMS-508): a collection with a bin
       // but without the refusal fails here, and so does one whose description does not say how to use the bin.
-      const binned = [Places, PlacePeriods, PeriodNames, Sources, Titles, VassalLinks]
+      const binned = [Places, PlacePeriods, PeriodNames, Sources, Titles, HierarchyLinks]
       for (const collection of binned) {
         expect(collection.trash).toBe(true)
         expect(collection.hooks?.beforeOperation).toContain(refuseBulkRemovalOverMcp)

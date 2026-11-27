@@ -1,20 +1,20 @@
 import {
   chainPaths,
   distinctPaths,
-  vassalChain,
-} from '@europe-historical-atlas/core/data/vassalChain'
+  hierarchyChain,
+} from '@europe-historical-atlas/core/data/hierarchyChain'
 import { dateCoversYear } from '@europe-historical-atlas/core/time/dateOverlap'
 
+import { hierarchyLinkOf } from '../../../fields/hierarchyLinkOf'
 import { relationId } from '../../../fields/relationId'
 import { sovereignLinkOf } from '../../../fields/sovereignLinkOf'
-import { vassalLinkOf } from '../../../fields/vassalLinkOf'
 
 import { readDocs } from './readDocs'
 
 import type { RecordChoice } from './sheetValues'
+import type { StoredLink } from '../../../fields/hierarchyLinkOf'
 import type { StoredTitle } from '../../../fields/sovereignLinkOf'
-import type { StoredLink } from '../../../fields/vassalLinkOf'
-import type { ChainEnd, VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { ChainEnd, HierarchyLink } from '@europe-historical-atlas/core/data/hierarchyChain'
 
 /** One step of a reading above the holder: the link it came by, and that link's source. */
 export interface ChainStep {
@@ -45,15 +45,18 @@ export interface ChainReading {
 }
 
 /**
- * Every link of vassalage the base holds, as `core`'s chain reads them — a link that cannot say whom it answers to
- * is left out by `vassalLinkOf`, so the chain says « we do not know » above it, never a sovereign.
+ * Every hierarchical link the base holds, as `core`'s chain reads them — a link that cannot say whom it answers to
+ * is left out by `hierarchyLinkOf`, so the chain says « we do not know » above it, never a sovereign.
  * @param fetcher - the `fetch` to use
  * @param api - the API's root
  * @returns the links
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server refuses, or answers a link without its id
  */
-export async function fetchVassalLinks(fetcher: typeof fetch, api: string): Promise<VassalLink[]> {
+export async function fetchHierarchyLinks(
+  fetcher: typeof fetch,
+  api: string
+): Promise<HierarchyLink[]> {
   const params = new URLSearchParams({
     depth: '0',
     pagination: 'false',
@@ -62,19 +65,19 @@ export async function fetchVassalLinks(fetcher: typeof fetch, api: string): Prom
     'select[suzerain]': 'true',
     'select[date]': 'true',
   })
-  const response = await fetcher(`${api}/vassal-links?${params.toString()}`, {
+  const response = await fetcher(`${api}/hierarchy-links?${params.toString()}`, {
     credentials: 'include',
   })
-  const docs = await readDocs(response, 'the links of vassalage', 'could not be read')
+  const docs = await readDocs(response, 'the hierarchical links', 'could not be read')
   return docs
     .map((doc) => {
       const link = (doc ?? {}) as StoredLink
       if (typeof link.id !== 'number' && typeof link.id !== 'string') {
-        throw new Error('[CMS] a link of vassalage came without its id')
+        throw new Error('[CMS] a hierarchical link came without its id')
       }
-      return vassalLinkOf(link)
+      return hierarchyLinkOf(link)
     })
-    .filter((link): link is VassalLink => link !== null)
+    .filter((link): link is HierarchyLink => link !== null)
 }
 
 /**
@@ -89,7 +92,7 @@ export async function fetchVassalLinks(fetcher: typeof fetch, api: string): Prom
 export async function fetchSovereignLinks(
   fetcher: typeof fetch,
   api: string
-): Promise<VassalLink[]> {
+): Promise<HierarchyLink[]> {
   const params = new URLSearchParams({
     'where[sovereign][equals]': 'true',
     depth: '0',
@@ -101,7 +104,7 @@ export async function fetchSovereignLinks(
   const docs = await readDocs(response, 'the sovereign titles', 'could not be read')
   return docs
     .map((doc) => sovereignLinkOf((doc ?? {}) as StoredTitle))
-    .filter((link): link is VassalLink => link !== null)
+    .filter((link): link is HierarchyLink => link !== null)
 }
 
 /**
@@ -150,8 +153,8 @@ export async function fetchTitleNames(
 }
 
 /**
- * The chain of vassalage of a holder's title at a year (CMS-422 step 2c): the links read, the chain computed by
- * `core` (`vassalChain`), each reading named — one when the sources agree, one per branch when they diverge.
+ * The hierarchical chain of a holder's title at a year (CMS-422 step 2c): the links read, the chain computed by
+ * `core` (`hierarchyChain`), each reading named — one when the sources agree, one per branch when they diverge.
  * @param fetcher - the `fetch` to use
  * @param api - the API's root
  * @param title - the holder's title
@@ -160,17 +163,17 @@ export async function fetchTitleNames(
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server refuses, or answers what the chain cannot be read from
  */
-export async function readVassalChain(
+export async function readHierarchyChain(
   fetcher: typeof fetch,
   api: string,
   title: number | string,
   year: number
 ): Promise<ChainReading[]> {
   const links = [
-    ...(await fetchVassalLinks(fetcher, api)),
+    ...(await fetchHierarchyLinks(fetcher, api)),
     ...(await fetchSovereignLinks(fetcher, api)),
   ]
-  const paths = distinctPaths(chainPaths(vassalChain(String(title), year, links)))
+  const paths = distinctPaths(chainPaths(hierarchyChain(String(title), year, links)))
   const ids = [...new Set(paths.flatMap((path) => path.titles))]
   const names = await fetchTitleNames(fetcher, api, ids)
   const steps = paths.map((path) => stepsOf(path.titles, links, year))
@@ -188,7 +191,7 @@ export async function readVassalChain(
 
 /**
  * The link each title of a path came by, from the second up — the one valid in the year, from the title below to it;
- * `null` where none is found, which `vassalChain`, having climbed by them, never leaves.
+ * `null` where none is found, which `hierarchyChain`, having climbed by them, never leaves.
  * @param titles - the path's titles, the holder's first
  * @param links - the links read
  * @param year - the sheet's year
@@ -196,7 +199,7 @@ export async function readVassalChain(
  */
 function stepsOf(
   titles: readonly string[],
-  links: readonly VassalLink[],
+  links: readonly HierarchyLink[],
   year: number
 ): (string | null)[] {
   return titles.slice(1).map((suzerain, index) => {
@@ -230,7 +233,7 @@ export async function fetchLinkSources(
     pagination: 'false',
     'select[lines]': 'true',
   })
-  const response = await fetcher(`${api}/vassal-links?${params.toString()}`, {
+  const response = await fetcher(`${api}/hierarchy-links?${params.toString()}`, {
     credentials: 'include',
   })
   const docs = await readDocs(response, 'the sources of the chain', 'could not be read')

@@ -1,5 +1,5 @@
-/** A link of vassalage entered from the city sheet: the title that answers to another, at the sheet's year. */
-export interface NewVassalLink {
+/** A hierarchical link entered from the city sheet: the title that answers to another, at the sheet's year. */
+export interface NewHierarchyLink {
   /** The title at the top of the chain read, the vassal. */
   readonly vassal: number | string
   /** The title it answers to, chosen on the line. */
@@ -24,7 +24,7 @@ interface PayloadErrors {
 }
 
 /**
- * Saves a link of vassalage (CMS-422, the dev's mock-up: « Vassal de ⊕ »), through Payload's API so every rule of the
+ * Saves a hierarchical link (CMS-422, the dev's mock-up: « Vassal de ⊕ »), through Payload's API so every rule of the
  * collection « Maillons » holds — a duplicate refused, a source required. The link is entered once and serves every
  * city under that title (`files/plans/contribution/vassal-chain.md`, rule 2).
  * @param fetcher - the `fetch` to use
@@ -34,12 +34,12 @@ interface PayloadErrors {
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server fails, or refuses without a sentence
  */
-export async function saveVassalLink(
+export async function saveHierarchyLink(
   fetcher: typeof fetch,
   api: string,
-  link: NewVassalLink
+  link: NewHierarchyLink
 ): Promise<LinkAnswer> {
-  const url = `${api}/vassal-links`
+  const url = `${api}/hierarchy-links`
   const response = await fetcher(url, {
     method: 'POST',
     credentials: 'include',
@@ -54,15 +54,15 @@ export async function saveVassalLink(
   })
   if (response.ok) return { kind: 'saved' }
   if (response.status >= 500) {
-    throw new Error(`[CMS] the API failed to save a link of vassalage (${String(response.status)})`)
+    throw new Error(`[CMS] the API failed to save a hierarchical link (${String(response.status)})`)
   }
-  return { kind: 'refused', message: await refusalOf(response, 'a link of vassalage') }
+  return { kind: 'refused', message: await refusalOf(response, 'a hierarchical link') }
 }
 
 /**
  * The sentence of a refusal: the field's own when the refusal names a field, else the refusal's.
  * @param response - the server's refusal
- * @param what - what was refused, for the console: `a link of vassalage`
+ * @param what - what was refused, for the console: `a hierarchical link`
  * @returns the sentence
  * @throws {Error} when the refusal carries none — a body that is not Payload's, JSON or not
  */
@@ -77,8 +77,8 @@ export async function refusalOf(response: Response, what: string): Promise<strin
   return message
 }
 
-/** A link of vassalage changed from the city sheet: its suzerain, and its source. */
-export interface ChangedVassalLink {
+/** A hierarchical link changed from the city sheet: its suzerain, and its source. */
+export interface ChangedHierarchyLink {
   /** The link's id. */
   readonly link: string
   /** Its suzerain now. */
@@ -93,7 +93,7 @@ export interface ChangedVassalLink {
 type StoredLine = Record<string, unknown>
 
 /**
- * Changes a link of vassalage from the city sheet (the dev, 2026-11-16: the chain is edited in the same blocks it was
+ * Changes a hierarchical link from the city sheet (the dev, 2026-11-16: the chain is edited in the same blocks it was
  * entered in) — its suzerain, and its source. **The lines of source are never rewritten from the sheet's copy**, which
  * holds the first source only (review ARCH-001 of 2026-11-16: a changed suzerain once wiped the other lines and their
  * quotations): untouched when the source did not change; when it did, the link's lines are read again and only the
@@ -106,12 +106,12 @@ type StoredLine = Record<string, unknown>
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server fails, or refuses without a sentence
  */
-export async function updateVassalLink(
+export async function updateHierarchyLink(
   fetcher: typeof fetch,
   api: string,
-  change: ChangedVassalLink
+  change: ChangedHierarchyLink
 ): Promise<LinkAnswer> {
-  const url = `${api}/vassal-links/${encodeURIComponent(change.link)}`
+  const url = `${api}/hierarchy-links/${encodeURIComponent(change.link)}`
   const lines = change.sourceChanged
     ? withFirstSource(await linesOf(fetcher, url), change.source)
     : null
@@ -126,10 +126,10 @@ export async function updateVassalLink(
   if (response.ok) return { kind: 'saved' }
   if (response.status >= 500) {
     throw new Error(
-      `[CMS] the API failed to change a link of vassalage (${String(response.status)})`
+      `[CMS] the API failed to change a hierarchical link (${String(response.status)})`
     )
   }
-  return { kind: 'refused', message: await refusalOf(response, 'a change of a link of vassalage') }
+  return { kind: 'refused', message: await refusalOf(response, 'a change of a hierarchical link') }
 }
 
 /**
@@ -143,7 +143,7 @@ async function linesOf(fetcher: typeof fetch, url: string): Promise<StoredLine[]
   const response = await fetcher(`${url}?depth=0`, { credentials: 'include' })
   if (!response.ok) {
     throw new Error(
-      `[CMS] the API refused to read a link of vassalage (${String(response.status)})`
+      `[CMS] the API refused to read a hierarchical link (${String(response.status)})`
     )
   }
   const body = (await response.json()) as { lines?: StoredLine[] | null }
@@ -166,7 +166,7 @@ export function withFirstSource(
 }
 
 /**
- * Removes a link of vassalage from the city sheet — its ✕, saved at « Enregistrer ».
+ * Removes a hierarchical link from the city sheet — its ✕, saved at « Enregistrer ».
  * @param fetcher - the `fetch` to use
  * @param api - the API's root: `/api`
  * @param link - the link's id
@@ -174,23 +174,23 @@ export function withFirstSource(
  * @throws {TypeError} when the server cannot be reached
  * @throws {Error} when the server fails, or refuses without a sentence
  */
-export async function deleteVassalLink(
+export async function deleteHierarchyLink(
   fetcher: typeof fetch,
   api: string,
   link: string
 ): Promise<LinkAnswer> {
-  const response = await fetcher(`${api}/vassal-links/${encodeURIComponent(link)}`, {
+  const response = await fetcher(`${api}/hierarchy-links/${encodeURIComponent(link)}`, {
     method: 'DELETE',
     credentials: 'include',
   })
   if (response.ok) return { kind: 'saved' }
   if (response.status >= 500) {
     throw new Error(
-      `[CMS] the API failed to remove a link of vassalage (${String(response.status)})`
+      `[CMS] the API failed to remove a hierarchical link (${String(response.status)})`
     )
   }
   return {
     kind: 'refused',
-    message: await refusalOf(response, 'the removal of a link of vassalage'),
+    message: await refusalOf(response, 'the removal of a hierarchical link'),
   }
 }

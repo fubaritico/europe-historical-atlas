@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { chainPaths, vassalChain } from './vassalChain'
+import { chainPaths, hierarchyChain } from './hierarchyChain'
 
-import type { VassalLink } from './vassalChain'
+import type { HierarchyLink } from './hierarchyChain'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
 
 /**
@@ -31,21 +31,21 @@ function span(from: number, to: number): HistoricalDate {
  * @param date - when it holds
  * @returns the link
  */
-function link(vassal: string, suzerain: string | null, date: HistoricalDate): VassalLink {
+function link(vassal: string, suzerain: string | null, date: HistoricalDate): HierarchyLink {
   return { id: `${vassal}>${suzerain ?? 'none'}`, vassal, suzerain, date }
 }
 
 // Nantes in 1100, the plan's case: the count of Nantes under the duke of Brittany under the king of France
-const NANTES: VassalLink[] = [
+const NANTES: HierarchyLink[] = [
   link('count-nantes', 'duke-brittany', span(1084, 1103)),
   link('duke-brittany', 'king-france', span(1084, 1112)),
   link('king-france', null, span(1060, 1108)),
 ]
 
-describe('vassalChain', () => {
+describe('hierarchyChain', () => {
   describe('happy path', () => {
     it('climbs from the sheet’s title to the sovereign, each step naming the link it came by', () => {
-      expect(vassalChain('count-nantes', 1100, NANTES)).toEqual({
+      expect(hierarchyChain('count-nantes', 1100, NANTES)).toEqual({
         title: 'count-nantes',
         via: null,
         end: null,
@@ -68,7 +68,7 @@ describe('vassalChain', () => {
     })
 
     it('lists that chain as one path', () => {
-      expect(chainPaths(vassalChain('count-nantes', 1100, NANTES))).toEqual([
+      expect(chainPaths(hierarchyChain('count-nantes', 1100, NANTES))).toEqual([
         { titles: ['count-nantes', 'duke-brittany', 'king-france'], end: 'sovereign' },
       ])
     })
@@ -76,18 +76,18 @@ describe('vassalChain', () => {
 
   describe('variants', () => {
     it('keeps only the links valid in the year: in 1105 the count’s has ended, so nothing is known above him', () => {
-      expect(chainPaths(vassalChain('count-nantes', 1105, NANTES))).toEqual([
+      expect(chainPaths(hierarchyChain('count-nantes', 1105, NANTES))).toEqual([
         { titles: ['count-nantes'], end: 'unknown' },
       ])
     })
 
     it('reads a link dated by a year alone as holding that year only', () => {
       const once = [link('count-nantes', 'duke-brittany', { kind: 'instant', at: moment(1100) })]
-      expect(chainPaths(vassalChain('count-nantes', 1100, once))[0]?.titles).toEqual([
+      expect(chainPaths(hierarchyChain('count-nantes', 1100, once))[0]?.titles).toEqual([
         'count-nantes',
         'duke-brittany',
       ])
-      expect(chainPaths(vassalChain('count-nantes', 1101, once))).toEqual([
+      expect(chainPaths(hierarchyChain('count-nantes', 1101, once))).toEqual([
         { titles: ['count-nantes'], end: 'unknown' },
       ])
     })
@@ -99,7 +99,7 @@ describe('vassalChain', () => {
         link('king-france', null, span(1060, 1108)),
         link('emperor', null, span(1084, 1105)),
       ]
-      expect(chainPaths(vassalChain('count-flanders', 1100, flanders))).toEqual([
+      expect(chainPaths(hierarchyChain('count-flanders', 1100, flanders))).toEqual([
         { titles: ['count-flanders', 'king-france'], end: 'sovereign' },
         { titles: ['count-flanders', 'emperor'], end: 'sovereign' },
       ])
@@ -111,7 +111,7 @@ describe('vassalChain', () => {
         link('duke-brittany', 'king-france', span(1084, 1112)),
         link('king-france', null, span(1060, 1108)),
       ]
-      expect(chainPaths(vassalChain('duke-brittany', 1100, doubt))).toEqual([
+      expect(chainPaths(hierarchyChain('duke-brittany', 1100, doubt))).toEqual([
         { titles: ['duke-brittany'], end: 'sovereign' },
         { titles: ['duke-brittany', 'king-france'], end: 'sovereign' },
       ])
@@ -121,7 +121,7 @@ describe('vassalChain', () => {
   describe('managed errors', () => {
     it('says « we do not know » where no link says whom a title answers to — never a silent gap', () => {
       const partial = [link('count-nantes', 'duke-brittany', span(1084, 1103))]
-      expect(chainPaths(vassalChain('count-nantes', 1100, partial))).toEqual([
+      expect(chainPaths(hierarchyChain('count-nantes', 1100, partial))).toEqual([
         { titles: ['count-nantes', 'duke-brittany'], end: 'unknown' },
       ])
     })
@@ -131,7 +131,7 @@ describe('vassalChain', () => {
         link('count-a', 'duke-b', span(1090, 1110)),
         link('duke-b', 'count-a', span(1090, 1110)),
       ]
-      expect(chainPaths(vassalChain('count-a', 1100, circle))).toEqual([
+      expect(chainPaths(hierarchyChain('count-a', 1100, circle))).toEqual([
         { titles: ['count-a', 'duke-b', 'count-a'], end: 'loop' },
       ])
     })
@@ -147,7 +147,7 @@ describe('vassalChain', () => {
 
   describe('edge cases', () => {
     it('gives the title alone, unknown above, when no link is entered at all', () => {
-      expect(vassalChain('count-nantes', 1100, [])).toEqual({
+      expect(hierarchyChain('count-nantes', 1100, [])).toEqual({
         title: 'count-nantes',
         via: null,
         above: [],
@@ -156,8 +156,8 @@ describe('vassalChain', () => {
     })
 
     it('reads a link’s first and last years as within it', () => {
-      expect(chainPaths(vassalChain('count-nantes', 1084, NANTES))[0]?.titles).toHaveLength(3)
-      expect(chainPaths(vassalChain('count-nantes', 1103, NANTES))[0]?.titles).toHaveLength(3)
+      expect(chainPaths(hierarchyChain('count-nantes', 1084, NANTES))[0]?.titles).toHaveLength(3)
+      expect(chainPaths(hierarchyChain('count-nantes', 1103, NANTES))[0]?.titles).toHaveLength(3)
     })
 
     it('lets two vassals share their suzerain’s branch without it counting as a loop', () => {
@@ -166,7 +166,7 @@ describe('vassalChain', () => {
         link('count-rennes', 'duke-brittany', span(1084, 1103)),
         link('duke-brittany', null, span(1084, 1112)),
       ]
-      expect(chainPaths(vassalChain('count-rennes', 1100, shared))).toEqual([
+      expect(chainPaths(hierarchyChain('count-rennes', 1100, shared))).toEqual([
         { titles: ['count-rennes', 'duke-brittany'], end: 'sovereign' },
       ])
     })

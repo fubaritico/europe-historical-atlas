@@ -16,7 +16,7 @@ import type { SanitizedConfig } from 'payload'
  * Read every event and every city at a date out of the base, as the atlas and the Cartographer read them (CMS-223,
  * ATLAS-295): through Payload's Local API with every locale and every relation resolved, and every siege engin's
  * period; turned into the content format — each city sheet first checked by the schema the form and the server check
- * it by, and given its chain of vassalage computed from the titles and the links — and the result checked against
+ * it by, and given its hierarchical chain computed from the titles and the links — and the result checked against
  * `core`'s content schema. Shared by the export, which writes it for the atlas, and by the city alerts (CARTO-456),
  * which print it for the Cartographer's verdict without writing anything.
  * Anything wrong throws and names the event — nothing half-read goes on.
@@ -54,7 +54,7 @@ export async function readContent(
   })
   // The chains' register, read once: every title with its territory, every link (CARTO-435)
   const titles = await payload.find({ collection: 'titles', depth: 1, pagination: false })
-  const links = await payload.find({ collection: 'vassal-links', depth: 0, pagination: false })
+  const links = await payload.find({ collection: 'hierarchy-links', depth: 0, pagination: false })
   const register = chainRegister(titles.docs, links.docs)
   // Every territory, for a polity of the map to be tied to one where it has no Wikidata id (CARTO-450)
   const territories = await payload.find({

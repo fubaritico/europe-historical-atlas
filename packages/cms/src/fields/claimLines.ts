@@ -1,7 +1,7 @@
 import type { ArrayField } from 'payload'
 
 /**
- * The source lines of a claim — a title held, a link of vassalage (CMS-422): one line per source that says it, with
+ * The source lines of a claim — a title held, a hierarchical link (CMS-422): one line per source that says it, with
  * where it says it, its own words, and the name as it writes the person or the land. **Facultative** (the dev,
  * 2026-11-16: the sources are not to be made mandatory) — a claim may be entered first and sourced later; a divergent
  * reading is a second claim, never a second line here.

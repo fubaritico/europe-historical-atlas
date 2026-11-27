@@ -24,7 +24,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   sources' holder.
  * - `misplacedLevel` — The chain not followed on the map (the dev, 2026-11-16); `city` is the city, `polity` the title
  *   it should depend on, with the map's name for it, `onMap` the polity the map puts the city in.
- * - `misplacedChain`, `incomplete`, `cannotCompareMap` — The verdict by the city's chain of vassalage (CARTO-435);
+ * - `misplacedChain`, `incomplete`, `cannotCompareMap` — The verdict by the city's hierarchical chain (CARTO-435);
  *   `polity` is the polity the map has under it.
  * - `chainEnd` — After the last title of a reading of the chain, how the chain ends; `end` is one of
  *   `chainSovereign`, `chainUnknown`, `chainLoop`.

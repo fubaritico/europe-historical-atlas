@@ -41,8 +41,8 @@
   "bySourcesTitle": "By the sources",
   "sourcesTitle": "Sources",
   "onMapTitle": "On the map",
-  "chainTitle": "Chain of vassalage",
-  "chainTitleReadings": "Chain of vassalage — {count} readings according to the sources",
+  "chainTitle": "Hierarchical chain",
+  "chainTitleReadings": "Hierarchical chain — {count} readings according to the sources",
   "chainReading": "Reading {number}",
   "noPolity": "no polity",
   "chainEnd": " · {end}",
@@ -60,13 +60,13 @@
   "sortName": "By name",
   "sortVerification": "By verification",
   "sortHolder": "By holder",
-  "incomplete": "{polity} is not in its chain of vassalage, which stops for want of a link: we do not know yet.",
-  "misplacedChain": "Not at the right place: {polity} is not in its chain of vassalage.",
+  "incomplete": "{polity} is not in its hierarchical chain, which stops for want of a link: we do not know yet.",
+  "misplacedChain": "Not at the right place: {polity} is not in its hierarchical chain.",
   "cannotCompareMap": "{polity} has neither a Wikidata id nor a CMS ID on the map: it cannot be looked for in the chain.",
   "chainSovereign": "sovereign",
   "chainUnknown": "beyond, we do not know",
   "chainLoop": "the links contradict one another",
   "chainRankInversion": "To check: “{vassal}” ranks higher than its suzerain, “{suzerain}”.",
   "stateIncomplete": "Chain incomplete ({count})",
-  "misplacedLevel": "Chain of vassalage not followed on the map: {city} should depend on {polity}. Not {onMap}."
+  "misplacedLevel": "Hierarchical chain not followed on the map: {city} should depend on {polity}. Not {onMap}."
 }

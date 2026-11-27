@@ -1765,7 +1765,7 @@
  * Two levels of alert (CARTO-386, the dev, 2026-11-07). In yellow, the map to correct: a city whose holder the map puts
  * elsewhere — move the border — or whose holder the map has not drawn yet. In red, the research to do: a city nobody
  * has entered a holder for, under a polity with no Wikidata id, or whose chain needs a title the map has not drawn. The dev's rule of 2026-11-16: yellow not at the right
- * place — a chain of vassalage that stops short of the polity under it included — red a problem in the data, plain at
+ * place — a hierarchical chain that stops short of the polity under it included — red a problem in the data, plain at
  * the right place; the slate of CARTO-435 is gone. An alert stays in its
  * colour on a hidden city, over the hidden row's dimming (same weight, written after): the eye says it is hidden.
  */

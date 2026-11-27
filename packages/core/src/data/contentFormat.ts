@@ -23,16 +23,16 @@ import { historicalDateSchema, historicalMomentSchema } from '../time/historical
 
 import { COMMUNITY_WEIGHTS } from './cityCommunity'
 import { CITY_IMPORTANCES } from './cityImportance'
+import { CHAIN_ENDS } from './hierarchyChain'
 import { NAME_LANGUAGES } from './periodName'
 import { SIEGE_ENGINES } from './siegeEngines'
-import { CHAIN_ENDS } from './vassalChain'
 import { WIKIDATA_ID } from './wikidataId'
 
 import type { CommunityWeight } from './cityCommunity'
 import type { CityImportance } from './cityImportance'
+import type { ChainEnd } from './hierarchyChain'
 import type { NameForm } from './periodName'
 import type { SiegeEngine } from './siegeEngines'
-import type { ChainEnd } from './vassalChain'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
 
 /** A text in the two languages of the project. */
@@ -300,7 +300,7 @@ const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('s
 ])
 
 /**
- * One title of a city's chain of vassalage, as the map compares it: its name, its territory's Wikidata id, and its
+ * One title of a city's hierarchical chain, as the map compares it: its name, its territory's Wikidata id, and its
  * territory's number in the CMS — the map's polity compared by the id first, by the number where the id is missing
  * (CARTO-450, `data/territoryMatch`).
  */
@@ -379,8 +379,8 @@ export function contentTerritoriesIn(value: unknown): ContentTerritory[] | null 
 }
 
 /**
- * One reading of a city's chain of vassalage at its sheet's year (CMS-422, CARTO-435): the titles from its holder's
- * up, and why it stops — computed by `data/vassalChain` at the export, never typed. Two readings or more when the
+ * One reading of a city's hierarchical chain at its sheet's year (CMS-422, CARTO-435): the titles from its holder's
+ * up, and why it stops — computed by `data/hierarchyChain` at the export, never typed. Two readings or more when the
  * sources diverge.
  */
 export interface ContentChainReading {
@@ -441,7 +441,7 @@ export interface ContentCity {
   /** The polity that held it at that date, or `null` before it is entered (CMS-335). */
   holder: ContentHolder | null
   /**
-   * Its chain of vassalage at the sheet's year (CARTO-435), from the title its sheet names as holder — every reading
+   * Its hierarchical chain at the sheet's year (CARTO-435), from the title its sheet names as holder — every reading
    * kept — or `null` while its sheet names no title.
    */
   chain: ContentChainReading[] | null
@@ -492,8 +492,8 @@ export interface ContentFile {
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
  * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
  * and a source line its quotation (2026-11-02, CMS-335), 7 since a city says whether the atlas shows it (2026-11-08,
- * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433), 9 since a city carries its chain
- * of vassalage (2026-11-15, CARTO-435), 10 since a city carries its name of the time (2026-11-22, CMS-495) — an
+ * CMS-391), 8 since a city carries its religious communities (2026-11-13, CMS-433), 9 since a city carries its hierarchical
+ * chain (2026-11-15, CARTO-435), 10 since a city carries its name of the time (2026-11-22, CMS-495) — an
  * export of 9 is refused, and a new export mends it.
  */
 export const CONTENT_FORMAT_VERSION = 10

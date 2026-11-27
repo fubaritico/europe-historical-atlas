@@ -1,6 +1,7 @@
 import { Confessions } from './Confessions'
 import { Events } from './Events'
 import { EventTypes } from './EventTypes'
+import { HierarchyLinks } from './HierarchyLinks'
 import { ImportanceReasons } from './ImportanceReasons'
 import { People } from './People'
 import { PeriodNames } from './PeriodNames'
@@ -11,7 +12,6 @@ import { Sources } from './Sources'
 import { Territories } from './Territories'
 import { Titles } from './Titles'
 import { Users } from './Users'
-import { VassalLinks } from './VassalLinks'
 
 import type { CollectionConfig } from 'payload'
 
@@ -31,7 +31,7 @@ export const CMS_COLLECTIONS: readonly CollectionConfig[] = [
   People,
   Territories,
   Titles,
-  VassalLinks,
+  HierarchyLinks,
   Sources,
   Users,
 ]

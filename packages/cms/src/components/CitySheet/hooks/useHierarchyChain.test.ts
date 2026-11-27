@@ -2,9 +2,9 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { useVassalChain } from './useVassalChain'
+import { useHierarchyChain } from './useHierarchyChain'
 
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 
 const READING: ChainReading[] = [
   { titles: [{ id: '10', name: 'Mathias II — comté de Nantes' }], steps: [], end: 'unknown' },
@@ -14,11 +14,11 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('useVassalChain', () => {
+describe('useHierarchyChain', () => {
   describe('happy path', () => {
     it('reads the chain of the title at the year', async () => {
       const read = vi.fn(() => Promise.resolve(READING))
-      const { result } = renderHook(() => useVassalChain(10, 1100, read))
+      const { result } = renderHook(() => useHierarchyChain(10, 1100, read))
       await waitFor(() => {
         expect(result.current).toEqual({ kind: 'read', year: 1100, readings: READING })
       })
@@ -29,14 +29,14 @@ describe('useVassalChain', () => {
   describe('variants', () => {
     it('reads nothing while no title is chosen', () => {
       const read = vi.fn(() => Promise.resolve(READING))
-      const { result } = renderHook(() => useVassalChain(null, 1100, read))
+      const { result } = renderHook(() => useHierarchyChain(null, 1100, read))
       expect(result.current).toEqual({ kind: 'none' })
       expect(read).not.toHaveBeenCalled()
     })
 
     it('waits for a year before reading', () => {
       const read = vi.fn(() => Promise.resolve(READING))
-      const { result } = renderHook(() => useVassalChain(10, null, read))
+      const { result } = renderHook(() => useHierarchyChain(10, null, read))
       expect(result.current).toEqual({ kind: 'no-year' })
       expect(read).not.toHaveBeenCalled()
     })
@@ -46,12 +46,12 @@ describe('useVassalChain', () => {
     it('says a failed read, and logs it', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
       const read = vi.fn(() => Promise.reject(new Error('refused')))
-      const { result } = renderHook(() => useVassalChain(10, 1100, read))
+      const { result } = renderHook(() => useHierarchyChain(10, 1100, read))
       await waitFor(() => {
         expect(result.current).toEqual({ kind: 'failed' })
       })
       expect(error).toHaveBeenCalledWith(
-        '[CMS] the chain of vassalage could not be read',
+        '[CMS] the hierarchical chain could not be read',
         expect.any(Error)
       )
     })
@@ -62,7 +62,7 @@ describe('useVassalChain', () => {
   describe('edge cases', () => {
     it('reads once the typing of the year stops, saying « loading » at once', async () => {
       const read = vi.fn(() => Promise.resolve(READING))
-      const { result, rerender } = renderHook(({ year }) => useVassalChain(10, year, read), {
+      const { result, rerender } = renderHook(({ year }) => useHierarchyChain(10, year, read), {
         initialProps: { year: 1 },
       })
       rerender({ year: 11 })
@@ -90,7 +90,7 @@ describe('useVassalChain', () => {
       const read = vi.fn((title: number | string) =>
         title === 10 ? older : Promise.resolve(newer)
       )
-      const { result, rerender } = renderHook(({ title }) => useVassalChain(title, 1100, read), {
+      const { result, rerender } = renderHook(({ title }) => useHierarchyChain(title, 1100, read), {
         initialProps: { title: 10 as number | string },
       })
       rerender({ title: 20 })

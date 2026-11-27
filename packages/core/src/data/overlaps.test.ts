@@ -149,7 +149,7 @@ describe('overlaps', () => {
       expect(overlapsOf(document)).toEqual([])
     })
 
-    it('reads a vassal inside its suzerain as vassalage, not as an overlap', () => {
+    it('reads a vassal inside its suzerain as a hierarchical tie, not as an overlap', () => {
       const document = createYearDocument(1100)
       square(document, 'france', [0, 0, 4])
       square(document, 'aquitaine', [1, 1, 1], 'france')
@@ -157,7 +157,7 @@ describe('overlaps', () => {
       expect(overlapsOf(document)).toEqual([])
     })
 
-    it('reads a vassal of a vassal inside the kingdom above both as vassalage too', () => {
+    it('reads a vassal of a vassal inside the kingdom above both as a hierarchical tie too', () => {
       const document = createYearDocument(1100)
       square(document, 'france', [0, 0, 4])
       square(document, 'aquitaine', [5, 5, 1], 'france')
@@ -297,14 +297,14 @@ describe('isOverlapPair', () => {
   })
 
   describe('variants', () => {
-    it('makes vassalage, never an overlap, of a vassal and its suzerain, whichever comes first', () => {
+    it('makes a hierarchical tie, never an overlap, of a vassal and its suzerain, whichever comes first', () => {
       expect([
         isOverlapPair(above, 'duchy', 'kingdom'),
         isOverlapPair(above, 'kingdom', 'duchy'),
       ]).toEqual([false, false])
     })
 
-    it('makes vassalage of a suzerain two levels up', () => {
+    it('makes a hierarchical tie of a suzerain two levels up', () => {
       expect(isOverlapPair(above, 'kingdom', 'county')).toBe(false)
     })
   })

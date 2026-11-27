@@ -105,7 +105,7 @@ describe('yearFormat schemas', () => {
       ])
     })
 
-    it('accepts a suzerain, which is how vassalage is declared', () => {
+    it('accepts a suzerain, which is how a hierarchical tie is declared', () => {
       const vassal = withField(polity, { id: 'aquitaine', suzerain: 'fr-couronne' })
       expect(yearPolitySchema.safeParse(vassal).success).toBe(true)
     })

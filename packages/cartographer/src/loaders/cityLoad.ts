@@ -28,7 +28,7 @@ export interface LoadedCity {
   readonly date: ContentCity['date']
   /** The polity holding it by the sources, or `null` while nobody has entered it. */
   readonly holder: ContentCity['holder']
-  /** Its chain of vassalage at its sheet's year, or `null` while its sheet names no title (CARTO-435). */
+  /** Its hierarchical chain at its sheet's year, or `null` while its sheet names no title (CARTO-435). */
   readonly chain: ContentCity['chain']
   /** The sources that say who held it. */
   readonly holderSources: readonly {

@@ -1,4 +1,4 @@
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 
 /**

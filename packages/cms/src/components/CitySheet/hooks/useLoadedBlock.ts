@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { useOnChange } from './useOnChange'
 
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 
 /** A chain read, as the block was loaded from it: its readings and the year they were read at. */
 export interface LoadedChain {

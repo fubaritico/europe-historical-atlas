@@ -113,7 +113,7 @@ false` et `user: req.user` sur ces lectures. **Sévérité : à savoir.**
   les millisecondes d'un enregistrement de la chaîne afficherait l'erreur sous la case du nouveau titre — rien d'écrit de
   travers dans la base ; (2) la région annoncée aux lecteurs d'écran de la chaîne est plus large que ses messages, et l'aide
   de la case « Souverain » n'est pas reliée à elle (outil local, courtoisie) ; (3) `refusalOf` est rangé dans
-  `saveVassalLink.ts` alors qu'il lit tout refus de Payload. **Sévérité : cosmétique.**
+  `saveHierarchyLink.ts` alors qu'il lit tout refus de Payload. **Sévérité : cosmétique.**
 - **L'historien met à la corbeille par le MCP, et rien ne dit quelles fiches sa clé a créées** (CMS-454 le 18/11, la
   corbeille CMS-508 le 24/11, `mcp/mcpAccess.ts`) : sa clé ne supprime plus rien ; sur les fiches de ville, les lieux,
   les noms d'époque, les sources, les titres et les maillons (`trash: true`), il écrit `deletedAt` par l'outil de mise à

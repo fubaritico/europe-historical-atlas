@@ -1,25 +1,25 @@
 import {
   chainPaths,
   distinctPaths,
-  vassalChain,
-} from '@europe-historical-atlas/core/data/vassalChain'
+  hierarchyChain,
+} from '@europe-historical-atlas/core/data/hierarchyChain'
 
+import { hierarchyLinkOf } from '../fields/hierarchyLinkOf'
 import { relationId } from '../fields/relationId'
 import { sovereignLinkOf } from '../fields/sovereignLinkOf'
-import { vassalLinkOf } from '../fields/vassalLinkOf'
 
 import { resolved } from './docRecords'
 import { territoryNumberOf } from './toContentTerritory'
 
 import type { DocId } from './docRecords'
+import type { StoredLink } from '../fields/hierarchyLinkOf'
 import type { EventDateFields } from '../fields/historicalDate'
-import type { StoredLink } from '../fields/vassalLinkOf'
 import type {
   ContentChainReading,
   ContentChainTitle,
   ContentHolder,
 } from '@europe-historical-atlas/core/data/contentFormat'
-import type { VassalLink } from '@europe-historical-atlas/core/data/vassalChain'
+import type { HierarchyLink } from '@europe-historical-atlas/core/data/hierarchyChain'
 
 /** A territory as the export reads it, through its title: its number and its Wikidata id, what the map matches it by. */
 export interface DocTerritory {
@@ -54,7 +54,7 @@ export interface ChainRegister {
   /** The territory each title holds, as a city held by that title is said to be held: by its title's id as text. */
   readonly holders: ReadonlyMap<string, ContentHolder>
   /** Every link the base holds, as `core`'s chain reads them. */
-  readonly links: readonly VassalLink[]
+  readonly links: readonly HierarchyLink[]
 }
 
 /**
@@ -79,7 +79,7 @@ function namedTerritory(title: DocTitle, where: string): DocTerritory & { name: 
  * The register the chains are computed from (CARTO-435). A title without its name, or whose territory is not
  * resolved, stops the export and names it — a chain written with a hole would read as a chain.
  * @param titles - every title, its territory resolved
- * @param links - every link of vassalage
+ * @param links - every hierarchical link
  * @returns the register
  * @throws {Error} when a title has no name, or its territory is not resolved or has no name
  */
@@ -109,8 +109,8 @@ export function chainRegister(
   return {
     titles: named,
     holders,
-    links: [...links.map(vassalLinkOf), ...titles.map(sovereignLinkOf)].filter(
-      (link): link is VassalLink => link !== null
+    links: [...links.map(hierarchyLinkOf), ...titles.map(sovereignLinkOf)].filter(
+      (link): link is HierarchyLink => link !== null
     ),
   }
 }
@@ -143,7 +143,7 @@ export function titleHolder(
 }
 
 /**
- * A city's chain of vassalage at its sheet's year — every reading kept, each once (`distinctPaths`) — or `null` when
+ * A city's hierarchical chain at its sheet's year — every reading kept, each once (`distinctPaths`) — or `null` when
  * its sheet names no title.
  * @param register - the titles and the links
  * @param title - the title the sheet names as its holder, bare or resolved
@@ -160,16 +160,18 @@ export function contentChain(
 ): ContentChainReading[] | null {
   const id = relationId(title)
   if (id === null) return null
-  return distinctPaths(chainPaths(vassalChain(String(id), year, register.links))).map((path) => ({
-    titles: path.titles.map((titleId) => {
-      const named = register.titles.get(titleId)
-      if (named === undefined) {
-        throw new Error(
-          `[CMS] ${where}: its chain names title ${titleId}, which the export did not read`
-        )
-      }
-      return named
-    }),
-    end: path.end,
-  }))
+  return distinctPaths(chainPaths(hierarchyChain(String(id), year, register.links))).map(
+    (path) => ({
+      titles: path.titles.map((titleId) => {
+        const named = register.titles.get(titleId)
+        if (named === undefined) {
+          throw new Error(
+            `[CMS] ${where}: its chain names title ${titleId}, which the export did not read`
+          )
+        }
+        return named
+      }),
+      end: path.end,
+    })
+  )
 }

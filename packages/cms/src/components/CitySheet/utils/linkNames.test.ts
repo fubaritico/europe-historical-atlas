@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { linkNamesOf } from './linkNames'
 
-import type { ChainReading } from './readVassalChain'
+import type { ChainReading } from './readHierarchyChain'
 
 const COUNT = { id: 10, name: 'Mathias II — comté de Nantes' }
 const DUKE = { id: 20, name: 'Alain IV — duché de Bretagne' }

@@ -4,7 +4,7 @@ import type { PolityDraft } from './polityDraft'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /**
- * A step of the ladder of vassalage that the ranks contradict: a vassal whose rank scores higher than its suzerain's
+ * A step of the hierarchical ladder that the ranks contradict: a vassal whose rank scores higher than its suzerain's
  * (CORE-489, the dev, 2026-11-20). **A warning, never a refusal**: the form says it and saves all the same.
  */
 export interface RankWarning {

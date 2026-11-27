@@ -233,7 +233,7 @@ export const PlacePeriods: CollectionConfig = {
           'Pourquoi elle a cette importance : pouvoir, religion, commerce… Facultatif. La liste se complète dans « Raisons d’importance ».',
       },
     },
-    // CMS-422 step 2c: the holder as a title — a person for a territory — the first link of the chain of vassalage.
+    // CMS-422 step 2c: the holder as a title — a person for a territory — the first link of the hierarchical chain.
     // Optional, an added column: the sheets already saved keep their free-text holder until 1100 is taken over (step 3).
     {
       name: 'holderTitle',
@@ -242,7 +242,7 @@ export const PlacePeriods: CollectionConfig = {
       label: 'Détenteur',
       admin: {
         description:
-          'Le titre de celui à qui la ville obéit à cette date — par exemple : Mathias II, comte de Nantes. Choisi dans « Titres » ; sa chaîne de vassalité se lit dessous.',
+          'Le titre de celui à qui la ville obéit à cette date — par exemple : Mathias II, comte de Nantes. Choisi dans « Titres » ; sa chaîne hiérarchique se lit dessous.',
       },
     },
     // « Tenue par » (CMS-335): two added columns, neither required, so the sheets already saved stay valid and the

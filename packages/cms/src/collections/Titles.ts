@@ -14,7 +14,7 @@ import type { CollectionConfig } from 'payload'
 /** What cites a title, so neither deleted nor put in the bin from under them: the links, and the cities' sheets. */
 const TITLE_CITERS: readonly Citers[] = [
   {
-    collection: 'vassal-links',
+    collection: 'hierarchy-links',
     fields: ['vassal', 'suzerain'],
     subject: 'Ce titre',
     cited: 'cité',
@@ -32,8 +32,8 @@ const TITLE_CITERS: readonly Citers[] = [
 /**
  * A title (CMS-422 step 2) — **what a person holds or exercises, over a period, as the sources say**: Mathias II,
  * count of Nantes, 1084–1103; Gilles de Rais, marshal of France from 1429. A rank lives here, never on the person
- * (`files/plans/contribution/vassal-chain.md`, rule 3). The sheet of a place names its holder as a title; a link of
- * vassalage joins two titles.
+ * (`files/plans/contribution/vassal-chain.md`, rule 3). The sheet of a place names its holder as a title; a hierarchical
+ * link joins two titles.
  */
 export const Titles: CollectionConfig = {
   slug: 'titles',
@@ -99,7 +99,7 @@ export const Titles: CollectionConfig = {
       defaultValue: false,
       admin: {
         description:
-          'Coché : ce titre ne relève de personne à ces dates — la chaîne de vassalité s’arrête à lui.',
+          'Coché : ce titre ne relève de personne à ces dates — la chaîne hiérarchique s’arrête à lui.',
       },
     },
     claimLines(

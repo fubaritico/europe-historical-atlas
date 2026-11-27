@@ -2,7 +2,7 @@ import { ChainReadings } from './ChainReadings'
 import { SovereignBox } from './SovereignBox'
 
 import type { PendingLinks } from '../hooks/usePendingLinks'
-import type { ChainReading } from '../utils/readVassalChain'
+import type { ChainReading } from '../utils/readHierarchyChain'
 import type { Say } from '../utils/say'
 
 /**

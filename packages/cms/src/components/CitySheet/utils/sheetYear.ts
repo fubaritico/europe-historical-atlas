@@ -1,7 +1,7 @@
 import { readNumber } from './sheetValues'
 
 /**
- * The sheet's year, read from its start as typed — the chain of vassalage is read at a year (`vassal-chain.md`: a
+ * The sheet's year, read from its start as typed — the hierarchical chain is read at a year (`vassal-chain.md`: a
  * sheet is a picture of a year). Anything but a whole year other than 0 is no year yet: the date's own rules say why
  * under it.
  * @param typed - the start's year, as typed

@@ -71,7 +71,7 @@ export interface CityVerdict {
   readonly bySources: CityHolder | null
   /** Whether they agree, and if not, why. */
   readonly kind: CityVerdictKind
-  /** The city's chain of vassalage it was judged by, or `null` when its sheet names no title (CARTO-435). */
+  /** The city's hierarchical chain it was judged by, or `null` when its sheet names no title (CARTO-435). */
   readonly chain: readonly ContentChainReading[] | null
   /**
    * The title of its chain the polity under it must be, or lie under — the level below the sovereign, or the
@@ -214,7 +214,7 @@ function polityOnMap(document: YearDocument, id: string): PolityOnMap {
 }
 
 /**
- * The verdict of a city that has its chain of vassalage (CARTO-435, the dev's rule of 2026-11-15: *"if the duchy it lies
+ * The verdict of a city that has its hierarchical chain (CARTO-435, the dev's rule of 2026-11-15: *"if the duchy it lies
  * in is not in its chain, it is wrong"*): the polity under it is one of the chain's titles' territories, in any reading
  * — the sources diverging, each reading is a place it may rightly be — by Wikidata id, else by the CMS's territory
  * number (CARTO-450); a polity with neither cannot be looked for. Not found: wrong where every reading reaches its end, and
@@ -321,7 +321,7 @@ export function cityVerdicts(
       if (top === undefined || (first.kind !== 'misplaced' && first.kind !== 'incomplete'))
         return verdict(first, onTop, null)
       for (const id of below) {
-        // Only the ground the map hatches: a duchy drawn inside its kingdom is vassalage, never a disputed zone
+        // Only the ground the map hatches: a duchy drawn inside its kingdom is a hierarchical tie, never a disputed zone
         if (!isOverlapPair(above, top, id)) continue
         const other = polityOnMap(document, id)
         const second = judged(city, other, map)

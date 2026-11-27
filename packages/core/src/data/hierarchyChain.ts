@@ -1,5 +1,5 @@
 /**
- * The chain of vassalage of a place at a year — never entered, computed from the links (CMS-422, step 2;
+ * The hierarchical chain of a place at a year — never entered, computed from the links (CMS-422, step 2;
  * `files/plans/contribution/vassal-chain.md`, layer 3). The sheet of a place names its holder as a **title** — a person
  * holding a territory over a period (Mathias II, count of Nantes); a **link** says that a title answers to another over
  * a period (the count of Nantes to the duke of Brittany), entered once and read by every place under it. From the
@@ -13,8 +13,8 @@ import { dateCoversYear } from '../time/dateOverlap'
 
 import type { HistoricalDate } from '../time/historicalDate'
 
-/** A link of vassalage: a title answering to another over a period, as a source states it. */
-export interface VassalLink {
+/** A hierarchical link: a title answering to another over a period, as a source states it. */
+export interface HierarchyLink {
   /** The link's id, so the chain can name the link each step came by. */
   readonly id: string
   /** The title that answers — the vassal's. */
@@ -53,7 +53,7 @@ export interface ChainNode {
 }
 
 /**
- * The chain of vassalage of a title at a year: every link valid in the year followed, branch by branch.
+ * The hierarchical chain of a title at a year: every link valid in the year followed, branch by branch.
  *
  * A link saying « answers to no one » ends its branch as sovereign; no link at all ends it as unknown — *beyond, we
  * do not know*, the third cause of uncertainty, never a silent gap. A title reached twice in one branch ends it as a
@@ -63,7 +63,11 @@ export interface ChainNode {
  * @param links - the links entered, whatever their dates
  * @returns the chain, its root the sheet's title
  */
-export function vassalChain(title: string, year: number, links: readonly VassalLink[]): ChainNode {
+export function hierarchyChain(
+  title: string,
+  year: number,
+  links: readonly HierarchyLink[]
+): ChainNode {
   const valid = links.filter((link) => dateCoversYear(link.date, year))
   return climb(title, null, valid, new Set())
 }
@@ -79,7 +83,7 @@ export function vassalChain(title: string, year: number, links: readonly VassalL
 function climb(
   title: string,
   via: string | null,
-  valid: readonly VassalLink[],
+  valid: readonly HierarchyLink[],
   below: ReadonlySet<string>
 ): ChainNode {
   if (below.has(title)) return { title, via, above: [], end: 'loop' }
@@ -87,7 +91,7 @@ function climb(
   if (out.length === 0) return { title, via, above: [], end: 'unknown' }
   const met = new Set([...below, title])
   const above = out
-    .filter((link): link is VassalLink & { suzerain: string } => link.suzerain !== null)
+    .filter((link): link is HierarchyLink & { suzerain: string } => link.suzerain !== null)
     .map((link) => climb(link.suzerain, link.id, valid, met))
   // Every valid link names a suzerain → the chain goes on; only « no one » links → sovereign. When the sources
   // diverge between « no one » and a suzerain, the suzerain's branch is kept and the « no one » reading with it.
@@ -104,7 +108,7 @@ function climb(
  */
 export function chainPaths(chain: ChainNode): { titles: string[]; end: ChainEnd }[] {
   if (chain.above.length === 0) {
-    // `vassalChain` ends every branch with its reason; a node without one is not a chain it built
+    // `hierarchyChain` ends every branch with its reason; a node without one is not a chain it built
     if (chain.end === null)
       throw new Error(`[core] a chain's branch ends at ${chain.title} with no reason`)
     return [{ titles: [chain.title], end: chain.end }]

@@ -1,8 +1,8 @@
 import { useOnChange } from './useOnChange'
 
 import type { ChainSaver } from './useChainSaver'
+import type { HierarchyChainState } from './useHierarchyChain'
 import type { PendingLinks } from './usePendingLinks'
-import type { VassalChainState } from './useVassalChain'
 
 /**
  * The block wired to the chain read and to the sheet's « Enregistrer » (the dev, 2026-11-16): each chain read is
@@ -13,7 +13,7 @@ import type { VassalChainState } from './useVassalChain'
  * @param saver - the sheet's « Enregistrer »
  */
 export function useBlockWiring(
-  state: VassalChainState,
+  state: HierarchyChainState,
   pending: PendingLinks,
   saver: ChainSaver
 ): void {

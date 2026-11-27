@@ -76,7 +76,7 @@ export function isPixelRing(points) {
 }
 
 /**
- * Every suzerain above a polity and every vassal under it — the ground they share is vassalage, not an overflow.
+ * Every suzerain above a polity and every vassal under it — the ground they share is a hierarchical tie, not an overflow.
  * @param {YearMap} map - the map
  * @param {string} polity - the polity
  * @returns {Set<string>} the related polities

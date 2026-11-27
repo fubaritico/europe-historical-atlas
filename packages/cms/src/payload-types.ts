@@ -79,7 +79,7 @@ export interface Config {
     people: Person;
     territories: Territory;
     titles: Title;
-    'vassal-links': VassalLink;
+    'hierarchy-links': HierarchyLink;
     sources: Source;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
@@ -101,7 +101,7 @@ export interface Config {
     people: PeopleSelect<false> | PeopleSelect<true>;
     territories: TerritoriesSelect<false> | TerritoriesSelect<true>;
     titles: TitlesSelect<false> | TitlesSelect<true>;
-    'vassal-links': VassalLinksSelect<false> | VassalLinksSelect<true>;
+    'hierarchy-links': HierarchyLinksSelect<false> | HierarchyLinksSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
@@ -561,7 +561,7 @@ export interface PlacePeriod {
    */
   reasons?: (number | ImportanceReason)[] | null;
   /**
-   * Le titre de celui à qui la ville obéit à cette date — par exemple : Mathias II, comte de Nantes. Choisi dans « Titres » ; sa chaîne de vassalité se lit dessous.
+   * Le titre de celui à qui la ville obéit à cette date — par exemple : Mathias II, comte de Nantes. Choisi dans « Titres » ; sa chaîne hiérarchique se lit dessous.
    */
   holderTitle?: (number | null) | Title;
   /**
@@ -773,7 +773,7 @@ export interface Title {
     };
   };
   /**
-   * Coché : ce titre ne relève de personne à ces dates — la chaîne de vassalité s’arrête à lui.
+   * Coché : ce titre ne relève de personne à ces dates — la chaîne hiérarchique s’arrête à lui.
    */
   sovereign?: boolean | null;
   /**
@@ -925,9 +925,9 @@ export interface Confession {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vassal-links".
+ * via the `definition` "hierarchy-links".
  */
-export interface VassalLink {
+export interface HierarchyLink {
   id: number;
   /**
    * Écrit seul à l’enregistrement : le vassal → son suzerain.
@@ -1169,17 +1169,17 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
-  vassalLinks?: {
+  hierarchyLinks?: {
     /**
-     * Allow clients to find vassal-links.
+     * Allow clients to find hierarchy-links.
      */
     find?: boolean | null;
     /**
-     * Allow clients to create vassal-links.
+     * Allow clients to create hierarchy-links.
      */
     create?: boolean | null;
     /**
-     * Allow clients to update vassal-links.
+     * Allow clients to update hierarchy-links.
      */
     update?: boolean | null;
   };
@@ -1260,8 +1260,8 @@ export interface PayloadLockedDocument {
         value: number | Title;
       } | null)
     | ({
-        relationTo: 'vassal-links';
-        value: number | VassalLink;
+        relationTo: 'hierarchy-links';
+        value: number | HierarchyLink;
       } | null)
     | ({
         relationTo: 'sources';
@@ -1756,9 +1756,9 @@ export interface TitlesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vassal-links_select".
+ * via the `definition` "hierarchy-links_select".
  */
-export interface VassalLinksSelect<T extends boolean = true> {
+export interface HierarchyLinksSelect<T extends boolean = true> {
   label?: T;
   vassal?: T;
   answersTo?: T;
@@ -1911,7 +1911,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         create?: T;
         update?: T;
       };
-  vassalLinks?:
+  hierarchyLinks?:
     | T
     | {
         find?: T;

@@ -23,7 +23,7 @@ import { meanPoint, ringAreaKm2 } from './lint.mjs'
  * @property {(document: object, polity: string) => PolityShape | null} polityShape - a polity's ground; throws on a
  *   degenerate ring
  * @property {(document: object, shapes: PolityShape[]) => [PolityShape, PolityShape][]} overlapCandidates - the pairs
- *   worth intersecting, vassalage left out
+ *   worth intersecting, hierarchical ties left out
  * @property {(a: PolityShape, b: PolityShape) => MultiPolygon} pairOverlap - the ground two share; throws on refusal
  * @property {(document: object, pieces: Overlap[], next: Overlap) => Overlap[]} addOverlap - cuts a new overlap into
  *   the pieces

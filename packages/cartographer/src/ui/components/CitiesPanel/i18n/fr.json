@@ -41,8 +41,8 @@
   "bySourcesTitle": "Selon les sources",
   "sourcesTitle": "Sources",
   "onMapTitle": "Sur la carte",
-  "chainTitle": "Chaîne de vassalité",
-  "chainTitleReadings": "Chaîne de vassalité — {count} lectures selon les sources",
+  "chainTitle": "Chaîne hiérarchique",
+  "chainTitleReadings": "Chaîne hiérarchique — {count} lectures selon les sources",
   "chainReading": "Lecture {number}",
   "noPolity": "aucun pays",
   "chainEnd": " · {end}",
@@ -60,13 +60,13 @@
   "sortName": "Par nom",
   "sortVerification": "Par vérification",
   "sortHolder": "Par détenteur",
-  "incomplete": "{polity} n’est pas dans sa chaîne de vassalité, qui s’arrête faute de maillon : on ne sait pas encore.",
-  "misplacedChain": "Pas au bon endroit : {polity} n’est pas dans sa chaîne de vassalité.",
+  "incomplete": "{polity} n’est pas dans sa chaîne hiérarchique, qui s’arrête faute de maillon : on ne sait pas encore.",
+  "misplacedChain": "Pas au bon endroit : {polity} n’est pas dans sa chaîne hiérarchique.",
   "cannotCompareMap": "{polity} n’a ni identifiant Wikidata ni CMS ID sur la carte : impossible de le chercher dans la chaîne.",
   "chainSovereign": "souverain",
   "chainUnknown": "au-delà, on ne sait pas",
   "chainLoop": "les maillons se contredisent",
   "chainRankInversion": "À vérifier : « {vassal} » a un rang plus élevé que son suzerain, « {suzerain} ».",
   "stateIncomplete": "Chaîne incomplète ({count})",
-  "misplacedLevel": "Chaîne de vassalité non respectée dans la carte : {city} doit dépendre de {polity}. Pas {onMap}."
+  "misplacedLevel": "Chaîne hiérarchique non respectée dans la carte : {city} doit dépendre de {polity}. Pas {onMap}."
 }
