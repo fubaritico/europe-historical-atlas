@@ -378,6 +378,11 @@ def main(argv):
         if named:
             print(f'  accepted while {os.path.basename(os.path.dirname(os.path.dirname(lst)))} researches them: {len(named)}')
         accepted |= set(named)
+    # a duchy laid as a FRAME (the dev, 2026-11-27: "on the map we cannot have holes"): the lands with no lord read are
+    # the frame's until the research gives them one — accepted whole, with the frame's reason, and said
+    if spec.get('accept_all'):
+        print(f'  accepted as the frame\'s ({spec["accept_all"]}): {len(grey_in)}')
+        accepted |= set(grey_in)
     blocking = [n for n in grey_in if n not in accepted]
     if blocking and '--emit' in argv:
         print(f'  REFUSED: {len(blocking)} sheet(s) with no prince inside the outline — research them, or list each '
