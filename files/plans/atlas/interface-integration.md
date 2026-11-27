@@ -159,7 +159,9 @@ first screen, then the map starts under it. What remains to measure is React's o
   the cartouches, the boxes and modals the plates proposed — and I integrate what he hands over. Until a piece
   arrives, a component is built with its structure, its behaviour and its tokens, and a plain dress.
 - **The plates' CSS is not ported**: written by script, one rule per combination, in fixed pixels (README). Each piece
-  is rewritten with variables, the corners as one `<symbol>` + `<use>`; class names are namespaced, the plates reusing
+  is rewritten with variables, each kind of corner as one `<symbol>` + `<use>` — **not one corner for every piece: the
+  dev tries corners piece by piece, and the same one is not bound to serve everywhere** (the dev, 2026-11-27); class
+  names are namespaced, the plates reusing
   `.band`, `.row`, `.btn`, `.cap` for different things.
 - **A workbench page** shows each piece alone, as the Cartographer's does (memory `workbench-over-storybook`).
 

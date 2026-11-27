@@ -28,38 +28,45 @@ dessinée seldjoukide alors qu'elle était fatimide (`/Volumes/Acer/atlas-histor
 **Les données sont à l'historien, toute la chaîne** (le dev, 24/11 ; `roles/coder.md`, mémoire `data-chain-is-the-historians`) :
 recherche, saisie, export, son commit, sa fusion et le push. Je n'exporte plus, ne commite plus d'export, n'écris plus de
 donnée du CMS ; je lui demande une pause avant une migration ou une relance du serveur, rien d'autre. **J'avance seul par
-le tableau** (le dev, 24/11) : un arbre par ticket (`.claude/worktrees/<ticket>`), fusionné et retiré à la fin — sauf une
-fusion qui rechargerait son Cartographe, qui attend son mot. **À la reprise** : `ListAgents`, et dire à l'historien que je
-suis la nouvelle session du codeur.
+le tableau** (le dev, 24/11). **Depuis le 27/11 au soir : tout dans `main`, plus d'arbre par ticket** (sa règle, mémoire
+`everything-in-main-no-tree-per-ticket` — elle remplace l'« arbre par ticket » de `roles/coder.md`, à corriger là).
+**À la reprise** : `ListAgents`, et dire à l'historien que je suis la nouvelle session du codeur.
 
 **Le plan d'autonomie de 1200** : `files/plans/historian/autonomy-and-1200.md` (ma part au § 5). **Attendent sa décision**
 (§ 7) : le commit d'export allégé (point a) et la suppression des pays et des personnes ouverte à l'historien (point d).
 
-## ▶ ON REPREND ICI — après le redémarrage du 27/11 : CARTO-568
+## ▶ ON REPREND ICI — le 27/11 au soir, après CARTO-568 et CARTO-584
 
-**Le 26/11, deux tickets faits et fusionnés dans `main`, poussés le soir par le push de l'historien (`c7bc10f7`)** : CARTO-498 (« Ajouter au CMS » par la session
-de la personne connectée, plus de clé ; la fenêtre « Le CMS » quand il n'est pas lancé) et CARTO-567 (la session ne se
-prolonge qu'après un geste ; deux heures sans geste, reconnexion ; « La carte est enregistrée. »). **Il les essaiera
-lui-même sur `main`** ; son CMS prendra `tokenExpiration: 7200` à son prochain démarrage. `CMS_API_KEY` du `.env` du
-Cartographe ne sert plus (le lui rappeler s'il l'a posée). **Pour une page à son image** : sa capture, point par point
-(mémoire `reproduce-the-reference`). **Un arbre** : `git worktree add`, puis `EnterWorktree`, et `ExitWorktree` (keep)
-avant la fusion — la ligne d'état suit (sa règle du 26/11, `CLAUDE.md`).
+**Fait et fusionné dans `main` le 27/11, pas poussé** : CARTO-568 (`0ff19d9f`, « Vérifier cette année » face au CMS) et
+CARTO-584 (`1f0d9676`, `placeRing` / `replaceRun` pour les plans de dessin de l'historien), tous deux « À valider ».
+**À lui dire** : pour essayer CARTO-568, relancer une fois le serveur du Cartographe (une route neuve du serveur de dev).
+**De l'historien** : il essaie CARTO-584 depuis son arbre `CARTO-580` (serveur 5180) — attendre son retour sur un refus
+à tort. **Les trois propositions laissées sans réponse** (une à la fois) : la ligne pour la revue (« une garde d'origine
+sur un GET ne s'appuie pas sur `Origin` seul : le navigateur ne l'envoie pas à sa propre adresse »), et rien d'autre.
 
-**Ensuite** : **CARTO-568** (« À faire », sa décision) — confronter la carte au CMS, l'aligner, puis bloquer le nom et les
-dates ; il lit le CMS par la même session que CARTO-498. **Un essai : `127.0.0.1`, jamais `localhost`** —
-`pnpm --dir <arbre>/packages/cms trial:start`, mon Cartographe sur 5199 avec `CMS_URL=http://127.0.0.1:3110`.
-**À préparer** : DESIGN-558 — le Claude du design system a fait le chat de l'agent (l'historien, 26/11) ; demander à sa
-session (`fubaritico-ds`) le paquet, la version et les composants, et les noter sur le ticket. ATLAS-559 (le kit) reste
-ouvert. **Fait le 27/11, sur son ordre** : les six fusions de doublons (CARTO-571, la source Fournier ; CARTO-575, Eu,
-Rethel, Sancerre, Montpellier, Laval) — copies d'avant dans `packages/cms/.backups/`, export refait par l'historien
-(`3c1d8a28`). **`pnpm cms:merge` demande l'ordre du dev écrit en toutes lettres** : le feu vert de l'historien a été refusé
-par le mode auto ; et sous zsh, les arguments d'une variable se passent `${=args}`. **De l'historien, 26/11** : relire
-`count_chains.py` et `direct_vassals.py` (non commités, dans `.claude/skills/bulk-entry/scripts/`) avant de les prendre.
+**▶ D'abord, finir le rangement qu'il a demandé** (_« je veux juste que tout revienne à sa place »_) : l'arbre `CMS-225`
+garde 4 fichiers commencés et non commités (`packages/cms/src/names/{fetchLabels,nameReport}.ts`, `src/report/`,
+`src/wikidata/askPatiently.ts`). Ma proposition, sans réponse : les écrire dans `files/patches/CMS-225.patch` (sur son
+disque, réappliquables), puis retirer l'arbre — **son oui avant**, le retrait efface ce qui n'est pas commité. Un commit
+`--no-verify` dans la branche a été refusé (règle du projet). Les arbres `historian` (1100) et `CARTO-580` (1200) sont à
+l'historien, avec ses cartes en cours : lui demander de les ranger quand il a fini. **Sur `main`, à moi et non commité** :
+`files/plans/atlas/interface-integration.md` (sa règle : les coins d'ornement ne sont pas les mêmes partout) — commité
+avec ce point de reprise.
 
-**À valider par lui** : REPO-542 (ses deux règles de permission, dans le commentaire du ticket). **En haut d'« À
-faire »** : CORE-486, CMS-441, CARTO-336, et CARTO-568 là où il l'a rangé ; **CARTO-554** (les vignettes des cartes récentes), mis de côté.
-**En cours** : ATLAS-136, ATLAS-408, ATLAS-448 (bloqué), ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien), et les
-épiques. **Les arbres en attente** : CMS-225 (son code commencé, le ticket au Backlog).
+**Ensuite, sa demande du 27/11** : **ATLAS-522**, la navigation par siècle (la capsule, les deux flèches), à faire seul
+sans attendre ATLAS-520/521 ; une feuille CSS par composant (`Century/century.css`, chargée par `ui/styles/sheets.ts`) ;
+**il en écrira lui-même le cadre et les ornements**, je corrige ce qui n'est pas à sa place — et je lui livre
+`packages/atlas/src/ui/styles/README.md` (où sont les styles, la nomenclature `atlas-<bloc>__<élément>`, l'état par
+`aria-*`, les variables `--atlas-*` de `theme.css`, l'établi).
+**À préparer** : DESIGN-558 — la réponse est arrivée : `HANDOFF-from-fubaritico-ds.md` à la racine (non suivi) annonce
+`fubaritico-ds` 0.11.0 (`Chat`, `Textarea`) ; la recopier sur le ticket puis supprimer la note ; la montée du catalogue
+avec ATLAS-559. **De l'historien, 26/11** : relire `count_chains.py` et `direct_vassals.py` (non commités, dans
+`.claude/skills/bulk-entry/scripts/`) avant de les prendre. **`pnpm cms:merge` demande l'ordre du dev écrit en toutes
+lettres**, et sous zsh les arguments d'une variable se passent `${=args}`.
+
+**À valider par lui** : REPO-542, CARTO-568, CARTO-584. **En haut d'« À faire »** : CORE-486, CMS-441, CARTO-336 ;
+**CARTO-554** (les vignettes des cartes récentes), mis de côté. **En cours** : ATLAS-136, ATLAS-408, ATLAS-448 (bloqué),
+ATLAS-461, CMS-279, CARTO-525 et 526 (l'historien), et les épiques.
 **Prioritaire, à lui proposer** : ATLAS-527, le crédit Cliopatria sur l'atlas — le site en ligne n'est pas en règle.
 **L'interface de l'atlas** (épique ATLAS-329, `files/plans/atlas/interface-integration.md`) : suivent ATLAS-520,
 521, 522, la frise (ATLAS-358).

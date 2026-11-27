@@ -29,13 +29,11 @@
 
 ## Where it works
 
-- **Its tree is `coder`** (`.claude/worktrees/coder`, branch `coder`), synced with `main` whenever `main` moves; the
-  dev's servers run on `main`'s tree and are his.
-- **A tree per ticket** when it works on its own through the board (the dev, 2026-11-24: « tu peux créer des worktrees »):
-  `.claude/worktrees/<ticket>`, branch `<ticket>`, merged into `main` at the ticket's end and removed — except a merge
-  that would reload the dev's Cartographer, which waits for his word. **The session enters it** with `EnterWorktree`
-  (`path`) once created, and leaves it with `ExitWorktree` (`keep`) before the merge — otherwise its folder stays in
-  `main` and the status line says `arbre main · branche main` while it writes in the ticket's tree (the dev, 2026-11-26).
+- **On `main`, no tree per ticket** (the dev, 2026-11-27: « tout dans main … il n'y a jamais de limite » — it replaces
+  the tree per ticket of 2026-11-24 and the `coder` tree): a ticket is committed on `main`, the historian told so he can
+  sync his drawing tree. The dev's servers run on `main`'s tree and are his; a change his Cartographer reloads is said.
+  A trial that needs a server of my own (`trial:start`) is the one case for a short-lived tree, entered with
+  `EnterWorktree` (`path`), left with `ExitWorktree` (`keep`), and removed at once.
 - **A second coder**, when the dev wants two at once: its own tree `coder-2`, its own tickets, never the same files;
   each merges into `main` at the end of each ticket.
 - The status line shows the role, the tree and the branch at all times (`.claude/statusline.mjs`).

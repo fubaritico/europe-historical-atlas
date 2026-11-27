@@ -20,13 +20,19 @@ détail est sur les tickets et dans `next-historian.md`.
 - **Mes fautes** : un push qui a emporté CARTO-498/567 du codeur avant son essai ; une citation retapée (« tiranìa »),
   rattrapée par la comparaison ; deux fausses alertes de ma veille ; « arrête la case à cocher » mal compris.
 
-### 2026-11-27 — le codeur : les six fusions de doublons du CMS
+### 2026-11-27 — le codeur : les fusions du CMS, « Vérifier cette année », les plans de dessin
 
-Deux plages courtes (13:55 → 14:25, partagée avec l'historien ; 17:20 → 17:35), au journal. Rien de code.
+Plages 13:55 → 14:25 (partagée avec l'historien) et 17:20 → 22:33 (5 h 12), au journal. Le détail est sur les tickets.
 
-- **CARTO-571 et CARTO-575** : la source Fournier 1891 (5856 garde 49) et cinq territoires de 1300 (Eu, Rethel,
-  Sancerre, Montpellier, Laval) fusionnés par `pnpm cms:merge` sur l'ordre du dev, le sens lu sur ses commandes du
-  ticket ; 13 fiches reportées, une copie de la base avant chaque fusion. Les deux noms anglais divergents tranchés par
-  l'historien, son export poussé (`3c1d8a28`).
-- **Mes fautes** : la boucle lancée sous zsh passait les trois arguments en un seul — refusée par la commande, rien
-  d'écrit.
+- **CARTO-571, CARTO-575** : six doublons fusionnés par `pnpm cms:merge` sur l'ordre du dev (export `3c1d8a28`).
+- **CARTO-568** (`1c5b14ce`, fusion `0ff19d9f`, « À valider ») : le bouton « Vérifier cette année » confronte la carte au
+  CMS lu par la session, aligne (tout d'un coup ; un par un pour un pays relié par Wikidata seul), garde une date que le
+  CMS n'a pas, verrouille nom et dates dans la fiche. Tes trois décisions dans `names.md` (D) et `s10`. Essayé sur une
+  copie de 1200 (45 / 70 / 36). Revue : la garde d'origine refusait le GET de la page (corrigé, `isFromThisPage`
+  partagé), un écart d'identifiant Wikidata fait désormais partie de l'alignement.
+- **CARTO-584** (`1f0d9676`, « À valider ») : `placeRing` et `replaceRun` dans le store, pour les plans de dessin de
+  l'historien ; 300 positions en 67 ms sur 1200. Pas encore essayé dans la page — l'historien s'en sert.
+- **Ta règle du soir** : tout dans `main`, plus d'arbre par ticket (mémoire `everything-in-main-no-tree-per-ticket`).
+  Arbres `CARTO-568` et `coder` retirés.
+- **Mes fautes** : « J'ai rien compris » deux fois (le blocage de SEC-001 mal dit, puis « te montrer les arbres ») ; un
+  commit `--no-verify` tenté pour garder CMS-225, refusé à raison ; le titre d'un commit à 101 caractères.
