@@ -288,11 +288,61 @@
 }
 
 /*
- * [Check this year] (CARTO-568, `s10`): the groups one under the other, each a heading with its action, a line of
- * help, its rows — a polity's name as a button that opens its sheet, what the CMS says, the row's action.
+ * [Check this year] (CARTO-568, `s10`): one tab per group (the dev, 2026-11-27: one long list « fait juste peur »),
+ * wide enough for the four labels side by side; in a tab, its help beside its action, then its rows — a polity's name
+ * as a button that opens its sheet, what the CMS says, the row's action.
  */
-.map-check__group + .map-check__group {
-  margin-top: 14px;
+.map-check {
+  width: 640px;
+}
+
+/* The open tab in the text's white, the others in the dimmer ink — the design system's two, swapped (the dev,
+   2026-11-27). */
+.map-check .ui-tabs {
+  --ui-tabs-trigger-color: var(--ink-off);
+  --ui-tabs-trigger-active-color: var(--ink);
+  --ui-tabs-trigger-padding-inline: 8px;
+  --ui-tabs-panel-offset: 8px;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 10px; /* the tabs clear of the title bar */
+}
+
+/*
+ * Only the open tab's panel scrolls (the dev, 2026-11-27): the dialogue's body, which scrolls in every other dialogue,
+ * is a column here that does not, so the title bar and the row of tabs stay in view. The panel is never given a
+ * `display` — the design system hides the closed ones with `hidden`.
+ */
+.ui-modal .map-check .ui-card__body {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.map-check__panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/*
+ * A tab's count, a capsule after its label, raised to the tab's upper corner (the dev, 2026-11-27): the tabs on the
+ * left, each as wide as its label and its count, so the room between label and capsule is the same in every tab.
+ */
+.map-check .ui-tabs__trigger {
+  white-space: nowrap;
+}
+
+.map-check__count {
+  --ui-badge-font-size: 10px;
+  --ui-badge-padding-inline: 5px;
+  --ui-badge-padding-block: 1px;
+
+  position: relative;
+  top: -6px;
 }
 
 .map-check__heading {
@@ -300,18 +350,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-.map-check__title {
-  margin: 0;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
+  margin-bottom: 8px;
 }
 
 .map-check__help {
-  margin: 2px 0 6px;
+  margin: 0;
   color: var(--ink-dim);
   font-size: 11px;
   line-height: 16px;
@@ -371,6 +414,13 @@
 .ui-modal .ui-card__body {
   min-height: 0;
   overflow-y: auto;
+}
+
+/* The title bar and the buttons keep their height: without it a long body squeezes them instead of scrolling — seen on
+   [Check this year] with 125 rows, its title pressed against the bar's edge (the dev, 2026-11-27). */
+.ui-modal .ui-card__header,
+.ui-modal .ui-card__footer {
+  flex-shrink: 0;
 }
 
 /* A city's information box (the dev, 2026-11-16: « élargis la modale »): its sources and chain on long lines. */

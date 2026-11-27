@@ -14,7 +14,7 @@ import type { TiedPolity } from '@europe-historical-atlas/core/data/cmsAlignment
  * @param props.rows - the polities
  * @param props.pageOf - the address of a territory's page
  * @param props.onOpen - opens a polity's form
- * @returns the group, or nothing when no polity is in it
+ * @returns the group — its tab is made only when a polity is in it
  */
 export function ToEnterGroup({
   rows,
@@ -29,10 +29,8 @@ export function ToEnterGroup({
   const t = useTranslation(MAP_CHECK_MESSAGES)
 
   // Render
-  if (rows.length === 0) return null
-
   return (
-    <CheckGroup heading={t('toEnter', { count: rows.length })} help={t('toEnterHelp')}>
+    <CheckGroup help={t('toEnterHelp')}>
       {rows.map((row) => (
         <CheckRow
           key={row.id}

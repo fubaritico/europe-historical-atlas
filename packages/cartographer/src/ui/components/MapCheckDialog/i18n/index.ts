@@ -10,7 +10,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `title` — the dialogue's title and accessible name.
  * - `reading` — while the CMS is read.
  * - `nothing` — no group has a row.
- * - `toAlign`, `toConfirm`, `toEnter`, `untied` — a group's heading; `count`, its rows.
+ * - `groups` — the tabs' accessible name.
+ * - `toAlign`, `toConfirm`, `toEnter`, `untied` — a group's tab, its count beside it in a badge.
  * - `toAlignHelp`, `toConfirmHelp`, `toEnterHelp`, `untiedHelp` — what a group means and what settles it.
  * - `alignAll` — aligns every row of « different from the CMS ».
  * - `align` — aligns one row to confirm; `alignPolity`, its accessible name, `name` the polity's.

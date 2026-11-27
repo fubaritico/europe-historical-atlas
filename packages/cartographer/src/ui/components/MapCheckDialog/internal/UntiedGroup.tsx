@@ -12,7 +12,7 @@ import type { UntiedPolity } from '@europe-historical-atlas/core/data/cmsAlignme
  * @param props - the rows and the opening
  * @param props.rows - the polities
  * @param props.onOpen - opens a polity's form
- * @returns the group, or nothing when no polity is in it
+ * @returns the group — its tab is made only when a polity is in it
  */
 export function UntiedGroup({
   rows,
@@ -25,10 +25,8 @@ export function UntiedGroup({
   const t = useTranslation(MAP_CHECK_MESSAGES)
 
   // Render
-  if (rows.length === 0) return null
-
   return (
-    <CheckGroup heading={t('untied', { count: rows.length })} help={t('untiedHelp')}>
+    <CheckGroup help={t('untiedHelp')}>
       {rows.map((row) => (
         <CheckRow
           key={row.id}

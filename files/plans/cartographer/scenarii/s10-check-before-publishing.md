@@ -159,6 +159,15 @@ Scenario: the CI checks before the site is deployed
 > CMS » does; online, the chrome writes no CMS and this check is not offered.
 
 ```gherkin
+Scenario: the groups in tabs (the dev, 2026-11-27: one long list to scroll « fait juste peur »)
+  Given "1300" is open and the CMS answers
+  When I press [Check this year]
+  Then each group with a polity in it is a tab, its count in a capsule in the tab's corner — different from the CMS,
+    to confirm, to enter in the CMS, tied to nothing, in that order
+  And the open tab is written in white, the others in the dimmer ink
+  And the first of them is open, and a group with none has no tab
+  And a tab emptied by an alignment goes, its neighbour opened
+
 Scenario: the polities tied to nothing
   Given "1300" is open and the CMS answers
   When I press [Check this year]

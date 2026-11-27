@@ -125,11 +125,16 @@ function open(
 }
 
 /**
- * A group of the dialogue, by the start of its heading.
- * @param heading - its heading's first words
- * @returns the group
+ * A group of the dialogue, its tab chosen, by the start of its tab's label.
+ * @param user - the user who chooses the tab
+ * @param heading - the label's first words
+ * @returns the group's panel
  */
-const group = (heading: string) => screen.getByRole('region', { name: new RegExp(`^${heading}`) })
+async function group(user: ReturnType<typeof userEvent.setup>, heading: string) {
+  const name = new RegExp(`^${heading}`)
+  await user.click(await screen.findByRole('tab', { name }))
+  return screen.getByRole('tabpanel', { name })
+}
 
 beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -142,21 +147,38 @@ afterEach(() => {
 
 describe('MapCheckDialog', () => {
   describe('happy path', () => {
-    it('reads the CMS at the press and lists the four groups', async () => {
+    it('reads the CMS at the press and lists the four groups, one tab each, the first open', async () => {
       const { store, territories, user } = open()
 
       await user.click(screen.getByRole('button', { name: 'press' }))
 
-      expect(await screen.findByRole('region', { name: 'Different from the CMS (1)' })).toBeTruthy()
-      expect(within(group('Different')).getByText('→ royaume de León · 910 – 1230')).toBeTruthy()
-      expect(within(group('To confirm')).getByText('→ califat abbasside · 750 – 1258')).toBeTruthy()
-      expect(within(group('To enter')).getByText('beginning')).toBeTruthy()
-      expect(within(group('Tied to nothing')).getByText('Friesland')).toBeTruthy()
+      const tabs = await screen.findAllByRole('tab')
+      expect(tabs.map((tab) => tab.firstChild?.textContent)).toEqual([
+        'Different from the CMS',
+        'To confirm',
+        'To enter in the CMS',
+        'Tied to nothing',
+      ])
+      expect(tabs.map((tab) => tab.querySelector('.map-check__count')?.textContent)).toEqual([
+        '1',
+        '1',
+        '1',
+        '1',
+      ])
+      expect(screen.getByRole('tabpanel').getAttribute('aria-labelledby')).toBe(tabs[0]?.id)
+      expect(
+        within(await group(user, 'Different')).getByText('→ royaume de León · 910 – 1230')
+      ).toBeTruthy()
+      expect(
+        within(await group(user, 'To confirm')).getByText('→ califat abbasside · 750 – 1258')
+      ).toBeTruthy()
+      expect(within(await group(user, 'To enter')).getByText('beginning')).toBeTruthy()
+      expect(within(await group(user, 'Tied to nothing')).getByText('Friesland')).toBeTruthy()
       expect(territories.list).toHaveBeenCalledOnce()
       expect(store.getState().territories).toEqual([LEON, CASTILE, ABBASIDS])
     })
 
-    it('aligns every polity tied by number as one step, the Buyids left to confirm', async () => {
+    it('aligns every polity tied by number as one step, the Buyids left to confirm, their tab open', async () => {
       const { store, user } = open()
       await user.click(screen.getByRole('button', { name: 'press' }))
 
@@ -168,7 +190,8 @@ describe('MapCheckDialog', () => {
         'Buyid Dynasty'
       )
       expect(store.getState().undoLabel).toBe('align royaume de León on the CMS')
-      expect(screen.queryByRole('region', { name: /^Different/ })).toBeNull()
+      expect(screen.queryByRole('tab', { name: /^Different/ })).toBeNull()
+      expect(screen.getByRole('tabpanel', { name: /^To confirm/ })).toBeTruthy()
     })
 
     it('aligns one polity to confirm on its click, writing its number', async () => {
@@ -176,7 +199,7 @@ describe('MapCheckDialog', () => {
       await user.click(screen.getByRole('button', { name: 'press' }))
 
       await user.click(
-        await within(group('To confirm')).findByRole('button', {
+        await within(await group(user, 'To confirm')).findByRole('button', {
           name: 'Align Buyid Dynasty on the CMS',
         })
       )
@@ -191,7 +214,9 @@ describe('MapCheckDialog', () => {
       const { user } = open()
       await user.click(screen.getByRole('button', { name: 'press' }))
 
-      const link = await within(group('To enter')).findByRole('link', { name: 'Edit in the CMS' })
+      const link = await within(await group(user, 'To enter')).findByRole('link', {
+        name: 'Edit in the CMS',
+      })
 
       expect(link.getAttribute('href')).toBe('http://cms/territories/16')
     })
@@ -200,10 +225,14 @@ describe('MapCheckDialog', () => {
       const { store, user } = open()
       await user.click(screen.getByRole('button', { name: 'press' }))
 
-      await user.click(await screen.findByRole('button', { name: 'Open the sheet of Friesland' }))
+      await user.click(
+        await within(await group(user, 'Tied to nothing')).findByRole('button', {
+          name: 'Open the sheet of Friesland',
+        })
+      )
 
       expect(store.getState().polityForm).toBe('friesland')
-      expect(screen.queryByRole('region', { name: /^Tied to nothing/ })).toBeNull()
+      expect(screen.queryByRole('tab')).toBeNull()
     })
 
     it('says a map aligned on the CMS has nothing to report', async () => {
@@ -215,6 +244,20 @@ describe('MapCheckDialog', () => {
       expect(
         await screen.findByText('The map is aligned on the CMS: nothing to report.')
       ).toBeTruthy()
+      expect(screen.queryByRole('tablist')).toBeNull()
+    })
+
+    it('makes no tab for an empty group, the first group with a polity open', async () => {
+      const { user } = open(undefined, [BUYIDS, FRIESLAND])
+
+      await user.click(screen.getByRole('button', { name: 'press' }))
+
+      const tabs = await screen.findAllByRole('tab')
+      expect(tabs.map((tab) => tab.firstChild?.textContent)).toEqual([
+        'To confirm',
+        'Tied to nothing',
+      ])
+      expect(screen.getByRole('tabpanel', { name: /^To confirm/ })).toBeTruthy()
     })
   })
 
@@ -278,7 +321,7 @@ describe('MapCheckDialog', () => {
     it('says an alignment the document refuses, as an error and on screen, nothing changed (review QUAL-001)', async () => {
       const { store, report, user } = open()
       await user.click(screen.getByRole('button', { name: 'press' }))
-      await screen.findByRole('region', { name: /^Different/ })
+      await screen.findByRole('tabpanel', { name: /^Different/ })
       vi.spyOn(store.getState(), 'editPolities').mockReturnValue(false)
 
       await user.click(screen.getByRole('button', { name: 'Align all' }))
@@ -310,11 +353,15 @@ describe('MapCheckDialog', () => {
 
       await user.click(screen.getByRole('button', { name: 'press' }))
 
-      expect(await within(group('To enter')).findByText('beginning and end')).toBeTruthy()
+      expect(within(await group(user, 'To enter')).getByText('beginning and end')).toBeTruthy()
       expect(
-        within(group('Tied to nothing')).getByText('territory no. 99 is no longer in the CMS')
+        within(await group(user, 'Tied to nothing')).getByText(
+          'territory no. 99 is no longer in the CMS'
+        )
       ).toBeTruthy()
-      expect(within(group('To confirm')).getByText('→ royaume de Castille · ? – ?')).toBeTruthy()
+      expect(
+        within(await group(user, 'To confirm')).getByText('→ royaume de Castille · ? – ?')
+      ).toBeTruthy()
     })
 
     it('names the CMS’s Wikidata item of a polity tied by number to another', async () => {
@@ -324,7 +371,7 @@ describe('MapCheckDialog', () => {
       await user.click(screen.getByRole('button', { name: 'press' }))
 
       expect(
-        await within(group('Different')).findByText(
+        within(await group(user, 'Different')).getByText(
           "→ royaume de León · 910 – 1230 · the CMS's Wikidata: Q199442"
         )
       ).toBeTruthy()

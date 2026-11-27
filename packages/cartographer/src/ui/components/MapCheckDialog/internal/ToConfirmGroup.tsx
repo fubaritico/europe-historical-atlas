@@ -15,7 +15,7 @@ import type { TiedPolity } from '@europe-historical-atlas/core/data/cmsAlignment
  * @param props.rows - the polities
  * @param props.onAlign - aligns one polity
  * @param props.onOpen - opens a polity's form
- * @returns the group, or nothing when no polity is in it
+ * @returns the group — its tab is made only when a polity is in it
  */
 export function ToConfirmGroup({
   rows,
@@ -30,10 +30,8 @@ export function ToConfirmGroup({
   const t = useTranslation(MAP_CHECK_MESSAGES)
 
   // Render
-  if (rows.length === 0) return null
-
   return (
-    <CheckGroup heading={t('toConfirm', { count: rows.length })} help={t('toConfirmHelp')}>
+    <CheckGroup help={t('toConfirmHelp')}>
       {rows.map((row) => (
         <CheckRow key={row.id} id={row.id} name={row.name} detail={cmsSide(row, t)} onOpen={onOpen}>
           <AlignButton id={row.id} name={row.name} onAlign={onAlign} />

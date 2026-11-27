@@ -15,7 +15,7 @@ import type { TiedPolity } from '@europe-historical-atlas/core/data/cmsAlignment
  * @param props.rows - the polities
  * @param props.onAlignAll - aligns them all, as one step
  * @param props.onOpen - opens a polity's form
- * @returns the group, or nothing when no polity is in it
+ * @returns the group — its tab is made only when a polity is in it
  */
 export function ToAlignGroup({
   rows,
@@ -30,11 +30,8 @@ export function ToAlignGroup({
   const t = useTranslation(MAP_CHECK_MESSAGES)
 
   // Render
-  if (rows.length === 0) return null
-
   return (
     <CheckGroup
-      heading={t('toAlign', { count: rows.length })}
       help={t('toAlignHelp')}
       action={
         <Button type="button" variant="secondary" onClick={onAlignAll}>
