@@ -24,6 +24,31 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
 > runs. The limit comes from open data that keeps old limits; the belonging from the CMS's sheets. 33 polities drawn
 > the first evening (Holstein to Thuringia), the Empire's alerts from 1 966 to 1 290.
 
+### The order of work — the dev's, 2026-11-27, compulsory
+
+> _"Not just taking up my order: you build it into the way you must draw."_ The surface method below is HOW a polity is
+> drawn; this is in WHICH ORDER, and what each laying must also do.
+
+1. **The base is Cliopatria's map** of the year — its sovereigns, their lines, their Wikidata: a first draft, its
+   political reading not binding (the dev, 27/11).
+2. **Tier N-1 first: every direct vassal of each sovereign**, whatever its rank — duchy, march, county, bishopric,
+   abbey, free town. The list is the base's, never my memory: the vassal links of 1200 (`direct_vassals.py`, the page
+   `<year>/toutes-zones/resultats/vassaux-directs.md`; for the Empire, the vassals of the kingdom of Germany — 104 in
+   1200). **Then N-2** (a county held of a duke: La Marck of Cologne, Leuchtenberg, Upper Lusatia…), each laid inside
+   its N-1, never before it. **Careful with empires** (the dev, 27/11): the Empire has **kingdoms between it and its
+   princes** — Germany, Italy, Burgundy-Arles, Bohemia — more an organisation of the territory than a holder's bond (the
+   evidence system's « territory it depends on », not « the bond »). Read the base's chain before counting a tier, and
+   accept the progressive fragmentation of the Empire as it is.
+3. **Every laying also corrects the border between sovereign states** where the vassal reaches it: a vassal at its
+   sovereign's edge carries that edge to its own limit, and the neighbouring sovereign's line moves with it — no
+   Cliopatria straight line is left where a vassal has been laid (Prignitz inside Cliopatria's Denmark, 1200).
+4. **Precision by zone**: **Western Europe exact** (commune limits, no geometric line); **Central Europe as exact as
+   the data allows**; the farther from Europe, the more Cliopatria's lines are acceptable — _"sometimes we will have no
+   choice, and it won't matter much; in some parts it matters a lot."_
+5. **A vassal with too few sheets for the vote is researched before it is drawn** — never laid as district patches
+   (Brandenburg of 1200: 6 sheets, three islands; held back for a research lot).
+6. **The same retracing for France and Spain** after the Empire (the dev, 27/11) — every sovereign of Western Europe.
+
 1. **The data** (once, on the archive disk, `outils/geodata/`, each with its licence in `geodata.py`): BKG DLM250
    (named rivers, Germany) and VG250 (communes), GISCO NUTS 3 (districts, Europe), HydroRIVERS (steps of 500 m —
    outside Germany only). `compose.py` keeps two pickles in `outils/geodata/cache/` (delete one to rebuild it).
