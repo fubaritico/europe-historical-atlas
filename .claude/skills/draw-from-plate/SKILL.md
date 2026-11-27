@@ -17,6 +17,50 @@ procedure below is the slow way. Do not skip a step to go faster: every skipped 
 Read first: `/use-cartographer` (how an agent uses the Cartographer — its journal, local, says how the Pen behaves under my hands) and
 `files/plans/cartographer/scenarii/s99-holes.md` from `H-36` on (what the tool still gets wrong).
 
+## The surface method — the way to draw since 2026-11-27 (the Empire of 1200, CARTO-580)
+
+> The dev, 27/11: _"extreme precision — no potatoes, no triangles"_, then _"precision, and speed: proceed as a machine,
+> as a program"_. A plate at 1:9 M is ~3 km a pixel: it says **which** territories exist, never **where** their limit
+> runs. The limit comes from open data that keeps old limits; the belonging from the CMS's sheets. 33 polities drawn
+> the first evening (Holstein to Thuringia), the Empire's alerts from 1 966 to 1 290.
+
+1. **The data** (once, on the archive disk, `outils/geodata/`, each with its licence in `geodata.py`): BKG DLM250
+   (named rivers, Germany) and VG250 (communes), GISCO NUTS 3 (districts, Europe), HydroRIVERS (steps of 500 m —
+   outside Germany only). `compose.py` keeps two pickles in `outils/geodata/cache/` (delete one to rebuild it).
+2. **A spec per polity** (`compose.py`, its header): the polity's registry fields (ids from the CMS's territory and
+   Wikidata — `band-specs.py` in `cartes/1200/hre/` writes a whole band of them), **`{"vote": [NUTS districts]}`** —
+   each commune goes to the holder most of its sheets name; a commune with no sheet follows its neighbours; a commune
+   with only sheets naming no prince stays out — and `within` the suzerain. Add or remove districts and communes by hand
+   only where the vote cannot know (Hadeln, saxon, left out of Bremen).
+3. **`compose.py <spec> [--emit]`** cuts by the suzerain's own domain (minus its vassals, minus foreign polities, plus the
+   polity's own present surface when it is redrawn), **takes its sea** (the suzerain's sea nearest its coast, 40 km,
+   teeth under 1.5 km cut), drops points doubling an anchor, checks every 1200 sheet of the box, draws `plan.png`, and
+   with `--emit` writes `ops.json`. **It refuses** while a sheet naming no prince falls inside — research it, or
+   `accept` it with why, or `accept_in` the list of a backfill researching it (CARTO-585).
+4. **A band in one go**: `after` lists the plans composed before (taken out of the domain), so a whole band is composed
+   by one shell loop, smallest polities first, then laid by one call in the page.
+5. **Lay it** (`serve.py <folder> --port 87xx`, then in the page `await import('http://127.0.0.1:87xx/<f>/page-ops.js')`,
+   `await ops.load()`, `await ops.run(0, n)`): `ring` is **`placeRing`** (CARTO-584, the coder's: one history step, an
+   anchor within 1 m reused, no snap, the Pen's closing — a vassal carved); `replace` is `replaceRun`; `pen` is the old
+   click-by-click. A polity redrawn: `pilot.removeRings` its rings, then `placeRing` the new ones.
+6. **Measure, before and after, always the same export**: `pnpm cities:alerts --map 1200 --box=…` from `main` (before)
+   and from the drawing tree (after), `overlaps.mjs`, `shape.mjs` (its « spikes » are the corners of commune limits).
+
+**What it costs**: ~4 s to compose a polity, under 1 s to lay it; the time is in choosing the districts.
+
+**The traps met on 27/11** — each one cost a run:
+
+- **zsh splits no variable into words**: `set -- ${=e}`, never `set -- $e` (a loop of NUTS pairs ran on one argument).
+- **Wikidata answers 403 to Python without a `User-Agent`** header.
+- **The page's anchor indices are not the file's**: the save renumbers. Find an anchor by its exact position.
+- **Two positions within 1 m of one anchor**: `placeRing` refuses (rightly, nothing written) — `compose.py` drops them.
+- **A modern commune can hold two lords' places** (Unna, Ense, Hamm…): the vote gives it to the majority; the minority
+  stays a witness on the wrong side, said in the report, never forced.
+- **A polity redrawn must get back its own surface** in the domain (the carve took it out of the lord's): fixed in
+  `compose.py`.
+- **An allegiance or a witness is not a holder** (`/enter-in-cms`): 447 sheets of 1200 held « by the king » on one
+  witness line drew Wistedt into Bremen — the refusal of step 3 exists for that.
+
 ## Licence — before anything
 
 A plate is one of the **verification layers** of a year — the whole method, base layer first: `/use-cartographer`,

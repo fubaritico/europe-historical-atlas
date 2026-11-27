@@ -61,6 +61,12 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   map's vassal », a point valid by the duchy drawn under it — the obligation wins. A place whose holder is not read yet
   is entered with its line of existence and no holder, and listed in the region's note as _holder to read_: a debt
   to pay, since every place still has a belonging to find.
+- **An allegiance or a witness is never a holder** (the dev, 2026-11-27, CARTO-585). A holder line quotes a sentence
+  that says **who held the place** — his lordship, his fief, his rights there. A sentence that says whose side a lord
+  took (« erkannten Philipp an », « von Seiten des Königs Otto »), or that a man witnessed a charter (« dann die
+  dienstmannen … »), says nothing of the place: it is not a holder line, even « by district ». Found on 27/11 in 447
+  sheets of 1200, all given to the king of Germany on one witness line laid in series. A district whose lord is not
+  read keeps no holder — never the king, nor the sovereign, by default.
 - **Through the MCP only.** Never the seed (`pnpm seed:cms` once ran on his base), never SQL that writes, never the
   REST API by `curl`, never a script. If the `cms` tools are absent or refused, **stop and tell the dev** — no other way in.
 - **I undo my own errors — never the dev** (the dev, 2026-11-18: _"I no longer delete your mistakes"_; CMS-454,

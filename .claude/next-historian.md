@@ -9,7 +9,63 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — après le redémarrage du 27/11, 17 h 35
+## ▶ ON REPREND ICI — 27/11, 22 h 45 : le Saint-Empire de 1200 (CARTO-580), la bande suivante vers le sud
+
+**Sa demande (27/11)** : les vassaux de l'Empire du nord au sud, précision extrême (« pas de patates, pas de
+triangles »), duchés d'abord, regroupement par royaume ensuite ; couleurs et retouches de points **plus tard, avec
+lui**. **Il regarde dans l'onglet Chrome** du groupe de Claude, mon Cartographe : `http://127.0.0.1:5180/` (arbre
+`.claude/worktrees/CARTO-580`, à jour de `main` au `1f0d9676` ; il s'y est connecté au CMS). Serveur 5180 : tâche de fond
+de la session, à relancer si absent (`CMS_URL=http://127.0.0.1:3100 pnpm -C <arbre>/packages/cartographer exec vite
+--port 5180 --strictPort`, Node 24). La carte n'est **ni commitée ni dans `main`** : sur son mot (sa règle du 27/11, tout
+le code dans `main` ; la carte, sur son mot). Copie d'avant : `/Volumes/Acer/atlas-historien/cartes/1200/1200.before-claude-2026-11-27`.
+
+**La méthode** : `/draw-from-plate`, section « The surface method » (écrite ce soir) — `compose.py` (vote par commune,
+mer, cache), `band-specs.py` (`cartes/1200/hre/`), `page-ops.js` + `serve.py`, `placeRing` / `replaceRun` (CARTO-584,
+livré par le codeur). Dans la page, après un rechargement : `await import('/@fs/<arbre>/.claude/skills/use-cartographer/scripts/pilot.js')`,
+puis `serve.py /Volumes/Acer/atlas-historien/cartes/1200/hre --port 8769` et `await import('http://127.0.0.1:8769/<dossier>/page-ops.js')`.
+
+**Fait (33 entités, toutes vassales de l'Empire)** : la frontière danoise sur l'Eider (crochet de Rendsburg) ; Fehmarn
+au Danemark ; Holstein ; Brême (refait avec sa mer) ; Westphalie ; terres welfes ; Ravensberg, Tecklenburg, Osnabrück,
+Minden, Schaumbourg, Münster, Lippe ; la bande 50,2–52° (`band2-order.json`, 20 : Klettenberg … Cologne, Thuringe).
+**Mesure** (`cities:alerts`, export `cartes/1200/hre/export.json`, boîte 3,43.5,19,55) : **1 966 → 1 290**. Chevauchements :
+seuls les deux d'avant (Danemark × Empire à l'Eider 2,6 km² ; Danemark × Sandomierz).
+
+**Suivant** : la bande 48,5–50,2° (Trèves, le Palatinat, la Hesse rhénane, Wurtzbourg, Bamberg, Nuremberg…), puis la
+Souabe, la Bavière, l'Autriche, la Styrie, la Carinthie ; la Bohême et la Haute-Lusace ; la Lorraine et les Pays-Bas
+(hors VG250 : GISCO seul, ou le LAU — à ajouter à `compose.py`). Ratzebourg, le Dithmarschen, Verden, la Frise et
+Oldenbourg : à rechercher d'abord (un témoin ou aucun). **À sa décision** : Bassum et Syke (exclave de Brême ?) ; le
+Hadeln hors de Brême (de mémoire) ; le libellé « archevêché souverain » d'un vassal ; la Marck vassale de Cologne
+(posée sous l'Empire) ; les alleux welfes en une entité.
+
+**La reprise CARTO-585** (En cours, deux chefs de zone en fond) : 498 fiches au roi seul (447 sur la ligne de témoin
+« dann die dieustmannen Cuno von Minzenberg ») ; dossier `/Volumes/Acer/atlas-historien/1200/reprise-germanie/`. Les
+villes qu'elle traite sont **acceptées** dans les contours (`accept_in`) : à remesurer à son retour, et les contours
+recomposés si le vote change. Puis export, commit, push ; l'oracle réindexé (livres de CARTO-578, 579, 582, 583, 585).
+
+**À nettoyer, sur son mot** (des dossiers à moi sur Acer, rien de lui) : `cartes/1200/hre/_test/` ; les 20 dossiers de
+la bande à noms français (`comte-de-…`, `principaute-episcopale-de-…`, `archeveche-de-mayence`, `archidiocese-de-cologne`,
+`landgraviat-de-thuringe`, `marche-de-…`) restés de la première génération ; les zips `outils/geodata/bkg/*.zip` et
+`hydrorivers/*.zip` (déjà dézippés, 375 Mo). Les serveurs `serve.py` (ports 8765–8769) sont arrêtés à la fin de la session.
+
+## ▶ AVANT — 27/11, 17 h 55 : CARTO-582 et CARTO-583 lancés, sur son ordre
+
+**Sa décision (27/11, 17 h 50)** : lancer maintenant les lots des Balkans-Byzance et de l'Anatolie-Caucase de 1300 (elle
+remplace « après le 2/12 » ci-dessous). Deux chefs de zone `zone-lead` en fond, les deux tickets « En cours » ; leur
+travail dans `/Volumes/Acer/atlas-historien/1300/balkans-byzance/` et `anatolie-caucase/` (leur `fiche.md` dit où ils en
+sont). Le journal : `pnpm research-log`. **À leur retour** : la réindexation de l'oracle (leurs livres et ceux de
+CARTO-578, 579), l'export, le commit, le push, les tickets. Le MCP « cms » était à reconnecter par lui (`/mcp`) :
+le serveur écoute sur 127.0.0.1 seulement, et l'adresse configurée est `localhost` (refusée en IPv6).
+
+**Les deux recherches sont closes (27/11, ~18 h 45), rien de saisi : CONNEXION IMPOSSIBLE au MCP « cms »**. Les charges
+sont prêtes dans `travail/payloads/` des deux zones ; la reprise pas à pas est dans chaque `note-de-region.md`.
+Anatolie-Caucase : 180 fiches, 29 titres. Balkans-Byzance : 235 fiches, 32 titres. **À moi** : (1) ranger et indexer les
+ouvrages (Anatolie : Bedrosian 1979, Uzunçarşılı 1969, Brosset 1849, Fallmerayer 1827 à ranger, que `archive.py work` a
+refusés, et 5 autres à indexer ; Balkans : 13, listés dans sa note, Dinić 1978 rangé deux fois) ; (2) revérifier
+`1300/hongrie-pologne/travail/candidats-exclus.json`, réécrit par le script du chef d'Anatolie puis restauré ;
+(3) la ligne 3196 de `registre/attempts.jsonl` ; (4) les doublons des Balkans (Véria, Tríkala, Amyclées, Parga,
+Kassiópi, Ioánnina, Árta, Acanthos), à fusionner par `cms:merge` sur l'ordre du dev.
+
+## ▶ AVANT — après le redémarrage du 27/11, 17 h 35
 
 **Au départ** : Acer vérifié (`diskutil verifyVolume`) et la base de l'oracle (`PRAGMA quick_check` sur
 `oracle-data/oracle.sqlite`), puis `pnpm oracle:start` (le crochet le fait aussi) ; le serveur du CMS relancé
