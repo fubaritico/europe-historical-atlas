@@ -19,6 +19,7 @@ The spec:
   "take": ["kingdom-of-denmark"],                        sovereigns the polity may take ground from (the order of
                                                          work, point 3): their land enters the domain, and the plan
                                                          lays each of their rings again without what was taken
+  "extend": true,                                        a polity already drawn: only its new ground, as more rings
   "over": ["duchy-of-franconia"],                        co-vassals laid as frames whose ground the polity may
                                                          take (placeRing carves them itself)
   "remove": [ … the same kinds … ],
@@ -307,6 +308,10 @@ def main(argv):
             surface = unary_union([surface, bite]).buffer(0)
             print(f'  sea taken offshore: {round(bite.area * 111.32 * 111.32 * math.cos(math.radians((s_ + n_) / 2)))} km²')
     surface = surface.intersection(domain)
+    # a polity already drawn, EXTENDED (Thuringia into the Franconian frame, 28/11): only the ground it does not hold
+    # yet is planned, laid as more rings of it (no create) — placeRing carves it out of the frame
+    if spec.get('extend') and own in F:
+        surface = surface.difference(F[own]).buffer(0)
     parts = [g for g in getattr(surface, 'geoms', [surface]) if isinstance(g, Polygon)]
     lat = surface.centroid.y
     tol = km_to_deg(spec.get('tol_km', 0.1), lat)
@@ -403,7 +408,8 @@ def main(argv):
               f"--cities {folder}/cities.json --px 1800 > /dev/null")
     print(f'  picture: {folder}/plan.png')
     if '--emit' in argv:
-        ops = [['create', spec['polity']]] + [['ring', spec['polity']['id'], list(map(list, r))] for r in rings]
+        ops = ([] if spec.get('extend') else [['create', spec['polity']]]) + \
+            [['ring', spec['polity']['id'], list(map(list, r))] for r in rings]
         # each neighbouring sovereign the polity took ground from: its rings under the new outline taken away and laid
         # again without that ground — their new edge runs on the polity's own points, so the border is shared
         A_ = doc['anchors']
