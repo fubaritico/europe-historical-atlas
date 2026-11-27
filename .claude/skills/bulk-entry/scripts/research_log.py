@@ -29,6 +29,12 @@ ATTEMPTS = pathlib.Path('/Volumes/Acer/atlas-historien/registre/attempts.jsonl')
 WORDS = {'found': 'TROUVÉ', 'nothing': 'RIEN', 'refused': 'REFUSÉ', 'not available': 'INACCESSIBLE',
          'not relevant': 'HORS SUJET'}
 NEEDED = ('year', 'region', 'kind', 'where', 'words', 'result')
+# The kinds region_gate.py reads (its CHANNELS, WORKS and 'library'), copied, never imported (a neighbour that writes
+# files is never imported: bulk-entry, « Gotchas »). Refused at the writing since 2026-11-27: two lines a gate refuses
+# blocked every team's entry that night, and the register is the dev's to repair, never an agent's.
+KINDS = {'oracle', 'wikipedia-bibliography', 'jstor', 'gallica', 'bnf', 'archive-org',
+         'atlas-on-disk', 'book-index', 'book-passage', 'library'}
+WORKS = {'atlas-on-disk', 'book-index', 'book-passage'}
 
 
 def say(message):
@@ -47,6 +53,11 @@ def attempt(raw):
     lacking = [k for k in NEEDED if row.get(k) in (None, '')]
     if row.get('result') not in WORDS:
         lacking.append('result (one of: %s)' % ', '.join(WORDS))
+    if row.get('kind') not in KINDS:
+        lacking.append('kind (one of: %s)' % ', '.join(sorted(KINDS)))
+    if row.get('result') == 'not relevant' and row.get('kind') not in WORKS:
+        lacking.append('« not relevant » only for a single work (%s); a channel searched in vain is « nothing »'
+                       % ', '.join(sorted(WORKS)))
     if row.get('result') == 'not relevant' and not str(row.get('reason') or '').strip():
         lacking.append('reason')
     if lacking:
