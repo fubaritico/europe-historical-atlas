@@ -12,6 +12,11 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **Pour le codeur, de l'historien (23/11)** : les notes de recherche sont sur Acer ; `wikidataId.ts:3` et `cityVerdict.ts:21` citent encore
 `files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md`.
 
+**De l'historien (27/11)** : la décision du dev — la carte tirée de Cliopatria est un premier jet (les tracés, les
+identifiants Wikidata), sa lecture politique ne fait pas foi ; les données d'abord, la retouche ensuite, avec lui :
+CARTO-580 (1200), CARTO-581 (1300). 1300 a 4 809 fiches sur sept zones. `pnpm oracle:start|stop` existent ; un arbre :
+`EnterWorktree` (la ligne d'état suit).
+
 **De l'historien (26/11)** : l'épique **ATLAS-557** (l'agent de l'atlas, pour les lecteurs) t'est assignée, découpée en 8 tickets ; DESIGN-558 d'abord (Claude Design, sur la base des composants de chat du design system en marque blanche), puis ATLAS-559 (le choix du kit). Un crochet de plus dans `settings.json`, `oracle-session.mjs` (REPO-544) : il démarre et arrête l'oracle de l'historien, et ne fait rien dans tes sessions.
 
 **À lui rappeler en début de session, quel que soit le rôle** (sa demande, 19/11) : (1) la côte libanaise de sa 1100,
@@ -30,7 +35,7 @@ suis la nouvelle session du codeur.
 **Le plan d'autonomie de 1200** : `files/plans/historian/autonomy-and-1200.md` (ma part au § 5). **Attendent sa décision**
 (§ 7) : le commit d'export allégé (point a) et la suppression des pays et des personnes ouverte à l'historien (point d).
 
-## ▶ ON REPREND ICI — après le 26/11 au soir : CARTO-568
+## ▶ ON REPREND ICI — après le redémarrage du 27/11 : CARTO-568
 
 **Le 26/11, deux tickets faits et fusionnés dans `main`, poussés le soir par le push de l'historien (`c7bc10f7`)** : CARTO-498 (« Ajouter au CMS » par la session
 de la personne connectée, plus de clé ; la fenêtre « Le CMS » quand il n'est pas lancé) et CARTO-567 (la session ne se
@@ -45,9 +50,11 @@ dates ; il lit le CMS par la même session que CARTO-498. **Un essai : `127.0.0.
 `pnpm --dir <arbre>/packages/cms trial:start`, mon Cartographe sur 5199 avec `CMS_URL=http://127.0.0.1:3110`.
 **À préparer** : DESIGN-558 — le Claude du design system a fait le chat de l'agent (l'historien, 26/11) ; demander à sa
 session (`fubaritico-ds`) le paquet, la version et les composants, et les noter sur le ticket. ATLAS-559 (le kit) reste
-ouvert. **De l'historien, 26/11** : CARTO-571, fusionner la source Fournier en double (`pnpm cms:merge sources 5856 49`,
-après sa pause : ses agents écrivent la nuit) ; relire `count_chains.py` et `direct_vassals.py` (non commités, dans
-`.claude/skills/bulk-entry/scripts/`) avant de les prendre.
+ouvert. **Fait le 27/11, sur son ordre** : les six fusions de doublons (CARTO-571, la source Fournier ; CARTO-575, Eu,
+Rethel, Sancerre, Montpellier, Laval) — copies d'avant dans `packages/cms/.backups/`, export refait par l'historien
+(`3c1d8a28`). **`pnpm cms:merge` demande l'ordre du dev écrit en toutes lettres** : le feu vert de l'historien a été refusé
+par le mode auto ; et sous zsh, les arguments d'une variable se passent `${=args}`. **De l'historien, 26/11** : relire
+`count_chains.py` et `direct_vassals.py` (non commités, dans `.claude/skills/bulk-entry/scripts/`) avant de les prendre.
 
 **À valider par lui** : REPO-542 (ses deux règles de permission, dans le commentaire du ticket). **En haut d'« À
 faire »** : CORE-486, CMS-441, CARTO-336, et CARTO-568 là où il l'a rangé ; **CARTO-554** (les vignettes des cartes récentes), mis de côté.

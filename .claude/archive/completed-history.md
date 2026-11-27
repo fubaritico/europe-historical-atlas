@@ -2,6 +2,42 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-26 — le codeur : « Ajouter au CMS » par la session, deux heures sans geste
+
+Session **26/11 15:24 → 19:24**, dans la plage du journal 14:08 → 19:24 (5 h 15, partagée avec l'historien qui veillait
+l'oracle). **Fusionné dans `main`, pas poussé.**
+
+- **CARTO-498 Fait** (`1189bb29`, `214eab78`) : « Ajouter au CMS » crée ou relie le territoire avec la session de
+  la personne connectée, le cookie de Payload relayé par le serveur du Cartographe, plus de clé MCP ; le CMS absent
+  ouvre la fenêtre « Le CMS », la session perdue celle de reconnexion. Revue à sept relecteurs, essai sur une copie
+  de la base (657 trouvé, 779 créé). L'alignement carte/CMS sorti dans **CARTO-568** (« À faire », sa décision).
+- **CARTO-567 Fait** (`464c1d4b`) : la session ne se prolonge qu'après un geste, battement de 10 min, deux heures
+  écrites dans le CMS ; la fenêtre dit « La carte est enregistrée. » (sa formulation). Essayé avec des durées
+  raccourcies.
+- **Mes fautes** : une resynchronisation dont git avait doublé un bloc de `httpEndpoint.ts`, non relu — chaque requête
+  partait deux fois, attrapé par la revue (mémoire `resync-worktree-with-main`) ; un passage en « À faire » tenté
+  sans son ordre écrit, refusé par le mode auto.
+
+### 2026-11-25/26, nuit — le codeur : l'écran de départ façon Illustrator, la barre du haut, l'onglet de la carte
+
+Session **25/11 20:45 → 26/11 00:22** (3 h 37 ; la plage du journal, 12:26 → 00:22, est partagée avec les deux
+sessions d'avant) ; le chantier totalise **423 h 19 sur 64 plages**. **Tout est poussé** (le dev : « tu peux tout
+pousser ») ; CI verte jusqu'au déploiement, Sonar compris (run 45717522108).
+
+- **CARTO-536 Fait** (`a359c014`, fusion `d1ecd09d`) : l'écran de départ, refait d'après la capture d'Illustrator ;
+  plus de carte par défaut ni de `?map=` (la carte retenue dans l'onglet) ; « Nouvelle carte », « Fermer la carte » ;
+  ses icônes choisies par le dev sur l'établi. Revue (un défaut grave corrigé : une nouvelle carte du nom de la carte
+  ouverte la remplaçait) ; essayé sur une copie de la base (`s24`). CARTO-537 couvert par lui.
+- **CARTO-555 Fait** (`032fc7cd`, `0b8d34f6`) : la barre du haut — le nom au centre, les menus contre l'icône, plus de
+  boutons de fichier, un menu grisé en entier ; les cartes récentes défilent ; plus de formulaire qui clignote à
+  l'ouverture d'une carte ; « Se déconnecter » ferme la carte.
+- **CARTO-556 Fait** (`ba40bcd1`) : la croix de l'onglet ferme la carte ; `DocTab` et `DocTabs`, prêts pour plusieurs
+  cartes ouvertes ; l'onglet nomme la carte, plus son année.
+- **CARTO-554 À faire** : les vignettes des cartes récentes, mises de côté par le dev.
+- **Mes fautes** : « comme Illustrator » interprété au lieu d'être reproduit, trois fois, jusqu'à sa colère (mémoire
+  `reproduce-the-reference`) ; des icônes dessinées en carrés, floues et crénelées ; dit à tort que l'onglet portait le
+  nom de la carte ; deux titres de commit refusés.
+
 ### 2026-11-25/26 — l'historien : onze zones de 1200 saisies, l'oracle construit sur Qdrant, l'agent de l'atlas découpé
 
 Session **25/11 12:26 → 26/11 01:39** (13 h 12, 7 052 actions, au journal ; plage partagée avec le codeur). Le détail :

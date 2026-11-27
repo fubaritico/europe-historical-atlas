@@ -4,38 +4,29 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-26 — le codeur : « Ajouter au CMS » par la session, deux heures sans geste
+### 2026-11-26/27 — l'historien : les empreintes finies, le Maghreb et les chaînes de 1200, sept zones de 1300
 
-Session **26/11 15:24 → 19:24**, dans la plage du journal 14:08 → 19:24 (5 h 15, partagée avec l'historien qui veillait
-l'oracle). **Fusionné dans `main`, pas poussé.**
+Session **26/11 14:08 → 27/11 17:35** (plages 13 h 09, 29 min, 14 min, au journal ; partagées avec le codeur). Le
+détail est sur les tickets et dans `next-historian.md`.
 
-- **CARTO-498 Fait** (`1189bb29`, `214eab78`) : « Ajouter au CMS » crée ou relie le territoire avec la session de
-  la personne connectée, le cookie de Payload relayé par le serveur du Cartographe, plus de clé MCP ; le CMS absent
-  ouvre la fenêtre « Le CMS », la session perdue celle de reconnexion. Revue à sept relecteurs, essai sur une copie
-  de la base (657 trouvé, 779 créé). L'alignement carte/CMS sorti dans **CARTO-568** (« À faire », sa décision).
-- **CARTO-567 Fait** (`464c1d4b`) : la session ne se prolonge qu'après un geste, battement de 10 min, deux heures
-  écrites dans le CMS ; la fenêtre dit « La carte est enregistrée. » (sa formulation). Essayé avec des durées
-  raccourcies.
-- **Mes fautes** : une resynchronisation dont git avait doublé un bloc de `httpEndpoint.ts`, non relu — chaque requête
-  partait deux fois, attrapé par la revue (mémoire `resync-worktree-with-main`) ; un passage en « À faire » tenté
-  sans son ordre écrit, refusé par le mode auto.
+- **REPO-540 Fait** : 573 906 empreintes, toute la bibliothèque ; puis deux réindexations (25 508 et 146 572 passages).
+  REPO-569 créé (indexer chaque livre au fil de la recherche).
+- **1200** : CARTO-570 (le Maghreb, 57 fiches) et CARTO-571 (18 liens de vassalité, la page des vassaux directs) Fait.
+- **1300** (épique CARTO-572, sa demande) : CARTO-573 à 579 Fait — 4 809 fiches sur sept zones (Ibérie, Italie, îles
+  Britanniques, France, Empire ouest et est, Hongrie-Pologne), Albert Ier souverain. CARTO-582, 583 au Backlog (après
+  le 2/12) ; la retouche des cartes : CARTO-580 (1200), CARTO-581 (1300), « À faire », ensemble.
+- **Outillage** : la ligne d'état suit l'arbre (`EnterWorktree`) et note le contexte de la session ; le journal refuse
+  une tentative fautive à l'écriture ; `pnpm oracle:start|stop` ; le dev a posé la règle `mcp__cms`.
+- **Mes fautes** : un push qui a emporté CARTO-498/567 du codeur avant son essai ; une citation retapée (« tiranìa »),
+  rattrapée par la comparaison ; deux fausses alertes de ma veille ; « arrête la case à cocher » mal compris.
 
-### 2026-11-25/26, nuit — le codeur : l'écran de départ façon Illustrator, la barre du haut, l'onglet de la carte
+### 2026-11-27 — le codeur : les six fusions de doublons du CMS
 
-Session **25/11 20:45 → 26/11 00:22** (3 h 37 ; la plage du journal, 12:26 → 00:22, est partagée avec les deux
-sessions d'avant) ; le chantier totalise **423 h 19 sur 64 plages**. **Tout est poussé** (le dev : « tu peux tout
-pousser ») ; CI verte jusqu'au déploiement, Sonar compris (run 45717522108).
+Deux plages courtes (13:55 → 14:25, partagée avec l'historien ; 17:20 → 17:35), au journal. Rien de code.
 
-- **CARTO-536 Fait** (`a359c014`, fusion `d1ecd09d`) : l'écran de départ, refait d'après la capture d'Illustrator ;
-  plus de carte par défaut ni de `?map=` (la carte retenue dans l'onglet) ; « Nouvelle carte », « Fermer la carte » ;
-  ses icônes choisies par le dev sur l'établi. Revue (un défaut grave corrigé : une nouvelle carte du nom de la carte
-  ouverte la remplaçait) ; essayé sur une copie de la base (`s24`). CARTO-537 couvert par lui.
-- **CARTO-555 Fait** (`032fc7cd`, `0b8d34f6`) : la barre du haut — le nom au centre, les menus contre l'icône, plus de
-  boutons de fichier, un menu grisé en entier ; les cartes récentes défilent ; plus de formulaire qui clignote à
-  l'ouverture d'une carte ; « Se déconnecter » ferme la carte.
-- **CARTO-556 Fait** (`ba40bcd1`) : la croix de l'onglet ferme la carte ; `DocTab` et `DocTabs`, prêts pour plusieurs
-  cartes ouvertes ; l'onglet nomme la carte, plus son année.
-- **CARTO-554 À faire** : les vignettes des cartes récentes, mises de côté par le dev.
-- **Mes fautes** : « comme Illustrator » interprété au lieu d'être reproduit, trois fois, jusqu'à sa colère (mémoire
-  `reproduce-the-reference`) ; des icônes dessinées en carrés, floues et crénelées ; dit à tort que l'onglet portait le
-  nom de la carte ; deux titres de commit refusés.
+- **CARTO-571 et CARTO-575** : la source Fournier 1891 (5856 garde 49) et cinq territoires de 1300 (Eu, Rethel,
+  Sancerre, Montpellier, Laval) fusionnés par `pnpm cms:merge` sur l'ordre du dev, le sens lu sur ses commandes du
+  ticket ; 13 fiches reportées, une copie de la base avant chaque fusion. Les deux noms anglais divergents tranchés par
+  l'historien, son export poussé (`3c1d8a28`).
+- **Mes fautes** : la boucle lancée sous zsh passait les trois arguments en un seul — refusée par la commande, rien
+  d'écrit.

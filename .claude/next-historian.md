@@ -9,7 +9,27 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 26/11 après-midi : REPRENDRE LA VEILLE DES EMPREINTES (REPO-540), PUIS LE RESTE
+## ▶ ON REPREND ICI — après le redémarrage du 27/11, 17 h 35
+
+**Au départ** : Acer vérifié (`diskutil verifyVolume`) et la base de l'oracle (`PRAGMA quick_check` sur
+`oracle-data/oracle.sqlite`), puis `pnpm oracle:start` (le crochet le fait aussi) ; le serveur du CMS relancé
+(`/Volumes/Acer/atlas-historien/outils/start-cms.sh`, détaché) — le prévenir au codeur. Puis **réindexer l'oracle** :
+les livres rangés par CARTO-578 et 579 ne le sont pas (`catalog build`, `index build`, `embed`, Node 24).
+
+**Avec lui, d'abord** : **CARTO-580**, la retouche de 1200 — Cracovie en premier (Leszek le Blanc, pas Mieszko III :
+`1200/toutes-zones/resultats/note-de-region.md`, « À faire au matin ») ; la page
+`1200/toutes-zones/resultats/vassaux-directs.md`. Puis **CARTO-581**, la retouche de 1300. **Sa règle (27/11)** : la carte
+de Cliopatria est un premier jet (les tracés, les Wikidata) ; les données et les recherches complètes d'abord.
+
+**1300, ce qui reste** (épique CARTO-572 ; sept zones Fait, 4 809 fiches) : **CARTO-582** Balkans-Byzance et
+**CARTO-583** Anatolie-Caucase, tickets prêts au Backlog, **après le 2/12** (la semaine à ~51 %, sa décision : la
+méthode complète, le calendrier étalé) ; puis Scandinavie, Rus', Levant, Maghreb. ~3 points de semaine par zone, mesuré.
+
+**À savoir** : la règle `mcp__cms` est posée (toutes les écritures du CMS, la corbeille seule) ; le journal refuse une
+tentative fautive à l'écriture ; une citation se poste depuis son fichier et se compare ensuite par script dans la base
+(`titles_lines` en lecture seule) — jamais retapée. Les agents de saisie retapent : chaque chef répare depuis ses charges.
+
+## AVANT — 26/11 après-midi : la veille des empreintes (REPO-540, fini)
 
 **La session du 26/11 (01 h 41 → ~14 h 45) a eu un seul rôle, sa demande : surveiller le calcul des empreintes.** Il a
 fermé le terminal à la fin (bloqué) : le crochet a arrêté l'oracle proprement — **à relancer, et la veille avec**.
