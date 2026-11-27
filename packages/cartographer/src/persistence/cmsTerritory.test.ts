@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createCmsTerritoryClient, territoryAddedOf } from './cmsTerritory'
+import { createCmsTerritoryClient, territoriesReadOf, territoryAddedOf } from './cmsTerritory'
 
 import type { FetchLike } from '@europe-historical-atlas/core/utils/fetchWithin'
 
@@ -97,4 +97,66 @@ describe('createCmsTerritoryClient', () => {
   })
 
   // L2, L3, L5: the answers are read by territoryAddedOf, tested above
+})
+
+describe('territoriesReadOf (CARTO-568)', () => {
+  const LEON = {
+    id: 15,
+    name: 'royaume de León',
+    wikidata: 'Q199442',
+    existsFrom: 910,
+    existsTo: 1230,
+  }
+
+  describe('happy path', () => {
+    it('reads the territories of a 200', () => {
+      expect(territoriesReadOf(200, { territories: [LEON] })).toEqual({
+        kind: 'read',
+        territories: [LEON],
+      })
+    })
+  })
+
+  describe('managed errors', () => {
+    it('reads the failures as a creation does', () => {
+      expect(territoriesReadOf(503, null)).toEqual({ kind: 'offline' })
+      expect(territoriesReadOf(401, { reason: 'nobody' })).toEqual({ kind: 'signedOut' })
+      expect(territoriesReadOf(502, { reason: 'territory 4: no French name' })).toEqual({
+        kind: 'refused',
+        reason: 'territory 4: no French name',
+      })
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses a 200 whose list is malformed, never read as no territory', () => {
+      expect(territoriesReadOf(200, { territories: [{ id: 'x' }] })).toEqual({
+        kind: 'refused',
+        reason: 'the dev server answered a malformed list of territories',
+      })
+      expect(territoriesReadOf(200, null).kind).toBe('refused')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('refuses a 200 shaped as a creation', () => {
+      expect(territoriesReadOf(200, { id: 3, created: true }).kind).toBe('refused')
+    })
+
+    it('reads an empty list as no territory', () => {
+      expect(territoriesReadOf(200, { territories: [] })).toEqual({ kind: 'read', territories: [] })
+    })
+  })
+})
+
+describe('createCmsTerritoryClient, the listing', () => {
+  it('reads the route with a plain GET', async () => {
+    const fetchFile = vi.fn<FetchLike>(() => Promise.resolve(Response.json({ territories: [] })))
+
+    expect(await createCmsTerritoryClient('/__cms/territories', fetchFile).list()).toEqual({
+      kind: 'read',
+      territories: [],
+    })
+    expect(fetchFile).toHaveBeenCalledWith('/__cms/territories')
+  })
 })

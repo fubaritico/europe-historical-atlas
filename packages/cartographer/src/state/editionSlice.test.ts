@@ -882,6 +882,95 @@ describe('editionSlice.editPolity', () => {
   // L2/L4/L5: the variants and edges of the change are `core/editor/documentEdits.updatePolity`'s.
 })
 
+/**
+ * The two polities of the fixture.
+ * @param store - the store opened
+ * @returns France and the Empire
+ */
+function both(store: ReturnType<typeof openStore>['store']) {
+  const [france, empire] = store.getState().document.polities
+  if (france === undefined || empire === undefined) throw new Error('fixture changed')
+  return { france, empire }
+}
+
+describe('editionSlice.editPolities', () => {
+  const ALIGN: HistoryStep = { kind: 'align-on-cms', label: 'align 2 polities on the CMS' }
+
+  describe('happy path', () => {
+    it('changes several polities as one step, and one undo puts them all back', () => {
+      const { store } = openStore()
+      const { france, empire } = both(store)
+
+      const done = store.getState().editPolities(
+        [
+          { ...france, name: 'royaume de France' },
+          { ...empire, territory: 5 },
+        ],
+        ALIGN
+      )
+
+      expect(done).toBe(true)
+      expect(store.getState().document.polities.map((polity) => polity.name)).toContain(
+        'royaume de France'
+      )
+      expect(store.getState().document.polities[1]?.territory).toBe(5)
+      expect(store.getState().undoLabel).toBe('align 2 polities on the CMS')
+      store.getState().undo()
+      expect(store.getState().document.polities[0]?.name).toBe(france.name)
+      expect(store.getState().document.polities[1]?.territory).toBeUndefined()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('changes nothing when one polity is unknown, the known one included', () => {
+      const { store } = openStore()
+      const { france } = both(store)
+
+      const done = store.getState().editPolities(
+        [
+          { ...france, name: 'royaume de France' },
+          { ...france, id: 'nobody' },
+        ],
+        ALIGN
+      )
+
+      expect(done).toBe(false)
+      expect(store.getState().document.polities[0]?.name).toBe(france.name)
+      expect(store.getState().canUndo).toBe(false)
+    })
+
+    it('puts back what it changed when a later change is refused', () => {
+      // The trap: `updatePolity` changes the document as it goes, so the first polity would stay renamed outside any
+      // step if the second is refused — here a suzerain that would loop
+      const { store } = openStore()
+      const { france, empire } = both(store)
+
+      const done = store.getState().editPolities(
+        [
+          { ...france, name: 'royaume de France' },
+          { ...empire, suzerain: empire.id },
+        ],
+        ALIGN
+      )
+
+      expect(done).toBe(false)
+      expect(store.getState().document.polities[0]?.name).toBe(france.name)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('records nothing for an empty list', () => {
+      const { store } = openStore()
+
+      expect(store.getState().editPolities([], ALIGN)).toBe(false)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  // L4: N/A — no async; a throw of the copier propagates as every recorded action's (`recorder`).
+})
+
 const REMOVE: HistoryStep = { kind: 'delete-polity', label: 'delete Reaume de France' }
 
 describe('editionSlice.deletePolity', () => {

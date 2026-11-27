@@ -278,3 +278,15 @@ return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel
   read the CMS's setting. Harmless while the CMS's length stays well above the beat. **Trigger**: a CMS length brought
   near ten minutes — then a working author would be cut between two beats; derive the beat from one shared length.
   **Severity: à savoir.**
+- **[Check this year] (CARTO-568) leaves five points open, by my decision after its review of 2026-11-27**: (1) **the
+  store's territories have two writers** — the export at a map's opening, the CMS read live at the check — and the last
+  wins (ARCH-002): a map opened after a check goes back to the export's list, older; the form's locks then read it, and
+  a territory created since, or dates entered since, lock nothing until the next check. Harmless: a lock can only fall
+  away, never hold a wrong value. **Trigger**: the dev missing a lock — then the live list outlives a map's opening.
+  (2) **The reading of a Payload territory is written twice**, the export's (`packages/cms/src/export/toContentTerritory.ts`)
+  and the dev server's (`devServer/territoryList.ts`); the CMS package cannot be imported by the Cartographer. **Trigger**:
+  a field of the territories changed — then one reader in core taking `unknown`. (3) **`editPolities` rolls back by the
+  polities' array** (ARCH-005): right while `updatePolity` writes nothing else. (4) **The check's hook runs online too**,
+  subscribed to every document version while the dialogue is never mounted (ARCH-002 of the second batch): the bar
+  re-renders at each gesture, as it does already for its undo label. (5) **« Aligner » leaves the focus on the page's
+  body** when its row goes (A11Y-002), the editor's screen-reader courtesy as CARTO-498's point 3. **Severity: à savoir.**

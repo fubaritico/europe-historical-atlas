@@ -9,12 +9,12 @@ import { territoryProposals } from '../../../utils/territoryProposals'
 import { wikidataViewOf } from '../../../utils/wikidataView'
 import { POLITY_FORM_MESSAGES, PolityForm } from '../../PolityForm'
 import { useAddToCms } from '../hooks/useAddToCms'
+import { useCmsHeld } from '../hooks/useCmsHeld'
 import { usePolityDraft } from '../hooks/usePolityDraft'
 import { useWikidataItem } from '../hooks/useWikidataItem'
 import { ignoreOverlayClick } from '../utils/ignoreOverlayClick'
 
 import type { CartographerStoreHook } from '../../../../state/store'
-import type { WikidataField } from '../../../../wikidata/wikidataFacts'
 import type { WikidataSource } from '../../../../wikidata/wikidataSource'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
@@ -61,31 +61,28 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   const cms = useCmsChannel()
 
   // State
-  const { draft, errors, suzerains, ranks, close, onField, onColour, onForceShortName, onSubmit } =
+  const { draft, errors, suzerains, ranks, close, onColour, onForceShortName, onSubmit, ...rest } =
     usePolityDraft(store, editing, onClose)
   const reading = useWikidataItem(wikidata, draft.wikidata)
 
   // Derived
+  const { cmsHeld, onField, ...hold } = useCmsHeld(editing, territories, cms, rest.onField)
   const title = editing === null ? action('newPolity') : form('editTitle')
   const { document } = store.getState()
   const others = document.polities.filter((polity) => polity.id !== editing?.id)
   const warnings = rankWarnings(draft, editing?.id ?? null, document.polities)
-  const proposals = territoryProposals(
-    draft,
-    territories.find((territory) => String(territory.id) === draft.territory)
+  const proposals = hold.proposals(
+    territoryProposals(
+      draft,
+      territories.find(({ id }) => String(id) === draft.territory)
+    )
   )
-  const wikidataView = wikidataViewOf(reading, draft, document.year, others)
+  const wikidataView = hold.view(wikidataViewOf(reading, draft, document.year, others))
   const addToCms = useAddToCms(cms, addToCmsOffer(draft, wikidataView), onField)
   const territoryOptions = territories.map((territory) => ({
     value: String(territory.id),
     label: form('territoryLabel', { name: territory.name, id: String(territory.id) }),
   }))
-
-  // Handlers
-  // Wikidata only ever writes on the author's click, through the same path as typing.
-  const handleUseWikidata = (field: WikidataField, value: string) => {
-    onField(field, value)
-  }
 
   // Render
   return (
@@ -100,6 +97,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         rankWarnings={warnings}
         territoryProposals={proposals}
         addToCms={addToCms}
+        cmsHeld={cmsHeld}
         idLocked={editing !== null}
         onField={onField}
         onColour={onColour}
@@ -107,7 +105,8 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         onSubmit={onSubmit}
         onCancel={close}
         wikidata={wikidataView}
-        onUseWikidata={handleUseWikidata}
+        // Wikidata only ever writes on the author's click, through the same path as typing — the CMS's locks included
+        onUseWikidata={onField}
       />
     </Modal>
   )

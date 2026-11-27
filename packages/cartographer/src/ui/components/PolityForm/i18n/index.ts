@@ -29,6 +29,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `cmsCreated`, `cmsFound` — How it ended: created now, or found by its Wikidata item; `id` the territory's number.
  * - `cmsOffline`, `cmsSignedOut`, `cmsRefused` — Why nothing was written: the CMS not started, the session expired, or its refusal
  *   in its words (`reason`).
+ * - `heldByCms`, `editInCms` — A field the CMS holds, read-only, and the link to its territory's page (CARTO-568).
  * - `cmsBlock` — Why it cannot be added yet, by `reason` — `addToCmsOffer`'s `AddToCmsBlock`.
  * - `rankWarning` — A vassal ranking higher than its suzerain (CORE-489), under the suzerain: `vassal` and `suzerain`
  *   their names, `vassalRank` and `suzerainRank` their ranks, named.

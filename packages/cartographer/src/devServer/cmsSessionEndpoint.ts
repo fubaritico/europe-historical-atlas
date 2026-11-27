@@ -1,11 +1,5 @@
 import { CmsUnreachableError, SESSION_COOKIE, cookieOf, sessionUserOf } from './cmsSession'
-import {
-  LOG_TAG,
-  LOOPBACK_HOST,
-  answer,
-  createBodyMiddleware,
-  isSameMachineRequest,
-} from './httpEndpoint'
+import { LOG_TAG, answer, createBodyMiddleware, isFromThisPage } from './httpEndpoint'
 
 import type { CmsAnswer, CmsSession, SessionUser } from './cmsSession'
 import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from './httpEndpoint'
@@ -175,23 +169,6 @@ async function route(request: EndpointRequest, session: CmsSession): Promise<End
 }
 
 /**
- * Whether a request comes from a page this server served on this machine. A browser sends no `Origin` with a GET to its
- * own origin, so a GET without one, to a loopback host, is the page's own; a GET with another origin is refused like
- * any other request.
- * @param request - the request
- * @returns `true` when it does
- */
-function fromThisPage(request: EndpointRequest): boolean {
-  if (isSameMachineRequest(request.host, request.origin)) return true
-  return (
-    request.method === 'GET' &&
-    request.origin === undefined &&
-    request.host !== undefined &&
-    LOOPBACK_HOST.test(request.host)
-  )
-}
-
-/**
  * Answer one request, the CMS's silence told apart.
  * @param request - the request, its body read
  * @param session - the CMS's session routes
@@ -201,7 +178,7 @@ export async function handleSession(
   request: EndpointRequest,
   session: CmsSession
 ): Promise<EndpointResponse> {
-  if (!fromThisPage(request)) {
+  if (!isFromThisPage(request)) {
     console.warn(
       `${LOG_TAG} refused a session request from another origin: ${String(request.origin)}`
     )

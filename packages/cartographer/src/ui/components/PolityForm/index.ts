@@ -6,4 +6,4 @@
 export { PolityForm } from './PolityForm'
 export { POLITY_FORM_MESSAGES } from './i18n'
 export type { PolityFormProps } from './PolityForm'
-export type { AddToCmsProps, PolityFormField } from './polityFieldsProps'
+export type { AddToCmsProps, CmsHeld, PolityFormField } from './polityFieldsProps'

@@ -75,6 +75,26 @@ export function isSameMachineRequest(
 }
 
 /**
+ * Whether a request comes from a page this server served on this machine, a GET included. A browser sends no `Origin`
+ * with a GET to its own origin (CARTO-535 for the session's routes, CARTO-568 for the territories' listing), so a GET
+ * without one, to a loopback host, is the page's own — a page of another site cannot read its answer, and the loopback
+ * `Host` refuses a DNS-rebound name. Any other request needs both headers, `isSameMachineRequest`.
+ * @param request - the request
+ * @returns `true` when it does
+ */
+export function isFromThisPage(
+  request: Pick<EndpointRequest, 'method' | 'host' | 'origin'>
+): boolean {
+  if (isSameMachineRequest(request.host, request.origin)) return true
+  return (
+    request.method === 'GET' &&
+    request.origin === undefined &&
+    request.host !== undefined &&
+    LOOPBACK_HOST.test(request.host)
+  )
+}
+
+/**
  * Build a response with a JSON body.
  * @param status - the HTTP status
  * @param payload - what to put in the body

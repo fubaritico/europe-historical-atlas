@@ -19,6 +19,7 @@ import type {
 } from './wikidata/wikidataFacts'
 import type { HandPattern } from '@europe-historical-atlas/core/data/borderHands'
 import type { BorderRelation } from '@europe-historical-atlas/core/data/borderRelation'
+import type { DateField } from '@europe-historical-atlas/core/data/cmsAlignment'
 import type { WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { StackingSide } from '@europe-historical-atlas/core/editor/stacking'
 import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
@@ -68,6 +69,11 @@ const YES_NO = all<'yes' | 'no'>({ yes: true, no: true })
  * a defect reaches, and visibly. Keyed by catalogue, message and argument.
  */
 const CLOSED: Readonly<Record<string, readonly string[]>> = {
+  'MAP_CHECK_MESSAGES.dateFields.fields': all<'both' | DateField>({
+    both: true,
+    existsFrom: true,
+    existsTo: true,
+  }),
   'POLITIES_PANEL_MESSAGES.dropStep.side': all<StackingSide>({ front: true, back: true }),
   'POLITIES_PANEL_MESSAGES.dropped.side': all<StackingSide>({ front: true, back: true }),
   'ALARM_MESSAGES.title.topic': all<NoticeTopic>({
@@ -284,8 +290,9 @@ describe('the Cartographer catalogues', () => {
       // 28 since s19 (2026-11-02): the snapshots' and the draft's dialogues gone, Save as…'s and the question before
       // opening added; 29 with {Cities} (CARTO-193), 30 with the panels’ frame (CARTO-342), 31 with the clipboard (CARTO-345),
       // 32 with the panels' filter (CARTO-360); 33 with the sheet's paste (CARTO-345); 34 with the sign-in (CARTO-535);
-      // 36 with the start screen and « Nouvelle carte » (CARTO-536); 38 with the map's tab and their list (CARTO-556).
-      expect(CATALOGUES.length).toBe(38)
+      // 36 with the start screen and « Nouvelle carte » (CARTO-536); 38 with the map's tab and their list (CARTO-556);
+      // 39 with [Check this year] (CARTO-568).
+      expect(CATALOGUES.length).toBe(39)
     })
   })
 

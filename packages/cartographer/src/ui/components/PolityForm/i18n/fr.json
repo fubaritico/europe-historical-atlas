@@ -43,5 +43,7 @@
   "cmsOffline": "Le CMS ne répond pas : lancez-le, puis réessayez. Rien n’a été écrit.",
   "cmsSignedOut": "Votre session du CMS a expiré : reconnectez-vous, puis réessayez. Rien n’a été écrit.",
   "cmsRefused": "Le CMS a refusé : {reason}. Rien n’a été écrit.",
+  "heldByCms": "Tenu par le CMS : il se modifie dans le CMS.",
+  "editInCms": "Modifier dans le CMS",
   "cmsBlock": "{reason, select, noWikidata {Pour l’ajouter au CMS, tapez son identifiant Wikidata.} notAPolity {Cet identifiant Wikidata n’est pas une entité politique : il ne peut pas aller au CMS.} noRank {Pour l’ajouter au CMS, choisissez son rang.} noFrenchName {Wikidata n’a pas de nom français : créez le territoire dans le CMS.} noEnglishName {Wikidata n’a pas de nom anglais : créez le territoire dans le CMS.} badYear {Une année n’est pas un nombre entier : corrigez-la pour l’ajouter au CMS.} other {{reason}}}"
 }

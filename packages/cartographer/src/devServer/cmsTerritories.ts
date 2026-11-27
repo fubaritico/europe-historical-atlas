@@ -1,7 +1,9 @@
 import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { CmsUnreachableError } from './cmsSession'
+import { territoriesOf } from './territoryList'
 
+import type { ContentTerritory } from '@europe-historical-atlas/core/data/contentFormat'
 import type { FetchLike } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 /**
@@ -26,6 +28,12 @@ export interface CmsTerritories {
    * @returns its number
    */
   create(token: string, body: Record<string, unknown>): Promise<number>
+  /**
+   * Every territory, the bin left out — what [Check this year] confronts the map with (CARTO-568).
+   * @param token - the session's token
+   * @returns the territories, as the Cartographer holds them
+   */
+  list(token: string): Promise<ContentTerritory[]>
 }
 
 /** The CMS answered, and refused — its own sentence, a validation's. */
@@ -139,6 +147,16 @@ export function createCmsTerritories(url: string, fetchFile: FetchLike): CmsTerr
         body: JSON.stringify(territory),
       })) as { doc?: { id?: unknown } } | null
       return idOf(body?.doc?.id)
+    },
+    async list(token) {
+      // One page holding them all: a thousand territories, a few hundred kB; the bin is left out by Payload's default
+      const query = new URLSearchParams({ pagination: 'false', depth: '0' })
+      const body = await ask(fetchFile, `${base}?${query.toString()}`, { headers: headers(token) })
+      try {
+        return territoriesOf(body)
+      } catch (error: unknown) {
+        throw new CmsRefusalError(error instanceof Error ? error.message : String(error))
+      }
     },
   }
 }

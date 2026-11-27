@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
+import { useCmsChannel } from '../../../hooks/useCmsChannel'
+import { MapCheckDialog, useMapCheck } from '../../MapCheckDialog'
 import { followZoom } from '../utils/followZoom'
 
 import { DocBar } from './DocBar'
@@ -10,7 +12,8 @@ import type { MapNameSource } from '../../../utils/mapNameSource'
 
 /**
  * The document bar's binding: the one place it knows there is a store (`react-canvas-and-panels`). `DocBar`
- * takes values; this reads the slices and hands them over.
+ * takes values; this reads the slices and hands them over — and [Check this year]'s dialogue, which its button opens
+ * (CARTO-568).
  */
 
 /** What the document bar's binding needs. */
@@ -39,8 +42,12 @@ export function DocBarPanel({ store, history, mapName, onCloseMap }: DocBarPanel
   const undoLabel = store((state) => state.undoLabel)
   const redoLabel = store((state) => state.redoLabel)
 
+  // Context
+  const cms = useCmsChannel()
+
   // State
   const map = useSyncExternalStore(mapName.subscribe, mapName.get)
+  const check = useMapCheck(store, cms)
 
   // Derived
   // One map open, its tab shown — the list several maps open will fill (CARTO-556).
@@ -64,15 +71,19 @@ export function DocBarPanel({ store, history, mapName, onCloseMap }: DocBarPanel
 
   // Render
   return (
-    <DocBar
-      tabs={tabs}
-      onActivate={handleActivate}
-      onClose={handleClose}
-      undoLabel={undoLabel}
-      redoLabel={redoLabel}
-      onUndo={handleUndo}
-      onRedo={handleRedo}
-      zoomRef={handleZoomRef}
-    />
+    <>
+      <DocBar
+        tabs={tabs}
+        onActivate={handleActivate}
+        onClose={handleClose}
+        undoLabel={undoLabel}
+        redoLabel={redoLabel}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        onCheck={cms.mode === 'online' ? null : check.start}
+        zoomRef={handleZoomRef}
+      />
+      {cms.mode === 'offline' && <MapCheckDialog check={check} pageOf={cms.pageOf} />}
+    </>
   )
 }

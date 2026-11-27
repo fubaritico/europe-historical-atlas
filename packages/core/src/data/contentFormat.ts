@@ -364,6 +364,20 @@ const territorySchema: z.ZodMiniType<ContentTerritory> = z.strictObject({
   names: z.exactOptional(z.array(nameFormSchema)),
 })
 
+/** A list of the CMS's territories. */
+const territoryListSchema = z.array(territorySchema)
+
+/**
+ * The CMS's territories in a value read from outside — the Cartographer's live reading of the CMS (CARTO-568), held in
+ * the same shape as the export's.
+ * @param value - the value, as JSON parsed it
+ * @returns the territories, or `null` when it is not a list of them
+ */
+export function contentTerritoriesIn(value: unknown): ContentTerritory[] | null {
+  const read = territoryListSchema.safeParse(value)
+  return read.success ? read.data : null
+}
+
 /**
  * One reading of a city's chain of vassalage at its sheet's year (CMS-422, CARTO-435): the titles from its holder's
  * up, and why it stops — computed by `data/vassalChain` at the export, never typed. Two readings or more when the
