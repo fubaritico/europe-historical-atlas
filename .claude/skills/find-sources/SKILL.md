@@ -49,7 +49,7 @@ The orders only. Why each exists, the dev's words and the detail of every step: 
    when it exists, `<year>/<zone>/fiche.md`: what is already read is not fetched again. `archive.py open` the research.
    The base already has sheets for this region at this date: « A region already researched », step 1, first.
 1. Create the region's note `/Volumes/Acer/atlas-historien/<year>/<zone>/resultats/note-de-region.md` (sections: Axes given, Resources given,
-   Context points given, Context — …, Hypotheses, Holders by district, The chain of vassalage, Index references,
+   Context points given, Context — …, Hypotheses, Holders by district, The hierarchical chain, Index references,
    Cities met in the sources, Existence to read, Attempts).
 2. **One question, once — the setup is fast** (the dev, 2026-11-23: _"there must not be half an hour of
    preparation"_). His request carries the zone, the year and, if he has them, his axes and references

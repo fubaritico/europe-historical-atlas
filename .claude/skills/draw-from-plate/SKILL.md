@@ -31,7 +31,7 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
 
 1. **The base is Cliopatria's map** of the year — its sovereigns, their lines, their Wikidata: a first draft, its
    political reading not binding (the dev, 27/11).
-2. **Tier N-1 first: every direct vassal of each sovereign**, whatever its rank — duchy, march, county, bishopric,
+2. **Hierarchical rank N-1 first: every direct vassal of each sovereign**, whatever its rank — duchy, march, county, bishopric,
    abbey, free town. The list is the base's, never my memory: the vassal links of 1200 (`direct_vassals.py`, the page
    `<year>/toutes-zones/resultats/vassaux-directs.md`; for the Empire, the vassals of the kingdom of Germany — 104 in
    1200). **Then N-2** (a county held of a duke: La Marck of Cologne, Leuchtenberg, Upper Lusatia…), each laid inside
@@ -58,7 +58,7 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
    two plates (Shepherd pl. 72; Beidler 2019 p. 61, a reference), its lands with no lord read held by the frame
    (`accept_all`); the king's towns cut out as enclaves of the Empire; **a prince inside a frame keeps the suzerain the
    base gives it** (Trier under the Empire, never under Lorraine — my call, the dev having left it to me, 28/11), laid
-   with `over` so it is carved out of the frame. A vassal too small or too deep is hidden in the atlas, never undrawn
+   with `over` so it is carved out of the frame. A vassal is hidden in the atlas by its depth alone, never undrawn
    (CARTO-588).
 
 1. **The data** (once, on the archive disk, `outils/geodata/`, each with its licence in `geodata.py`): BKG DLM250

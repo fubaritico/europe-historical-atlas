@@ -309,7 +309,7 @@ Fragile: <yes — rests on Wikipedia alone / on one witness> | no
 Not found / dropped: <a quotation that could not be checked, a lead that led nowhere>
 ```
 
-**And per lord, once — the chain of vassalage up to the sovereign** (the dev, 2026-11-14: _"a clear concept to take
+**And per lord, once — the hierarchical chain up to the sovereign (« chain of vassalage » until 28/11)** (the dev, 2026-11-14: _"a clear concept to take
 into account in the research"_): of whom the holder holds at the date, then of whom that lord holds, each link with its
 witness, a link in doubt with both readings (Pitten → Margrave Ottokar II → Duke Henry III of Carinthia → the Emperor).
 Going down it draws the borders at every rank; going up it lets a town agree with a map that draws a higher rank
