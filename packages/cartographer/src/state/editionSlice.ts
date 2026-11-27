@@ -25,9 +25,11 @@ import { restack, restackBeside } from '@europe-historical-atlas/core/editor/sta
 
 import { outlineActions } from './outlineActions'
 import { pasteActions } from './pasteActions'
+import { scriptedActions } from './scriptedActions'
 
 import type { OutlineActions } from './outlineActions'
 import type { PasteActions } from './pasteActions'
+import type { ScriptedActions } from './scriptedActions'
 import type { Segment } from '@europe-historical-atlas/core/data/borderOverrides'
 import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -112,7 +114,7 @@ export interface EditionState {
  * {@link EditionActions.drawOutline}, {@link EditionActions.moveAnchors} — so no caller can do the first half
  * and forget the commit.
  */
-export interface EditionActions extends OutlineActions, PasteActions {
+export interface EditionActions extends OutlineActions, PasteActions, ScriptedActions {
   /** Record a finished gesture. One gesture is one step — never one per pointer move. */
   commit: (step: HistoryStep) => void
   /**
@@ -641,6 +643,7 @@ export function editionActions(
     ...pasteActions(record, backToTheLine(line, publish)),
     ...overrideActions(record),
     ...outlineActions(record),
+    ...scriptedActions(record, FREE_POINT_PROVENANCE),
     moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),
     ...stackingActions(record),
     ...anchorActions(record),
