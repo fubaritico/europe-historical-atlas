@@ -19,6 +19,8 @@ The spec:
   "take": ["kingdom-of-denmark"],                        sovereigns the polity may take ground from (the order of
                                                          work, point 3): their land enters the domain, and the plan
                                                          lays each of their rings again without what was taken
+  "over": ["duchy-of-franconia"],                        co-vassals laid as frames whose ground the polity may
+                                                         take (placeRing carves them itself)
   "remove": [ … the same kinds … ],
   "within": "holy-roman-empire",                         the suzerain whose own domain cuts the surface
   "after": ["<folder>", …],                              plans of the same band, composed before, taken out too
@@ -244,8 +246,13 @@ def main(argv):
     take = [t for t in spec.get('take', []) if t in F]
     for t in take:
         domain = unary_union([domain, F[t]]).buffer(0)
+    # a co-vassal laid as a frame (Franconia, 27/11): its ground is open to the princes inside it — placeRing carves a
+    # co-vassal itself, so nothing is emitted for it
+    over = [t for t in spec.get('over', []) if t in F]
+    for t in over:
+        domain = unary_union([domain, F[t]]).buffer(0)
     for pid, p in reg.items():
-        if p.get('suzerain') == lord and pid in F and pid != spec['polity']['id']:
+        if p.get('suzerain') == lord and pid in F and pid != spec['polity']['id'] and pid not in over:
             domain = domain.difference(F[pid])
     # and the neighbours that are not the lord's: an overlap the map already has (the Danish × Empire one at the
     # Eider's mouth) is never handed to the new polity

@@ -54,6 +54,12 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
    without blocking it** — the vote takes over once the sheets are there. Never district patches (Brandenburg of 1200:
    6 sheets, three islands).
 6. **The same retracing for France and Spain** after the Empire (the dev, 27/11) — every sovereign of Western Europe.
+7. **No holes: a duchy is laid as a frame** (the dev, 28/11: _"on the map we cannot have holes"_) — the region of the
+   two plates (Shepherd pl. 72; Beidler 2019 p. 61, a reference), its lands with no lord read held by the frame
+   (`accept_all`); the king's towns cut out as enclaves of the Empire; **a prince inside a frame keeps the suzerain the
+   base gives it** (Trier under the Empire, never under Lorraine — my call, the dev having left it to me, 28/11), laid
+   with `over` so it is carved out of the frame. A vassal too small or too deep is hidden in the atlas, never undrawn
+   (CARTO-588).
 
 1. **The data** (once, on the archive disk, `outils/geodata/`, each with its licence in `geodata.py`): BKG DLM250
    (named rivers, Germany) and VG250 (communes), GISCO NUTS 3 (districts, Europe), HydroRIVERS (steps of 500 m —
