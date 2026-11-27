@@ -18,6 +18,8 @@
  *                                                       the stretch between two anchors replaced (`replaceRun`)
  *   ["pen", "polity-id", [[lon, lat], …]]               the same outline with the Pen, a click per point (the old way)
  *   ["edit", "polity-id", {fields}]                     a polity's registry fields changed
+ *   ["unring", "polity-id", [[lon, lat], …]]             the polity's ring with exactly these anchors taken away (a
+ *                                                       sovereign's ring, laid again after without a vassal's ground)
  *
  * Loaded with: await import('http://127.0.0.1:<port>/page-ops.js') — `serve.py` serves it beside the plan's ops.json;
  * then `await ops.load()` and `await ops.run(from, to)`. `ops.run` stops at the first operation that fails, with why.
@@ -134,6 +136,17 @@ async function op(o) {
     if (a < 0 || b < 0) return { ok: false, why: 'replace ends', a, b }
     const r = S().replaceRun(a, b, o[3], { kind: 'replace-run', label: 'Replace a stretch' }, o[4] ?? {})
     return { ...r, ring: r.ring?.length }
+  }
+  if (kind === 'unring') {
+    // a sovereign's ring taken back before it is laid again without the ground a vassal took (the order of work, 27/11)
+    // matched by POSITION: two anchors can sit on one position (Austria, 27/11), and idx() takes the last of them
+    const A = S().document.anchors
+    const holds = (r, p) => r.some((i) => A[i] && near(A[i], where(p)))
+    // every planned point, plus the crossings the vassal's laying placed on the ring just before (Styria, 27/11)
+    const ring = rings(o[1]).find((r) => o[2].every((p) => holds(r, p)) && r.length - o[2].length <= 64)
+    if (!ring) return { ok: false, why: 'unring: no ring of the polity holds these anchors' }
+    const r = P().removeRings([{ polity: o[1], anchors: ring }])
+    return { ok: r.done === 1, ...r }
   }
   if (kind === 'pen') return drawRing(o[1], o[2])
   if (kind === 'edit') {

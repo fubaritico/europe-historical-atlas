@@ -15,7 +15,10 @@ The spec:
               {"rings": "<file.json>"},
               {"vote": ["DE929", …]} ],                 the communes of these districts the polity wins by its sheets
                                                          (a majority of a commune's sheets; a commune with none
-                                                         follows its neighbours) — Germany only (VG250)
+                                                         follows its neighbours) — VG250 in Germany, LAU elsewhere
+  "take": ["kingdom-of-denmark"],                        sovereigns the polity may take ground from (the order of
+                                                         work, point 3): their land enters the domain, and the plan
+                                                         lays each of their rings again without what was taken
   "remove": [ … the same kinds … ],
   "within": "holy-roman-empire",                         the suzerain whose own domain cuts the surface
   "after": ["<folder>", …],                              plans of the same band, composed before, taken out too
@@ -84,7 +87,16 @@ def communes():
         return [(sr.record['GEN'], sr.record['ARS'], transform(to_wgs, shape(sr.shape.__geo_interface__)))
                 for sr in shapefile.Reader(GEO + 'bkg/vg250_ebenen_0101/VG250_GEM.shp').iterShapeRecords(
                     fields=['GEN', 'ARS', 'GF']) if sr.record['GF'] == 4]
-    return cached('vg250_gem', build)
+    german = cached('vg250_gem', build)
+
+    def build_eu():
+        """The other countries' communes, GISCO LAU 2021 (EU and EFTA; © EuroGeographics, attribution)."""
+        feats = json.load(open(GEO + 'gisco/LAU_RG_01M_2021_4326.geojson'))['features']
+        return [(f['properties']['LAU_NAME'], f['properties']['GISCO_ID'], shape(f['geometry']).buffer(0))
+                for f in feats if f['properties']['CNTR_CODE'] != 'DE' and f['geometry']]
+    # Germany by the VG250 (finer), every other country by the LAU — so a duchy over Austria, Alsace or Brabant votes
+    # on its own communes too (the dev, 2026-11-27: Western Europe exact, Central Europe as exact as possible)
+    return german + cached('lau_eu', build_eu)
 
 
 def nuts(code):
@@ -110,7 +122,7 @@ def vg(layer, ars):
 
 
 def vote(districts, want, neutral, box):
-    """The communes (VG250, Germany) of some NUTS districts that the polity WINS, by the CMS's 1200 sheets: a commune
+    """The communes (VG250 in Germany, LAU elsewhere) of some NUTS districts that the polity WINS, by the CMS's 1200 sheets: a commune
     goes to the holder most of its sheets name (its own sheets only — a sheet with no prince does not vote); a commune
     with no sheet follows the majority of its neighbours already decided, round after round, until nothing moves; a
     commune still undecided stays out. Prints the count of each kind. Returns the union, WGS 84."""
@@ -217,13 +229,18 @@ def main(argv):
     own = spec['polity']['id']
     if own in F:  # a polity composed again: its present surface was carved out of the lord, it is its own to redraw
         domain = unary_union([domain, F[own]]).buffer(0)
+    # the order of work, point 3 (the dev, 2026-11-27): a vassal may carry its sovereign's edge into a neighbouring
+    # sovereign's ground that Cliopatria drew too far — the neighbour's land is open to it, and laid again without it
+    take = [t for t in spec.get('take', []) if t in F]
+    for t in take:
+        domain = unary_union([domain, F[t]]).buffer(0)
     for pid, p in reg.items():
         if p.get('suzerain') == lord and pid in F and pid != spec['polity']['id']:
             domain = domain.difference(F[pid])
     # and the neighbours that are not the lord's: an overlap the map already has (the Danish × Empire one at the
     # Eider's mouth) is never handed to the new polity
     for pid, g in F.items():
-        if pid not in (lord, own) and reg.get(pid, {}).get('suzerain') != lord and g.intersects(domain):
+        if pid not in (lord, own, *take) and reg.get(pid, {}).get('suzerain') != lord and g.intersects(domain):
             domain = domain.difference(g)
     # a band composed in one go: the outlines planned before this one (not drawn yet) are taken out as well
     for prev in spec.get('after', []):
@@ -365,6 +382,24 @@ def main(argv):
     print(f'  picture: {folder}/plan.png')
     if '--emit' in argv:
         ops = [['create', spec['polity']]] + [['ring', spec['polity']['id'], list(map(list, r))] for r in rings]
+        # each neighbouring sovereign the polity took ground from: its rings under the new outline taken away and laid
+        # again without that ground — their new edge runs on the polity's own points, so the border is shared
+        A_ = doc['anchors']
+        claims = {c['polity']: c['rings'] for c in doc['claims']}
+        for t in take:
+            for r in claims.get(t, []):
+                if len(r) < 3:
+                    continue
+                poly = Polygon([A_[j] for j in r]).buffer(0)
+                if poly.intersection(whole).area < min_area:
+                    continue
+                rest = poly.difference(whole)
+                ops.append(['unring', t, [list(A_[j]) for j in r]])
+                for g in getattr(rest, 'geoms', [rest]):
+                    if isinstance(g, Polygon) and g.area >= min_area:
+                        ops.append(['ring', t, [list(c) for c in g.exterior.coords][:-1]])
+                print(f'  {t}: one ring laid again without the ground taken '
+                      f'({round(poly.intersection(whole).area * 111.32 * 111.32 * math.cos(math.radians(lat)))} km²)')
         json.dump(ops, open(os.path.join(folder, 'ops.json'), 'w'))
         print(f'  ops.json: {len(ops)} operations')
 
