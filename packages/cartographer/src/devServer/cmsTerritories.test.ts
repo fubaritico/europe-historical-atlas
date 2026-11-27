@@ -112,3 +112,54 @@ describe('createCmsTerritories', () => {
     })
   })
 })
+
+describe('createCmsTerritories, the listing (CARTO-568)', () => {
+  describe('happy path', () => {
+    it('reads every territory in one page, with the session', async () => {
+      const fetchFile = cmsAnswering(200, {
+        docs: [{ id: 15, name: 'royaume de León', kind: 'kingdom', wikidata: 'Q199442' }],
+      })
+
+      const read = await createCmsTerritories(CMS_URL, fetchFile).list(TOKEN)
+
+      expect(read.map(({ id, name }) => [id, name])).toEqual([[15, 'royaume de León']])
+      const [url, init] = fetchFile.mock.calls[0] ?? []
+      const asked = new URL(url as string)
+      expect(asked.pathname).toBe('/api/territories')
+      expect(asked.searchParams.get('pagination')).toBe('false')
+      expect(new Headers(init?.headers).get('Authorization')).toBe('JWT session-token')
+      expect(init?.signal).toBeInstanceOf(AbortSignal)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('turns a list that cannot be read into a refusal, in its words', async () => {
+      const territories = createCmsTerritories(
+        CMS_URL,
+        cmsAnswering(200, { docs: [{ id: 4, name: '', kind: 'county' }] })
+      )
+
+      await expect(territories.list(TOKEN)).rejects.toThrow(
+        new CmsRefusalError('territory 4: no French name')
+      )
+    })
+
+    it('tells the session refused from a refusal', async () => {
+      const territories = createCmsTerritories(CMS_URL, cmsAnswering(403, null))
+
+      await expect(territories.list(TOKEN)).rejects.toThrow(CmsSessionRefusedError)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('tells a CMS that does not answer', async () => {
+      const fetchFile = vi.fn<FetchLike>(() => Promise.reject(new TypeError('fetch failed')))
+
+      await expect(createCmsTerritories(CMS_URL, fetchFile).list(TOKEN)).rejects.toThrow(
+        CmsUnreachableError
+      )
+    })
+  })
+
+  // L2, L5: the shapes of a territory are `territoryList`'s.
+})

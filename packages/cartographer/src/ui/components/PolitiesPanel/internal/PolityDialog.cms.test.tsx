@@ -67,7 +67,10 @@ function openOffline(answer: () => Promise<TerritoryAdded>, polity: YearPolity =
     viewport: { viewport: UNFRAMED },
   })
   store.getState().createPolity(polity, STEP)
-  const territories = { add: vi.fn<CmsTerritoryPort['add']>(answer) }
+  const territories = {
+    add: vi.fn<CmsTerritoryPort['add']>(answer),
+    list: vi.fn<CmsTerritoryPort['list']>(() => Promise.resolve({ kind: 'read', territories: [] })),
+  }
   const sessionLost = vi.fn()
   const report = vi.fn<Report>()
   const channel: CmsChannel = {

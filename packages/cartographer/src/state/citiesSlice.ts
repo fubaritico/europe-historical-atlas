@@ -65,7 +65,11 @@ export type CitiesLoad =
 export interface CitiesState {
   /** Every city of the export, whatever its date. */
   cities: readonly CityMark[]
-  /** Every territory of the CMS, for a polity of the map to be tied to one (CARTO-450); empty until read. */
+  /**
+   * Every territory of the CMS, for a polity of the map to be tied to one (CARTO-450); empty until read. The export's
+   * at a map's opening, replaced by the CMS read live at [Check this year] (CARTO-568) — the last written wins, nothing
+   * says which it holds (`rules/known-issues/cartographer.md`).
+   */
   territories: readonly ContentTerritory[]
   /** Where the load stands. */
   citiesLoad: CitiesLoad
@@ -112,7 +116,7 @@ export interface CitiesActions {
    */
   setCities: (cities: readonly CityMark[]) => void
   /**
-   * Install the CMS's territories read from the export (CARTO-450).
+   * Install the CMS's territories — read from the export (CARTO-450), or live by [Check this year] (CARTO-568).
    * @param territories - every territory
    */
   setTerritories: (territories: readonly ContentTerritory[]) => void

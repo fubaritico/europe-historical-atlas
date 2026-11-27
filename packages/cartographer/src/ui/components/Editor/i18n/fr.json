@@ -1,10 +1,10 @@
 {
-  "notBuilt": "pas encore construit ({scenarios})",
   "nothingToUndo": "rien à annuler",
   "nothingToRedo": "rien à rétablir",
   "undoHint": "{label} ({keys})",
   "redoHint": "{label} ({keys})",
   "checkYear": "Vérifier cette année",
+  "checkOnline": "en ligne, la carte ne se confronte pas au CMS",
   "menuBar": "Menus du Cartographe",
   "placeholder": "{zone, select, appBar {barre de l’application} docBar {barre du document} tools {outils} panels {panneaux} other {{zone}}}",
   "signOut": "Se déconnecter",

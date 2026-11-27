@@ -6,6 +6,7 @@ import { DocTabs } from '../../DocTabs'
 import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
+import { CheckYearButton } from './CheckYearButton'
 
 import type { DocTabsProps } from '../../DocTabs'
 
@@ -28,6 +29,8 @@ export interface DocBarProps extends DocTabsProps {
   onUndo: () => void
   /** Redo. */
   onRedo: () => void
+  /** [Check this year] — the map against the CMS (CARTO-568); `null` online, where the chrome reads no CMS. */
+  onCheck: (() => void) | null
 }
 
 /**
@@ -40,10 +43,18 @@ export interface DocBarProps extends DocTabsProps {
  * @param props.redoLabel - what a redo would apply again
  * @param props.onUndo - undo
  * @param props.onRedo - redo
+ * @param props.onCheck - check the year, or `null` when it cannot be
  * @param props.zoomRef - where the zoom is written
  * @returns the tab and the actions, the two ends of the bar
  */
-export function DocBar({ undoLabel, redoLabel, onUndo, onRedo, ...tabsProps }: DocBarProps) {
+export function DocBar({
+  undoLabel,
+  redoLabel,
+  onUndo,
+  onRedo,
+  onCheck,
+  ...tabsProps
+}: DocBarProps) {
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
@@ -81,11 +92,7 @@ export function DocBar({ undoLabel, redoLabel, onUndo, onRedo, ...tabsProps }: D
                 hint: t('redoHint', { label: redo, keys: shortcut('redo').shown }),
               })}
         />
-        <BarButton
-          label={t('checkYear')}
-          unavailable={t('notBuilt', { scenarios: 's10' })}
-          variant="primary"
-        />
+        <CheckYearButton onCheck={onCheck} />
       </div>
     </>
   )

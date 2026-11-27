@@ -5,6 +5,7 @@ import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../uti
 import type { RankWarning } from '../../utils/rankWarnings'
 import type { TerritoryProposal } from '../../utils/territoryProposals'
 import type { WikidataView } from '../../utils/wikidataView'
+import type { CmsLocks } from '@europe-historical-atlas/core/data/cmsAlignment'
 import type { ColorValue } from '@fubaritico/behaviors'
 
 /** « Ajouter au CMS », as the form shows it (CARTO-498, the flow offline). */
@@ -23,6 +24,14 @@ export interface AddToCmsProps {
   pageOf: (id: number) => string
   /** The author clicked « Ajouter au CMS ». */
   onAdd: () => void
+}
+
+/** What the CMS holds of a polity aligned on it (CARTO-568): its fields read-only, and where to change them. */
+export interface CmsHeld {
+  /** The fields the CMS holds — read-only in the form. */
+  locks: CmsLocks
+  /** Its territory's page in the CMS's admin, for « Modifier dans le CMS »; `null` online. */
+  page: string | null
 }
 
 /** The fields a form event can name: every text field and every list of the draft — the colour and the box their own. */
@@ -49,6 +58,8 @@ export interface PolityFieldsProps {
   territoryProposals: readonly TerritoryProposal[]
   /** « Ajouter au CMS » under « Territoire du CMS » (CARTO-498) — `null` online, where the chrome writes no CMS. */
   addToCms: AddToCmsProps | null
+  /** What the CMS holds of the polity — absent for a polity new or tied to no territory's number: nothing held. */
+  cmsHeld?: CmsHeld
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
   idLocked?: boolean
   /**

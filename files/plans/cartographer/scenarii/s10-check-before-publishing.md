@@ -149,3 +149,50 @@ Scenario: the CI checks before the site is deployed
   And its log says first, as a fault: the year, the polity, the stretch, "publishable: no"
   And a ring that crosses itself is reported the same way, as a warning
 ```
+
+## Added 2026-11-27 — the map against the CMS (CARTO-568)
+
+> The dev's calls, 2026-11-25 and 2026-11-27: the CMS is the only source of truth; the map keeps each polity's name and
+> dates; [Check this year] confronts them with the CMS and aligns the map on it; once aligned, a polity's name and
+> dates are locked in the Cartographer. **The first check built behind the button** — the others of this scenario stay
+> CARTO-192, each joining the same list. The CMS is read live, with the session of whoever is signed in, as « Ajouter au
+> CMS » does; online, the chrome writes no CMS and this check is not offered.
+
+```gherkin
+Scenario: the polities tied to nothing
+  Given "1300" is open and the CMS answers
+  When I press [Check this year]
+  Then the polities neither a territory's number nor a Wikidata item ties to the CMS are listed, by name
+
+Scenario: a polity tied by its number, which differs from the CMS
+  Given the County of Ampuria carries the number of its territory, named « comté d'Empúries » in the CMS
+  When I check the year
+  Then it is listed with the map's name and the CMS's, side by side
+  And [Align all] gives every such polity the CMS's French name and the CMS's dates, as one undoable step
+
+Scenario: a polity tied by its Wikidata item only
+  Given "Buyid Dynasty" carries the Wikidata item of the Abbasid Caliphate, as Cliopatria wrote it
+  When I check the year
+  Then it is listed apart, « to confirm », the two names side by side
+  And it is aligned one at a time, on my click — the Wikidata items Cliopatria gives are sometimes wrong
+  And aligning it writes the territory's number on the polity, which ties it for good
+
+Scenario: a date the CMS does not have
+  Given the CMS has no beginning for the Kingdom of Castile and the map says 1065
+  When I align it
+  Then the map keeps 1065, still editable
+  And the check lists it: « to enter in the CMS »
+  And nothing the CMS does not know is erased, nothing is invented
+
+Scenario: an aligned polity is locked
+  Given the Kingdom of León carries the number of its territory, and its name and dates are the CMS's
+  When I open its form
+  Then its name and every date the CMS gives are read-only
+  And a link « Modifier dans le CMS » opens its territory's page
+  And a date the CMS lacks stays editable
+
+Scenario: the CMS does not answer, or the session is refused
+  When I press [Check this year] with the CMS stopped
+  Then the alarm dialogue says the CMS is not started — nothing on the map changes
+  And a session refused opens the session's dialogue, as « Ajouter au CMS » does
+```

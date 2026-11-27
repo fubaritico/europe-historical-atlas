@@ -288,6 +288,77 @@
 }
 
 /*
+ * [Check this year] (CARTO-568, `s10`): the groups one under the other, each a heading with its action, a line of
+ * help, its rows — a polity's name as a button that opens its sheet, what the CMS says, the row's action.
+ */
+.map-check__group + .map-check__group {
+  margin-top: 14px;
+}
+
+.map-check__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.map-check__title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.map-check__help {
+  margin: 2px 0 6px;
+  color: var(--ink-dim);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.map-check__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-check__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 3px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.map-check__polity {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.map-check__polity:hover {
+  text-decoration: underline;
+}
+
+.map-check__polity:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.map-check__detail {
+  flex: 1;
+  color: var(--ink-dim);
+}
+
+/*
  * Every dialogue at most 80 % of the window's height, its body scrolling between the title and the buttons, which stay
  * in view (CARTO-464, the dev, 2026-11-17: a city's or a polity's sheet can be very tall). The design system's card is
  * already a column that clips; its body takes the room left and scrolls. Its menus (Dropdown, Typeahead, the colour

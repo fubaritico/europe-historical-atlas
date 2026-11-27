@@ -148,6 +148,14 @@ export interface EditionActions extends OutlineActions, PasteActions {
    */
   editPolity: (polity: YearPolity, step: HistoryStep) => boolean
   /**
+   * Change several polities' properties, as one undoable step — [Check this year]'s « Tout aligner » (CARTO-568).
+   * All or nothing: every id is checked before any is changed, so a refusal leaves the document as it was.
+   * @param polities - the new properties, each under the id of the polity to change
+   * @param step - how the gesture is named
+   * @returns `false` when a polity is unknown or one change is refused — and nothing happened
+   */
+  editPolities: (polities: readonly YearPolity[], step: HistoryStep) => boolean
+  /**
    * Delete a polity, as one undoable step — the trash of `{Polities}`'s action bar (`s07`, *Removing*).
    *
    * **Its outline goes, never a point** (`removePolity`): the anchors it shared with a neighbour stay, or
@@ -478,16 +486,27 @@ function overrideActions(
  * `addPolity` and `updatePolity` copy what they keep, so the caller's object cannot be mutated from here
  * later.
  * @param record - the runner every recorded action goes through
- * @returns `createPolity`, `editPolity` and `deletePolity`
+ * @returns `createPolity`, `editPolity`, `editPolities` and `deletePolity`
  */
 function polityActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'createPolity' | 'editPolity' | 'deletePolity'> {
+): Pick<EditionActions, 'createPolity' | 'editPolity' | 'editPolities' | 'deletePolity'> {
   return {
     createPolity: (polity, step, inFrontOf = null): boolean =>
       record((document) => addPolity(document, polity, inFrontOf), step),
     editPolity: (polity, step): boolean =>
       record((document) => updatePolity(document, polity), step),
+    editPolities: (polities, step): boolean =>
+      record((document) => {
+        // Checked whole first: `updatePolity` changes the document as it goes, and a refusal halfway would leave it
+        // half changed outside any step. A homage the batch itself would loop is the one refusal left after the check
+        const known = new Set(document.polities.map((polity) => polity.id))
+        if (polities.length === 0 || !polities.every((polity) => known.has(polity.id))) return false
+        const before = document.polities.slice()
+        if (polities.every((polity) => updatePolity(document, polity))) return true
+        document.polities.splice(0, document.polities.length, ...before)
+        return false
+      }, step),
     deletePolity: (polityId, step): RemovalReport | null => {
       let report: RemovalReport | null = null
       record((document) => {

@@ -5,10 +5,12 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { WikidataPanel } from '../../WikidataPanel'
 import { POLITY_FORM_MESSAGES } from '../i18n'
 import { errorOf } from '../utils/errorOf'
+import { heldField } from '../utils/heldField'
 import { textField } from '../utils/textField'
 
 import { AddToCms } from './AddToCms'
 import { ColourField } from './ColourField'
+import { ExistenceFields } from './ExistenceFields'
 import { RankWarnings } from './RankWarnings'
 import { ShortNameFields } from './ShortNameFields'
 import { StandingFields } from './StandingFields'
@@ -42,7 +44,7 @@ export function PolityFields(props: PolityFieldsProps) {
         label={t('name')}
         ref={autofocusOnOpen}
         {...textField('name', props)}
-        {...errorOf(t, errors.name)}
+        {...heldField(t, 'name', props.cmsHeld, errors)}
       />
       <ShortNameFields {...props} />
       <Input
@@ -52,19 +54,7 @@ export function PolityFields(props: PolityFieldsProps) {
         {...errorOf(t, errors.id)}
       />
       <StandingFields ranks={ranks} rank={draft.rank} status={draft.status} onField={onField} />
-      <Input
-        label={t('existsFrom')}
-        inputMode="numeric"
-        {...textField('existsFrom', props)}
-        {...errorOf(t, errors.existsFrom)}
-      />
-      <Input
-        label={t('existsTo')}
-        inputMode="numeric"
-        placeholder={t('stillExists')}
-        {...textField('existsTo', props)}
-        {...errorOf(t, errors.existsTo)}
-      />
+      <ExistenceFields {...props} />
       <SuzerainField options={suzerains} value={draft.suzerain} onSelect={choose('suzerain')} />
       <RankWarnings warnings={props.rankWarnings} />
       <ColourField value={draft.colour} onChange={onColour} />

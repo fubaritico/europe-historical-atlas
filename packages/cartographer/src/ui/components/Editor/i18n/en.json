@@ -1,10 +1,10 @@
 {
-  "notBuilt": "not built yet ({scenarios})",
   "nothingToUndo": "nothing to undo",
   "nothingToRedo": "nothing to redo",
   "undoHint": "{label} ({keys})",
   "redoHint": "{label} ({keys})",
   "checkYear": "Check this year",
+  "checkOnline": "online, the map is not checked against the CMS",
   "menuBar": "The Cartographer’s menus",
   "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}",
   "signOut": "Sign out",

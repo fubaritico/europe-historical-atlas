@@ -26,6 +26,7 @@ function mount(overrides: Partial<DocBarProps> = {}): DocBarProps {
     redoLabel: null,
     onUndo: vi.fn(),
     onRedo: vi.fn(),
+    onCheck: vi.fn(),
     zoomRef: () => undefined,
     ...overrides,
   }
@@ -82,12 +83,21 @@ describe('DocBar', () => {
       expect(onRedo).not.toHaveBeenCalled()
     })
 
-    it('marks checking unavailable, naming its scenario', () => {
-      mount()
+    it('checks the year when pressed (CARTO-568)', async () => {
+      const onCheck = vi.fn()
+      mount({ onCheck })
+      const check = screen.getByRole('button', { name: 'Check this year' })
+      expect(check.className).toContain('bar-button--primary')
+      await userEvent.click(check)
+      expect(onCheck).toHaveBeenCalledOnce()
+    })
+
+    it('marks checking unavailable online, saying why', async () => {
+      mount({ onCheck: null })
       const check = screen.getByRole('button', { name: 'Check this year' })
       expect(check.getAttribute('aria-disabled')).toBe('true')
-      expect(check.getAttribute('title')).toContain('s10')
-      expect(check.className).toContain('bar-button--primary')
+      expect(check.getAttribute('title')).toContain('online')
+      await userEvent.click(check)
     })
   })
 
