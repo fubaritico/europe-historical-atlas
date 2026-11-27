@@ -12,6 +12,8 @@
     "cms:schema": "pnpm -s --filter @europe-historical-atlas/cms schema",
     "cities:alerts": "pnpm -s --filter @europe-historical-atlas/cms export:print | pnpm -s --filter @europe-historical-atlas/cartographer cities:alerts",
     "names:check": "pnpm -s --filter @europe-historical-atlas/cms export:print | pnpm -s --filter @europe-historical-atlas/cms names:check",
+    "oracle:start": "npm --prefix /Volumes/Acer/atlas-historien/outils/oracle run session:start",
+    "oracle:stop": "npm --prefix /Volumes/Acer/atlas-historien/outils/oracle run session:stop",
     "research-log": "python3 -I .claude/skills/bulk-entry/scripts/research_log.py follow",
     "research-log:all": "python3 -I .claude/skills/bulk-entry/scripts/research_log.py follow all",
     "seed:cms": "pnpm --filter @europe-historical-atlas/cms seed",
