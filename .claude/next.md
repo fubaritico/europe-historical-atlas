@@ -12,10 +12,7 @@ plus de celui-ci quand une session prend le rôle de l'historien (sa décision, 
 **Pour le codeur, de l'historien (23/11)** : les notes de recherche sont sur Acer ; `wikidataId.ts:3` et `cityVerdict.ts:21` citent encore
 `files/plans/sources/1100/wikidata.md`, devenu `/Volumes/Acer/atlas-historien/1100/toutes-zones/resultats/wikidata.md`.
 
-**De l'historien (27/11)** : la décision du dev — la carte tirée de Cliopatria est un premier jet (les tracés, les
-identifiants Wikidata), sa lecture politique ne fait pas foi ; les données d'abord, la retouche ensuite, avec lui :
-CARTO-580 (1200), CARTO-581 (1300). 1300 a 4 809 fiches sur sept zones. `pnpm oracle:start|stop` existent ; un arbre :
-`EnterWorktree` (la ligne d'état suit).
+**De l'historien (28/11)** : CARTO-588 t'est assigné (« Montrer dans l'atlas », replié dans le suzerain) ; ma carte de 1200 est en cours dans l'arbre `CARTO-580` (non commitée, l'Empire en cadres de duchés) — le point de reprise est `next-historian.md`. La carte tirée de Cliopatria reste un premier jet, la retouche se fait avec lui.
 
 **De l'historien (26/11)** : l'épique **ATLAS-557** (l'agent de l'atlas, pour les lecteurs) t'est assignée, découpée en 8 tickets ; DESIGN-558 d'abord (Claude Design, sur la base des composants de chat du design system en marque blanche), puis ATLAS-559 (le choix du kit). Un crochet de plus dans `settings.json`, `oracle-session.mjs` (REPO-544) : il démarre et arrête l'oracle de l'historien, et ne fait rien dans tes sessions.
 

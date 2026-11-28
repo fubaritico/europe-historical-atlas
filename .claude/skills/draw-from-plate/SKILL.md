@@ -85,6 +85,26 @@ Read first: `/use-cartographer` (how an agent uses the Cartographer — its jour
 
 **What it costs**: ~4 s to compose a polity, under 1 s to lay it; the time is in choosing the districts.
 
+**Closing the Empire, night of 28/11** — the tools are on the archive disk, `cartes/1200/hre/_outils/` (`status.py`
+the Empire's own ground left, `undrawn.py` the base's vassals not drawn, `hole.py` / `hole_lau.py` a piece of ground as
+a ring, `mkspec.py` + `go.sh` a spec composed on the saved map, `move.py` ground from one polity to another, `fill.py` a
+hole under no polity, `slivers.py` and `bands.py` the lanières to their largest neighbour, `gaps.py` the holes and bands
+of a box). What the night taught:
+
+- **`placeRing` carves the polity's suzerain and every co-vassal of it**: a direct vassal of the Empire laid with
+  `suzerain: holy-roman-empire` carves the Empire and the frames (Bavaria, Frisia) at once. A polity whose suzerain is
+  not the ground's owner (an N-2 on the Empire's own ground, a sovereign taking ground across a border) is laid with
+  its suzerain set for one gesture to the owner, then set back — otherwise nothing is carved and the owner's ring
+  lies under it.
+- **Ground moved between two polities** that are not lord and vassal (Bresse from France to Arles): the piece laid as
+  a ring of the giver (even-odd: a hole in it) and as a ring of the taker. Never `unring` a ring that holds holes (the
+  Empire's, France's): its carved vassals would be lost.
+- **A carve can fail on two anchors a few nanometres apart** (« Unable to complete output ring », Utrecht at the
+  Emsland): the ring is placed but carves nothing — read `refusal` on every `ring`, remove that ring, lay it under the
+  frame instead.
+- **A piece of the Empire's own ground can be a royal enclave**: check the enclave list before giving a piece away
+  (Duisburg and Kaiserswerth went to Berg, then came back).
+
 **The traps met on 27/11** — each one cost a run:
 
 - **zsh splits no variable into words**: `set -- ${=e}`, never `set -- $e` (a loop of NUTS pairs ran on one argument).

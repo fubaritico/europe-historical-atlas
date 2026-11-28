@@ -2,6 +2,22 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-26/27 — l'historien : les empreintes finies, le Maghreb et les chaînes de 1200, sept zones de 1300
+
+Session **26/11 14:08 → 27/11 17:35** (plages 13 h 09, 29 min, 14 min, au journal ; partagées avec le codeur). Le
+détail est sur les tickets et dans `next-historian.md`.
+
+- **REPO-540 Fait** : 573 906 empreintes, toute la bibliothèque ; puis deux réindexations (25 508 et 146 572 passages).
+  REPO-569 créé (indexer chaque livre au fil de la recherche).
+- **1200** : CARTO-570 (le Maghreb, 57 fiches) et CARTO-571 (18 liens de vassalité, la page des vassaux directs) Fait.
+- **1300** (épique CARTO-572, sa demande) : CARTO-573 à 579 Fait — 4 809 fiches sur sept zones (Ibérie, Italie, îles
+  Britanniques, France, Empire ouest et est, Hongrie-Pologne), Albert Ier souverain. CARTO-582, 583 au Backlog (après
+  le 2/12) ; la retouche des cartes : CARTO-580 (1200), CARTO-581 (1300), « À faire », ensemble.
+- **Outillage** : la ligne d'état suit l'arbre (`EnterWorktree`) et note le contexte de la session ; le journal refuse
+  une tentative fautive à l'écriture ; `pnpm oracle:start|stop` ; le dev a posé la règle `mcp__cms`.
+- **Mes fautes** : un push qui a emporté CARTO-498/567 du codeur avant son essai ; une citation retapée (« tiranìa »),
+  rattrapée par la comparaison ; deux fausses alertes de ma veille ; « arrête la case à cocher » mal compris.
+
 ### 2026-11-26 — le codeur : « Ajouter au CMS » par la session, deux heures sans geste
 
 Session **26/11 15:24 → 19:24**, dans la plage du journal 14:08 → 19:24 (5 h 15, partagée avec l'historien qui veillait

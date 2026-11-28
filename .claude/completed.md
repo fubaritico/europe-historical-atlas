@@ -4,21 +4,20 @@ The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 > Older sessions (2026-09-12 → 2026-11-11, code instance) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
 
-### 2026-11-26/27 — l'historien : les empreintes finies, le Maghreb et les chaînes de 1200, sept zones de 1300
+### 2026-11-27/28 — l'historien : l'Empire de 1200 en cadres, ton ordre de travail dans la skill
 
-Session **26/11 14:08 → 27/11 17:35** (plages 13 h 09, 29 min, 14 min, au journal ; partagées avec le codeur). Le
-détail est sur les tickets et dans `next-historian.md`.
+Plage 22:34 → 00:45 (dans celle de 17:20, partagée avec le codeur), au journal. Le détail : CARTO-580, 585, 586, 587, 588.
 
-- **REPO-540 Fait** : 573 906 empreintes, toute la bibliothèque ; puis deux réindexations (25 508 et 146 572 passages).
-  REPO-569 créé (indexer chaque livre au fil de la recherche).
-- **1200** : CARTO-570 (le Maghreb, 57 fiches) et CARTO-571 (18 liens de vassalité, la page des vassaux directs) Fait.
-- **1300** (épique CARTO-572, sa demande) : CARTO-573 à 579 Fait — 4 809 fiches sur sept zones (Ibérie, Italie, îles
-  Britanniques, France, Empire ouest et est, Hongrie-Pologne), Albert Ier souverain. CARTO-582, 583 au Backlog (après
-  le 2/12) ; la retouche des cartes : CARTO-580 (1200), CARTO-581 (1300), « À faire », ensemble.
-- **Outillage** : la ligne d'état suit l'arbre (`EnterWorktree`) et note le contexte de la session ; le journal refuse
-  une tentative fautive à l'écriture ; `pnpm oracle:start|stop` ; le dev a posé la règle `mcp__cms`.
-- **Mes fautes** : un push qui a emporté CARTO-498/567 du codeur avant son essai ; une citation retapée (« tiranìa »),
-  rattrapée par la comparaison ; deux fausses alertes de ma veille ; « arrête la case à cocher » mal compris.
+- **CARTO-585** (la reprise, 498 fiches) saisi et exporté (`803d4a96`) ; **CARTO-586** (Bavière, Méranie) et **CARTO-587**
+  (Lorraine, Bar, Brabant, Limbourg, Gueldre) lancés, saisis (0 défaut), exportés (`7fa8f7d3`) ; poussé sur son mot.
+- **`/draw-from-plate`, « The order of work »** : ses mots (N-1 d'abord, frontières entre souverains retracées, précision
+  par zone, sa 1100 pour un vassal sans fiches, pas de trous : les duchés en cadres) ; `compose.py` : communes d'Europe
+  (GISCO LAU), `take`, `districts_in`, `accept_all`, `over`, `extend`. La mention Shepherd pl. 72 (calque).
+- **La carte de 1200** (non commitée) : ~45 duchés, cadres, princes et enclaves posés ; alertes 1 636 → ~1 130.
+- **CARTO-588** créé et passé au codeur (un pays caché dans l'atlas, replié dans son suzerain).
+- **Mes fautes** : « les duchés d'abord » réinterprété en « tous les N-1 » (38 comtés avant les duchés, un fouillis) ; le
+  royaume de Germanie lancé sans sa demande (défait, 40 gestes) ; 5 comtés posés sans lien en base ; deux refus
+  d'enregistrer non vus (`territory` vide, `wikidata` absent) ; deux poses qu'il avait refusées ont tout de même eu lieu.
 
 ### 2026-11-27 — le codeur : les fusions du CMS, « Vérifier cette année », les plans de dessin
 

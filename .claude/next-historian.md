@@ -9,123 +9,57 @@
 plein de trucs »_) : effacer `/Volumes/Acer/atlas-historien/1100/toutes-zones/travail/1100-retouches.md`, son document de lecture des sept retouches. Les notes
 de `/Volumes/Acer/atlas-historien/1100/` (kosovo, france-empire, lusatia) restent : ce sont la trace des sources.
 
-## ▶ ON REPREND ICI — 27/11, 22 h 45 : le Saint-Empire de 1200 (CARTO-580), la bande suivante vers le sud
+## ▶ ON REPREND ICI — 28/11, ~02 h : l'Empire de 1200 est tracé ; la retouche avec lui
 
-**Sa demande (27/11)** : les vassaux de l'Empire du nord au sud, précision extrême (« pas de patates, pas de
-triangles »), duchés d'abord, regroupement par royaume ensuite ; couleurs et retouches de points **plus tard, avec
-lui**. **Il regarde dans l'onglet Chrome** du groupe de Claude, mon Cartographe : `http://127.0.0.1:5180/` (arbre
-`.claude/worktrees/CARTO-580`, à jour de `main` au `1f0d9676` ; il s'y est connecté au CMS). Serveur 5180 : tâche de fond
-de la session, à relancer si absent (`CMS_URL=http://127.0.0.1:3100 pnpm -C <arbre>/packages/cartographer exec vite
---port 5180 --strictPort`, Node 24). La carte n'est **ni commitée ni dans `main`** : sur son mot (sa règle du 27/11, tout
-le code dans `main` ; la carte, sur son mot). Copie d'avant : `/Volumes/Acer/atlas-historien/cartes/1200/1200.before-claude-2026-11-27`.
+**Fait cette nuit, seul, sur son mot** (« finir les tracés des territoires sur le Saint-Empire », puis les retouches entre
+voisins, les erreurs, les bandes, les trous) : **le terrain propre de l'Empire est fermé** — il ne reste que les enclaves
+royales voulues (Francfort, Nuremberg, Aix, Wetzlar, Duisbourg + Kaiserswerth, Kirchheimbolanden, Oberwesel, et cette nuit
+Besançon, Goslar, Herford, Haguenau, Obernai). Villes en alerte (boîte 3,43.5,19,55, même export) : **1 166 → 1 015** ;
+« mal placées » **14 → 1** (Mende, côté France). Aucun chevauchement nouveau au-dessus de 1,4 km².
+La carte reste **non commitée** dans l'arbre `CARTO-580`, sur son mot ; mon Cartographe `http://127.0.0.1:5180/` (onglet
+du groupe de Claude) et `serve.py` 8769 tournent encore pour qu'il regarde.
 
-**La méthode** : `/draw-from-plate`, section « The surface method » (écrite ce soir) — `compose.py` (vote par commune,
-mer, cache), `band-specs.py` (`cartes/1200/hre/`), `page-ops.js` + `serve.py`, `placeRing` / `replaceRun` (CARTO-584,
-livré par le codeur). Dans la page, après un rechargement : `await import('/@fs/<arbre>/.claude/skills/use-cartographer/scripts/pilot.js')`,
-puis `serve.py /Volumes/Acer/atlas-historien/cartes/1200/hre --port 8769` et `await import('http://127.0.0.1:8769/<dossier>/page-ops.js')`.
+**Posé** (tout en cadres, « de mémoire, à lire » dans chaque spec — la recherche corrige ensuite) :
+- **Allemagne** : Brandebourg (Havelland, Zauche, Prignitz, Ruppin, Spandau, repris au Danemark), Magdebourg (Jerichow,
+  Jüterbog), l'Anhalt à la Saxe de Bernhard, Basse-Lusace élargie, Haute-Lusace et Kłodzko (sous la Bohême), Moravie,
+  Pleissenland, Augsbourg, Eichstätt, Strasbourg (Basse-Alsace), Salzbourg (avec Lungau et Friesach), Passau, Frisingue,
+  Ratisbonne, Brixen, Trente, la Méranie des Andechs (Carniole, Andechs, Wolfratshausen, Inn, Bayreuth, Kulmbach),
+  Basse-Styrie, Villach à Bamberg, Bouillon à Liège, le Barrois à l'ouest de la Meuse.
+- **Pays-Bas** (le cadre « Frisia » couvrait tout) : Hainaut, Namur, Luxembourg (hors du duché de Lorraine), Utrecht avec
+  l'Oversticht, Hollande (sous le Brabant, lecture de la base), Flandre impériale (Zélande, Quatre-Métiers, Waes, Alost),
+  Veluwe, Nimègue et Achterhoek à la Gueldre, Breda au Brabant.
+- **Sud** : Zähringen (Vaud, Fribourg, Neuchâtel, Argovie, Suisse centrale), évêché de Bâle, Souabe (Haute-Alsace,
+  Thurgovie, Rhétie, Vorarlberg), comté de Bourgogne ; **royaume d'Arles** (son suzerain était la France dans le
+  registre : corrigé) avec Provence, Albon, Genève, Aoste ; **royaume d'Italie** avec Toscane, Vérone, Aquilée, Spolète
+  (Ancône, Fermo sous lui), Romagne, Milan, Savone, Vintimille ; Istrie, Crémone, Mantoue, Reggio directs.
+- **Frontières entre souverains** : Bresse, Dombes, Lyon et la rive gauche du Rhône rendues à l'Arles (Cliopatria les
+  donnait à la France) ; Barnim, Cedynia, Myślibórz, Suchań au Danemark (Poméranie) ; Lebus et l'est de la Kwisa à la
+  Silésie ; Rethel-Mouzon à la Champagne et à Reims ; Kopčany à la Hongrie ; Chioggia à Venise ; Ravenne-Cervia au pape
+  (lecture de la base). Hadeln (406 km² sous personne) à la Saxe ; 21 lanières et 112 bouts rattachés au plus grand voisin.
 
-**Fait (33 entités, toutes vassales de l'Empire)** : la frontière danoise sur l'Eider (crochet de Rendsburg) ; Fehmarn
-au Danemark ; Holstein ; Brême (refait avec sa mer) ; Westphalie ; terres welfes ; Ravensberg, Tecklenburg, Osnabrück,
-Minden, Schaumbourg, Münster, Lippe ; la bande 50,2–52° (`band2-order.json`, 20 : Klettenberg … Cologne, Thuringe).
-**Mesure** (`cities:alerts`, export `cartes/1200/hre/export.json`, boîte 3,43.5,19,55) : **1 966 → 1 290**. Chevauchements :
-seuls les deux d'avant (Danemark × Empire à l'Eider 2,6 km² ; Danemark × Sandomierz).
+**Erreurs relevées, à reprendre avec lui** (aucune n'est grave pour l'atlas — cadres, pas encore de couleurs) :
+1. Haute-Franconie : Hof, Wunsiedel, Kronach à la Thuringe, Coburg et Lichtenfels à Henneberg — le Regnitzland et Kronach
+   (Bamberg) sont à refaire.
+2. 129 fiches « au roi » (royaume de Germanie) tombent dans des cadres de duchés : villes royales à mettre en enclaves ou
+   non — sa décision (seules 13 le sont).
+3. 330 fiches « incomplètes » : surtout en Italie (60), Arles (52), Milan (24) — des maillons manquent en base (communes
+   sans suzerain), pas une faute de dessin ; à saisir après la migration « hierarchy-links ».
+4. La Savoie n'est pas en base : la Maurienne et le Chablais restent au cadre d'Arles / de Genève.
+5. La Poméranie : en base sous le Brandebourg, sur la carte dans le Danemark (Cliopatria) — deux lectures, à trancher.
+6. Spolète et Ancône : deux lectures en base (Italie ou États pontificaux, récupérations de 1198) ; posés sous l'Italie.
+7. Petits chevauchements laissés (≤ 1,4 km²) : Danemark × Silésie (Oder), Ravensberg × Utrecht, Saxe × Utrecht, Münster ×
+   Gueldre, Arles × Aragon, Arles × Toulouse.
+8. Mende (Gévaudan) dans l'Aragon : la France et l'Espagne, après l'Empire (ordre de travail, point 6).
 
-**Suivant** : la bande 48,5–50,2° (Trèves, le Palatinat, la Hesse rhénane, Wurtzbourg, Bamberg, Nuremberg…), puis la
-Souabe, la Bavière, l'Autriche, la Styrie, la Carinthie ; la Bohême et la Haute-Lusace ; la Lorraine et les Pays-Bas
-(hors VG250 : GISCO seul, ou le LAU — à ajouter à `compose.py`). Ratzebourg, le Dithmarschen, Verden, la Frise et
-Oldenbourg : à rechercher d'abord (un témoin ou aucun). **À sa décision** : Bassum et Syke (exclave de Brême ?) ; le
-Hadeln hors de Brême (de mémoire) ; le libellé « archevêché souverain » d'un vassal ; la Marck vassale de Cologne
-(posée sous l'Empire) ; les alleux welfes en une entité.
+**Ensuite** : sa retouche ; puis la France et l'Espagne retracées de même (point 6). Les specs de la nuit sont dans
+`cartes/1200/hre/x-*`, `m-*`, `f-*`, `b-*` (83 dossiers, à moi) ; les outils dans `_outils/`.
 
-**La reprise CARTO-585** (En cours, deux chefs de zone en fond) : 498 fiches au roi seul (447 sur la ligne de témoin
-« dann die dieustmannen Cuno von Minzenberg ») ; dossier `/Volumes/Acer/atlas-historien/1200/reprise-germanie/`. Les
-villes qu'elle traite sont **acceptées** dans les contours (`accept_in`) : à remesurer à son retour, et les contours
-recomposés si le vote change. Puis export, commit, push ; l'oracle réindexé (livres de CARTO-578, 579, 582, 583, 585).
-
-**À nettoyer, sur son mot** (des dossiers à moi sur Acer, rien de lui) : `cartes/1200/hre/_test/` ; les 20 dossiers de
-la bande à noms français (`comte-de-…`, `principaute-episcopale-de-…`, `archeveche-de-mayence`, `archidiocese-de-cologne`,
-`landgraviat-de-thuringe`, `marche-de-…`) restés de la première génération ; les zips `outils/geodata/bkg/*.zip` et
-`hydrorivers/*.zip` (déjà dézippés, 375 Mo). Les serveurs `serve.py` (ports 8765–8769) sont arrêtés à la fin de la session.
-
-## ▶ AVANT — 27/11, 17 h 55 : CARTO-582 et CARTO-583 lancés, sur son ordre
-
-**Sa décision (27/11, 17 h 50)** : lancer maintenant les lots des Balkans-Byzance et de l'Anatolie-Caucase de 1300 (elle
-remplace « après le 2/12 » ci-dessous). Deux chefs de zone `zone-lead` en fond, les deux tickets « En cours » ; leur
-travail dans `/Volumes/Acer/atlas-historien/1300/balkans-byzance/` et `anatolie-caucase/` (leur `fiche.md` dit où ils en
-sont). Le journal : `pnpm research-log`. **À leur retour** : la réindexation de l'oracle (leurs livres et ceux de
-CARTO-578, 579), l'export, le commit, le push, les tickets. Le MCP « cms » était à reconnecter par lui (`/mcp`) :
-le serveur écoute sur 127.0.0.1 seulement, et l'adresse configurée est `localhost` (refusée en IPv6).
-
-**Les deux recherches sont closes (27/11, ~18 h 45), rien de saisi : CONNEXION IMPOSSIBLE au MCP « cms »**. Les charges
-sont prêtes dans `travail/payloads/` des deux zones ; la reprise pas à pas est dans chaque `note-de-region.md`.
-Anatolie-Caucase : 180 fiches, 29 titres. Balkans-Byzance : 235 fiches, 32 titres. **À moi** : (1) ranger et indexer les
-ouvrages (Anatolie : Bedrosian 1979, Uzunçarşılı 1969, Brosset 1849, Fallmerayer 1827 à ranger, que `archive.py work` a
-refusés, et 5 autres à indexer ; Balkans : 13, listés dans sa note, Dinić 1978 rangé deux fois) ; (2) revérifier
-`1300/hongrie-pologne/travail/candidats-exclus.json`, réécrit par le script du chef d'Anatolie puis restauré ;
-(3) la ligne 3196 de `registre/attempts.jsonl` ; (4) les doublons des Balkans (Véria, Tríkala, Amyclées, Parga,
-Kassiópi, Ioánnina, Árta, Acanthos), à fusionner par `cms:merge` sur l'ordre du dev.
-
-## ▶ AVANT — après le redémarrage du 27/11, 17 h 35
-
-**Au départ** : Acer vérifié (`diskutil verifyVolume`) et la base de l'oracle (`PRAGMA quick_check` sur
-`oracle-data/oracle.sqlite`), puis `pnpm oracle:start` (le crochet le fait aussi) ; le serveur du CMS relancé
-(`/Volumes/Acer/atlas-historien/outils/start-cms.sh`, détaché) — le prévenir au codeur. Puis **réindexer l'oracle** :
-les livres rangés par CARTO-578 et 579 ne le sont pas (`catalog build`, `index build`, `embed`, Node 24).
-
-**Avec lui, d'abord** : **CARTO-580**, la retouche de 1200 — Cracovie en premier (Leszek le Blanc, pas Mieszko III :
-`1200/toutes-zones/resultats/note-de-region.md`, « À faire au matin ») ; la page
-`1200/toutes-zones/resultats/vassaux-directs.md`. Puis **CARTO-581**, la retouche de 1300. **Sa règle (27/11)** : la carte
-de Cliopatria est un premier jet (les tracés, les Wikidata) ; les données et les recherches complètes d'abord.
-
-**1300, ce qui reste** (épique CARTO-572 ; sept zones Fait, 4 809 fiches) : **CARTO-582** Balkans-Byzance et
-**CARTO-583** Anatolie-Caucase, tickets prêts au Backlog, **après le 2/12** (la semaine à ~51 %, sa décision : la
-méthode complète, le calendrier étalé) ; puis Scandinavie, Rus', Levant, Maghreb. ~3 points de semaine par zone, mesuré.
-
-**À savoir** : la règle `mcp__cms` est posée (toutes les écritures du CMS, la corbeille seule) ; le journal refuse une
-tentative fautive à l'écriture ; une citation se poste depuis son fichier et se compare ensuite par script dans la base
-(`titles_lines` en lecture seule) — jamais retapée. Les agents de saisie retapent : chaque chef répare depuis ses charges.
-
-## AVANT — 26/11 après-midi : la veille des empreintes (REPO-540, fini)
-
-**La session du 26/11 (01 h 41 → ~14 h 45) a eu un seul rôle, sa demande : surveiller le calcul des empreintes.** Il a
-fermé le terminal à la fin (bloqué) : le crochet a arrêté l'oracle proprement — **à relancer, et la veille avec**.
-
-- **Le calcul** : il restait **~131 000 passages** (442 665 points dans Qdrant, collection `green`) ; ~6,5 passages/s,
-  donc ~5 h 30. Une session d'historien le relance d'elle-même (crochet) ; sinon `npm --prefix
-  /Volumes/Acer/atlas-historien/outils/oracle run session:start` (Node 24). Vérifier : `curl -s
-  127.0.0.1:6333/collections/passages` (status, points_count) et la fin de `oracle-data/embed-run.log`.
-- **La veille** : une boucle de fond toutes les 5 min, qui note une ligne dans `oracle-data/veille-nuit.log` et me
-  réveille sur : disque absent, image de Qdrant démontée, calcul arrêté, Qdrant muet, échange > 5 Go, compteur figé
-  10 min. **Chercher le calcul par `pgrep -f 'cli.ts embe[d]'`** — sans les crochets la boucle se trouve elle-même
-  (ma faute de la nuit). **Rien d'autre sans sa demande** : ni Maghreb, ni agent (la recherche Autriche-Alpes de la
-  session d'avant a été arrêtée — ne pas la relancer sans lui).
-- **Acer saute quand il déplace le Mac** (14 h 16, et la veille aussi) : la reprise, décrite au paragraphe « 26/11,
-  14 h 16 » plus bas, a marché sans rien perdre. **Sa priorité : aucune corruption** — toujours vérifier le volume
-  (`diskutil verifyVolume`) et la base (`PRAGMA quick_check`) avant de relancer. Spotlight (`mds_stores`) restait
-  coincé sur le disque après le retour : la piste du terminal bloqué ; le remède, Acer hors de Spotlight, est son réglage.
-- **Fait aussi** : poussé les deux commits de doc (`a255a4ea`, sur son « pousse main ») ; **ATLAS-566** créé, dans
-  « À faire » pour le codeur — les frontières débordent du plan relief (Éthiopie, Mali, Asie centrale en 1300 ; les
-  frontières sont des lignes 3D sans coupe au rectangle du relief, lu dans le code).
-
-## ▶ AVANT — 26/11 : LE MAGHREB, LE RATTRAPAGE, PUIS LA CORRECTION DE LA CARTE DE 1200
-
-**Fait le 25/11** : 11 zones de 1200 saisies (îles, Ibérie, France, Balkans, Anatolie, Empire ouest et est, Levant,
-Italie, Scandinavie, Hongrie-Pologne, Rus') — **5 940 villes**, 2 283 alertes (dessin en attente, sa décision) ;
-Opole et Nysa (titre 953, fiches 19690-19691) commitées, **push à faire si la CI n'était pas libre** (`gh run list
--L 1`, puis push seul). **L'oracle** : épiques REPO-538 et REPO-545 (Qdrant) — tout Fait sauf **REPO-540** (les
-empreintes, en fond : `oracle-data/embed-run.log`, ~85 000 / 585 065). L'oracle suit la session (crochet REPO-544) ;
-**la réindexation de fin de zone est à moi** : `session:stop`, `catalog build`, `index build`, `session:start`
-(tout par `npm --prefix /Volumes/Acer/atlas-historien/outils/oracle run …`, Node 24). Tableau de bord Qdrant :
-http://127.0.0.1:6333/dashboard. Tes PDF : `bibliotheque-texte/` (OCR Vision, à relire sur la page).
-**À faire, dans l'ordre** : (1) CARTO Maghreb (3 agents, l'oracle, Gallica par Chrome) ; (2) le rattrapage
-JSTOR/BnF/Gallica d'Anatolie, des deux Empires, de l'Italie (della Grossa, ark:/12148/bpt6k480065p) ; (3) **à
-proposer** (il n'a pas répondu) : le ticket « chaînes ouvertes (549) et litiges repris par l'oracle », quand les
-empreintes seront avancées, et la page des vassaux directs (52 souverains, 118 vassaux directs) pour la correction ;
-(4) la correction de la carte avec lui — **je ne dessine pas** sauf sa décision. **Semaine** : 23 % à 22 h 51
-(repart le 2/12, 7 h). **Doublons à lui** : 9 livres du catalogue (`catalog dupes`), 2 PDF de sa bibliothèque
-(Ancient Rome ×2, Penguin medieval = Penguin 2005). `travail/` des zones (Scandinavie 168 Mo…) à vider sur son mot.
-
-**26/11, 01 h 20** : Qdrant bloqué (le Mac à court de mémoire : 6,2 Go d'échange) — arrêté de force, relancé à 01 h 37, rien perdu ; **8 doublons exacts retirés** vers `_retires/ouvrages-doublons/` (sa décision), oracle réindexé. **26/11, 14 h 16** : Acer éjecté quelques secondes (le Mac déplacé) — l'image de Qdrant démontée, Qdrant bloqué à 650 % de CPU, le calcul arrêté à 312 128 / 443 561. **La reprise, qui a marché** : arrêter Qdrant (TERM puis KILL), `hdiutil detach` des attaches orphelines, `hdiutil attach -nomount` + `diskutil verifyVolume` (sain), `PRAGMA quick_check` sur `oracle.sqlite` (ok), `session:start` → 442 665 points, rien perdu. Ma veille (`oracle-data/veille-nuit.log`) contrôle aussi le montage de l'image. Les anciens points de reprise : `archive/next-historian-history.md`.
+**Reste de la veille, toujours vrai** : les 5 comtés sans lien en base (Weimar-Orlamünde, Schwarzbourg, Beichlingen,
+Klettenberg, Blankenburg) ; ≈ 540 fiches vidées (le tour suivant de lectures, `besoin-de-toi.md` de CARTO-585/586/587) ;
+**à lui** : la corbeille de la personne 1479 et du territoire 1063 ; vider les `travail/` de `1200/duches-est` et
+`duches-ouest` ; **à moi** : réindexer l'oracle, CARTO-585 « Fait » sur son mot, Neuwied. **La migration
+« hierarchy-links »** (codeur, REPO-589) se fait avec lui et ma pause ; mes `count_chains.py` et `direct_vassals.py`
+liront alors `hierarchy_links`.
 
 ## Les cartes — l'épique CARTO-400 (les vingt cartes de base)
 
